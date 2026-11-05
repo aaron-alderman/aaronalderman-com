@@ -1,0 +1,521 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "gateway.build": [
+      {
+        "assert": [
+          "eq",
+          [
+            "count",
+            [
+              "subjects",
+              "isa",
+              "CorpusDoor"
+            ]
+          ],
+          7
+        ],
+        "message": "The gateway must preserve all seven requested names."
+      },
+      {
+        "let": "prefix",
+        "value": ""
+      },
+      {
+        "let": "pageTitle",
+        "value": "Enter the corpus — Aaron Alderman"
+      },
+      {
+        "let": "description",
+        "value": [
+          "one",
+          "gateway",
+          "description"
+        ]
+      },
+      {
+        "let": "canonical",
+        "value": [
+          "concat",
+          [
+            "one",
+            "site",
+            "origin"
+          ],
+          [
+            "one",
+            "gateway",
+            "route"
+          ]
+        ]
+      },
+      {
+        "let": "light",
+        "value": "home"
+      },
+      {
+        "call": "gateway.view"
+      },
+      {
+        "let": "body",
+        "value": "$result"
+      },
+      {
+        "call": "publication.document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": [
+            "one",
+            "gateway",
+            "route"
+          ],
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "gateway.view": [
+      {
+        "let": "result",
+        "value": [
+          "list",
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "gate-hero",
+              "aria-labelledby": "gate-heading"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "eyebrow"
+                },
+                "children": [
+                  "list",
+                  "Aaron Alderman / The larger world"
+                ]
+              },
+              {
+                "tag": "h1",
+                "attrs": {
+                  "id": "gate-heading"
+                },
+                "children": [
+                  "list",
+                  "Beyond the first",
+                  {
+                    "tag": "br",
+                    "attrs": {},
+                    "children": [
+                      "list"
+                    ]
+                  },
+                  {
+                    "tag": "em",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "doorway."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "gate-intro"
+                },
+                "children": [
+                  "list",
+                  [
+                    "one",
+                    "gateway",
+                    "invitation"
+                  ]
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "gate-actions"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": [
+                        "one",
+                        "gateway",
+                        "library"
+                      ],
+                      "class": "button gate-primary"
+                    },
+                    "children": [
+                      "list",
+                      "Open the corpus library ↗"
+                    ]
+                  },
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": [
+                        "one",
+                        "gateway",
+                        "book"
+                      ],
+                      "class": "gate-book"
+                    },
+                    "children": [
+                      "list",
+                      "Read the current story ↗"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "gate-footnote"
+                },
+                "children": [
+                  "list",
+                  "Corpus / the collected work, with its sources, disagreements and unfinished questions."
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "section doorway-hall",
+              "aria-labelledby": "doors-heading"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "section-heading"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "eyebrow"
+                    },
+                    "children": [
+                      "list",
+                      "Seven names. More than one way in."
+                    ]
+                  },
+                  {
+                    "tag": "h2",
+                    "attrs": {
+                      "id": "doors-heading"
+                    },
+                    "children": [
+                      "list",
+                      "Choose a doorway."
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Research, software, stories and ways of seeing. Each door offers a place to begin and a way to look more closely."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "door-grid"
+                },
+                "children": [
+                  "map",
+                  [
+                    "subjects",
+                    "isa",
+                    "CorpusDoor"
+                  ],
+                  "door",
+                  {
+                    "tag": "article",
+                    "attrs": {
+                      "class": "corpus-door",
+                      "data-light": [
+                        "one",
+                        "$door",
+                        "light"
+                      ],
+                      "data-door": [
+                        "one",
+                        "$door",
+                        "slug"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "div",
+                        "attrs": {
+                          "class": "door-portal",
+                          "aria-hidden": "true"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "span",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "✧"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "eyebrow"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$door",
+                            "kind"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "h3",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "href": [
+                                "one",
+                                "$door",
+                                "href"
+                              ]
+                            },
+                            "children": [
+                              "list",
+                              [
+                                "one",
+                                "$door",
+                                "name"
+                              ]
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "door-title"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$door",
+                            "title"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "door-description"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$door",
+                            "description"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "door-question"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$door",
+                            "question"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "div",
+                        "attrs": {
+                          "class": "door-actions"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "href": [
+                                "one",
+                                "$door",
+                                "href"
+                              ],
+                              "class": "door-primary"
+                            },
+                            "children": [
+                              "list",
+                              [
+                                "concat",
+                                [
+                                  "one",
+                                  "$door",
+                                  "label"
+                                ],
+                                " ↗"
+                              ]
+                            ]
+                          },
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "href": [
+                                "one",
+                                "$door",
+                                "secondaryHref"
+                              ],
+                              "class": "door-secondary"
+                            },
+                            "children": [
+                              "list",
+                              [
+                                "concat",
+                                [
+                                  "one",
+                                  "$door",
+                                  "secondaryLabel"
+                                ],
+                                " →"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "gate-proposal"
+                },
+                "children": [
+                  "list",
+                  "Kingdom, The Field and World are suggested reading paths in this edition; their wider identities remain open."
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "gate-library"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {},
+                "children": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "eyebrow"
+                    },
+                    "children": [
+                      "list",
+                      "Go beyond the guided tour"
+                    ]
+                  },
+                  {
+                    "tag": "h2",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "The whole library is there to explore."
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Search a question, browse a programme, or trace a claim through its sources. A link is a way to investigate; it does not make a claim true."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "gate-library-actions"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": [
+                        "one",
+                        "gateway",
+                        "library"
+                      ],
+                      "class": "button"
+                    },
+                    "children": [
+                      "list",
+                      "Search and browse the corpus ↗"
+                    ]
+                  },
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "index.html#first-trails"
+                    },
+                    "children": [
+                      "list",
+                      "Return to the personal expedition →"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

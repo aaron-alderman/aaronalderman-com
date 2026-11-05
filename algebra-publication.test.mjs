@@ -39,12 +39,13 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  const b=await fs.readFile(path.join(root,'dist/assets/sourcerer-threshold.png'));
  assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b.readUInt32BE(16),1672);assert.equal(b.readUInt32BE(20),941);
  assert.ok(b.length<5_000_000);
- const xml=await read('dist/sitemap.xml');assert.equal((xml.match(/<loc>/g)||[]).length,41);
+ const xml=await read('dist/sitemap.xml');assert.equal((xml.match(/<loc>/g)||[]).length,42);
+ assert.ok(xml.includes('https://aaronalderman.com/gate.html'));
  for(const id of Object.keys(scenes))assert.ok(xml.includes(`https://aaronalderman.com/places/${id}.html`));
 });
 
 test('all local links and assets in the new static pages resolve within the publication',async()=>{
- for(const file of ['index.html',...Object.keys(scenes).map(id=>`places/${id}.html`)]){
+ for(const file of ['index.html','gate.html',...Object.keys(scenes).map(id=>`places/${id}.html`)]){
   const html=await read('dist/'+file);
   for(const match of html.matchAll(/(?:src|href)="([^"]+)"/g)){
    const href=match[1];if(/^(?:https?:|#)/.test(href))continue;
@@ -70,13 +71,30 @@ test('algebra owns the publication with the existing admission rules, ports and 
  assert.equal(receipt.assurance.places,40);assert.equal(receipt.assurance.sourceNotes,29);
  assert.equal(receipt.execution.limit,20_000_000);assert.ok(receipt.execution.totalSteps<20_000_000);
  assert.equal(receipt.admission.passes,5);assert.deepEqual(receipt.mjsImports,[]);
- for(const file of ['source/expedition.rel','source/presentation.rel','algebra/publication.process.json'])assert.equal(receipt.sources[file],sha(await fs.readFile(path.join(root,file))));
+ for(const file of ['source/expedition.rel','source/presentation.rel','algebra/publication.process.json','source/gateway.rel','source/gateway-presentation.rel','algebra/gateway.process.json'])assert.equal(receipt.sources[file],sha(await fs.readFile(path.join(root,file))));
  for(const [file,hash]of Object.entries(receipt.artifacts))if(/\.(?:js|mjs|cjs)$/.test(file)){
   const retained=file.startsWith('retained/')?file:'retained/'+file;
   assert.equal(hash,contract.compatibilityOrigin.sha256[retained],file+' is unchanged compatibility code');
  }
  const css=await read('dist/expedition.css');assert.ok(css.includes(':focus-visible'));assert.ok(css.includes('(prefers-reduced-motion: reduce)'));assert.ok(css.includes('@keyframes arrival{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}'));
  assert.ok(css.includes('arrival 1.2s ease-out both'));assert.ok(!css.includes('infinite'));
+});
+
+test('the seven-door gateway connects the guided journey to the real corpus without inventing project identities',async()=>{
+ const html=await read('dist/gate.html'),home=await read('dist/index.html');
+ assert.equal(meta(html,'og:url'),'https://aaronalderman.com/gate.html');
+ assert.equal(meta(html,'twitter:card'),'summary_large_image');
+ assert.ok(!html.includes('<script'));
+ assert.ok(html.includes('https://aaron-alderman.github.io/spin23-relational-geometry/edition-3/library/'));
+ for(const name of ['Temple','Sourcery','Claimipedia','Worldwright','Kingdom','The Field','World'])assert.ok(html.includes('>'+name+'</a></h3>'),name);
+ assert.equal((html.match(/class="corpus-door"/g)||[]).length,7);
+ assert.equal((html.match(/>Suggested reading path</g)||[]).length,3);
+ assert.ok(html.includes('their wider identities remain open'));
+ assert.ok(home.includes('href="gate.html" class="button gate-primary"'));
+ for(const id of Object.keys(scenes))assert.ok((await read(`dist/places/${id}.html`)).includes('href="../gate.html" class="gate-nav"'),id+' can reach the corpus');
+ const provenance=JSON.parse(await read('source/gateway-provenance.json'));
+ assert.deepEqual(provenance.sourceIntent.names,['Temple','Sourcery','Claimipedia','Worldright','Kingdom','The Field','World']);
+ assert.deepEqual(provenance.interpretation.proposedReadingPaths,['Kingdom','The Field','World']);
 });
 
 test('a fresh algebra build reproduces every publication artifact',async()=>{

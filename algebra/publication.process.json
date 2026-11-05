@@ -270,6 +270,9 @@
         ]
       },
       {
+        "call": "gateway.build"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "robots.txt",
@@ -299,13 +302,23 @@
           "xml",
           [
             "concat",
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url><loc>",
+            [
+              "concat",
+              "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url><loc>",
+              [
+                "one",
+                "site",
+                "origin"
+              ],
+              "</loc></url>"
+            ],
+            "<url><loc>",
             [
               "one",
               "site",
               "origin"
             ],
-            "</loc></url>"
+            "gate.html</loc></url>"
           ],
           [
             "concat",
@@ -800,6 +813,21 @@
                             "href": [
                               "concat",
                               "$prefix",
+                              "gate.html"
+                            ],
+                            "class": "gate-nav"
+                          },
+                          "children": [
+                            "list",
+                            "Enter the corpus ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "$prefix",
                               "index.html#atlas"
                             ]
                           },
@@ -1013,8 +1041,19 @@
                   {
                     "tag": "a",
                     "attrs": {
+                      "href": "gate.html",
+                      "class": "button gate-primary"
+                    },
+                    "children": [
+                      "list",
+                      "Enter the corpus ↗"
+                    ]
+                  },
+                  {
+                    "tag": "a",
+                    "attrs": {
                       "href": "#first-trails",
-                      "class": "button"
+                      "class": "button secondary-button"
                     },
                     "children": [
                       "list",
@@ -1217,7 +1256,7 @@
                 },
                 "children": [
                   "list",
-                  "There is more beyond the first doorway"
+                  "Beyond the personal expedition"
                 ]
               },
               {
@@ -1225,7 +1264,7 @@
                 "attrs": {},
                 "children": [
                   "list",
-                  "Follow what catches your attention."
+                  "There is a larger world behind this one."
                 ]
               },
               {
@@ -1233,7 +1272,26 @@
                 "attrs": {},
                 "children": [
                   "list",
-                  "Try a small experiment. Unfold an idea. Find a correction that changed the question. Each path keeps its sources and its limits within reach."
+                  "Temple. Sourcery. Claimipedia. Worldwright. Kingdom. The Field. World."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Open a doorway into the research, software, stories and questions behind these trails."
+                ]
+              },
+              {
+                "tag": "a",
+                "attrs": {
+                  "href": "gate.html",
+                  "class": "button"
+                },
+                "children": [
+                  "list",
+                  "Find your way into the corpus ↗"
                 ]
               },
               {
