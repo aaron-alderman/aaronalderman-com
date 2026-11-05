@@ -1,0 +1,68 @@
+{
+  "protocol": "temple/native-port-grants/1",
+  "profiles": {
+    "build": [
+      "value.describe",
+      "value.string",
+      "value.type",
+      "record.entries",
+      "record.fromEntries",
+      "record.put",
+      "value.freeze",
+      "record.get",
+      "text.replaceAll",
+      "text.split",
+      "text.trim",
+      "text.lowerCase",
+      "text.matches",
+      "file.write",
+      "file.read",
+      "file.copy",
+      "url.resolve",
+      "runtime.bundle",
+      "json.stringify",
+      "json.parse",
+      "text.slice",
+      "text.join"
+    ],
+    "browser": [
+      "dom.exists",
+      "dom.on",
+      "dom.value",
+      "dom.checked",
+      "dom.attribute",
+      "dom.setAttribute",
+      "dom.classToggle",
+      "dom.text",
+      "dom.reset",
+      "http.json"
+    ],
+    "worker": [
+      "value.type",
+      "record.get",
+      "text.trim",
+      "text.lowerCase",
+      "text.matches",
+      "http.method",
+      "http.decode",
+      "http.header",
+      "http.respond",
+      "mail.send"
+    ],
+    "compilation": [
+      "value.describe",
+      "record.entries",
+      "text.trim",
+      "text.matches",
+      "text.split",
+      "json.parse",
+      "json.stringify"
+    ],
+    "reflection": [
+      "value.describe",
+      "record.entries",
+      "json.stringify",
+      "text.replaceAll"
+    ]
+  }
+}

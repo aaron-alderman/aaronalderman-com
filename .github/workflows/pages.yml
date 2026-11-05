@@ -21,8 +21,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Compile the algebra-owned publication
+        run: npm run build
       - name: Check the portable publication
-        run: node --test reading.test.mjs publication.test.mjs
+        run: node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

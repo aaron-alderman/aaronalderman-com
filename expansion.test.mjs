@@ -4,11 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {scenes,sources,territories} from './dist/world.js';
-import {regions,coverage} from './dist/expansion.js';
-import {renderWorldEncounter} from './dist/world-encounters.js';
-import {sourceReceipts} from './dist/source-receipts.js';
-import {allowedPairs,positivePairs,inflatePair,decodeRepetition,weightedOptions,memoryTrace,coarseCells,reportedRates} from './dist/world-models.js';
+import {scenes,sources,territories} from './dist/retained/world.js';
+import {regions,coverage} from './dist/retained/expansion.js';
+import {renderWorldEncounter} from './dist/retained/world-encounters.js';
+import {sourceReceipts} from './dist/retained/source-receipts.js';
+import {allowedPairs,positivePairs,inflatePair,decodeRepetition,weightedOptions,memoryTrace,coarseCells,reportedRates} from './dist/retained/world-models.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 test('each of the ten identified areas has a distinct, sourced and rendered entrance and continuation',()=>{
  assert.equal(regions.length,10);
@@ -30,11 +30,11 @@ test('every selected corpus source is bundled byte-for-byte with its exact hash'
  for(const [key,source] of Object.entries(sources)){
   if(!source.path)continue;
   const receipt=sourceReceipts[key];assert.ok(receipt,key);assert.equal(receipt.path,source.path);
-  const original=fs.readFileSync(path.resolve(root,'../..',source.path)),bundled=fs.readFileSync(path.join(root,'dist',receipt.href));
+  const original=fs.readFileSync(path.resolve(root,'../..',source.path)),bundled=fs.readFileSync(path.join(root,'dist/retained',receipt.href));
   assert.deepEqual(bundled,original,key);assert.equal(bundled.length,receipt.bytes);
   assert.equal(crypto.createHash('sha256').update(bundled).digest('hex'),receipt.sha256,key);
  }
- const audit=JSON.parse(fs.readFileSync(path.join(root,'dist/coverage.json')));
+ const audit=JSON.parse(fs.readFileSync(path.join(root,'dist/retained/coverage.json')));
  assert.equal(audit.sceneCount,Object.keys(scenes).length);assert.equal(audit.bundledSourceCount,Object.keys(sourceReceipts).length);
 });
 test('optional readings have explicit scope and do not gate a scientific route',()=>{
@@ -78,7 +78,7 @@ test('the ranking desk discloses a reversible arithmetic preference rather than 
  assert.deepEqual(weightedOptions(0),{a:2,b:8});assert.deepEqual(weightedOptions(50),{a:5,b:5});assert.deepEqual(weightedOptions(100),{a:8,b:2});
 });
 test('reported rate cards retain the source decimals and their model-local intermediate optimum',()=>{
- const source=fs.readFileSync(path.join(root,'dist',sourceReceipts.instrument.href),'utf8');
+ const source=fs.readFileSync(path.join(root,'dist/retained',sourceReceipts.instrument.href),'utf8');
  for(const r of reportedRates){assert.ok(source.includes(r.overlap.toFixed(6)));assert.ok(source.includes(r.loss.toFixed(6)));}
  assert.equal(reportedRates.reduce((best,r)=>r.overlap>best.overlap?r:best).rate,8);
 });

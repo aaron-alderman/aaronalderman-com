@@ -1,0 +1,2532 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "publication.build": [
+      {
+        "assert": [
+          "eq",
+          [
+            "count",
+            [
+              "subjects",
+              "isa",
+              "Place"
+            ]
+          ],
+          40
+        ],
+        "message": "Publication must retain all forty places."
+      },
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "PublicationAsset"
+        ],
+        "as": "asset",
+        "steps": [
+          {
+            "port": "file.copy",
+            "args": {
+              "path": [
+                "one",
+                "$asset",
+                "path"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "when": [
+              "optional",
+              "$asset",
+              "legacyAlias"
+            ],
+            "then": [
+              {
+                "port": "file.read",
+                "args": {
+                  "path": [
+                    "one",
+                    "$asset",
+                    "path"
+                  ]
+                },
+                "into": "legacyBytes"
+              },
+              {
+                "port": "file.write",
+                "args": {
+                  "path": [
+                    "one",
+                    "$asset",
+                    "legacyAlias"
+                  ],
+                  "text": "$legacyBytes"
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "call": "publication.icon"
+      },
+      {
+        "let": "projection",
+        "value": "main"
+      },
+      {
+        "call": "publication.styles"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "expedition.css",
+          "text": "$css"
+        },
+        "into": "_"
+      },
+      {
+        "let": "projection",
+        "value": "activity"
+      },
+      {
+        "call": "publication.styles"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "activity.css",
+          "text": "$css"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "retained/index.html"
+        },
+        "into": "legacyHTML"
+      },
+      {
+        "port": "text.replaceAll",
+        "args": {
+          "value": "$legacyHTML",
+          "search": "</head>",
+          "replacement": "<meta name=\"robots\" content=\"noindex\"><link rel=\"stylesheet\" href=\"../activity.css\">\n</head>"
+        },
+        "into": "legacyHTML"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "retained/activity.html",
+          "text": "$legacyHTML"
+        },
+        "into": "_"
+      },
+      {
+        "let": "prefix",
+        "value": ""
+      },
+      {
+        "let": "pageTitle",
+        "value": [
+          "concat",
+          "Aaron Alderman — ",
+          [
+            "one",
+            "site",
+            "headline"
+          ]
+        ]
+      },
+      {
+        "let": "description",
+        "value": [
+          "one",
+          "site",
+          "description"
+        ]
+      },
+      {
+        "let": "canonical",
+        "value": [
+          "one",
+          "site",
+          "origin"
+        ]
+      },
+      {
+        "let": "light",
+        "value": "home"
+      },
+      {
+        "call": "publication.home"
+      },
+      {
+        "let": "body",
+        "value": "$result"
+      },
+      {
+        "call": "publication.document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "Place"
+        ],
+        "as": "place",
+        "steps": [
+          {
+            "let": "prefix",
+            "value": "../"
+          },
+          {
+            "let": "pageTitle",
+            "value": [
+              "concat",
+              [
+                "one",
+                "$place",
+                "title"
+              ],
+              " — Aaron Alderman"
+            ]
+          },
+          {
+            "let": "description",
+            "value": [
+              "one",
+              "$place",
+              "lead"
+            ]
+          },
+          {
+            "let": "canonical",
+            "value": [
+              "concat",
+              [
+                "one",
+                "site",
+                "origin"
+              ],
+              [
+                "one",
+                "$place",
+                "route"
+              ]
+            ]
+          },
+          {
+            "let": "light",
+            "value": [
+              "one",
+              "$place",
+              "light"
+            ]
+          },
+          {
+            "call": "publication.place"
+          },
+          {
+            "let": "body",
+            "value": "$result"
+          },
+          {
+            "call": "publication.document"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": [
+                "one",
+                "$place",
+                "route"
+              ],
+              "text": [
+                "concat",
+                "<!doctype html>\n",
+                "$result"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "robots.txt",
+          "text": [
+            "concat",
+            "User-agent: *\nAllow: /\nSitemap: ",
+            [
+              "one",
+              "site",
+              "origin"
+            ],
+            "sitemap.xml\n"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "sitemap",
+        "value": [
+          "fold",
+          [
+            "subjects",
+            "isa",
+            "Place"
+          ],
+          "sitemapPlace",
+          "xml",
+          [
+            "concat",
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url><loc>",
+            [
+              "one",
+              "site",
+              "origin"
+            ],
+            "</loc></url>"
+          ],
+          [
+            "concat",
+            "$xml",
+            "<url><loc>",
+            [
+              "one",
+              "site",
+              "origin"
+            ],
+            [
+              "one",
+              "$sitemapPlace",
+              "route"
+            ],
+            "</loc></url>"
+          ]
+        ]
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "sitemap.xml",
+          "text": [
+            "concat",
+            "$sitemap",
+            "</urlset>"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "assurance",
+        "value": {
+          "places": [
+            "count",
+            [
+              "subjects",
+              "isa",
+              "Place"
+            ]
+          ],
+          "sourceNotes": [
+            "count",
+            [
+              "subjects",
+              "isa",
+              "SourceNote"
+            ]
+          ],
+          "policy": "Temple process algebra",
+          "compatibility": "retained reader and workshop",
+          "budget": 20000000
+        }
+      }
+    ],
+    "publication.styles": [
+      {
+        "let": "cssPlan",
+        "value": {
+          "imports": [
+            "list"
+          ],
+          "tokens": [
+            "list"
+          ],
+          "rules": [
+            "map",
+            [
+              "filter",
+              [
+                "subjects",
+                "isa",
+                "StyleRule"
+              ],
+              "rule",
+              [
+                "eq",
+                [
+                  "one",
+                  "$rule",
+                  "projection"
+                ],
+                "$projection"
+              ]
+            ],
+            "rule",
+            {
+              "id": "$rule",
+              "selector": [
+                "one",
+                "$rule",
+                "selector"
+              ],
+              "context": [
+                "optional",
+                "$rule",
+                "context"
+              ],
+              "declarations": [
+                "map",
+                [
+                  "objects",
+                  "$rule",
+                  "declaration"
+                ],
+                "decl",
+                {
+                  "property": [
+                    "one",
+                    "$decl",
+                    "property"
+                  ],
+                  "value": [
+                    "one",
+                    "$decl",
+                    "value"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "css.renderPlan"
+      },
+      {
+        "when": [
+          "eq",
+          "$projection",
+          "main"
+        ],
+        "then": [
+          {
+            "call": "publication.motion"
+          },
+          {
+            "let": "css",
+            "value": [
+              "concat",
+              "$css",
+              "$motionCSS"
+            ]
+          }
+        ]
+      }
+    ],
+    "publication.document": [
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "theme-color",
+                    "content": "#0c111b"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$pageTitle"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "$description"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "$canonical"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:type",
+                    "content": "website"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:site_name",
+                    "content": "Aaron Alderman"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": "$pageTitle"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": "$description"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": "$canonical"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image",
+                    "content": [
+                      "concat",
+                      [
+                        "one",
+                        "site",
+                        "origin"
+                      ],
+                      [
+                        "one",
+                        "site",
+                        "image"
+                      ]
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:alt",
+                    "content": [
+                      "one",
+                      "site",
+                      "imageAlt"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:card",
+                    "content": "summary_large_image"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:title",
+                    "content": "$pageTitle"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:description",
+                    "content": "$description"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image",
+                    "content": [
+                      "concat",
+                      [
+                        "one",
+                        "site",
+                        "origin"
+                      ],
+                      [
+                        "one",
+                        "site",
+                        "image"
+                      ]
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image:alt",
+                    "content": [
+                      "one",
+                      "site",
+                      "imageAlt"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "icon",
+                    "type": "image/svg+xml",
+                    "href": [
+                      "concat",
+                      "$prefix",
+                      "assets/personal-mark.svg"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": [
+                      "concat",
+                      "$prefix",
+                      "expedition.css"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:width",
+                    "content": "1672"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:height",
+                    "content": "941"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {
+                "data-light": "$light"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "#main",
+                    "class": "skip"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to the story"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {
+                    "class": "masthead"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": [
+                          "concat",
+                          "$prefix",
+                          "index.html"
+                        ],
+                        "class": "brand"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "span",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            {
+                              "tag": "span",
+                              "attrs": {
+                                "class": "monogram",
+                                "aria-hidden": "true"
+                              },
+                              "children": [
+                                "list",
+                                "A"
+                              ]
+                            },
+                            "Aaron Alderman"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Main navigation"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "$prefix",
+                              "index.html#atlas"
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            "Explore the map"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "$prefix",
+                              "retained/workshop/index.html"
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            "The workshop ↗"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "id": "main"
+                  },
+                  "children": [
+                    "list",
+                    "$body"
+                  ]
+                },
+                {
+                  "tag": "footer",
+                  "attrs": {
+                    "class": "footer"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "div",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "signature"
+                          },
+                          "children": [
+                            "list",
+                            "Aaron Alderman"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "A few things I’ve built. A few things I’m still trying to understand."
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Elsewhere"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://github.com/aaron-alderman"
+                          },
+                          "children": [
+                            "list",
+                            "GitHub ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://www.linkedin.com/in/aaron-alderman/"
+                          },
+                          "children": [
+                            "list",
+                            "LinkedIn ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://worldwright.io/"
+                          },
+                          "children": [
+                            "list",
+                            "Built with Worldwright.io ↗"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      }
+    ],
+    "publication.home": [
+      {
+        "let": "result",
+        "value": [
+          "list",
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "hero",
+              "aria-labelledby": "hero-title"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "img",
+                "attrs": {
+                  "class": "hero-image",
+                  "src": [
+                    "one",
+                    "site",
+                    "image"
+                  ],
+                  "alt": "",
+                  "aria-hidden": "true",
+                  "width": "1672",
+                  "height": "941",
+                  "fetchpriority": "high"
+                },
+                "children": [
+                  "list"
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "hero-content"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "eyebrow"
+                    },
+                    "children": [
+                      "list",
+                      "Aaron Alderman / A personal expedition"
+                    ]
+                  },
+                  {
+                    "tag": "h1",
+                    "attrs": {
+                      "id": "hero-title"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "span",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "Inside the mind"
+                        ]
+                      },
+                      {
+                        "tag": "span",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "of a modern-day"
+                        ]
+                      },
+                      {
+                        "tag": "em",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "sourcerer."
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "hero-copy"
+                    },
+                    "children": [
+                      "list",
+                      "Physics, faith, machines, and the work of remembering care."
+                    ]
+                  },
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "#first-trails",
+                      "class": "button"
+                    },
+                    "children": [
+                      "list",
+                      "Find your first trail  ↓"
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "word-note"
+                    },
+                    "children": [
+                      "list",
+                      "Sourcerer / a little wordplay, a lot of curiosity."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "hero-coordinate",
+                  "aria-hidden": "true"
+                },
+                "children": [
+                  "list",
+                  "FIELD NOTES / ALWAYS UNFOLDING"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "section first-trails",
+              "id": "first-trails"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "section-heading"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "eyebrow"
+                    },
+                    "children": [
+                      "list",
+                      "Three ways into the same world"
+                    ]
+                  },
+                  {
+                    "tag": "h2",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Begin with a question."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "trail-grid"
+                },
+                "children": [
+                  "map",
+                  [
+                    "subjects",
+                    "isa",
+                    "Entrance"
+                  ],
+                  "entrance",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "class": "trail",
+                      "href": [
+                        "concat",
+                        "places/",
+                        [
+                          "one",
+                          [
+                            "one",
+                            "$entrance",
+                            "destination"
+                          ],
+                          "slug"
+                        ],
+                        ".html"
+                      ],
+                      "data-light": [
+                        "one",
+                        [
+                          "one",
+                          "$entrance",
+                          "destination"
+                        ],
+                        "light"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "eyebrow"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "concat",
+                            [
+                              "one",
+                              "$entrance",
+                              "number"
+                            ],
+                            " / ",
+                            [
+                              "one",
+                              "$entrance",
+                              "name"
+                            ]
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "trail-glyph",
+                          "aria-hidden": "true"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$entrance",
+                            "symbol"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "h3",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$entrance",
+                            "question"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$entrance",
+                            "note"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "arrow",
+                          "aria-hidden": "true"
+                        },
+                        "children": [
+                          "list",
+                          "↗"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "threshold"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "eyebrow"
+                },
+                "children": [
+                  "list",
+                  "There is more beyond the first doorway"
+                ]
+              },
+              {
+                "tag": "h2",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Follow what catches your attention."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Try a small experiment. Unfold an idea. Find a correction that changed the question. Each path keeps its sources and its limits within reach."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "image-note"
+                },
+                "children": [
+                  "list",
+                  "An imagined landscape of inquiry. The evidence lives in the source notes."
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "section atlas",
+              "id": "atlas"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "section-heading"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "eyebrow"
+                    },
+                    "children": [
+                      "list",
+                      "The map / 40 places, many possible paths"
+                    ]
+                  },
+                  {
+                    "tag": "h2",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "The world keeps opening."
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "These colours mark three themes. Choose a place by its question; there is no required order."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "atlas-grid"
+                },
+                "children": [
+                  "map",
+                  [
+                    "subjects",
+                    "isa",
+                    "Territory"
+                  ],
+                  "territory",
+                  {
+                    "tag": "section",
+                    "attrs": {
+                      "class": "territory",
+                      "data-light": [
+                        "one",
+                        "$territory",
+                        "light"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "eyebrow"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "concat",
+                            [
+                              "count",
+                              [
+                                "objects",
+                                "$territory",
+                                "place"
+                              ]
+                            ],
+                            " places to explore"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "h3",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$territory",
+                            "name"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$territory",
+                            "question"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "ul",
+                        "attrs": {
+                          "class": "place-list"
+                        },
+                        "children": [
+                          "map",
+                          [
+                            "objects",
+                            "$territory",
+                            "place"
+                          ],
+                          "p",
+                          {
+                            "tag": "li",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "href": [
+                                    "concat",
+                                    "places/",
+                                    [
+                                      "one",
+                                      "$p",
+                                      "slug"
+                                    ],
+                                    ".html"
+                                  ]
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "span",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "strong",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          [
+                                            "one",
+                                            "$p",
+                                            "region"
+                                          ]
+                                        ]
+                                      },
+                                      {
+                                        "tag": "small",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          [
+                                            "one",
+                                            "$p",
+                                            "title"
+                                          ]
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "map-note"
+                },
+                "children": [
+                  "list",
+                  "Some connections became useful. Some broke. I’ve kept both. You’re welcome to find your own way through."
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "publication.place": [
+      {
+        "let": "result",
+        "value": [
+          "list",
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "place-opening"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "breadcrumbs"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "../index.html#atlas"
+                    },
+                    "children": [
+                      "list",
+                      "← Return to the map"
+                    ]
+                  },
+                  {
+                    "tag": "span",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      [
+                        "concat",
+                        "Place ",
+                        [
+                          "one",
+                          "$place",
+                          "chapter"
+                        ],
+                        " / ",
+                        [
+                          "one",
+                          "$place",
+                          "region"
+                        ]
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "eyebrow"
+                },
+                "children": [
+                  "list",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      [
+                        "one",
+                        "$place",
+                        "light"
+                      ],
+                      "unseen"
+                    ],
+                    "Finding things out",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        [
+                          "one",
+                          "$place",
+                          "light"
+                        ],
+                        "human"
+                      ],
+                      "Understanding people",
+                      "Using power responsibly"
+                    ]
+                  ]
+                ]
+              },
+              {
+                "tag": "h1",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "one",
+                    "$place",
+                    "title"
+                  ]
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "place-lead"
+                },
+                "children": [
+                  "list",
+                  [
+                    "one",
+                    "$place",
+                    "lead"
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "encounter-layout",
+              "aria-label": "Explore this question"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "activity-wrap"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "class": "activity-heading"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "eyebrow"
+                        },
+                        "children": [
+                          "list",
+                          "A closer look"
+                        ]
+                      },
+                      {
+                        "tag": "a",
+                        "attrs": {
+                          "href": [
+                            "concat",
+                            "../reader.html#",
+                            [
+                              "one",
+                              "$place",
+                              "slug"
+                            ]
+                          ]
+                        },
+                        "children": [
+                          "list",
+                          "Open in a larger view ↗"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "iframe",
+                    "attrs": {
+                      "src": [
+                        "concat",
+                        "../retained/activity.html#",
+                        [
+                          "one",
+                          "$place",
+                          "slug"
+                        ]
+                      ],
+                      "title": [
+                        "concat",
+                        [
+                          "one",
+                          "$place",
+                          "region"
+                        ],
+                        " — interactive example"
+                      ],
+                      "loading": "lazy",
+                      "class": "activity-frame"
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "frame-note"
+                    },
+                    "children": [
+                      "list",
+                      "The interactive example has its own motion control. Scroll inside it if you need more room."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "reading"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "scope"
+                    },
+                    "children": [
+                      "list",
+                      [
+                        "at",
+                        [
+                          "objects",
+                          [
+                            "one",
+                            "$place",
+                            "source"
+                          ],
+                          "paragraph"
+                        ],
+                        0
+                      ]
+                    ]
+                  },
+                  [
+                    "if",
+                    [
+                      "optional",
+                      "$place",
+                      "personal"
+                    ],
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "draft-label"
+                      },
+                      "children": [
+                        "list",
+                        "Personal account · working draft"
+                      ]
+                    },
+                    null
+                  ],
+                  {
+                    "tag": "div",
+                    "attrs": {},
+                    "children": [
+                      "map",
+                      [
+                        "objects",
+                        "$place",
+                        "paragraph"
+                      ],
+                      "paragraph",
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "$paragraph"
+                        ]
+                      }
+                    ]
+                  },
+                  [
+                    "if",
+                    [
+                      "optional",
+                      "$place",
+                      "instruction"
+                    ],
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "instruction"
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "one",
+                          "$place",
+                          "instruction"
+                        ]
+                      ]
+                    },
+                    null
+                  ],
+                  [
+                    "if",
+                    [
+                      "count",
+                      [
+                        "objects",
+                        "$place",
+                        "word"
+                      ]
+                    ],
+                    {
+                      "tag": "details",
+                      "attrs": {
+                        "class": "word-help"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "summary",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Words used here"
+                          ]
+                        },
+                        {
+                          "tag": "dl",
+                          "attrs": {},
+                          "children": [
+                            "map",
+                            [
+                              "objects",
+                              "$place",
+                              "word"
+                            ],
+                            "word",
+                            [
+                              "list",
+                              {
+                                "tag": "dt",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$word",
+                                    "label"
+                                  ]
+                                ]
+                              },
+                              {
+                                "tag": "dd",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$word",
+                                    "meaning"
+                                  ]
+                                ]
+                              }
+                            ]
+                          ]
+                        }
+                      ]
+                    },
+                    null
+                  ],
+                  {
+                    "tag": "details",
+                    "attrs": {
+                      "class": "full-reading"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "summary",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "Read the fuller explanation"
+                        ]
+                      },
+                      {
+                        "tag": "div",
+                        "attrs": {},
+                        "children": [
+                          "map",
+                          [
+                            "objects",
+                            "$place",
+                            "fullParagraph"
+                          ],
+                          "paragraph",
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "$paragraph"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "details",
+                    "attrs": {
+                      "class": "source-note"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "summary",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "concat",
+                            "Where this comes from: ",
+                            [
+                              "one",
+                              [
+                                "one",
+                                "$place",
+                                "source"
+                              ],
+                              "title"
+                            ]
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "scope"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            [
+                              "one",
+                              "$place",
+                              "source"
+                            ],
+                            "kind"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "div",
+                        "attrs": {},
+                        "children": [
+                          "map",
+                          [
+                            "objects",
+                            [
+                              "one",
+                              "$place",
+                              "source"
+                            ],
+                            "paragraph"
+                          ],
+                          "paragraph",
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "$paragraph"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "details",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "summary",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "Read the full source note"
+                            ]
+                          },
+                          {
+                            "tag": "h3",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              [
+                                "one",
+                                [
+                                  "one",
+                                  "$place",
+                                  "source"
+                                ],
+                                "originalTitle"
+                              ]
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              [
+                                "one",
+                                [
+                                  "one",
+                                  "$place",
+                                  "source"
+                                ],
+                                "note"
+                              ]
+                            ]
+                          }
+                        ]
+                      },
+                      [
+                        "if",
+                        [
+                          "optional",
+                          [
+                            "one",
+                            "$place",
+                            "source"
+                          ],
+                          "href"
+                        ],
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "$prefix",
+                              [
+                                "one",
+                                [
+                                  "one",
+                                  "$place",
+                                  "source"
+                                ],
+                                "href"
+                              ]
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            "Read the original source ↗"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "This account is drawn from Aaron’s own words; it is not an independent account of anyone else’s experience."
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "div",
+                    "attrs": {},
+                    "children": [
+                      "map",
+                      [
+                        "objects",
+                        "$place",
+                        "supplement"
+                      ],
+                      "supplement",
+                      {
+                        "tag": "details",
+                        "attrs": {
+                          "class": "source-note"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "summary",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              [
+                                "concat",
+                                "Where this comes from: ",
+                                [
+                                  "one",
+                                  "$supplement",
+                                  "title"
+                                ]
+                              ]
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "scope"
+                            },
+                            "children": [
+                              "list",
+                              [
+                                "one",
+                                "$supplement",
+                                "kind"
+                              ]
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {},
+                            "children": [
+                              "map",
+                              [
+                                "objects",
+                                "$supplement",
+                                "paragraph"
+                              ],
+                              "paragraph",
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$paragraph"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "details",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "summary",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Read the full source note"
+                                ]
+                              },
+                              {
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$supplement",
+                                    "originalTitle"
+                                  ]
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$supplement",
+                                    "note"
+                                  ]
+                                ]
+                              }
+                            ]
+                          },
+                          [
+                            "if",
+                            [
+                              "optional",
+                              "$supplement",
+                              "href"
+                            ],
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": [
+                                  "concat",
+                                  "$prefix",
+                                  [
+                                    "one",
+                                    "$supplement",
+                                    "href"
+                                  ]
+                                ]
+                              },
+                              "children": [
+                                "list",
+                                "Read the original source ↗"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "This account is drawn from Aaron’s own words; it is not an independent account of anyone else’s experience."
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  },
+                  [
+                    "if",
+                    [
+                      "optional",
+                      "$place",
+                      "pause"
+                    ],
+                    {
+                      "tag": "aside",
+                      "attrs": {
+                        "class": "pause"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "eyebrow"
+                          },
+                          "children": [
+                            "list",
+                            "Stay with the question"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            [
+                              "one",
+                              "$place",
+                              "pause"
+                            ]
+                          ]
+                        }
+                      ]
+                    },
+                    null
+                  ],
+                  [
+                    "if",
+                    [
+                      "optional",
+                      "$place",
+                      "experience"
+                    ],
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../retained/workshop/index.html",
+                            "class": "button"
+                          },
+                          "children": [
+                            "list",
+                            "Enter the interactive workshop ↗"
+                          ]
+                        }
+                      ]
+                    },
+                    null
+                  ],
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "share-note"
+                    },
+                    "children": [
+                      "list",
+                      "To share this question, copy this page’s address. Its title, introduction and landscape travel with the link."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "section onward"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "section-heading"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "eyebrow"
+                    },
+                    "children": [
+                      "list",
+                      "Where does your curiosity go?"
+                    ]
+                  },
+                  {
+                    "tag": "h2",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Another doorway."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "trail-grid"
+                },
+                "children": [
+                  "map",
+                  [
+                    "objects",
+                    "$place",
+                    "choice"
+                  ],
+                  "choice",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "class": "trail",
+                      "href": [
+                        "concat",
+                        [
+                          "one",
+                          [
+                            "one",
+                            "$choice",
+                            "destination"
+                          ],
+                          "slug"
+                        ],
+                        ".html"
+                      ],
+                      "data-light": [
+                        "one",
+                        [
+                          "one",
+                          "$choice",
+                          "destination"
+                        ],
+                        "light"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "eyebrow"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$choice",
+                            "kind"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "h3",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$choice",
+                            "label"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            [
+                              "one",
+                              "$choice",
+                              "destination"
+                            ],
+                            "lead"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "arrow",
+                          "aria-hidden": "true"
+                        },
+                        "children": [
+                          "list",
+                          "↗"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "publication.motion": [
+      {
+        "let": "motionCSS",
+        "value": [
+          "fold",
+          [
+            "subjects",
+            "isa",
+            "Motion"
+          ],
+          "motion",
+          "allMotion",
+          "",
+          [
+            "concat",
+            "$allMotion",
+            "@keyframes ",
+            [
+              "one",
+              "$motion",
+              "name"
+            ],
+            "{",
+            [
+              "fold",
+              [
+                "objects",
+                "$motion",
+                "frame"
+              ],
+              "frame",
+              "allFrames",
+              "",
+              [
+                "concat",
+                "$allFrames",
+                [
+                  "one",
+                  "$frame",
+                  "selector"
+                ],
+                "{",
+                [
+                  "fold",
+                  [
+                    "objects",
+                    "$frame",
+                    "declaration"
+                  ],
+                  "decl",
+                  "allDeclarations",
+                  "",
+                  [
+                    "concat",
+                    "$allDeclarations",
+                    [
+                      "one",
+                      "$decl",
+                      "property"
+                    ],
+                    ":",
+                    [
+                      "one",
+                      "$decl",
+                      "value"
+                    ],
+                    ";"
+                  ]
+                ],
+                "}"
+              ]
+            ],
+            "}"
+          ]
+        ]
+      }
+    ],
+    "publication.icon": [
+      {
+        "let": "input",
+        "value": {
+          "tag": "svg",
+          "attrs": {
+            "xmlns": "http://www.w3.org/2000/svg",
+            "viewBox": "0 0 64 64"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "rect",
+              "attrs": {
+                "width": "64",
+                "height": "64",
+                "rx": "16",
+                "fill": "#0c111b"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "circle",
+              "attrs": {
+                "cx": "32",
+                "cy": "32",
+                "r": "27",
+                "fill": "none",
+                "stroke": "#ba975f"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "text",
+              "attrs": {
+                "x": "32",
+                "y": "44",
+                "text-anchor": "middle",
+                "font-family": "Georgia,serif",
+                "font-size": "38",
+                "fill": "#ebc991"
+              },
+              "children": [
+                "list",
+                "A"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assets/personal-mark.svg",
+          "text": "$result"
+        },
+        "into": "_"
+      }
+    ]
+  }
+}

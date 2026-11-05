@@ -4,8 +4,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {sourceReceipts} from './dist/source-receipts.js';
-const root=new URL('./dist/',import.meta.url);
+import {sourceReceipts} from './dist/retained/source-receipts.js';
+const root=new URL('./dist/retained/',import.meta.url);
 test('all bundled research sources preserve their recorded bytes',async()=>{
  for(const receipt of Object.values(sourceReceipts)){
   const bytes=await fs.readFile(new URL(receipt.href,root));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),receipt.sha256);assert.equal(bytes.length,receipt.bytes);

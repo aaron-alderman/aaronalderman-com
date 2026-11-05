@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { scenes, sources, entrances, territories } from './dist/world.js';
-import { encounterKinds, echoes, horizons, calibrationReading, projectionVisibility } from './dist/encounter-data.js';
+import { scenes, sources, entrances, territories } from './dist/retained/world.js';
+import { encounterKinds, echoes, horizons, calibrationReading, projectionVisibility } from './dist/retained/encounter-data.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 test('encounters and paths beyond a territory preserve real destinations and source identity',()=>{
  for(const id of Object.keys(encounterKinds))assert.ok(scenes[id],id);
