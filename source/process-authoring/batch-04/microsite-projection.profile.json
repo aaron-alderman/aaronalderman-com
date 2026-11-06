@@ -1,0 +1,38 @@
+{
+  "protocol": "encounter-process-text/2",
+  "status": "supplied-bootstrap-syntax-definition",
+  "operators": [
+    "and",
+    "at",
+    "concat",
+    "eq",
+    "if",
+    "list",
+    "one",
+    "optional",
+    "or"
+  ],
+  "forbidden": [
+    "__proto__",
+    "prototype",
+    "constructor"
+  ],
+  "referenceSigil": "$",
+  "directPorts": [
+    "json.parse",
+    "record.put",
+    "text.replaceAll"
+  ],
+  "maxDepth": 64,
+  "maxCodeUnits": 160000,
+  "maxTokens": 36000,
+  "name": "encounter/module-batch/microsite-projection/1",
+  "emitProfile": false,
+  "statementForms": [
+    "call",
+    "fold",
+    "let",
+    "port",
+    "when"
+  ]
+}
