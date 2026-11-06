@@ -90,7 +90,7 @@ test('lived questions retain a personal Christian centre and open the bounded Fi
  assert.ok(questions.includes('live like Jesus?'));
  assert.equal((questions.match(/class="q-question"/g)||[]).length,6);
  assert.ok(questions.includes('href="the-field/#encounter"'));
- assert.ok(questions.includes('assets/questions/open-workshop-v1.png'));
+ assert.ok(questions.includes('assets/questions/open-workshop-daylight-v2.png'));
  assert.ok(questions.includes('class="footer-stewardship"'));
  const source=read('source/hierarchy-evidence/the-field-0.json');
  for(const action of source.actions){assert.ok(field.includes('id="choice-'+action.id+'"'));}
