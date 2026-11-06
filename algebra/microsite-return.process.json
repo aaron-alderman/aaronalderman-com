@@ -214,16 +214,18 @@
         ]
       },
       {
+        "call": "microsite.return.decorate"
+      }
+    ],
+    "microsite.return.decorate": [
+      {
         "when": [
-          "includes",
+          "not",
           [
-            "list",
-            "temple/index.html",
-            "temple/films/index.html",
-            "sourcery/index.html",
-            "sourcery/films/index.html"
-          ],
-          "$returnDocument"
+            "includes",
+            "$result",
+            "id=\"microsite-return\""
+          ]
         ],
         "then": [
           {
@@ -231,17 +233,35 @@
             "value": "$result"
           },
           {
-            "let": "returnPrefix",
-            "value": [
-              "if",
-              [
-                "includes",
-                "$returnDocument",
-                "/films/"
+            "port": "text.split",
+            "args": {
+              "value": "$returnDocument",
+              "pattern": "/"
+            },
+            "into": "returnParts"
+          },
+          {
+            "port": "text.join",
+            "args": {
+              "values": [
+                "map",
+                [
+                  "range",
+                  [
+                    "add",
+                    [
+                      "count",
+                      "$returnParts"
+                    ],
+                    -1
+                  ]
+                ],
+                "level",
+                "../"
               ],
-              "../../",
-              "../"
-            ]
+              "separator": ""
+            },
+            "into": "returnPrefix"
           },
           {
             "let": "input",
@@ -345,6 +365,102 @@
               ]
             },
             "into": "result"
+          }
+        ]
+      }
+    ],
+    "microsite.return.all": [
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "StandalonePage"
+        ],
+        "as": "returnPage",
+        "steps": [
+          {
+            "let": "returnCanonical",
+            "value": [
+              "one",
+              "$returnPage",
+              "canonical"
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$returnCanonical",
+              "pattern": "/$"
+            },
+            "into": "returnDirectory"
+          },
+          {
+            "when": [
+              "and",
+              "$returnDirectory",
+              [
+                "includes",
+                "$returnCanonical",
+                [
+                  "one",
+                  "site",
+                  "origin"
+                ]
+              ],
+              [
+                "not",
+                [
+                  "eq",
+                  "$returnCanonical",
+                  [
+                    "one",
+                    "site",
+                    "origin"
+                  ]
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "port": "text.replaceAll",
+                "args": {
+                  "value": "$returnCanonical",
+                  "search": [
+                    "one",
+                    "site",
+                    "origin"
+                  ],
+                  "replacement": ""
+                },
+                "into": "returnRoute"
+              },
+              {
+                "let": "returnDocument",
+                "value": [
+                  "concat",
+                  "$returnRoute",
+                  "index.html"
+                ]
+              },
+              {
+                "port": "file.read",
+                "args": {
+                  "path": "$returnDocument"
+                },
+                "into": "result"
+              },
+              {
+                "call": "microsite.return.decorate"
+              },
+              {
+                "port": "file.write",
+                "args": {
+                  "path": "$returnDocument",
+                  "text": "$result"
+                },
+                "into": "_"
+              }
+            ]
           }
         ]
       }

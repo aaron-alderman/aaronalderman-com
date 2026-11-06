@@ -41,3 +41,23 @@ test('original application JavaScript is an oracle only; shipping behaviour is a
  for(const entry of correspondence.entries)assert.ok(entry.owner);
  assert.equal(build.seedSha256,json('source/publication-contract.json').nativeOrigin.sha256['bootstrap/temple-seed.cjs']);assert.equal(build.execution.limit,20_000_000);
 });
+
+test('every project microsite has exactly one algebra-owned return to the main catalogue',()=>{
+ const routes=new Set(json('source/hierarchy.json').items.map(item=>item.href).filter(href=>href.endsWith('/')));
+ for(const route of ['creativity/','relational-geometry/','temple/films/','sourcery/films/']) routes.add(route);
+ assert.equal(routes.size,22);
+ for(const route of routes){
+  const html=read('dist/'+route+'index.html').toString();
+  assert.equal((html.match(/id="microsite-return"/g)||[]).length,1,route);
+  const anchor=html.match(/<a\b[^>]*id="microsite-return"[^>]*>[\s\S]*?<\/a>/)?.[0];
+  assert.ok(anchor,route);
+  const base=new URL(route,'https://aaronalderman.com/');
+  assert.equal(new URL(anchor.match(/href="([^"]+)"/)[1],base).href,'https://aaronalderman.com/index.html#microsites',route);
+  assert.ok(anchor.includes('Back to Aaron Alderman’s main website'),route);
+  const sheet=html.match(/href="([^"]*microsite-return\.css[^\"]*)"/)[1];
+  assert.equal(new URL(sheet,base).pathname,'/assets/microsite-return.css',route);
+ }
+ assert.ok(!read('dist/index.html').toString().includes('id="microsite-return"'));
+ const css=read('dist/assets/microsite-return.css').toString();
+ for(const fragment of ['position:fixed','min-height:44px',':focus-visible','prefers-reduced-motion'])assert.ok(css.includes(fragment),fragment);
+});
