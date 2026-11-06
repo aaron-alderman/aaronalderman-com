@@ -3003,7 +3003,8 @@
                   "sourcery",
                   "claimipedia",
                   "worldwright",
-                  "encounter"
+                  "encounter",
+                  "the-field"
                 ],
                 "$hItem.id"
               ]
@@ -3604,6 +3605,16 @@
     ],
     "hierarchy.questions.build": [
       {
+        "call": "hierarchy.field.build"
+      },
+      {
+        "call": "publication.stewardship.view"
+      },
+      {
+        "let": "stewardshipLinks",
+        "value": "$result"
+      },
+      {
         "let": "input",
         "value": {
           "tag": "html",
@@ -3637,18 +3648,40 @@
                   ]
                 },
                 {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "theme-color",
+                    "content": "#0c111b"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
                   "tag": "title",
                   "attrs": {},
                   "children": [
                     "list",
-                    "Begin with a question. — Aaron Alderman"
+                    [
+                      "concat",
+                      [
+                        "one",
+                        "questions",
+                        "title"
+                      ],
+                      " — Aaron Alderman"
+                    ]
                   ]
                 },
                 {
                   "tag": "meta",
                   "attrs": {
                     "name": "description",
-                    "content": "Three ways into the same world: measurement, power and care."
+                    "content": [
+                      "one",
+                      "questions",
+                      "description"
+                    ]
                   },
                   "children": [
                     "list"
@@ -3668,7 +3701,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "expedition.css?v=triple-braid-1"
+                    "href": "expedition.css?v=questions-lived-1"
                   },
                   "children": [
                     "list"
@@ -3678,7 +3711,11 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:title",
-                    "content": "Begin with a question."
+                    "content": [
+                      "one",
+                      "questions",
+                      "title"
+                    ]
                   },
                   "children": [
                     "list"
@@ -3688,7 +3725,21 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:description",
-                    "content": "Three ways into the same world: measurement, power and care."
+                    "content": [
+                      "one",
+                      "questions",
+                      "description"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:type",
+                    "content": "website"
                   },
                   "children": [
                     "list"
@@ -3708,7 +3759,95 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:image",
-                    "content": "https://aaronalderman.com/assets/atlas/unseen-v1.png"
+                    "content": "https://aaronalderman.com/assets/questions/open-workshop-v1.png"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:width",
+                    "content": "1672"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:height",
+                    "content": "941"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:alt",
+                    "content": "An open, lamplit workshop: two people share a repair, with a chair and a basin close at hand."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:card",
+                    "content": "summary_large_image"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:title",
+                    "content": [
+                      "one",
+                      "questions",
+                      "title"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:description",
+                    "content": [
+                      "one",
+                      "questions",
+                      "description"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image",
+                    "content": "https://aaronalderman.com/assets/questions/open-workshop-v1.png"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image:alt",
+                    "content": "An illustrated workshop with room for another person."
                   },
                   "children": [
                     "list"
@@ -3724,8 +3863,8 @@
                 {
                   "tag": "a",
                   "attrs": {
-                    "class": "skip",
-                    "href": "#main"
+                    "href": "#main",
+                    "class": "skip"
                   },
                   "children": [
                     "list",
@@ -3742,8 +3881,8 @@
                     {
                       "tag": "a",
                       "attrs": {
-                        "class": "brand",
-                        "href": "index.html"
+                        "href": "index.html",
+                        "class": "brand"
                       },
                       "children": [
                         "list",
@@ -3795,146 +3934,185 @@
                   "tag": "main",
                   "attrs": {
                     "id": "main",
-                    "class": "questions-page"
+                    "class": "q-page"
                   },
                   "children": [
                     "list",
                     {
-                      "tag": "section",
+                      "tag": "div",
                       "attrs": {
-                        "class": "questions-intro"
+                        "class": "q-world"
                       },
                       "children": [
                         "list",
                         {
-                          "tag": "p",
+                          "tag": "section",
                           "attrs": {
-                            "class": "eyebrow"
+                            "class": "q-hero",
+                            "aria-labelledby": "q-heading"
                           },
                           "children": [
                             "list",
-                            "Questions / A place to begin"
-                          ]
-                        },
-                        {
-                          "tag": "h1",
-                          "attrs": {},
-                          "children": [
-                            "list",
-                            "Begin with a question."
-                          ]
-                        },
-                        {
-                          "tag": "p",
-                          "attrs": {
-                            "class": "lead"
-                          },
-                          "children": [
-                            "list",
-                            "Start with what you’re wondering. Follow it wherever it leads."
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "tag": "section",
-                      "attrs": {
-                        "class": "section first-trails questions-choices",
-                        "id": "questions-choices"
-                      },
-                      "children": [
-                        "list",
-                        {
-                          "tag": "div",
-                          "attrs": {
-                            "class": "trail-grid"
-                          },
-                          "children": [
-                            "map",
-                            [
-                              "subjects",
-                              "isa",
-                              "Entrance"
-                            ],
-                            "entrance",
                             {
-                              "tag": "a",
+                              "tag": "img",
                               "attrs": {
-                                "class": "trail",
-                                "href": [
-                                  "concat",
-                                  "places/",
-                                  [
-                                    "one",
-                                    [
-                                      "one",
-                                      "$entrance",
-                                      "destination"
-                                    ],
-                                    "slug"
-                                  ],
-                                  ".html"
-                                ],
-                                "data-light": [
+                                "class": "q-hero-art",
+                                "src": [
                                   "one",
-                                  [
-                                    "one",
-                                    "$entrance",
-                                    "destination"
-                                  ],
-                                  "light"
-                                ]
+                                  "questions",
+                                  "hero"
+                                ],
+                                "alt": "",
+                                "aria-hidden": "true",
+                                "width": 1672,
+                                "height": 941,
+                                "fetchpriority": "high"
+                              },
+                              "children": [
+                                "list"
+                              ]
+                            },
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "q-hero-copy"
                               },
                               "children": [
                                 "list",
                                 {
-                                  "tag": "span",
+                                  "tag": "p",
                                   "attrs": {
                                     "class": "eyebrow"
                                   },
                                   "children": [
                                     "list",
-                                    [
-                                      "concat",
-                                      [
-                                        "one",
-                                        "$entrance",
-                                        "number"
-                                      ],
-                                      " / ",
-                                      [
-                                        "one",
-                                        "$entrance",
-                                        "name"
-                                      ]
-                                    ]
+                                    "Questions I’m living and building with"
                                   ]
                                 },
                                 {
-                                  "tag": "span",
+                                  "tag": "h1",
                                   "attrs": {
-                                    "class": "trail-glyph",
-                                    "aria-hidden": "true"
+                                    "id": "q-heading"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "How do I actually",
+                                    {
+                                      "tag": "em",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "live like Jesus?"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "q-subtitle"
                                   },
                                   "children": [
                                     "list",
                                     [
                                       "one",
-                                      "$entrance",
-                                      "symbol"
+                                      "questions",
+                                      "subtitle"
                                     ]
                                   ]
                                 },
                                 {
-                                  "tag": "h3",
-                                  "attrs": {},
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "q-intro"
+                                  },
                                   "children": [
                                     "list",
                                     [
                                       "one",
-                                      "$entrance",
-                                      "question"
+                                      "questions",
+                                      "intro"
                                     ]
+                                  ]
+                                },
+                                {
+                                  "tag": "div",
+                                  "attrs": {
+                                    "class": "q-actions"
+                                  },
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "the-field/#encounter",
+                                        "class": "button q-primary"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Explore a situation in The Field →"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "#lived-questions",
+                                        "class": "q-text-link"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Follow the questions ↓"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "q-hero-note"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "The question becomes real in what I do next."
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "q-section q-posture",
+                            "aria-labelledby": "q-posture-heading"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "q-section-intro"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "eyebrow"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "An open hand. A real responsibility."
+                                  ]
+                                },
+                                {
+                                  "tag": "h2",
+                                  "attrs": {
+                                    "id": "q-posture-heading"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Faith has to meet the person in front of me."
                                   ]
                                 },
                                 {
@@ -3942,22 +4120,501 @@
                                   "attrs": {},
                                   "children": [
                                     "list",
-                                    [
-                                      "one",
-                                      "$entrance",
-                                      "note"
-                                    ]
+                                    "I want following Christ to become visible in how I pay attention, share power and remain answerable. Sometimes that means helping. Sometimes it means a boundary that protects someone else."
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "q-practices"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "article",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "eyebrow"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "01 / Attend"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "See the person."
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Listen before I turn someone’s situation into my explanation. Separate what I know from what I am assuming."
+                                      ]
+                                    }
                                   ]
                                 },
                                 {
-                                  "tag": "span",
+                                  "tag": "article",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "eyebrow"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "02 / Make room"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Keep a choice open."
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Offer help without making submission its price. Accept a cost freely, and ask who else is being asked to carry it."
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "article",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "eyebrow"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "03 / Answer for it"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Stay open to repair."
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Give reasons. Hear an objection. Protect people from harm, and change course when the consequences call for it."
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "q-scripture"
+                              },
+                              "children": [
+                                "list",
+                                "A Christian starting point: Philippians 2:3–8 · John 13:1–17 · Luke 10:25–37"
+                              ]
+                            },
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": "places/kenosis.html",
+                                "class": "q-text-link"
+                              },
+                              "children": [
+                                "list",
+                                "Explore power, service and restraint →"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "q-section q-questions",
+                            "id": "lived-questions",
+                            "aria-labelledby": "q-questions-heading"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "q-section-intro"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "p",
                                   "attrs": {
-                                    "class": "arrow",
-                                    "aria-hidden": "true"
+                                    "class": "eyebrow"
                                   },
                                   "children": [
                                     "list",
-                                    "↗"
+                                    "Faith / physics / software / the work of care"
+                                  ]
+                                },
+                                {
+                                  "tag": "h2",
+                                  "attrs": {
+                                    "id": "q-questions-heading"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Questions I have to answer."
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "If my tools, explanations and beliefs ask for trust, I owe people ways to question them. These are some of the places where that responsibility becomes concrete."
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "q-question-grid"
+                              },
+                              "children": [
+                                "list",
+                                [
+                                  "map",
+                                  [
+                                    "subjects",
+                                    "isa",
+                                    "LivedQuestion"
+                                  ],
+                                  "q",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "q-question",
+                                      "href": [
+                                        "one",
+                                        "$q",
+                                        "href"
+                                      ],
+                                      "aria-label": [
+                                        "one",
+                                        "$q",
+                                        "title"
+                                      ],
+                                      "data-light": [
+                                        "one",
+                                        "$q",
+                                        "light"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "img",
+                                        "attrs": {
+                                          "src": [
+                                            "one",
+                                            "$q",
+                                            "image"
+                                          ],
+                                          "alt": "",
+                                          "width": 112,
+                                          "height": 140,
+                                          "loading": "lazy",
+                                          "decoding": "async"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "div",
+                                        "attrs": {
+                                          "class": "q-question-copy"
+                                        },
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "p",
+                                            "attrs": {
+                                              "class": "eyebrow"
+                                            },
+                                            "children": [
+                                              "list",
+                                              [
+                                                "one",
+                                                "$q",
+                                                "label"
+                                              ]
+                                            ]
+                                          },
+                                          {
+                                            "tag": "h3",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              [
+                                                "one",
+                                                "$q",
+                                                "title"
+                                              ]
+                                            ]
+                                          },
+                                          {
+                                            "tag": "p",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              [
+                                                "one",
+                                                "$q",
+                                                "note"
+                                              ]
+                                            ]
+                                          },
+                                          {
+                                            "tag": "span",
+                                            "attrs": {
+                                              "class": "q-card-link",
+                                              "aria-hidden": "true"
+                                            },
+                                            "children": [
+                                              "list",
+                                              [
+                                                "concat",
+                                                [
+                                                  "one",
+                                                  "$q",
+                                                  "cta"
+                                                ],
+                                                " →"
+                                              ]
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "q-section q-field",
+                            "id": "the-field",
+                            "aria-labelledby": "q-field-heading"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "figure",
+                              "attrs": {
+                                "class": "q-field-art"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "img",
+                                  "attrs": {
+                                    "src": [
+                                      "one",
+                                      "questions",
+                                      "hero"
+                                    ],
+                                    "alt": "An illustrated workshop with an open door and a chair offered beside a shared repair.",
+                                    "width": 1672,
+                                    "height": 941,
+                                    "loading": "lazy"
+                                  },
+                                  "children": [
+                                    "list"
+                                  ]
+                                },
+                                {
+                                  "tag": "figcaption",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "THE FIELD / A PLACE TO PRACTISE"
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "q-field-copy"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "eyebrow"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Where the question meets a situation"
+                                  ]
+                                },
+                                {
+                                  "tag": "h2",
+                                  "attrs": {
+                                    "id": "q-field-heading"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Someone asks for help. What do I owe them?"
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "q-field-lede"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "The Field begins with a workshop shift that needs covering. A private request. An uncertain reason. A problem that will still exist tomorrow."
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "I want to examine what a choice does now, what it teaches a relationship, and what it makes normal over time. You can bring a different judgment—and ask what the scenario leaves out."
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "the-field/#encounter",
+                                    "class": "button q-primary"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Enter the workshop encounter →"
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "q-caption"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "One fictional encounter. Five choices. Room to disagree."
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "q-section q-closing"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "eyebrow"
+                              },
+                              "children": [
+                                "list",
+                                "Urgency without taking over"
+                              ]
+                            },
+                            {
+                              "tag": "h2",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "What is mine to do next?"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "I cannot wait until every explanation is complete to practise care. I can act with reasons, acknowledge what I don’t know, and remain responsible for repair."
+                              ]
+                            },
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "aria-label": "Continue exploring",
+                                "class": "q-actions"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "places/personal.html",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Read why this is personal →"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "gate.html",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Follow a thread →"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "atlas.html",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Explore the atlas →"
                                   ]
                                 }
                               ]
@@ -3965,47 +4622,81 @@
                           ]
                         }
                       ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "footer",
+                  "attrs": {
+                    "class": "footer"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "div",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "signature"
+                          },
+                          "children": [
+                            "list",
+                            "Aaron Alderman"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "A few things I’ve built. A few things I’m still trying to understand."
+                          ]
+                        }
+                      ]
                     },
                     {
                       "tag": "nav",
                       "attrs": {
-                        "class": "questions-return",
-                        "aria-label": "Other ways in"
+                        "aria-label": "Elsewhere"
                       },
                       "children": [
                         "list",
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "gate.html"
+                            "href": "https://github.com/aaron-alderman"
                           },
                           "children": [
                             "list",
-                            "Follow a thread →"
+                            "GitHub ↗"
                           ]
                         },
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "atlas.html"
+                            "href": "https://www.linkedin.com/in/aaron-alderman/"
                           },
                           "children": [
                             "list",
-                            "Explore the atlas →"
+                            "LinkedIn ↗"
                           ]
                         },
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "index.html"
+                            "href": "https://worldwright.io/"
                           },
                           "children": [
                             "list",
-                            "Return to the homepage →"
+                            "Built with Worldwright.io ↗"
                           ]
                         }
                       ]
-                    }
+                    },
+                    "$stewardshipLinks"
                   ]
                 }
               ]
@@ -5128,6 +5819,982 @@
         "port": "file.write",
         "args": {
           "path": "inspection/source-algebra.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "hierarchy.field.build": [
+      {
+        "call": "publication.stewardship.view"
+      },
+      {
+        "let": "stewardshipLinks",
+        "value": "$result"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "theme-color",
+                    "content": "#0c111b"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "The Field — What does love require here?",
+                      " — Aaron Alderman"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "Explore a fictional workshop encounter through five choices and their immediate, relational and institutional consequences."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "https://aaronalderman.com/the-field/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "../expedition.css?v=questions-lived-1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": "The Field — What does love require here?"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": "Explore a fictional workshop encounter through five choices and their immediate, relational and institutional consequences."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:type",
+                    "content": "website"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": "https://aaronalderman.com/the-field/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image",
+                    "content": "https://aaronalderman.com/assets/questions/open-workshop-v1.png"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:width",
+                    "content": "1672"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:height",
+                    "content": "941"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:alt",
+                    "content": "An open, lamplit workshop: two people share a repair, with a chair and a basin close at hand."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:card",
+                    "content": "summary_large_image"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:title",
+                    "content": "The Field — What does love require here?"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:description",
+                    "content": "Explore a fictional workshop encounter through five choices and their immediate, relational and institutional consequences."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image",
+                    "content": "https://aaronalderman.com/assets/questions/open-workshop-v1.png"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image:alt",
+                    "content": "An illustrated workshop with room for another person."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "#main",
+                    "class": "skip"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to content"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {
+                    "class": "masthead"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../index.html",
+                        "class": "brand"
+                      },
+                      "children": [
+                        "list",
+                        "Aaron Alderman"
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Site"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../questions.html"
+                          },
+                          "children": [
+                            "list",
+                            "Questions"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../gate.html"
+                          },
+                          "children": [
+                            "list",
+                            "Threads"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../atlas.html"
+                          },
+                          "children": [
+                            "list",
+                            "Atlas / Map"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "id": "main",
+                    "class": "field-page",
+                    "data-type": "simulation"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "class": "field-world"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "field-hero"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "div",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "eyebrow"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "The Field / A first encounter"
+                                  ]
+                                },
+                                {
+                                  "tag": "h1",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "What does love",
+                                    {
+                                      "tag": "em",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "require here?"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "q-subtitle"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "A place to practise attention, choice and responsibility."
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "q-intro"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "I want to understand what my help asks of someone else—and what kind of world my choices make easier to repeat."
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../questions.html",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Return to the questions behind The Field →"
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "img",
+                              "attrs": {
+                                "src": "../assets/questions/open-workshop-v1.png",
+                                "alt": "An illustrated workshop opening onto a field, with two people sharing a repair.",
+                                "width": 1672,
+                                "height": 941
+                              },
+                              "children": [
+                                "list"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "q-section field-encounter",
+                            "id": "encounter",
+                            "aria-labelledby": "encounter-heading"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "eyebrow"
+                              },
+                              "children": [
+                                "list",
+                                "A fictional situation. A real kind of responsibility."
+                              ]
+                            },
+                            {
+                              "tag": "h2",
+                              "attrs": {
+                                "id": "encounter-heading"
+                              },
+                              "children": [
+                                "list",
+                                "The shift is still uncovered."
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "field-scenario"
+                              },
+                              "children": [
+                                "list",
+                                "Mira asks privately for help covering an evening workshop shift. The freezer needs maintenance. The coordinator says there is no budget for cover. You have limits of your own."
+                              ]
+                            },
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "field-knowledge"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "article",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "What is known"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "The shift is uncovered, maintenance is overdue, and Mira has asked privately for help."
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "article",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "What is reported"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "The coordinator says there is no budget. That is a report, rather than the whole explanation."
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "article",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "What is still unknown"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Why Mira needs to leave, who else can help, and whether the budget claim is complete."
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "field-invitation"
+                              },
+                              "children": [
+                                "list",
+                                "Open a choice to examine possible consequences. Compare them in any order. These branches are authored possibilities, not predictions about real people."
+                              ]
+                            },
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "field-choices"
+                              },
+                              "children": [
+                                "list",
+                                [
+                                  "map",
+                                  [
+                                    "subjects",
+                                    "isa",
+                                    "FieldChoice"
+                                  ],
+                                  "choice",
+                                  {
+                                    "tag": "details",
+                                    "attrs": {
+                                      "class": "field-choice",
+                                      "id": [
+                                        "concat",
+                                        "choice-",
+                                        [
+                                          "one",
+                                          "$choice",
+                                          "id"
+                                        ]
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "summary",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          [
+                                            "one",
+                                            "$choice",
+                                            "title"
+                                          ]
+                                        ]
+                                      },
+                                      {
+                                        "tag": "div",
+                                        "attrs": {
+                                          "class": "field-consequences"
+                                        },
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "article",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "h3",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "Right now"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "p",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  [
+                                                    "one",
+                                                    "$choice",
+                                                    "direct"
+                                                  ]
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "tag": "article",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "h3",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "Between people"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "p",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  [
+                                                    "one",
+                                                    "$choice",
+                                                    "relational"
+                                                  ]
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "tag": "article",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "h3",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "What this could make normal"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "p",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  [
+                                                    "one",
+                                                    "$choice",
+                                                    "institutional"
+                                                  ]
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "tag": "article",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "h3",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "What remains uncertain"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "p",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  [
+                                                    "one",
+                                                    "$choice",
+                                                    "unknown"
+                                                  ]
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      [
+                                        "if",
+                                        [
+                                          "eq",
+                                          [
+                                            "one",
+                                            "$choice",
+                                            "id"
+                                          ],
+                                          "leave-encounter"
+                                        ],
+                                        {
+                                          "tag": "a",
+                                          "attrs": {
+                                            "href": "../questions.html",
+                                            "class": "q-text-link field-exit"
+                                          },
+                                          "children": [
+                                            "list",
+                                            "Leave The Field →"
+                                          ]
+                                        },
+                                        null
+                                      ]
+                                    ]
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "q-section field-reflection"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "eyebrow"
+                              },
+                              "children": [
+                                "list",
+                                "After the choice"
+                              ]
+                            },
+                            {
+                              "tag": "h2",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Keep the reasons open to correction."
+                              ]
+                            },
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "q-practices"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "article",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Whose choice did I preserve?"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Consider Mira, the other workers and your own continuing capacity."
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "article",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Who absorbed the cost?"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Ask whether the cost was freely accepted, quietly shifted or left invisible."
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "article",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "What would repair require?"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Acknowledge a specific harm, change the practice, and allow accountability and time. An apology alone does not erase history."
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "q-caption"
+                              },
+                              "children": [
+                                "list",
+                                "This first encounter supports reflection. It does not assess your standing or certify a morally correct answer. You can disagree with its assumptions or leave."
+                              ]
+                            },
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "aria-label": "Leave or inspect this encounter",
+                                "class": "q-actions"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../questions.html",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Return to Questions →"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../inspection/the-field.html",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Inspect the retained encounter source →"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../relationship-manager/",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Explore rupture and repair →"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "footer",
+                  "attrs": {
+                    "class": "footer"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "div",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "signature"
+                          },
+                          "children": [
+                            "list",
+                            "Aaron Alderman"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "A few things I’ve built. A few things I’m still trying to understand."
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Elsewhere"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://github.com/aaron-alderman"
+                          },
+                          "children": [
+                            "list",
+                            "GitHub ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://www.linkedin.com/in/aaron-alderman/"
+                          },
+                          "children": [
+                            "list",
+                            "LinkedIn ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://worldwright.io/"
+                          },
+                          "children": [
+                            "list",
+                            "Built with Worldwright.io ↗"
+                          ]
+                        }
+                      ]
+                    },
+                    "$stewardshipLinks"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "the-field/index.html",
           "text": [
             "concat",
             "<!doctype html>\n",

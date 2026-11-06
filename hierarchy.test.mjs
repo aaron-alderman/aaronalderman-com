@@ -70,7 +70,7 @@ test('the opening fold has three illustrated entrances and moves questions and a
  for(const [href,label]of [['questions.html','Questions'],['gate.html','Threads'],['atlas.html','Atlas / Map']]){assert.ok(hero.includes('href="'+href+'"'));assert.ok(hero.includes('<h2>'+label+'</h2>'));}
  assert.equal((hero.match(/assets\/atlas\//g)||[]).length,3);assert.ok(!hero.includes('data-item='));assert.ok(home.indexOf('data-item="temple"')>home.indexOf('</section>'));
  assert.ok(!home.includes('class="section first-trails"'));assert.ok(!home.includes('class="section atlas-portal"'));assert.equal((home.match(/class="hierarchy-section home-fold /g)||[]).length,4);
- const questions=fs.readFileSync('dist/questions.html','utf8');assert.ok(questions.includes('<h1>Begin with a question.</h1>'));for(const slug of ['observation','kenosis','care'])assert.ok(questions.includes('href="places/'+slug+'.html"'));
+ const questions=fs.readFileSync('dist/questions.html','utf8');assert.ok(questions.includes('live like Jesus?'));for(const slug of ['laboratory','kenosis','care'])assert.ok(questions.includes('href="places/'+slug+'.html"'));
  const science=fs.readFileSync('dist/claimipedia-science/index.html','utf8');assert.ok(science.includes('<h1>Claimipedia Science</h1>'));assert.ok(science.includes('First use case'));assert.ok(science.includes('Relational Geometry Programme'));assert.ok(science.includes('href="https://aaron-alderman.github.io/spin23-relational-geometry/"'));
  const item=catalogue.items.find(i=>i.id==='worldwright');assert.equal(item.icon.tag,'svg');assert.ok(fs.existsSync('dist/relational-geometry/index.html'));
 });
@@ -85,3 +85,22 @@ test('Mission Control is a first-class Sourcery tool, linked from Science, with 
 });
 
 test('purpose types distinguish all cards while Creator Studio completes six developing entries',()=>{const items=catalogue.items,home=fs.readFileSync('dist/index.html','utf8'),types=read('source/card-types.json').types;assert.equal(items.filter(i=>i.group==='progress').length,6);for(const item of items){assert.ok(types[item.type],item.id);assert.equal(item.typeLabel,types[item.type].label);assert.ok(home.includes('data-type="'+item.type+'"'));}const science=items.find(i=>i.id==='relational-geometry');assert.equal(science.icon.tag,'img');assert.ok(science.icon.attrs.src.endsWith('.png'));for(const asset of read('source/entry-card-art.json').assets){const b=fs.readFileSync('dist/'+asset.path);assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b[25],6);assert.equal(sha(b),asset.sha256);}const studio=fs.readFileSync('dist/creator-studio/index.html','utf8');assert.ok(studio.includes('<h1>Creator Studio</h1>'));assert.ok(studio.includes('still taking shape'));assert.ok(studio.includes('href="../encounter/"'));});
+
+test('lived questions retain a personal Christian centre and open the bounded Field encounter',()=>{
+ const questions=fs.readFileSync('dist/questions.html','utf8'),field=fs.readFileSync('dist/the-field/index.html','utf8');
+ assert.ok(questions.includes('live like Jesus?'));
+ assert.equal((questions.match(/class="q-question"/g)||[]).length,6);
+ assert.ok(questions.includes('href="the-field/#encounter"'));
+ assert.ok(questions.includes('assets/questions/open-workshop-v1.png'));
+ assert.ok(questions.includes('class="footer-stewardship"'));
+ const source=read('source/hierarchy-evidence/the-field-0.json');
+ for(const action of source.actions){assert.ok(field.includes('id="choice-'+action.id+'"'));}
+ assert.equal((field.match(/class="field-choice"/g)||[]).length,source.actions.length);
+ assert.equal((field.match(/class="field-consequences"/g)||[]).length,5);
+ for(const label of ['Right now','Between people','What this could make normal','What remains uncertain'])assert.equal(field.split('>'+label+'<').length-1,5,label);
+ assert.ok(field.includes('authored possibilities, not predictions'));
+ assert.ok(field.includes('does not assess your standing'));
+ assert.ok(!field.includes('<script'));
+ assert.ok(field.includes('id="microsite-return"'));
+ assert.equal(sha(fs.readFileSync('source/hierarchy-evidence/the-field-0.json')),read('source/questions-correspondence.json').encounterSource.sha256);
+});
