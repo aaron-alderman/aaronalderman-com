@@ -59,10 +59,21 @@
   "grants": [
     "value.describe",
     "document.observe",
+    "document.entries",
     "publication.stage",
     "publication.validate",
     "document.commit",
-    "receipt.write"
+    "receipt.write",
+    "json.parse",
+    "json.stringify",
+    "record.entries",
+    "record.put",
+    "text.matches",
+    "text.split",
+    "value.sort",
+    "process.compile",
+    "process.lower",
+    "checkout.stage"
   ],
   "inputDirectories": [
     "bootstrap",
@@ -76,7 +87,9 @@
   ],
   "inputFiles": [
     "package.json",
-    "CNAME"
+    "CNAME",
+    "package-lock.json",
+    "preservation-receipt.json"
   ],
   "checks": [
     "reading.test.mjs",
@@ -93,7 +106,12 @@
     "reader-workshop-algebra.test.mjs",
     "hierarchy.test.mjs",
     "process-authoring.test.mjs",
-    "batch-process-authoring.test.mjs"
+    "batch-process-authoring.test.mjs",
+    "authoring-workflow.test.mjs",
+    "document-inspection.test.mjs",
+    "expansion.test.mjs",
+    "expedition.test.mjs",
+    "workshop.test.mjs"
   ],
   "owners": {
     "facts": [
@@ -142,7 +160,10 @@
       "source/microsites/sourcery.encounter",
       "source/microsites/temple-ui.encounter"
     ],
-    "authoringPolicy": "algebra/authoring.process.json",
+    "authoringPolicy": [
+      "algebra/authoring.process.json",
+      "source/authoring/workflow.encounter"
+    ],
     "mechanism": "tooling/author.mjs"
   },
   "boundary": "Original JavaScript is a local comparison oracle, excluded from the published execution graph. All current reader/workshop authoring sources are edited through the same algebra proposal path.",
@@ -175,5 +196,36 @@
       "source": "source/microsites/temple-ui.encounter",
       "frontend": "bootstrap/frontends/microsite-temple-ui.json"
     }
+  },
+  "processSources": [
+    {
+      "file": "source/authoring/workflow.encounter",
+      "frontend": "bootstrap/frontends/authoring-workflow.json"
+    }
+  ],
+  "migration": {
+    "manifests": [
+      "bootstrap/site.json",
+      "bootstrap/microsites-preview.json"
+    ],
+    "frontends": [
+      "bootstrap/process-frontend.json",
+      "bootstrap/frontends/encounter.json",
+      "bootstrap/frontends/source.json",
+      "bootstrap/frontends/microsite-ui.json",
+      "bootstrap/frontends/microsite-values.json",
+      "bootstrap/frontends/microsite-sourcery.json",
+      "bootstrap/frontends/microsite-temple-ui.json"
+    ],
+    "archiveRoot": "source/process-authoring/history"
+  },
+  "retirement": {
+    "directory": ".build",
+    "archiveRoot": "source/retired-build-helpers",
+    "index": "source/retired-build-helpers/index.json",
+    "receipt": "verification/retired-build-helpers.json"
+  },
+  "clean": {
+    "receipt": "verification/workflow-clean-checkout.json"
   }
 }

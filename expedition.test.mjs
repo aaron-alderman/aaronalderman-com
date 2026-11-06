@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { scenes, sources, entrances, territories } from './retained/world.js';
 import { encounterKinds, echoes, horizons, calibrationReading, projectionVisibility } from './retained/encounter-data.js';
+import {sourceReceipts} from './retained/source-receipts.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 test('encounters and paths beyond a territory preserve real destinations and source identity',()=>{
  for(const id of Object.keys(encounterKinds))assert.ok(scenes[id],id);
@@ -45,9 +46,9 @@ test('all passages resolve, all scenes are reachable, and every scene has a rout
  assert.equal(all.size,Object.keys(scenes).length);
  for(const id of Object.keys(scenes)){const reachable=visit(id);assert.ok(entrances.some(e=>reachable.has(e.to)),`${id} has no return route`);}
 });
-test('each scene retains source identity and every cited local corpus file exists',()=>{
+test('each scene retains source identity and every cited corpus capture exists locally',()=>{
  for(const scene of Object.values(scenes))assert.ok(sources[scene.source],scene.source);
- for(const source of Object.values(sources))if(source.path)assert.ok(fs.existsSync(path.resolve(root,'../..',source.path)),source.path);
+ for(const [key,source]of Object.entries(sources))if(source.path){const receipt=sourceReceipts[key];assert.ok(receipt,key);assert.equal(receipt.path,source.path);assert.ok(fs.existsSync(path.join(root,'retained',receipt.href)),source.path);}
 });
 test('personal passages are marked as personal and cannot be mistaken for model results',()=>{
  for(const id of ['personal','care']){assert.equal(scenes[id].source,'personal');assert.equal(scenes[id].personal,true);}

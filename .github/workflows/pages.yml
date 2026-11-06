@@ -23,10 +23,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install declared verification dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Compile the algebra-owned publication
         run: npm run build
       - name: Check the portable publication
-        run: node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs activity-layout.test.mjs atlas.test.mjs atlas-journey.test.mjs authoring.test.mjs hierarchy.test.mjs process-authoring.test.mjs batch-process-authoring.test.mjs reader-workshop-algebra.test.mjs
+        run: npm run test:portable
+      - name: Verify microsite presentation from declared dependencies
+        run: node tooling/verify-microsite-presentation.mjs dist
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

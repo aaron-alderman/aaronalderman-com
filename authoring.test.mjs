@@ -2,18 +2,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
+import {loadAuthorModel} from './tooling/author.mjs';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),read=f=>JSON.parse(fs.readFileSync(new URL(f,import.meta.url)));
 const {lower}=require('./bootstrap/ports/algebra-lower.cjs'),{createKernel}=require('./bootstrap/temple-seed.cjs'),{valuePorts}=require('./bootstrap/ports/value.cjs'),{invoke}=require('./bootstrap/ports/programme.cjs');
 const contract=read('source/authoring-contract.json'),compile=input=>lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input,mode:'model',ports:valuePorts(),limit:contract.budget});
-const model=await compile({...read(contract.process),entry:'author.run'});
+const {model}=await loadAuthorModel(contract);
 const file='source/front-doors.rel',change={file,beforeSha256:'observed-hash',text:'replacement REL supplied as data'};
 const request=(changes=[change],apply=false)=>({protocol:'worldwright/authoring-proposal/1',apply,changes});
 async function run(proposal,options={}) {
  const calls=options.calls??[];
  const ports={...valuePorts(),'document.observe':()=>({sha256:'observed-hash',text:'old REL'}),
   'publication.stage':args=>{calls.push(['stage',args]);return {id:'candidate'};},
-  'publication.validate':()=>{calls.push(['validate']);return {ok:options.valid!==false,log:'validation.json',receipt:{}};},
+  'publication.validate':({commands})=>{calls.push(['validate']);return {ok:true,runs:commands.map(command=>({command:[command.tool,...command.args],status:options.valid===false?1:0,error:null})),log:'validation.json',receipt:{}};},
   'document.commit':args=>{calls.push(['commit',args]);return {files:args.changes};},
   'receipt.write':args=>{calls.push(['receipt']);return args.value;}};
  const result=await invoke({model,entry:options.entry??'author.run',input:{contract,request:proposal},ports,limit:contract.budget});

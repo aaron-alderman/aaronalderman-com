@@ -26,11 +26,11 @@ test('each of the ten identified areas has a distinct, sourced and rendered entr
  assert.equal(all.size,21);assert.equal(Object.keys(scenes).length,40);
  assert.deepEqual(coverage.map(c=>c.area),regions.map(r=>r.id));
 });
-test('every selected corpus source is bundled byte-for-byte with its exact hash',()=>{
+test('every selected corpus source preserves its retained capture and recorded hash',()=>{
  for(const [key,source] of Object.entries(sources)){
   if(!source.path)continue;
   const receipt=sourceReceipts[key];assert.ok(receipt,key);assert.equal(receipt.path,source.path);
-  const original=fs.readFileSync(path.resolve(root,'../..',source.path)),bundled=fs.readFileSync(path.join(root,'dist/retained',receipt.href));
+  const original=fs.readFileSync(path.join(root,'retained',receipt.href)),bundled=fs.readFileSync(path.join(root,'dist/retained',receipt.href));
   assert.deepEqual(bundled,original,key);assert.equal(bundled.length,receipt.bytes);
   assert.equal(crypto.createHash('sha256').update(bundled).digest('hex'),receipt.sha256,key);
  }

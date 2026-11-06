@@ -1,0 +1,13 @@
+const fs=require('fs'),crypto=require('crypto'),cp=require('child_process'),sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+const old=JSON.parse(fs.readFileSync('.build/module-proposal.json','utf8')),find=f=>old.changes.find(c=>c.file===f),read=f=>JSON.parse(fs.readFileSync(f,'utf8'));
+let test=fs.readFileSync('algebra-publication.test.mjs','utf8').replace(/<<<<<<< ours\r?\n([\s\S]*?)=======\r?\n[\s\S]*?>>>>>>> theirs\r?\n/g,'$1');
+test=test.replace("home.includes('expedition.css?v=braided-1')","home.includes('expedition.css?v='+stylesheetVersion)");
+test=test.replace("'relational-geometry/',...Object.keys(scenes)","'relational-geometry/','inspection/source-algebra.html',...Object.keys(scenes)");fs.writeFileSync('algebra-publication.test.mjs',test);
+const hf='algebra/hierarchy.process.json',current=read(hf),proposed=JSON.parse(find(hf).text);
+for(const key of ['hierarchy.viewer.boot','hierarchy.viewer.build','hierarchy.module.boot','hierarchy.module.select','hierarchy.module.build'])current.queries[key]=proposed.queries[key];
+current.queries['hierarchy.viewer.build'].find(s=>s.port==='runtime.bundle').args.data.processes={'hierarchy.shared':['at','$hProcesses.queries','hierarchy.shared']};
+const build=current.queries['hierarchy.build'];build.splice(build.findIndex(s=>s.call==='hierarchy.viewer.build')+1,0,{call:'hierarchy.module.build'});
+function walk(x){if(Array.isArray(x))x.forEach(walk);else if(x&&typeof x==='object'){if(x.tag==='a'&&x.children?.includes('Shared Markdown, lexer and formatting algebra'))x.attrs.href='source-algebra.html';Object.values(x).forEach(walk);}}walk(current.queries['hierarchy.inspect.build']);
+const base=cp.execFileSync('git',['show','409471f:source/hierarchy.rel'],{encoding:'utf8'}),tail=find('source/hierarchy.rel').text.slice(base.length);
+const changes=[['algebra/encounter-source.process.json',find('algebra/encounter-source.process.json').text],[hf,JSON.stringify(current,null,2).replaceAll('braided-1','module-2').replaceAll('module-1','module-2')+'\n'],['source/hierarchy.rel',fs.readFileSync('source/hierarchy.rel','utf8')+tail],['source/expedition.rel',fs.readFileSync('source/expedition.rel','utf8').replace('braided-1','module-2')]];
+fs.writeFileSync('.build/module-integrated.json',JSON.stringify({...old,changes:changes.map(([file,text])=>({file,text,beforeSha256:sha(fs.readFileSync(file))}))}));

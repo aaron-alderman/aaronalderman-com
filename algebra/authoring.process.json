@@ -166,7 +166,7 @@
         }
       }
     ],
-    "author.run": [
+    "author.edit": [
       {
         "call": "author.prepare"
       },
@@ -175,50 +175,7 @@
         "value": "$result"
       },
       {
-        "port": "publication.stage",
-        "args": {
-          "changes": "$proposal.changes"
-        },
-        "into": "candidate"
-      },
-      {
-        "port": "publication.validate",
-        "args": {},
-        "into": "validation"
-      },
-      {
-        "assert": "$validation.ok",
-        "message": "AUTHOR-011: Candidate failed publication checks; inspect candidate validation.json. Sources were not committed."
-      },
-      {
-        "let": "commit",
-        "value": null
-      },
-      {
-        "when": "$request.apply",
-        "then": [
-          {
-            "port": "document.commit",
-            "args": {
-              "changes": "$proposal.changes"
-            },
-            "into": "commit"
-          }
-        ]
-      },
-      {
-        "port": "receipt.write",
-        "args": {
-          "value": {
-            "protocol": "worldwright/authoring-receipt/1",
-            "applied": "$request.apply",
-            "files": "$proposal.files",
-            "changes": "$proposal.changes",
-            "validation": "$validation",
-            "commit": "$commit"
-          }
-        },
-        "into": "result"
+        "call": "author.transaction"
       }
     ]
   }

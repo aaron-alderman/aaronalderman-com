@@ -1,0 +1,236 @@
+# Source migration, evidence retirement and clean verification share author.run.
+# Native ports observe, invoke existing machinery, stage files and report exits.
+process-module "temple/surface-process-module/1"
+profile "encounter/authoring-workflow/1"
+
+process author.run:
+  port value.describe { value = $request } → requestKind
+  assert $requestKind.plain
+    otherwise "AUTHOR-001: Request must be a record."
+  let protocol = at($request, "protocol")
+  assert includes(list("worldwright/authoring-proposal/1", "worldwright/source-migration/1", "worldwright/retire-helpers/1", "worldwright/clean-verification/1"), $protocol)
+    otherwise "AUTHOR-002: Unknown proposal protocol."
+  when eq($protocol, "worldwright/authoring-proposal/1"):
+    call author.edit
+  when eq($protocol, "worldwright/source-migration/1"):
+    call author.migration.prepare
+    let proposal = $result
+    call author.transaction
+  when eq($protocol, "worldwright/retire-helpers/1"):
+    call author.retirement.prepare
+    let proposal = $result
+    call author.transaction
+  when eq($protocol, "worldwright/clean-verification/1"):
+    call author.clean.run
+
+process author.flag:
+  port value.describe { value = at($request, "apply") } → applyType
+  assert eq($applyType.type, "boolean")
+    otherwise "AUTHOR-003: apply must be an explicit boolean."
+
+process author.validation:
+  assert isArray(at($validation, "runs"))
+    otherwise "AUTHOR-011: Structured command results are required."
+  assert eq(count($validation.runs), count($commands))
+    otherwise "AUTHOR-011: Every selected check must have an observed result."
+  fold range(count($commands)) as position; valid starts true:
+    let index = add($position, -1)
+    let check = at($validation.runs, $index)
+    let selected = at($commands, $index)
+    port json.stringify { value = at($check, "command") } → observedCommand
+    port json.stringify { value = append(list($selected.tool), $selected.args) } → expectedCommand
+    yield and($valid, eq($observedCommand, $expectedCommand), eq(at($check, "status"), 0), eq(at($check, "error"), null)) → valid
+  assert $valid
+    otherwise "AUTHOR-011: Candidate failed checks; source was not committed."
+  port record.put { record = $validation; key = "ok"; value = true } → validation
+
+process author.commands:
+  let result = list(
+    { tool = "npm"; args = list("ci", "--ignore-scripts", "--no-audit", "--no-fund", "--cache", ".npm-cache") },
+    { tool = "node"; args = list("bootstrap/run.cjs", ".", "dist", "bootstrap/site.json") },
+    { tool = "node"; args = append(list("--test"), $contract.checks) },
+    { tool = "node"; args = list("tooling/verify-microsite-presentation.mjs", "dist") }
+  )
+
+process author.transaction:
+  port publication.stage { changes = $proposal.changes } → candidate
+  call author.commands
+  let commands = $result
+  port publication.validate { commands = $commands; receiptPath = "dist/build-receipt.json" } → validation
+  call author.validation
+  let commit = null
+  when $request.apply:
+    port document.commit { changes = $proposal.changes } → commit
+  let receiptFile = null
+  when eq($request.protocol, "worldwright/retire-helpers/1"):
+    let receiptFile = $contract.retirement.receipt
+  port receipt.write {
+    file = $receiptFile;
+    value = {
+      protocol = "worldwright/authoring-receipt/2";
+      requestProtocol = $request.protocol;
+      applied = $request.apply;
+      files = $proposal.files;
+      evidence = or(at($proposal, "evidence"), list());
+      validation = $validation;
+      commit = $commit
+    }
+  } → result
+
+process author.migration.prepare:
+  call author.flag
+  assert isArray(at($request, "transitions"))
+    otherwise "MIGRATE-001: Explicit transitions are required."
+  assert not(eq(count($request.transitions), 0))
+    otherwise "MIGRATE-001: Empty migrations refuse."
+  port document.observe { file = "source/authoring-contract.json" } → contractBefore
+  port json.parse { text = $contractBefore.text } → contractObserved
+  port json.stringify { value = $contractObserved } → contractObservedText
+  port json.stringify { value = $contract } → contractLoadedText
+  assert eq($contractObservedText, $contractLoadedText)
+    otherwise "MIGRATE-002: Authoring contract changed after loading."
+  fold $contract.migration.manifests as file; controls starts list():
+    port document.observe { file = $file } → observed
+    port json.parse { text = $observed.text } → manifest
+    yield append($controls, list({ file = $file; observed = $observed; manifest = $manifest })) → controls
+  let updatedContract = $contract
+  let changes = list()
+  let evidence = list()
+  let seen = list()
+  fold $request.transitions as transition; migration starts {
+    controls = $controls; contract = $updatedContract; changes = $changes; evidence = $evidence; seen = $seen
+  }:
+    let controls = $migration.controls
+    let updatedContract = $migration.contract
+    let changes = $migration.changes
+    let evidence = $migration.evidence
+    let seen = $migration.seen
+    assert includes($contract.editable, $transition.json)
+      otherwise "MIGRATE-003: The JSON must be an existing editable owner."
+    assert not(includes($seen, $transition.json))
+      otherwise "MIGRATE-004: Repeated migration target."
+    assert not(includes($seen, $transition.source))
+      otherwise "MIGRATE-004: Repeated source destination."
+    port text.matches { value = $transition.source; pattern = "^source/[A-Za-z0-9_./-]+\\.encounter$" } → sourcePath
+    port text.matches { value = $transition.source; pattern = "(?:^|/)\\.\\.(?:/|$)" } → traversal
+    assert and($sourcePath, not($traversal))
+      otherwise "MIGRATE-005: A bounded Encounter source destination is required."
+    assert includes($contract.migration.frontends, $transition.frontend)
+      otherwise "MIGRATE-006: Select a declared frontend."
+    port document.observe { file = $transition.json } → original
+    assert and($original.exists, eq($original.sha256, $transition.beforeSha256))
+      otherwise "MIGRATE-007: Stale or absent JSON owner."
+    port document.observe { file = $transition.frontend } → frontend
+    assert eq($frontend.sha256, $transition.frontendSha256)
+      otherwise "MIGRATE-008: Frontend selection changed."
+    port document.observe { file = $transition.source } → sourceBefore
+    assert not($sourceBefore.exists)
+      otherwise "MIGRATE-009: Migration cannot overwrite a source owner."
+    port json.parse { text = $original.text } → originalModule
+    assert eq($originalModule.protocol, "temple/surface-process-module/1")
+      otherwise "MIGRATE-010: A surface process module is required."
+    port process.compile { frontend = $transition.frontend; file = $transition.source; text = $transition.text } → compiled
+    port json.stringify { value = $originalModule } → originalJson
+    port json.stringify { value = $compiled.surface } → candidateJson
+    assert eq($originalJson, $candidateJson)
+      otherwise "MIGRATE-011: Ordered module correspondence failed."
+    port record.entries { value = $originalModule.queries } → definitions
+    assert not(eq(count($definitions), 0))
+      otherwise "MIGRATE-012: A nonempty module is required."
+    let entry = at(at($definitions, 0), 0)
+    port process.lower { model = { entry = $entry; queries = $originalModule.queries } } → originalLowered
+    port process.lower { model = { entry = $entry; queries = $compiled.surface.queries } } → candidateLowered
+    port json.stringify { value = $originalLowered } → originalLoweredText
+    port json.stringify { value = $candidateLowered } → candidateLoweredText
+    assert eq($originalLoweredText, $candidateLoweredText)
+      otherwise "MIGRATE-013: Whole-module lowering correspondence failed."
+    let primary = at($controls, 0)
+    assert includes($primary.manifest.modules, $transition.json)
+      otherwise "MIGRATE-014: JSON is not selected by the primary build."
+    fold $controls as control; nextControls starts list():
+      let manifest = $control.manifest
+      when includes($manifest.modules, $transition.json):
+        let selected = or(at($manifest, "processModules"), list())
+        let duplicates = filter($selected, "selection", or(eq($selection.output, $transition.json), eq($selection.file, $transition.source)))
+        assert eq(count($duplicates), 0)
+          otherwise "MIGRATE-015: Conflicting process authority already selected."
+        port record.put { record = $manifest; key = "modules"; value = filter($manifest.modules, "moduleFile", not(eq($moduleFile, $transition.json))) } → manifest
+        port record.put { record = $manifest; key = "processModules"; value = append($selected, list({ file = $transition.source; output = $transition.json; frontend = $transition.frontend })) } → manifest
+      yield append($nextControls, list({ file = $control.file; observed = $control.observed; manifest = $manifest })) → controls
+    port record.put { record = $updatedContract; key = "editable"; value = append(filter($updatedContract.editable, "owner", not(eq($owner, $transition.json))), list($transition.source)) } → updatedContract
+    port record.put { record = $updatedContract.owners; key = "applicationProcesses"; value = append(filter($updatedContract.owners.applicationProcesses, "owner", not(eq($owner, $transition.json))), list($transition.source)) } → nextOwners
+    port record.put { record = $updatedContract; key = "owners"; value = $nextOwners } → updatedContract
+    port record.put { record = or(at($updatedContract, "generated"), { }); key = $transition.json; value = { source = $transition.source; frontend = $transition.frontend } } → nextGenerated
+    port record.put { record = $updatedContract; key = "generated"; value = $nextGenerated } → updatedContract
+    port text.split { value = $transition.json; pattern = "/" } → pathParts
+    let archive = concat($contract.migration.archiveRoot, "/", $original.sha256, "-", at($pathParts, add(count($pathParts), -1)), ".txt")
+    port document.observe { file = $archive } → archived
+    when $archived.exists:
+      assert eq($archived.sha256, $original.sha256)
+        otherwise "MIGRATE-016: Existing predecessor archive differs."
+    when not($archived.exists):
+      let changes = append($changes, list({ file = $archive; beforeSha256 = null; text = $original.text }))
+    let changes = append($changes, list(
+      { file = $transition.source; beforeSha256 = null; text = $transition.text },
+      { file = $transition.json; beforeSha256 = $original.sha256; text = null }
+    ))
+    let evidence = append($evidence, list({ json = $transition.json; source = $transition.source; predecessor = $archive; jsonSha256 = $original.sha256; sourceHash = $compiled.sourceHash; frontendSha256 = $frontend.sha256; orderedJson = true; loweredEquality = true }))
+    let seen = append($seen, list($transition.json, $transition.source))
+    yield { controls = $controls; contract = $updatedContract; changes = $changes; evidence = $evidence; seen = $seen } → migration
+  let changes = $migration.changes
+  fold $migration.controls as control; manifestChanges starts $changes:
+    port json.stringify { value = $control.manifest; space = 2 } → text
+    yield append($manifestChanges, list({ file = $control.file; beforeSha256 = $control.observed.sha256; text = concat($text, "\n") })) → changes
+  port json.stringify { value = $migration.contract; space = 2 } → text
+  let changes = append($changes, list({ file = "source/authoring-contract.json"; beforeSha256 = $contractBefore.sha256; text = concat($text, "\n") }))
+  let result = { changes = $changes; files = map($changes, "change", $change.file); evidence = $migration.evidence }
+
+process author.retirement.prepare:
+  call author.flag
+  port document.entries { directory = $contract.retirement.directory } → entries
+  port value.sort { values = map(filter($entries, "entry", eq($entry.kind, "file")), "entry", $entry.name) } → names
+  port document.observe { file = $contract.retirement.index } → indexBefore
+  let previous = list()
+  when $indexBefore.exists:
+    port json.parse { text = $indexBefore.text } → index
+    let previous = $index.items
+  fold $names as name; retirement starts { changes = list(); items = list() }:
+    let changes = $retirement.changes
+    let items = $retirement.items
+    port text.matches { value = $name; pattern = "^[A-Za-z0-9_.-]+\\.(?:cjs|mjs|js|py)$" } → helper
+    when $helper:
+      let file = concat($contract.retirement.directory, "/", $name)
+      port document.observe { file = $file } → current
+      assert $current.exists
+        otherwise "RETIRE-001: Selected helper disappeared."
+      let archive = concat($contract.retirement.archiveRoot, "/", $current.sha256, "-", $name, ".txt")
+      port document.observe { file = $archive } → archived
+      when $archived.exists:
+        assert eq($archived.sha256, $current.sha256)
+          otherwise "RETIRE-002: Existing archive differs; retirement refused."
+      when not($archived.exists):
+        let changes = append($changes, list({ file = $archive; beforeSha256 = null; text = $current.text }))
+      let changes = append($changes, list({ file = $file; beforeSha256 = $current.sha256; text = null }))
+      let items = append($items, list({ original = $file; archive = $archive; sha256 = $current.sha256; role = "Retired one-off development helper; historical evidence only" }))
+    yield { changes = $changes; items = $items } → retirement
+  assert not(eq(count($retirement.items), 0))
+    otherwise "RETIRE-003: No one-off helpers selected."
+  let index = { protocol = "worldwright/retired-helper-evidence/1"; items = append($previous, $retirement.items) }
+  port json.stringify { value = $index; space = 2 } → indexText
+  let changes = append($retirement.changes, list({ file = $contract.retirement.index; beforeSha256 = $indexBefore.sha256; text = concat($indexText, "\n") }))
+  let result = { changes = $changes; files = map($changes, "change", $change.file); evidence = $retirement.items }
+
+process author.clean.run:
+  port checkout.stage { excludeRoots = list(".build", "node_modules", "dist") } → checkout
+  assert $checkout.clean
+    otherwise "CLEAN-001: Commit tracked source before clean verification."
+  assert and($checkout.excludedBuild, $checkout.excludedDependencies, $checkout.excludedOutput)
+    otherwise "CLEAN-002: Clean verification cannot inherit working outputs or dependencies."
+  call author.commands
+  let commands = $result
+  port publication.validate { commands = $commands; receiptPath = "dist/build-receipt.json" } → validation
+  call author.validation
+  port receipt.write {
+    file = $contract.clean.receipt;
+    value = { protocol = "worldwright/clean-checkout-receipt/1"; checkout = $checkout; validation = $validation; applied = false }
+  } → result
