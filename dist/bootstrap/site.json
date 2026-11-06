@@ -16,8 +16,6 @@
     "algebra/fact-index.process.json",
     "algebra/admission.process.json",
     "algebra/lowering.process.json",
-    "algebra/microsite-projection.process.json",
-    "algebra/microsites.process.json",
     "algebra/front-doors.process.json",
     "algebra/claimipedia.process.json",
     "algebra/claimipedia-review.process.json",
@@ -33,8 +31,7 @@
     "algebra/workshop-lab.process.json",
     "algebra/workshop-session.process.json",
     "algebra/reader-workshop-publication.process.json",
-    "algebra/hierarchy.process.json",
-    "algebra/microsite-return.process.json"
+    "algebra/hierarchy.process.json"
   ],
   "sources": [
     "source/expedition.rel",
@@ -111,6 +108,21 @@
       "file": "source/microsites/media.encounter",
       "output": "algebra/microsite-media.process.json",
       "frontend": "bootstrap/frontends/microsite-media.json"
+    },
+    {
+      "file": "source/microsites/projection.encounter",
+      "output": "algebra/microsite-projection.process.json",
+      "frontend": "bootstrap/frontends/microsite-projection.json"
+    },
+    {
+      "file": "source/microsites/publication.encounter",
+      "output": "algebra/microsites.process.json",
+      "frontend": "bootstrap/frontends/microsites.json"
+    },
+    {
+      "file": "source/microsites/return.encounter",
+      "output": "algebra/microsite-return.process.json",
+      "frontend": "bootstrap/frontends/microsite-return.json"
     }
   ]
 }
