@@ -35,7 +35,7 @@ test('compiler identity refuses changed dependencies before compilation',async()
 
 test('linking traverses folds and error handlers and refuses undeclared calls or effects',async()=>{
  const {compiler,compiled}=await ready;
- const all=Object.assign({},...read('bootstrap/site.json').modules.map(f=>read(f).queries),compiled.surface.queries);
+ const all=Object.assign({},...read('bootstrap/site.json').modules.map(f=>read(f).queries),...read('bootstrap/site.json').processModules.map(s=>read('dist/'+s.output).queries),compiled.surface.queries);
  assert.equal((await compiler.link(compiled.surface,all)).value.ok,true);
  for(const programme of [[{call:'missing'}],[{fold:['list'],as:'x',accumulator:'a',initial:0,steps:[{port:'file.write',args:{},into:'x'}],yield:'$a',into:'a'}],[{try:[{let:'x',value:1}],error:'e',catch:[{call:'missing'}]}]])await assert.rejects(compiler.link({queries:{probe:programme}},all));
 });
@@ -53,7 +53,7 @@ test('the authority switch selects Encounter exclusively and binds generated JSO
 
 test('Inspect displays exact authored characters using compiler ranges rather than regenerated notation',async()=>{
  const {compiler}=await ready,authText='process-module "temple/surface-process-module/1"\nprofile "encounter/shared-source-module/2"\n\nprocess   probe:\n  let answer = 42\n',compiled=await compiler.compile('exact.encounter',authText);
- const all=Object.assign({},...read('bootstrap/site.json').modules.map(f=>read(f).queries),target.queries),bundle=all['hierarchy.viewer.build'].find(s=>s.port==='runtime.bundle').args,names=bundle.queries.slice(1).flatMap(x=>x.slice(1)),model=await lowerModel({entry:'hierarchy.module.select',queries:Object.fromEntries(names.map(n=>[n,all[n]]))}),effects=[];
+ const all=Object.assign({},...read('bootstrap/site.json').modules.map(f=>read(f).queries),...read('bootstrap/site.json').processModules.map(s=>read('dist/'+s.output).queries),target.queries),bundle=all['hierarchy.viewer.build'].find(s=>s.port==='runtime.bundle').args,names=bundle.queries.slice(1).flatMap(x=>x.slice(1)),model=await lowerModel({entry:'hierarchy.module.select',queries:Object.fromEntries(names.map(n=>[n,all[n]]))}),effects=[];
  await invoke({model,entry:'hierarchy.module.select',input:{data:{presentation:read('source/encounter/presentation.json'),sourceModule:compiled.surface,authorText:authText,sourceOrigins:compiled.origins}},ports:{...valuePorts(),...computationalPorts(),'browser.property':()=> 'probe','browser.content':x=>{effects.push(x);return true},'browser.write':x=>{effects.push(x);return true}},nested:['kernel.invoke','kernel.execute','kernel.evaluate'],limit:20000000});
  assert.ok(effects.find(x=>x.ref==='#module-readable').html.replace(/<[^>]*>/g,'').includes('process   probe'));assert.ok(effects.find(x=>x.ref==='#module-pointer').value.includes('source-algebra.encounter'));
 });

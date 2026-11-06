@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+const require=createRequire(import.meta.url);const {readProcessFixture:read}=require('./tooling/read-process-fixture.cjs');
 const {createKernel}=require('./bootstrap/temple-seed.cjs'),{valuePorts}=require('./bootstrap/ports/value.cjs'),{computationalPorts}=require('./bootstrap/ports/browser-effects.cjs'),{lower}=require('./bootstrap/ports/algebra-lower.cjs'),{invoke}=require('./bootstrap/ports/programme.cjs');
 const proposal=process.env.DOCUMENT_PROPOSAL?read(process.env.DOCUMENT_PROPOSAL):null;
 const source=p=>{const change=proposal?.changes.find(c=>c.file===p);return change?JSON.parse(change.text):read(p==='algebra/encounter-source.process.json'?'dist/'+p:p)};

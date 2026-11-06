@@ -1,0 +1,1786 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "canonical.encode": [
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "value.describe",
+        "args": {
+          "value": "$value"
+        },
+        "into": "kind"
+      },
+      {
+        "let": "result",
+        "value": ""
+      },
+      {
+        "when": [
+          "or",
+          "$kind.null",
+          [
+            "eq",
+            "$kind.type",
+            "string"
+          ],
+          [
+            "eq",
+            "$kind.type",
+            "boolean"
+          ],
+          [
+            "and",
+            [
+              "eq",
+              "$kind.type",
+              "number"
+            ],
+            "$eventInput.numbers"
+          ]
+        ],
+        "then": [
+          {
+            "port": "json.stringify",
+            "args": {
+              "value": "$value"
+            },
+            "into": "result"
+          }
+        ]
+      },
+      {
+        "when": "$kind.array",
+        "then": [
+          {
+            "fold": "$value",
+            "as": "item",
+            "accumulator": "parts",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "canonical.encode",
+                  "input": {
+                    "value": "$item",
+                    "numbers": "$eventInput.numbers"
+                  }
+                },
+                "into": "part"
+              }
+            ],
+            "yield": [
+              "append",
+              "$parts",
+              [
+                "list",
+                "$part"
+              ]
+            ],
+            "into": "parts"
+          },
+          {
+            "port": "text.join",
+            "args": {
+              "values": "$parts",
+              "separator": ","
+            },
+            "into": "joined"
+          },
+          {
+            "let": "result",
+            "value": [
+              "concat",
+              "[",
+              "$joined",
+              "]"
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "and",
+          [
+            "eq",
+            "$kind.type",
+            "object"
+          ],
+          [
+            "not",
+            "$kind.null"
+          ],
+          [
+            "not",
+            "$kind.array"
+          ]
+        ],
+        "then": [
+          {
+            "port": "record.entries",
+            "args": {
+              "value": "$value"
+            },
+            "into": "entries"
+          },
+          {
+            "port": "value.sort",
+            "args": {
+              "values": [
+                "map",
+                "$entries",
+                "entry",
+                [
+                  "at",
+                  "$entry",
+                  0
+                ]
+              ],
+              "mode": "lexical"
+            },
+            "into": "keys"
+          },
+          {
+            "fold": "$keys",
+            "as": "key",
+            "accumulator": "parts",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "port": "json.stringify",
+                "args": {
+                  "value": "$key"
+                },
+                "into": "keyJSON"
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "canonical.encode",
+                  "input": {
+                    "value": [
+                      "at",
+                      "$value",
+                      "$key"
+                    ],
+                    "numbers": "$eventInput.numbers"
+                  }
+                },
+                "into": "part"
+              }
+            ],
+            "yield": [
+              "append",
+              "$parts",
+              [
+                "list",
+                [
+                  "concat",
+                  "$keyJSON",
+                  ":",
+                  "$part"
+                ]
+              ]
+            ],
+            "into": "parts"
+          },
+          {
+            "port": "text.join",
+            "args": {
+              "values": "$parts",
+              "separator": ","
+            },
+            "into": "joined"
+          },
+          {
+            "let": "result",
+            "value": [
+              "concat",
+              "{",
+              "$joined",
+              "}"
+            ]
+          }
+        ]
+      },
+      {
+        "assert": [
+          "not",
+          [
+            "eq",
+            "$result",
+            ""
+          ]
+        ],
+        "message": "Non-canonical value type"
+      }
+    ],
+    "canonical.identify": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "canonical.encode",
+          "input": {
+            "value": {
+              "kind": "$eventInput.kind",
+              "value": "$eventInput.value"
+            },
+            "numbers": false
+          }
+        },
+        "into": "bytes"
+      },
+      {
+        "port": "digest.sha256",
+        "args": {
+          "text": "$bytes"
+        },
+        "into": "digest"
+      },
+      {
+        "let": "result",
+        "value": [
+          "concat",
+          "$eventInput.kind",
+          ":sha256:",
+          "$digest"
+        ]
+      }
+    ],
+    "canonical.is": [
+      {
+        "let": "result",
+        "value": true
+      },
+      {
+        "try": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "canonical.encode",
+              "input": {
+                "value": "$eventInput.value",
+                "numbers": false
+              }
+            },
+            "into": "_"
+          }
+        ],
+        "error": "error",
+        "catch": [
+          {
+            "let": "result",
+            "value": false
+          }
+        ]
+      }
+    ],
+    "address.digest": [
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$eventInput.id",
+          "pattern": ":"
+        },
+        "into": "parts"
+      },
+      {
+        "let": "result",
+        "value": [
+          "at",
+          "$parts",
+          [
+            "add",
+            [
+              "count",
+              "$parts"
+            ],
+            -1
+          ]
+        ]
+      }
+    ],
+    "address.short": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "address.digest",
+          "input": {
+            "id": "$eventInput.id"
+          }
+        },
+        "into": "digest"
+      },
+      {
+        "port": "text.slice",
+        "args": {
+          "value": "$digest",
+          "start": 0,
+          "end": "$eventInput.head"
+        },
+        "into": "first"
+      },
+      {
+        "let": "result",
+        "value": [
+          "concat",
+          "$first",
+          "…"
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greater",
+          "values": [
+            "list",
+            "$eventInput.tail",
+            0
+          ]
+        },
+        "into": "tailExists"
+      },
+      {
+        "when": "$tailExists",
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$eventInput.tail",
+                -1
+              ]
+            },
+            "into": "tailStart"
+          },
+          {
+            "port": "text.slice",
+            "args": {
+              "value": "$digest",
+              "start": "$tailStart"
+            },
+            "into": "last"
+          },
+          {
+            "let": "result",
+            "value": [
+              "concat",
+              "$first",
+              "…",
+              "$last"
+            ]
+          }
+        ]
+      }
+    ],
+    "record.remove": [
+      {
+        "port": "record.entries",
+        "args": {
+          "value": "$eventInput.record"
+        },
+        "into": "entries"
+      },
+      {
+        "port": "record.fromEntries",
+        "args": {
+          "entries": [
+            "filter",
+            "$entries",
+            "entry",
+            [
+              "not",
+              [
+                "eq",
+                [
+                  "at",
+                  "$entry",
+                  0
+                ],
+                "$eventInput.key"
+              ]
+            ]
+          ]
+        },
+        "into": "result"
+      }
+    ],
+    "record.clone": [
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$eventInput.value"
+        },
+        "into": "text"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$text"
+        },
+        "into": "result"
+      }
+    ],
+    "lamp.measure": [
+      {
+        "let": "node",
+        "value": "$eventInput.node"
+      },
+      {
+        "let": "children",
+        "value": [
+          "or",
+          [
+            "at",
+            "$node",
+            "args"
+          ],
+          [
+            "list"
+          ]
+        ]
+      },
+      {
+        "fold": "$children",
+        "as": "child",
+        "accumulator": "metric",
+        "initial": {
+          "nodes": 1,
+          "depth": 1,
+          "closed": [
+            "includes",
+            [
+              "list",
+              "literal",
+              "read",
+              "eq",
+              "not",
+              "all",
+              "any"
+            ],
+            [
+              "at",
+              "$node",
+              "op"
+            ]
+          ]
+        },
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.measure",
+              "input": {
+                "node": "$child"
+              }
+            },
+            "into": "childMetric"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "max",
+              "values": [
+                "list",
+                "$metric.depth",
+                [
+                  "add",
+                  "$childMetric.depth",
+                  1
+                ]
+              ]
+            },
+            "into": "depth"
+          }
+        ],
+        "yield": {
+          "nodes": [
+            "add",
+            "$metric.nodes",
+            "$childMetric.nodes"
+          ],
+          "depth": "$depth",
+          "closed": [
+            "and",
+            "$metric.closed",
+            "$childMetric.closed"
+          ]
+        },
+        "into": "result"
+      }
+    ],
+    "lamp.readPath": [
+      {
+        "port": "text.indexOf",
+        "args": {
+          "value": "$eventInput.path",
+          "search": "."
+        },
+        "into": "dot"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greaterEqual",
+          "values": [
+            "list",
+            "$dot",
+            0
+          ]
+        },
+        "into": "hasNamespace"
+      },
+      {
+        "let": "result",
+        "value": null
+      },
+      {
+        "when": [
+          "not",
+          "$hasNamespace"
+        ],
+        "then": [
+          {
+            "port": "record.get",
+            "args": {
+              "record": "$eventInput.view",
+              "key": "$eventInput.path"
+            },
+            "into": "result"
+          }
+        ]
+      },
+      {
+        "when": "$hasNamespace",
+        "then": [
+          {
+            "port": "text.slice",
+            "args": {
+              "value": "$eventInput.path",
+              "start": 0,
+              "end": "$dot"
+            },
+            "into": "namespace"
+          },
+          {
+            "port": "text.slice",
+            "args": {
+              "value": "$eventInput.path",
+              "start": [
+                "add",
+                "$dot",
+                1
+              ]
+            },
+            "into": "key"
+          },
+          {
+            "port": "record.get",
+            "args": {
+              "record": [
+                "at",
+                "$eventInput.view",
+                "$namespace"
+              ],
+              "key": "$key"
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "lamp.evaluateNode": [
+      {
+        "let": "node",
+        "value": "$eventInput.node"
+      },
+      {
+        "let": "remaining",
+        "value": [
+          "add",
+          "$eventInput.remaining",
+          -1
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greaterEqual",
+          "values": [
+            "list",
+            "$remaining",
+            0
+          ]
+        },
+        "into": "hasFuel"
+      },
+      {
+        "assert": "$hasFuel",
+        "message": "Evaluation fuel exhausted"
+      },
+      {
+        "let": "value",
+        "value": null
+      },
+      {
+        "when": [
+          "eq",
+          "$node.op",
+          "literal"
+        ],
+        "then": [
+          {
+            "let": "value",
+            "value": "$node.value"
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$node.op",
+          "read"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.readPath",
+              "input": {
+                "view": "$eventInput.view",
+                "path": "$node.path"
+              }
+            },
+            "into": "value"
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$node.op",
+          "eq"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.evaluateNode",
+              "input": {
+                "node": [
+                  "at",
+                  "$node.args",
+                  0
+                ],
+                "view": "$eventInput.view",
+                "remaining": "$remaining"
+              }
+            },
+            "into": "left"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.evaluateNode",
+              "input": {
+                "node": [
+                  "at",
+                  "$node.args",
+                  1
+                ],
+                "view": "$eventInput.view",
+                "remaining": "$left.remaining"
+              }
+            },
+            "into": "right"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "canonical.encode",
+              "input": {
+                "value": "$left.value",
+                "numbers": false
+              }
+            },
+            "into": "leftJSON"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "canonical.encode",
+              "input": {
+                "value": "$right.value",
+                "numbers": false
+              }
+            },
+            "into": "rightJSON"
+          },
+          {
+            "let": "value",
+            "value": [
+              "eq",
+              "$leftJSON",
+              "$rightJSON"
+            ]
+          },
+          {
+            "let": "remaining",
+            "value": "$right.remaining"
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$node.op",
+          "not"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.evaluateNode",
+              "input": {
+                "node": [
+                  "at",
+                  "$node.args",
+                  0
+                ],
+                "view": "$eventInput.view",
+                "remaining": "$remaining"
+              }
+            },
+            "into": "child"
+          },
+          {
+            "let": "value",
+            "value": [
+              "not",
+              [
+                "eq",
+                "$child.value",
+                true
+              ]
+            ]
+          },
+          {
+            "let": "remaining",
+            "value": "$child.remaining"
+          }
+        ]
+      },
+      {
+        "when": [
+          "or",
+          [
+            "eq",
+            "$node.op",
+            "all"
+          ],
+          [
+            "eq",
+            "$node.op",
+            "any"
+          ]
+        ],
+        "then": [
+          {
+            "fold": "$node.args",
+            "as": "childNode",
+            "accumulator": "evaluation",
+            "initial": {
+              "value": [
+                "eq",
+                "$node.op",
+                "all"
+              ],
+              "remaining": "$remaining",
+              "done": false
+            },
+            "steps": [
+              {
+                "let": "next",
+                "value": "$evaluation"
+              },
+              {
+                "when": [
+                  "not",
+                  "$evaluation.done"
+                ],
+                "then": [
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "lamp.evaluateNode",
+                      "input": {
+                        "node": "$childNode",
+                        "view": "$eventInput.view",
+                        "remaining": "$evaluation.remaining"
+                      }
+                    },
+                    "into": "child"
+                  },
+                  {
+                    "let": "truth",
+                    "value": [
+                      "eq",
+                      "$child.value",
+                      true
+                    ]
+                  },
+                  {
+                    "let": "next",
+                    "value": {
+                      "value": "$truth",
+                      "remaining": "$child.remaining",
+                      "done": [
+                        "if",
+                        [
+                          "eq",
+                          "$node.op",
+                          "all"
+                        ],
+                        [
+                          "not",
+                          "$truth"
+                        ],
+                        "$truth"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "yield": "$next",
+            "into": "evaluation"
+          },
+          {
+            "let": "value",
+            "value": "$evaluation.value"
+          },
+          {
+            "let": "remaining",
+            "value": "$evaluation.remaining"
+          }
+        ]
+      },
+      {
+        "assert": [
+          "includes",
+          [
+            "list",
+            "literal",
+            "read",
+            "eq",
+            "not",
+            "all",
+            "any"
+          ],
+          "$node.op"
+        ],
+        "message": "Operator outside the closed set"
+      },
+      {
+        "let": "result",
+        "value": {
+          "value": "$value",
+          "remaining": "$remaining"
+        }
+      }
+    ],
+    "lamp.evaluate": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.evaluateNode",
+          "input": {
+            "node": "$eventInput.node",
+            "view": "$eventInput.view",
+            "remaining": "$eventInput.fuel"
+          }
+        },
+        "into": "evaluation"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$eventInput.fuel",
+            "$evaluation.remaining"
+          ]
+        },
+        "into": "used"
+      },
+      {
+        "let": "result",
+        "value": {
+          "value": [
+            "eq",
+            "$evaluation.value",
+            true
+          ],
+          "fuelUsed": "$used"
+        }
+      }
+    ],
+    "lamp.render": [
+      {
+        "let": "node",
+        "value": "$eventInput.node"
+      },
+      {
+        "let": "indent",
+        "value": "$eventInput.indent"
+      },
+      {
+        "let": "result",
+        "value": ""
+      },
+      {
+        "when": [
+          "eq",
+          "$node.op",
+          "literal"
+        ],
+        "then": [
+          {
+            "port": "json.stringify",
+            "args": {
+              "value": "$node.value"
+            },
+            "into": "literal"
+          },
+          {
+            "let": "result",
+            "value": [
+              "concat",
+              "literal ",
+              "$literal"
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$node.op",
+          "read"
+        ],
+        "then": [
+          {
+            "let": "result",
+            "value": [
+              "concat",
+              "read ",
+              "$node.path"
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$node.op",
+          "eq"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.render",
+              "input": {
+                "node": [
+                  "at",
+                  "$node.args",
+                  0
+                ],
+                "indent": ""
+              }
+            },
+            "into": "left"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.render",
+              "input": {
+                "node": [
+                  "at",
+                  "$node.args",
+                  1
+                ],
+                "indent": ""
+              }
+            },
+            "into": "right"
+          },
+          {
+            "let": "result",
+            "value": [
+              "concat",
+              "eq(",
+              "$left",
+              ", ",
+              "$right",
+              ")"
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$node.op",
+          "not"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.render",
+              "input": {
+                "node": [
+                  "at",
+                  "$node.args",
+                  0
+                ],
+                "indent": "$indent"
+              }
+            },
+            "into": "child"
+          },
+          {
+            "let": "result",
+            "value": [
+              "concat",
+              "not(",
+              "$child",
+              ")"
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "or",
+          [
+            "eq",
+            "$node.op",
+            "all"
+          ],
+          [
+            "eq",
+            "$node.op",
+            "any"
+          ]
+        ],
+        "then": [
+          {
+            "let": "pad",
+            "value": [
+              "concat",
+              "$indent",
+              "  "
+            ]
+          },
+          {
+            "fold": "$node.args",
+            "as": "childNode",
+            "accumulator": "parts",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "lamp.render",
+                  "input": {
+                    "node": "$childNode",
+                    "indent": "$pad"
+                  }
+                },
+                "into": "child"
+              }
+            ],
+            "yield": [
+              "append",
+              "$parts",
+              [
+                "list",
+                [
+                  "concat",
+                  "$pad",
+                  "$child"
+                ]
+              ]
+            ],
+            "into": "parts"
+          },
+          {
+            "port": "text.join",
+            "args": {
+              "values": "$parts",
+              "separator": ",\n"
+            },
+            "into": "joined"
+          },
+          {
+            "let": "result",
+            "value": [
+              "concat",
+              "$node.op",
+              "(\n",
+              "$joined",
+              "\n",
+              "$indent",
+              ")"
+            ]
+          }
+        ]
+      }
+    ],
+    "lamp.cellId": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "canonical.identify",
+          "input": {
+            "kind": "cell",
+            "value": {
+              "key": "$eventInput.cell.key",
+              "value": "$eventInput.cell.value"
+            }
+          }
+        },
+        "into": "result"
+      }
+    ],
+    "lamp.merkle": [
+      {
+        "fold": "$eventInput.ids",
+        "as": "id",
+        "accumulator": "digests",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "address.digest",
+              "input": {
+                "id": "$id"
+              }
+            },
+            "into": "digest"
+          }
+        ],
+        "yield": [
+          "append",
+          "$digests",
+          [
+            "list",
+            "$digest"
+          ]
+        ],
+        "into": "digests"
+      },
+      {
+        "port": "value.sort",
+        "args": {
+          "values": "$digests",
+          "mode": "lexical"
+        },
+        "into": "level"
+      },
+      {
+        "let": "result",
+        "value": null
+      },
+      {
+        "when": [
+          "eq",
+          [
+            "count",
+            "$level"
+          ],
+          0
+        ],
+        "then": [
+          {
+            "port": "digest.sha256",
+            "args": {
+              "text": "empty"
+            },
+            "into": "empty"
+          },
+          {
+            "let": "result",
+            "value": {
+              "root": "$empty",
+              "levels": [
+                "list",
+                [
+                  "list"
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$level"
+            ],
+            0
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.merkleLevel",
+              "input": {
+                "level": "$level",
+                "levels": [
+                  "list",
+                  "$level"
+                ]
+              }
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "lamp.merkleLevel": [
+      {
+        "let": "level",
+        "value": "$eventInput.level"
+      },
+      {
+        "let": "result",
+        "value": {
+          "root": [
+            "at",
+            "$level",
+            0
+          ],
+          "levels": "$eventInput.levels"
+        }
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greater",
+          "values": [
+            "list",
+            [
+              "count",
+              "$level"
+            ],
+            1
+          ]
+        },
+        "into": "more"
+      },
+      {
+        "when": "$more",
+        "then": [
+          {
+            "fold": [
+              "range",
+              [
+                "count",
+                "$level"
+              ]
+            ],
+            "as": "position",
+            "accumulator": "nextLevel",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "let": "index",
+                "value": [
+                  "add",
+                  "$position",
+                  -1
+                ]
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "remainder",
+                  "values": [
+                    "list",
+                    "$index",
+                    2
+                  ]
+                },
+                "into": "parity"
+              },
+              {
+                "let": "next",
+                "value": "$nextLevel"
+              },
+              {
+                "when": [
+                  "eq",
+                  "$parity",
+                  0
+                ],
+                "then": [
+                  {
+                    "let": "digest",
+                    "value": [
+                      "at",
+                      "$level",
+                      "$index"
+                    ]
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "less",
+                      "values": [
+                        "list",
+                        [
+                          "add",
+                          "$index",
+                          1
+                        ],
+                        [
+                          "count",
+                          "$level"
+                        ]
+                      ]
+                    },
+                    "into": "hasRight"
+                  },
+                  {
+                    "when": "$hasRight",
+                    "then": [
+                      {
+                        "port": "digest.sha256",
+                        "args": {
+                          "text": [
+                            "concat",
+                            [
+                              "at",
+                              "$level",
+                              "$index"
+                            ],
+                            [
+                              "at",
+                              "$level",
+                              [
+                                "add",
+                                "$index",
+                                1
+                              ]
+                            ]
+                          ]
+                        },
+                        "into": "digest"
+                      }
+                    ]
+                  },
+                  {
+                    "let": "next",
+                    "value": [
+                      "append",
+                      "$nextLevel",
+                      [
+                        "list",
+                        "$digest"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": "$next",
+            "into": "nextLevel"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.merkleLevel",
+              "input": {
+                "level": "$nextLevel",
+                "levels": [
+                  "append",
+                  "$eventInput.levels",
+                  [
+                    "list",
+                    "$nextLevel"
+                  ]
+                ]
+              }
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "lamp.stateRoot": [
+      {
+        "port": "record.entries",
+        "args": {
+          "value": "$eventInput.state.cells"
+        },
+        "into": "entries"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.merkle",
+          "input": {
+            "ids": [
+              "map",
+              "$entries",
+              "entry",
+              [
+                "at",
+                "$entry",
+                0
+              ]
+            ]
+          }
+        },
+        "into": "tree"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "canonical.identify",
+          "input": {
+            "kind": "state",
+            "value": {
+              "activePredicateId": "$eventInput.state.predicateId",
+              "cellSetRoot": "$tree.root"
+            }
+          }
+        },
+        "into": "root"
+      },
+      {
+        "let": "result",
+        "value": {
+          "root": "$root",
+          "tree": "$tree"
+        }
+      }
+    ],
+    "lamp.cellsByKey": [
+      {
+        "port": "record.entries",
+        "args": {
+          "value": "$eventInput.state.cells"
+        },
+        "into": "entries"
+      },
+      {
+        "let": "result",
+        "value": [
+          "map",
+          "$entries",
+          "entry",
+          {
+            "id": [
+              "at",
+              "$entry",
+              0
+            ],
+            "key": [
+              "at",
+              [
+                "at",
+                "$entry",
+                1
+              ],
+              "key"
+            ],
+            "value": [
+              "at",
+              [
+                "at",
+                "$entry",
+                1
+              ],
+              "value"
+            ]
+          }
+        ]
+      }
+    ],
+    "lamp.findCell": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.cellsByKey",
+          "input": {
+            "state": "$eventInput.state"
+          }
+        },
+        "into": "cells"
+      },
+      {
+        "let": "matching",
+        "value": [
+          "filter",
+          "$cells",
+          "cell",
+          [
+            "eq",
+            "$cell.key",
+            "$eventInput.key"
+          ]
+        ]
+      },
+      {
+        "let": "result",
+        "value": [
+          "if",
+          [
+            "eq",
+            [
+              "count",
+              "$matching"
+            ],
+            0
+          ],
+          null,
+          [
+            "at",
+            "$matching",
+            0
+          ]
+        ]
+      }
+    ],
+    "lamp.createWorld": [
+      {
+        "let": "configuration",
+        "value": "$eventInput.configuration"
+      },
+      {
+        "fold": "$configuration.covenants",
+        "as": "covenant",
+        "accumulator": "registry",
+        "initial": {},
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "canonical.identify",
+              "input": {
+                "kind": "predicate",
+                "value": "$covenant.ast"
+              }
+            },
+            "into": "id"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$covenant",
+              "key": "id",
+              "value": "$id"
+            },
+            "into": "identified"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$registry",
+              "key": "$id",
+              "value": "$identified"
+            },
+            "into": "registry"
+          }
+        ],
+        "yield": "$registry",
+        "into": "registry"
+      },
+      {
+        "port": "record.entries",
+        "args": {
+          "value": "$registry"
+        },
+        "into": "covenants"
+      },
+      {
+        "let": "original",
+        "value": [
+          "at",
+          "$covenants",
+          0
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "canonical.identify",
+          "input": {
+            "kind": "ark",
+            "value": {
+              "name": "Candidate Ark v0.1 (miniature)",
+              "operators": "$configuration.operators",
+              "bounds": {
+                "nodes": [
+                  "concat",
+                  "$configuration.limits.nodes"
+                ],
+                "depth": [
+                  "concat",
+                  "$configuration.limits.depth"
+                ],
+                "fuel": [
+                  "concat",
+                  "$configuration.limits.fuel"
+                ],
+                "contextBytes": [
+                  "concat",
+                  "$configuration.limits.contextBytes"
+                ]
+              }
+            }
+          }
+        },
+        "into": "arkId"
+      },
+      {
+        "fold": "$configuration.genesisCells",
+        "as": "cell",
+        "accumulator": "cells",
+        "initial": {},
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.cellId",
+              "input": {
+                "cell": "$cell"
+              }
+            },
+            "into": "id"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$cells",
+              "key": "$id",
+              "value": "$cell"
+            },
+            "into": "cells"
+          }
+        ],
+        "yield": "$cells",
+        "into": "cells"
+      },
+      {
+        "let": "state",
+        "value": {
+          "cells": "$cells",
+          "predicateId": [
+            "at",
+            "$original",
+            0
+          ]
+        }
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.stateRoot",
+          "input": {
+            "state": "$state"
+          }
+        },
+        "into": "commitment"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "canonical.identify",
+          "input": {
+            "kind": "context",
+            "value": {
+              "name": "The Temple of the Lamp",
+              "purpose": "A miniature running in your browser, for illustration."
+            }
+          }
+        },
+        "into": "contextId"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "canonical.identify",
+          "input": {
+            "kind": "temple",
+            "value": {
+              "ark": "$arkId",
+              "initialStateRoot": "$commitment.root",
+              "genesisContext": "$contextId"
+            }
+          }
+        },
+        "into": "id"
+      },
+      {
+        "let": "result",
+        "value": {
+          "id": "$id",
+          "arkId": "$arkId",
+          "registry": "$registry",
+          "genesis": {
+            "state": "$state",
+            "root": "$commitment.root",
+            "tree": "$commitment.tree",
+            "id": "$id",
+            "arkId": "$arkId"
+          },
+          "temple": {
+            "id": "$id",
+            "arkId": "$arkId",
+            "state": "$state",
+            "root": "$commitment.root",
+            "tree": "$commitment.tree",
+            "predicates": "$registry",
+            "sequence": 0,
+            "tip": null,
+            "roots": [
+              "list",
+              "$commitment.root"
+            ]
+          },
+          "journal": [
+            "list"
+          ]
+        }
+      }
+    ]
+  }
+}

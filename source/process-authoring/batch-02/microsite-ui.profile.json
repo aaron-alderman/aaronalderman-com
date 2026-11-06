@@ -1,0 +1,59 @@
+{
+  "protocol": "encounter-process-text/2",
+  "status": "supplied-bootstrap-syntax-definition",
+  "operators": [
+    "add",
+    "and",
+    "append",
+    "at",
+    "concat",
+    "count",
+    "eq",
+    "if",
+    "includes",
+    "list",
+    "map",
+    "not",
+    "or"
+  ],
+  "forbidden": [
+    "__proto__",
+    "prototype",
+    "constructor"
+  ],
+  "referenceSigil": "$",
+  "directPorts": [
+    "browser.class",
+    "browser.content",
+    "browser.environment",
+    "browser.focus",
+    "browser.frame",
+    "browser.insert",
+    "browser.on",
+    "browser.read",
+    "browser.remove",
+    "browser.replace",
+    "browser.scrollIntoView",
+    "browser.write",
+    "clock.read",
+    "kernel.invoke",
+    "record.put",
+    "state.get",
+    "state.set",
+    "text.replace",
+    "text.slice",
+    "text.trim"
+  ],
+  "maxDepth": 64,
+  "maxCodeUnits": 160000,
+  "maxTokens": 36000,
+  "name": "encounter/module-batch/microsite-ui/1",
+  "emitProfile": false,
+  "statementForms": [
+    "call",
+    "fold",
+    "let",
+    "port",
+    "when"
+  ]
+}

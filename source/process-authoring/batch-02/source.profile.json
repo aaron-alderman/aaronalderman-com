@@ -1,0 +1,54 @@
+{
+  "protocol": "encounter-process-text/2",
+  "status": "supplied-bootstrap-syntax-definition",
+  "operators": [
+    "add",
+    "and",
+    "append",
+    "at",
+    "concat",
+    "count",
+    "eq",
+    "filter",
+    "fold",
+    "if",
+    "includes",
+    "list",
+    "map",
+    "not",
+    "range"
+  ],
+  "forbidden": [
+    "__proto__",
+    "prototype",
+    "constructor"
+  ],
+  "referenceSigil": "$",
+  "directPorts": [
+    "json.parse",
+    "json.stringify",
+    "record.put",
+    "text.indexOf",
+    "text.join",
+    "text.matches",
+    "text.slice",
+    "text.split",
+    "text.trim",
+    "value.describe",
+    "value.string"
+  ],
+  "maxDepth": 64,
+  "maxCodeUnits": 160000,
+  "maxTokens": 36000,
+  "name": "encounter/module-batch/source/1",
+  "emitProfile": false,
+  "statementForms": [
+    "assert",
+    "call",
+    "fold",
+    "let",
+    "port",
+    "try",
+    "when"
+  ]
+}

@@ -84,3 +84,17 @@ The compiler bootstrap has an explicit circularity boundary: a pinned predecesso
 Before the source-owner switch, correspondence passed for ordered whole-module JSON, every statement coordinate, whole-module lowering, real documents, formatting, effects and faults. The full publication gate passed 92 checks after the switch, including readable-source-driven execution, nested-link refusals, absence of a root JSON owner, exact whitespace in Inspect, authoring transaction/refusals and reproducibility. These are bounded engineering checks, not a proof over all inputs. The generic loader has an archived predecessor and updated native hashes; the Temple native snapshot has an explicit predecessor/successor receipt. `verification/encounter-source-authority-release.json` records identities, usage, gate and visual QA.
 
 Every declared project microsite receives the same fixed main-site return link. algebra/microsite-return.process.json owns its markup, CSS, relative destination and idempotent projection. The publication’s final pass applies it to local directory-style StandalonePage declarations; MicrositeDocument pages receive it during their source projection. No browser JavaScript is added. New declared microsites inherit the control automatically.
+
+
+Encounter source batch 02 migrates six further modules (66 queries) after exact ordered JSON, complete lowering, every-statement origins, scoped linking, `each` scope/effects/refusals, UI DOM/state traces and the 19 existing Encounter/microsite behaviour checks passed while JSON remained authoritative. The full post-switch publication gate passed 104 checks.
+
+| Readable source owner | Queries | Generated output |
+| --- | ---: | --- |
+| `source/encounter/encounter.encounter` | 1 | `algebra/encounter.process.json` |
+| `source/algebra/source.encounter` | 5 | `algebra/source.process.json` |
+| `source/microsites/ui.encounter` | 14 | `algebra/microsite-ui.process.json` |
+| `source/microsites/values.encounter` | 19 | `algebra/microsite-values.process.json` |
+| `source/microsites/sourcery.encounter` | 7 | `algebra/microsite-sourcery.process.json` |
+| `source/microsites/temple-ui.encounter` | 20 | `algebra/microsite-temple-ui.process.json` |
+
+The existing process frontend now supports `each` only in explicitly selected statement profiles. Temple UI keeps its original try/catch/error JSON field order via a checked field-order profile. All six modules have separately pinned operator and direct-effect profiles; these do not grant runtime effects. The original native loader, seed, lowerer, runtime grants and 20-million-step limit are unchanged. No root JSON cache or parse-failure fallback remains for these modules. The source/oracle/profile ledger and pre-switch gate live under `source/process-authoring/batch-02/`; `verification/encounter-batch-02-release.json` records the release and source hashes.

@@ -1,0 +1,573 @@
+# Immutable JSON-to-Encounter correspondence fixture for microsite-ui.
+process-module "temple/surface-process-module/1"
+profile "encounter/module-batch/microsite-ui/1"
+
+process ui.html:
+  let input = at($eventInput, "node")
+  call html.serialize
+
+process ui.short:
+  port text.slice { value = at($eventInput, "value"); start = 0; end = 6 } → first
+  port text.slice { value = at($eventInput, "value"); start = -4 } → last
+  let result = concat($first, "…", $last)
+
+process ui.sourcery.init:
+  port state.set { key = "ledger"; value = list() } → _
+  port state.set { key = "tampered"; value = null } → _
+  port state.set { key = "current"; value = null } → _
+  port browser.environment {  } → env
+  port browser.class { ref = "html"; name = "reduce"; value = at($env, "reduced") } → _
+  port browser.on {
+    ref = "#spell-form";
+    event = "submit";
+    query = "ui.sourcery.summon";
+    input = {  };
+    preventDefault = true
+  } → _
+  port browser.on {
+    ref = "document";
+    event = "click";
+    query = "ui.sourcery.example";
+    input = {  };
+    delegate = ".chip[data-example]"
+  } → _
+  port browser.on { ref = "#ledger-verify"; event = "click"; query = "ui.sourcery.verify"; input = {  } } → _
+  port browser.on { ref = "#ledger-tamper"; event = "click"; query = "ui.sourcery.tamper"; input = {  } } → _
+  port browser.on {
+    ref = "#spell-stage";
+    event = "click";
+    query = "ui.sourcery.actions";
+    input = {  };
+    delegate = "[data-spell-action]"
+  } → _
+  port browser.on {
+    ref = "#spell-stage";
+    event = "keydown";
+    query = "ui.sourcery.enter";
+    input = {  };
+    delegate = "#return-why";
+    preventKeys = list("Enter")
+  } → _
+
+process ui.sourcery.example:
+  port browser.write {
+    ref = "#spell-intent";
+    name = "value";
+    value = at(at(at($eventInput, "matched"), "attributes"), "data-example")
+  } → _
+  port kernel.invoke {
+    query = "ui.sourcery.summon";
+    input = { text = at(at(at($eventInput, "matched"), "attributes"), "data-example") }
+  } → result
+
+process ui.sourcery.summon:
+  port state.get { key = "configuration" } → configuration
+  port state.get { key = "ledger" } → ledger
+  let text = at($eventInput, "text")
+  when not($text):
+    port browser.read { ref = "#spell-intent" } → field
+    port text.replace { value = at($field, "value"); pattern = "\\s+"; flags = "g"; replacement = " " } → text
+    port text.trim { value = $text } → text
+    when eq($text, ""):
+      let text = at(at($field, "attributes"), "placeholder")
+      port browser.write { ref = "#spell-intent"; name = "value"; value = $text } → _
+    port text.slice { value = $text; start = 0; end = 160 } → text
+  let previous = if(
+    eq(count($ledger), 0),
+    "genesis",
+    at(at($ledger, add(count($ledger), -1)), "witness")
+  )
+  port kernel.invoke {
+    query = "sourcery.proposal";
+    input = { text = $text; previous = $previous; configuration = $configuration }
+  } → current
+  port state.set { key = "current"; value = $current } → _
+  port kernel.invoke { query = "ui.sourcery.proposal"; input = { current = $current } } → result
+  port browser.frame { query = "ui.sourcery.focus"; input = {  } } → _
+  port browser.environment {  } → env
+  port browser.scrollIntoView {
+    ref = "#spell-stage .scroll";
+    block = "nearest";
+    behavior = if(at($env, "reduced"), "auto", "smooth")
+  } → _
+
+process ui.sourcery.focus:
+  port browser.focus { ref = "#proposal-title"; preventScroll = true } → _
+
+process ui.sourcery.proposal:
+  let c = at($eventInput, "current")
+  let d = at($c, "draft")
+  port browser.read { ref = "html" } → root
+  let reduced = includes(at(at($root, "attributes"), "class"), "reduce")
+  port kernel.invoke { query = "ui.short"; input = { value = at(at($c, "proposal"), "basis") } } → short
+  let basis = if(
+    eq(at(at($c, "proposal"), "basis"), "genesis"),
+    "the empty ledger",
+    concat("witness ", $short)
+  )
+  port text.slice { value = at($c, "hash"); start = 0; end = 16 } → shortHash
+  port kernel.invoke {
+    query = "ui.html";
+    input = {
+      node = list(
+        {
+          tag = "p";
+          attrs = { class = concat("arrival", if($reduced, "", " is-flying")) };
+          children = list(
+            {
+              tag = "svg";
+              attrs = { viewBox = "-70 -250 140 262"; "aria-hidden" = "true"; focusable = "false" };
+              children = list(
+                {
+                  tag = "use";
+                  attrs = { href = "#broom"; x = -60; y = -240; width = 120; height = 250 };
+                  children = list()
+                }
+              )
+            },
+            concat("Broom № ", at($c, "broomNo"), " is back with a proposal.")
+          )
+        },
+        {
+          tag = "article";
+          attrs = { class = "scroll is-unrolling"; "aria-labelledby" = "proposal-title" };
+          children = list(
+            {
+              tag = "div";
+              attrs = { class = "scroll-head" };
+              children = list(
+                {
+                  tag = "h4";
+                  attrs = { id = "proposal-title"; tabindex = -1 };
+                  children = list(at($d, "title"))
+                },
+                {
+                  tag = "span";
+                  attrs = { class = "scroll-state" };
+                  children = list("Proposal · not yet real")
+                }
+              )
+            },
+            {
+              tag = "p";
+              attrs = { class = "scroll-meta" };
+              children = list(
+                concat(
+                  "From Broom № ",
+                  at($c, "broomNo"),
+                  ", an emissary · asked by you · basis: ",
+                  $basis
+                )
+              )
+            },
+            {
+              tag = "p";
+              attrs = { class = "scroll-words" };
+              children = list(
+                { tag = "span"; attrs = {  }; children = list("Your exact words, kept as written") },
+                concat("“", at(at($c, "proposal"), "intent"), "”")
+              )
+            },
+            {
+              tag = "div";
+              attrs = { class = "scroll-sec" };
+              children = list(
+                { tag = "h5"; attrs = {  }; children = list("It would create") },
+                {
+                  tag = "ul";
+                  attrs = { class = "kinds" };
+                  children = list(
+                    map(
+                      at($d, "creates"),
+                      "creation",
+                      {
+                        tag = "li";
+                        attrs = {  };
+                        children = list(
+                          { tag = "span"; attrs = { class = "kind" }; children = list(at($creation, 0)) },
+                          {
+                            tag = "span";
+                            attrs = { class = "what" };
+                            children = list(
+                              { tag = "b"; attrs = {  }; children = list(at($creation, 1)) },
+                              concat(": ", at($creation, 2))
+                            )
+                          }
+                        )
+                      }
+                    )
+                  )
+                }
+              )
+            },
+            {
+              tag = "div";
+              attrs = { class = "scroll-sec" };
+              children = list(
+                { tag = "h5"; attrs = {  }; children = list("It would add these house rules") },
+                {
+                  tag = "ul";
+                  attrs = {  };
+                  children = list(map(at($d, "rules"), "line", { tag = "li"; attrs = {  }; children = list($line) }))
+                }
+              )
+            },
+            {
+              tag = "div";
+              attrs = { class = "scroll-sec" };
+              children = list(
+                { tag = "h5"; attrs = {  }; children = list("It needs one answer from you") },
+                {
+                  tag = "ul";
+                  attrs = {  };
+                  children = list(map(at($d, "asks"), "line", { tag = "li"; attrs = {  }; children = list($line) }))
+                }
+              )
+            },
+            {
+              tag = "div";
+              attrs = { class = "scroll-sec" };
+              children = list(
+                { tag = "h5"; attrs = {  }; children = list("It will not") },
+                {
+                  tag = "ul";
+                  attrs = {  };
+                  children = list(map(at($d, "wont"), "line", { tag = "li"; attrs = {  }; children = list($line) }))
+                }
+              )
+            },
+            {
+              tag = "p";
+              attrs = { class = "scroll-meta" };
+              children = list(concat("Built from a reusable pattern: ", at($d, "pattern"), "."))
+            },
+            {
+              tag = "div";
+              attrs = { class = "scroll-seal" };
+              children = list(
+                {
+                  tag = "p";
+                  attrs = { class = "seal-text" };
+                  children = list(
+                    { tag = "span"; attrs = { class = "seal-label" }; children = list("Seal preview: ") },
+                    {
+                      tag = "span";
+                      attrs = { class = "hash"; title = concat("sha256:", at($c, "hash")) };
+                      children = list(concat("sha256:", $shortHash, "…"))
+                    }
+                  )
+                }
+              )
+            },
+            {
+              tag = "div";
+              attrs = { class = "scroll-actions" };
+              children = list(
+                {
+                  tag = "button";
+                  attrs = { type = "button"; class = "btn btn--seal"; "data-spell-action" = "seal" };
+                  children = list("Seal it")
+                },
+                {
+                  tag = "button";
+                  attrs = { type = "button"; class = "btn btn--ghost"; "data-spell-action" = "return" };
+                  children = list("Send it back")
+                }
+              )
+            }
+          )
+        }
+      )
+    }
+  } → html
+  port browser.content { ref = "#spell-stage"; html = $html } → _
+
+process ui.sourcery.actions:
+  let action = at(at(at($eventInput, "matched"), "attributes"), "data-spell-action")
+  when eq($action, "seal"):
+    port kernel.invoke { query = "ui.sourcery.decide"; input = { verdict = "sealed"; note = "" } } → result
+  when eq($action, "return"):
+    port kernel.invoke { query = "ui.sourcery.askWhy"; input = {  } } → result
+  when eq($action, "send"):
+    port browser.read { ref = "#return-why" } → field
+    port text.trim { value = at($field, "value") } → note
+    port kernel.invoke { query = "ui.sourcery.decide"; input = { verdict = "returned"; note = $note } } → result
+  when eq($action, "again"):
+    port browser.content { ref = "#spell-stage"; html = "" } → _
+    port state.set { key = "current"; value = null } → _
+    port browser.write { ref = "#spell-intent"; name = "value"; value = "" } → _
+    port browser.focus { ref = "#spell-intent" } → _
+
+process ui.sourcery.askWhy:
+  port kernel.invoke {
+    query = "ui.html";
+    input = {
+      node = {
+        tag = "div";
+        attrs = { class = "return-note" };
+        children = list(
+          {
+            tag = "label";
+            attrs = { for = "return-why" };
+            children = list("Why send it back? (optional, and it goes on the record)")
+          },
+          {
+            tag = "input";
+            attrs = {
+              id = "return-why";
+              type = "text";
+              maxlength = 120;
+              placeholder = "e.g. not yet, ask me about the six hours first"
+            };
+            children = list()
+          },
+          {
+            tag = "button";
+            attrs = { type = "button"; class = "btn btn--ghost"; "data-spell-action" = "send" };
+            children = list("Send it back")
+          }
+        )
+      }
+    }
+  } → html
+  port browser.replace { ref = "#spell-stage .scroll-actions"; html = $html } → _
+  port browser.focus { ref = "#return-why" } → _
+
+process ui.sourcery.enter:
+  when eq(at(at($eventInput, "event"), "key"), "Enter"):
+    port browser.read { ref = "#return-why" } → field
+    port text.trim { value = at($field, "value") } → note
+    port kernel.invoke { query = "ui.sourcery.decide"; input = { verdict = "returned"; note = $note } } → result
+
+process ui.sourcery.decide:
+  port state.get { key = "current" } → current
+  port state.get { key = "ledger" } → ledger
+  when and(
+    not(or(eq($current, null), eq($current, at({  }, "absent")))),
+    not(at($current, "decided"))
+  ):
+    port clock.read {  } → clock
+    port kernel.invoke {
+      query = "sourcery.decide";
+      input = {
+        current = $current;
+        ledger = $ledger;
+        verdict = at($eventInput, "verdict");
+        note = at($eventInput, "note");
+        at = at($clock, "iso")
+      }
+    } → decision
+    port record.put { record = $current; key = "decided"; value = true } → current
+    port state.set { key = "current"; value = $current } → _
+    port state.set { key = "ledger"; value = at($decision, "ledger") } → _
+    port kernel.invoke { query = "ui.sourcery.ledger"; input = {  } } → result
+    port browser.remove { ref = "#spell-stage .scroll-actions, #spell-stage .return-note" } → _
+    let sealed = eq(at($eventInput, "verdict"), "sealed")
+    port kernel.invoke {
+      query = "ui.html";
+      input = {
+        node = if(
+          $sealed,
+          {
+            tag = "svg";
+            attrs = { viewBox = "0 0 100 100"; class = "stamp"; "aria-hidden" = "true" };
+            children = list(
+              {
+                tag = "path";
+                attrs = {
+                  d = "M50 6c9 0 11 5 18 6s12 6 13 13 5 11 5 18-5 11-5 18-6 12-13 13-9 6-18 6-11-5-18-6-12-6-13-13-5-11-5-18 5-11 5-18 6-12 13-13 9-6 18-6z";
+                  fill = "#9c3550";
+                  stroke = "#221d2e";
+                  "stroke-width" = 2
+                };
+                children = list()
+              },
+              {
+                tag = "circle";
+                attrs = { cx = 50; cy = 50; r = 27; fill = "none"; stroke = "#6d1f33"; "stroke-width" = 2.4 };
+                children = list()
+              },
+              {
+                tag = "path";
+                attrs = {
+                  d = "M38 36l16 18";
+                  stroke = "#fbf3df";
+                  "stroke-width" = "3.4";
+                  "stroke-linecap" = "round"
+                };
+                children = list()
+              },
+              {
+                tag = "path";
+                attrs = { d = "M52 52l6-5 10 16-5 4z"; fill = "#fbf3df" };
+                children = list()
+              }
+            )
+          },
+          {
+            tag = "span";
+            attrs = { class = "stamp stamp--returned"; "aria-hidden" = "true" };
+            children = list("RETURNED")
+          }
+        )
+      }
+    } → html
+    port browser.insert { ref = "#spell-stage .scroll-seal"; position = "beforeend"; html = $html } → _
+    port browser.write {
+      ref = "#spell-stage .seal-label";
+      name = "textContent";
+      value = if($sealed, "Sealed: ", "Fingerprint: ")
+    } → _
+    port browser.write {
+      ref = "#spell-stage .scroll-state";
+      name = "textContent";
+      value = if($sealed, "Sealed · witnessed", "Returned · witnessed")
+    } → _
+    port kernel.invoke {
+      query = "ui.html";
+      input = {
+        node = list(
+          {
+            tag = "p";
+            attrs = { class = concat("outcome", if($sealed, "", " is-returned")) };
+            children = list(
+              if(
+                $sealed,
+                concat(
+                  "Sealed, and witnessed as № ",
+                  at(at($decision, "record"), "n"),
+                  ". In Sourcery, this is the moment the change would be checked, admitted and built into a working app, with this receipt attached."
+                ),
+                concat(
+                  "Sent back, and witnessed as № ",
+                  at(at($decision, "record"), "n"),
+                  ". Nothing changed, and the attempt is still on the record. No silent failure."
+                )
+              )
+            )
+          },
+          {
+            tag = "button";
+            attrs = { type = "button"; class = "btn btn--ghost again"; "data-spell-action" = "again" };
+            children = list("Cast another spell")
+          }
+        )
+      }
+    } → html
+    port browser.insert { ref = "#spell-stage .scroll"; position = "afterend"; html = $html } → _
+
+process ui.sourcery.ledger:
+  port state.get { key = "ledger" } → ledger
+  port state.get { key = "tampered" } → tampered
+  fold $ledger as entry; items starts list():
+    let r = at($entry, "record")
+    port kernel.invoke { query = "ui.short"; input = { value = at($r, "proposal") } } → proposal
+    port kernel.invoke { query = "ui.short"; input = { value = at($r, "previous") } } → previous
+    port kernel.invoke { query = "ui.short"; input = { value = at($entry, "witness") } } → witness
+    let mark = if(
+      at($eventInput, "marks"),
+      if(at(at($eventInput, "marks"), count($items)), " is-ok", " is-broken"),
+      ""
+    )
+    let item = {
+      tag = "li";
+      attrs = { class = concat("entry", $mark) };
+      children = list(
+        {
+          tag = "div";
+          attrs = { class = "entry-top" };
+          children = list(
+            {
+              tag = "span";
+              attrs = { class = "entry-n" };
+              children = list(concat("№ ", at($r, "n")))
+            },
+            {
+              tag = "span";
+              attrs = {
+                class = concat(
+                  "entry-verdict ",
+                  if(eq(at($r, "verdict"), "sealed"), "is-sealed", "is-returned")
+                )
+              };
+              children = list(if(eq(at($r, "verdict"), "sealed"), "Sealed by you", "Returned by you"))
+            }
+          )
+        },
+        {
+          tag = "p";
+          attrs = { class = "entry-words" };
+          children = list(concat("“", at($r, "intent"), "”"))
+        },
+        if(
+          at($r, "note"),
+          {
+            tag = "p";
+            attrs = { class = "entry-note" };
+            children = list(concat("Note: ", at($r, "note")))
+          },
+          null
+        ),
+        {
+          tag = "dl";
+          attrs = {  };
+          children = list(
+            { tag = "dt"; attrs = {  }; children = list("proposal") },
+            { tag = "dd"; attrs = { class = "hash" }; children = list($proposal) },
+            { tag = "dt"; attrs = {  }; children = list("previous") },
+            {
+              tag = "dd";
+              attrs = { class = "hash" };
+              children = list(if(eq(at($r, "previous"), "genesis"), "genesis", $previous))
+            },
+            { tag = "dt"; attrs = {  }; children = list("witness") },
+            { tag = "dd"; attrs = { class = "hash" }; children = list($witness) }
+          )
+        }
+      )
+    }
+    yield append($items, list($item)) → items
+  port kernel.invoke {
+    query = "ui.html";
+    input = {
+      node = if(
+        eq(count($ledger), 0),
+        {
+          tag = "li";
+          attrs = { class = "ledger-empty" };
+          children = list("No spells yet. The first entry will be witness № 1.")
+        },
+        $items
+      )
+    }
+  } → html
+  port browser.content { ref = "#ledger-list"; html = $html } → _
+  port browser.write { ref = "#ledger-verify"; name = "disabled"; value = eq(count($ledger), 0) } → _
+  port browser.write { ref = "#ledger-tamper"; name = "disabled"; value = eq(count($ledger), 0) } → _
+  port browser.write {
+    ref = "#ledger-tamper";
+    name = "textContent";
+    value = if($tampered, "Undo the tampering", "Try tampering with № 1")
+  } → _
+
+process ui.sourcery.verify:
+  port state.get { key = "ledger" } → ledger
+  port kernel.invoke { query = "sourcery.verify"; input = { ledger = $ledger } } → verified
+  port kernel.invoke { query = "ui.sourcery.ledger"; input = { marks = at($verified, "marks") } } → result
+  port browser.write {
+    ref = "#ledger-result";
+    name = "className";
+    value = if(eq(at($verified, "firstBad"), -1), "ledger-result is-ok", "ledger-result is-bad")
+  } → _
+  port browser.write { ref = "#ledger-result"; name = "textContent"; value = at($verified, "message") } → _
+
+process ui.sourcery.tamper:
+  port state.get { key = "ledger" } → ledger
+  port state.get { key = "tampered" } → tampered
+  port kernel.invoke { query = "sourcery.tamper"; input = { ledger = $ledger; originalRecord = $tampered } } → changed
+  port state.set { key = "ledger"; value = at($changed, "ledger") } → _
+  port state.set { key = "tampered"; value = at($changed, "originalRecord") } → _
+  port browser.write { ref = "#ledger-result"; name = "className"; value = "ledger-result" } → _
+  port browser.write { ref = "#ledger-result"; name = "textContent"; value = at($changed, "message") } → _
+  port kernel.invoke { query = "ui.sourcery.ledger"; input = {  } } → result
+

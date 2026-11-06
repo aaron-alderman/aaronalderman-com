@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),read=p=>JSON.parse(fs.readFileSync(p,'utf8')),sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+const require=createRequire(import.meta.url),{readProcessFixture:read}=require('./tooling/read-process-fixture.cjs'),sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const {parseRel}=require('./bootstrap/ports/rel-codec.cjs'),{createKernel}=require('./bootstrap/temple-seed.cjs'),{valuePorts}=require('./bootstrap/ports/value.cjs'),{lower}=require('./bootstrap/ports/algebra-lower.cjs'),{invoke}=require('./bootstrap/ports/programme.cjs');
 const catalogue=read('source/hierarchy.json'),evidence=read('source/hierarchy-evidence.json');
 const surface={entry:'hierarchy.parse',queries:{...read('algebra/source.process.json').queries,...Object.fromEntries(Object.entries(read('algebra/hierarchy.process.json').queries).filter(([n])=>['hierarchy.parse','hierarchy.shared'].includes(n)))}};

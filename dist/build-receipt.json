@@ -315,7 +315,7 @@
     ]
   },
   "sources": {
-    "bootstrap/site.json": "f905620a0edd510223a8c47b5cb67a4775998ec8f95ec7819b4b706a9cd9a1cc",
+    "bootstrap/site.json": "6e5e9176d793a7cf7a9ac30121dc1d1038d0667eae79c859b452b05ad281a658",
     "bootstrap/native.json": "c475c82130ce97ef2ba8047d58eb13454678be706b46d41521f85134b7bd1730",
     "bootstrap/run.cjs": "0dd1f8d066b05fb915b6cdc6a7abe8507c5c019b8450d3725952338bf4c6b28c",
     "bootstrap/temple-seed.cjs": "c1fdf47cb183a0c8e69d000d091ada457fdc8333b34a2a5bba4bcc51d53ac71e",
@@ -333,8 +333,8 @@
     "bootstrap/ports/browser-effects.cjs": "23d5aece795c7a6338ab4b302853682996797418dbdb4122b08454ce4dbb7c0d",
     "bootstrap/ports/process-source.cjs": "ba6c413ea117047e85e024c8aedaf4947ee37761625159ed3f16584c6206bb19",
     "bootstrap/ports.json": "0de76253d50abcefcf36f9a0a7c4c5d026d1f44a283cdd8382af7e1f87eafc3c",
-    "bootstrap/process-frontend.json": "d85855db087ed20d4242fa22b18f1a9d81831c4a8efd9a686582d50bbc1c9c37",
-    "algebra/language-process.process.json": "da252cf2aaf2a2425661aadc931fc77587805665a230e863ad0eee662a7f2b47",
+    "bootstrap/process-frontend.json": "64f397a006462bf27579383821f29e907470c16aadc105467c28364baffdcc88",
+    "algebra/language-process.process.json": "c06b86550f54bf007a58d64c61fe1255737a70f946f0c1563f4ad624038a1989",
     "source/process-authoring/bootstrap.json": "eb38af5f82a0a2229aebcbbb0f0b6ee98ffd5251a4ed8fefd2c93071ab84e520",
     "algebra/lowering.process.json": "616c1c5860d0245bad4df16de9e04074e44a601a716d99b641e7fec07d43bbd8",
     "algebra/operators.expression.json": "b03c2c863cab748899675ffb4afd8f7ead0979f5e992923a086d19ad89a2c7f2",
@@ -344,20 +344,33 @@
     "source/process-authoring/lexical.json": "60f3ccd74eed17738478a63f2e24559c430f71d5091974a5c9a3d8b637801f06",
     "source/encounter/presentation.json": "04725adbc103d9e53be08a7daa6f14c053bbde9f9d2eeef2cd8e4c27a4700786",
     "source/encounter/source-algebra.encounter": "927be102d80170a4eb2dc6d4d9f7f28589ed0f484121bdf1838275e3f930c2db",
+    "bootstrap/frontends/encounter.json": "eebb1ecef2c437e3aa83506b3a5900ed002e540e8c5619d670399f8d5a6dc0dc",
+    "source/process-authoring/batch-02/encounter.profile.json": "f9257dfb8dec557b1fc9652e92da439ad000231e90e1ed1a9a6a7e2f56036b46",
+    "source/encounter/encounter.encounter": "0dbc78858a181acd09826a0eb4d10ba8ce6f4dc238c54ce5f0b98e547e92cb0d",
+    "bootstrap/frontends/source.json": "ec6c78af856a3d53b201442fdfff58b661e2440a731fc60f08cb191d648a1a3c",
+    "source/process-authoring/batch-02/source.profile.json": "1f9c918236ab93cd521c5f45cc920e1b615d15080869028d651bb5f50769ad23",
+    "source/algebra/source.encounter": "bd919af5fcf5cf99850b755c6eb5c6bd3aa762bdd6b68999f85a041e32b4281b",
+    "bootstrap/frontends/microsite-ui.json": "603b07be2679a85b8ef459a98ef933c08c6da2e39d64f889f998a818f4519ce3",
+    "source/process-authoring/batch-02/microsite-ui.profile.json": "6dce4155e648492d5c6cada6e6d343e2dee227694ae3ddd3ff742acdd3d4150c",
+    "source/microsites/ui.encounter": "1eb81f35ca8aad95bc3d555d06d3f001f2c1bf74a82b1605aa621bc33816beff",
+    "bootstrap/frontends/microsite-values.json": "7640e7aec59dbfe4d5dd52a65fd9420c89a29f66fa92fff7833fde4520f7c0c5",
+    "source/process-authoring/batch-02/microsite-values.profile.json": "2f1c47d4676d24630f56c4795b6da0fea5f4a0a20ed00e94dc64b1ea196e3778",
+    "source/microsites/values.encounter": "d50110fcdcceb687542a1899c38f49e337b8b16a55bf094a09ac600911f83ac9",
+    "bootstrap/frontends/microsite-sourcery.json": "fd5a2ceffa393a64e6c49d42bb514fc63c15b4d9bb4bdc10ef5d38aab5128687",
+    "source/process-authoring/batch-02/microsite-sourcery.profile.json": "ff6e28fea05d06521cac8dcb1cfed428155e15e27c4f7af172dc74fa27378bf9",
+    "source/microsites/sourcery.encounter": "9f8c7b52ffac3cb9d76424585d8e013a6ec866b72433ee6806daa0ceb99ab937",
+    "bootstrap/frontends/microsite-temple-ui.json": "0753ac0f75ba1e7fcd3fa7b39bf6b93cfcc81f66ad992ae981960ea29e44ce8d",
+    "source/process-authoring/batch-02/microsite-temple-ui.profile.json": "2c5332a881db67a9be93e7155897e64899a8de26554b94aaf06ae9fabd5d758e",
+    "source/microsites/temple-ui.encounter": "45977096dc7063ab8d5fe055365f889ae63c4bcb6c4f02f429255f76e9a3043f",
     "algebra/html.process.json": "3c0daa63fd4ca49a59d3228db2dc55f74f145c3f715bc7d365de0dfbbd6261ef",
     "algebra/css.process.json": "12dc9aca9f4c3d9d61588105246e6ae7194f638768f2d5718d0730ebecb6b4f1",
     "algebra/publication.process.json": "d94664c98f4242a9f78f7e0dfd45b6d1f7884a1cbe4af2d5d80b9a37413fa197",
     "algebra/gateway.process.json": "b6d685106717a80f4e443ae86a83e57a149a6f67782610f774ebcbf493e89e4f",
     "algebra/language.process.json": "83e8fcd65685ea08bc875d92d68bef37c95bad2e1f702cd8f8ecbe0337c61cda",
     "algebra/fact-index.process.json": "66ba62d753114df7abad1b11a0c89cb014474da7744d391668508caa0ce336d9",
-    "algebra/source.process.json": "27d5b5a43e7bf6eac502e7096770bf871c6e6ea5a68d9b35e6df40012d5c6246",
     "algebra/microsite-projection.process.json": "b9448dd1a2425f1a937dbb38669718aa0ce3e0c9cc34b9baed138d80a5b9422f",
     "algebra/microsites.process.json": "24311035a534f5a0b51a12b017c8c9c761fc365f2de0e128de0f231994ff1530",
-    "algebra/microsite-values.process.json": "1f995db6a7b6855aab6d80f279488345988c90997e6dfaaea75e304dfe036069",
     "algebra/microsite-lamp.process.json": "fc4d07d31f82924b36fb9a921229c0b2f5f93b84727b52b4884b58144feecd5b",
-    "algebra/microsite-sourcery.process.json": "4e1c5995c7dc334043cc345ee9684139ac705d3772ad34f70c79ea79dcd3323c",
-    "algebra/microsite-ui.process.json": "4b5e098df13bcc4c1fffabd354a79ec0db2681fdaf801c0c7249342619c041d2",
-    "algebra/microsite-temple-ui.process.json": "5268456e95c933922ab842b4c5512b0d2d5824b6ff82384ba279fa20e61d501e",
     "algebra/microsite-motion.process.json": "ca994deeca7d4dd565b5ce0777d863e37f60d81b1a6316431101068debc4f357",
     "algebra/microsite-temple-motion.process.json": "16197e683130c5cab6cc6ba7112fd74354fd1126d0bc461553b426f75d73c864",
     "algebra/microsite-media.process.json": "a8581be25a23c46ad8eaae9cb178f3055d74f8b1f759cde17b7550e08e13629b",
@@ -368,7 +381,6 @@
     "algebra/encounter-code-types.process.json": "1289d28de383f0b00e06d9e7ae323da31ad8460668afbb6c9e49e6b6daa79b05",
     "algebra/encounter-code-compiler.process.json": "4e2559bb1b560f30a245a9e71566005e7425825cb6f15e056a626ea1178582d9",
     "algebra/encounter-code-runtime.process.json": "4c7f7e56e0eb303b1419970f7895903b2e0581a3a27d3bb180a56424bdb64ffc",
-    "algebra/encounter.process.json": "c536702195b172350470ac26baf53b3ef7a2cb09e87c4e4865522bb585fa005a",
     "algebra/atlas.process.json": "b2a33febd6a0983086584ef0ea944a26eddfab78493882625a1ceb99b0644cbd",
     "algebra/atlas-journey.process.json": "6bb32792386552e8fed084e6be5e9d7c2d25f9d755bd93f1a159f9d663ed0817",
     "algebra/reader-models.process.json": "4a495045162fff241d6e302497a2e4071aada5ed92989b993f9eaf21f581220b",
@@ -539,7 +551,25 @@
   "artifacts": {
     "algebra/encounter-source.process.json": "eb38af5f82a0a2229aebcbbb0f0b6ee98ffd5251a4ed8fefd2c93071ab84e520",
     "source/encounter/source-algebra.encounter": "927be102d80170a4eb2dc6d4d9f7f28589ed0f484121bdf1838275e3f930c2db",
-    "algebra/encounter-source.process.json.map.json": "e106d30d455a672060bdef3621ad36b0d0a3030c59a035a1772a8bd21557795c",
+    "algebra/encounter-source.process.json.map.json": "cb26466e96b4348fb8f2503951eddab769c286a405170d2b02b50d8d123987de",
+    "algebra/encounter.process.json": "c536702195b172350470ac26baf53b3ef7a2cb09e87c4e4865522bb585fa005a",
+    "source/encounter/encounter.encounter": "0dbc78858a181acd09826a0eb4d10ba8ce6f4dc238c54ce5f0b98e547e92cb0d",
+    "algebra/encounter.process.json.map.json": "c5cdc82e9f1d59a9805a1200ef3b84752b01da3d808131239a0d06843f266bac",
+    "algebra/source.process.json": "27d5b5a43e7bf6eac502e7096770bf871c6e6ea5a68d9b35e6df40012d5c6246",
+    "source/algebra/source.encounter": "bd919af5fcf5cf99850b755c6eb5c6bd3aa762bdd6b68999f85a041e32b4281b",
+    "algebra/source.process.json.map.json": "fe74ab953a5457fd9714bb1c17b38d45dab5e424e2450d5d32e1063a7f8b34e0",
+    "algebra/microsite-ui.process.json": "4b5e098df13bcc4c1fffabd354a79ec0db2681fdaf801c0c7249342619c041d2",
+    "source/microsites/ui.encounter": "1eb81f35ca8aad95bc3d555d06d3f001f2c1bf74a82b1605aa621bc33816beff",
+    "algebra/microsite-ui.process.json.map.json": "82361d114d7c97b93e94337eb913552b9dc84d3cb102db371b03231fa04bdbad",
+    "algebra/microsite-values.process.json": "1f995db6a7b6855aab6d80f279488345988c90997e6dfaaea75e304dfe036069",
+    "source/microsites/values.encounter": "d50110fcdcceb687542a1899c38f49e337b8b16a55bf094a09ac600911f83ac9",
+    "algebra/microsite-values.process.json.map.json": "887629b2ea35a82659c2f88f9a937dfeb7159ab8b5f6079e1192c1952d89c670",
+    "algebra/microsite-sourcery.process.json": "4e1c5995c7dc334043cc345ee9684139ac705d3772ad34f70c79ea79dcd3323c",
+    "source/microsites/sourcery.encounter": "9f8c7b52ffac3cb9d76424585d8e013a6ec866b72433ee6806daa0ceb99ab937",
+    "algebra/microsite-sourcery.process.json.map.json": "eda97ed4cac618095ee4d64325b4a25b2821315c7edf687cae22d6621d74b7c0",
+    "algebra/microsite-temple-ui.process.json": "5268456e95c933922ab842b4c5512b0d2d5824b6ff82384ba279fa20e61d501e",
+    "source/microsites/temple-ui.encounter": "45977096dc7063ab8d5fe055365f889ae63c4bcb6c4f02f429255f76e9a3043f",
+    "algebra/microsite-temple-ui.process.json.map.json": "e06d4cb9ad5c4d8ef37fc8472d78908297ab227356fd215619aa5b700a021b46",
     "assets/microsite-return.css": "fc636c68f930a02d3dce6bd9e70365918bb7b39d7abcecc1baff2a2fce204a4f",
     "temple/assets/covenant.css": "64e189820f4aea0b91bc820a9d5006317f93d8bbc315358b08bec5587460141c",
     "sourcery/assets/css/story.css": "529d84e31dc439d43efa46b0b2cc64935b0581e07e830e93c6bda013753e0642",
@@ -547,15 +577,15 @@
     "temple/films/index.html": "aabc3c9cdaf6a09d9941d08845948843862a3e0107feb07552244d318cd68499",
     "sourcery/index.html": "beae785a5c1eb39962a0f957ae22d05f87d9257b885f1df8df33c9f6ea1d8533",
     "sourcery/films/index.html": "6910fb80d7edee5a62f8632bcfc3466bbf2322a99d716650866519c65beba5a9",
-    "temple/runtime.js": "5f47d0053d791ac92ec1fe14e8211424175b71355f04331729e53bbf56a4ff7b",
-    "sourcery/runtime.js": "19134a4f738b8476eb7e28f89f86fe8635436138bbe784a8c2e15bf4adeba1f7",
+    "temple/runtime.js": "207d52870fea2389b9892a22f8ecb5c8e4c4adfbbe471bc622bdbe76fcffcb1c",
+    "sourcery/runtime.js": "452c7665d285b75db150dc89ee254c49ffbd89ed5ee45aaf5580a5cfe3def34c",
     "temple/early.js": "90000f969e272bf04d0f6e2f0e5a8ca38c102ffa535ae89ce53914a8a72397de",
-    "claimipedia/runtime.js": "963fe96aafaaedc430ed4debf088bf1e4fa95ba400baab2a68c6cf0389fd89b5",
+    "claimipedia/runtime.js": "41f27455081493bf8e386807377efb39a05f7b7d0f637764d5f4cfb17b0a89a2",
     "claimipedia/claimipedia.css": "9b097c3445ce6ee88341759140439c4bd41a004224d2e61138dca0623d84794d",
     "claimipedia/mark.svg": "b633f6d21438a1e60ba7a52f0aebdc47400e752291e5e9bb24abbe426a16e733",
     "claimipedia/index.html": "4967b31f453d499985a558969650b39a8bfc9f0b8c6e2679592435fda799711f",
     "worldwright/index.html": "9faca4bc2654898d01a9eba42e466ad7d68cc58a783b4e0e82bc3689bf426f06",
-    "atlas-runtime.js": "7b989e07c32e4d779e3c8bec2945661205e1830c7a5a529e281785ef3ad96839",
+    "atlas-runtime.js": "fe723a83bfad321890361705869a4670e01ef255cfc036f94572d7d156ec2724",
     "atlas.html": "91e73c09c77ec91645863b5bccaf06028139f84411e508b8ef8fae93a4c504cc",
     "kingdom/index.html": "8fc8f9d02683409dde7b6b3dee81534bb40f8d223c06b6ddec2c8de6b62a124d",
     "world-modelling/index.html": "b74508c86cb142decb8c8af241f6ff20000fd008c69a9c7a5b6fe790cc9e4366",
@@ -576,7 +606,7 @@
     "encounter/sources/story.rel": "d01fb6bf6c744a89115432ad0cf190898229494f33d67d15b3be7b68310a4b28",
     "retained/workshop/sources/source/experiment/contracts.rel": "a2ab6758f5dc709fa9ab46129115c33a1b35122e72b4ba173ddb4b5969f32b5a",
     "encounter/sources/contracts.rel": "a2ab6758f5dc709fa9ab46129115c33a1b35122e72b4ba173ddb4b5969f32b5a",
-    "encounter/runtime.js": "33d512fc679ff45d70a8013aaea576995b9e152cb0e4cc23e9088f3ef9b80c6b",
+    "encounter/runtime.js": "94257a4f1b04e894e236cb04127f7bdb985b3086c87d5ebbb0ad7a9703b4a1de",
     "encounter/encounter.css": "7d86fa02b516539c12315d65ebed462fe180f5be3288028fa6e15b1753ce361b",
     "encounter/mark.svg": "1f2d866335dbfafee9f1b4dbb79dbf03ef87c1ce41da4340ed2d8b90e0286a24",
     "encounter/index.html": "b7a6ba5d2034116c6b746f6bf1298d67dd76721b6b792fe841e6ebad85e4c1ee",
@@ -607,7 +637,7 @@
     "inspection/bindings.json": "1f289e79f1cdb6b81f2154432d3a32b953e36712460a06cd7490c13dbf9be3a9",
     "algebra/hierarchy.process.json": "46e1fa5f3411843e88aa13947f01e14c503a0229a1274f8f02488926192b41e6",
     "source/hierarchy.rel": "774f8bd2f007bf82996c276d0a59359b25bcfee7bf4067b5ece277119340847a",
-    "inspection/runtime.js": "e5e5d6aa561837266a92614049c66c6fcabcd1caaaa53597046cffa773e27595",
+    "inspection/runtime.js": "a0fbb39f53fb295fdfc229aea31e93f38a58210692d05047848e54b50f5835a8",
     "inspection/source-algebra.html": "bb7ef4d301e1f6ce36d741a3fe0d7ea2d6f3a6fa32eba76fdbda1a8711d6cc7b",
     "inspection/temple.html": "5f2906d0dbd3e6eb3fc0964f86353b806ca7a365adc387cf455936c2023ee058",
     "inspection/sourcery.html": "1b92a3b97a6e097b9261497c84219cb96b8e7771f5c370668b20c139849fbd55",
@@ -861,10 +891,10 @@
     "source/reader/source-receipts.json": "ba1632b934d46779c3ee54637e8ba057f414ce82b006b8e78a9c6faebc178de0",
     "source/reader/activities.json": "bff368d13fb955bfbdb70694527cb6f7479f58550d5e1e600896aaa25c4c9055",
     "source/workshop/provenance.json": "04952dac5e7e95f7579f8cd2a3c4fb958acea67b0e785bbc539950849898a65f",
-    "reader/runtime.js": "4ce15897065ef014633a3d33f06e358c3e875c8e84df561ab22f606b8d797bb3",
-    "reader/activity-runtime.js": "654e177c9eea1fa1ad1be55c5a6161a42d7bdde91caaf0f2735a33c2b352145c",
-    "workshop/runtime.js": "a5e873f1b0a04284d90363459af292b8b179f27dd2f5a0b940677149b34babfd",
-    "retained/workshop/runtime.js": "a5e873f1b0a04284d90363459af292b8b179f27dd2f5a0b940677149b34babfd",
+    "reader/runtime.js": "6b61087009ee258d74fcc0f2217718741eceb282bb0e7c7f59f4aa4629d8cf18",
+    "reader/activity-runtime.js": "dd717c6aa0e8914ee4a4a084356ac07d137e483d4a350396edfe24cfbea116fa",
+    "workshop/runtime.js": "f8e94c8bac98691f43bb56a0242d32bf2131ecc6bbf7daf55edb859fd4e376d9",
+    "retained/workshop/runtime.js": "f8e94c8bac98691f43bb56a0242d32bf2131ecc6bbf7daf55edb859fd4e376d9",
     "retained/activity.html": "824928867c223bb0d24882190c72924d1d2de1bf426692a094b5cb171b2458f4",
     "source/reader/reader.css": "925189f5991c22bd4dd2e9e56d71041693a40d54f2925661d596bdc3d3529de3",
     "reader/reader.css": "925189f5991c22bd4dd2e9e56d71041693a40d54f2925661d596bdc3d3529de3",
@@ -884,7 +914,7 @@
   "admission": {
     "passes": 25,
     "steps": [
-      6296822,
+      6278804,
       54285,
       62753,
       11191,
@@ -919,14 +949,104 @@
       "sourceHash": "927be102d80170a4eb2dc6d4d9f7f28589ed0f484121bdf1838275e3f930c2db",
       "moduleHash": "eb38af5f82a0a2229aebcbbb0f0b6ee98ffd5251a4ed8fefd2c93071ab84e520",
       "basis": {
-        "runtime": "56822e7ffee5d1f7005965d304045c3e1c613ab16898cc92bec07105972508a9"
+        "runtime": "2be94f826cbc3cfbedbaafe347f4377f1e27858fb8e6cafa715cc5c805725ca8"
       },
-      "steps": 4214614,
+      "steps": 4236268,
       "compilerAdmissions": [
-        448376,
+        472155,
         2618
       ],
       "linkSteps": 39480
+    },
+    {
+      "file": "source/encounter/encounter.encounter",
+      "output": "algebra/encounter.process.json",
+      "sourceHash": "0dbc78858a181acd09826a0eb4d10ba8ce6f4dc238c54ce5f0b98e547e92cb0d",
+      "moduleHash": "c536702195b172350470ac26baf53b3ef7a2cb09e87c4e4865522bb585fa005a",
+      "basis": {
+        "runtime": "dc02b360adc1c00c63e44657a4a4a33813479af5655087eccdfe301badf3ec56"
+      },
+      "steps": 2434490,
+      "compilerAdmissions": [
+        472155,
+        2618
+      ],
+      "linkSteps": 3184
+    },
+    {
+      "file": "source/algebra/source.encounter",
+      "output": "algebra/source.process.json",
+      "sourceHash": "bd919af5fcf5cf99850b755c6eb5c6bd3aa762bdd6b68999f85a041e32b4281b",
+      "moduleHash": "27d5b5a43e7bf6eac502e7096770bf871c6e6ea5a68d9b35e6df40012d5c6246",
+      "basis": {
+        "runtime": "b72ea4db427f8b2325dbece7751d466ee08de33ec658e25b4205ce50e30fa8f0"
+      },
+      "steps": 1217627,
+      "compilerAdmissions": [
+        472155,
+        2618
+      ],
+      "linkSteps": 9446
+    },
+    {
+      "file": "source/microsites/ui.encounter",
+      "output": "algebra/microsite-ui.process.json",
+      "sourceHash": "1eb81f35ca8aad95bc3d555d06d3f001f2c1bf74a82b1605aa621bc33816beff",
+      "moduleHash": "4b5e098df13bcc4c1fffabd354a79ec0db2681fdaf801c0c7249342619c041d2",
+      "basis": {
+        "runtime": "56e42341917dbb8ec687164846a807160aab79c0fc71228df69b7ba0aa96e232"
+      },
+      "steps": 1841168,
+      "compilerAdmissions": [
+        472155,
+        2618
+      ],
+      "linkSteps": 9461
+    },
+    {
+      "file": "source/microsites/values.encounter",
+      "output": "algebra/microsite-values.process.json",
+      "sourceHash": "d50110fcdcceb687542a1899c38f49e337b8b16a55bf094a09ac600911f83ac9",
+      "moduleHash": "1f995db6a7b6855aab6d80f279488345988c90997e6dfaaea75e304dfe036069",
+      "basis": {
+        "runtime": "4243f3b9f18fc7f71c8b35e6d53c91abc79ec9a9a29a644e0d533daac0c35109"
+      },
+      "steps": 1317401,
+      "compilerAdmissions": [
+        472155,
+        2618
+      ],
+      "linkSteps": 12845
+    },
+    {
+      "file": "source/microsites/sourcery.encounter",
+      "output": "algebra/microsite-sourcery.process.json",
+      "sourceHash": "9f8c7b52ffac3cb9d76424585d8e013a6ec866b72433ee6806daa0ceb99ab937",
+      "moduleHash": "4e1c5995c7dc334043cc345ee9684139ac705d3772ad34f70c79ea79dcd3323c",
+      "basis": {
+        "runtime": "4673037acef7c571855cecf59be1ba2d34b83789fbadd69953e1127e62e0b8e6"
+      },
+      "steps": 1009643,
+      "compilerAdmissions": [
+        472155,
+        2618
+      ],
+      "linkSteps": 9070
+    },
+    {
+      "file": "source/microsites/temple-ui.encounter",
+      "output": "algebra/microsite-temple-ui.process.json",
+      "sourceHash": "45977096dc7063ab8d5fe055365f889ae63c4bcb6c4f02f429255f76e9a3043f",
+      "moduleHash": "5268456e95c933922ab842b4c5512b0d2d5824b6ff82384ba279fa20e61d501e",
+      "basis": {
+        "runtime": "079999b5da4066a49e85f460aed27ddfb8ce2bc4ef9d9cf7a672757ae47d03c8"
+      },
+      "steps": 4547362,
+      "compilerAdmissions": [
+        472155,
+        2618
+      ],
+      "linkSteps": 30650
     }
   ],
   "mjsImports": [],

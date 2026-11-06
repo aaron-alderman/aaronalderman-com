@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),read=f=>JSON.parse(fs.readFileSync(f));
+const require=createRequire(import.meta.url);const {readProcessFixture:read}=require('./tooling/read-process-fixture.cjs');
 const {createKernel}=require('./bootstrap/temple-seed.cjs'),{valuePorts}=require('./bootstrap/ports/value.cjs'),{lower}=require('./bootstrap/ports/algebra-lower.cjs'),{invoke}=require('./bootstrap/ports/programme.cjs'),{computationalPorts}=require('./bootstrap/ports/browser-effects.cjs');
 const manifest=read('bootstrap/site.json'),all=Object.assign({},...manifest.modules.map(f=>read(f).queries),...(manifest.processModules??[]).map(s=>read('dist/'+s.output).queries)),args=read('algebra/encounter.process.json').queries['encounter.build'].find(s=>s.port==='runtime.bundle').args;
 const names=[...args.queries[1].slice(1),...args.queries[2].slice(1)],surface={entry:'encounter.demo.boot',queries:Object.fromEntries(names.map(n=>[n,all[n]]))};

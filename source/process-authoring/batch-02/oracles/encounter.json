@@ -1,0 +1,2084 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "encounter.build": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/encounter/example.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/encounter/example.json"
+        },
+        "into": "assetText"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/example.json",
+          "text": "$assetText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/encounter/presentation.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/encounter/presentation.json"
+        },
+        "into": "assetText"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/presentation.json",
+          "text": "$assetText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "algebra/encounter-demo.process.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "algebra/encounter-demo.process.json"
+        },
+        "into": "assetText"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/sources/encounter-demo.process.json",
+          "text": "$assetText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "algebra/encounter-source.process.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "algebra/encounter-source.process.json"
+        },
+        "into": "assetText"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/sources/encounter-source.process.json",
+          "text": "$assetText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/encounter/reuse.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/encounter/reuse.json"
+        },
+        "into": "assetText"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/sources/reuse.json",
+          "text": "$assetText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "retained/workshop/sources/source/experiment/story.encounter"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "retained/workshop/sources/source/experiment/story.encounter"
+        },
+        "into": "assetText"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/sources/story.encounter",
+          "text": "$assetText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "retained/workshop/sources/source/experiment/story.rel"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "retained/workshop/sources/source/experiment/story.rel"
+        },
+        "into": "assetText"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/sources/story.rel",
+          "text": "$assetText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "retained/workshop/sources/source/experiment/contracts.rel"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "retained/workshop/sources/source/experiment/contracts.rel"
+        },
+        "into": "assetText"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/sources/contracts.rel",
+          "text": "$assetText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "encounter/example.json"
+        },
+        "into": "inputJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$inputJSON"
+        },
+        "into": "inputs"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "encounter/presentation.json"
+        },
+        "into": "presentationJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$presentationJSON"
+        },
+        "into": "presentation"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "encounter/sources/encounter-demo.process.json"
+        },
+        "into": "processJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$processJSON"
+        },
+        "into": "process"
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "encounter.demo.boot",
+          "mode": "browser",
+          "grantProfile": "encounterBrowser",
+          "queries": [
+            "append",
+            [
+              "list",
+              "encounter.demo.boot",
+              "encounter.demo.change",
+              "encounter.demo.apply",
+              "encounter.demo.reset",
+              "encounter.demo.select",
+              "encounter.demo.html",
+              "encounter.demo.render",
+              "encounter.demo.source",
+              "encounter.demo.inspect",
+              "sp.role",
+              "sp.scan",
+              "sp.observed",
+              "sp.clip",
+              "sp.line",
+              "sp.render",
+              "sp.present",
+              "sp.expression",
+              "sp.programme",
+              "sp.statement",
+              "sp.listing",
+              "sp.style",
+              "sp.outline",
+              "sp.metadata",
+              "sp.stylePlan",
+              "source.split",
+              "source.lex",
+              "s01.portable",
+              "ec.schema",
+              "ec.slot",
+              "ec.scalar",
+              "ec.check",
+              "ec.referenceType",
+              "ec.fact",
+              "ec.reference",
+              "ec.argument",
+              "ec.lex",
+              "ec.header",
+              "ec.expression",
+              "ec.fields",
+              "ec.data",
+              "ec.record",
+              "ec.representation",
+              "ec.view",
+              "ec.edits",
+              "ec.show",
+              "ec.emitView",
+              "ec.emitRepresentation",
+              "ec.compile",
+              "ec.attempt",
+              "ec.complete"
+            ],
+            [
+              "list",
+              "ec.verifyShow",
+              "ec.verify",
+              "ec.oneField",
+              "ec.prepare",
+              "ec.resolve",
+              "ec.safeTree",
+              "ec.events",
+              "ec.run",
+              "ec.patch",
+              "ec.findElement",
+              "source.rel",
+              "source.compile",
+              "source.encode",
+              "source.patch",
+              "source.jsonSpan",
+              "html.escape",
+              "html.serialize",
+              "html.observe",
+              "html.inspect",
+              "html.cssText",
+              "facts.index",
+              "lower.scan",
+              "lower.fresh",
+              "lower.template",
+              "lower.expression",
+              "lower.programme",
+              "lower.model",
+              "lower.start",
+              "admit.binding",
+              "admit.expression",
+              "admit.programme",
+              "admit.model",
+              "admit.effects.programme",
+              "admit.effects",
+              "admit.ownership",
+              "css.render",
+              "css.plan",
+              "css.renderPlan",
+              "language.refuse",
+              "language.line",
+              "language.module",
+              "language.entity",
+              "language.property",
+              "language.compile"
+            ]
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "data": {
+            "inputs": "$inputs",
+            "presentation": "$presentation",
+            "processes": "$process.queries"
+          },
+          "budget": 20000000
+        },
+        "into": "runtime"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/runtime.js",
+          "text": "$runtime"
+        },
+        "into": "_"
+      },
+      {
+        "let": "projection",
+        "value": "encounter"
+      },
+      {
+        "call": "publication.styles"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/encounter.css",
+          "text": "$css"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "svg",
+          "attrs": {
+            "viewBox": "0 0 420 310",
+            "role": "img",
+            "aria-label": "One source connects three views. A change follows the declared route back to the source."
+          },
+          "children": [
+            "list",
+            {
+              "tag": "path",
+              "attrs": {
+                "d": "M210 103V150M210 150H70V197M210 150V197M210 150H350V197",
+                "fill": "none",
+                "stroke": "#536c71",
+                "stroke-width": 1.5
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "path",
+              "attrs": {
+                "d": "M353 185C388 111 348 32 255 45",
+                "fill": "none",
+                "stroke": "#b35636",
+                "stroke-width": 1.4,
+                "stroke-dasharray": "4 5"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "circle",
+              "attrs": {
+                "cx": 210,
+                "cy": 64,
+                "r": 44,
+                "fill": "#173744"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "circle",
+              "attrs": {
+                "cx": 210,
+                "cy": 64,
+                "r": 57,
+                "fill": "none",
+                "stroke": "#b8bcae",
+                "stroke-width": 1
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "text",
+              "attrs": {
+                "x": 210,
+                "y": 62,
+                "text-anchor": "middle",
+                "fill": "#fff9e7",
+                "font-size": 12,
+                "font-family": "monospace"
+              },
+              "children": [
+                "list",
+                "STORY"
+              ]
+            },
+            {
+              "tag": "text",
+              "attrs": {
+                "x": 210,
+                "y": 80,
+                "text-anchor": "middle",
+                "fill": "#c4d0c8",
+                "font-size": 9,
+                "font-family": "monospace"
+              },
+              "children": [
+                "list",
+                "one source"
+              ]
+            },
+            {
+              "tag": "g",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "rect",
+                  "attrs": {
+                    "x": 19,
+                    "y": 197,
+                    "width": 102,
+                    "height": 70,
+                    "rx": 5,
+                    "fill": "#f9f5e9",
+                    "stroke": "#7d9593"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "text",
+                  "attrs": {
+                    "x": 70,
+                    "y": 225,
+                    "text-anchor": "middle",
+                    "fill": "#263d43",
+                    "font-size": 10,
+                    "font-family": "monospace"
+                  },
+                  "children": [
+                    "list",
+                    "PAGE"
+                  ]
+                },
+                {
+                  "tag": "path",
+                  "attrs": {
+                    "d": "M40 238h60M40 248h41",
+                    "stroke": "#b5bdb4",
+                    "stroke-width": 2
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "g",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "rect",
+                  "attrs": {
+                    "x": 159,
+                    "y": 197,
+                    "width": 102,
+                    "height": 70,
+                    "rx": 5,
+                    "fill": "#f9f5e9",
+                    "stroke": "#7d9593"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "text",
+                  "attrs": {
+                    "x": 210,
+                    "y": 225,
+                    "text-anchor": "middle",
+                    "fill": "#263d43",
+                    "font-size": 10,
+                    "font-family": "monospace"
+                  },
+                  "children": [
+                    "list",
+                    "MENU"
+                  ]
+                },
+                {
+                  "tag": "path",
+                  "attrs": {
+                    "d": "M180 238h60M180 248h41",
+                    "stroke": "#b5bdb4",
+                    "stroke-width": 2
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "g",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "rect",
+                  "attrs": {
+                    "x": 299,
+                    "y": 197,
+                    "width": 102,
+                    "height": 70,
+                    "rx": 5,
+                    "fill": "#f9f5e9",
+                    "stroke": "#7d9593"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "text",
+                  "attrs": {
+                    "x": 350,
+                    "y": 225,
+                    "text-anchor": "middle",
+                    "fill": "#263d43",
+                    "font-size": 10,
+                    "font-family": "monospace"
+                  },
+                  "children": [
+                    "list",
+                    "ROW"
+                  ]
+                },
+                {
+                  "tag": "path",
+                  "attrs": {
+                    "d": "M320 238h60M320 248h41",
+                    "stroke": "#b5bdb4",
+                    "stroke-width": 2
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "circle",
+              "attrs": {
+                "cx": 210,
+                "cy": 150,
+                "r": 4,
+                "fill": "#b35636"
+              },
+              "children": [
+                "list"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/mark.svg",
+          "text": "$result"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Encounter — See what you’re changing."
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "Inspect meaning, follow behaviour to its source, and make changes through declared routes. Try the live Encounter story example."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "theme-color",
+                    "content": "#f7f3ea"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "https://aaronalderman.com/encounter/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": "Encounter — See what you’re changing."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": "One story. Three views. A change with a route back."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": "https://aaronalderman.com/encounter/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:type",
+                    "content": "website"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image",
+                    "content": "https://aaronalderman.com/encounter/mark.svg"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "icon",
+                    "type": "image/svg+xml",
+                    "href": "mark.svg"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "encounter.css?v=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "style",
+                  "attrs": {
+                    "id": "encounter-source-style"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "style",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "@font-face{font-family:Fraunces;src:url('../sourcery/assets/fonts/fraunces-latin-full-normal.woff2') format('woff2');font-display:swap;font-weight:100 900}"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "#main",
+                    "class": "skip"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to the example"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "class": "brand",
+                        "href": "./"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "span",
+                          "attrs": {
+                            "aria-hidden": "true"
+                          },
+                          "children": [
+                            "list",
+                            "◎"
+                          ]
+                        },
+                        "Encounter"
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Encounter"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "#idea"
+                          },
+                          "children": [
+                            "list",
+                            "The idea"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "#example"
+                          },
+                          "children": [
+                            "list",
+                            "Try it"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "#underneath"
+                          },
+                          "children": [
+                            "list",
+                            "Look underneath"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "id": "main"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "list",
+                      {
+                        "tag": "section",
+                        "attrs": {
+                          "class": "hero",
+                          "id": "idea"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "div",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "eyebrow"
+                                },
+                                "children": [
+                                  "list",
+                                  "Encounter / meaning in reach"
+                                ]
+                              },
+                              {
+                                "tag": "h1",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "See what you’re",
+                                  {
+                                    "tag": "br",
+                                    "attrs": {},
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "em",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "changing."
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "lead"
+                                },
+                                "children": [
+                                  "list",
+                                  "Meet an idea where it appears. Follow it to its meaning. Make a change with a route back."
+                                ]
+                              },
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "class": "button",
+                                  "href": "#example"
+                                },
+                                "children": [
+                                  "list",
+                                  "Follow one change",
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "↘"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "hero-note"
+                                },
+                                "children": [
+                                  "list",
+                                  "A working example. Real contracts. Room to look underneath."
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "diagram"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "svg",
+                                "attrs": {
+                                  "viewBox": "0 0 420 310",
+                                  "role": "img",
+                                  "aria-label": "One source connects three views. A change follows the declared route back to the source."
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "path",
+                                    "attrs": {
+                                      "d": "M210 103V150M210 150H70V197M210 150V197M210 150H350V197",
+                                      "fill": "none",
+                                      "stroke": "#536c71",
+                                      "stroke-width": 1.5
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "path",
+                                    "attrs": {
+                                      "d": "M353 185C388 111 348 32 255 45",
+                                      "fill": "none",
+                                      "stroke": "#b35636",
+                                      "stroke-width": 1.4,
+                                      "stroke-dasharray": "4 5"
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "circle",
+                                    "attrs": {
+                                      "cx": 210,
+                                      "cy": 64,
+                                      "r": 44,
+                                      "fill": "#173744"
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "circle",
+                                    "attrs": {
+                                      "cx": 210,
+                                      "cy": 64,
+                                      "r": 57,
+                                      "fill": "none",
+                                      "stroke": "#b8bcae",
+                                      "stroke-width": 1
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "text",
+                                    "attrs": {
+                                      "x": 210,
+                                      "y": 62,
+                                      "text-anchor": "middle",
+                                      "fill": "#fff9e7",
+                                      "font-size": 12,
+                                      "font-family": "monospace"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "STORY"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "text",
+                                    "attrs": {
+                                      "x": 210,
+                                      "y": 80,
+                                      "text-anchor": "middle",
+                                      "fill": "#c4d0c8",
+                                      "font-size": 9,
+                                      "font-family": "monospace"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "one source"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "g",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "rect",
+                                        "attrs": {
+                                          "x": 19,
+                                          "y": 197,
+                                          "width": 102,
+                                          "height": 70,
+                                          "rx": 5,
+                                          "fill": "#f9f5e9",
+                                          "stroke": "#7d9593"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "text",
+                                        "attrs": {
+                                          "x": 70,
+                                          "y": 225,
+                                          "text-anchor": "middle",
+                                          "fill": "#263d43",
+                                          "font-size": 10,
+                                          "font-family": "monospace"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "PAGE"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "path",
+                                        "attrs": {
+                                          "d": "M40 238h60M40 248h41",
+                                          "stroke": "#b5bdb4",
+                                          "stroke-width": 2
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "g",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "rect",
+                                        "attrs": {
+                                          "x": 159,
+                                          "y": 197,
+                                          "width": 102,
+                                          "height": 70,
+                                          "rx": 5,
+                                          "fill": "#f9f5e9",
+                                          "stroke": "#7d9593"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "text",
+                                        "attrs": {
+                                          "x": 210,
+                                          "y": 225,
+                                          "text-anchor": "middle",
+                                          "fill": "#263d43",
+                                          "font-size": 10,
+                                          "font-family": "monospace"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "MENU"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "path",
+                                        "attrs": {
+                                          "d": "M180 238h60M180 248h41",
+                                          "stroke": "#b5bdb4",
+                                          "stroke-width": 2
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "g",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "rect",
+                                        "attrs": {
+                                          "x": 299,
+                                          "y": 197,
+                                          "width": 102,
+                                          "height": 70,
+                                          "rx": 5,
+                                          "fill": "#f9f5e9",
+                                          "stroke": "#7d9593"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "text",
+                                        "attrs": {
+                                          "x": 350,
+                                          "y": 225,
+                                          "text-anchor": "middle",
+                                          "fill": "#263d43",
+                                          "font-size": 10,
+                                          "font-family": "monospace"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "ROW"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "path",
+                                        "attrs": {
+                                          "d": "M320 238h60M320 248h41",
+                                          "stroke": "#b5bdb4",
+                                          "stroke-width": 2
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "circle",
+                                    "attrs": {
+                                      "cx": 210,
+                                      "cy": 150,
+                                      "r": 4,
+                                      "fill": "#b35636"
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "diagram-caption"
+                                },
+                                "children": [
+                                  "list",
+                                  "One thing. More than one way to meet it."
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "section",
+                        "attrs": {
+                          "class": "principles",
+                          "aria-label": "What Encounter makes possible"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "article",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "span",
+                                "attrs": {
+                                  "class": "step"
+                                },
+                                "children": [
+                                  "list",
+                                  "01"
+                                ]
+                              },
+                              {
+                                "tag": "h2",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Meet it."
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "A title, a menu, a row. Start with the thing in front of you."
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "article",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "span",
+                                "attrs": {
+                                  "class": "step"
+                                },
+                                "children": [
+                                  "list",
+                                  "02"
+                                ]
+                              },
+                              {
+                                "tag": "h2",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Look underneath."
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Find the source, the rules and the choices that give it meaning."
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "article",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "span",
+                                "attrs": {
+                                  "class": "step"
+                                },
+                                "children": [
+                                  "list",
+                                  "03"
+                                ]
+                              },
+                              {
+                                "tag": "h2",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Follow the change."
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "An explicit edit route says what can change, and where the change belongs."
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "section",
+                        "attrs": {
+                          "class": "workbench",
+                          "id": "example"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "section-top"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "div",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "eyebrow"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "A small encounter / the existing story example"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Change the title.",
+                                      {
+                                        "tag": "br",
+                                        "attrs": {},
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      "Keep the meaning in view."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "The story and the row borrow the same title. The web menu has its own label. Change one source and see what follows."
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "span",
+                                "attrs": {
+                                  "class": "session-tag"
+                                },
+                                "children": [
+                                  "list",
+                                  "LOCAL SESSION · RESETTABLE"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "id": "encounter-loading"
+                            },
+                            "children": [
+                              "list",
+                              "Preparing the declared story example…"
+                            ]
+                          },
+                          {
+                            "tag": "noscript",
+                            "attrs": {
+                              "class": "noscript"
+                            },
+                            "children": [
+                              "list",
+                              "The explanation and source downloads remain available. Enable JavaScript to run the local example."
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "bench-grid"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "example"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "div",
+                                    "attrs": {
+                                      "class": "example-head"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "strong",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "One story, three views"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "p",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "Each view comes from the existing Encounter definitions."
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "section",
+                                    "attrs": {
+                                      "class": "projection"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "p",
+                                        "attrs": {
+                                          "class": "eyebrow"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "01 / the story"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "div",
+                                        "attrs": {
+                                          "id": "encounter-story"
+                                        },
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "p",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              "The story will appear here."
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "section",
+                                    "attrs": {
+                                      "class": "projection"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "p",
+                                        "attrs": {
+                                          "class": "eyebrow"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "02 / the web menu"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "div",
+                                        "attrs": {
+                                          "id": "encounter-menu"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "section",
+                                    "attrs": {
+                                      "class": "projection"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "p",
+                                        "attrs": {
+                                          "class": "eyebrow"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "03 / another screen"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "div",
+                                        "attrs": {
+                                          "id": "encounter-row"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "div",
+                                    "attrs": {
+                                      "class": "edit-controls"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "label",
+                                        "attrs": {
+                                          "for": "encounter-title"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "Story title"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "input",
+                                        "attrs": {
+                                          "id": "encounter-title",
+                                          "type": "text",
+                                          "value": "What happened",
+                                          "autocomplete": "off"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "div",
+                                        "attrs": {
+                                          "class": "actions"
+                                        },
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "button",
+                                            "attrs": {
+                                              "id": "encounter-apply",
+                                              "class": "button",
+                                              "type": "button"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Apply through the source"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "button",
+                                            "attrs": {
+                                              "id": "encounter-reset",
+                                              "class": "reset",
+                                              "type": "button"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Reset"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "tag": "p",
+                                        "attrs": {
+                                          "id": "encounter-status",
+                                          "class": "status",
+                                          "role": "status",
+                                          "aria-live": "polite"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "No source files are saved by this example."
+                                        ]
+                                      },
+                                      {
+                                        "tag": "p",
+                                        "attrs": {
+                                          "data-temple-errors": "",
+                                          "class": "errors",
+                                          "role": "alert"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "aside",
+                                "attrs": {
+                                  "class": "inspector",
+                                  "aria-label": "Inspect the live example"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "div",
+                                    "attrs": {
+                                      "class": "inspector-head"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "p",
+                                        "attrs": {
+                                          "class": "eyebrow"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "Inspect / follow the definition"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "h3",
+                                        "attrs": {
+                                          "id": "encounter-source-label"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "The meaning and its routes"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "div",
+                                        "attrs": {
+                                          "class": "inspect-tabs"
+                                        },
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "button",
+                                            "attrs": {
+                                              "id": "inspect-meaning",
+                                              "type": "button",
+                                              "aria-pressed": "true"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Meaning"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "button",
+                                            "attrs": {
+                                              "id": "inspect-facts",
+                                              "type": "button",
+                                              "aria-pressed": "false"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Current source"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "button",
+                                            "attrs": {
+                                              "id": "inspect-contract",
+                                              "type": "button",
+                                              "aria-pressed": "false"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Type contracts"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "button",
+                                            "attrs": {
+                                              "id": "inspect-process",
+                                              "type": "button",
+                                              "aria-pressed": "false"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Inspect this change"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "button",
+                                            "attrs": {
+                                              "id": "inspect-inspector",
+                                              "type": "button",
+                                              "aria-pressed": "false"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Inspect the inspector"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "pre",
+                                    "attrs": {
+                                      "id": "encounter-source",
+                                      "class": "source",
+                                      "tabindex": 0,
+                                      "aria-label": "Readable source definition"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Loading the source…"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "id": "encounter-hash",
+                                      "class": "hash"
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "boundary"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "This is the current definition, not an execution trace. Changes live only in this browser session."
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "section",
+                        "attrs": {
+                          "class": "underneath",
+                          "id": "underneath"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "div",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "eyebrow"
+                                },
+                                "children": [
+                                  "list",
+                                  "The route is part of the meaning"
+                                ]
+                              },
+                              {
+                                "tag": "h2",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "A change has somewhere to belong."
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "The title travels through a declared source route. The web menu has a local contribution, so a story-title change leaves its wording alone. A field without a unique edit route is refused."
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "The example uses Encounter’s existing compiler, type contracts and patch operation. The inspector uses the shared source lexer and presenter. Both run through the same admitted process algebra."
+                                ]
+                              },
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "href": "../retained/workshop/index.html"
+                                },
+                                "children": [
+                                  "list",
+                                  "Open the full existing workshop ↗"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "route"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "b",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Prepare and check the declared meaning"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "code",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "ec.prepare → ec.run"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "route"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "b",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Follow the existing source edit route"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "code",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "ec.patch → ec.prepare → ec.run"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "route"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "b",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Inspect the definition using the shared presenter"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "code",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "source.lex → sp.present → html.serialize"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Worldwright composes stories. Encounter makes their meaning and changes inspectable. Temple provides the execution kernel."
+                                ]
+                              },
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "href": "sources/story.encounter"
+                                },
+                                "children": [
+                                  "list",
+                                  "Read the example definition ↗"
+                                ]
+                              },
+                              " · ",
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "href": "sources/encounter-demo.process.json"
+                                },
+                                "children": [
+                                  "list",
+                                  "Read the process module ↗"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "tag": "footer",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "span",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Encounter · by Aaron Alderman"
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Related worlds"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../temple/"
+                          },
+                          "children": [
+                            "list",
+                            "Temple"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../sourcery/"
+                          },
+                          "children": [
+                            "list",
+                            "Sourcery"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../claimipedia/"
+                          },
+                          "children": [
+                            "list",
+                            "Claimipedia"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../worldwright/"
+                          },
+                          "children": [
+                            "list",
+                            "Worldwright"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../index.html#microsites"
+                          },
+                          "children": [
+                            "list",
+                            "Aaron Alderman"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "script",
+                  "attrs": {
+                    "src": "runtime.js?v=1",
+                    "type": "module"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "encounter/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ]
+  }
+}

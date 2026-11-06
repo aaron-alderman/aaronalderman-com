@@ -2692,14 +2692,22 @@
           [
             "includes",
             [
-              "list",
-              "let",
-              "when",
-              "port",
-              "assert",
-              "call",
-              "fold",
-              "try"
+              "or",
+              [
+                "at",
+                "$lpPolicy",
+                "statementForms"
+              ],
+              [
+                "list",
+                "let",
+                "when",
+                "port",
+                "assert",
+                "call",
+                "fold",
+                "try"
+              ]
             ],
             "$kind"
           ]
@@ -3658,7 +3666,8 @@
             "assert",
             "call",
             "fold",
-            "try"
+            "try",
+            "each"
           ],
           "$kind"
         ],
@@ -3689,6 +3698,124 @@
           {
             "let": "value",
             "value": "$parsed.value"
+          }
+        ]
+      },
+      {
+        "let": "fieldOrder",
+        "value": [
+          "at",
+          [
+            "or",
+            [
+              "at",
+              "$lpPolicy",
+              "statementFieldOrder"
+            ],
+            {}
+          ],
+          "$kind"
+        ]
+      },
+      {
+        "when": "$fieldOrder",
+        "then": [
+          {
+            "port": "record.entries",
+            "args": {
+              "value": "$value"
+            },
+            "into": "orderedFields"
+          },
+          {
+            "let": "orderedKeys",
+            "value": [
+              "map",
+              "$orderedFields",
+              "orderedField",
+              [
+                "at",
+                "$orderedField",
+                0
+              ]
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "and",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$fieldOrder"
+                  ],
+                  [
+                    "count",
+                    "$orderedKeys"
+                  ]
+                ],
+                [
+                  "eq",
+                  [
+                    "count",
+                    [
+                      "distinct",
+                      "$fieldOrder"
+                    ]
+                  ],
+                  [
+                    "count",
+                    "$fieldOrder"
+                  ]
+                ],
+                [
+                  "every",
+                  "$fieldOrder",
+                  "orderedKey",
+                  [
+                    "includes",
+                    "$orderedKeys",
+                    "$orderedKey"
+                  ]
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "lp.fail",
+                  "input": {
+                    "code": "PROC-TEXT-BASIS",
+                    "summary": "Statement field-order profile differs from its parsed fields.",
+                    "token": "$begin"
+                  }
+                },
+                "into": "unused"
+              }
+            ]
+          },
+          {
+            "port": "record.fromEntries",
+            "args": {
+              "entries": [
+                "map",
+                "$fieldOrder",
+                "orderedKey",
+                [
+                  "list",
+                  "$orderedKey",
+                  [
+                    "at",
+                    "$value",
+                    "$orderedKey"
+                  ]
+                ]
+              ]
+            },
+            "into": "value"
           }
         ]
       },
@@ -6907,6 +7034,188 @@
               "try": "$tryBody",
               "error": "$errorName",
               "catch": "$catchBody"
+            }
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$kind",
+          "each"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lp.expression",
+              "input": {
+                "i": "$i",
+                "pointer": [
+                  "concat",
+                  "$pointer",
+                  "/each"
+                ],
+                "depth": 1,
+                "origins": "$origins"
+              }
+            },
+            "into": "parsed"
+          },
+          {
+            "let": "i",
+            "value": "$parsed.i"
+          },
+          {
+            "let": "origins",
+            "value": "$parsed.origins"
+          },
+          {
+            "let": "items",
+            "value": "$parsed.value"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lp.take",
+              "input": {
+                "i": "$i",
+                "expected": "as"
+              }
+            },
+            "into": "i"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lp.binding",
+              "input": {
+                "i": "$i",
+                "pointer": [
+                  "concat",
+                  "$pointer",
+                  "/",
+                  "as"
+                ],
+                "qualified": false,
+                "origins": "$origins"
+              }
+            },
+            "into": "parsed"
+          },
+          {
+            "let": "i",
+            "value": "$parsed.i"
+          },
+          {
+            "let": "origins",
+            "value": "$parsed.origins"
+          },
+          {
+            "let": "itemName",
+            "value": "$parsed.value"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lp.take",
+              "input": {
+                "i": "$i",
+                "expected": ":"
+              }
+            },
+            "into": "i"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lp.take",
+              "input": {
+                "i": "$i",
+                "expected": "\n"
+              }
+            },
+            "into": "i"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lp.programme",
+              "input": {
+                "i": "$i",
+                "pointer": [
+                  "concat",
+                  "$pointer",
+                  "/",
+                  "steps"
+                ],
+                "level": [
+                  "add",
+                  "$level",
+                  1
+                ],
+                "indent": [
+                  "add",
+                  "$begin.indent",
+                  2
+                ],
+                "origins": "$origins",
+                "statements": [
+                  "list"
+                ],
+                "stops": [
+                  "list"
+                ]
+              }
+            },
+            "into": "parsed"
+          },
+          {
+            "let": "i",
+            "value": "$parsed.i"
+          },
+          {
+            "let": "origins",
+            "value": "$parsed.origins"
+          },
+          {
+            "let": "body",
+            "value": "$parsed.value"
+          },
+          {
+            "when": [
+              "eq",
+              [
+                "count",
+                "$body"
+              ],
+              0
+            ],
+            "then": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "lp.fail",
+                  "input": {
+                    "code": "PROC-TEXT-LAYOUT",
+                    "summary": "An each suite must not be empty.",
+                    "token": [
+                      "at",
+                      "$lpTokens",
+                      "$i"
+                    ]
+                  }
+                },
+                "into": "unused"
+              }
+            ]
+          },
+          {
+            "let": "value",
+            "value": {
+              "each": "$items",
+              "as": "$itemName",
+              "steps": "$body"
             }
           }
         ]

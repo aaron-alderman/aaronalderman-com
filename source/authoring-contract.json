@@ -19,11 +19,7 @@
     "algebra/gateway.process.json",
     "algebra/microsite-projection.process.json",
     "algebra/microsites.process.json",
-    "algebra/microsite-values.process.json",
     "algebra/microsite-lamp.process.json",
-    "algebra/microsite-sourcery.process.json",
-    "algebra/microsite-ui.process.json",
-    "algebra/microsite-temple-ui.process.json",
     "algebra/microsite-motion.process.json",
     "algebra/microsite-temple-motion.process.json",
     "algebra/microsite-media.process.json",
@@ -31,7 +27,6 @@
     "algebra/claimipedia.process.json",
     "algebra/claimipedia-review.process.json",
     "algebra/encounter-demo.process.json",
-    "algebra/encounter.process.json",
     "algebra/atlas.process.json",
     "source/encounter/example.json",
     "source/encounter/presentation.json",
@@ -53,7 +48,13 @@
     "source/hierarchy.rel",
     "algebra/hierarchy.process.json",
     "source/encounter/source-algebra.encounter",
-    "algebra/microsite-return.process.json"
+    "algebra/microsite-return.process.json",
+    "source/encounter/encounter.encounter",
+    "source/algebra/source.encounter",
+    "source/microsites/ui.encounter",
+    "source/microsites/values.encounter",
+    "source/microsites/sourcery.encounter",
+    "source/microsites/temple-ui.encounter"
   ],
   "grants": [
     "value.describe",
@@ -91,7 +92,8 @@
     "authoring.test.mjs",
     "reader-workshop-algebra.test.mjs",
     "hierarchy.test.mjs",
-    "process-authoring.test.mjs"
+    "process-authoring.test.mjs",
+    "batch-process-authoring.test.mjs"
   ],
   "owners": {
     "facts": [
@@ -114,11 +116,7 @@
       "algebra/gateway.process.json",
       "algebra/microsite-projection.process.json",
       "algebra/microsites.process.json",
-      "algebra/microsite-values.process.json",
       "algebra/microsite-lamp.process.json",
-      "algebra/microsite-sourcery.process.json",
-      "algebra/microsite-ui.process.json",
-      "algebra/microsite-temple-ui.process.json",
       "algebra/microsite-motion.process.json",
       "algebra/microsite-temple-motion.process.json",
       "algebra/microsite-media.process.json",
@@ -126,7 +124,6 @@
       "algebra/claimipedia.process.json",
       "algebra/claimipedia-review.process.json",
       "algebra/encounter-demo.process.json",
-      "algebra/encounter.process.json",
       "algebra/atlas.process.json",
       "algebra/atlas-journey.process.json",
       "algebra/reader-models.process.json",
@@ -137,7 +134,13 @@
       "algebra/reader-workshop-publication.process.json",
       "algebra/hierarchy.process.json",
       "source/encounter/source-algebra.encounter",
-      "algebra/microsite-return.process.json"
+      "algebra/microsite-return.process.json",
+      "source/encounter/encounter.encounter",
+      "source/algebra/source.encounter",
+      "source/microsites/ui.encounter",
+      "source/microsites/values.encounter",
+      "source/microsites/sourcery.encounter",
+      "source/microsites/temple-ui.encounter"
     ],
     "authoringPolicy": "algebra/authoring.process.json",
     "mechanism": "tooling/author.mjs"
@@ -147,6 +150,30 @@
     "algebra/encounter-source.process.json": {
       "source": "source/encounter/source-algebra.encounter",
       "frontend": "bootstrap/process-frontend.json"
+    },
+    "algebra/encounter.process.json": {
+      "source": "source/encounter/encounter.encounter",
+      "frontend": "bootstrap/frontends/encounter.json"
+    },
+    "algebra/source.process.json": {
+      "source": "source/algebra/source.encounter",
+      "frontend": "bootstrap/frontends/source.json"
+    },
+    "algebra/microsite-ui.process.json": {
+      "source": "source/microsites/ui.encounter",
+      "frontend": "bootstrap/frontends/microsite-ui.json"
+    },
+    "algebra/microsite-values.process.json": {
+      "source": "source/microsites/values.encounter",
+      "frontend": "bootstrap/frontends/microsite-values.json"
+    },
+    "algebra/microsite-sourcery.process.json": {
+      "source": "source/microsites/sourcery.encounter",
+      "frontend": "bootstrap/frontends/microsite-sourcery.json"
+    },
+    "algebra/microsite-temple-ui.process.json": {
+      "source": "source/microsites/temple-ui.encounter",
+      "frontend": "bootstrap/frontends/microsite-temple-ui.json"
     }
   }
 }

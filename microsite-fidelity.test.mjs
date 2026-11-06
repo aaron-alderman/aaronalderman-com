@@ -13,7 +13,7 @@ const {createKernel}=require('./bootstrap/temple-seed.cjs');
 const {valuePorts}=require('./bootstrap/ports/value.cjs');
 const {computationalPorts}=require('./bootstrap/ports/browser-effects.cjs');
 const {invoke}=require('./bootstrap/ports/programme.cjs');
-const read=file=>JSON.parse(fs.readFileSync(new URL(file,import.meta.url),'utf8'));
+const {readProcessFixture:read}=require('./tooling/read-process-fixture.cjs');
 const configuration=read('./source/microsites/temple/config.json');
 const queries=Object.assign({},...['html','microsite-values','microsite-lamp','microsite-sourcery','microsite-ui','microsite-temple-ui','microsite-motion','microsite-temple-motion','microsite-media'].map(name=>read('./algebra/'+name+'.process.json').queries));
 const model=await lower({compiler:read('./algebra/lowering.process.json'),definitions:read('./algebra/operators.expression.json'),primitives:createKernel.operators,input:{queries,entry:'lamp.createWorld'},mode:'model',ports:valuePorts()});

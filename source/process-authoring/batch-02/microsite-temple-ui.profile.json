@@ -1,0 +1,70 @@
+{
+  "protocol": "encounter-process-text/2",
+  "status": "supplied-bootstrap-syntax-definition",
+  "operators": [
+    "add",
+    "and",
+    "append",
+    "at",
+    "concat",
+    "count",
+    "eq",
+    "filter",
+    "if",
+    "includes",
+    "list",
+    "map",
+    "not",
+    "or",
+    "range"
+  ],
+  "forbidden": [
+    "__proto__",
+    "prototype",
+    "constructor"
+  ],
+  "referenceSigil": "$",
+  "directPorts": [
+    "browser.attribute",
+    "browser.class",
+    "browser.content",
+    "browser.environment",
+    "browser.insert",
+    "browser.on",
+    "browser.read",
+    "browser.reflow",
+    "browser.select",
+    "browser.timer",
+    "browser.write",
+    "json.stringify",
+    "kernel.invoke",
+    "number.calculate",
+    "number.parse",
+    "record.put",
+    "state.get",
+    "state.set",
+    "text.slice",
+    "text.utf8Length",
+    "value.sort"
+  ],
+  "maxDepth": 64,
+  "maxCodeUnits": 160000,
+  "maxTokens": 36000,
+  "name": "encounter/module-batch/microsite-temple-ui/1",
+  "emitProfile": false,
+  "statementForms": [
+    "each",
+    "fold",
+    "let",
+    "port",
+    "try",
+    "when"
+  ],
+  "statementFieldOrder": {
+    "try": [
+      "try",
+      "catch",
+      "error"
+    ]
+  }
+}

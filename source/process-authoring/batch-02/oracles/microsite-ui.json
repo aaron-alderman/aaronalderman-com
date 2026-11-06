@@ -1,0 +1,2134 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "ui.html": [
+      {
+        "let": "input",
+        "value": [
+          "at",
+          "$eventInput",
+          "node"
+        ]
+      },
+      {
+        "call": "html.serialize"
+      }
+    ],
+    "ui.short": [
+      {
+        "port": "text.slice",
+        "args": {
+          "value": [
+            "at",
+            "$eventInput",
+            "value"
+          ],
+          "start": 0,
+          "end": 6
+        },
+        "into": "first"
+      },
+      {
+        "port": "text.slice",
+        "args": {
+          "value": [
+            "at",
+            "$eventInput",
+            "value"
+          ],
+          "start": -4
+        },
+        "into": "last"
+      },
+      {
+        "let": "result",
+        "value": [
+          "concat",
+          "$first",
+          "…",
+          "$last"
+        ]
+      }
+    ],
+    "ui.sourcery.init": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "ledger",
+          "value": [
+            "list"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "tampered",
+          "value": null
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "current",
+          "value": null
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "port": "browser.class",
+        "args": {
+          "ref": "html",
+          "name": "reduce",
+          "value": [
+            "at",
+            "$env",
+            "reduced"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#spell-form",
+          "event": "submit",
+          "query": "ui.sourcery.summon",
+          "input": {},
+          "preventDefault": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "document",
+          "event": "click",
+          "query": "ui.sourcery.example",
+          "input": {},
+          "delegate": ".chip[data-example]"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#ledger-verify",
+          "event": "click",
+          "query": "ui.sourcery.verify",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#ledger-tamper",
+          "event": "click",
+          "query": "ui.sourcery.tamper",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#spell-stage",
+          "event": "click",
+          "query": "ui.sourcery.actions",
+          "input": {},
+          "delegate": "[data-spell-action]"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#spell-stage",
+          "event": "keydown",
+          "query": "ui.sourcery.enter",
+          "input": {},
+          "delegate": "#return-why",
+          "preventKeys": [
+            "list",
+            "Enter"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "ui.sourcery.example": [
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#spell-intent",
+          "name": "value",
+          "value": [
+            "at",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput",
+                "matched"
+              ],
+              "attributes"
+            ],
+            "data-example"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.sourcery.summon",
+          "input": {
+            "text": [
+              "at",
+              [
+                "at",
+                [
+                  "at",
+                  "$eventInput",
+                  "matched"
+                ],
+                "attributes"
+              ],
+              "data-example"
+            ]
+          }
+        },
+        "into": "result"
+      }
+    ],
+    "ui.sourcery.summon": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "configuration"
+        },
+        "into": "configuration"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "ledger"
+        },
+        "into": "ledger"
+      },
+      {
+        "let": "text",
+        "value": [
+          "at",
+          "$eventInput",
+          "text"
+        ]
+      },
+      {
+        "when": [
+          "not",
+          "$text"
+        ],
+        "then": [
+          {
+            "port": "browser.read",
+            "args": {
+              "ref": "#spell-intent"
+            },
+            "into": "field"
+          },
+          {
+            "port": "text.replace",
+            "args": {
+              "value": [
+                "at",
+                "$field",
+                "value"
+              ],
+              "pattern": "\\s+",
+              "flags": "g",
+              "replacement": " "
+            },
+            "into": "text"
+          },
+          {
+            "port": "text.trim",
+            "args": {
+              "value": "$text"
+            },
+            "into": "text"
+          },
+          {
+            "when": [
+              "eq",
+              "$text",
+              ""
+            ],
+            "then": [
+              {
+                "let": "text",
+                "value": [
+                  "at",
+                  [
+                    "at",
+                    "$field",
+                    "attributes"
+                  ],
+                  "placeholder"
+                ]
+              },
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "#spell-intent",
+                  "name": "value",
+                  "value": "$text"
+                },
+                "into": "_"
+              }
+            ]
+          },
+          {
+            "port": "text.slice",
+            "args": {
+              "value": "$text",
+              "start": 0,
+              "end": 160
+            },
+            "into": "text"
+          }
+        ]
+      },
+      {
+        "let": "previous",
+        "value": [
+          "if",
+          [
+            "eq",
+            [
+              "count",
+              "$ledger"
+            ],
+            0
+          ],
+          "genesis",
+          [
+            "at",
+            [
+              "at",
+              "$ledger",
+              [
+                "add",
+                [
+                  "count",
+                  "$ledger"
+                ],
+                -1
+              ]
+            ],
+            "witness"
+          ]
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sourcery.proposal",
+          "input": {
+            "text": "$text",
+            "previous": "$previous",
+            "configuration": "$configuration"
+          }
+        },
+        "into": "current"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "current",
+          "value": "$current"
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.sourcery.proposal",
+          "input": {
+            "current": "$current"
+          }
+        },
+        "into": "result"
+      },
+      {
+        "port": "browser.frame",
+        "args": {
+          "query": "ui.sourcery.focus",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "port": "browser.scrollIntoView",
+        "args": {
+          "ref": "#spell-stage .scroll",
+          "block": "nearest",
+          "behavior": [
+            "if",
+            [
+              "at",
+              "$env",
+              "reduced"
+            ],
+            "auto",
+            "smooth"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "ui.sourcery.focus": [
+      {
+        "port": "browser.focus",
+        "args": {
+          "ref": "#proposal-title",
+          "preventScroll": true
+        },
+        "into": "_"
+      }
+    ],
+    "ui.sourcery.proposal": [
+      {
+        "let": "c",
+        "value": [
+          "at",
+          "$eventInput",
+          "current"
+        ]
+      },
+      {
+        "let": "d",
+        "value": [
+          "at",
+          "$c",
+          "draft"
+        ]
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "html"
+        },
+        "into": "root"
+      },
+      {
+        "let": "reduced",
+        "value": [
+          "includes",
+          [
+            "at",
+            [
+              "at",
+              "$root",
+              "attributes"
+            ],
+            "class"
+          ],
+          "reduce"
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.short",
+          "input": {
+            "value": [
+              "at",
+              [
+                "at",
+                "$c",
+                "proposal"
+              ],
+              "basis"
+            ]
+          }
+        },
+        "into": "short"
+      },
+      {
+        "let": "basis",
+        "value": [
+          "if",
+          [
+            "eq",
+            [
+              "at",
+              [
+                "at",
+                "$c",
+                "proposal"
+              ],
+              "basis"
+            ],
+            "genesis"
+          ],
+          "the empty ledger",
+          [
+            "concat",
+            "witness ",
+            "$short"
+          ]
+        ]
+      },
+      {
+        "port": "text.slice",
+        "args": {
+          "value": [
+            "at",
+            "$c",
+            "hash"
+          ],
+          "start": 0,
+          "end": 16
+        },
+        "into": "shortHash"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.html",
+          "input": {
+            "node": [
+              "list",
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": [
+                    "concat",
+                    "arrival",
+                    [
+                      "if",
+                      "$reduced",
+                      "",
+                      " is-flying"
+                    ]
+                  ]
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "svg",
+                    "attrs": {
+                      "viewBox": "-70 -250 140 262",
+                      "aria-hidden": "true",
+                      "focusable": "false"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "use",
+                        "attrs": {
+                          "href": "#broom",
+                          "x": -60,
+                          "y": -240,
+                          "width": 120,
+                          "height": 250
+                        },
+                        "children": [
+                          "list"
+                        ]
+                      }
+                    ]
+                  },
+                  [
+                    "concat",
+                    "Broom № ",
+                    [
+                      "at",
+                      "$c",
+                      "broomNo"
+                    ],
+                    " is back with a proposal."
+                  ]
+                ]
+              },
+              {
+                "tag": "article",
+                "attrs": {
+                  "class": "scroll is-unrolling",
+                  "aria-labelledby": "proposal-title"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "class": "scroll-head"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "h4",
+                        "attrs": {
+                          "id": "proposal-title",
+                          "tabindex": -1
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "at",
+                            "$d",
+                            "title"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "scroll-state"
+                        },
+                        "children": [
+                          "list",
+                          "Proposal · not yet real"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "scroll-meta"
+                    },
+                    "children": [
+                      "list",
+                      [
+                        "concat",
+                        "From Broom № ",
+                        [
+                          "at",
+                          "$c",
+                          "broomNo"
+                        ],
+                        ", an emissary · asked by you · basis: ",
+                        "$basis"
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "scroll-words"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "span",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "Your exact words, kept as written"
+                        ]
+                      },
+                      [
+                        "concat",
+                        "“",
+                        [
+                          "at",
+                          [
+                            "at",
+                            "$c",
+                            "proposal"
+                          ],
+                          "intent"
+                        ],
+                        "”"
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "class": "scroll-sec"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "h5",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "It would create"
+                        ]
+                      },
+                      {
+                        "tag": "ul",
+                        "attrs": {
+                          "class": "kinds"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "map",
+                            [
+                              "at",
+                              "$d",
+                              "creates"
+                            ],
+                            "creation",
+                            {
+                              "tag": "li",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "span",
+                                  "attrs": {
+                                    "class": "kind"
+                                  },
+                                  "children": [
+                                    "list",
+                                    [
+                                      "at",
+                                      "$creation",
+                                      0
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "tag": "span",
+                                  "attrs": {
+                                    "class": "what"
+                                  },
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "b",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        [
+                                          "at",
+                                          "$creation",
+                                          1
+                                        ]
+                                      ]
+                                    },
+                                    [
+                                      "concat",
+                                      ": ",
+                                      [
+                                        "at",
+                                        "$creation",
+                                        2
+                                      ]
+                                    ]
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "class": "scroll-sec"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "h5",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "It would add these house rules"
+                        ]
+                      },
+                      {
+                        "tag": "ul",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "map",
+                            [
+                              "at",
+                              "$d",
+                              "rules"
+                            ],
+                            "line",
+                            {
+                              "tag": "li",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "$line"
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "class": "scroll-sec"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "h5",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "It needs one answer from you"
+                        ]
+                      },
+                      {
+                        "tag": "ul",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "map",
+                            [
+                              "at",
+                              "$d",
+                              "asks"
+                            ],
+                            "line",
+                            {
+                              "tag": "li",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "$line"
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "class": "scroll-sec"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "h5",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "It will not"
+                        ]
+                      },
+                      {
+                        "tag": "ul",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "map",
+                            [
+                              "at",
+                              "$d",
+                              "wont"
+                            ],
+                            "line",
+                            {
+                              "tag": "li",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "$line"
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "scroll-meta"
+                    },
+                    "children": [
+                      "list",
+                      [
+                        "concat",
+                        "Built from a reusable pattern: ",
+                        [
+                          "at",
+                          "$d",
+                          "pattern"
+                        ],
+                        "."
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "class": "scroll-seal"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "seal-text"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "span",
+                            "attrs": {
+                              "class": "seal-label"
+                            },
+                            "children": [
+                              "list",
+                              "Seal preview: "
+                            ]
+                          },
+                          {
+                            "tag": "span",
+                            "attrs": {
+                              "class": "hash",
+                              "title": [
+                                "concat",
+                                "sha256:",
+                                [
+                                  "at",
+                                  "$c",
+                                  "hash"
+                                ]
+                              ]
+                            },
+                            "children": [
+                              "list",
+                              [
+                                "concat",
+                                "sha256:",
+                                "$shortHash",
+                                "…"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "class": "scroll-actions"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "button",
+                        "attrs": {
+                          "type": "button",
+                          "class": "btn btn--seal",
+                          "data-spell-action": "seal"
+                        },
+                        "children": [
+                          "list",
+                          "Seal it"
+                        ]
+                      },
+                      {
+                        "tag": "button",
+                        "attrs": {
+                          "type": "button",
+                          "class": "btn btn--ghost",
+                          "data-spell-action": "return"
+                        },
+                        "children": [
+                          "list",
+                          "Send it back"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "into": "html"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#spell-stage",
+          "html": "$html"
+        },
+        "into": "_"
+      }
+    ],
+    "ui.sourcery.actions": [
+      {
+        "let": "action",
+        "value": [
+          "at",
+          [
+            "at",
+            [
+              "at",
+              "$eventInput",
+              "matched"
+            ],
+            "attributes"
+          ],
+          "data-spell-action"
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$action",
+          "seal"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.sourcery.decide",
+              "input": {
+                "verdict": "sealed",
+                "note": ""
+              }
+            },
+            "into": "result"
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$action",
+          "return"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.sourcery.askWhy",
+              "input": {}
+            },
+            "into": "result"
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$action",
+          "send"
+        ],
+        "then": [
+          {
+            "port": "browser.read",
+            "args": {
+              "ref": "#return-why"
+            },
+            "into": "field"
+          },
+          {
+            "port": "text.trim",
+            "args": {
+              "value": [
+                "at",
+                "$field",
+                "value"
+              ]
+            },
+            "into": "note"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.sourcery.decide",
+              "input": {
+                "verdict": "returned",
+                "note": "$note"
+              }
+            },
+            "into": "result"
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$action",
+          "again"
+        ],
+        "then": [
+          {
+            "port": "browser.content",
+            "args": {
+              "ref": "#spell-stage",
+              "html": ""
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "current",
+              "value": null
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#spell-intent",
+              "name": "value",
+              "value": ""
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.focus",
+            "args": {
+              "ref": "#spell-intent"
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "ui.sourcery.askWhy": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.html",
+          "input": {
+            "node": {
+              "tag": "div",
+              "attrs": {
+                "class": "return-note"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "label",
+                  "attrs": {
+                    "for": "return-why"
+                  },
+                  "children": [
+                    "list",
+                    "Why send it back? (optional, and it goes on the record)"
+                  ]
+                },
+                {
+                  "tag": "input",
+                  "attrs": {
+                    "id": "return-why",
+                    "type": "text",
+                    "maxlength": 120,
+                    "placeholder": "e.g. not yet, ask me about the six hours first"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "button",
+                  "attrs": {
+                    "type": "button",
+                    "class": "btn btn--ghost",
+                    "data-spell-action": "send"
+                  },
+                  "children": [
+                    "list",
+                    "Send it back"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "into": "html"
+      },
+      {
+        "port": "browser.replace",
+        "args": {
+          "ref": "#spell-stage .scroll-actions",
+          "html": "$html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.focus",
+        "args": {
+          "ref": "#return-why"
+        },
+        "into": "_"
+      }
+    ],
+    "ui.sourcery.enter": [
+      {
+        "when": [
+          "eq",
+          [
+            "at",
+            [
+              "at",
+              "$eventInput",
+              "event"
+            ],
+            "key"
+          ],
+          "Enter"
+        ],
+        "then": [
+          {
+            "port": "browser.read",
+            "args": {
+              "ref": "#return-why"
+            },
+            "into": "field"
+          },
+          {
+            "port": "text.trim",
+            "args": {
+              "value": [
+                "at",
+                "$field",
+                "value"
+              ]
+            },
+            "into": "note"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.sourcery.decide",
+              "input": {
+                "verdict": "returned",
+                "note": "$note"
+              }
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "ui.sourcery.decide": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "current"
+        },
+        "into": "current"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "ledger"
+        },
+        "into": "ledger"
+      },
+      {
+        "when": [
+          "and",
+          [
+            "not",
+            [
+              "or",
+              [
+                "eq",
+                "$current",
+                null
+              ],
+              [
+                "eq",
+                "$current",
+                [
+                  "at",
+                  {},
+                  "absent"
+                ]
+              ]
+            ]
+          ],
+          [
+            "not",
+            [
+              "at",
+              "$current",
+              "decided"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "clock.read",
+            "args": {},
+            "into": "clock"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "sourcery.decide",
+              "input": {
+                "current": "$current",
+                "ledger": "$ledger",
+                "verdict": [
+                  "at",
+                  "$eventInput",
+                  "verdict"
+                ],
+                "note": [
+                  "at",
+                  "$eventInput",
+                  "note"
+                ],
+                "at": [
+                  "at",
+                  "$clock",
+                  "iso"
+                ]
+              }
+            },
+            "into": "decision"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$current",
+              "key": "decided",
+              "value": true
+            },
+            "into": "current"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "current",
+              "value": "$current"
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "ledger",
+              "value": [
+                "at",
+                "$decision",
+                "ledger"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.sourcery.ledger",
+              "input": {}
+            },
+            "into": "result"
+          },
+          {
+            "port": "browser.remove",
+            "args": {
+              "ref": "#spell-stage .scroll-actions, #spell-stage .return-note"
+            },
+            "into": "_"
+          },
+          {
+            "let": "sealed",
+            "value": [
+              "eq",
+              [
+                "at",
+                "$eventInput",
+                "verdict"
+              ],
+              "sealed"
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.html",
+              "input": {
+                "node": [
+                  "if",
+                  "$sealed",
+                  {
+                    "tag": "svg",
+                    "attrs": {
+                      "viewBox": "0 0 100 100",
+                      "class": "stamp",
+                      "aria-hidden": "true"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M50 6c9 0 11 5 18 6s12 6 13 13 5 11 5 18-5 11-5 18-6 12-13 13-9 6-18 6-11-5-18-6-12-6-13-13-5-11-5-18 5-11 5-18 6-12 13-13 9-6 18-6z",
+                          "fill": "#9c3550",
+                          "stroke": "#221d2e",
+                          "stroke-width": 2
+                        },
+                        "children": [
+                          "list"
+                        ]
+                      },
+                      {
+                        "tag": "circle",
+                        "attrs": {
+                          "cx": 50,
+                          "cy": 50,
+                          "r": 27,
+                          "fill": "none",
+                          "stroke": "#6d1f33",
+                          "stroke-width": 2.4
+                        },
+                        "children": [
+                          "list"
+                        ]
+                      },
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M38 36l16 18",
+                          "stroke": "#fbf3df",
+                          "stroke-width": "3.4",
+                          "stroke-linecap": "round"
+                        },
+                        "children": [
+                          "list"
+                        ]
+                      },
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M52 52l6-5 10 16-5 4z",
+                          "fill": "#fbf3df"
+                        },
+                        "children": [
+                          "list"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "span",
+                    "attrs": {
+                      "class": "stamp stamp--returned",
+                      "aria-hidden": "true"
+                    },
+                    "children": [
+                      "list",
+                      "RETURNED"
+                    ]
+                  }
+                ]
+              }
+            },
+            "into": "html"
+          },
+          {
+            "port": "browser.insert",
+            "args": {
+              "ref": "#spell-stage .scroll-seal",
+              "position": "beforeend",
+              "html": "$html"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#spell-stage .seal-label",
+              "name": "textContent",
+              "value": [
+                "if",
+                "$sealed",
+                "Sealed: ",
+                "Fingerprint: "
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#spell-stage .scroll-state",
+              "name": "textContent",
+              "value": [
+                "if",
+                "$sealed",
+                "Sealed · witnessed",
+                "Returned · witnessed"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.html",
+              "input": {
+                "node": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": [
+                        "concat",
+                        "outcome",
+                        [
+                          "if",
+                          "$sealed",
+                          "",
+                          " is-returned"
+                        ]
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      [
+                        "if",
+                        "$sealed",
+                        [
+                          "concat",
+                          "Sealed, and witnessed as № ",
+                          [
+                            "at",
+                            [
+                              "at",
+                              "$decision",
+                              "record"
+                            ],
+                            "n"
+                          ],
+                          ". In Sourcery, this is the moment the change would be checked, admitted and built into a working app, with this receipt attached."
+                        ],
+                        [
+                          "concat",
+                          "Sent back, and witnessed as № ",
+                          [
+                            "at",
+                            [
+                              "at",
+                              "$decision",
+                              "record"
+                            ],
+                            "n"
+                          ],
+                          ". Nothing changed, and the attempt is still on the record. No silent failure."
+                        ]
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "button",
+                    "attrs": {
+                      "type": "button",
+                      "class": "btn btn--ghost again",
+                      "data-spell-action": "again"
+                    },
+                    "children": [
+                      "list",
+                      "Cast another spell"
+                    ]
+                  }
+                ]
+              }
+            },
+            "into": "html"
+          },
+          {
+            "port": "browser.insert",
+            "args": {
+              "ref": "#spell-stage .scroll",
+              "position": "afterend",
+              "html": "$html"
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "ui.sourcery.ledger": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "ledger"
+        },
+        "into": "ledger"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "tampered"
+        },
+        "into": "tampered"
+      },
+      {
+        "fold": "$ledger",
+        "as": "entry",
+        "accumulator": "items",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "r",
+            "value": [
+              "at",
+              "$entry",
+              "record"
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.short",
+              "input": {
+                "value": [
+                  "at",
+                  "$r",
+                  "proposal"
+                ]
+              }
+            },
+            "into": "proposal"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.short",
+              "input": {
+                "value": [
+                  "at",
+                  "$r",
+                  "previous"
+                ]
+              }
+            },
+            "into": "previous"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.short",
+              "input": {
+                "value": [
+                  "at",
+                  "$entry",
+                  "witness"
+                ]
+              }
+            },
+            "into": "witness"
+          },
+          {
+            "let": "mark",
+            "value": [
+              "if",
+              [
+                "at",
+                "$eventInput",
+                "marks"
+              ],
+              [
+                "if",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$eventInput",
+                    "marks"
+                  ],
+                  [
+                    "count",
+                    "$items"
+                  ]
+                ],
+                " is-ok",
+                " is-broken"
+              ],
+              ""
+            ]
+          },
+          {
+            "let": "item",
+            "value": {
+              "tag": "li",
+              "attrs": {
+                "class": [
+                  "concat",
+                  "entry",
+                  "$mark"
+                ]
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "entry-top"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "span",
+                      "attrs": {
+                        "class": "entry-n"
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "№ ",
+                          [
+                            "at",
+                            "$r",
+                            "n"
+                          ]
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "span",
+                      "attrs": {
+                        "class": [
+                          "concat",
+                          "entry-verdict ",
+                          [
+                            "if",
+                            [
+                              "eq",
+                              [
+                                "at",
+                                "$r",
+                                "verdict"
+                              ],
+                              "sealed"
+                            ],
+                            "is-sealed",
+                            "is-returned"
+                          ]
+                        ]
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            [
+                              "at",
+                              "$r",
+                              "verdict"
+                            ],
+                            "sealed"
+                          ],
+                          "Sealed by you",
+                          "Returned by you"
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "entry-words"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "“",
+                      [
+                        "at",
+                        "$r",
+                        "intent"
+                      ],
+                      "”"
+                    ]
+                  ]
+                },
+                [
+                  "if",
+                  [
+                    "at",
+                    "$r",
+                    "note"
+                  ],
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "entry-note"
+                    },
+                    "children": [
+                      "list",
+                      [
+                        "concat",
+                        "Note: ",
+                        [
+                          "at",
+                          "$r",
+                          "note"
+                        ]
+                      ]
+                    ]
+                  },
+                  null
+                ],
+                {
+                  "tag": "dl",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "proposal"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {
+                        "class": "hash"
+                      },
+                      "children": [
+                        "list",
+                        "$proposal"
+                      ]
+                    },
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "previous"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {
+                        "class": "hash"
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            [
+                              "at",
+                              "$r",
+                              "previous"
+                            ],
+                            "genesis"
+                          ],
+                          "genesis",
+                          "$previous"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "witness"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {
+                        "class": "hash"
+                      },
+                      "children": [
+                        "list",
+                        "$witness"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$items",
+          [
+            "list",
+            "$item"
+          ]
+        ],
+        "into": "items"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.html",
+          "input": {
+            "node": [
+              "if",
+              [
+                "eq",
+                [
+                  "count",
+                  "$ledger"
+                ],
+                0
+              ],
+              {
+                "tag": "li",
+                "attrs": {
+                  "class": "ledger-empty"
+                },
+                "children": [
+                  "list",
+                  "No spells yet. The first entry will be witness № 1."
+                ]
+              },
+              "$items"
+            ]
+          }
+        },
+        "into": "html"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#ledger-list",
+          "html": "$html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#ledger-verify",
+          "name": "disabled",
+          "value": [
+            "eq",
+            [
+              "count",
+              "$ledger"
+            ],
+            0
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#ledger-tamper",
+          "name": "disabled",
+          "value": [
+            "eq",
+            [
+              "count",
+              "$ledger"
+            ],
+            0
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#ledger-tamper",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$tampered",
+            "Undo the tampering",
+            "Try tampering with № 1"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "ui.sourcery.verify": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "ledger"
+        },
+        "into": "ledger"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sourcery.verify",
+          "input": {
+            "ledger": "$ledger"
+          }
+        },
+        "into": "verified"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.sourcery.ledger",
+          "input": {
+            "marks": [
+              "at",
+              "$verified",
+              "marks"
+            ]
+          }
+        },
+        "into": "result"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#ledger-result",
+          "name": "className",
+          "value": [
+            "if",
+            [
+              "eq",
+              [
+                "at",
+                "$verified",
+                "firstBad"
+              ],
+              -1
+            ],
+            "ledger-result is-ok",
+            "ledger-result is-bad"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#ledger-result",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$verified",
+            "message"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "ui.sourcery.tamper": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "ledger"
+        },
+        "into": "ledger"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "tampered"
+        },
+        "into": "tampered"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sourcery.tamper",
+          "input": {
+            "ledger": "$ledger",
+            "originalRecord": "$tampered"
+          }
+        },
+        "into": "changed"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "ledger",
+          "value": [
+            "at",
+            "$changed",
+            "ledger"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "tampered",
+          "value": [
+            "at",
+            "$changed",
+            "originalRecord"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#ledger-result",
+          "name": "className",
+          "value": "ledger-result"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#ledger-result",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$changed",
+            "message"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.sourcery.ledger",
+          "input": {}
+        },
+        "into": "result"
+      }
+    ]
+  }
+}
