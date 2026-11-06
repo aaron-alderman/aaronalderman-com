@@ -6,8 +6,24 @@ import crypto from 'node:crypto';
 const root=new URL('.',import.meta.url),read=f=>fs.readFileSync(new URL(f,root)),json=f=>JSON.parse(read(f)),sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const receipt=json('source/microsites/presentation-correspondence.json');
 test('all four recomposed documents retain their independently compared source structure and reading',()=>{
+ assert.equal(sha(read('source/microsites/editorial-successor.json')),receipt.editorialSuccessorSha256);
  assert.equal(receipt.pages.length,4);
  for(const page of receipt.pages){assert.equal(sha(read(page.source)),page.sourceSha256);assert.equal(sha(read('dist/'+page.path)),page.outputSha256);const html=read('dist/'+page.path).toString();assert.ok(html.includes('rel="canonical"'));assert.ok(html.includes('property="og:image"'));assert.ok(html.includes('name="twitter:card"'));}
+});
+
+test('microsite navigation and referenced resources stay inside the ecosystem and resolve, including fragments',()=>{
+ for(const page of receipt.pages){
+  const html=read('dist/'+page.path).toString(),base=new URL(page.path,'https://aaronalderman.com/');
+  for(const match of html.matchAll(/\b(?:href|src|poster)="([^"]+)"/g)){
+   const url=new URL(match[1].replaceAll('&amp;','&'),base);assert.equal(url.origin,base.origin,page.path+': '+url.href);
+   const relative=decodeURIComponent(url.pathname).replace(/^\//,''),file=(!relative||relative.endsWith('/'))?relative+'index.html':relative;
+   assert.ok(fs.statSync(new URL('dist/'+file,root)).isFile(),page.path+': '+file);
+   if(url.hash){const target=read('dist/'+file).toString(),id=decodeURIComponent(url.hash.slice(1));assert.ok(target.includes('id="'+id+'"'),page.path+': missing #'+id);}
+  }
+  assert.ok(html.includes('ecosystem-links'));assert.ok(html.includes('>Corpus gate</a>'));assert.ok(html.includes('>Temple</a>'));assert.ok(html.includes('>Sourcery</a>'));
+ }
+ for(const file of ['temple/index.html','temple/films/index.html']){const html=read('dist/'+file).toString();assert.ok(html.includes('<span>Temple</span>'));assert.ok(!html.includes('aria-label="Sourcery, back'));}
+ const temple=read('dist/temple/index.html').toString();for(const obsolete of ['latest integrated qualification','101 of 101','486 hostile cases','Claimipedia opens soon','Enforced in Claimipedia today'])assert.ok(!temple.includes(obsolete));
 });
 test('every captured microsite asset and both complete stylesheets retain their exact bytes',()=>{
  for(const sheet of receipt.sheets){assert.equal(sha(read(sheet.source)),sheet.sha256);assert.equal(sha(read('dist/'+sheet.path)),sheet.sha256);}

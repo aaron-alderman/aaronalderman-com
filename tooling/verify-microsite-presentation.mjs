@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import assert from 'node:assert/strict';
-import {parse} from '../.build/authoring-deps/node_modules/parse5/dist/index.js';
+import {parse,parseFragment} from '../.build/authoring-deps/node_modules/parse5/dist/index.js';
 const output=process.argv[2]??'microsite-preview',hash=b=>crypto.createHash('sha256').update(b).digest('hex');
 const pages=[];
 for(const site of ['temple','sourcery'])for(const file of ['index.html','films/index.html']){
@@ -24,7 +24,14 @@ for(const site of ['temple','sourcery'])for(const file of ['index.html','films/i
   for(const child of node.childNodes??[]){const value=normalize(child,reference);if(!value)continue;if(value.node==='#text'&&children.at(-1)?.node==='#text')children.at(-1).text+=value.text;else children.push(value);}
   return {node:node.nodeName,...(node.value!==undefined?{text:node.value}:{}),...(node.data!==undefined?{comment:node.data}:{}),...(node.tagName?{namespace:node.namespaceURI,attributes:attrs}:{}),...(children.length?{children}:{})};
  }
- const expected=normalize(parse(original.toString()),true),actual=normalize(parse(generated.toString()),false);
+ const reference=parse(original.toString(),{sourceCodeLocationInfo:true});
+ const edits=JSON.parse(fs.readFileSync('source/microsites/editorial-successor.json')).patches.filter(p=>p.page===target);
+ const targets=new Map();function collect(n){if(n.tagName&&n.sourceCodeLocation)targets.set(n.sourceCodeLocation.startOffset,n);(n.childNodes??[]).forEach(collect);}collect(reference);
+ const text=n=>n.value??(n.childNodes??[]).map(text).join('');
+ for(const edit of edits){const node=targets.get(edit.sourceStart);assert.ok(node);assert.equal(text(node).replace(/\s+/g,' ').trim(),edit.beforeText);}
+ for(const edit of edits){const node=targets.get(edit.sourceStart);if(edit.html!==undefined)node.childNodes=parseFragment(edit.html).childNodes;if(edit.appendHtml)node.childNodes.push(...parseFragment(edit.appendHtml).childNodes);for(const [name,value]of Object.entries(edit.attributes??{})){const a=node.attrs.find(a=>a.name===name);if(a)a.value=value;else node.attrs.push({name,value});}}
+
+ const expected=normalize(reference,true),actual=normalize(parse(generated.toString()),false);
  assert.deepEqual(actual,expected,target+' preserves the complete original parsed document after the declared script/favicon/metadata deployment substitutions');
  pages.push({path:target,source,sourceSha256:hash(original),outputSha256:hash(generated),normalizedDOMSha256:hash(JSON.stringify(expected))});
 }
@@ -32,6 +39,6 @@ const sheets=[];
 for(const [site,file]of [['temple','assets/covenant.css'],['sourcery','assets/css/story.css']]){
  const source=`source/microsites/${site}/oracle/${file}`,target=`${site}/${file}`,a=fs.readFileSync(source),b=fs.readFileSync(path.join(output,target));assert.deepEqual(b,a);sheets.push({path:target,source,sha256:hash(a)});
 }
-const receipt={protocol:'worldwright/microsite-presentation-correspondence/1',parser:'parse5@7.3.0',scope:'Every document node, attribute, text, comment and namespace; original scripts replaced by admitted process runtime, favicon URI externalized without changing its bytes, canonical/social metadata added for the new host. Both complete stylesheets byte-identical.',pages,sheets};
+const receipt={protocol:'worldwright/microsite-presentation-correspondence/1',parser:'parse5@7.3.0',editorialSuccessorSha256:hash(fs.readFileSync('source/microsites/editorial-successor.json')),scope:'Every document node, attribute, text, comment and namespace after the explicit author-requested editorial successor; original scripts replaced by admitted process runtime, favicon URI externalized without changing its bytes, canonical/social metadata added for the new host. Both complete stylesheets byte-identical.',pages,sheets};
 fs.writeFileSync('source/microsites/presentation-correspondence.json',JSON.stringify(receipt,null,2)+'\n');
 console.log(JSON.stringify({pages:pages.length,byteIdenticalStylesheets:sheets.length}));

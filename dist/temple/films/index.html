@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>The Film · Sourcery</title>
+    <title>The Film · Temple</title>
     <meta name="description" content="The Covenant, in forty seconds: a trailer rendered entirely from code — a sky computed pixel by pixel, lights that leave trails, the commandments set in type, and a drone synthesised from sine waves and noise.">
     <meta name="theme-color" content="#07080f">
     <meta name="color-scheme" content="dark">
@@ -10,15 +10,15 @@
     <script src="../early.js"></script><link rel="stylesheet" href="../assets/covenant.css">
     
     
-  <script type="module" src="../runtime.js"></script><link rel="canonical" href="https://aaronalderman.com/temple/films/"><meta property="og:type" content="website"><meta property="og:title" content="The Film · Sourcery"><meta property="og:description" content="The Covenant, in forty seconds: a trailer rendered entirely from code — a sky computed pixel by pixel, lights that leave trails, the commandments set in type, and a drone synthesised from sine waves and noise."><meta property="og:url" content="https://aaronalderman.com/temple/films/"><meta property="og:image" content="https://aaronalderman.com/temple/films/the-film-poster.jpg"><meta property="og:image:alt" content="The Covenant: a Temple in lamplight."><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="The Film · Sourcery"><meta name="twitter:description" content="The Covenant, in forty seconds: a trailer rendered entirely from code — a sky computed pixel by pixel, lights that leave trails, the commandments set in type, and a drone synthesised from sine waves and noise."><meta name="twitter:image" content="https://aaronalderman.com/temple/films/the-film-poster.jpg"></head>
+  <script type="module" src="../runtime.js"></script><link rel="canonical" href="https://aaronalderman.com/temple/films/"><meta property="og:type" content="website"><meta property="og:title" content="The Film · Temple"><meta property="og:description" content="The Covenant, in forty seconds: a trailer rendered entirely from code — a sky computed pixel by pixel, lights that leave trails, the commandments set in type, and a drone synthesised from sine waves and noise."><meta property="og:url" content="https://aaronalderman.com/temple/films/"><meta property="og:image" content="https://aaronalderman.com/temple/films/the-film-poster.jpg"><meta property="og:image:alt" content="The Covenant: a Temple in lamplight."><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="The Film · Temple"><meta name="twitter:description" content="The Covenant, in forty seconds: a trailer rendered entirely from code — a sky computed pixel by pixel, lights that leave trails, the commandments set in type, and a drone synthesised from sine waves and noise."><meta name="twitter:image" content="https://aaronalderman.com/temple/films/the-film-poster.jpg"></head>
   <body class="films-page">
     <a class="skip-link" href="#screen">Skip to the film</a>
     <canvas id="sky" class="sky" aria-hidden="true"></canvas>
 
     <header class="masthead">
-      <a class="wordmark" href="../index.html" aria-label="Sourcery, back to The Covenant">
+      <a class="wordmark" href="../index.html" aria-label="Temple, back to The Covenant">
         <svg viewBox="0 0 64 40" aria-hidden="true"><path d="M6 16 L32 4 L58 16 Z"></path><path d="M13 20 V34 M25 20 V34 M39 20 V34 M51 20 V34 M6 37 H58"></path></svg>
-        <span>Sourcery</span>
+        <span>Temple</span>
       </a>
       <nav aria-label="Pages">
         <a href="../index.html">The Covenant</a>
@@ -32,7 +32,7 @@
       <section class="films-hero" aria-labelledby="films-title">
         <p class="eyebrow">The film</p>
         <h1 id="films-title">The Covenant, in forty seconds.</h1>
-        <p class="lead">A trailer rendered entirely from code: a sky computed pixel by pixel, lights that leave trails, the commandments set in type, and a drone synthesised from sine waves and noise. No cameras, no stock footage, no generated video — every frame can be rendered again from the site’s own source.</p>
+        <p class="lead">A trailer rendered entirely from code: a sky computed pixel by pixel, lights that leave trails, the commandments set in type, and a drone synthesised from sine waves and noise. This edition preserves the original film, its captions and its recorded provenance.</p>
       </section>
 
       <section id="screen" class="screening" aria-label="The film">
@@ -46,7 +46,7 @@
             </video>
           </div>
           <figcaption class="screen-bar">
-            <span id="film-description">The Covenant · 41 seconds · 1280×720 · rendered by ffmpeg from the site’s own source.</span>
+            <span id="film-description">The Covenant · 41 seconds · 1280×720 · retained from the original procedural film.</span>
             <button type="button" class="btn-line sound" data-sound="" aria-pressed="false">Sound off</button>
           </figcaption>
         </figure>
@@ -64,7 +64,7 @@
       <section class="scene-text made" aria-labelledby="made-title">
         <p class="eyebrow">How it was made</p>
         <h2 id="made-title">Procedural cinematography, in filtergraphs.</h2>
-        <p class="body-wide">The film is a separate pipeline beside the site. A choreography file sets every scene, plate, light, spark and chime to the tenth of a second; one Python script turns it into picture and sound with ffmpeg and headless Chrome.</p>
+        <p class="body-wide">The original film was made with a separate rendering pipeline. A choreography file set the scenes, lights, sparks and chimes; Python, ffmpeg and headless Chrome produced the picture and sound. This edition retains the rendered files and their manifest.</p>
         <dl class="techniques">
           <div><dt>The sky</dt><dd>Computed per pixel with <code>geq</code>: an indigo zenith, lamplight low on the horizon, and far stars from a hash of each pixel’s coordinates.</dd></div>
           <div><dt>Stars that twinkle</dt><dd>A seamless three-second loop in which every star keeps its own phase, rendered once and looped under every scene.</dd></div>
@@ -80,7 +80,7 @@
       <section id="witness-of-the-film" class="scene-text provenance" aria-labelledby="prov-title">
         <p class="eyebrow">Its witness</p>
         <h2 id="prov-title">The film has a witness too.</h2>
-        <p class="body-wide">Every file below carries the hash of its bytes, and the whole set carries the hash of the sources that produced it. The site’s tests recompute both: change a single frame’s recipe without re-rendering, and the build refuses to call the film current.</p>
+        <p class="body-wide">The manifest records the original files and the source hash reported by their rendering pipeline. This edition checks the retained file bytes against the captured hashes. It does not rerun or independently verify that original rendering pipeline.</p>
         <div class="prov" id="provenance" aria-live="polite">
           <p class="fine">Reading <a href="manifest.json">manifest.json</a>…</p>
         </div>
@@ -109,8 +109,8 @@
 
     <footer class="colophon">
       <p class="wordmark-foot">Sourcery · Temple · Claimipedia</p>
-      <p class="fine">A speculative design. The film was rendered from code by ffmpeg and headless Chrome; its recipe lives beside the site’s source.</p>
-    </footer>
+      <p class="fine">A speculative design, retained from the original procedural film. The published media are checked against their captured file hashes.</p>
+    <p class="fine ecosystem-links"><a href="../../gate.html">Corpus gate</a> · <a href="../">Temple</a> · <a href="../../sourcery/">Sourcery</a> · <a href="../../">Aaron Alderman</a></p></footer>
   
 
 </body></html>

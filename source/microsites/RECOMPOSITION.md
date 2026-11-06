@@ -32,3 +32,7 @@ node --test microsite-fidelity.test.mjs microsite-publication.test.mjs
 ```
 
 The authoring-only HTML/CSS/JavaScript parsers are listed with registry integrities in `authoring-tools.json`. They are installed under ignored `.build/authoring-deps/node_modules/`; they do not enter the build or browser closure. With those tools available, `node tooling/verify-microsite-presentation.mjs dist` repeats the complete parsed-document comparison. `tooling/author-*.mjs` are authoring shorthand that emits reviewable process JSON, not an alternative runtime.
+
+## Author-requested editorial successor
+
+The author subsequently requested Temple branding in its title bar, a relevance review of its prose, and self-contained ecosystem links. `editorial-successor.json` records each explicit text, accessibility-label and navigation change against the untouched captured source coordinates. `presentation-correspondence.json` now compares that declared edition against the generated documents. Historical laboratory results are attributed to the original prototype, launch-date promises are removed from Temple, and film provenance distinguishes retained file verification from rerunning the original renderer. This successor changes presentation data in REL; application rules, motion, media and CSS retain the baseline implementation.
