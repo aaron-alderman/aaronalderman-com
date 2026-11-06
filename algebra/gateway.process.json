@@ -289,137 +289,155 @@
                         ]
                       },
                       {
-                        "tag": "p",
+                        "tag": "div",
                         "attrs": {
-                          "class": "eyebrow"
+                          "class": "door-reading"
                         },
                         "children": [
                           "list",
-                          [
-                            "one",
-                            "$door",
-                            "kind"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "h3",
-                        "attrs": {},
-                        "children": [
-                          "list",
                           {
-                            "tag": "a",
+                            "tag": "p",
                             "attrs": {
-                              "href": [
-                                "one",
-                                "$door",
-                                "href"
-                              ]
+                              "class": "eyebrow"
                             },
                             "children": [
                               "list",
                               [
                                 "one",
                                 "$door",
-                                "readingName"
+                                "kind"
+                              ]
+                            ]
+                          },
+                          {
+                            "tag": "h3",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "href": [
+                                    "one",
+                                    "$door",
+                                    "href"
+                                  ]
+                                },
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$door",
+                                    "readingName"
+                                  ]
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "door-title"
+                            },
+                            "children": [
+                              "list",
+                              [
+                                "one",
+                                "$door",
+                                "title"
+                              ]
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "door-description"
+                            },
+                            "children": [
+                              "list",
+                              [
+                                "one",
+                                "$door",
+                                "description"
                               ]
                             ]
                           }
                         ]
                       },
                       {
-                        "tag": "p",
-                        "attrs": {
-                          "class": "door-title"
-                        },
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$door",
-                            "title"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "p",
-                        "attrs": {
-                          "class": "door-description"
-                        },
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$door",
-                            "description"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "p",
-                        "attrs": {
-                          "class": "door-question"
-                        },
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$door",
-                            "question"
-                          ]
-                        ]
-                      },
-                      {
                         "tag": "div",
                         "attrs": {
-                          "class": "door-actions"
+                          "class": "door-next"
                         },
                         "children": [
                           "list",
                           {
-                            "tag": "a",
+                            "tag": "p",
                             "attrs": {
-                              "href": [
-                                "one",
-                                "$door",
-                                "href"
-                              ],
-                              "class": "door-primary"
+                              "class": "door-question"
                             },
                             "children": [
                               "list",
                               [
-                                "concat",
-                                [
-                                  "one",
-                                  "$door",
-                                  "label"
-                                ],
-                                " ↗"
+                                "one",
+                                "$door",
+                                "question"
                               ]
                             ]
                           },
                           {
-                            "tag": "a",
+                            "tag": "div",
                             "attrs": {
-                              "href": [
-                                "one",
-                                "$door",
-                                "secondaryHref"
-                              ],
-                              "class": "door-secondary"
+                              "class": "door-actions"
                             },
                             "children": [
                               "list",
-                              [
-                                "concat",
-                                [
-                                  "one",
-                                  "$door",
-                                  "secondaryLabel"
-                                ],
-                                " →"
-                              ]
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "href": [
+                                    "one",
+                                    "$door",
+                                    "href"
+                                  ],
+                                  "class": "door-primary"
+                                },
+                                "children": [
+                                  "list",
+                                  [
+                                    "concat",
+                                    [
+                                      "one",
+                                      "$door",
+                                      "label"
+                                    ],
+                                    " ↗"
+                                  ]
+                                ]
+                              },
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "href": [
+                                    "one",
+                                    "$door",
+                                    "secondaryHref"
+                                  ],
+                                  "class": "door-secondary"
+                                },
+                                "children": [
+                                  "list",
+                                  [
+                                    "concat",
+                                    [
+                                      "one",
+                                      "$door",
+                                      "secondaryLabel"
+                                    ],
+                                    " →"
+                                  ]
+                                ]
+                              }
                             ]
                           }
                         ]

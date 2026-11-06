@@ -3,6 +3,13 @@
   "queries": {
     "atlas.build": [
       {
+        "call": "publication.stewardship.view"
+      },
+      {
+        "let": "stewardshipLinks",
+        "value": "$result"
+      },
+      {
         "call": "atlas.runtime.build"
       },
       {
@@ -70,7 +77,15 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "expedition.css?v=atlas-journey-1"
+                    "href": [
+                      "concat",
+                      "expedition.css?v=",
+                      [
+                        "one",
+                        "site",
+                        "stylesheetVersion"
+                      ]
+                    ]
                   },
                   "children": [
                     "list"
@@ -1190,7 +1205,8 @@
                           ]
                         }
                       ]
-                    }
+                    },
+                    "$stewardshipLinks"
                   ]
                 },
                 {
