@@ -101,7 +101,7 @@ test('Temple sky scatter, twinkle, parallax, motes and respawn match original ca
  const window={innerWidth:900,innerHeight:700,devicePixelRatio:1.5,scrollY:0};
  const context=vm.createContext({document:{getElementById:()=>canvas},window,Math:math,clamp01:v=>Math.max(0,Math.min(1,v))});
  const body=film.slice(film.indexOf('  const canvas =',film.indexOf('function initSky()')),film.indexOf('  seed();'));
- vm.runInContext('(function(){'+body+';globalThis.sky={seed,draw,state:()=>({stars,motes,w,h})};})();',context);
+ vm.runInContext('(function(){'+body+';globalThis.sky={seed,draw,state:()=>({stars,motes,w,h}),setMotes:value=>{motes=value;}};})();',context);
  context.sky.seed();const expected=normalize(context.sky.state());
  const state=new Map(),ports={'state.get':({key})=>state.get(key),'state.set':({key,value})=>{state.set(key,value);return true;},'browser.environment':()=>({width:900,height:700,dpr:1.5}),'canvas.draw':()=>true,'random.values':({count})=>Array.from({length:count},random)};
  await run('motion.sky.seed',{},ports);
@@ -111,6 +111,13 @@ test('Temple sky scatter, twinkle, parallax, motes and respawn match original ca
   const plan=await run('motion.sky.plan',{size:state.get('skySize'),stars:state.get('skyStars'),motes:state.get('skyMotes'),time,scroll,still},ports);state.set('skyMotes',plan.motes);
   assert.deepEqual(plan.commands,normalize(capture.commands));assert.deepEqual(normalize(plan.motes),normalize(context.sky.state().motes));
  }
+ // Exercise both replacement boundaries, retaining the same random stream on
+ // each side. Ordinary sampled frames above do not reach either boundary.
+ const forced=normalize(state.get('skyMotes').slice(0,2));forced[0].age=1;forced[1].y=0;
+ context.sky.setMotes(structuredClone(forced));capture.commands.length=0;context.sky.draw(3000,false);
+ const replacement=await run('motion.sky.plan',{size:state.get('skySize'),stars:state.get('skyStars'),motes:structuredClone(forced),time:3000,scroll:window.scrollY,still:false},ports);
+ assert.deepEqual(normalize(replacement.motes),normalize(context.sky.state().motes));assert.deepEqual(replacement.commands,normalize(capture.commands));
+ assert.ok(replacement.motes.every(m=>m.age===0&&m.y===706));
 });
 
 test('Temple constellation geometry, glow, sparks and rings match original canvas effects',async()=>{
