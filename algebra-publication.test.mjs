@@ -121,7 +121,7 @@ test('the homepage presents the hierarchy and preserves existing project entranc
  for(const id of ['foundation','applications','taking-shape','tooling'])assert.ok(home.includes('id="'+id+'"'));
  for(const href of ['temple/','sourcery/','claimipedia/','claimipedia-science/','worldwright/','kingdom/','world-modelling/','tradie/','foundry/','encounter/','the-field/','supercrm/','timesheet/','workgarden/','harborboard/','relationship-manager/'])assert.ok(home.includes('href="'+href+'"'),href);
  assert.equal((home.match(/class="hierarchy-inspect"/g)||[]).length,18);
- assert.ok(!home.includes('hero-capabilities'));assert.ok(home.includes('expedition.css?v=braided-1'));
+ assert.ok(!home.includes('hero-capabilities'));assert.ok(home.includes('expedition.css?v=triple-braid-1'));
  const stub=await read('dist/claimipedia/index.html');assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(stub.includes('runtime.js?v=review-1'));
 });
 
