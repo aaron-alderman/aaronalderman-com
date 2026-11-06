@@ -1,19 +1,30 @@
 {
   "protocol": "worldwright/purpose-sharing/1",
   "authoring": "node tooling/author-social-sharing.mjs (after other page authoring)",
-  "source": "New original raster cards using the project’s painted emblems as reference.",
+  "source": "New original raster cards using the project’s painted emblems and personal observatory artwork as reference.",
   "meaningSource": "source/purpose-edition.json",
   "owners": {
     "facts": "source/social-sharing.rel",
     "originalMicrositeProjection": "algebra/microsite-projection.process.json",
     "otherPages": [
       "algebra/claimipedia.process.json",
-      "algebra/front-doors.process.json"
+      "algebra/front-doors.process.json",
+      "algebra/publication.process.json"
     ]
   },
-  "scope": "Project landing pages. Original film pages retain their film posters; the personal homepage retains its personal identity.",
+  "scope": "Personal homepage and project landing pages. Original film pages retain their film posters; encounter-page imagery and homepage hero art are unchanged.",
   "cache": "New versioned image URLs; third-party platforms may retain their own cached previews.",
   "images": [
+    {
+      "slug": "home",
+      "path": "assets/sharing/home-purpose-v1.png",
+      "width": 1734,
+      "height": 907,
+      "sha256": "ef17cf029b183387a52610642f8b6287327744411c0a2d0745524a97b812d8e3",
+      "title": "Aaron Alderman — Inside the mind of a modern-day sourcerer.",
+      "description": "Explore Aaron Alderman’s ideas, software, research and stories—and the reasons, evidence and philosophy behind them.",
+      "alt": "Aaron Alderman. Inside the mind of a modern-day sourcerer. Ideas, systems and the reasons behind them. A lamplit stone observatory opens onto branching paths and a golden sea."
+    },
     {
       "slug": "temple",
       "path": "assets/sharing/temple-purpose-v1.png",

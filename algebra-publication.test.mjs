@@ -132,9 +132,9 @@ test('Claimipedia has its own three-lens identity with accessible sections, loca
 
 test('purpose-first sharing cards have real raster bytes and consistent server-visible metadata',async()=>{
  const sharing=JSON.parse(await read('source/social-sharing.json'));
- assert.equal(sharing.images.length,4);
+ assert.equal(sharing.images.length,5);
  for(const card of sharing.images){
-  const html=await read('dist/'+card.slug+'/index.html'),bytes=await fs.readFile(path.join(root,'dist',card.path));
+  const html=await read(card.slug==='home'?'dist/index.html':'dist/'+card.slug+'/index.html'),bytes=await fs.readFile(path.join(root,'dist',card.path));
   assert.equal(bytes.subarray(1,4).toString(),'PNG');assert.equal(sha(bytes),card.sha256);
   assert.equal(bytes.readUInt32BE(16),card.width);assert.equal(bytes.readUInt32BE(20),card.height);
   assert.ok(card.width/card.height>1.85&&card.width/card.height<1.96);

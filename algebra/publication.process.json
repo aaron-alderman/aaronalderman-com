@@ -27,6 +27,9 @@
         "call": "frontdoors.worldwright"
       },
       {
+        "call": "encounter.build"
+      },
+      {
         "each": [
           "subjects",
           "isa",
@@ -622,7 +625,24 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:title",
-                    "content": "$pageTitle"
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "title"
+                      ],
+                      "$pageTitle"
+                    ]
                   },
                   "children": [
                     "list"
@@ -632,7 +652,24 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:description",
-                    "content": "$description"
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "description"
+                      ],
+                      "$description"
+                    ]
                   },
                   "children": [
                     "list"
@@ -653,16 +690,33 @@
                   "attrs": {
                     "property": "og:image",
                     "content": [
-                      "concat",
+                      "if",
                       [
-                        "one",
-                        "site",
-                        "origin"
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
                       ],
                       [
                         "one",
-                        "site",
+                        "sharing.home",
                         "image"
+                      ],
+                      [
+                        "concat",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ],
+                        [
+                          "one",
+                          "site",
+                          "image"
+                        ]
                       ]
                     ]
                   },
@@ -675,9 +729,26 @@
                   "attrs": {
                     "property": "og:image:alt",
                     "content": [
-                      "one",
-                      "site",
-                      "imageAlt"
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "alt"
+                      ],
+                      [
+                        "one",
+                        "site",
+                        "imageAlt"
+                      ]
                     ]
                   },
                   "children": [
@@ -698,7 +769,24 @@
                   "tag": "meta",
                   "attrs": {
                     "name": "twitter:title",
-                    "content": "$pageTitle"
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "title"
+                      ],
+                      "$pageTitle"
+                    ]
                   },
                   "children": [
                     "list"
@@ -708,7 +796,24 @@
                   "tag": "meta",
                   "attrs": {
                     "name": "twitter:description",
-                    "content": "$description"
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "description"
+                      ],
+                      "$description"
+                    ]
                   },
                   "children": [
                     "list"
@@ -719,16 +824,33 @@
                   "attrs": {
                     "name": "twitter:image",
                     "content": [
-                      "concat",
+                      "if",
                       [
-                        "one",
-                        "site",
-                        "origin"
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
                       ],
                       [
                         "one",
-                        "site",
+                        "sharing.home",
                         "image"
+                      ],
+                      [
+                        "concat",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ],
+                        [
+                          "one",
+                          "site",
+                          "image"
+                        ]
                       ]
                     ]
                   },
@@ -741,9 +863,26 @@
                   "attrs": {
                     "name": "twitter:image:alt",
                     "content": [
-                      "one",
-                      "site",
-                      "imageAlt"
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "alt"
+                      ],
+                      [
+                        "one",
+                        "site",
+                        "imageAlt"
+                      ]
                     ]
                   },
                   "children": [
@@ -788,7 +927,24 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:image:width",
-                    "content": "1672"
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "width"
+                      ],
+                      "1672"
+                    ]
                   },
                   "children": [
                     "list"
@@ -798,12 +954,83 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:image:height",
-                    "content": "941"
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "height"
+                      ],
+                      "941"
+                    ]
                   },
                   "children": [
                     "list"
                   ]
-                }
+                },
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$canonical",
+                    [
+                      "one",
+                      "site",
+                      "origin"
+                    ]
+                  ],
+                  {
+                    "tag": "meta",
+                    "attrs": {
+                      "property": "og:image:secure_url",
+                      "content": [
+                        "one",
+                        "sharing.home",
+                        "image"
+                      ]
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  },
+                  null
+                ],
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$canonical",
+                    [
+                      "one",
+                      "site",
+                      "origin"
+                    ]
+                  ],
+                  {
+                    "tag": "meta",
+                    "attrs": {
+                      "property": "og:image:type",
+                      "content": [
+                        "one",
+                        "sharing.home",
+                        "type"
+                      ]
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  },
+                  null
+                ]
               ]
             },
             {
