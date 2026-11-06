@@ -1210,7 +1210,8 @@
                           "$prefix",
                           "index.html"
                         ],
-                        "class": "brand"
+                        "class": "brand",
+                        "aria-label": "Aaron Alderman"
                       },
                       "children": [
                         "list",
@@ -1230,7 +1231,26 @@
                                 "A"
                               ]
                             },
-                            "Aaron Alderman"
+                            {
+                              "tag": "span",
+                              "attrs": {
+                                "class": "brand-name"
+                              },
+                              "children": [
+                                "list",
+                                "Aaron ",
+                                {
+                                  "tag": "span",
+                                  "attrs": {
+                                    "class": "brand-surname"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Alderman"
+                                  ]
+                                }
+                              ]
+                            }
                           ]
                         }
                       ]
