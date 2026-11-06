@@ -27,6 +27,9 @@
         "call": "frontdoors.worldwright"
       },
       {
+        "call": "atlas.build"
+      },
+      {
         "call": "encounter.build"
       },
       {
@@ -1119,7 +1122,7 @@
                             "href": [
                               "concat",
                               "$prefix",
-                              "index.html#atlas"
+                              "atlas.html"
                             ]
                           },
                           "children": [
@@ -1589,16 +1592,41 @@
           {
             "tag": "section",
             "attrs": {
-              "class": "section atlas",
+              "class": "section atlas-portal",
               "id": "atlas"
             },
             "children": [
               "list",
               {
-                "tag": "div",
+                "tag": "a",
                 "attrs": {
-                  "class": "section-heading"
+                  "href": "atlas.html",
+                  "aria-label": "Explore the illustrated atlas"
                 },
+                "children": [
+                  "list",
+                  {
+                    "tag": "img",
+                    "attrs": {
+                      "src": [
+                        "one",
+                        "atlas",
+                        "image"
+                      ],
+                      "alt": "An illustrated island with three territories and branching golden trails.",
+                      "loading": "lazy",
+                      "width": 1942,
+                      "height": 809
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {},
                 "children": [
                   "list",
                   {
@@ -1608,7 +1636,7 @@
                     },
                     "children": [
                       "list",
-                      "The map / 40 places, many possible paths"
+                      "The atlas / Forty places to explore"
                     ]
                   },
                   {
@@ -1624,172 +1652,20 @@
                     "attrs": {},
                     "children": [
                       "list",
-                      "These colours mark three themes. Choose a place by its question; there is no required order."
+                      "Leave the front door behind. Follow a question through the unseen, the human and the boundary—three territories with many possible paths."
                     ]
-                  }
-                ]
-              },
-              {
-                "tag": "div",
-                "attrs": {
-                  "class": "atlas-grid"
-                },
-                "children": [
-                  "map",
-                  [
-                    "subjects",
-                    "isa",
-                    "Territory"
-                  ],
-                  "territory",
+                  },
                   {
-                    "tag": "section",
+                    "tag": "a",
                     "attrs": {
-                      "class": "territory",
-                      "data-light": [
-                        "one",
-                        "$territory",
-                        "light"
-                      ]
+                      "class": "button",
+                      "href": "atlas.html"
                     },
                     "children": [
                       "list",
-                      {
-                        "tag": "p",
-                        "attrs": {
-                          "class": "eyebrow"
-                        },
-                        "children": [
-                          "list",
-                          [
-                            "concat",
-                            [
-                              "count",
-                              [
-                                "objects",
-                                "$territory",
-                                "place"
-                              ]
-                            ],
-                            " places to explore"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "h3",
-                        "attrs": {},
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$territory",
-                            "name"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "p",
-                        "attrs": {},
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$territory",
-                            "question"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "ul",
-                        "attrs": {
-                          "class": "place-list"
-                        },
-                        "children": [
-                          "map",
-                          [
-                            "objects",
-                            "$territory",
-                            "place"
-                          ],
-                          "p",
-                          {
-                            "tag": "li",
-                            "attrs": {},
-                            "children": [
-                              "list",
-                              {
-                                "tag": "a",
-                                "attrs": {
-                                  "href": [
-                                    "concat",
-                                    "places/",
-                                    [
-                                      "one",
-                                      "$p",
-                                      "slug"
-                                    ],
-                                    ".html"
-                                  ]
-                                },
-                                "children": [
-                                  "list",
-                                  {
-                                    "tag": "span",
-                                    "attrs": {},
-                                    "children": [
-                                      "list",
-                                      {
-                                        "tag": "strong",
-                                        "attrs": {},
-                                        "children": [
-                                          "list",
-                                          [
-                                            "or",
-                                            [
-                                              "optional",
-                                              "$p",
-                                              "atlasLabel"
-                                            ],
-                                            [
-                                              "one",
-                                              "$p",
-                                              "region"
-                                            ]
-                                          ]
-                                        ]
-                                      },
-                                      {
-                                        "tag": "small",
-                                        "attrs": {},
-                                        "children": [
-                                          "list",
-                                          [
-                                            "one",
-                                            "$p",
-                                            "title"
-                                          ]
-                                        ]
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
+                      "Explore the atlas ↗"
                     ]
                   }
-                ]
-              },
-              {
-                "tag": "p",
-                "attrs": {
-                  "class": "map-note"
-                },
-                "children": [
-                  "list",
-                  "Some connections became useful. Some broke. I’ve kept both. You’re welcome to find your own way through."
                 ]
               }
             ]
@@ -1819,7 +1695,7 @@
                   {
                     "tag": "a",
                     "attrs": {
-                      "href": "../index.html#atlas"
+                      "href": "../atlas.html"
                     },
                     "children": [
                       "list",

@@ -5,15 +5,15 @@
   "presentationReceiptSha256": "dccaa5dea3800f3141fd5ae38531005eb28fca85405c06001ad1414bfd1daa47",
   "functionCorrespondenceSha256": "dc3a032bb37a5cb5202e20118a78f1883bc6e9608c073dded8378d92ff58021f",
   "validation": {
-    "command": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs activity-layout.test.mjs",
-    "passed": 41,
+    "command": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs activity-layout.test.mjs atlas.test.mjs",
+    "passed": 42,
     "failed": 0,
-    "reproducibleArtifacts": 283,
+    "reproducibleArtifacts": 288,
     "seedSha256": "c1fdf47cb183a0c8e69d000d091ada457fdc8333b34a2a5bba4bcc51d53ac71e",
     "execution": {
-      "indexSteps": 3070225,
-      "applicationSteps": 4217639,
-      "totalSteps": 7287864,
+      "indexSteps": 3223850,
+      "applicationSteps": 4336858,
+      "totalSteps": 7560708,
       "limit": 20000000
     }
   },
@@ -44,7 +44,7 @@
       "Four illustrated, explanatory microsite entrances; Worldwright placeholder; responsive and keyboard checks",
       "Four transparent raster images loaded on desktop/mobile; Sourcery keyboard focus visibly animates the emblem; Worldwright relative image resolves."
     ],
-    "stylesheetVersion": "Shared pages request expedition.css?v=worlds-3 for raster emblems and hover/focus motion.",
+    "stylesheetVersion": "Shared pages request expedition.css?v=atlas-1 for the independent illustrated atlas and homepage entrance.",
     "claimipediaMotif": [
       "Original painted landscape in three overlapping lenses",
       "Own warm-paper identity and Claimipedia header",
@@ -64,7 +64,8 @@
       "mobile": "Temple grid constrained to the viewport; introductions remain readable; original stylesheets unchanged."
     },
     "socialSharing": "Five purpose-first raster cards visually inspected, including the personal homepage. Dimensions, hashes, unique Open Graph/Twitter bindings and home-specific projection checked by publication tests. No third-party preview crawler was invoked.",
-    "activityLayout": "See source/activity-qa.json: responsive personal-panel cause, 80 layout observations across all 40 activities, representative interactive controls and 180 successful live resource checks. Fix integrated with the Encounter release."
+    "activityLayout": "See source/activity-qa.json: responsive personal-panel cause, 80 layout observations across all 40 activities, representative interactive controls and 180 successful live resource checks. Fix integrated with the Encounter release.",
+    "atlas": "See source/atlas-qa.json and source/atlas-art.json: four original PNGs, native territory links, forty retained places, keyboard journey and mobile layout checks."
   },
   "limits": "Finite correspondence cases against the captured originals, not a formal proof across every event interleaving or host. Media/font bytes remain retained assets. See RECOMPOSITION.md.",
   "editorialSuccessorSha256": "4ce485cad17065f1cc60e3f920f134af02e2551ebd75ac42306230b2a5df8265"
