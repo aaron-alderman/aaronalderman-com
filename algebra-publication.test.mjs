@@ -110,7 +110,18 @@ test('the homepage links directly to published microsites and Claimipedia has an
  assert.equal((menu.match(/<a /g)||[]).length,3);
  for(const [name,href]of [['Temple','temple/'],['Sourcery','sourcery/'],['Claimipedia','claimipedia/']])assert.ok(menu.includes(`href="${href}"`)&&menu.includes(`<strong>${name}</strong>`));
  assert.ok(home.includes('expedition.css?v=worlds-1'));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));const atlas=home.slice(home.indexOf('<section class="section atlas"'));assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
- const stub=await read('dist/claimipedia/index.html');assert.ok(stub.includes('<h1 id="claimipedia-title">Claimipedia</h1>'));assert.ok(stub.includes('Microsite in preparation'));assert.ok(stub.includes('href="../gate.html#path-claimipedia"'));assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(!stub.includes('<script'));
+ const stub=await read('dist/claimipedia/index.html');assert.ok(stub.includes('id="claimipedia-title"'));assert.ok(stub.includes('Knowledge, connected.'));assert.ok(stub.includes('Understanding, evolving.'));assert.ok(stub.includes('Microsite in preparation'));assert.ok(stub.includes('href="../gate.html#path-claimipedia"'));assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(!stub.includes('<script'));
+});
+
+test('Claimipedia has its own three-lens identity with accessible sections, local assets and quiet motion',async()=>{
+ const html=await read('dist/claimipedia/index.html'),css=await read('dist/claimipedia/claimipedia.css');
+ assert.equal((html.match(/class="claim-lens /g)||[]).length,3);
+ for(const id of ['world','knowing','doing','idea','inquiry','main'])assert.ok(html.includes('id="'+id+'"'));
+ assert.ok(html.includes('Claimipedia, back to the top'));assert.ok(!html.includes('class="masthead"'));
+ assert.ok(css.includes('(prefers-reduced-motion: reduce)'));assert.ok(css.includes('animation:none !important'));assert.ok(css.includes('@keyframes arrival'));assert.ok(!css.includes('infinite'));
+ for(const match of css.matchAll(/url\(['"]?([^)'"\s]+)['"]?\)/g)){const file=path.resolve(root,'dist/claimipedia',match[1]);assert.ok((await fs.stat(file)).isFile());}
+ const motif=JSON.parse(await read('source/claimipedia-motif.json'));assert.equal(sha(await fs.readFile(path.join(root,'dist',motif.landscape.path))),motif.landscape.sha256);
+ assert.equal(meta(html,'og:image'),'https://aaronalderman.com/assets/claimipedia/landscape-v1.png');
 });
 
 test('a fresh algebra build reproduces every publication artifact',async()=>{

@@ -1,0 +1,1201 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "claimipedia.build": [
+      {
+        "let": "projection",
+        "value": "claimipedia"
+      },
+      {
+        "call": "publication.styles"
+      },
+      {
+        "call": "publication.motion"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "claimipedia/claimipedia.css",
+          "text": [
+            "concat",
+            "$css",
+            "$motionCSS"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "svg",
+          "attrs": {
+            "xmlns": "http://www.w3.org/2000/svg",
+            "viewBox": "0 0 44 34",
+            "aria-hidden": "true"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "circle",
+              "attrs": {
+                "cx": 13,
+                "cy": 17,
+                "r": 12,
+                "fill": "none",
+                "stroke": "#297a7e",
+                "stroke-width": 1.6
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "circle",
+              "attrs": {
+                "cx": 22,
+                "cy": 17,
+                "r": 12,
+                "fill": "none",
+                "stroke": "#718e76",
+                "stroke-width": 1.6
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "circle",
+              "attrs": {
+                "cx": 31,
+                "cy": 17,
+                "r": 12,
+                "fill": "none",
+                "stroke": "#cb7863",
+                "stroke-width": 1.6
+              },
+              "children": [
+                "list"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "claimipedia/mark.svg",
+          "text": "$result"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Claimipedia — Knowledge, connected. Understanding, evolving."
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "A shared world of inquiry: connecting ideas, evidence and the choices we make. A first glimpse of the Claimipedia microsite."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "theme-color",
+                    "content": "#faf4e8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "https://aaronalderman.com/claimipedia/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "icon",
+                    "href": "mark.svg",
+                    "type": "image/svg+xml"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "claimipedia.css?v=motif-1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "preload",
+                    "href": "../sourcery/assets/fonts/fraunces-latin-full-normal.woff2",
+                    "as": "font",
+                    "type": "font/woff2",
+                    "crossorigin": true
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:type",
+                    "content": "website"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:site_name",
+                    "content": "Claimipedia"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": "Claimipedia — Knowledge, connected. Understanding, evolving."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": "A shared world of inquiry: connecting ideas, evidence and the choices we make."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": "https://aaronalderman.com/claimipedia/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image",
+                    "content": "https://aaronalderman.com/assets/claimipedia/landscape-v1.png"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:alt",
+                    "content": "A painted landscape connects a globe, a field-research table and a path to a city."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:width",
+                    "content": "2172"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:height",
+                    "content": "724"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:card",
+                    "content": "summary_large_image"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:title",
+                    "content": "Claimipedia — Knowledge, connected. Understanding, evolving."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:description",
+                    "content": "A shared world of inquiry. A first glimpse of Claimipedia."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image",
+                    "content": "https://aaronalderman.com/assets/claimipedia/landscape-v1.png"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "class": "claim-skip",
+                    "href": "#main"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to the idea"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {
+                    "class": "claim-header"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "class": "claim-brand",
+                        "href": "./",
+                        "aria-label": "Claimipedia, back to the top"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "svg",
+                          "attrs": {
+                            "xmlns": "http://www.w3.org/2000/svg",
+                            "viewBox": "0 0 44 34",
+                            "aria-hidden": "true"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "circle",
+                              "attrs": {
+                                "cx": 13,
+                                "cy": 17,
+                                "r": 12,
+                                "fill": "none",
+                                "stroke": "#297a7e",
+                                "stroke-width": 1.6
+                              },
+                              "children": [
+                                "list"
+                              ]
+                            },
+                            {
+                              "tag": "circle",
+                              "attrs": {
+                                "cx": 22,
+                                "cy": 17,
+                                "r": 12,
+                                "fill": "none",
+                                "stroke": "#718e76",
+                                "stroke-width": 1.6
+                              },
+                              "children": [
+                                "list"
+                              ]
+                            },
+                            {
+                              "tag": "circle",
+                              "attrs": {
+                                "cx": 31,
+                                "cy": 17,
+                                "r": 12,
+                                "fill": "none",
+                                "stroke": "#cb7863",
+                                "stroke-width": 1.6
+                              },
+                              "children": [
+                                "list"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "span",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Claimipedia"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "class": "claim-nav",
+                        "aria-label": "Claimipedia"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "#idea"
+                          },
+                          "children": [
+                            "list",
+                            "The idea"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "#inquiry"
+                          },
+                          "children": [
+                            "list",
+                            "The inquiry"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../gate.html#path-claimipedia"
+                          },
+                          "children": [
+                            "list",
+                            "Reading paths ↗"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "id": "main"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "list",
+                      {
+                        "tag": "section",
+                        "attrs": {
+                          "class": "claim-hero",
+                          "aria-labelledby": "claimipedia-title"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "claim-eyebrow"
+                            },
+                            "children": [
+                              "list",
+                              "Claimipedia / A shared world of inquiry"
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "claim-preview"
+                            },
+                            "children": [
+                              "list",
+                              "Microsite in preparation"
+                            ]
+                          },
+                          {
+                            "tag": "h1",
+                            "attrs": {
+                              "id": "claimipedia-title"
+                            },
+                            "children": [
+                              "list",
+                              "Knowledge, connected.",
+                              {
+                                "tag": "br",
+                                "attrs": {},
+                                "children": [
+                                  "list"
+                                ]
+                              },
+                              {
+                                "tag": "em",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Understanding, evolving."
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "claim-lede"
+                            },
+                            "children": [
+                              "list",
+                              "Ideas need more than answers. They need a way to show their evidence, meet other perspectives, and change."
+                            ]
+                          },
+                          {
+                            "tag": "figure",
+                            "attrs": {
+                              "class": "claim-motif",
+                              "aria-label": "Three overlapping lenses connect the world, the ways we investigate it, and the choices we make."
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "claim-orbits"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "claim-lens lens-world",
+                                      "href": "#world"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "img",
+                                        "attrs": {
+                                          "src": "../assets/claimipedia/landscape-v1.png",
+                                          "alt": "",
+                                          "width": 2172,
+                                          "height": 724,
+                                          "fetchpriority": "high",
+                                          "decoding": "async"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "h2",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "The world"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "claim-lens lens-knowing",
+                                      "href": "#knowing"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "img",
+                                        "attrs": {
+                                          "src": "../assets/claimipedia/landscape-v1.png",
+                                          "alt": "",
+                                          "width": 2172,
+                                          "height": 724,
+                                          "fetchpriority": "high",
+                                          "decoding": "async"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "h2",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "How we know"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "claim-lens lens-doing",
+                                      "href": "#doing"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "img",
+                                        "attrs": {
+                                          "src": "../assets/claimipedia/landscape-v1.png",
+                                          "alt": "",
+                                          "width": 2172,
+                                          "height": 724,
+                                          "fetchpriority": "high",
+                                          "decoding": "async"
+                                        },
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "h2",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "What we do"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "svg",
+                                "attrs": {
+                                  "class": "claim-thread",
+                                  "viewBox": "0 0 900 50",
+                                  "aria-hidden": "true"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "path",
+                                    "attrs": {
+                                      "d": "M25 0 C120 45 220 45 320 0 M230 0 C350 50 540 50 660 0 M575 0 C680 45 785 45 880 0 M70 15 C290 60 620 -10 835 15"
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "circle",
+                                    "attrs": {
+                                      "cx": 210,
+                                      "cy": 31,
+                                      "r": 4,
+                                      "fill": "#297a7e"
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "circle",
+                                    "attrs": {
+                                      "cx": 450,
+                                      "cy": 37,
+                                      "r": 4,
+                                      "fill": "#b18b3d"
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "circle",
+                                    "attrs": {
+                                      "cx": 710,
+                                      "cy": 31,
+                                      "r": 4,
+                                      "fill": "#cb7863"
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "figcaption",
+                                "attrs": {
+                                  "class": "claim-caption"
+                                },
+                                "children": [
+                                  "list",
+                                  "One shared world. More than one way to understand it."
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "claim-hero-actions"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "class": "claim-button",
+                                  "href": "#idea"
+                                },
+                                "children": [
+                                  "list",
+                                  "Explore the idea ↓"
+                                ]
+                              },
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "class": "claim-quiet-link",
+                                  "href": "../gate.html#path-claimipedia"
+                                },
+                                "children": [
+                                  "list",
+                                  "Follow the evidence →"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "section",
+                        "attrs": {
+                          "class": "claim-section",
+                          "id": "idea",
+                          "aria-labelledby": "idea-title"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "claim-section-heading"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "claim-eyebrow"
+                                },
+                                "children": [
+                                  "list",
+                                  "The idea we’re building toward"
+                                ]
+                              },
+                              {
+                                "tag": "h2",
+                                "attrs": {
+                                  "id": "idea-title"
+                                },
+                                "children": [
+                                  "list",
+                                  "Keep the connections.",
+                                  {
+                                    "tag": "br",
+                                    "attrs": {},
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  "Keep the distinctions."
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "claim-principles"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "article",
+                                "attrs": {
+                                  "id": "world"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "claim-eyebrow"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "01 / Notice"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "h3",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Start with something real."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Begin with a question about the world. Put observations, explanations and models alongside one another, so the seams stay visible."
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "article",
+                                "attrs": {
+                                  "id": "knowing"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "claim-eyebrow"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "02 / Understand"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "h3",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Show the route to the answer."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Keep the route to an answer in view: where an observation came from, which method shaped it, and what remains uncertain."
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "article",
+                                "attrs": {
+                                  "id": "doing"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "claim-eyebrow"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "03 / Respond"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "h3",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Leave room to change course."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Bring what we learn back to shared choices. Keep the reasons for a decision, then revisit them when the world answers back."
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "section",
+                        "attrs": {
+                          "class": "claim-inquiry",
+                          "id": "inquiry",
+                          "aria-labelledby": "inquiry-title"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "claim-section"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "claim-section-heading"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "claim-eyebrow"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Inquiry stays open"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {
+                                      "id": "inquiry-title"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "A good answer makes",
+                                      {
+                                        "tag": "br",
+                                        "attrs": {},
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      "the next question possible."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Move from curiosity to investigation, from judgment to action—and stay willing to return."
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "ol",
+                                "attrs": {
+                                  "class": "claim-cycle",
+                                  "aria-label": "A continuing inquiry"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "li",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Ask"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "li",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Investigate"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "li",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Evaluate"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "li",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Act"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "li",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Revise"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "section",
+                        "attrs": {
+                          "class": "claim-closing",
+                          "aria-labelledby": "closing-title"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "img",
+                            "attrs": {
+                              "src": "../assets/claimipedia/landscape-v1.png",
+                              "alt": "",
+                              "width": 2172,
+                              "height": 724,
+                              "loading": "lazy"
+                            },
+                            "children": [
+                              "list"
+                            ]
+                          },
+                          {
+                            "tag": "h2",
+                            "attrs": {
+                              "id": "closing-title"
+                            },
+                            "children": [
+                              "list",
+                              "A common language for questions.",
+                              {
+                                "tag": "br",
+                                "attrs": {},
+                                "children": [
+                                  "list"
+                                ]
+                              },
+                              "Room for different answers."
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "Every field has its own ways of asking, judging, and correcting. Claimipedia is being shaped to make those differences easier to see."
+                            ]
+                          },
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "class": "claim-button",
+                              "href": "../gate.html#path-claimipedia"
+                            },
+                            "children": [
+                              "list",
+                              "Explore the research →"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "tag": "footer",
+                  "attrs": {
+                    "class": "claim-footer",
+                    "id": "ecosystem"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "div",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "class": "claim-brand",
+                            "href": "./"
+                          },
+                          "children": [
+                            "list",
+                            "Claimipedia"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "A first glimpse. The microsite is taking shape."
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "The ecosystem"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../temple/"
+                          },
+                          "children": [
+                            "list",
+                            "Temple"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../sourcery/"
+                          },
+                          "children": [
+                            "list",
+                            "Sourcery"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../gate.html"
+                          },
+                          "children": [
+                            "list",
+                            "Corpus gate"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../index.html#microsites"
+                          },
+                          "children": [
+                            "list",
+                            "Aaron Alderman"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "claimipedia/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ]
+  }
+}
