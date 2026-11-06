@@ -13,7 +13,7 @@ const run=async(entry,eventInput)=>(await invoke({model,entry,input:{eventInput}
 
 test('the homepage hierarchy preserves the author order and routes every tool to its own microsite',()=>{
  const groups=Object.fromEntries(['foundation','platform','application','progress','tool'].map(g=>[g,catalogue.items.filter(i=>i.group===g).map(i=>i.name)]));
- assert.deepEqual(groups,{foundation:['Temple'],platform:['Sourcery'],application:['Claimipedia','Claimipedia Science'],progress:['Worldwright','Kingdom','World Modelling','Tradie','Foundry'],tool:['Encounter','The Field','SuperCRM','Timesheet','Workgarden','Harborboard','Relationship Manager']});
+ assert.deepEqual(groups,{foundation:['Temple'],platform:['Sourcery'],application:['Claimipedia','Claimipedia Science'],progress:['Worldwright','Kingdom','World Modelling','Tradie','Foundry'],tool:['Encounter','Mission Control','The Field','SuperCRM','Timesheet','Workgarden','Harborboard','Relationship Manager']});
  const home=fs.readFileSync('dist/index.html','utf8');
  for(const item of catalogue.items){assert.ok(home.includes('data-item="'+item.id+'"'));assert.ok(home.includes('href="'+item.href+'"'));assert.ok(home.includes('href="inspection/'+item.id+'.html"'));assert.ok(fs.existsSync('dist/'+item.href+'index.html'));assert.ok(fs.existsSync('dist/inspection/'+item.id+'.html'));}
  assert.ok(!home.includes('Shared capabilities'));assert.ok(!home.includes('Proposed connections'));
@@ -72,4 +72,13 @@ test('the opening fold has three illustrated entrances and moves questions and a
  const questions=fs.readFileSync('dist/questions.html','utf8');assert.ok(questions.includes('<h1>Begin with a question.</h1>'));for(const slug of ['observation','kenosis','care'])assert.ok(questions.includes('href="places/'+slug+'.html"'));
  const science=fs.readFileSync('dist/claimipedia-science/index.html','utf8');assert.ok(science.includes('<h1>Claimipedia Science</h1>'));assert.ok(science.includes('First use case'));assert.ok(science.includes('Relational Geometry Programme'));assert.ok(science.includes('href="https://aaron-alderman.github.io/spin23-relational-geometry/"'));
  const item=catalogue.items.find(i=>i.id==='worldwright');assert.equal(item.icon.tag,'svg');assert.ok(fs.existsSync('dist/relational-geometry/index.html'));
+});
+
+test('Mission Control is a first-class Sourcery tool, linked from Science, with inspected sources and native workflow disclosure',()=>{
+ const home=fs.readFileSync('dist/index.html','utf8'),mission=fs.readFileSync('dist/mission-control/index.html','utf8'),science=fs.readFileSync('dist/claimipedia-science/index.html','utf8');
+ assert.ok(home.includes('data-item="mission-control"'));assert.ok(home.includes('class="scroll-invitation"'));assert.ok(home.includes('href="#microsites"'));assert.ok(home.includes('There’s more beneath the surface.'));assert.ok(home.includes('aria-label="Explore Mission Control"'));assert.ok(home.includes('aria-label="Inspect Mission Control"'));
+ assert.ok(mission.includes('<h1>Mission Control</h1>'));assert.ok(mission.includes('internal job system'));assert.ok(mission.includes('<details class="mission-workflow">'));assert.ok(mission.includes('<summary>How Mission Control works</summary>'));assert.ok(!mission.includes('<script'));
+ assert.ok(science.includes('href="../mission-control/"'));assert.ok(science.includes('Agent-assisted research'));
+ const bindings=evidence.bindings.filter(b=>b.item==='mission-control');assert.equal(bindings.length,2);assert.ok(bindings.some(b=>b.origin.endsWith('research-mission-control.mjs')));assert.ok(fs.readFileSync('dist/inspection/mission-control.html','utf8').includes('Research Mission Control adapter source'));
+ const icon=catalogue.items.find(i=>i.name==='Claimipedia Science').icon;assert.ok(icon.attrs.class.includes('science-emblem'));
 });

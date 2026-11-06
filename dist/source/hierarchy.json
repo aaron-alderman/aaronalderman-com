@@ -83,20 +83,30 @@
       "icon": {
         "tag": "svg",
         "attrs": {
-          "viewBox": "0 0 32 32",
+          "viewBox": "0 0 48 48",
           "fill": "none",
           "stroke": "currentColor",
-          "stroke-width": 1.5,
+          "stroke-width": 1.6,
           "stroke-linecap": "round",
           "stroke-linejoin": "round",
           "aria-hidden": "true",
-          "class": "hierarchy-icon"
+          "class": "hierarchy-icon science-emblem"
         },
         "children": [
           {
+            "tag": "circle",
+            "attrs": {
+              "cx": 24,
+              "cy": 24,
+              "r": 21,
+              "opacity": 0.35
+            },
+            "children": []
+          },
+          {
             "tag": "path",
             "attrs": {
-              "d": "M4 16h24M16 4v24M7 7l18 18M7 25L25 7"
+              "d": "M18 9h8v15h-8ZM22 24l-8 10M13 34h21M12 40h26M31 16a11 11 0 0 1 0 22H16M20 9V6h4v3M15 14h3"
             },
             "children": []
           }
@@ -117,6 +127,9 @@
           "name": "Relational Geometry Programme",
           "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
         }
+      ],
+      "relatedTools": [
+        "mission-control"
       ]
     },
     {
@@ -367,6 +380,46 @@
         ]
       },
       "links": []
+    },
+    {
+      "id": "mission-control",
+      "name": "Mission Control",
+      "group": "tool",
+      "href": "mission-control/",
+      "description": "Sourcery’s agent harness and automatic workflow mechanism.",
+      "status": "Agent harness",
+      "icon": {
+        "tag": "svg",
+        "attrs": {
+          "viewBox": "0 0 32 32",
+          "fill": "none",
+          "stroke": "currentColor",
+          "stroke-width": 1.5,
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "aria-hidden": "true",
+          "class": "hierarchy-icon"
+        },
+        "children": [
+          {
+            "tag": "path",
+            "attrs": {
+              "d": "M4 5h24v17H4ZM10 27h12M16 22v5M8 16l4-5 5 7 6-9"
+            },
+            "children": []
+          }
+        ]
+      },
+      "links": [
+        [
+          "../sourcery/",
+          "Built within Sourcery"
+        ],
+        [
+          "../claimipedia-science/",
+          "Explore the science use case"
+        ]
+      ]
     },
     {
       "id": "the-field",
