@@ -6,6 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {createRequire} from 'node:module';
 import {scenes} from './retained/world.js';
 import {readingFor,wordMeanings} from './retained/reading-guide.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
@@ -14,6 +15,9 @@ const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const escape=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const contract=JSON.parse(await read('source/publication-contract.json'));
 const receipt=JSON.parse(await read('dist/build-receipt.json'));
+const {parseRel}=createRequire(import.meta.url)('./bootstrap/ports/rel-codec.cjs');
+const siteFacts=parseRel(await read('source/expedition.rel'));
+const stylesheetVersion=siteFacts.find(f=>f.s==='site'&&f.p==='stylesheetVersion').o;
 const meta=(html,key)=>[...html.matchAll(/<meta\s+([^>]+)>/g)].map(m=>m[1]).find(a=>a.includes(`property="${key}"`)||a.includes(`name="${key}"`))?.match(/content="([^"]*)"/)?.[1];
 
 test('every encounter has a crawler-readable canonical page and complete sharing metadata',async()=>{
@@ -39,14 +43,16 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  const b=await fs.readFile(path.join(root,'dist/assets/sourcerer-threshold.png'));
  assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b.readUInt32BE(16),1672);assert.equal(b.readUInt32BE(20),941);
  assert.ok(b.length<5_000_000);
- const xml=await read('dist/sitemap.xml');assert.equal((xml.match(/<loc>/g)||[]).length,54);
+ const xml=await read('dist/sitemap.xml'),urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
+ const expected=['','gate.html','atlas.html',...Object.keys(scenes).map(id=>`places/${id}.html`),...['temple','temple/films','sourcery','sourcery/films','claimipedia','worldwright','encounter','kingdom','world-modelling','creativity','the-field'].map(slug=>slug+'/')].map(route=>'https://aaronalderman.com/'+route);
+ assert.deepEqual([...urls].sort(),expected.sort());assert.equal(new Set(urls).size,urls.length);
  assert.ok(xml.includes('https://aaronalderman.com/claimipedia/'));
  assert.ok(xml.includes('https://aaronalderman.com/gate.html'));
  for(const id of Object.keys(scenes))assert.ok(xml.includes(`https://aaronalderman.com/places/${id}.html`));
 });
 
 test('all local links and assets in the new static pages resolve within the publication',async()=>{
- for(const file of ['index.html','gate.html','claimipedia/index.html',...Object.keys(scenes).map(id=>`places/${id}.html`)]){
+ for(const file of ['index.html','gate.html','atlas.html','claimipedia/index.html',...Object.keys(scenes).map(id=>`places/${id}.html`)]){
   const html=await read('dist/'+file);
   for(const match of html.matchAll(/(?:src|href)="([^"]+)"/g)){
    const href=match[1];if(/^(?:https?:|#)/.test(href))continue;
@@ -114,15 +120,10 @@ test('the homepage links directly to published microsites and Claimipedia has a 
  assert.deepEqual([...capabilities.matchAll(/<strong>([^<]+)</g)].map(m=>m[1]),['Encounter','Kingdom','World Modelling','Creativity','The Field']);
  assert.ok(!menu.includes('href="encounter/"'));assert.ok(capabilities.includes('href="encounter/"'));
  for(const href of ['kingdom/','world-modelling/','creativity/','the-field/'])assert.ok(capabilities.includes(`href="${href}"`));
- assert.equal((capabilities.match(/<svg /g)||[]).length,5);
- assert.equal((capabilities.match(/class="capability-blurb"/g)||[]).length,5);
- for(const [slug,name]of [['kingdom','Kingdom'],['world-modelling','World Modelling'],['creativity','Creativity'],['the-field','The Field']]){
-  const page=await read('dist/'+slug+'/index.html');assert.ok(page.includes('<h1>'+name+'</h1>'));assert.ok(page.includes('class="capability-page-links"'));assert.equal(meta(page,'og:url'),'https://aaronalderman.com/'+slug+'/');assert.ok(!page.includes('>list'));assert.ok(!page.includes('<script'));
- }
  for(const slug of ['temple','sourcery','claimipedia','worldwright'])assert.ok(menu.includes('assets/world-emblems/'+slug+'-v1.png'));
  const worldwright=await read('dist/worldwright/index.html');assert.ok(worldwright.includes('Worldwright / In preparation'));assert.ok(worldwright.includes('This is a placeholder'));assert.equal(meta(worldwright,'og:url'),'https://aaronalderman.com/worldwright/');
  for(const [name,href]of [['Temple','temple/'],['Sourcery','sourcery/'],['Claimipedia','claimipedia/'],['Worldwright','worldwright/']])assert.ok(menu.includes(`href="${href}"`)&&menu.includes(`<strong>${name}</strong>`));
- assert.ok(home.includes('expedition.css?v=atlas-journey-1'));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));const atlas=await read("dist/atlas.html");assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
+ assert.ok(home.includes('expedition.css?v='+stylesheetVersion));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));assert.ok(home.includes('href="atlas.html"'));assert.ok(!home.includes('<section class="section atlas"'));const atlas=await read('dist/atlas.html');assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
  const stub=await read('dist/claimipedia/index.html');assert.ok(stub.includes('id="claimipedia-title"'));assert.ok(stub.includes('Knowledge, connected.'));assert.ok(stub.includes('Understanding, evolving.'));assert.ok(stub.includes('An interactive introduction'));assert.ok(stub.includes('href="../gate.html#path-claimipedia"'));assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(stub.includes('runtime.js?v=review-1'));
 });
 

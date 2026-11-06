@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node serve.mjs",
-    "test": "node --test expedition.test.mjs expansion.test.mjs workshop.test.mjs reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs",
-    "build": "node bootstrap/run.cjs . dist bootstrap/site.json"
+    "test": "node --test expedition.test.mjs expansion.test.mjs workshop.test.mjs reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs activity-layout.test.mjs atlas.test.mjs atlas-journey.test.mjs authoring.test.mjs",
+    "build": "node bootstrap/run.cjs . dist bootstrap/site.json",
+    "author": "node tooling/author.mjs"
   }
 }

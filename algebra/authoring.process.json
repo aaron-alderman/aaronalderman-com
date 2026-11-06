@@ -1,0 +1,225 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "author.prepare": [
+      {
+        "port": "value.describe",
+        "args": {
+          "value": "$request"
+        },
+        "into": "kind"
+      },
+      {
+        "assert": "$kind.plain",
+        "message": "AUTHOR-001: Request must be a record."
+      },
+      {
+        "assert": [
+          "eq",
+          "$request.protocol",
+          "worldwright/authoring-proposal/1"
+        ],
+        "message": "AUTHOR-002: Unknown proposal protocol."
+      },
+      {
+        "port": "value.describe",
+        "args": {
+          "value": "$request.apply"
+        },
+        "into": "kind"
+      },
+      {
+        "assert": [
+          "eq",
+          "$kind.type",
+          "boolean"
+        ],
+        "message": "AUTHOR-003: apply must be an explicit boolean."
+      },
+      {
+        "assert": [
+          "isArray",
+          "$request.changes"
+        ],
+        "message": "AUTHOR-004: changes must be a list."
+      },
+      {
+        "assert": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$request.changes"
+            ],
+            0
+          ]
+        ],
+        "message": "AUTHOR-004: Empty proposals refuse."
+      },
+      {
+        "fold": "$request.changes",
+        "as": "change",
+        "accumulator": "seen",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "value.describe",
+            "args": {
+              "value": "$change"
+            },
+            "into": "kind"
+          },
+          {
+            "assert": "$kind.plain",
+            "message": "AUTHOR-005: Change must be a record."
+          },
+          {
+            "assert": [
+              "includes",
+              "$contract.editable",
+              "$change.file"
+            ],
+            "message": "AUTHOR-006: No authoring authority for this file."
+          },
+          {
+            "assert": [
+              "not",
+              [
+                "includes",
+                "$seen",
+                "$change.file"
+              ]
+            ],
+            "message": "AUTHOR-007: Duplicate target in one proposal."
+          },
+          {
+            "port": "value.describe",
+            "args": {
+              "value": "$change.text"
+            },
+            "into": "kind"
+          },
+          {
+            "assert": [
+              "eq",
+              "$kind.type",
+              "string"
+            ],
+            "message": "AUTHOR-008: Replacement must be text."
+          },
+          {
+            "assert": [
+              "not",
+              [
+                "eq",
+                "$change.text",
+                ""
+              ]
+            ],
+            "message": "AUTHOR-008: Empty replacement refuses."
+          },
+          {
+            "port": "document.observe",
+            "args": {
+              "file": "$change.file"
+            },
+            "into": "current"
+          },
+          {
+            "assert": [
+              "eq",
+              "$current.sha256",
+              "$change.beforeSha256"
+            ],
+            "message": "AUTHOR-009: Stale source; rebase the proposal."
+          },
+          {
+            "assert": [
+              "not",
+              [
+                "eq",
+                "$current.text",
+                "$change.text"
+              ]
+            ],
+            "message": "AUTHOR-010: No-op replacement refuses."
+          }
+        ],
+        "yield": [
+          "append",
+          "$seen",
+          [
+            "list",
+            "$change.file"
+          ]
+        ],
+        "into": "files"
+      },
+      {
+        "let": "result",
+        "value": {
+          "changes": "$request.changes",
+          "files": "$files"
+        }
+      }
+    ],
+    "author.run": [
+      {
+        "call": "author.prepare"
+      },
+      {
+        "let": "proposal",
+        "value": "$result"
+      },
+      {
+        "port": "publication.stage",
+        "args": {
+          "changes": "$proposal.changes"
+        },
+        "into": "candidate"
+      },
+      {
+        "port": "publication.validate",
+        "args": {},
+        "into": "validation"
+      },
+      {
+        "assert": "$validation.ok",
+        "message": "AUTHOR-011: Candidate failed publication checks; inspect candidate validation.json. Sources were not committed."
+      },
+      {
+        "let": "commit",
+        "value": null
+      },
+      {
+        "when": "$request.apply",
+        "then": [
+          {
+            "port": "document.commit",
+            "args": {
+              "changes": "$proposal.changes"
+            },
+            "into": "commit"
+          }
+        ]
+      },
+      {
+        "port": "receipt.write",
+        "args": {
+          "value": {
+            "protocol": "worldwright/authoring-receipt/1",
+            "applied": "$request.apply",
+            "files": "$proposal.files",
+            "changes": "$proposal.changes",
+            "validation": "$validation",
+            "commit": "$commit"
+          }
+        },
+        "into": "result"
+      }
+    ]
+  }
+}

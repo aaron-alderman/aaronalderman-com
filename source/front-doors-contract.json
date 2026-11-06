@@ -22,11 +22,11 @@
     "review": "algebra/claimipedia-review.process.json"
   },
   "entrances": {
-    "authoring": "tooling/author-world-entrances.mjs",
+    "authoring": "npm run author -- proposal.json; authoritative definitions are REL and process JSON, governed by source/authoring-contract.json",
     "icons": "Four original transparent raster illustrations in assets/world-emblems, bound by REL and rendered as decorative images.",
     "presentation": "Distinct gold, rose, sage and blue light; decorative orbital backgrounds; explanatory copy and native anchor cards.",
     "worldwright": "worldwright/index.html is an explicitly labelled placeholder for the storytelling and authoring product.",
-    "stylesheet": "expedition.css?v=capabilities-2",
+    "stylesheet": "Homepage shared stylesheet version is owned by site.stylesheetVersion in source/expedition.rel.",
     "checks": [
       "Desktop two-column and mobile single-column layout",
       "No horizontal overflow at 390 CSS pixels",
@@ -39,11 +39,11 @@
   "sharing": {
     "source": "source/social-sharing.rel",
     "images": "source/social-sharing.json",
-    "authoring": "Run node tooling/author-social-sharing.mjs after the page authoring helpers; then run the normal algebra build."
+    "authoring": "npm run author -- proposal.json; authoritative definitions are REL and process JSON, governed by source/authoring-contract.json"
   },
   "capabilities": {
     "catalog": "CapabilitySet facts in source/front-doors.rel",
-    "authoring": "tooling/author-capabilities.mjs (also run by Encounter and world-entrance authoring)",
+    "authoring": "npm run author -- proposal.json; authoritative definitions are REL and process JSON, governed by source/authoring-contract.json",
     "projection": "Compact SVG-icon cards in a four-column grid (two on mobile); approximately half the width and height of headline cards.",
     "order": [
       "Encounter",
