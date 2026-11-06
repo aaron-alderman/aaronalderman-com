@@ -1,0 +1,4020 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "hierarchy.load": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/hierarchy.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/hierarchy.json"
+        },
+        "into": "hText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$hText"
+        },
+        "into": "hCatalogue"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/hierarchy-evidence.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/hierarchy-evidence.json"
+        },
+        "into": "hText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$hText"
+        },
+        "into": "hEvidence"
+      }
+    ],
+    "hierarchy.parse": [
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$eventInput.text",
+          "pattern": "\\r?\\n"
+        },
+        "into": "hExactLines"
+      },
+      {
+        "let": "text",
+        "value": "$eventInput.text"
+      },
+      {
+        "let": "file",
+        "value": "$eventInput.binding.file"
+      },
+      {
+        "call": "source.rel"
+      },
+      {
+        "let": "hParsed",
+        "value": "$result"
+      },
+      {
+        "assert": "$hParsed.ok",
+        "message": "HIERARCHY-001: Source declarations must parse through source.rel."
+      },
+      {
+        "let": "hBinding",
+        "value": "$eventInput.binding"
+      },
+      {
+        "fold": "$hParsed.facts",
+        "as": "hFact",
+        "accumulator": "hScan",
+        "initial": {
+          "rows": [
+            "list"
+          ],
+          "index": 0
+        },
+        "steps": [
+          {
+            "assert": [
+              "includes",
+              [
+                "list",
+                "dependsOn",
+                "pack"
+              ],
+              "$hFact.p"
+            ],
+            "message": "HIERARCHY-002: Unsupported capability relation."
+          },
+          {
+            "let": "hOrigin",
+            "value": [
+              "at",
+              "$hParsed.origins",
+              "$hScan.index"
+            ]
+          },
+          {
+            "let": "hSnapshotLine",
+            "value": "$hOrigin.span.line"
+          },
+          {
+            "let": "hOriginalLine",
+            "value": [
+              "at",
+              "$hBinding.lineMap",
+              [
+                "add",
+                "$hSnapshotLine",
+                -1
+              ]
+            ]
+          },
+          {
+            "port": "value.string",
+            "args": {
+              "value": "$hOriginalLine"
+            },
+            "into": "hLineText"
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$hLineText",
+              "pattern": "^[1-9][0-9]*$"
+            },
+            "into": "hLineValid"
+          },
+          {
+            "assert": "$hLineValid",
+            "message": "HIERARCHY-003: Missing or invalid source line binding."
+          },
+          {
+            "assert": [
+              "eq",
+              [
+                "at",
+                "$hExactLines",
+                [
+                  "add",
+                  "$hSnapshotLine",
+                  -1
+                ]
+              ],
+              [
+                "at",
+                "$hBinding.lines",
+                [
+                  "add",
+                  "$hSnapshotLine",
+                  -1
+                ]
+              ]
+            ],
+            "message": "HIERARCHY-004: Snapshot and original line receipt disagree."
+          }
+        ],
+        "yield": {
+          "rows": [
+            "append",
+            "$hScan.rows",
+            [
+              "list",
+              {
+                "item": "$hBinding.item",
+                "binding": "$hBinding.id",
+                "subject": "$hFact.s",
+                "relation": "$hFact.p",
+                "target": "$hFact.o",
+                "line": "$hOriginalLine",
+                "snapshotLine": "$hSnapshotLine",
+                "text": [
+                  "at",
+                  "$hBinding.lines",
+                  [
+                    "add",
+                    "$hSnapshotLine",
+                    -1
+                  ]
+                ]
+              }
+            ]
+          ],
+          "index": [
+            "add",
+            "$hScan.index",
+            1
+          ]
+        },
+        "into": "hScan"
+      },
+      {
+        "let": "result",
+        "value": "$hScan.rows"
+      }
+    ],
+    "hierarchy.shared": [
+      {
+        "let": "hRelation",
+        "value": "$eventInput.relation"
+      },
+      {
+        "let": "hTarget",
+        "value": "$eventInput.target"
+      },
+      {
+        "let": "hMatches",
+        "value": [
+          "filter",
+          "$eventInput.rows",
+          "hMatch",
+          [
+            "and",
+            [
+              "eq",
+              "$hMatch.relation",
+              "$hRelation"
+            ],
+            [
+              "eq",
+              "$hMatch.target",
+              "$hTarget"
+            ]
+          ]
+        ]
+      },
+      {
+        "fold": "$hMatches",
+        "as": "hMatch",
+        "accumulator": "hPeers",
+        "initial": [
+          "list"
+        ],
+        "steps": [],
+        "yield": [
+          "if",
+          [
+            "includes",
+            "$hPeers",
+            "$hMatch.item"
+          ],
+          "$hPeers",
+          [
+            "append",
+            "$hPeers",
+            [
+              "list",
+              "$hMatch.item"
+            ]
+          ]
+        ],
+        "into": "hPeers"
+      },
+      {
+        "let": "result",
+        "value": "$hPeers"
+      }
+    ],
+    "hierarchy.extract": [
+      {
+        "fold": "$hEvidence.bindings",
+        "as": "hBinding",
+        "accumulator": "hRows",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "hExtracted",
+            "value": [
+              "list"
+            ]
+          },
+          {
+            "port": "file.copy",
+            "args": {
+              "path": "$hBinding.file"
+            },
+            "into": "_"
+          },
+          {
+            "when": [
+              "eq",
+              "$hBinding.kind",
+              "rel"
+            ],
+            "then": [
+              {
+                "port": "file.read",
+                "args": {
+                  "path": "$hBinding.file"
+                },
+                "into": "hRaw"
+              },
+              {
+                "let": "eventInput",
+                "value": {
+                  "text": "$hRaw",
+                  "binding": "$hBinding"
+                }
+              },
+              {
+                "call": "hierarchy.parse"
+              },
+              {
+                "let": "hExtracted",
+                "value": "$result"
+              }
+            ]
+          }
+        ],
+        "yield": [
+          "append",
+          "$hRows",
+          "$hExtracted"
+        ],
+        "into": "hRows"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": {
+            "protocol": "worldwright/extracted-bindings/1",
+            "rows": "$hRows"
+          }
+        },
+        "into": "hJSON"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "inspection/bindings.json",
+          "text": "$hJSON"
+        },
+        "into": "_"
+      }
+    ],
+    "hierarchy.viewer.boot": [
+      {
+        "let": "spPolicy",
+        "value": "$data.presentation.spPolicy"
+      },
+      {
+        "let": "spGrammar",
+        "value": "$data.presentation.spGrammar"
+      },
+      {
+        "let": "lexPolicy",
+        "value": "$data.presentation.lexPolicy"
+      },
+      {
+        "let": "lexGrammar",
+        "value": "$data.presentation.lexGrammar"
+      },
+      {
+        "call": "sp.style"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hierarchy-source-style",
+          "name": "textContent",
+          "value": "$result"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.property",
+        "args": {
+          "ref": "#hierarchy-source",
+          "name": "textContent"
+        },
+        "into": "hSource"
+      },
+      {
+        "port": "browser.property",
+        "args": {
+          "ref": "#hierarchy-language",
+          "name": "value"
+        },
+        "into": "hLanguage"
+      },
+      {
+        "when": [
+          "eq",
+          "$hLanguage",
+          "markdown"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "md.preview",
+              "input": {
+                "text": "$hSource"
+              }
+            },
+            "into": "hPreview"
+          },
+          {
+            "let": "input",
+            "value": "$hPreview"
+          },
+          {
+            "call": "html.serialize"
+          },
+          {
+            "port": "browser.content",
+            "args": {
+              "ref": "#hierarchy-preview",
+              "html": "$result"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "digest.sha256",
+        "args": {
+          "text": "$hSource"
+        },
+        "into": "hDigest"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sp.present",
+          "input": {
+            "text": "$hSource",
+            "file": "selected-source-bindings",
+            "language": "$hLanguage",
+            "theme": "dark",
+            "expectedHash": "$hDigest",
+            "lineNumbers": true,
+            "selectedLine": null,
+            "origin": {
+              "scope": "source-snapshot; not an execution trace"
+            }
+          }
+        },
+        "into": "hPresentation"
+      },
+      {
+        "let": "input",
+        "value": "$hPresentation.tree"
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hierarchy-source",
+          "html": "$result"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hierarchy-source-hash",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Displayed source SHA-256 ",
+            "$hDigest"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sp.listing",
+          "input": {
+            "programme": [
+              "at",
+              "$data.processes",
+              "hierarchy.shared"
+            ],
+            "origin": {
+              "file": "algebra/hierarchy.process.json",
+              "query": "hierarchy.shared"
+            }
+          }
+        },
+        "into": "hDefinition"
+      },
+      {
+        "let": "hDefinitionText",
+        "value": [
+          "concat",
+          "process hierarchy.shared:\n",
+          "$hDefinition.text"
+        ]
+      },
+      {
+        "port": "digest.sha256",
+        "args": {
+          "text": "$hDefinitionText"
+        },
+        "into": "hDefinitionDigest"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sp.present",
+          "input": {
+            "text": "$hDefinitionText",
+            "file": "hierarchy-shared.process",
+            "language": "process",
+            "theme": "dark",
+            "lineNumbers": true,
+            "selectedLine": null,
+            "origin": {
+              "file": "algebra/hierarchy.process.json",
+              "query": "hierarchy.shared"
+            },
+            "expectedHash": "$hDefinitionDigest"
+          }
+        },
+        "into": "hDefinitionView"
+      },
+      {
+        "let": "input",
+        "value": "$hDefinitionView.tree"
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hierarchy-process",
+          "html": "$result"
+        },
+        "into": "_"
+      }
+    ],
+    "hierarchy.viewer.build": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "algebra/hierarchy.process.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "algebra/hierarchy.process.json"
+        },
+        "into": "hProcessText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$hProcessText"
+        },
+        "into": "hProcesses"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/hierarchy.rel"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/encounter/presentation.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/encounter/presentation.json"
+        },
+        "into": "hText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$hText"
+        },
+        "into": "hPresentationData"
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "hierarchy.viewer.boot",
+          "mode": "browser",
+          "grantProfile": "encounterBrowser",
+          "queries": [
+            "append",
+            [
+              "list",
+              "sp.role",
+              "sp.scan",
+              "sp.observed",
+              "sp.clip",
+              "sp.line",
+              "sp.render",
+              "sp.present",
+              "sp.expression",
+              "sp.programme",
+              "sp.statement",
+              "sp.listing",
+              "sp.style",
+              "sp.outline",
+              "sp.metadata",
+              "sp.stylePlan",
+              "source.split",
+              "source.lex",
+              "s01.portable",
+              "source.rel",
+              "source.compile",
+              "source.encode",
+              "source.patch",
+              "source.jsonSpan",
+              "html.escape",
+              "html.serialize",
+              "html.observe",
+              "html.inspect",
+              "html.cssText",
+              "facts.index",
+              "lower.scan",
+              "lower.fresh",
+              "lower.template",
+              "lower.expression",
+              "lower.programme",
+              "lower.model",
+              "lower.start",
+              "admit.binding",
+              "admit.expression",
+              "admit.programme",
+              "admit.model",
+              "admit.effects.programme",
+              "admit.effects",
+              "admit.ownership",
+              "css.render",
+              "css.plan",
+              "css.renderPlan",
+              "language.refuse",
+              "language.line",
+              "language.module",
+              "language.entity"
+            ],
+            [
+              "list",
+              "language.property",
+              "language.compile",
+              "hierarchy.viewer.boot",
+              "md.inline",
+              "md.block",
+              "md.preview"
+            ]
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "data": {
+            "presentation": "$hPresentationData",
+            "processes": "$hProcesses.queries"
+          },
+          "budget": 20000000
+        },
+        "into": "hRuntime"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "inspection/runtime.js",
+          "text": "$hRuntime"
+        },
+        "into": "_"
+      }
+    ],
+    "hierarchy.home": [
+      {
+        "call": "hierarchy.load"
+      },
+      {
+        "let": "result",
+        "value": {
+          "tag": "div",
+          "attrs": {
+            "class": "hierarchy-home",
+            "id": "microsites"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "hierarchy-section home-fold home-fold-foundation",
+                "id": "foundation"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "hierarchy-section-heading"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Foundation & platform"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Temple → Sourcery"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "hierarchy-grid hierarchy-foundation"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "map",
+                      [
+                        "filter",
+                        "$hCatalogue.items",
+                        "hItem",
+                        [
+                          "includes",
+                          [
+                            "list",
+                            "foundation",
+                            "platform"
+                          ],
+                          "$hItem.group"
+                        ]
+                      ],
+                      "hItem",
+                      {
+                        "tag": "article",
+                        "attrs": {
+                          "class": "hierarchy-card",
+                          "data-item": "$hItem.id"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "hierarchy-emblem"
+                            },
+                            "children": [
+                              "list",
+                              "$hItem.icon"
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "hierarchy-card-content"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "hierarchy-status"
+                                },
+                                "children": [
+                                  "list",
+                                  "$hItem.status"
+                                ]
+                              },
+                              {
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$hItem.name"
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "hierarchy-description"
+                                },
+                                "children": [
+                                  "list",
+                                  "$hItem.description"
+                                ]
+                              },
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "hierarchy-usecase"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "First use case: ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Relational Geometry Programme"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                null
+                              ],
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "science-mission-note"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Agent-assisted research with ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "mission-control/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Mission Control"
+                                      ]
+                                    },
+                                    " →"
+                                  ]
+                                },
+                                null
+                              ],
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "hierarchy-actions"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "$hItem.href",
+                                      "aria-label": [
+                                        "concat",
+                                        "Explore ",
+                                        "$hItem.name"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Explore ",
+                                      {
+                                        "tag": "span",
+                                        "attrs": {
+                                          "class": "action-arrow",
+                                          "aria-hidden": "true"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "↗"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "hierarchy-inspect",
+                                      "href": [
+                                        "concat",
+                                        "inspection/",
+                                        "$hItem.id",
+                                        ".html"
+                                      ],
+                                      "aria-label": [
+                                        "concat",
+                                        "Inspect ",
+                                        "$hItem.name"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Inspect"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "hierarchy-section home-fold home-fold-applications",
+                "id": "applications"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "hierarchy-section-heading"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Applications & programmes"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Substantial worlds of work."
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "hierarchy-grid hierarchy-applications"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "map",
+                      [
+                        "filter",
+                        "$hCatalogue.items",
+                        "hItem",
+                        [
+                          "includes",
+                          [
+                            "list",
+                            "application"
+                          ],
+                          "$hItem.group"
+                        ]
+                      ],
+                      "hItem",
+                      {
+                        "tag": "article",
+                        "attrs": {
+                          "class": "hierarchy-card",
+                          "data-item": "$hItem.id"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "hierarchy-emblem"
+                            },
+                            "children": [
+                              "list",
+                              "$hItem.icon"
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "hierarchy-card-content"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "hierarchy-status"
+                                },
+                                "children": [
+                                  "list",
+                                  "$hItem.status"
+                                ]
+                              },
+                              {
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$hItem.name"
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "hierarchy-description"
+                                },
+                                "children": [
+                                  "list",
+                                  "$hItem.description"
+                                ]
+                              },
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "hierarchy-usecase"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "First use case: ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Relational Geometry Programme"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                null
+                              ],
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "science-mission-note"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Agent-assisted research with ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "mission-control/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Mission Control"
+                                      ]
+                                    },
+                                    " →"
+                                  ]
+                                },
+                                null
+                              ],
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "hierarchy-actions"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "$hItem.href",
+                                      "aria-label": [
+                                        "concat",
+                                        "Explore ",
+                                        "$hItem.name"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Explore ",
+                                      {
+                                        "tag": "span",
+                                        "attrs": {
+                                          "class": "action-arrow",
+                                          "aria-hidden": "true"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "↗"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "hierarchy-inspect",
+                                      "href": [
+                                        "concat",
+                                        "inspection/",
+                                        "$hItem.id",
+                                        ".html"
+                                      ],
+                                      "aria-label": [
+                                        "concat",
+                                        "Inspect ",
+                                        "$hItem.name"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Inspect"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "hierarchy-section home-fold home-fold-progress",
+                "id": "taking-shape"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "hierarchy-section-heading"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Taking shape"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Applications in progress."
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "hierarchy-grid hierarchy-progress"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "map",
+                      [
+                        "filter",
+                        "$hCatalogue.items",
+                        "hItem",
+                        [
+                          "includes",
+                          [
+                            "list",
+                            "progress"
+                          ],
+                          "$hItem.group"
+                        ]
+                      ],
+                      "hItem",
+                      {
+                        "tag": "article",
+                        "attrs": {
+                          "class": "hierarchy-card",
+                          "data-item": "$hItem.id"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "hierarchy-emblem"
+                            },
+                            "children": [
+                              "list",
+                              "$hItem.icon"
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "hierarchy-card-content"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "hierarchy-status"
+                                },
+                                "children": [
+                                  "list",
+                                  "$hItem.status"
+                                ]
+                              },
+                              {
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$hItem.name"
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "hierarchy-description"
+                                },
+                                "children": [
+                                  "list",
+                                  "$hItem.description"
+                                ]
+                              },
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "hierarchy-usecase"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "First use case: ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Relational Geometry Programme"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                null
+                              ],
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "science-mission-note"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Agent-assisted research with ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "mission-control/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Mission Control"
+                                      ]
+                                    },
+                                    " →"
+                                  ]
+                                },
+                                null
+                              ],
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "hierarchy-actions"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "$hItem.href",
+                                      "aria-label": [
+                                        "concat",
+                                        "Explore ",
+                                        "$hItem.name"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Explore ",
+                                      {
+                                        "tag": "span",
+                                        "attrs": {
+                                          "class": "action-arrow",
+                                          "aria-hidden": "true"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "↗"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "hierarchy-inspect",
+                                      "href": [
+                                        "concat",
+                                        "inspection/",
+                                        "$hItem.id",
+                                        ".html"
+                                      ],
+                                      "aria-label": [
+                                        "concat",
+                                        "Inspect ",
+                                        "$hItem.name"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Inspect"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "hierarchy-section home-fold home-fold-tooling",
+                "id": "tooling"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "hierarchy-section-heading"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Tools & workbenches"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Smaller doors into the same system."
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "hierarchy-grid hierarchy-tools"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "map",
+                      [
+                        "filter",
+                        "$hCatalogue.items",
+                        "hItem",
+                        [
+                          "includes",
+                          [
+                            "list",
+                            "tool"
+                          ],
+                          "$hItem.group"
+                        ]
+                      ],
+                      "hItem",
+                      {
+                        "tag": "article",
+                        "attrs": {
+                          "class": "hierarchy-card",
+                          "data-item": "$hItem.id"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "hierarchy-emblem"
+                            },
+                            "children": [
+                              "list",
+                              "$hItem.icon"
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "hierarchy-card-content"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "hierarchy-status"
+                                },
+                                "children": [
+                                  "list",
+                                  "$hItem.status"
+                                ]
+                              },
+                              {
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$hItem.name"
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "hierarchy-description"
+                                },
+                                "children": [
+                                  "list",
+                                  "$hItem.description"
+                                ]
+                              },
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "hierarchy-usecase"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "First use case: ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Relational Geometry Programme"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                null
+                              ],
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "science-mission-note"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Agent-assisted research with ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "mission-control/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Mission Control"
+                                      ]
+                                    },
+                                    " →"
+                                  ]
+                                },
+                                null
+                              ],
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "hierarchy-actions"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "$hItem.href",
+                                      "aria-label": [
+                                        "concat",
+                                        "Explore ",
+                                        "$hItem.name"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Explore ",
+                                      {
+                                        "tag": "span",
+                                        "attrs": {
+                                          "class": "action-arrow",
+                                          "aria-hidden": "true"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "↗"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "hierarchy-inspect",
+                                      "href": [
+                                        "concat",
+                                        "inspection/",
+                                        "$hItem.id",
+                                        ".html"
+                                      ],
+                                      "aria-label": [
+                                        "concat",
+                                        "Inspect ",
+                                        "$hItem.name"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Inspect"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "hierarchy.inspect.build": [
+      {
+        "let": "hItemRows",
+        "value": [
+          "filter",
+          "$hRows",
+          "hRow",
+          [
+            "eq",
+            "$hRow.item",
+            "$hItem.id"
+          ]
+        ]
+      },
+      {
+        "let": "hItemBindings",
+        "value": [
+          "filter",
+          "$hEvidence.bindings",
+          "hBinding",
+          [
+            "eq",
+            "$hBinding.item",
+            "$hItem.id"
+          ]
+        ]
+      },
+      {
+        "let": "hCapabilityViews",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "let": "hSeen",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "fold": "$hItemRows",
+        "as": "hRow",
+        "accumulator": "hCardScan",
+        "initial": {
+          "views": [
+            "list"
+          ],
+          "seen": [
+            "list"
+          ]
+        },
+        "steps": [
+          {
+            "let": "hCapabilityViews",
+            "value": "$hCardScan.views"
+          },
+          {
+            "let": "hSeen",
+            "value": "$hCardScan.seen"
+          },
+          {
+            "let": "hKey",
+            "value": [
+              "concat",
+              "$hRow.relation",
+              ":",
+              "$hRow.target"
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "includes",
+                "$hSeen",
+                "$hKey"
+              ]
+            ],
+            "then": [
+              {
+                "let": "hSeen",
+                "value": [
+                  "append",
+                  "$hSeen",
+                  [
+                    "list",
+                    "$hKey"
+                  ]
+                ]
+              },
+              {
+                "let": "eventInput",
+                "value": {
+                  "rows": "$hRows",
+                  "relation": "$hRow.relation",
+                  "target": "$hRow.target"
+                }
+              },
+              {
+                "call": "hierarchy.shared"
+              },
+              {
+                "let": "hPeers",
+                "value": "$result"
+              },
+              {
+                "when": [
+                  "not",
+                  [
+                    "includes",
+                    [
+                      "list",
+                      0,
+                      1
+                    ],
+                    [
+                      "count",
+                      "$hPeers"
+                    ]
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "hWitnesses",
+                    "value": [
+                      "filter",
+                      "$hRows",
+                      "hWitness",
+                      [
+                        "and",
+                        [
+                          "eq",
+                          "$hWitness.relation",
+                          "$hRow.relation"
+                        ],
+                        [
+                          "eq",
+                          "$hWitness.target",
+                          "$hRow.target"
+                        ]
+                      ]
+                    ]
+                  },
+                  {
+                    "let": "hCapabilityViews",
+                    "value": [
+                      "append",
+                      "$hCapabilityViews",
+                      [
+                        "list",
+                        {
+                          "tag": "details",
+                          "attrs": {
+                            "class": "hierarchy-capability"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "summary",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "code",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "$hRow.target"
+                                  ]
+                                },
+                                {
+                                  "tag": "span",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    [
+                                      "concat",
+                                      " · ",
+                                      [
+                                        "count",
+                                        "$hPeers"
+                                      ],
+                                      " consumers · ",
+                                      [
+                                        "if",
+                                        [
+                                          "eq",
+                                          "$hRow.relation",
+                                          "pack"
+                                        ],
+                                        "semantic pack",
+                                        "bundle dependency"
+                                      ]
+                                    ]
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "aria-label": "Consumers"
+                              },
+                              "children": [
+                                "list",
+                                [
+                                  "map",
+                                  "$hPeers",
+                                  "hPeer",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": [
+                                        "concat",
+                                        "$hPeer",
+                                        ".html"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      [
+                                        "at",
+                                        [
+                                          "at",
+                                          [
+                                            "filter",
+                                            "$hCatalogue.items",
+                                            "hPeerItem",
+                                            [
+                                              "eq",
+                                              "$hPeerItem.id",
+                                              "$hPeer"
+                                            ]
+                                          ],
+                                          0
+                                        ],
+                                        "name"
+                                      ]
+                                    ]
+                                  }
+                                ]
+                              ]
+                            },
+                            {
+                              "tag": "ul",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                [
+                                  "map",
+                                  "$hWitnesses",
+                                  "hWitness",
+                                  {
+                                    "tag": "li",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "code",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          [
+                                            "concat",
+                                            "$hWitness.subject",
+                                            " — ",
+                                            "$hWitness.relation",
+                                            " → ",
+                                            "$hWitness.target"
+                                          ]
+                                        ]
+                                      },
+                                      {
+                                        "tag": "a",
+                                        "attrs": {
+                                          "href": [
+                                            "concat",
+                                            "../",
+                                            [
+                                              "at",
+                                              [
+                                                "at",
+                                                [
+                                                  "filter",
+                                                  "$hEvidence.bindings",
+                                                  "hB",
+                                                  [
+                                                    "eq",
+                                                    "$hB.id",
+                                                    "$hWitness.binding"
+                                                  ]
+                                                ],
+                                                0
+                                              ],
+                                              "file"
+                                            ]
+                                          ]
+                                        },
+                                        "children": [
+                                          "list",
+                                          [
+                                            "concat",
+                                            "source line ",
+                                            "$hWitness.line"
+                                          ]
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": {
+          "views": "$hCapabilityViews",
+          "seen": "$hSeen"
+        },
+        "into": "hCardScan"
+      },
+      {
+        "let": "hCapabilityViews",
+        "value": "$hCardScan.views"
+      },
+      {
+        "let": "hDisplayedSource",
+        "value": ""
+      },
+      {
+        "let": "hSourceLanguage",
+        "value": "rel"
+      },
+      {
+        "fold": "$hItemBindings",
+        "as": "hBinding",
+        "accumulator": "hSourceText",
+        "initial": "",
+        "steps": [
+          {
+            "port": "file.read",
+            "args": {
+              "path": "$hBinding.file"
+            },
+            "into": "hRaw"
+          }
+        ],
+        "yield": [
+          "concat",
+          "$hSourceText",
+          "// ",
+          "$hBinding.origin",
+          "\n",
+          "$hRaw",
+          "\n"
+        ],
+        "into": "hDisplayedSource"
+      },
+      {
+        "when": [
+          "eq",
+          [
+            "count",
+            "$hItemRows"
+          ],
+          0
+        ],
+        "then": [
+          {
+            "let": "hFirst",
+            "value": [
+              "at",
+              "$hItemBindings",
+              0
+            ]
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": "$hFirst.file"
+            },
+            "into": "hDisplayedSource"
+          },
+          {
+            "let": "hSourceLanguage",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$hFirst.kind",
+                "rel"
+              ],
+              "rel",
+              [
+                "if",
+                [
+                  "eq",
+                  "$hFirst.file",
+                  [
+                    "concat",
+                    "source/hierarchy-evidence/",
+                    "$hFirst.id",
+                    ".json"
+                  ]
+                ],
+                "json",
+                "text"
+              ]
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$hFirst.file",
+              "pattern": "\\.md$"
+            },
+            "into": "hMarkdown"
+          },
+          {
+            "when": "$hMarkdown",
+            "then": [
+              {
+                "let": "hSourceLanguage",
+                "value": "markdown"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "Inspect ",
+                      "$hItem.name"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "Exact source bindings and declared shared capabilities."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": [
+                      "concat",
+                      "https://aaronalderman.com/inspection/",
+                      "$hItem.id",
+                      ".html"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": [
+                      "concat",
+                      "../",
+                      "expedition.css?v=document-1"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": [
+                      "concat",
+                      "Inspect ",
+                      "$hItem.name"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": "Exact source bindings and declared shared capabilities."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": [
+                      "concat",
+                      "https://aaronalderman.com/inspection/",
+                      "$hItem.id",
+                      ".html"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "class": "skip",
+                    "href": "#main"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to content"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {
+                    "class": "masthead"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "class": "brand",
+                        "href": "../index.html"
+                      },
+                      "children": [
+                        "list",
+                        "Aaron Alderman"
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Site"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../index.html#microsites"
+                          },
+                          "children": [
+                            "list",
+                            "The work"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../atlas.html"
+                          },
+                          "children": [
+                            "list",
+                            "The atlas"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "class": "hierarchy-page hierarchy-inspector",
+                    "id": "main"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "eyebrow"
+                      },
+                      "children": [
+                        "list",
+                        "Inspect / source-bound"
+                      ]
+                    },
+                    {
+                      "tag": "h1",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "$hItem.name"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "$hItem.description"
+                      ]
+                    },
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$hItem.id",
+                        "relational-geometry"
+                      ],
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "hierarchy-scope"
+                        },
+                        "children": [
+                          "list",
+                          "The source bindings below describe the first use case: the Relational Geometry Programme."
+                        ]
+                      },
+                      null
+                    ],
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "hierarchy-scope"
+                      },
+                      "children": [
+                        "list",
+                        "These connections are extracted from recorded source declarations. Exact identity establishes declared reuse; it does not establish deployment or equivalent behaviour."
+                      ]
+                    },
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": [
+                          "concat",
+                          "../",
+                          "$hItem.href"
+                        ]
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "Open ",
+                          "$hItem.name",
+                          " ↗"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Shared capabilities & dependencies"
+                      ]
+                    },
+                    [
+                      "if",
+                      [
+                        "eq",
+                        [
+                          "count",
+                          "$hCapabilityViews"
+                        ],
+                        0
+                      ],
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "No shared capability identity is declared in the selected sources. The source bindings below remain inspectable."
+                        ]
+                      },
+                      {
+                        "tag": "div",
+                        "attrs": {
+                          "class": "hierarchy-capabilities"
+                        },
+                        "children": [
+                          "list",
+                          "$hCapabilityViews"
+                        ]
+                      }
+                    ],
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Source bindings"
+                      ]
+                    },
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "class": "hierarchy-table-wrap"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "table",
+                          "attrs": {
+                            "class": "hierarchy-table"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "thead",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "tr",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "th",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Source binding"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "th",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Snapshot"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "tbody",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                [
+                                  "map",
+                                  "$hItemBindings",
+                                  "hBinding",
+                                  {
+                                    "tag": "tr",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "td",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "code",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              [
+                                                "concat",
+                                                "$hBinding.sourceRoot",
+                                                "/",
+                                                "$hBinding.origin"
+                                              ]
+                                            ]
+                                          },
+                                          {
+                                            "tag": "p",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              "$hBinding.scope"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "small",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              [
+                                                "concat",
+                                                "Upstream SHA-256: ",
+                                                "$hBinding.sourceSha256"
+                                              ]
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "tag": "td",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "a",
+                                            "attrs": {
+                                              "href": [
+                                                "concat",
+                                                "../",
+                                                "$hBinding.file"
+                                              ]
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Read exact snapshot"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "small",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              [
+                                                "concat",
+                                                "Snapshot SHA-256: ",
+                                                "$hBinding.snapshotSha256"
+                                              ]
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Readable source"
+                      ]
+                    },
+                    {
+                      "tag": "input",
+                      "attrs": {
+                        "id": "hierarchy-language",
+                        "type": "hidden",
+                        "value": "$hSourceLanguage"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "style",
+                      "attrs": {
+                        "id": "hierarchy-source-style"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "class": [
+                          "if",
+                          [
+                            "eq",
+                            "$hSourceLanguage",
+                            "markdown"
+                          ],
+                          "inspection-document inspection-document-dual",
+                          "inspection-document"
+                        ]
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$hSourceLanguage",
+                            "markdown"
+                          ],
+                          {
+                            "tag": "section",
+                            "attrs": {
+                              "class": "inspection-preview-pane",
+                              "aria-label": "Markdown preview"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Preview"
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "md-note"
+                                },
+                                "children": [
+                                  "list",
+                                  "Rendered from the exact snapshot. Source-relative links retain their target; unbundled documents do not navigate."
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "id": "hierarchy-preview",
+                                  "tabindex": "0",
+                                  "aria-label": "Scrollable Markdown preview"
+                                },
+                                "children": [
+                                  "list",
+                                  "Markdown preview loads through the shared algebra."
+                                ]
+                              }
+                            ]
+                          },
+                          null
+                        ],
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "inspection-source-pane",
+                            "aria-label": "Highlighted exact source"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "h3",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Source"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "md-note"
+                              },
+                              "children": [
+                                "list",
+                                "Exact source, with shared syntax highlighting. Line wrapping is visual; the snapshot and its SHA-256 remain unchanged."
+                              ]
+                            },
+                            {
+                              "tag": "pre",
+                              "attrs": {
+                                "id": "hierarchy-source",
+                                "class": "hierarchy-source",
+                                "tabindex": "0",
+                                "aria-label": "Scrollable highlighted source"
+                              },
+                              "children": [
+                                "list",
+                                "$hDisplayedSource"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "id": "hierarchy-source-hash",
+                        "class": "hierarchy-source-digest"
+                      },
+                      "children": [
+                        "list",
+                        "Source highlighting uses the shared Encounter presenter."
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Snapshots preserve the observed source version. An excerpt retains its upstream file hash and original line locations. This is source inspection, not an execution trace."
+                      ]
+                    },
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "How sharing is computed"
+                      ]
+                    },
+                    {
+                      "tag": "pre",
+                      "attrs": {
+                        "id": "hierarchy-process",
+                        "class": "hierarchy-source"
+                      },
+                      "children": [
+                        "list",
+                        "Readable process definition loads through the shared source presenter."
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../algebra/hierarchy.process.json"
+                          },
+                          "children": [
+                            "list",
+                            "Authoritative inspection algebra"
+                          ]
+                        },
+                        " · ",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../source/hierarchy.json"
+                          },
+                          "children": [
+                            "list",
+                            "Homepage source catalogue"
+                          ]
+                        },
+                        " · ",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../source/hierarchy.rel"
+                          },
+                          "children": [
+                            "list",
+                            "Presentation facts"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "script",
+                      "attrs": {
+                        "src": "runtime.js",
+                        "defer": true
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../algebra/encounter-source.process.json"
+                          },
+                          "children": [
+                            "list",
+                            "Shared Markdown, lexer and formatting algebra"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": [
+            "concat",
+            "inspection/",
+            "$hItem.id",
+            ".html"
+          ],
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "hierarchy.build": [
+      {
+        "call": "hierarchy.load"
+      },
+      {
+        "call": "hierarchy.extract"
+      },
+      {
+        "call": "hierarchy.viewer.build"
+      },
+      {
+        "each": "$hCatalogue.items",
+        "as": "hItem",
+        "steps": [
+          {
+            "call": "hierarchy.inspect.build"
+          },
+          {
+            "when": [
+              "not",
+              [
+                "includes",
+                [
+                  "list",
+                  "temple",
+                  "sourcery",
+                  "claimipedia",
+                  "worldwright",
+                  "encounter"
+                ],
+                "$hItem.id"
+              ]
+            ],
+            "then": [
+              {
+                "let": "input",
+                "value": {
+                  "tag": "html",
+                  "attrs": {
+                    "lang": "en"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "head",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "charset": "utf-8"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "name": "viewport",
+                            "content": "width=device-width, initial-scale=1"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "title",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "$hItem.name"
+                          ]
+                        },
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "name": "description",
+                            "content": "$hItem.description"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "link",
+                          "attrs": {
+                            "rel": "canonical",
+                            "href": [
+                              "concat",
+                              "https://aaronalderman.com/",
+                              "$hItem.href"
+                            ]
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "link",
+                          "attrs": {
+                            "rel": "stylesheet",
+                            "href": [
+                              "concat",
+                              "../",
+                              "expedition.css?v=document-1"
+                            ]
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "property": "og:title",
+                            "content": "$hItem.name"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "property": "og:description",
+                            "content": "$hItem.description"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "property": "og:url",
+                            "content": [
+                              "concat",
+                              "https://aaronalderman.com/",
+                              "$hItem.href"
+                            ]
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "body",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "class": "skip",
+                            "href": "#main"
+                          },
+                          "children": [
+                            "list",
+                            "Skip to content"
+                          ]
+                        },
+                        {
+                          "tag": "header",
+                          "attrs": {
+                            "class": "masthead"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "class": "brand",
+                                "href": "../index.html"
+                              },
+                              "children": [
+                                "list",
+                                "Aaron Alderman"
+                              ]
+                            },
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "aria-label": "Site"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../index.html#microsites"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "The work"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../atlas.html"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "The atlas"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "main",
+                          "attrs": {
+                            "class": "hierarchy-page",
+                            "id": "main"
+                          },
+                          "children": [
+                            "list",
+                            "$hItem.icon",
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "eyebrow"
+                              },
+                              "children": [
+                                "list",
+                                "$hItem.status"
+                              ]
+                            },
+                            {
+                              "tag": "h1",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "$hItem.name"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "lead"
+                              },
+                              "children": [
+                                "list",
+                                "$hItem.description"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "hierarchy-scope"
+                              },
+                              "children": [
+                                "list",
+                                [
+                                  "if",
+                                  [
+                                    "eq",
+                                    "$hItem.id",
+                                    "the-field"
+                                  ],
+                                  "The source contains a single-encounter prototype with direct, relational and institutional consequences, including refusal and repair.",
+                                  [
+                                    "if",
+                                    [
+                                      "eq",
+                                      "$hItem.id",
+                                      "relationship-manager"
+                                    ],
+                                    "The underlying source project is named Relationship Navigator. It explores boundaries, assistance, rupture and repair.",
+                                    "This microsite introduces the work and its selected source bindings. Source inspection records declarations, rather than claiming a deployed application runtime."
+                                  ]
+                                ]
+                              ]
+                            },
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "class": "button",
+                                "href": [
+                                  "concat",
+                                  "../inspection/",
+                                  "$hItem.id",
+                                  ".html"
+                                ]
+                              },
+                              "children": [
+                                "list",
+                                "Inspect sources & shared capabilities →"
+                              ]
+                            },
+                            [
+                              "if",
+                              [
+                                "eq",
+                                "$hItem.id",
+                                "relational-geometry"
+                              ],
+                              {
+                                "tag": "section",
+                                "attrs": {
+                                  "class": "science-usecase"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "eyebrow"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "First use case"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Relational Geometry Programme"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "An audited Spin(2,3) relational and response geometry research corpus. Explore its models, evidence and open questions."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Explore the programme ↗"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "section",
+                                    "attrs": {
+                                      "class": "science-agent"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "p",
+                                        "attrs": {
+                                          "class": "eyebrow"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "Agent-assisted research"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "h2",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "Mission Control"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "p",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "Sourcery’s agent harness and automatic workflow mechanism coordinates the work behind an inquiry, using the internal job system to manage tasks, agents and results."
+                                        ]
+                                      },
+                                      {
+                                        "tag": "a",
+                                        "attrs": {
+                                          "class": "button",
+                                          "href": "../mission-control/"
+                                        },
+                                        "children": [
+                                          "list",
+                                          "Explore Mission Control →"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "p",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "a",
+                                            "attrs": {
+                                              "href": "../inspection/mission-control.html"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Inspect its source bindings"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              null
+                            ],
+                            [
+                              "if",
+                              [
+                                "eq",
+                                "$hItem.id",
+                                "mission-control"
+                              ],
+                              {
+                                "tag": "section",
+                                "attrs": {
+                                  "class": "mission-introduction"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "A harness for agents and automatic workflows"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Mission Control belongs to Sourcery. It coordinates agent work through the internal job system: tasks, workers, progress, results and review. Claimipedia Science is one application of that mechanism."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "details",
+                                    "attrs": {
+                                      "class": "mission-workflow"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "summary",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "How Mission Control works"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "ol",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "li",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "strong",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "Define the work"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "p",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "Frame a task, its scope and the authority it needs."
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "tag": "li",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "strong",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "Coordinate jobs and agents"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "p",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "Manage worker lanes and bounded work through the internal job system."
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "tag": "li",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "strong",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "Bring results back"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "p",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "Keep progress and evidence visible, with findings returned for review."
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              null
+                            ],
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "class": "hierarchy-page-links",
+                                "aria-label": "Explore further"
+                              },
+                              "children": [
+                                "list",
+                                [
+                                  "map",
+                                  "$hItem.links",
+                                  "hLink",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": [
+                                        "at",
+                                        "$hLink",
+                                        0
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      [
+                                        "at",
+                                        "$hLink",
+                                        1
+                                      ]
+                                    ]
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "call": "html.serialize"
+              },
+              {
+                "port": "file.write",
+                "args": {
+                  "path": [
+                    "concat",
+                    "$hItem.href",
+                    "index.html"
+                  ],
+                  "text": [
+                    "concat",
+                    "<!doctype html>\n",
+                    "$result"
+                  ]
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "call": "hierarchy.questions.build"
+      },
+      {
+        "call": "hierarchy.usecase.build"
+      }
+    ],
+    "hierarchy.questions.build": [
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Begin with a question. — Aaron Alderman"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "Three ways into the same world: measurement, power and care."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "https://aaronalderman.com/questions.html"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "expedition.css?v=document-1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": "Begin with a question."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": "Three ways into the same world: measurement, power and care."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": "https://aaronalderman.com/questions.html"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image",
+                    "content": "https://aaronalderman.com/assets/atlas/unseen-v1.png"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "class": "skip",
+                    "href": "#main"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to content"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {
+                    "class": "masthead"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "class": "brand",
+                        "href": "index.html"
+                      },
+                      "children": [
+                        "list",
+                        "Aaron Alderman"
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Site"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "questions.html"
+                          },
+                          "children": [
+                            "list",
+                            "Questions"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "gate.html"
+                          },
+                          "children": [
+                            "list",
+                            "Threads"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "atlas.html"
+                          },
+                          "children": [
+                            "list",
+                            "Atlas / Map"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "id": "main",
+                    "class": "questions-page"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "section",
+                      "attrs": {
+                        "class": "questions-intro"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "eyebrow"
+                          },
+                          "children": [
+                            "list",
+                            "Questions / A place to begin"
+                          ]
+                        },
+                        {
+                          "tag": "h1",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Begin with a question."
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "lead"
+                          },
+                          "children": [
+                            "list",
+                            "Start with what you’re wondering. Follow it wherever it leads."
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "section",
+                      "attrs": {
+                        "class": "section first-trails questions-choices",
+                        "id": "questions-choices"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "div",
+                          "attrs": {
+                            "class": "trail-grid"
+                          },
+                          "children": [
+                            "map",
+                            [
+                              "subjects",
+                              "isa",
+                              "Entrance"
+                            ],
+                            "entrance",
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "class": "trail",
+                                "href": [
+                                  "concat",
+                                  "places/",
+                                  [
+                                    "one",
+                                    [
+                                      "one",
+                                      "$entrance",
+                                      "destination"
+                                    ],
+                                    "slug"
+                                  ],
+                                  ".html"
+                                ],
+                                "data-light": [
+                                  "one",
+                                  [
+                                    "one",
+                                    "$entrance",
+                                    "destination"
+                                  ],
+                                  "light"
+                                ]
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "span",
+                                  "attrs": {
+                                    "class": "eyebrow"
+                                  },
+                                  "children": [
+                                    "list",
+                                    [
+                                      "concat",
+                                      [
+                                        "one",
+                                        "$entrance",
+                                        "number"
+                                      ],
+                                      " / ",
+                                      [
+                                        "one",
+                                        "$entrance",
+                                        "name"
+                                      ]
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "tag": "span",
+                                  "attrs": {
+                                    "class": "trail-glyph",
+                                    "aria-hidden": "true"
+                                  },
+                                  "children": [
+                                    "list",
+                                    [
+                                      "one",
+                                      "$entrance",
+                                      "symbol"
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "tag": "h3",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    [
+                                      "one",
+                                      "$entrance",
+                                      "question"
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    [
+                                      "one",
+                                      "$entrance",
+                                      "note"
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "tag": "span",
+                                  "attrs": {
+                                    "class": "arrow",
+                                    "aria-hidden": "true"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "↗"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "class": "questions-return",
+                        "aria-label": "Other ways in"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "gate.html"
+                          },
+                          "children": [
+                            "list",
+                            "Follow a thread →"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "atlas.html"
+                          },
+                          "children": [
+                            "list",
+                            "Explore the atlas →"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "index.html"
+                          },
+                          "children": [
+                            "list",
+                            "Return to the homepage →"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "questions.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "hierarchy.usecase.build": [
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Relational Geometry Programme — Claimipedia Science"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "Explore relational structure, physical models and the tests that could distinguish them."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "https://aaronalderman.com/relational-geometry/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "../expedition.css?v=document-1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "class": "hierarchy-page"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "eyebrow"
+                      },
+                      "children": [
+                        "list",
+                        "Claimipedia Science / First use case"
+                      ]
+                    },
+                    {
+                      "tag": "h1",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Relational Geometry Programme"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "lead"
+                      },
+                      "children": [
+                        "list",
+                        "Explore relational structure, physical models and the tests that could distinguish them."
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "class": "hierarchy-page-links"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "class": "button",
+                            "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                          },
+                          "children": [
+                            "list",
+                            "Explore the programme ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../claimipedia-science/"
+                          },
+                          "children": [
+                            "list",
+                            "Claimipedia Science →"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../inspection/relational-geometry.html"
+                          },
+                          "children": [
+                            "list",
+                            "Inspect the source bindings →"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "relational-geometry/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ]
+  }
+}

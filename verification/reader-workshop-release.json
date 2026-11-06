@@ -1,0 +1,29 @@
+{
+  "protocol": "worldwright/reader-workshop-deployment-integration/1",
+  "scope": "Reader/workshop migration integrated with the published homepage hierarchy and Markdown source inspection.",
+  "classification": "Local same-run engineering checks; not independent assurance or scientific validation.",
+  "parents": [
+    "42ee277d62b47756eb2a3fb05e170dd15b413934",
+    "409471f93d8a880719befb34709acb4bb86f0690"
+  ],
+  "build": {
+    "sha256": "16e27c52a2f88ed3f7f3e8901b3680c461e3cf590bfbc7267514dd057673e3ad",
+    "artifacts": 323,
+    "admissionPasses": 25,
+    "execution": {
+      "indexSteps": 3764754,
+      "applicationSteps": 7264668,
+      "totalSteps": 11029422,
+      "limit": 20000000
+    },
+    "seedSha256": "c1fdf47cb183a0c8e69d000d091ada457fdc8333b34a2a5bba4bcc51d53ac71e"
+  },
+  "tests": {
+    "command": "node --test expedition.test.mjs expansion.test.mjs workshop.test.mjs reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs activity-layout.test.mjs atlas.test.mjs atlas-journey.test.mjs authoring.test.mjs reader-workshop-algebra.test.mjs hierarchy.test.mjs",
+    "passed": 105,
+    "failed": 0,
+    "logSha256": "1eb6ed01a342781ad627efb2597c6d48c8d7823542f80cbe13112171abe30a5f"
+  },
+  "migrationBaseline": "source/reader/qualification.json",
+  "deploymentVerification": "Deployment success, public artifact hashes, retired URLs and live browser controls are verified separately after publication."
+}

@@ -49,7 +49,10 @@
     "source/reader/reader.css",
     "source/workshop/document.html",
     "source/reader/navigation.json",
-    "source/workshop/README.txt"
+    "source/workshop/README.txt",
+    "source/hierarchy.json",
+    "source/hierarchy.rel",
+    "algebra/hierarchy.process.json"
   ],
   "grants": [
     "value.describe",
@@ -85,7 +88,8 @@
     "atlas.test.mjs",
     "atlas-journey.test.mjs",
     "authoring.test.mjs",
-    "reader-workshop-algebra.test.mjs"
+    "reader-workshop-algebra.test.mjs",
+    "hierarchy.test.mjs"
   ],
   "owners": {
     "facts": [
@@ -100,7 +104,8 @@
       "source/claimipedia-example.rel",
       "source/social-sharing.rel",
       "source/encounter.rel",
-      "source/atlas.rel"
+      "source/atlas.rel",
+      "source/hierarchy.rel"
     ],
     "applicationProcesses": [
       "algebra/publication.process.json",
@@ -128,7 +133,8 @@
       "algebra/reader-navigation.process.json",
       "algebra/workshop-lab.process.json",
       "algebra/workshop-session.process.json",
-      "algebra/reader-workshop-publication.process.json"
+      "algebra/reader-workshop-publication.process.json",
+      "algebra/hierarchy.process.json"
     ],
     "authoringPolicy": "algebra/authoring.process.json",
     "mechanism": "tooling/author.mjs"

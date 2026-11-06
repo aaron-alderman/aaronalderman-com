@@ -44,7 +44,8 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b.readUInt32BE(16),1672);assert.equal(b.readUInt32BE(20),941);
  assert.ok(b.length<5_000_000);
  const xml=await read('dist/sitemap.xml'),urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
- const expected=['','gate.html','atlas.html',...Object.keys(scenes).map(id=>`places/${id}.html`),...['temple','temple/films','sourcery','sourcery/films','claimipedia','worldwright','encounter','kingdom','world-modelling','creativity','the-field'].map(slug=>slug+'/')].map(route=>'https://aaronalderman.com/'+route);
+ const expected=['','gate.html','atlas.html','questions.html','relational-geometry/',...Object.keys(scenes).map(id=>`places/${id}.html`),...['temple','temple/films','sourcery','sourcery/films','claimipedia','worldwright','encounter','kingdom','world-modelling','creativity','the-field'].map(slug=>slug+'/')].map(route=>'https://aaronalderman.com/'+route);
+ for(const item of JSON.parse(await read('source/hierarchy.json')).items)for(const route of [item.href,'inspection/'+item.id+'.html']){const url='https://aaronalderman.com/'+route;if(!expected.includes(url))expected.push(url);}
  assert.deepEqual([...urls].sort(),expected.sort());assert.equal(new Set(urls).size,urls.length);
  assert.ok(xml.includes('https://aaronalderman.com/claimipedia/'));
  assert.ok(xml.includes('https://aaronalderman.com/gate.html'));
@@ -85,10 +86,10 @@ test('historical oracle bytes, passive resources and declared mechanism successo
 test('algebra owns the publication with the existing admission rules, ports and budget',async()=>{
  assert.equal(receipt.assurance.places,40);assert.equal(receipt.assurance.sourceNotes,29);
  assert.equal(receipt.execution.limit,20_000_000);assert.ok(receipt.execution.totalSteps<20_000_000);
- assert.equal(receipt.admission.passes,23);assert.deepEqual(receipt.mjsImports,[]);
+ assert.equal(receipt.admission.passes,25);assert.deepEqual(receipt.mjsImports,[]);
  for(const file of ['source/expedition.rel','source/presentation.rel','algebra/publication.process.json','source/gateway.rel','source/gateway-presentation.rel','algebra/gateway.process.json'])assert.equal(receipt.sources[file],sha(await fs.readFile(path.join(root,file))));
  for(const [file,hash]of Object.entries(receipt.artifacts))if(/\.(?:js|mjs|cjs)$/.test(file)){
-  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js',...contract.readerWorkshopSuccessor.runtimes].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
+  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js','inspection/runtime.js',...contract.readerWorkshopSuccessor.runtimes].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
   const retained=file.startsWith('retained/')?file:'retained/'+file;
   assert.equal(hash,contract.compatibilityOrigin.sha256[retained],file+' is unchanged compatibility code');
  }
@@ -106,7 +107,7 @@ test('reading paths connect the guided journey to research while microsites keep
  assert.equal((html.match(/class="corpus-door"/g)||[]).length,7);
  assert.equal((html.match(/>Suggested reading path</g)||[]).length,3);
  assert.ok(html.includes('they do not define future microsites'));
- assert.ok(home.includes('Explore the reading paths'));
+ assert.ok(home.includes('href="gate.html"'));
  assert.ok(html.includes('id="path-claimipedia"'));
  assert.ok(!html.includes('href="temple/index.html"'));assert.ok(!html.includes('href="sourcery/index.html"'));
  for(const id of Object.keys(scenes))assert.ok((await read(`dist/places/${id}.html`)).includes('href="../gate.html" class="gate-nav"'),id+' can reach the corpus');
@@ -115,20 +116,13 @@ test('reading paths connect the guided journey to research while microsites keep
  assert.deepEqual(provenance.interpretation.proposedReadingPaths,['Kingdom','The Field','World']);
 });
 
-test('the homepage links directly to published microsites and Claimipedia has a working standalone introduction',async()=>{
- const home=await read('dist/index.html'),menu=home.match(/<nav class="hero-microsites"[\s\S]*?<\/nav>/)?.[0];assert.ok(menu);
- assert.equal((menu.match(/<a /g)||[]).length,4);
- assert.equal((menu.match(/class="world-emblem"/g)||[]).length,4);assert.equal((menu.match(/class="world-card-description"/g)||[]).length,4);
- assert.equal((menu.match(/<img /g)||[]).length,4);assert.ok(!menu.includes('<svg'));
- const capabilities=home.match(/<nav class="hero-capabilities"[\s\S]*?<\/nav>/)?.[0];assert.ok(capabilities);
- assert.deepEqual([...capabilities.matchAll(/<strong>([^<]+)</g)].map(m=>m[1]),['Encounter','Kingdom','World Modelling','Creativity','The Field']);
- assert.ok(!menu.includes('href="encounter/"'));assert.ok(capabilities.includes('href="encounter/"'));
- for(const href of ['kingdom/','world-modelling/','creativity/','the-field/'])assert.ok(capabilities.includes(`href="${href}"`));
- for(const slug of ['temple','sourcery','claimipedia','worldwright'])assert.ok(menu.includes('assets/world-emblems/'+slug+'-v1.png'));
- const worldwright=await read('dist/worldwright/index.html');assert.ok(worldwright.includes('Worldwright / In preparation'));assert.ok(worldwright.includes('This is a placeholder'));assert.equal(meta(worldwright,'og:url'),'https://aaronalderman.com/worldwright/');
- for(const [name,href]of [['Temple','temple/'],['Sourcery','sourcery/'],['Claimipedia','claimipedia/'],['Worldwright','worldwright/']])assert.ok(menu.includes(`href="${href}"`)&&menu.includes(`<strong>${name}</strong>`));
- assert.ok(home.includes('expedition.css?v='+stylesheetVersion));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));assert.ok(home.includes('href="atlas.html"'));assert.ok(!home.includes('<section class="section atlas"'));const atlas=await read('dist/atlas.html');assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
- const stub=await read('dist/claimipedia/index.html');assert.ok(stub.includes('id="claimipedia-title"'));assert.ok(stub.includes('Knowledge, connected.'));assert.ok(stub.includes('Understanding, evolving.'));assert.ok(stub.includes('An interactive introduction'));assert.ok(stub.includes('href="../gate.html#path-claimipedia"'));assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(stub.includes('runtime.js?v=review-1'));
+test('the homepage presents the hierarchy and preserves existing project entrances',async()=>{
+ const home=await read('dist/index.html');
+ for(const id of ['foundation','applications','taking-shape','tooling'])assert.ok(home.includes('id="'+id+'"'));
+ for(const href of ['temple/','sourcery/','claimipedia/','claimipedia-science/','worldwright/','kingdom/','world-modelling/','tradie/','foundry/','encounter/','the-field/','supercrm/','timesheet/','workgarden/','harborboard/','relationship-manager/'])assert.ok(home.includes('href="'+href+'"'),href);
+ assert.equal((home.match(/class="hierarchy-inspect"/g)||[]).length,17);
+ assert.ok(!home.includes('hero-capabilities'));assert.ok(home.includes('expedition.css?v=document-1'));
+ const stub=await read('dist/claimipedia/index.html');assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(stub.includes('runtime.js?v=review-1'));
 });
 
 test('Claimipedia has its own three-lens identity with accessible sections, local assets and quiet motion',async()=>{
