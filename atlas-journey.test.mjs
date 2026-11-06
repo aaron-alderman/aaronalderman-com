@@ -64,6 +64,7 @@ test('each identity can randomly reach every other identity without an immediate
    const next=state.get('identity');assert.notEqual(next,current.key);reached.add(next);
    assert.equal(attributes['body:data-identity'],next);
    assert.equal(attributes['#identity-background:src'],model.data.themes.find(t=>t.key===next).image);
+   for(const card of ['questions','threads','atlas'])assert.equal(attributes['#identity-card-'+card+':src'],model.data.themes.find(t=>t.key===next)[card+'Image']);
    assert.equal(writes['#identity-word:textContent'],next+'.');
    assert.equal(writes['#identity-copy:textContent'],model.data.themes.find(t=>t.key===next).copy);
    assert.match(writes['#identity-status:textContent'],new RegExp('Current theme: '+next));
@@ -76,7 +77,7 @@ test('the homepage provides a native keyboard button and an announced theme stat
  assert.match(html,/<button[^>]*id="identity-switch"/);
  assert.match(html,/aria-label="Discover another side of Aaron: change the theme"/);
  assert.match(html,/id="identity-status"[^>]*aria-live="polite"/);
- assert.match(html,/src="identity-runtime.js\?v=identity-worlds-1" defer/);
+ assert.match(html,/src="identity-runtime.js\?v=identity-cards-1" defer/);
  assert.match(html,/<img[^>]*id="identity-background"/);
 });
 test('every identity publishes its own distinct image and preloads it through the homepage algebra',()=>{
@@ -90,6 +91,20 @@ test('every identity publishes its own distinct image and preloads it through th
   return require('node:crypto').createHash('sha256').update(bytes).digest('hex');
  });
  assert.equal(new Set(hashes).size,4);
+});
+test('Questions, Threads and Atlas publish distinct world artwork while preserving native destinations',()=>{
+ const html=fs.readFileSync('dist/index.html','utf8');
+ const images=model.data.themes.flatMap(theme=>['questions','threads','atlas'].map(card=>theme[card+'Image']));
+ assert.equal(new Set(images).size,12);
+ const hashes=images.map(image=>{
+  const bytes=fs.readFileSync('dist/'+image);
+  assert.ok(html.includes('src="'+image+'"'),image+' is preloaded');
+  if(image.endsWith('.webp')){assert.equal(bytes.subarray(0,4).toString(),'RIFF');assert.equal(bytes.subarray(8,12).toString(),'WEBP');}
+  return require('node:crypto').createHash('sha256').update(bytes).digest('hex');
+ });
+ assert.equal(new Set(hashes).size,12);
+ for(const [id,href]of [['first-trails','questions.html'],['threads','gate.html'],['atlas','atlas.html']])assert.match(html,new RegExp('<a[^>]*id="'+id+'"[^>]*href="'+href+'"'));
+ for(const card of ['questions','threads','atlas'])assert.match(html,new RegExp('<img[^>]*id="identity-card-'+card+'"'));
 });
 
 }

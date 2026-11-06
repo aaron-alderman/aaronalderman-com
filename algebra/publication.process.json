@@ -1495,7 +1495,8 @@
                                   "alt": "",
                                   "width": 1774,
                                   "height": 887,
-                                  "decoding": "async"
+                                  "decoding": "async",
+                                  "id": "identity-card-questions"
                                 },
                                 "children": [
                                   "list"
@@ -1554,7 +1555,8 @@
                                   "alt": "",
                                   "width": 1774,
                                   "height": 887,
-                                  "decoding": "async"
+                                  "decoding": "async",
+                                  "id": "identity-card-threads"
                                 },
                                 "children": [
                                   "list"
@@ -1613,7 +1615,8 @@
                                   "alt": "",
                                   "width": 1942,
                                   "height": 809,
-                                  "decoding": "async"
+                                  "decoding": "async",
+                                  "id": "identity-card-atlas"
                                 },
                                 "children": [
                                   "list"
@@ -1726,7 +1729,7 @@
           {
             "tag": "script",
             "attrs": {
-              "src": "identity-runtime.js?v=identity-worlds-1",
+              "src": "identity-runtime.js?v=identity-cards-1",
               "defer": true
             },
             "children": [
@@ -1748,19 +1751,74 @@
               ],
               "theme",
               {
-                "tag": "img",
-                "attrs": {
-                  "src": [
-                    "one",
-                    "$theme",
-                    "image"
-                  ],
-                  "alt": "",
-                  "decoding": "async",
-                  "fetchpriority": "low"
-                },
+                "tag": "div",
+                "attrs": {},
                 "children": [
-                  "list"
+                  "list",
+                  {
+                    "tag": "img",
+                    "attrs": {
+                      "src": [
+                        "one",
+                        "$theme",
+                        "image"
+                      ],
+                      "alt": "",
+                      "decoding": "async",
+                      "fetchpriority": "low"
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  },
+                  {
+                    "tag": "img",
+                    "attrs": {
+                      "src": [
+                        "one",
+                        "$theme",
+                        "questionsImage"
+                      ],
+                      "alt": "",
+                      "decoding": "async",
+                      "fetchpriority": "low"
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  },
+                  {
+                    "tag": "img",
+                    "attrs": {
+                      "src": [
+                        "one",
+                        "$theme",
+                        "threadsImage"
+                      ],
+                      "alt": "",
+                      "decoding": "async",
+                      "fetchpriority": "low"
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  },
+                  {
+                    "tag": "img",
+                    "attrs": {
+                      "src": [
+                        "one",
+                        "$theme",
+                        "atlasImage"
+                      ],
+                      "alt": "",
+                      "decoding": "async",
+                      "fetchpriority": "low"
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  }
                 ]
               }
             ]
@@ -3025,6 +3083,33 @@
       {
         "port": "browser.attribute",
         "args": {
+          "ref": "#identity-card-questions",
+          "name": "src",
+          "value": "$chosen.questionsImage"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#identity-card-threads",
+          "name": "src",
+          "value": "$chosen.threadsImage"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#identity-card-atlas",
+          "name": "src",
+          "value": "$chosen.atlasImage"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
           "ref": "body",
           "name": "data-identity",
           "value": "$chosen.key"
@@ -3120,6 +3205,21 @@
                   "one",
                   "$t",
                   "image"
+                ],
+                "questionsImage": [
+                  "one",
+                  "$t",
+                  "questionsImage"
+                ],
+                "threadsImage": [
+                  "one",
+                  "$t",
+                  "threadsImage"
+                ],
+                "atlasImage": [
+                  "one",
+                  "$t",
+                  "atlasImage"
                 ]
               }
             ]
