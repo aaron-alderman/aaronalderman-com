@@ -1336,7 +1336,8 @@
                   "aria-hidden": "true",
                   "width": "1672",
                   "height": "941",
-                  "fetchpriority": "high"
+                  "fetchpriority": "high",
+                  "id": "identity-background"
                 },
                 "children": [
                   "list"
@@ -1725,11 +1726,43 @@
           {
             "tag": "script",
             "attrs": {
-              "src": "identity-runtime.js?v=identities-1",
+              "src": "identity-runtime.js?v=identity-worlds-1",
               "defer": true
             },
             "children": [
               "list"
+            ]
+          },
+          {
+            "tag": "div",
+            "attrs": {
+              "hidden": true,
+              "aria-hidden": "true"
+            },
+            "children": [
+              "map",
+              [
+                "subjects",
+                "isa",
+                "IdentityTheme"
+              ],
+              "theme",
+              {
+                "tag": "img",
+                "attrs": {
+                  "src": [
+                    "one",
+                    "$theme",
+                    "image"
+                  ],
+                  "alt": "",
+                  "decoding": "async",
+                  "fetchpriority": "low"
+                },
+                "children": [
+                  "list"
+                ]
+              }
             ]
           }
         ]
@@ -2983,6 +3016,15 @@
       {
         "port": "browser.attribute",
         "args": {
+          "ref": "#identity-background",
+          "name": "src",
+          "value": "$chosen.image"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
           "ref": "body",
           "name": "data-identity",
           "value": "$chosen.key"
@@ -3073,6 +3115,11 @@
                   "one",
                   "$t",
                   "copy"
+                ],
+                "image": [
+                  "one",
+                  "$t",
+                  "image"
                 ]
               }
             ]

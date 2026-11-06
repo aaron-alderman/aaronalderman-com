@@ -63,6 +63,7 @@ test('each identity can randomly reach every other identity without an immediate
    await createKernel(ports,model.budget).run(model.queries['identity.change'],{model,data:model.data});
    const next=state.get('identity');assert.notEqual(next,current.key);reached.add(next);
    assert.equal(attributes['body:data-identity'],next);
+   assert.equal(attributes['#identity-background:src'],model.data.themes.find(t=>t.key===next).image);
    assert.equal(writes['#identity-word:textContent'],next+'.');
    assert.equal(writes['#identity-copy:textContent'],model.data.themes.find(t=>t.key===next).copy);
    assert.match(writes['#identity-status:textContent'],new RegExp('Current theme: '+next));
@@ -75,7 +76,20 @@ test('the homepage provides a native keyboard button and an announced theme stat
  assert.match(html,/<button[^>]*id="identity-switch"/);
  assert.match(html,/aria-label="Discover another side of Aaron: change the theme"/);
  assert.match(html,/id="identity-status"[^>]*aria-live="polite"/);
- assert.match(html,/src="identity-runtime.js\?v=identities-1" defer/);
+ assert.match(html,/src="identity-runtime.js\?v=identity-worlds-1" defer/);
+ assert.match(html,/<img[^>]*id="identity-background"/);
+});
+test('every identity publishes its own distinct image and preloads it through the homepage algebra',()=>{
+ const html=fs.readFileSync('dist/index.html','utf8'),images=model.data.themes.map(t=>t.image);
+ assert.equal(new Set(images).size,4);
+ assert.equal(images[0],'assets/sourcerer-threshold.png');
+ const hashes=images.map(image=>{
+  const bytes=fs.readFileSync('dist/'+image);
+  assert.equal(bytes.subarray(1,4).toString(),'PNG');
+  assert.ok(html.includes('src="'+image+'"'));
+  return require('node:crypto').createHash('sha256').update(bytes).digest('hex');
+ });
+ assert.equal(new Set(hashes).size,4);
 });
 
 }
