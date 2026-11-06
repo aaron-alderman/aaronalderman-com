@@ -1483,7 +1483,16 @@
                             "attrs": {
                               "id": "first-trails",
                               "class": "begin-door",
-                              "href": "questions.html"
+                              "href": [
+                                "one",
+                                "identity.sourcerer",
+                                "questionHref"
+                              ],
+                              "aria-label": [
+                                "one",
+                                "identity.sourcerer",
+                                "questionCopy"
+                              ]
                             },
                             "children": [
                               "list",
@@ -1517,10 +1526,16 @@
                                   },
                                   {
                                     "tag": "p",
-                                    "attrs": {},
+                                    "attrs": {
+                                      "id": "identity-question-copy"
+                                    },
                                     "children": [
                                       "list",
-                                      "Start with something you wonder."
+                                      [
+                                        "one",
+                                        "identity.sourcerer",
+                                        "questionCopy"
+                                      ]
                                     ]
                                   },
                                   {
@@ -1725,7 +1740,7 @@
           {
             "tag": "script",
             "attrs": {
-              "src": "identity-runtime.js?v=identities-1",
+              "src": "identity-runtime.js?v=identity-questions-2",
               "defer": true
             },
             "children": [
@@ -3026,6 +3041,33 @@
         "into": "_"
       },
       {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#first-trails",
+          "name": "href",
+          "value": "$chosen.questionHref"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#first-trails",
+          "name": "aria-label",
+          "value": "$chosen.questionCopy"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-question-copy",
+          "name": "textContent",
+          "value": "$chosen.questionCopy"
+        },
+        "into": "_"
+      },
+      {
         "port": "state.set",
         "args": {
           "key": "identity",
@@ -3073,6 +3115,16 @@
                   "one",
                   "$t",
                   "copy"
+                ],
+                "questionHref": [
+                  "one",
+                  "$t",
+                  "questionHref"
+                ],
+                "questionCopy": [
+                  "one",
+                  "$t",
+                  "questionCopy"
                 ]
               }
             ]

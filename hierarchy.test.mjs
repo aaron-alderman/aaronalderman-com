@@ -66,7 +66,7 @@ test('the admitted viewer highlights source and its actual sharing definition wi
 test('the opening fold has three illustrated entrances and moves questions and applications to their own destinations',()=>{
  const home=fs.readFileSync('dist/index.html','utf8'),hero=home.match(/<section class="hero home-entrance-fold"[\s\S]*?<\/section>/)?.[0];assert.ok(hero);
  assert.equal((hero.match(/class="begin-door"/g)||[]).length,3);
- for(const [href,label]of [['questions.html','Questions'],['gate.html','Threads'],['atlas.html','Atlas / Map']]){assert.ok(hero.includes('href="'+href+'"'));assert.ok(hero.includes('<h2>'+label+'</h2>'));}
+ for(const [href,label]of [['questions-sourcerer.html','Questions'],['gate.html','Threads'],['atlas.html','Atlas / Map']]){assert.ok(hero.includes('href="'+href+'"'));assert.ok(hero.includes('<h2>'+label+'</h2>'));}
  assert.equal((hero.match(/assets\/atlas\//g)||[]).length,3);assert.ok(!hero.includes('data-item='));assert.ok(home.indexOf('data-item="temple"')>home.indexOf('</section>'));
  assert.ok(!home.includes('class="section first-trails"'));assert.ok(!home.includes('class="section atlas-portal"'));assert.equal((home.match(/class="hierarchy-section home-fold /g)||[]).length,4);
  const questions=fs.readFileSync('dist/questions.html','utf8');assert.ok(questions.includes('live like Jesus?'));for(const slug of ['laboratory','kenosis','care'])assert.ok(questions.includes('href="places/'+slug+'.html"'));
@@ -102,4 +102,27 @@ test('lived questions retain a personal Christian centre and open the bounded Fi
  assert.ok(!field.includes('<script'));
  assert.ok(field.includes('id="microsite-return"'));
  assert.equal(sha(fs.readFileSync('source/hierarchy-evidence/the-field-0.json')),read('source/questions-correspondence.json').encounterSource.sha256);
+});
+
+
+test('another side changes the question destination and label through the algebra for every role',async()=>{
+ const programme=read('algebra/publication.process.json'),facts=parseRel(fs.readFileSync('source/hierarchy.rel','utf8'));
+ const themes=facts.filter(f=>f.p==='isa'&&f.o==='IdentityTheme').map(f=>Object.fromEntries(['key','label','copy','questionHref','questionCopy'].map(p=>[p,facts.find(x=>x.s===f.s&&x.p===p)?.o])));
+ assert.deepEqual(themes.map(t=>t.key),['sourcerer','author','dad','christian']);
+ assert.equal(new Set(themes.map(t=>t.questionHref)).size,4);
+ const model=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:'identity.change',queries:{'identity.change':programme.queries['identity.change']}},mode:'model',ports:valuePorts(),limit:20000000});
+ const {computationalPorts}=require('./bootstrap/ports/browser-effects.cjs');
+ for(const current of themes){const choices=themes.filter(t=>t.key!==current.key);for(let i=0;i<choices.length;i++){
+  const effects=[],chosen=choices[i];
+  await invoke({model,entry:'identity.change',input:{data:{themes}},ports:{...valuePorts(),...computationalPorts(),'state.get':()=>current.key,'state.set':x=>{effects.push(x);return true},'random.values':()=>[(i+.1)/choices.length],'browser.attribute':x=>{effects.push(x);return true},'browser.write':x=>{effects.push(x);return true}},limit:20000000});
+  assert.ok(effects.some(x=>x.ref==='#first-trails'&&x.name==='href'&&x.value===chosen.questionHref));
+  assert.ok(effects.some(x=>x.ref==='#identity-question-copy'&&x.value===chosen.questionCopy));
+  assert.ok(effects.some(x=>x.ref==='body'&&x.value===chosen.key));
+ }}
+ const home=fs.readFileSync('dist/index.html','utf8');assert.ok(home.includes('href="questions-sourcerer.html"'));assert.ok(home.includes('How do I build software that earns trust?'));
+ for(const theme of themes){const html=fs.readFileSync('dist/'+theme.questionHref,'utf8');assert.ok(html.includes('<h1'));assert.ok(html.includes('Questions from another side'));for(const other of themes)assert.ok(html.includes('href="'+other.questionHref+'"'));}
+ const dad=fs.readFileSync('dist/questions-dad.html','utf8');assert.ok(dad.includes('present as Dad?'));assert.ok(!dad.includes('live like Jesus?'));assert.ok(!dad.includes('>Father'));
+ const author=fs.readFileSync('dist/questions-author.html','utf8');assert.ok(author.includes('the people who enter my stories?'));assert.ok(author.includes('href="worldwright/"'));assert.ok(author.includes('href="creator-studio/"'));
+ const sourcerer=fs.readFileSync('dist/questions-sourcerer.html','utf8');assert.ok(sourcerer.includes('software that earns trust?'));assert.ok(sourcerer.includes('href="sourcery/"'));assert.ok(sourcerer.includes('href="temple/"'));
+ for(const file of ['questions-dad.html','questions-author.html','questions-sourcerer.html']){const html=fs.readFileSync('dist/'+file,'utf8');assert.equal((html.match(/class="q-question"/g)||[]).length,4);assert.ok(!html.includes('<script'));assert.ok(html.includes('rel="canonical" href="https://aaronalderman.com/'+file+'"'));for(const m of html.matchAll(/(?:href|src)="([^"#]+)"/g)){if(!/^https?:/.test(m[1])){const target=m[1].split(/[?#]/)[0];assert.ok(fs.existsSync('dist/'+target),file+': '+target);}}}
 });

@@ -4247,7 +4247,7 @@
                                   },
                                   "children": [
                                     "list",
-                                    "Questions I’m living and building with"
+                                    "Questions / Christian"
                                   ]
                                 },
                                 {
@@ -4879,6 +4879,60 @@
                                   ]
                                 }
                               ]
+                            },
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "aria-label": "Questions from another side",
+                                "class": "q-actions"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "questions-sourcerer.html",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Sourcerer →"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "questions-author.html",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Author →"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "questions-dad.html",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Dad →"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "questions.html",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Christian →"
+                                  ]
+                                }
+                              ]
                             }
                           ]
                         }
@@ -4979,6 +5033,9 @@
           ]
         },
         "into": "_"
+      },
+      {
+        "call": "hierarchy.identityQuestions.build"
       }
     ],
     "hierarchy.usecase.build": [
@@ -7244,6 +7301,944 @@
           ]
         },
         "into": "_"
+      }
+    ],
+    "hierarchy.identityQuestions.build": [
+      {
+        "call": "publication.stewardship.view"
+      },
+      {
+        "let": "stewardshipLinks",
+        "value": "$result"
+      },
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "IdentityQuestionPage"
+        ],
+        "as": "identityPage",
+        "steps": [
+          {
+            "let": "input",
+            "value": {
+              "tag": "html",
+              "attrs": {
+                "lang": "en"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "head",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "charset": "utf-8"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "name": "viewport",
+                        "content": "width=device-width, initial-scale=1"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "name": "theme-color",
+                        "content": "#faf7ef"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "title",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "$identityPage",
+                            "questionTitle"
+                          ],
+                          " ",
+                          [
+                            "one",
+                            "$identityPage",
+                            "questionEm"
+                          ],
+                          " — Aaron Alderman"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "name": "description",
+                        "content": [
+                          "one",
+                          "$identityPage",
+                          "questionIntro"
+                        ]
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "link",
+                      "attrs": {
+                        "rel": "canonical",
+                        "href": [
+                          "concat",
+                          "https://aaronalderman.com/",
+                          [
+                            "one",
+                            "$identityPage",
+                            "questionHref"
+                          ]
+                        ]
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "link",
+                      "attrs": {
+                        "rel": "stylesheet",
+                        "href": "expedition.css?v=questions-light-1"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "property": "og:title",
+                        "content": [
+                          "concat",
+                          [
+                            "one",
+                            "$identityPage",
+                            "questionTitle"
+                          ],
+                          " ",
+                          [
+                            "one",
+                            "$identityPage",
+                            "questionEm"
+                          ]
+                        ]
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "property": "og:description",
+                        "content": [
+                          "one",
+                          "$identityPage",
+                          "questionIntro"
+                        ]
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "property": "og:type",
+                        "content": "website"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "property": "og:url",
+                        "content": [
+                          "concat",
+                          "https://aaronalderman.com/",
+                          [
+                            "one",
+                            "$identityPage",
+                            "questionHref"
+                          ]
+                        ]
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "property": "og:image",
+                        "content": "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "property": "og:image:width",
+                        "content": "1672"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "property": "og:image:height",
+                        "content": "941"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "property": "og:image:alt",
+                        "content": "A sunlit workshop opening onto a green field, with two people sharing a repair."
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "name": "twitter:card",
+                        "content": "summary_large_image"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "name": "twitter:title",
+                        "content": [
+                          "concat",
+                          [
+                            "one",
+                            "$identityPage",
+                            "questionTitle"
+                          ],
+                          " ",
+                          [
+                            "one",
+                            "$identityPage",
+                            "questionEm"
+                          ]
+                        ]
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "name": "twitter:description",
+                        "content": [
+                          "one",
+                          "$identityPage",
+                          "questionIntro"
+                        ]
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "name": "twitter:image",
+                        "content": "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "meta",
+                      "attrs": {
+                        "name": "twitter:image:alt",
+                        "content": "A sunlit workshop opening onto a green field, with two people sharing a repair."
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "body",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "#main",
+                        "class": "skip"
+                      },
+                      "children": [
+                        "list",
+                        "Skip to content"
+                      ]
+                    },
+                    {
+                      "tag": "header",
+                      "attrs": {
+                        "class": "masthead"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "index.html",
+                            "class": "brand"
+                          },
+                          "children": [
+                            "list",
+                            "Aaron Alderman"
+                          ]
+                        },
+                        {
+                          "tag": "nav",
+                          "attrs": {
+                            "aria-label": "Site"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": [
+                                  "one",
+                                  "$identityPage",
+                                  "questionHref"
+                                ]
+                              },
+                              "children": [
+                                "list",
+                                [
+                                  "concat",
+                                  [
+                                    "one",
+                                    "$identityPage",
+                                    "questionLabel"
+                                  ],
+                                  " questions"
+                                ]
+                              ]
+                            },
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": "gate.html"
+                              },
+                              "children": [
+                                "list",
+                                "Threads"
+                              ]
+                            },
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": "atlas.html"
+                              },
+                              "children": [
+                                "list",
+                                "Atlas / Map"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "main",
+                      "attrs": {
+                        "id": "main",
+                        "class": "q-page",
+                        "data-question-identity": [
+                          "one",
+                          "$identityPage",
+                          "key"
+                        ]
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "div",
+                          "attrs": {
+                            "class": "q-world"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "section",
+                              "attrs": {
+                                "class": "q-hero",
+                                "aria-labelledby": "q-heading"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "img",
+                                  "attrs": {
+                                    "class": "q-hero-art",
+                                    "src": [
+                                      "one",
+                                      "questions",
+                                      "hero"
+                                    ],
+                                    "alt": "",
+                                    "aria-hidden": "true",
+                                    "width": 1672,
+                                    "height": 941,
+                                    "fetchpriority": "high"
+                                  },
+                                  "children": [
+                                    "list"
+                                  ]
+                                },
+                                {
+                                  "tag": "div",
+                                  "attrs": {
+                                    "class": "q-hero-copy"
+                                  },
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "eyebrow"
+                                      },
+                                      "children": [
+                                        "list",
+                                        [
+                                          "concat",
+                                          "Questions / ",
+                                          [
+                                            "one",
+                                            "$identityPage",
+                                            "questionLabel"
+                                          ]
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "tag": "h1",
+                                      "attrs": {
+                                        "id": "q-heading"
+                                      },
+                                      "children": [
+                                        "list",
+                                        [
+                                          "one",
+                                          "$identityPage",
+                                          "questionTitle"
+                                        ],
+                                        {
+                                          "tag": "em",
+                                          "attrs": {},
+                                          "children": [
+                                            "list",
+                                            [
+                                              "one",
+                                              "$identityPage",
+                                              "questionEm"
+                                            ]
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "q-subtitle"
+                                      },
+                                      "children": [
+                                        "list",
+                                        [
+                                          "one",
+                                          "$identityPage",
+                                          "questionSubtitle"
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "q-intro"
+                                      },
+                                      "children": [
+                                        "list",
+                                        [
+                                          "one",
+                                          "$identityPage",
+                                          "questionIntro"
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "tag": "div",
+                                      "attrs": {
+                                        "class": "q-actions"
+                                      },
+                                      "children": [
+                                        "list",
+                                        {
+                                          "tag": "a",
+                                          "attrs": {
+                                            "href": "#lived-questions",
+                                            "class": "button q-primary"
+                                          },
+                                          "children": [
+                                            "list",
+                                            "Follow the questions ↓"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "q-hero-note"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "A question to practise, not a finished answer."
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "section",
+                              "attrs": {
+                                "class": "q-section q-posture",
+                                "aria-labelledby": "q-posture-heading"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "div",
+                                  "attrs": {
+                                    "class": "q-section-intro"
+                                  },
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "eyebrow"
+                                      },
+                                      "children": [
+                                        "list",
+                                        [
+                                          "one",
+                                          "$identityPage",
+                                          "questionLabel"
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "tag": "h2",
+                                      "attrs": {
+                                        "id": "q-posture-heading"
+                                      },
+                                      "children": [
+                                        "list",
+                                        [
+                                          "one",
+                                          "$identityPage",
+                                          "questionHeading"
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        [
+                                          "one",
+                                          "$identityPage",
+                                          "questionBody"
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "section",
+                              "attrs": {
+                                "class": "q-section q-questions",
+                                "id": "lived-questions",
+                                "aria-labelledby": "q-questions-heading"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "div",
+                                  "attrs": {
+                                    "class": "q-section-intro"
+                                  },
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "h2",
+                                      "attrs": {
+                                        "id": "q-questions-heading"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Where the question becomes concrete."
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "div",
+                                  "attrs": {
+                                    "class": "q-question-grid"
+                                  },
+                                  "children": [
+                                    "list",
+                                    [
+                                      "map",
+                                      [
+                                        "objects",
+                                        "$identityPage",
+                                        "question"
+                                      ],
+                                      "q",
+                                      {
+                                        "tag": "a",
+                                        "attrs": {
+                                          "class": "q-question",
+                                          "href": [
+                                            "one",
+                                            "$q",
+                                            "href"
+                                          ],
+                                          "data-light": [
+                                            "one",
+                                            "$identityPage",
+                                            "questionLight"
+                                          ]
+                                        },
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "img",
+                                            "attrs": {
+                                              "src": [
+                                                "one",
+                                                "$identityPage",
+                                                "questionImage"
+                                              ],
+                                              "alt": "",
+                                              "width": 112,
+                                              "height": 140,
+                                              "loading": "lazy",
+                                              "decoding": "async"
+                                            },
+                                            "children": [
+                                              "list"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "div",
+                                            "attrs": {
+                                              "class": "q-question-copy"
+                                            },
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "p",
+                                                "attrs": {
+                                                  "class": "eyebrow"
+                                                },
+                                                "children": [
+                                                  "list",
+                                                  [
+                                                    "one",
+                                                    "$q",
+                                                    "label"
+                                                  ]
+                                                ]
+                                              },
+                                              {
+                                                "tag": "h3",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  [
+                                                    "one",
+                                                    "$q",
+                                                    "title"
+                                                  ]
+                                                ]
+                                              },
+                                              {
+                                                "tag": "p",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  [
+                                                    "one",
+                                                    "$q",
+                                                    "note"
+                                                  ]
+                                                ]
+                                              },
+                                              {
+                                                "tag": "span",
+                                                "attrs": {
+                                                  "class": "q-card-link",
+                                                  "aria-hidden": "true"
+                                                },
+                                                "children": [
+                                                  "list",
+                                                  [
+                                                    "concat",
+                                                    [
+                                                      "one",
+                                                      "$q",
+                                                      "cta"
+                                                    ],
+                                                    " →"
+                                                  ]
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "section",
+                              "attrs": {
+                                "class": "q-section q-closing"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "h2",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "Another side of the same life."
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "These commitments meet in one life. Each brings a different question into focus."
+                                  ]
+                                },
+                                {
+                                  "tag": "nav",
+                                  "attrs": {
+                                    "aria-label": "Questions from another side",
+                                    "class": "q-actions"
+                                  },
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "questions-sourcerer.html",
+                                        "class": "q-text-link"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Sourcerer →"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "questions-author.html",
+                                        "class": "q-text-link"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Author →"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "questions-dad.html",
+                                        "class": "q-text-link"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Dad →"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "questions.html",
+                                        "class": "q-text-link"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Christian →"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "footer",
+                      "attrs": {
+                        "class": "footer"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "div",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "signature"
+                              },
+                              "children": [
+                                "list",
+                                "Aaron Alderman"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "A few things I’ve built. A few things I’m still trying to understand."
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "nav",
+                          "attrs": {
+                            "aria-label": "Elsewhere"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": "https://github.com/aaron-alderman"
+                              },
+                              "children": [
+                                "list",
+                                "GitHub ↗"
+                              ]
+                            },
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": "https://www.linkedin.com/in/aaron-alderman/"
+                              },
+                              "children": [
+                                "list",
+                                "LinkedIn ↗"
+                              ]
+                            },
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": "https://worldwright.io/"
+                              },
+                              "children": [
+                                "list",
+                                "Built with Worldwright.io ↗"
+                              ]
+                            }
+                          ]
+                        },
+                        "$stewardshipLinks"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "call": "html.serialize"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": [
+                "one",
+                "$identityPage",
+                "questionHref"
+              ],
+              "text": [
+                "concat",
+                "<!doctype html>\n",
+                "$result"
+              ]
+            },
+            "into": "_"
+          }
+        ]
       }
     ]
   }
