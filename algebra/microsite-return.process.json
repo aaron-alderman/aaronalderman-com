@@ -65,27 +65,27 @@
                 },
                 {
                   "property": "border",
-                  "value": "1px solid #dec18a99"
+                  "value": "1px solid var(--return-edge,var(--card-edge,var(--accent,#e6bc79)))"
                 },
                 {
                   "property": "border-radius",
-                  "value": "999px"
+                  "value": "var(--return-radius,3px)"
                 },
                 {
                   "property": "background",
-                  "value": "#101b2af5"
+                  "value": "var(--return-bg,linear-gradient(145deg,#182132,#111726))"
                 },
                 {
                   "property": "color",
-                  "value": "#f6ecda"
+                  "value": "var(--return-text,var(--card-light,var(--accent,#e6bc79)))"
                 },
                 {
                   "property": "box-shadow",
-                  "value": "0 5px 24px #0005"
+                  "value": "var(--return-shadow,0 5px 24px #0005)"
                 },
                 {
                   "property": "font",
-                  "value": "500 13px/1.35 system-ui,sans-serif"
+                  "value": "500 13px/1.35 var(--return-font,var(--serif,Georgia,serif))"
                 },
                 {
                   "property": "letter-spacing",
@@ -113,15 +113,15 @@
                 "list",
                 {
                   "property": "background",
-                  "value": "#22334a"
+                  "value": "var(--return-hover,#223047)"
                 },
                 {
                   "property": "border-color",
-                  "value": "#f0d597"
+                  "value": "var(--return-focus,var(--card-light,var(--accent,#e6bc79)))"
                 },
                 {
                   "property": "color",
-                  "value": "#fff5df"
+                  "value": "var(--return-text,var(--card-light,var(--accent,#e6bc79)))"
                 },
                 {
                   "property": "transform",
@@ -141,7 +141,7 @@
                 "list",
                 {
                   "property": "outline",
-                  "value": "2px solid #f0d597"
+                  "value": "2px solid var(--return-focus,var(--card-light,var(--accent,#e6bc79)))"
                 },
                 {
                   "property": "outline-offset",
@@ -186,6 +186,550 @@
                 {
                   "property": "display",
                   "value": "none"
+                }
+              ]
+            },
+            {
+              "id": "return.temple",
+              "selector": ".microsite-return[data-site=\"temple\"]",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--return-bg",
+                  "value": "linear-gradient(135deg,var(--ink-2,#0c0f24),var(--ink-1,#07080f))"
+                },
+                {
+                  "property": "--return-hover",
+                  "value": "var(--ink-3,#151a45)"
+                },
+                {
+                  "property": "--return-text",
+                  "value": "var(--gold,#e3c07a)"
+                },
+                {
+                  "property": "--return-edge",
+                  "value": "var(--gold-dim,#8f7443)"
+                },
+                {
+                  "property": "--return-focus",
+                  "value": "var(--lamp,#ffe2a8)"
+                },
+                {
+                  "property": "--return-font",
+                  "value": "var(--caps,Georgia,serif)"
+                },
+                {
+                  "property": "--return-radius",
+                  "value": "4px"
+                },
+                {
+                  "property": "--return-shadow",
+                  "value": "inset 0 0 0 3px var(--ink-1,#07080f),inset 0 0 0 4px var(--panel-edge,#e3c07a33),0 5px 24px #0005"
+                },
+                {
+                  "property": "letter-spacing",
+                  "value": ".035em"
+                }
+              ]
+            },
+            {
+              "id": "return.sourcery",
+              "selector": ".microsite-return[data-site=\"sourcery\"]",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--return-bg",
+                  "value": "var(--paper,#f4ecdd)"
+                },
+                {
+                  "property": "--return-hover",
+                  "value": "var(--paper-2,#ece0c8)"
+                },
+                {
+                  "property": "--return-text",
+                  "value": "var(--rose-ink,#9c3550)"
+                },
+                {
+                  "property": "--return-edge",
+                  "value": "var(--rose-ink,#9c3550)"
+                },
+                {
+                  "property": "--return-focus",
+                  "value": "var(--rose-ink,#9c3550)"
+                },
+                {
+                  "property": "--return-font",
+                  "value": "var(--display,Georgia,serif)"
+                },
+                {
+                  "property": "--return-radius",
+                  "value": "12px 3px 12px 3px"
+                },
+                {
+                  "property": "--return-shadow",
+                  "value": "3px 3px 0 var(--paper-3,#e1d2b4),0 5px 24px #221d2e1a"
+                }
+              ]
+            },
+            {
+              "id": "return.claimipedia",
+              "selector": ".microsite-return[data-site=\"claimipedia\"]",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--return-bg",
+                  "value": "var(--paper,#faf4e8)"
+                },
+                {
+                  "property": "--return-hover",
+                  "value": "#e8eee1"
+                },
+                {
+                  "property": "--return-text",
+                  "value": "var(--ink,#193e3c)"
+                },
+                {
+                  "property": "--return-edge",
+                  "value": "var(--teal,#297a7e)"
+                },
+                {
+                  "property": "--return-focus",
+                  "value": "var(--teal,#297a7e)"
+                },
+                {
+                  "property": "--return-radius",
+                  "value": "999px"
+                },
+                {
+                  "property": "--return-shadow",
+                  "value": "inset 0 0 0 3px var(--paper,#faf4e8),inset 0 0 0 4px #718e7655,0 5px 24px #193e3c1a"
+                }
+              ]
+            },
+            {
+              "id": "return.encounter",
+              "selector": ".microsite-return[data-site=\"encounter\"]",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--return-bg",
+                  "value": "var(--paper,#f7f3ea)"
+                },
+                {
+                  "property": "--return-hover",
+                  "value": "#eee4d6"
+                },
+                {
+                  "property": "--return-text",
+                  "value": "var(--ink,#182e3a)"
+                },
+                {
+                  "property": "--return-edge",
+                  "value": "var(--accent,#b35636)"
+                },
+                {
+                  "property": "--return-focus",
+                  "value": "var(--accent,#b35636)"
+                },
+                {
+                  "property": "--return-radius",
+                  "value": "5px"
+                },
+                {
+                  "property": "--return-shadow",
+                  "value": "inset 3px 0 0 var(--accent,#b35636),0 5px 24px #182e3a1a"
+                },
+                {
+                  "property": "--return-font",
+                  "value": "Arial,Helvetica,sans-serif"
+                }
+              ]
+            },
+            {
+              "id": "return.type.execution",
+              "selector": "body:has(main[data-type=\"execution\"]) .microsite-return",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.1.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.1.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.1.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.type.platform",
+              "selector": "body:has(main[data-type=\"platform\"]) .microsite-return",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.2.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.2.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.2.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.type.knowledge",
+              "selector": "body:has(main[data-type=\"knowledge\"]) .microsite-return",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.3.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.3.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.3.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.type.research",
+              "selector": "body:has(main[data-type=\"research\"]) .microsite-return",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.4.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.4.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.4.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.type.creation",
+              "selector": "body:has(main[data-type=\"creation\"]) .microsite-return",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.5.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.5.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.5.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.type.simulation",
+              "selector": "body:has(main[data-type=\"simulation\"]) .microsite-return",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.6.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.6.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.6.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.type.coordination",
+              "selector": "body:has(main[data-type=\"coordination\"]) .microsite-return",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.7.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.7.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.7.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.type.practice",
+              "selector": "body:has(main[data-type=\"practice\"]) .microsite-return",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.8.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.8.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.8.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.type.care",
+              "selector": "body:has(main[data-type=\"care\"]) .microsite-return",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.9.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.9.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.9.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.alias.worldwright",
+              "selector": ".microsite-return[data-site=\"worldwright\"]",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.5.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.5.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.5.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.alias.creativity",
+              "selector": ".microsite-return[data-site=\"creativity\"]",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.5.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.5.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.5.--card-edge",
+                    "value"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "return.alias.relational-geometry",
+              "selector": ".microsite-return[data-site=\"relational-geometry\"]",
+              "context": null,
+              "declarations": [
+                "list",
+                {
+                  "property": "--card-light",
+                  "value": [
+                    "one",
+                    "card-types.style.4.--card-light",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-wash",
+                  "value": [
+                    "one",
+                    "card-types.style.4.--card-wash",
+                    "value"
+                  ]
+                },
+                {
+                  "property": "--card-edge",
+                  "value": [
+                    "one",
+                    "card-types.style.4.--card-edge",
+                    "value"
+                  ]
                 }
               ]
             }
@@ -272,7 +816,7 @@
                 "href": [
                   "concat",
                   "$returnPrefix",
-                  "assets/microsite-return.css?v=return-1"
+                  "assets/microsite-return.css?v=return-2"
                 ]
               },
               "children": [
@@ -303,7 +847,12 @@
                   "$returnPrefix",
                   "index.html#microsites"
                 ],
-                "aria-label": "Back to Aaron Alderman’s main website"
+                "aria-label": "Back to Aaron Alderman’s main website",
+                "data-site": [
+                  "at",
+                  "$returnParts",
+                  0
+                ]
               },
               "children": [
                 "list",

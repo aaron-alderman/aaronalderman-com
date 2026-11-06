@@ -85,6 +85,8 @@ Before the source-owner switch, correspondence passed for ordered whole-module J
 
 Every declared project microsite receives the same fixed main-site return link. algebra/microsite-return.process.json owns its markup, CSS, relative destination and idempotent projection. The publication’s final pass applies it to local directory-style StandalonePage declarations; MicrositeDocument pages receive it during their source projection. No browser JavaScript is added. New declared microsites inherit the control automatically.
 
+The return control adopts each host’s theme through algebra-owned CSS variables: Temple’s engraved gold, Sourcery’s rose parchment, Claimipedia’s cream/teal and Encounter’s terracotta. Project pages reuse the existing card-type palette from source/hierarchy.rel. The data-site attribute keeps nested film pages in the same visual family. Shared positioning, native navigation, focus, reduced motion and 44px minimum targets remain centralized.
+
 
 Encounter source batch 02 migrates six further modules (66 queries) after exact ordered JSON, complete lowering, every-statement origins, scoped linking, `each` scope/effects/refusals, UI DOM/state traces and the 19 existing Encounter/microsite behaviour checks passed while JSON remained authoritative. The full post-switch publication gate passed 104 checks.
 
