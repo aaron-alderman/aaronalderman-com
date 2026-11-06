@@ -8,7 +8,7 @@ test('the independent illustrated atlas preserves all forty destinations and ret
  assert.ok(atlas.includes('The world keeps opening.'));assert.ok(atlas.includes('https://aaronalderman.com/atlas.html'));
  assert.equal((atlas.match(/class="atlas-place"/g)||[]).length,40);
  assert.equal((atlas.match(/class="atlas-territory"/g)||[]).length,3);
- assert.ok(home.includes('id="atlas"'));assert.ok(home.includes('href="atlas.html"'));assert.ok(!home.includes('class="atlas-place"'));assert.ok(!home.includes('class="section atlas"'));
+ assert.ok(home.includes('id="atlas"'));assert.ok(home.includes('href="/worlds/sourcerer/atlas.html"'));assert.ok(!home.includes('class="atlas-place"'));assert.ok(!home.includes('class="section atlas"'));
  for(const id of Object.keys(scenes)){assert.ok(atlas.includes('href="places/'+id+'.html"'),id);assert.ok(fs.readFileSync('dist/places/'+id+'.html','utf8').includes('href="../atlas.html"'),id+' returns to the atlas');}
  for(const slug of ['unseen','human','boundary']){assert.ok(atlas.includes('href="#'+slug+'"'));assert.ok(atlas.includes('id="'+slug+'"'));}
  assert.ok(atlas.includes('atlas-runtime.js?v=journey-1'));assert.ok(!atlas.match(/<script[^>]*>[^<]+/));assert.ok(atlas.includes('An imagined geography for real questions'));

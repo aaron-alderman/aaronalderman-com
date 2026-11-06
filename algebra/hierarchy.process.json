@@ -977,7 +977,11 @@
       },
       {
         "let": "identityKey",
-        "value": "sourcerer"
+        "value": [
+          "one",
+          "$homeIdentity",
+          "key"
+        ]
       },
       {
         "call": "identity.catalogue.view"
@@ -989,9 +993,17 @@
           "attrs": {
             "class": "hierarchy-home identity-catalogue",
             "id": "microsites",
-            "data-perspective": "sourcerer",
+            "data-perspective": [
+              "one",
+              "$homeIdentity",
+              "key"
+            ],
             "role": "region",
-            "aria-label": "The work through a Sourcerer’s eyes"
+            "aria-label": [
+              "one",
+              "$homeIdentity",
+              "catalogueIntro"
+            ]
           },
           "children": [
             "list",

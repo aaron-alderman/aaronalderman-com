@@ -50,6 +50,13 @@ const {computationalPorts}=require('./bootstrap/ports/browser-effects.cjs');
 const code=fs.readFileSync('dist/identity-runtime.js','utf8').replace(/startBrowser\(model,factIndex,grants\)\.catch[^\n]+/,'')+'\nglobalThis.capture={model,createKernel};';
 const context=vm.createContext({console});vm.runInContext(code,context);
 const {model,createKernel}=context.capture;
+test('a shared world homepage boots its declared identity and rejects an unknown initial key',async()=>{
+ for(const key of ['sourcerer','author','dad','christian','untrusted']){
+  const state=new Map(),attributes={};
+  await createKernel({...valuePorts(),'browser.read':()=>({attributes:{'data-initial-identity':key}}),'state.set':({key,value})=>state.set(key,value),'browser.attribute':({ref,name,value})=>attributes[ref+':'+name]=value,'browser.on':()=>true,'browser.write':()=>true},model.budget).run(model.queries['identity.boot'],{model,data:model.data});
+  assert.equal(state.get('identity'),key==='untrusted'?'sourcerer':key);assert.equal(attributes['body:data-identity'],state.get('identity'));
+ }
+});
 test('each identity can randomly reach every other identity without an immediate repeat',async()=>{
  assert.deepEqual(Array.from(model.data.themes,t=>t.key),['sourcerer','author','dad','christian']);
  for(const current of model.data.themes){
@@ -65,9 +72,10 @@ test('each identity can randomly reach every other identity without an immediate
    assert.equal(attributes['body:data-identity'],next);
    assert.equal(attributes['#microsites:data-perspective'],next);
    assert.equal(writes['#microsites:html'],model.data.themes.find(t=>t.key===next).catalogueHTML);
-   assert.equal(attributes['#first-trails:href'],model.data.themes.find(t=>t.key===next).questionHref);
-   assert.equal(attributes['#identity-background:src'],model.data.themes.find(t=>t.key===next).image);
-   for(const card of ['questions','threads','atlas'])assert.equal(attributes['#identity-card-'+card+':src'],model.data.themes.find(t=>t.key===next)[card+'Image']);
+   assert.equal(attributes['#first-trails:href'],model.data.themes.find(t=>t.key===next).questionWorldHref);
+   assert.equal(attributes['#identity-background:src'],'/'+model.data.themes.find(t=>t.key===next).image);
+   for(const card of ['questions','threads','atlas'])assert.equal(attributes['#identity-card-'+card+':src'],'/'+model.data.themes.find(t=>t.key===next)[card+'Image']);
+   assert.equal(attributes['#threads:href'],`/worlds/${next}/threads.html`);assert.equal(attributes['#atlas:href'],`/worlds/${next}/atlas.html`);
    assert.equal(writes['#identity-word:textContent'],next+'.');
    assert.equal(writes['#identity-copy:textContent'],model.data.themes.find(t=>t.key===next).copy);
    assert.match(writes['#identity-status:textContent'],new RegExp('Now viewing Aaron as '+next));
@@ -80,7 +88,7 @@ test('the homepage provides a native keyboard button and an announced theme stat
  assert.match(html,/<button[^>]*id="identity-switch"/);
  assert.match(html,/aria-label="Discover another side of Aaron: change the perspective and projects"/);
  assert.match(html,/id="identity-status"[^>]*aria-live="polite"/);
- assert.match(html,/src="identity-runtime.js\?v=identity-collections-optimized-1" defer/);
+ assert.match(html,/src="identity-runtime.js\?v=identity-journeys-1" defer/);
  assert.match(html,/<img[^>]*id="identity-background"/);
 });
 test('every identity publishes a distinct optimized hero image',()=>{
@@ -107,7 +115,7 @@ test('Questions, Threads and Atlas publish distinct world artwork while preservi
   return require('node:crypto').createHash('sha256').update(bytes).digest('hex');
  });
  assert.equal(new Set(hashes).size,12);
- for(const [id,href]of [['first-trails','questions-sourcerer.html'],['threads','gate.html'],['atlas','atlas.html']])assert.match(html,new RegExp('<a[^>]*id="'+id+'"[^>]*href="'+href+'"'));
+ for(const [id,href]of [['first-trails','/worlds/sourcerer/questions.html'],['threads','/worlds/sourcerer/threads.html'],['atlas','/worlds/sourcerer/atlas.html']])assert.match(html,new RegExp('<a[^>]*id="'+id+'"[^>]*href="'+href+'"'));
  for(const card of ['questions','threads','atlas'])assert.match(html,new RegExp('<img[^>]*id="identity-card-'+card+'"'));
 });
 

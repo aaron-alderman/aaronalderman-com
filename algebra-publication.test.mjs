@@ -46,6 +46,7 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  const xml=await read('dist/sitemap.xml'),urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
  const expected=['','assurance/','gate.html','atlas.html','questions.html','questions-sourcerer.html','questions-author.html','questions-dad.html','relational-geometry/','inspection/source-algebra.html',...Object.keys(scenes).map(id=>`places/${id}.html`),...['temple','temple/films','sourcery','sourcery/films','claimipedia','worldwright','encounter','kingdom','world-modelling','creativity','the-field'].map(slug=>slug+'/')].map(route=>'https://aaronalderman.com/'+route);
  for(const item of JSON.parse(await read('source/hierarchy.json')).items)for(const route of [item.href,'inspection/'+item.id+'.html']){const url='https://aaronalderman.com/'+route;if(!expected.includes(url))expected.push(url);}
+ for(const identity of ['sourcerer','author','dad','christian'])for(const route of ['index.html','threads.html','atlas.html','questions.html',...Object.keys(scenes).map(id=>`places/${id}.html`)])expected.push(`https://aaronalderman.com/worlds/${identity}/${route}`);
  assert.deepEqual([...urls].sort(),expected.sort());assert.equal(new Set(urls).size,urls.length);
  assert.ok(xml.includes('https://aaronalderman.com/claimipedia/'));
  assert.ok(xml.includes('https://aaronalderman.com/gate.html'));
@@ -57,7 +58,8 @@ test('all local links and assets in the new static pages resolve within the publ
   const html=await read('dist/'+file);
   for(const match of html.matchAll(/(?:src|href)="([^"]+)"/g)){
    const href=match[1];if(/^(?:https?:|#)/.test(href))continue;
-   let target=path.resolve(root,'dist',path.dirname(file),href.split(/[?#]/)[0]);
+   const route=new URL(href,'https://publication.invalid/'+file).pathname.replace(/^\/+/, '');
+   let target=path.resolve(root,'dist',decodeURIComponent(route));
    assert.ok(target.startsWith(path.join(root,'dist')+path.sep),file+': '+href);
    if((await fs.stat(target)).isDirectory())target=path.join(target,'index.html');
    assert.ok((await fs.stat(target)).isFile(),file+': '+href);
@@ -107,7 +109,7 @@ test('reading paths connect the guided journey to research while microsites keep
  assert.equal((html.match(/class="corpus-door"/g)||[]).length,7);
  assert.equal((html.match(/>Suggested reading path</g)||[]).length,3);
  assert.ok(html.includes('they do not define future microsites'));
- assert.ok(home.includes('href="gate.html"'));
+ assert.ok(home.includes('href="/worlds/sourcerer/threads.html"'));
  assert.ok(html.includes('id="path-claimipedia"'));
  assert.ok(!html.includes('href="temple/index.html"'));assert.ok(!html.includes('href="sourcery/index.html"'));
  for(const id of Object.keys(scenes))assert.ok((await read(`dist/places/${id}.html`)).includes('href="../gate.html" class="gate-nav"'),id+' can reach the corpus');

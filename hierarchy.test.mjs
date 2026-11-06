@@ -34,7 +34,7 @@ test('generated identity assurance keeps navigation gaps visible and covers ever
  assert.equal(report.protocol,'worldwright/identity-assurance/1');
  assert.deepEqual(report.identities,['sourcerer','author','dad','christian']);
  const row=id=>report.rows.find(r=>r.id===id);
- for(const id of ['threads.context','atlas.context'])assert.equal(row(id).status,'missing',id);
+ for(const id of ['threads.context','atlas.context']){assert.equal(row(id).status,'identity-mapped',id);assert.equal(row(id).destinationBound,true,id);}
  for(const id of ['hero.image','questions.route','threads.image','atlas.image','appearance.--identity-bg','apps.filter','apps.perspective','apps.accessible','collection.application.title'])assert.equal(row(id).status,'identity-mapped',id);
  for(const item of catalogue.items)assert.ok(['identity-mapped','missing'].includes(row('app.'+item.id).status),item.id);
  assert.equal(row('brand').status,'intentionally-invariant');
@@ -44,6 +44,56 @@ test('generated identity assurance keeps navigation gaps visible and covers ever
  assert.ok(html.includes('Where does each world reach?'));assert.ok(html.includes('identity-mappings.json'));assert.ok(!html.match(/<script/));
  assert.ok(fs.readFileSync('dist/index.html','utf8').includes('href="assurance/"'));
  assert.ok(fs.readFileSync('dist/sitemap.xml','utf8').includes('https://aaronalderman.com/assurance/'));
+});
+
+test('every identity has distinct Threads content, Map highlights and complete reading returns',async()=>{
+ const {parse}=await import('parse5'),all=n=>[n,...(n.childNodes??[]).flatMap(all)],attr=(n,k)=>n.attrs?.find(a=>a.name===k)?.value,text=n=>(n.value??'')+(n.childNodes??[]).map(text).join('');
+ const facts=parseRel(fs.readFileSync('source/hierarchy.rel','utf8')),field=(s,p)=>facts.find(f=>f.s===s&&f.p===p)?.o;
+ const places=parseRel(fs.readFileSync('source/expedition.rel','utf8')).filter(f=>f.p==='isa'&&f.o==='Place').map(f=>f.s.slice(6));
+ const evidence=JSON.parse(fs.readFileSync('dist/assurance/identity-journeys.json','utf8'));
+ assert.equal(evidence.worlds.length,4);const titles=new Set();
+ for(const key of ['sourcerer','author','dad','christian']){
+  const prefix=`worlds/${key}/`,subject='identity.'+key,world=evidence.worlds.find(w=>w.identity===key);
+  for(const kind of ['threads','map','home','questions'])assert.equal(world[kind].ok,true,key+' '+kind);
+  assert.equal(world.readings.length,40);assert.ok(world.readings.every(r=>r.ok));
+  const threads=all(parse(fs.readFileSync('dist/'+prefix+'threads.html','utf8'))),map=all(parse(fs.readFileSync('dist/'+prefix+'atlas.html','utf8')));
+  const h1=threads.find(n=>n.nodeName==='h1');assert.equal(text(h1),field(subject,'threadsTitle'));titles.add(text(h1));
+  assert.equal(threads.filter(n=>attr(n,'class')==='identity-thread').length,3);
+  assert.ok(map.some(n=>n.nodeName==='h1'&&text(n)===field(subject,'mapTitle')));
+  const pins=map.filter(n=>attr(n,'class')==='atlas-pin');assert.equal(pins.length,40);assert.ok(pins.some(n=>attr(n,'data-identity-recommended')==='true'));
+  for(const pin of pins)assert.equal(attr(pin,'href'),'/'+prefix+'places/'+attr(pin,'data-atlas-id')+'.html');
+  const home=all(parse(fs.readFileSync('dist/'+prefix+'index.html','utf8')));assert.equal(attr(home.find(n=>n.nodeName==='body'),'data-initial-identity'),key);assert.equal(attr(home.find(n=>attr(n,'id')==='identity-background'),'src'),'/'+field(subject,'image'));
+  for(const route of ['threads.html','atlas.html','index.html','questions.html',...places.map(id=>'places/'+id+'.html')]){
+   const html=fs.readFileSync('dist/'+prefix+route,'utf8'),nodes=all(parse(html));
+   assert.equal(attr(nodes.find(n=>n.nodeName==='body'),'data-identity'),key);
+   for(const kind of ['index','threads','atlas'])assert.ok(nodes.some(n=>n.nodeName==='a'&&attr(n,'href')==='/'+prefix+kind+'.html'),key+' '+route+' returns to '+kind);
+   for(const n of nodes){for(const attribute of ['href','src']){const href=attr(n,attribute);if(!href||/^(https?:|#|data:)/.test(href))continue;const url=new URL(href,'https://publication.invalid/'+prefix+route);const target=path.join('dist',decodeURIComponent(url.pathname));assert.ok(fs.existsSync(target),prefix+route+' → '+href);}}
+  }
+  for(const id of places){const shared=all(parse(fs.readFileSync('dist/places/'+id+'.html','utf8'))).find(n=>attr(n,'class')==='reading'),reading=all(parse(fs.readFileSync('dist/'+prefix+'places/'+id+'.html','utf8')));assert.equal(text(reading.find(n=>attr(n,'class')==='reading')),text(shared),key+' '+id+' preserves source reading');assert.ok(reading.some(n=>attr(n,'data-shared-exit')==='true'&&attr(n,'href')==='https://aaronalderman.com/places/'+id+'.html'));}
+ }
+ assert.equal(titles.size,4);
+});
+
+test('assurance refuses a wired route when destination evidence or identity returns are missing',async()=>{
+ const p=read('algebra/publication.process.json'),entry='identity.assurance.classify',compiled=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry,queries:{[entry]:p.queries[entry]}},mode:'model',ports:valuePorts(),limit:20000000});
+ const policy={id:'threads.context',area:'Threads',label:'Destination',intent:'identity',resolver:'theme',field:'threadsHref',target:'#threads',sink:'href',read:'$chosen.threadsHref',subjectRead:'$identitySubject',reason:'Carry identity',next:'Restore destination',source:'fixture'};
+ const input={policies:[policy],identities:['sourcerer','author','dad','christian'],worlds:['sourcerer','author','dad','christian'].map(key=>({key,values:{'threads.context':'/worlds/'+key+'/threads.html'}})),bindings:[{args:{ref:'#threads',name:'href',value:'$chosen.threadsHref'}}],themeFields:{threadsHref:['one','$identitySubject','threadsHref']},journeyChecks:{'threads.context':false}};
+ const classify=async x=>(await invoke({model:compiled,entry,input:{eventInput:x},ports:valuePorts(),limit:20000000})).value;
+ assert.equal((await classify(input))[0].status,'missing');input.journeyChecks['threads.context']=true;assert.equal((await classify(input))[0].status,'identity-mapped');
+ const checkEntry='identity.journey.check',checkModel=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:checkEntry,queries:{[checkEntry]:p.queries[checkEntry]}},mode:'model',ports:valuePorts(),limit:20000000});
+ const html=fs.readFileSync('dist/worlds/author/threads.html','utf8'),expected=['data-identity="author"','href="/worlds/author/atlas.html"','Follow the life between the lines.'];
+ const check=async value=>(await invoke({model:checkModel,entry:checkEntry,input:{eventInput:{html:value,expected}},ports:valuePorts(),limit:20000000})).value;
+ assert.equal((await check(html)).ok,true);for(const fragment of expected)assert.equal((await check(html.replaceAll(fragment,''))).ok,false,fragment);
+});
+
+test('the algebra preserves query strings, fragments and explicit shared exits while carrying identity',async()=>{
+ const {indexFacts}=require('./bootstrap/ports/fact-index.cjs'),{createNodeHost}=require('./bootstrap/ports/node.cjs'),entry='identity.journey.rebase';
+ const facts=parseRel(fs.readFileSync('source/hierarchy.rel','utf8')).filter(f=>f.s==='identity.author'),factIndex=await indexFacts(createKernel(valuePorts(),20000000),read('algebra/fact-index.process.json'),facts);
+ const compiled=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry,queries:{[entry]:read('algebra/publication.process.json').queries[entry]}},mode:'model',ports:valuePorts(),limit:20000000});
+ const host=await createNodeHost({root:process.cwd(),output:'.build/identity-link-verification'});
+ const html='<a href="../atlas.html#map">Map</a><a href="revision.html">Next</a><iframe src="../retained/activity.html?v=algebra-1#care"></iframe><a href="#local">Here</a><a href="https://aaronalderman.com/places/care.html">Shared</a>';
+ const result=(await invoke({model:compiled,entry,input:{factIndex,eventInput:{html,route:'places/care.html',identity:'identity.author'}},ports:{...valuePorts(),...host.ports},limit:20000000})).value;
+ for(const fragment of ['href="/worlds/author/atlas.html#map"','href="/worlds/author/places/revision.html"','src="/retained/activity.html?v=algebra-1#care"','href="#local"','href="https://aaronalderman.com/places/care.html"'])assert.ok(result.includes(fragment),fragment);
 });
 
 test('the homepage hierarchy preserves the author order and routes every tool to its own microsite',()=>{
@@ -101,7 +151,7 @@ test('the admitted viewer highlights source and its actual sharing definition wi
 test('the opening fold has three illustrated entrances and moves questions and applications to their own destinations',()=>{
  const home=fs.readFileSync('dist/index.html','utf8'),hero=home.match(/<section class="hero home-entrance-fold"[\s\S]*?<\/section>/)?.[0];assert.ok(hero);
  assert.equal((hero.match(/class="begin-door"/g)||[]).length,3);
- for(const [href,label]of [['questions-sourcerer.html','Questions'],['gate.html','Threads'],['atlas.html','Atlas / Map']]){assert.ok(hero.includes('href="'+href+'"'));assert.ok(hero.includes('<h2>'+label+'</h2>'));}
+ for(const [href,label]of [['/worlds/sourcerer/questions.html','Questions'],['/worlds/sourcerer/threads.html','Threads'],['/worlds/sourcerer/atlas.html','Atlas / Map']]){assert.ok(hero.includes('href="'+href+'"'));assert.ok(hero.includes('<h2>'+label+'</h2>'));}
  assert.equal((hero.match(/id="identity-card-(?:questions|threads|atlas)"/g)||[]).length,3);assert.ok(!hero.includes('data-item='));assert.ok(home.indexOf('data-item="temple"')>home.indexOf('</section>'));
  assert.ok(!home.includes('class="section first-trails"'));assert.ok(!home.includes('class="section atlas-portal"'));assert.equal((home.match(/class="hierarchy-section home-fold /g)||[]).length,4);
  const questions=fs.readFileSync('dist/questions.html','utf8');assert.ok(questions.includes('live like Jesus?'));for(const slug of ['laboratory','kenosis','care'])assert.ok(questions.includes('href="places/'+slug+'.html"'));
@@ -167,12 +217,12 @@ test('another side changes the question destination and label through the algebr
  for(const current of themes){const choices=themes.filter(t=>t.key!==current.key);for(let i=0;i<choices.length;i++){
   const effects=[],chosen=choices[i];
   await invoke({model,entry:'identity.change',input:{data:{themes}},ports:{...valuePorts(),...computationalPorts(),'state.get':()=>current.key,'state.set':x=>{effects.push(x);return true},'random.values':()=>[(i+.1)/choices.length],'browser.attribute':x=>{effects.push(x);return true},'browser.write':x=>{effects.push(x);return true},'browser.content':x=>{effects.push(x);return true}},limit:20000000});
-  assert.ok(effects.some(x=>x.ref==='#first-trails'&&x.name==='href'&&x.value===chosen.questionHref));
+  assert.ok(effects.some(x=>x.ref==='#first-trails'&&x.name==='href'&&x.value===chosen.questionWorldHref));
   assert.ok(effects.some(x=>x.ref==='#identity-question-copy'&&x.value===chosen.questionCopy));
   assert.ok(effects.some(x=>x.ref==='body'&&x.value===chosen.key));
-  for(const card of ['questions','threads','atlas'])assert.ok(effects.some(x=>x.ref==='#identity-card-'+card&&x.name==='src'&&x.value===chosen[card+'Image']));
+  for(const card of ['questions','threads','atlas'])assert.ok(effects.some(x=>x.ref==='#identity-card-'+card&&x.name==='src'&&x.value==='/'+chosen[card+'Image']));
  }}
- const home=fs.readFileSync('dist/index.html','utf8');assert.ok(home.includes('href="questions-sourcerer.html"'));assert.ok(home.includes('How do I build software that earns trust?'));
+ const home=fs.readFileSync('dist/index.html','utf8');assert.ok(home.includes('href="/worlds/sourcerer/questions.html"'));assert.ok(home.includes('How do I build software that earns trust?'));
  for(const theme of themes){const html=fs.readFileSync('dist/'+theme.questionHref,'utf8');assert.ok(html.includes('<h1'));assert.ok(html.includes('Questions from another side'));for(const other of themes)assert.ok(html.includes('href="'+other.questionHref+'"'));}
  const dad=fs.readFileSync('dist/questions-dad.html','utf8');assert.ok(dad.includes('present as Dad?'));assert.ok(!dad.includes('live like Jesus?'));assert.ok(!dad.includes('>Father'));
  const author=fs.readFileSync('dist/questions-author.html','utf8');assert.ok(author.includes('the people who enter my stories?'));assert.ok(author.includes('href="worldwright/"'));assert.ok(author.includes('href="creator-studio/"'));
@@ -220,12 +270,12 @@ test('each homepage perspective curates real projects without changing their pur
   assert.deepEqual(items(section('foundation')),['temple','sourcery']);assert.deepEqual(items(section('application')),expected[theme.key]);assert.deepEqual(items(section('progress')),shapes[theme.key]);
   headlines.add(text(all(section('application')).find(n=>n.nodeName==='h2')));
   assert.equal(new Set(cards.map(n=>attr(n,'data-item'))).size,cards.length);
-  for(const card of cards){const id=attr(card,'data-item'),original=catalogue.items.find(x=>x.id===id);assert.ok(original);assert.equal(attr(card,'data-type'),original.type);assert.equal(attr(card,'data-perspective'),theme.key);assert.ok(text(card).includes(original.description),theme.key+' '+id+' definition');assert.ok(text(card).includes(original.status),theme.key+' '+id+' maturity');assert.ok(all(card).some(n=>n.nodeName==='a'&&attr(n,'href')===original.href));assert.ok(all(card).some(n=>attr(n,'class')==='identity-card-note'&&text(n).length>20));}
+  for(const card of cards){const id=attr(card,'data-item'),original=catalogue.items.find(x=>x.id===id);assert.ok(original);assert.equal(attr(card,'data-type'),original.type);assert.equal(attr(card,'data-perspective'),theme.key);assert.ok(text(card).includes(original.description),theme.key+' '+id+' definition');assert.ok(text(card).includes(original.status),theme.key+' '+id+' maturity');assert.ok(all(card).some(n=>n.nodeName==='a'&&attr(n,'href')==='/'+original.href));assert.ok(all(card).some(n=>attr(n,'class')==='identity-card-note'&&text(n).length>20));}
   for(const img of nodes.filter(n=>n.nodeName==='img'))assert.ok(fs.existsSync('dist/'+attr(img,'src')),attr(img,'src'));
   for(const link of nodes.filter(n=>n.nodeName==='a')){const href=attr(link,'href');if(href&&!/^(https?:|#)/.test(href))assert.ok(fs.existsSync('dist/'+href.split('#')[0]),href);}
  }
  assert.equal(headlines.size,4);
- const home=fs.readFileSync('dist/index.html','utf8');assert.ok(home.includes(themes.find(t=>t.key==='sourcerer').catalogueHTML));assert.equal((home.match(/id="microsites"/g)||[]).length,1);assert.ok(home.includes('aria-controls="microsites"'));
+ const home=fs.readFileSync('dist/index.html','utf8'),rootLinks=html=>html.replace(/(href|src)="(?!https?:|#|\/)([^\"]+)"/g,'$1="/$2"');assert.ok(rootLinks(home).includes(themes.find(t=>t.key==='sourcerer').catalogueHTML));assert.equal((home.match(/id="microsites"/g)||[]).length,1);assert.ok(home.includes('aria-controls="microsites"'));
  const css=fs.readFileSync('dist/expedition.css','utf8');for(const type of Object.keys(read('source/card-types.json').types))assert.ok(css.includes('#microsites.identity-catalogue .hierarchy-card[data-type="'+type+'"]'));
  const programme=read('algebra/publication.process.json');assert.ok(JSON.stringify(programme.queries['identity.runtime.build']).includes('identity.catalogue.view'));assert.ok(JSON.stringify(read('algebra/hierarchy.process.json').queries['hierarchy.home']).includes('identity.catalogue.view'));assert.equal(read('bootstrap/site.json').executionBudget,20000000);
 });

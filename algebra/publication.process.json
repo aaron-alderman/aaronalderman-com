@@ -3,6 +3,10 @@
   "queries": {
     "publication.build": [
       {
+        "let": "homeIdentity",
+        "value": "identity.sourcerer"
+      },
+      {
         "call": "identity.runtime.build"
       },
       {
@@ -40,9 +44,6 @@
       },
       {
         "call": "hierarchy.build"
-      },
-      {
-        "call": "identity.assurance.build"
       },
       {
         "each": [
@@ -330,6 +331,12 @@
       },
       {
         "call": "gateway.build"
+      },
+      {
+        "call": "identity.journeys.build"
+      },
+      {
+        "call": "identity.assurance.build"
       },
       {
         "port": "file.write",
@@ -1209,12 +1216,30 @@
                       "tag": "a",
                       "attrs": {
                         "href": [
-                          "concat",
-                          "$prefix",
-                          "index.html"
+                          "if",
+                          [
+                            "eq",
+                            "$canonical",
+                            [
+                              "one",
+                              "site",
+                              "origin"
+                            ]
+                          ],
+                          [
+                            "one",
+                            "identity.sourcerer",
+                            "homeHref"
+                          ],
+                          [
+                            "concat",
+                            "$prefix",
+                            "index.html"
+                          ]
                         ],
                         "class": "brand",
-                        "aria-label": "Aaron Alderman"
+                        "aria-label": "Aaron Alderman",
+                        "id": "identity-home-link"
                       },
                       "children": [
                         "list",
@@ -1269,11 +1294,29 @@
                           "tag": "a",
                           "attrs": {
                             "href": [
-                              "concat",
-                              "$prefix",
-                              "gate.html"
+                              "if",
+                              [
+                                "eq",
+                                "$canonical",
+                                [
+                                  "one",
+                                  "site",
+                                  "origin"
+                                ]
+                              ],
+                              [
+                                "one",
+                                "identity.sourcerer",
+                                "threadsHref"
+                              ],
+                              [
+                                "concat",
+                                "$prefix",
+                                "gate.html"
+                              ]
                             ],
-                            "class": "gate-nav"
+                            "class": "gate-nav",
+                            "id": "identity-threads-nav"
                           },
                           "children": [
                             "list",
@@ -1284,10 +1327,28 @@
                           "tag": "a",
                           "attrs": {
                             "href": [
-                              "concat",
-                              "$prefix",
-                              "atlas.html"
-                            ]
+                              "if",
+                              [
+                                "eq",
+                                "$canonical",
+                                [
+                                  "one",
+                                  "site",
+                                  "origin"
+                                ]
+                              ],
+                              [
+                                "one",
+                                "identity.sourcerer",
+                                "atlasHref"
+                              ],
+                              [
+                                "concat",
+                                "$prefix",
+                                "atlas.html"
+                              ]
+                            ],
+                            "id": "identity-map-nav"
                           },
                           "children": [
                             "list",
@@ -1445,7 +1506,7 @@
                   "class": "hero-image",
                   "src": [
                     "one",
-                    "identity.sourcerer",
+                    "$homeIdentity",
                     "image"
                   ],
                   "alt": "",
@@ -1513,7 +1574,15 @@
                                 },
                                 "children": [
                                   "list",
-                                  "sourcerer."
+                                  [
+                                    "concat",
+                                    [
+                                      "one",
+                                      "$homeIdentity",
+                                      "label"
+                                    ],
+                                    "."
+                                  ]
                                 ]
                               },
                               {
@@ -1567,7 +1636,11 @@
                     },
                     "children": [
                       "list",
-                      "Physics, faith, machines, and the work of remembering care."
+                      [
+                        "one",
+                        "$homeIdentity",
+                        "copy"
+                      ]
                     ]
                   },
                   {
@@ -1603,12 +1676,12 @@
                               "class": "begin-door",
                               "href": [
                                 "one",
-                                "identity.sourcerer",
-                                "questionHref"
+                                "$homeIdentity",
+                                "questionWorldHref"
                               ],
                               "aria-label": [
                                 "one",
-                                "identity.sourcerer",
+                                "$homeIdentity",
                                 "questionCopy"
                               ]
                             },
@@ -1619,7 +1692,7 @@
                                 "attrs": {
                                   "src": [
                                     "one",
-                                    "identity.sourcerer",
+                                    "$homeIdentity",
                                     "questionsImage"
                                   ],
                                   "alt": "",
@@ -1656,7 +1729,7 @@
                                       "list",
                                       [
                                         "one",
-                                        "identity.sourcerer",
+                                        "$homeIdentity",
                                         "questionCopy"
                                       ]
                                     ]
@@ -1680,7 +1753,11 @@
                             "attrs": {
                               "id": "threads",
                               "class": "begin-door",
-                              "href": "gate.html"
+                              "href": [
+                                "one",
+                                "$homeIdentity",
+                                "threadsHref"
+                              ]
                             },
                             "children": [
                               "list",
@@ -1689,7 +1766,7 @@
                                 "attrs": {
                                   "src": [
                                     "one",
-                                    "identity.sourcerer",
+                                    "$homeIdentity",
                                     "threadsImage"
                                   ],
                                   "alt": "",
@@ -1719,10 +1796,16 @@
                                   },
                                   {
                                     "tag": "p",
-                                    "attrs": {},
+                                    "attrs": {
+                                      "id": "identity-threads-copy"
+                                    },
                                     "children": [
                                       "list",
-                                      "Follow an idea across the work."
+                                      [
+                                        "one",
+                                        "$homeIdentity",
+                                        "threadsCardCopy"
+                                      ]
                                     ]
                                   },
                                   {
@@ -1744,7 +1827,11 @@
                             "attrs": {
                               "id": "atlas",
                               "class": "begin-door",
-                              "href": "atlas.html"
+                              "href": [
+                                "one",
+                                "$homeIdentity",
+                                "atlasHref"
+                              ]
                             },
                             "children": [
                               "list",
@@ -1753,7 +1840,7 @@
                                 "attrs": {
                                   "src": [
                                     "one",
-                                    "identity.sourcerer",
+                                    "$homeIdentity",
                                     "atlasImage"
                                   ],
                                   "alt": "",
@@ -1783,10 +1870,16 @@
                                   },
                                   {
                                     "tag": "p",
-                                    "attrs": {},
+                                    "attrs": {
+                                      "id": "identity-atlas-copy"
+                                    },
                                     "children": [
                                       "list",
-                                      "Find a place. Choose your own path."
+                                      [
+                                        "one",
+                                        "$homeIdentity",
+                                        "atlasCardCopy"
+                                      ]
                                     ]
                                   },
                                   {
@@ -1867,13 +1960,22 @@
             },
             "children": [
               "list",
-              "Current theme: sourcerer."
+              [
+                "concat",
+                "Current theme: ",
+                [
+                  "one",
+                  "$homeIdentity",
+                  "label"
+                ],
+                "."
+              ]
             ]
           },
           {
             "tag": "script",
             "attrs": {
-              "src": "identity-runtime.js?v=identity-collections-optimized-1",
+              "src": "identity-runtime.js?v=identity-journeys-1",
               "defer": true
             },
             "children": [
@@ -3024,10 +3126,55 @@
     ],
     "identity.boot": [
       {
+        "port": "browser.read",
+        "args": {
+          "ref": "body"
+        },
+        "into": "initialBody"
+      },
+      {
+        "let": "initialKey",
+        "value": [
+          "at",
+          [
+            "at",
+            "$initialBody",
+            "attributes"
+          ],
+          "data-initial-identity"
+        ]
+      },
+      {
+        "let": "initialTheme",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$data.themes",
+            "t",
+            [
+              "eq",
+              "$t.key",
+              "$initialKey"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "initialKey",
+        "value": [
+          "if",
+          "$initialTheme",
+          "$initialTheme.key",
+          "sourcerer"
+        ]
+      },
+      {
         "port": "state.set",
         "args": {
           "key": "identity",
-          "value": "sourcerer"
+          "value": "$initialKey"
         },
         "into": "_"
       },
@@ -3036,7 +3183,7 @@
         "args": {
           "ref": "body",
           "name": "data-identity",
-          "value": "sourcerer"
+          "value": "$initialKey"
         },
         "into": "_"
       },
@@ -3142,7 +3289,11 @@
         "args": {
           "ref": "#identity-background",
           "name": "src",
-          "value": "$chosen.image"
+          "value": [
+            "concat",
+            "/",
+            "$chosen.image"
+          ]
         },
         "into": "_"
       },
@@ -3151,7 +3302,11 @@
         "args": {
           "ref": "#identity-card-questions",
           "name": "src",
-          "value": "$chosen.questionsImage"
+          "value": [
+            "concat",
+            "/",
+            "$chosen.questionsImage"
+          ]
         },
         "into": "_"
       },
@@ -3160,7 +3315,11 @@
         "args": {
           "ref": "#identity-card-threads",
           "name": "src",
-          "value": "$chosen.threadsImage"
+          "value": [
+            "concat",
+            "/",
+            "$chosen.threadsImage"
+          ]
         },
         "into": "_"
       },
@@ -3169,7 +3328,11 @@
         "args": {
           "ref": "#identity-card-atlas",
           "name": "src",
-          "value": "$chosen.atlasImage"
+          "value": [
+            "concat",
+            "/",
+            "$chosen.atlasImage"
+          ]
         },
         "into": "_"
       },
@@ -3240,7 +3403,7 @@
         "args": {
           "ref": "#first-trails",
           "name": "href",
-          "value": "$chosen.questionHref"
+          "value": "$chosen.questionWorldHref"
         },
         "into": "_"
       },
@@ -3259,6 +3422,69 @@
           "ref": "#identity-question-copy",
           "name": "textContent",
           "value": "$chosen.questionCopy"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#threads",
+          "name": "href",
+          "value": "$chosen.threadsHref"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#atlas",
+          "name": "href",
+          "value": "$chosen.atlasHref"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#identity-home-link",
+          "name": "href",
+          "value": "$chosen.homeHref"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#identity-threads-nav",
+          "name": "href",
+          "value": "$chosen.threadsHref"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#identity-map-nav",
+          "name": "href",
+          "value": "$chosen.atlasHref"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-threads-copy",
+          "name": "textContent",
+          "value": "$chosen.threadsCardCopy"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-atlas-copy",
+          "name": "textContent",
+          "value": "$chosen.atlasCardCopy"
         },
         "into": "_"
       },
@@ -3322,6 +3548,17 @@
           },
           {
             "call": "html.serialize"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$result",
+              "route": "index.html",
+              "identity": "$identitySubject"
+            }
+          },
+          {
+            "call": "identity.journey.rebase"
           }
         ],
         "yield": [
@@ -3380,6 +3617,36 @@
                 "one",
                 "$identitySubject",
                 "catalogueIntro"
+              ],
+              "homeHref": [
+                "one",
+                "$identitySubject",
+                "homeHref"
+              ],
+              "threadsHref": [
+                "one",
+                "$identitySubject",
+                "threadsHref"
+              ],
+              "atlasHref": [
+                "one",
+                "$identitySubject",
+                "atlasHref"
+              ],
+              "questionWorldHref": [
+                "one",
+                "$identitySubject",
+                "questionWorldHref"
+              ],
+              "threadsCardCopy": [
+                "one",
+                "$identitySubject",
+                "threadsCardCopy"
+              ],
+              "atlasCardCopy": [
+                "one",
+                "$identitySubject",
+                "atlasCardCopy"
               ]
             }
           ]
@@ -3592,46 +3859,67 @@
             "let": "complete",
             "value": [
               "and",
-              "$dataBound",
-              "$writerBound",
               [
-                "not",
+                "and",
+                "$dataBound",
+                "$writerBound",
                 [
-                  "eq",
+                  "not",
                   [
-                    "count",
-                    "$eventInput.identities"
-                  ],
-                  0
-                ]
-              ],
-              [
-                "every",
-                "$eventInput.identities",
-                "key",
-                [
-                  "eq",
-                  [
-                    "count",
+                    "eq",
                     [
-                      "filter",
-                      "$eventInput.worlds",
-                      "w",
+                      "count",
+                      "$eventInput.identities"
+                    ],
+                    0
+                  ]
+                ],
+                [
+                  "every",
+                  "$eventInput.identities",
+                  "key",
+                  [
+                    "eq",
+                    [
+                      "count",
                       [
-                        "eq",
-                        "$w.key",
-                        "$key"
+                        "filter",
+                        "$eventInput.worlds",
+                        "w",
+                        [
+                          "eq",
+                          "$w.key",
+                          "$key"
+                        ]
                       ]
-                    ]
-                  ],
-                  1
+                    ],
+                    1
+                  ]
+                ],
+                [
+                  "every",
+                  "$values",
+                  "v",
+                  "$v.value"
                 ]
               ],
               [
-                "every",
-                "$values",
-                "v",
-                "$v.value"
+                "if",
+                [
+                  "includes",
+                  [
+                    "list",
+                    "threads.context",
+                    "atlas.context"
+                  ],
+                  "$p.id"
+                ],
+                [
+                  "at",
+                  "$eventInput.journeyChecks",
+                  "$p.id"
+                ],
+                true
               ]
             ]
           },
@@ -3729,6 +4017,24 @@
                   "Checks declared CSS values and the body identity writer; does not certify visual appearance.",
                   "Checks authored world values, runtime field projection and matching browser writer; does not certify downstream meaning."
                 ]
+              ],
+              "destinationBound": [
+                "if",
+                [
+                  "includes",
+                  [
+                    "list",
+                    "threads.context",
+                    "atlas.context"
+                  ],
+                  "$p.id"
+                ],
+                [
+                  "at",
+                  "$eventInput.journeyChecks",
+                  "$p.id"
+                ],
+                null
               ]
             }
           }
@@ -3819,6 +4125,88 @@
       }
     ],
     "identity.assurance.build": [
+      {
+        "port": "file.read",
+        "args": {
+          "path": "assurance/identity-journeys.json"
+        },
+        "into": "journeyText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$journeyText"
+        },
+        "into": "journeyEvidence"
+      },
+      {
+        "let": "readingBound",
+        "value": [
+          "every",
+          "$journeyEvidence.worlds",
+          "w",
+          [
+            "and",
+            "$w.home.ok",
+            "$w.questions.ok",
+            [
+              "eq",
+              [
+                "count",
+                "$w.readings"
+              ],
+              40
+            ],
+            [
+              "every",
+              "$w.readings",
+              "r",
+              "$r.ok"
+            ]
+          ]
+        ]
+      },
+      {
+        "let": "journeyChecks",
+        "value": {
+          "threads.context": [
+            "and",
+            "$readingBound",
+            [
+              "eq",
+              [
+                "count",
+                "$journeyEvidence.worlds"
+              ],
+              4
+            ],
+            [
+              "every",
+              "$journeyEvidence.worlds",
+              "w",
+              "$w.threads.ok"
+            ]
+          ],
+          "atlas.context": [
+            "and",
+            "$readingBound",
+            [
+              "eq",
+              [
+                "count",
+                "$journeyEvidence.worlds"
+              ],
+              4
+            ],
+            [
+              "every",
+              "$journeyEvidence.worlds",
+              "w",
+              "$w.map.ok"
+            ]
+          ]
+        }
+      },
       {
         "port": "file.copy",
         "args": {
@@ -4518,7 +4906,8 @@
               }
             }
           ],
-          "themeFields": "$themeFields"
+          "themeFields": "$themeFields",
+          "journeyChecks": "$journeyChecks"
         }
       },
       {
@@ -4575,9 +4964,9 @@
         "let": "report",
         "value": {
           "protocol": "worldwright/identity-assurance/1",
-          "scope": "Homepage: opening, navigation, Questions entrance, Threads, Map, application catalogue and collection headings, notes, images and ordering, appearance, interaction and footer. Downstream article, thread and map internals are not certified.",
+          "scope": "Homepage, identity Threads and Maps, forty readings per identity, identity Questions return links, curated application collections, appearance, interaction and footer.",
           "policy": "Equal output never implies intentional invariance. Missing and undecided relationships remain open work.",
-          "boundary": "Declared surface inventory plus automatic discovery of unclassified top-level cross browser writers. Catalogue rows check collection facts, selected-app notes, the view/serializer pipeline and cross content writer; they do not prove every inner renderer dependency. This is not exhaustive DOM, transitive dependency, visual or semantic verification.",
+          "boundary": "Declared surface inventory plus automatic discovery of unclassified top-level cross browser writers. Catalogue rows check collection facts, selected-app notes, the view/serializer pipeline and cross content writer; they do not prove every inner renderer dependency. This is not exhaustive DOM, transitive dependency, visual or semantic verification. Threads and Map route rows additionally require generated destination headings, copy, artwork, reading links and identity return navigation across all forty readings in each world. These checks do not certify semantic or visual correctness.",
           "identities": [
             "map",
             "$resolved",
@@ -4585,7 +4974,8 @@
             "$w.key"
           ],
           "summary": "$summary",
-          "rows": "$assuranceRows"
+          "rows": "$assuranceRows",
+          "journeys": "$journeyEvidence"
         }
       },
       {
@@ -5055,6 +5445,29 @@
                                   "$r.writerBound",
                                   "present",
                                   "missing"
+                                ],
+                                [
+                                  "if",
+                                  [
+                                    "includes",
+                                    [
+                                      "list",
+                                      "threads.context",
+                                      "atlas.context"
+                                    ],
+                                    "$r.id"
+                                  ],
+                                  [
+                                    "concat",
+                                    " · Destination and return links: ",
+                                    [
+                                      "if",
+                                      "$r.destinationBound",
+                                      "verified",
+                                      "missing"
+                                    ]
+                                  ],
+                                  null
                                 ]
                               ]
                             },
@@ -5112,6 +5525,1825 @@
             "<!doctype html>\n",
             "$result"
           ]
+        },
+        "into": "_"
+      }
+    ],
+    "identity.journey.rebase": [
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$eventInput.html",
+          "pattern": "((?:href|src)=\"[^\"]+\")"
+        },
+        "into": "urls"
+      },
+      {
+        "fold": "$urls",
+        "as": "piece",
+        "accumulator": "rebased",
+        "initial": "",
+        "steps": [
+          {
+            "let": "replacement",
+            "value": "$piece"
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$piece",
+              "pattern": "^(?:href|src)=\"[^\"]+\"$"
+            },
+            "into": "isUrl"
+          },
+          {
+            "when": "$isUrl",
+            "then": [
+              {
+                "port": "text.split",
+                "args": {
+                  "value": "$piece",
+                  "pattern": "\"([^\"]+)\""
+                },
+                "into": "parts"
+              },
+              {
+                "let": "attribute",
+                "value": [
+                  "at",
+                  "$parts",
+                  0
+                ]
+              },
+              {
+                "let": "href",
+                "value": [
+                  "at",
+                  "$parts",
+                  1
+                ]
+              },
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$href",
+                  "pattern": "^(?:#|[A-Za-z][A-Za-z0-9+.-]*:|//)"
+                },
+                "into": "leave"
+              },
+              {
+                "when": [
+                  "not",
+                  "$leave"
+                ],
+                "then": [
+                  {
+                    "port": "url.resolve",
+                    "args": {
+                      "href": "$href",
+                      "route": "$eventInput.route"
+                    },
+                    "into": "resolved"
+                  },
+                  {
+                    "port": "text.matches",
+                    "args": {
+                      "value": "$resolved.route",
+                      "pattern": "^places/[a-z0-9-]+\\.html$"
+                    },
+                    "into": "isPlace"
+                  },
+                  {
+                    "let": "target",
+                    "value": [
+                      "if",
+                      [
+                        "eq",
+                        "$resolved.route",
+                        "index.html"
+                      ],
+                      [
+                        "one",
+                        "$eventInput.identity",
+                        "homeRoute"
+                      ],
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$resolved.route",
+                          "gate.html"
+                        ],
+                        [
+                          "one",
+                          "$eventInput.identity",
+                          "threadsRoute"
+                        ],
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$resolved.route",
+                            "atlas.html"
+                          ],
+                          [
+                            "one",
+                            "$eventInput.identity",
+                            "atlasRoute"
+                          ],
+                          [
+                            "if",
+                            [
+                              "eq",
+                              "$resolved.route",
+                              [
+                                "one",
+                                "$eventInput.identity",
+                                "questionHref"
+                              ]
+                            ],
+                            [
+                              "one",
+                              "$eventInput.identity",
+                              "questionWorldRoute"
+                            ],
+                            [
+                              "if",
+                              "$isPlace",
+                              [
+                                "concat",
+                                "worlds/",
+                                [
+                                  "one",
+                                  "$eventInput.identity",
+                                  "key"
+                                ],
+                                "/",
+                                "$resolved.route"
+                              ],
+                              "$resolved.route"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  },
+                  {
+                    "port": "text.split",
+                    "args": {
+                      "value": "$href",
+                      "pattern": "(\\?[^#]*)"
+                    },
+                    "into": "queryParts"
+                  },
+                  {
+                    "let": "replacement",
+                    "value": [
+                      "concat",
+                      "$attribute",
+                      "\"/",
+                      "$target",
+                      [
+                        "or",
+                        [
+                          "at",
+                          "$queryParts",
+                          1
+                        ],
+                        ""
+                      ],
+                      [
+                        "if",
+                        [
+                          "not",
+                          [
+                            "eq",
+                            "$resolved.fragment",
+                            ""
+                          ]
+                        ],
+                        [
+                          "concat",
+                          "#",
+                          "$resolved.fragment"
+                        ],
+                        ""
+                      ],
+                      "\""
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": [
+          "concat",
+          "$rebased",
+          "$replacement"
+        ],
+        "into": "rebased"
+      },
+      {
+        "let": "result",
+        "value": "$rebased"
+      }
+    ],
+    "identity.journey.nav": [
+      {
+        "let": "result",
+        "value": {
+          "tag": "nav",
+          "attrs": {
+            "class": "identity-journey-nav",
+            "aria-label": "This identity"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "a",
+              "attrs": {
+                "href": [
+                  "one",
+                  "$journeyIdentity",
+                  "homeHref"
+                ]
+              },
+              "children": [
+                "list",
+                [
+                  "concat",
+                  "← ",
+                  [
+                    "one",
+                    "$journeyIdentity",
+                    "label"
+                  ],
+                  " / Home"
+                ]
+              ]
+            },
+            {
+              "tag": "a",
+              "attrs": {
+                "href": [
+                  "one",
+                  "$journeyIdentity",
+                  "threadsHref"
+                ]
+              },
+              "children": [
+                "list",
+                "Threads"
+              ]
+            },
+            {
+              "tag": "a",
+              "attrs": {
+                "href": [
+                  "one",
+                  "$journeyIdentity",
+                  "atlasHref"
+                ]
+              },
+              "children": [
+                "list",
+                "Map"
+              ]
+            },
+            {
+              "tag": "a",
+              "attrs": {
+                "href": [
+                  "one",
+                  "$journeyIdentity",
+                  "questionWorldHref"
+                ]
+              },
+              "children": [
+                "list",
+                "Questions"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "identity.journey.intro": [
+      {
+        "call": "identity.journey.nav"
+      },
+      {
+        "let": "journeyNav",
+        "value": "$result"
+      },
+      {
+        "let": "result",
+        "value": {
+          "tag": "section",
+          "attrs": {
+            "class": "identity-journey-intro",
+            "data-journey-identity": [
+              "one",
+              "$journeyIdentity",
+              "key"
+            ]
+          },
+          "children": [
+            "list",
+            {
+              "tag": "img",
+              "attrs": {
+                "src": [
+                  "one",
+                  "$journeyIdentity",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$journeyKind",
+                      "threads"
+                    ],
+                    "threadsImage",
+                    "atlasImage"
+                  ]
+                ],
+                "alt": "",
+                "width": 768,
+                "height": 432,
+                "decoding": "async"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "div",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "AARON ALDERMAN / ",
+                      [
+                        "one",
+                        "$journeyIdentity",
+                        "label"
+                      ]
+                    ]
+                  ]
+                },
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$journeyKind",
+                        "threads"
+                      ],
+                      "An idea becomes a path.",
+                      "A perspective on shared terrain."
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$journeyKind",
+                        "threads"
+                      ],
+                      [
+                        "one",
+                        "$journeyIdentity",
+                        "threadsCopy"
+                      ],
+                      [
+                        "one",
+                        "$journeyIdentity",
+                        "mapCopy"
+                      ]
+                    ]
+                  ]
+                },
+                "$journeyNav"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "identity.threads.view": [
+      {
+        "let": "journeyKind",
+        "value": "threads"
+      },
+      {
+        "call": "identity.journey.intro"
+      },
+      {
+        "let": "journeyIntro",
+        "value": "$result"
+      },
+      {
+        "let": "result",
+        "value": [
+          "list",
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "gate-hero"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "eyebrow"
+                },
+                "children": [
+                  "list",
+                  "THREADS / ",
+                  [
+                    "one",
+                    "$journeyIdentity",
+                    "label"
+                  ]
+                ]
+              },
+              {
+                "tag": "h1",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "one",
+                    "$journeyIdentity",
+                    "threadsTitle"
+                  ]
+                ]
+              }
+            ]
+          },
+          "$journeyIntro",
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "identity-thread-grid",
+              "aria-label": "Identity reading threads"
+            },
+            "children": [
+              "list",
+              [
+                "map",
+                [
+                  "objects",
+                  "$journeyIdentity",
+                  "thread"
+                ],
+                "t",
+                {
+                  "tag": "article",
+                  "attrs": {
+                    "class": "identity-thread"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "one",
+                          "$t",
+                          "title"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "one",
+                          "$t",
+                          "note"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "ol",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "map",
+                          [
+                            "objects",
+                            "$t",
+                            "place"
+                          ],
+                          "p",
+                          {
+                            "tag": "li",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "href": [
+                                    "one",
+                                    "$p",
+                                    "route"
+                                  ]
+                                },
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$p",
+                                    "title"
+                                  ]
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$p",
+                                    "lead"
+                                  ]
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "identity-shared-exit"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "h2",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "The wider corpus remains open."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "These are editorial connections. The readings retain their sources, disagreements and limits."
+                ]
+              },
+              {
+                "tag": "a",
+                "attrs": {
+                  "href": [
+                    "concat",
+                    [
+                      "one",
+                      "site",
+                      "origin"
+                    ],
+                    "gate.html"
+                  ],
+                  "data-shared-exit": "true"
+                },
+                "children": [
+                  "list",
+                  "Leave this identity lens: browse all shared reading paths ↗"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "identity.reading.context": [
+      {
+        "call": "identity.journey.nav"
+      },
+      {
+        "let": "journeyNav",
+        "value": "$result"
+      },
+      {
+        "let": "result",
+        "value": {
+          "tag": "aside",
+          "attrs": {
+            "class": "identity-reading-context",
+            "data-journey-identity": [
+              "one",
+              "$journeyIdentity",
+              "key"
+            ]
+          },
+          "children": [
+            "list",
+            {
+              "tag": "p",
+              "attrs": {
+                "class": "eyebrow"
+              },
+              "children": [
+                "list",
+                [
+                  "concat",
+                  "READING AS ",
+                  [
+                    "one",
+                    "$journeyIdentity",
+                    "label"
+                  ]
+                ]
+              ]
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "readingPrompt"
+                ]
+              ]
+            },
+            "$journeyNav",
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                "The underlying reading and source evidence are shared. ",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": [
+                      "concat",
+                      [
+                        "one",
+                        "site",
+                        "origin"
+                      ],
+                      [
+                        "one",
+                        "$readingPlace",
+                        "route"
+                      ]
+                    ],
+                    "data-shared-exit": "true"
+                  },
+                  "children": [
+                    "list",
+                    "Open the shared version ↗"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "identity.journey.check": [
+      {
+        "fold": "$eventInput.expected",
+        "as": "fragment",
+        "accumulator": "missing",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "text.indexOf",
+            "args": {
+              "value": "$eventInput.html",
+              "search": "$fragment",
+              "from": 0
+            },
+            "into": "found"
+          }
+        ],
+        "yield": [
+          "if",
+          [
+            "eq",
+            "$found",
+            -1
+          ],
+          [
+            "append",
+            "$missing",
+            [
+              "list",
+              "$fragment"
+            ]
+          ],
+          "$missing"
+        ],
+        "into": "missing"
+      },
+      {
+        "let": "result",
+        "value": {
+          "ok": [
+            "and",
+            [
+              "not",
+              [
+                "eq",
+                [
+                  "count",
+                  "$eventInput.expected"
+                ],
+                0
+              ]
+            ],
+            [
+              "eq",
+              [
+                "count",
+                "$missing"
+              ],
+              0
+            ]
+          ],
+          "missing": "$missing"
+        }
+      }
+    ],
+    "identity.journeys.build": [
+      {
+        "let": "journeyReceipts",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "fold": [
+          "subjects",
+          "isa",
+          "IdentityTheme"
+        ],
+        "as": "journeyIdentity",
+        "accumulator": "receipts",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "homeIdentity",
+            "value": "$journeyIdentity"
+          },
+          {
+            "let": "prefix",
+            "value": ""
+          },
+          {
+            "let": "light",
+            "value": "home"
+          },
+          {
+            "let": "pageTitle",
+            "value": [
+              "concat",
+              [
+                "one",
+                "$journeyIdentity",
+                "label"
+              ],
+              " — Aaron Alderman"
+            ]
+          },
+          {
+            "let": "description",
+            "value": [
+              "one",
+              "$journeyIdentity",
+              "copy"
+            ]
+          },
+          {
+            "let": "canonical",
+            "value": [
+              "concat",
+              [
+                "one",
+                "site",
+                "origin"
+              ],
+              [
+                "one",
+                "$journeyIdentity",
+                "homeRoute"
+              ]
+            ]
+          },
+          {
+            "call": "publication.home"
+          },
+          {
+            "let": "body",
+            "value": "$result"
+          },
+          {
+            "call": "publication.document"
+          },
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$result",
+              "search": [
+                "concat",
+                [
+                  "one",
+                  "site",
+                  "origin"
+                ],
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "questionHref"
+                ]
+              ],
+              "replacement": [
+                "concat",
+                [
+                  "one",
+                  "site",
+                  "origin"
+                ],
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "questionWorldRoute"
+                ]
+              ]
+            },
+            "into": "questionHtml"
+          },
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$questionHtml",
+              "search": [
+                "concat",
+                [
+                  "one",
+                  "site",
+                  "origin"
+                ],
+                [
+                  "one",
+                  "site",
+                  "image"
+                ]
+              ],
+              "replacement": [
+                "concat",
+                [
+                  "one",
+                  "site",
+                  "origin"
+                ],
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "image"
+                ]
+              ]
+            },
+            "into": "worldHtml"
+          },
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$worldHtml",
+              "search": "<body ",
+              "replacement": [
+                "concat",
+                "<body data-initial-identity=\"",
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "key"
+                ],
+                "\" data-identity=\"",
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "key"
+                ],
+                "\" "
+              ]
+            },
+            "into": "worldHtml"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$worldHtml",
+              "route": "index.html",
+              "identity": "$journeyIdentity"
+            }
+          },
+          {
+            "call": "identity.journey.rebase"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": [
+                "one",
+                "$journeyIdentity",
+                "homeRoute"
+              ],
+              "text": [
+                "concat",
+                "<!doctype html>\n",
+                "$result"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "let": "pageTitle",
+            "value": [
+              "one",
+              "$journeyIdentity",
+              "threadsTitle"
+            ]
+          },
+          {
+            "let": "description",
+            "value": [
+              "one",
+              "$journeyIdentity",
+              "threadsCopy"
+            ]
+          },
+          {
+            "let": "canonical",
+            "value": [
+              "concat",
+              [
+                "one",
+                "site",
+                "origin"
+              ],
+              [
+                "one",
+                "$journeyIdentity",
+                "threadsRoute"
+              ]
+            ]
+          },
+          {
+            "call": "identity.threads.view"
+          },
+          {
+            "let": "body",
+            "value": "$result"
+          },
+          {
+            "call": "publication.document"
+          },
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$result",
+              "search": [
+                "concat",
+                [
+                  "one",
+                  "site",
+                  "origin"
+                ],
+                [
+                  "one",
+                  "site",
+                  "image"
+                ]
+              ],
+              "replacement": [
+                "concat",
+                [
+                  "one",
+                  "site",
+                  "origin"
+                ],
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "threadsImage"
+                ]
+              ]
+            },
+            "into": "worldHtml"
+          },
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$worldHtml",
+              "search": "<body ",
+              "replacement": [
+                "concat",
+                "<body data-identity=\"",
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "key"
+                ],
+                "\" "
+              ]
+            },
+            "into": "worldHtml"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$worldHtml",
+              "route": "gate.html",
+              "identity": "$journeyIdentity"
+            }
+          },
+          {
+            "call": "identity.journey.rebase"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": [
+                "one",
+                "$journeyIdentity",
+                "threadsRoute"
+              ],
+              "text": [
+                "concat",
+                "<!doctype html>\n",
+                "$result"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "let": "journeyKind",
+            "value": "atlas"
+          },
+          {
+            "call": "identity.journey.intro"
+          },
+          {
+            "let": "identityMapIntro",
+            "value": "$result"
+          },
+          {
+            "let": "atlasIdentity",
+            "value": "$journeyIdentity"
+          },
+          {
+            "call": "atlas.view"
+          },
+          {
+            "let": "input",
+            "value": "$result"
+          },
+          {
+            "call": "html.serialize"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$result",
+              "route": "atlas.html",
+              "identity": "$journeyIdentity"
+            }
+          },
+          {
+            "call": "identity.journey.rebase"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": [
+                "one",
+                "$journeyIdentity",
+                "atlasRoute"
+              ],
+              "text": [
+                "concat",
+                "<!doctype html>\n",
+                "$result"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "one",
+                "$journeyIdentity",
+                "questionHref"
+              ]
+            },
+            "into": "questionHtml"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$questionHtml",
+              "route": [
+                "one",
+                "$journeyIdentity",
+                "questionHref"
+              ],
+              "identity": "$journeyIdentity"
+            }
+          },
+          {
+            "call": "identity.journey.rebase"
+          },
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$result",
+              "search": "<body ",
+              "replacement": [
+                "concat",
+                "<body data-identity=\"",
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "key"
+                ],
+                "\" "
+              ]
+            },
+            "into": "worldHtml"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": [
+                "one",
+                "$journeyIdentity",
+                "questionWorldRoute"
+              ],
+              "text": "$worldHtml"
+            },
+            "into": "_"
+          },
+          {
+            "fold": [
+              "subjects",
+              "isa",
+              "Place"
+            ],
+            "as": "readingPlace",
+            "accumulator": "readings",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "port": "file.read",
+                "args": {
+                  "path": [
+                    "one",
+                    "$readingPlace",
+                    "route"
+                  ]
+                },
+                "into": "readingHtml"
+              },
+              {
+                "let": "eventInput",
+                "value": {
+                  "html": "$readingHtml",
+                  "route": [
+                    "one",
+                    "$readingPlace",
+                    "route"
+                  ],
+                  "identity": "$journeyIdentity"
+                }
+              },
+              {
+                "call": "identity.journey.rebase"
+              },
+              {
+                "let": "readingHtml",
+                "value": "$result"
+              },
+              {
+                "port": "text.replaceAll",
+                "args": {
+                  "value": "$readingHtml",
+                  "search": [
+                    "concat",
+                    [
+                      "one",
+                      "site",
+                      "origin"
+                    ],
+                    [
+                      "one",
+                      "$readingPlace",
+                      "route"
+                    ]
+                  ],
+                  "replacement": [
+                    "concat",
+                    [
+                      "one",
+                      "site",
+                      "origin"
+                    ],
+                    "worlds/",
+                    [
+                      "one",
+                      "$journeyIdentity",
+                      "key"
+                    ],
+                    "/",
+                    [
+                      "one",
+                      "$readingPlace",
+                      "route"
+                    ]
+                  ]
+                },
+                "into": "readingHtml"
+              },
+              {
+                "port": "text.replaceAll",
+                "args": {
+                  "value": "$readingHtml",
+                  "search": "Open in a larger view ↗",
+                  "replacement": "Open the shared interactive reader ↗"
+                },
+                "into": "readingHtml"
+              },
+              {
+                "call": "identity.reading.context"
+              },
+              {
+                "let": "input",
+                "value": "$result"
+              },
+              {
+                "call": "html.serialize"
+              },
+              {
+                "let": "contextHtml",
+                "value": "$result"
+              },
+              {
+                "port": "text.replaceAll",
+                "args": {
+                  "value": "$readingHtml",
+                  "search": "<main id=\"main\">",
+                  "replacement": [
+                    "concat",
+                    "<main id=\"main\">",
+                    "$contextHtml"
+                  ]
+                },
+                "into": "readingHtml"
+              },
+              {
+                "port": "text.replaceAll",
+                "args": {
+                  "value": "$readingHtml",
+                  "search": "<body ",
+                  "replacement": [
+                    "concat",
+                    "<body data-identity=\"",
+                    [
+                      "one",
+                      "$journeyIdentity",
+                      "key"
+                    ],
+                    "\" "
+                  ]
+                },
+                "into": "readingHtml"
+              },
+              {
+                "let": "readingRoute",
+                "value": [
+                  "concat",
+                  "worlds/",
+                  [
+                    "one",
+                    "$journeyIdentity",
+                    "key"
+                  ],
+                  "/",
+                  [
+                    "one",
+                    "$readingPlace",
+                    "route"
+                  ]
+                ]
+              },
+              {
+                "port": "file.write",
+                "args": {
+                  "path": "$readingRoute",
+                  "text": "$readingHtml"
+                },
+                "into": "_"
+              },
+              {
+                "port": "file.read",
+                "args": {
+                  "path": "$readingRoute"
+                },
+                "into": "actual"
+              },
+              {
+                "let": "eventInput",
+                "value": {
+                  "html": "$actual",
+                  "expected": [
+                    "list",
+                    [
+                      "concat",
+                      "data-identity=\"",
+                      [
+                        "one",
+                        "$journeyIdentity",
+                        "key"
+                      ],
+                      "\""
+                    ],
+                    [
+                      "concat",
+                      "href=\"",
+                      [
+                        "one",
+                        "$journeyIdentity",
+                        "homeHref"
+                      ],
+                      "\""
+                    ],
+                    [
+                      "concat",
+                      "href=\"",
+                      [
+                        "one",
+                        "$journeyIdentity",
+                        "threadsHref"
+                      ],
+                      "\""
+                    ],
+                    [
+                      "concat",
+                      "href=\"",
+                      [
+                        "one",
+                        "$journeyIdentity",
+                        "atlasHref"
+                      ],
+                      "\""
+                    ],
+                    [
+                      "one",
+                      "$journeyIdentity",
+                      "readingPrompt"
+                    ],
+                    [
+                      "concat",
+                      "href=\"",
+                      [
+                        "one",
+                        "site",
+                        "origin"
+                      ],
+                      [
+                        "one",
+                        "$readingPlace",
+                        "route"
+                      ],
+                      "\""
+                    ]
+                  ]
+                }
+              },
+              {
+                "call": "identity.journey.check"
+              }
+            ],
+            "yield": [
+              "append",
+              "$readings",
+              [
+                "list",
+                {
+                  "route": "$readingRoute",
+                  "ok": "$result.ok",
+                  "missing": "$result.missing"
+                }
+              ]
+            ],
+            "into": "readings"
+          },
+          {
+            "let": "navExpected",
+            "value": [
+              "list",
+              [
+                "concat",
+                "data-identity=\"",
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "key"
+                ],
+                "\""
+              ],
+              [
+                "concat",
+                "href=\"",
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "homeHref"
+                ],
+                "\""
+              ],
+              [
+                "concat",
+                "href=\"",
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "threadsHref"
+                ],
+                "\""
+              ],
+              [
+                "concat",
+                "href=\"",
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "atlasHref"
+                ],
+                "\""
+              ]
+            ]
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "one",
+                "$journeyIdentity",
+                "threadsRoute"
+              ]
+            },
+            "into": "actual"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$actual",
+              "expected": [
+                "append",
+                "$navExpected",
+                [
+                  "append",
+                  [
+                    "list",
+                    [
+                      "one",
+                      "$journeyIdentity",
+                      "threadsTitle"
+                    ],
+                    [
+                      "one",
+                      "$journeyIdentity",
+                      "threadsCopy"
+                    ],
+                    [
+                      "concat",
+                      "src=\"/",
+                      [
+                        "one",
+                        "$journeyIdentity",
+                        "threadsImage"
+                      ],
+                      "\""
+                    ]
+                  ],
+                  [
+                    "fold",
+                    [
+                      "objects",
+                      "$journeyIdentity",
+                      "thread"
+                    ],
+                    "t",
+                    "checks",
+                    [
+                      "list"
+                    ],
+                    [
+                      "append",
+                      "$checks",
+                      [
+                        "append",
+                        [
+                          "list",
+                          [
+                            "one",
+                            "$t",
+                            "title"
+                          ],
+                          [
+                            "one",
+                            "$t",
+                            "note"
+                          ]
+                        ],
+                        [
+                          "map",
+                          [
+                            "objects",
+                            "$t",
+                            "place"
+                          ],
+                          "p",
+                          [
+                            "concat",
+                            "href=\"/worlds/",
+                            [
+                              "one",
+                              "$journeyIdentity",
+                              "key"
+                            ],
+                            "/",
+                            [
+                              "one",
+                              "$p",
+                              "route"
+                            ],
+                            "\""
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "call": "identity.journey.check"
+          },
+          {
+            "let": "threadsCheck",
+            "value": "$result"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "one",
+                "$journeyIdentity",
+                "atlasRoute"
+              ]
+            },
+            "into": "actual"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$actual",
+              "expected": [
+                "append",
+                "$navExpected",
+                [
+                  "append",
+                  [
+                    "list",
+                    [
+                      "one",
+                      "$journeyIdentity",
+                      "mapTitle"
+                    ],
+                    [
+                      "one",
+                      "$journeyIdentity",
+                      "mapCopy"
+                    ],
+                    [
+                      "concat",
+                      "src=\"/",
+                      [
+                        "one",
+                        "$journeyIdentity",
+                        "atlasImage"
+                      ],
+                      "\""
+                    ],
+                    "data-identity-recommended=\"true\""
+                  ],
+                  [
+                    "map",
+                    [
+                      "subjects",
+                      "isa",
+                      "Place"
+                    ],
+                    "p",
+                    [
+                      "concat",
+                      "href=\"/worlds/",
+                      [
+                        "one",
+                        "$journeyIdentity",
+                        "key"
+                      ],
+                      "/",
+                      [
+                        "one",
+                        "$p",
+                        "route"
+                      ],
+                      "\""
+                    ]
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "call": "identity.journey.check"
+          },
+          {
+            "let": "mapCheck",
+            "value": "$result"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "one",
+                "$journeyIdentity",
+                "homeRoute"
+              ]
+            },
+            "into": "actual"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$actual",
+              "expected": [
+                "append",
+                "$navExpected",
+                [
+                  "list",
+                  [
+                    "concat",
+                    "data-initial-identity=\"",
+                    [
+                      "one",
+                      "$journeyIdentity",
+                      "key"
+                    ],
+                    "\""
+                  ],
+                  [
+                    "one",
+                    "$journeyIdentity",
+                    "copy"
+                  ],
+                  [
+                    "concat",
+                    "src=\"/",
+                    [
+                      "one",
+                      "$journeyIdentity",
+                      "image"
+                    ],
+                    "\""
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "call": "identity.journey.check"
+          },
+          {
+            "let": "homeCheck",
+            "value": "$result"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "one",
+                "$journeyIdentity",
+                "questionWorldRoute"
+              ]
+            },
+            "into": "actual"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$actual",
+              "expected": "$navExpected"
+            }
+          },
+          {
+            "call": "identity.journey.check"
+          },
+          {
+            "let": "questionCheck",
+            "value": "$result"
+          }
+        ],
+        "yield": [
+          "append",
+          "$receipts",
+          [
+            "list",
+            {
+              "identity": [
+                "one",
+                "$journeyIdentity",
+                "key"
+              ],
+              "threads": "$threadsCheck",
+              "map": "$mapCheck",
+              "home": "$homeCheck",
+              "questions": "$questionCheck",
+              "readings": "$readings"
+            }
+          ]
+        ],
+        "into": "journeyReceipts"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": {
+            "protocol": "worldwright/identity-journey-evidence/1",
+            "worlds": "$journeyReceipts",
+            "boundary": "Source-fragment and link checks on generated HTML, with original readings and sources retained. Visual, semantic and browser behaviour require separate evidence."
+          }
+        },
+        "into": "journeyJson"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/identity-journeys.json",
+          "text": "$journeyJson"
         },
         "into": "_"
       }
