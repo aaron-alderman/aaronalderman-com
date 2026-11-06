@@ -1,0 +1,43 @@
+{
+  "protocol": "temple/bootstrap-site/1",
+  "entry": "microsites.preview",
+  "operatorDefinitions": "algebra/operators.expression.json",
+  "operatorCompiler": "algebra/lowering.process.json",
+  "factIndexer": "algebra/fact-index.process.json",
+  "nativeSource": "bootstrap/native.json",
+  "hostPorts": "bootstrap/ports.json",
+  "executionBudget": 20000000,
+  "modules": [
+    "algebra/html.process.json",
+    "algebra/css.process.json",
+    "algebra/publication.process.json",
+    "algebra/gateway.process.json",
+    "algebra/language.process.json",
+    "algebra/fact-index.process.json",
+    "algebra/source.process.json",
+    "algebra/admission.process.json",
+    "algebra/lowering.process.json",
+    "algebra/microsite-projection.process.json",
+    "algebra/microsites.process.json",
+    "algebra/microsite-values.process.json",
+    "algebra/microsite-lamp.process.json",
+    "algebra/microsite-sourcery.process.json",
+    "algebra/microsite-ui.process.json",
+    "algebra/microsite-temple-ui.process.json",
+    "algebra/microsite-motion.process.json",
+    "algebra/microsite-temple-motion.process.json",
+    "algebra/microsite-media.process.json"
+  ],
+  "sources": [
+    "source/expedition.rel",
+    "source/presentation.rel",
+    "source/gateway.rel",
+    "source/gateway-presentation.rel",
+    "source/microsites/presentation.rel",
+    "source/microsites/release.rel"
+  ],
+  "kernelProfile": "bootstrap/kernel-profile.json",
+  "admission": "algebra/admission.process.json",
+  "languageCompiler": "algebra/language.process.json",
+  "languageSources": []
+}

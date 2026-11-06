@@ -1,0 +1,3831 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "lamp.availability": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.findCell",
+          "input": {
+            "state": "$eventInput.temple.state",
+            "key": "lamp.oil"
+          }
+        },
+        "into": "oil"
+      },
+      {
+        "let": "result",
+        "value": null
+      },
+      {
+        "when": [
+          "and",
+          [
+            "includes",
+            [
+              "list",
+              "tend",
+              "tend-unseen"
+            ],
+            "$eventInput.preset"
+          ],
+          [
+            "not",
+            [
+              "eq",
+              "$oil",
+              null
+            ]
+          ],
+          [
+            "eq",
+            "$oil.value",
+            "0"
+          ]
+        ],
+        "then": [
+          {
+            "let": "result",
+            "value": "The oil is spent. Refill the lamp first."
+          }
+        ]
+      },
+      {
+        "when": [
+          "and",
+          [
+            "includes",
+            [
+              "list",
+              "tend",
+              "tend-unseen",
+              "take",
+              "refill"
+            ],
+            "$eventInput.preset"
+          ],
+          [
+            "eq",
+            "$oil",
+            null
+          ]
+        ],
+        "then": [
+          {
+            "let": "result",
+            "value": "There is no oil cell."
+          }
+        ]
+      }
+    ],
+    "lamp.applyUnchecked": [
+      {
+        "let": "state",
+        "value": "$eventInput.temple.state"
+      },
+      {
+        "fold": "$eventInput.delta.consume",
+        "as": "id",
+        "accumulator": "cells",
+        "initial": "$state.cells",
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "record.remove",
+              "input": {
+                "record": "$cells",
+                "key": "$id"
+              }
+            },
+            "into": "cells"
+          }
+        ],
+        "yield": "$cells",
+        "into": "cells"
+      },
+      {
+        "fold": "$eventInput.delta.create",
+        "as": "cell",
+        "accumulator": "cells",
+        "initial": "$cells",
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.cellId",
+              "input": {
+                "cell": "$cell"
+              }
+            },
+            "into": "id"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$cells",
+              "key": "$id",
+              "value": {
+                "key": "$cell.key",
+                "value": "$cell.value"
+              }
+            },
+            "into": "cells"
+          }
+        ],
+        "yield": "$cells",
+        "into": "cells"
+      },
+      {
+        "let": "result",
+        "value": {
+          "cells": "$cells",
+          "predicateId": [
+            "or",
+            "$eventInput.successorId",
+            "$state.predicateId"
+          ]
+        }
+      }
+    ],
+    "address.flip": [
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$eventInput.id",
+          "pattern": ":"
+        },
+        "into": "parts"
+      },
+      {
+        "let": "digest",
+        "value": [
+          "at",
+          "$parts",
+          2
+        ]
+      },
+      {
+        "port": "text.slice",
+        "args": {
+          "value": "$digest",
+          "start": 0,
+          "end": 3
+        },
+        "into": "before"
+      },
+      {
+        "port": "text.slice",
+        "args": {
+          "value": "$digest",
+          "start": 3,
+          "end": 4
+        },
+        "into": "character"
+      },
+      {
+        "port": "text.slice",
+        "args": {
+          "value": "$digest",
+          "start": 4
+        },
+        "into": "after"
+      },
+      {
+        "let": "result",
+        "value": [
+          "concat",
+          [
+            "at",
+            "$parts",
+            0
+          ],
+          ":",
+          [
+            "at",
+            "$parts",
+            1
+          ],
+          ":",
+          "$before",
+          [
+            "if",
+            [
+              "eq",
+              "$character",
+              "0"
+            ],
+            "1",
+            "0"
+          ],
+          "$after"
+        ]
+      }
+    ],
+    "lamp.buildProposal": [
+      {
+        "let": "temple",
+        "value": "$eventInput.temple"
+      },
+      {
+        "let": "recipe",
+        "value": "$eventInput.recipe"
+      },
+      {
+        "let": "configuration",
+        "value": "$eventInput.configuration"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.findCell",
+          "input": {
+            "state": "$temple.state",
+            "key": "lamp.oil"
+          }
+        },
+        "into": "oil"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.findCell",
+          "input": {
+            "state": "$temple.state",
+            "key": "lamp.flame"
+          }
+        },
+        "into": "flame"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.findCell",
+          "input": {
+            "state": "$temple.state",
+            "key": "role.steward"
+          }
+        },
+        "into": "role"
+      },
+      {
+        "let": "read",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "let": "consume",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "let": "create",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "let": "successor",
+        "value": null
+      },
+      {
+        "assert": [
+          "includes",
+          [
+            "map",
+            "$configuration.presets",
+            "p",
+            "$p.id"
+          ],
+          "$recipe.preset"
+        ],
+        "message": "Unknown preset"
+      },
+      {
+        "when": [
+          "includes",
+          [
+            "list",
+            "tend",
+            "tend-unseen"
+          ],
+          "$recipe.preset"
+        ],
+        "then": [
+          {
+            "port": "record.get",
+            "args": {
+              "record": "$recipe",
+              "key": "forgeOil"
+            },
+            "into": "nextOil"
+          },
+          {
+            "when": [
+              "eq",
+              "$nextOil",
+              null
+            ],
+            "then": [
+              {
+                "port": "number.parse",
+                "args": {
+                  "value": "$oil.value"
+                },
+                "into": "measures"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "max",
+                  "values": [
+                    "list",
+                    0,
+                    [
+                      "add",
+                      "$measures",
+                      -1
+                    ]
+                  ]
+                },
+                "into": "measures"
+              },
+              {
+                "let": "nextOil",
+                "value": [
+                  "concat",
+                  "$measures"
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "and",
+              [
+                "eq",
+                "$recipe.preset",
+                "tend"
+              ],
+              [
+                "not",
+                [
+                  "eq",
+                  "$role",
+                  null
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "let": "read",
+                "value": [
+                  "list",
+                  "$role.id"
+                ]
+              }
+            ]
+          },
+          {
+            "let": "consume",
+            "value": [
+              "list",
+              "$oil.id",
+              "$flame.id"
+            ]
+          },
+          {
+            "let": "create",
+            "value": [
+              "list",
+              {
+                "key": "lamp.oil",
+                "value": "$nextOil"
+              },
+              {
+                "key": "lamp.flame",
+                "value": "lit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$recipe.preset",
+          "refill"
+        ],
+        "then": [
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$role",
+                null
+              ]
+            ],
+            "then": [
+              {
+                "let": "read",
+                "value": [
+                  "list",
+                  "$role.id"
+                ]
+              }
+            ]
+          },
+          {
+            "let": "consume",
+            "value": [
+              "list",
+              "$oil.id"
+            ]
+          },
+          {
+            "port": "number.parse",
+            "args": {
+              "value": "$oil.value"
+            },
+            "into": "measures"
+          },
+          {
+            "let": "create",
+            "value": [
+              "list",
+              {
+                "key": "lamp.oil",
+                "value": [
+                  "concat",
+                  [
+                    "add",
+                    "$measures",
+                    3
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$recipe.preset",
+          "take"
+        ],
+        "then": [
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$role",
+                null
+              ]
+            ],
+            "then": [
+              {
+                "let": "read",
+                "value": [
+                  "list",
+                  "$role.id"
+                ]
+              }
+            ]
+          },
+          {
+            "let": "consume",
+            "value": [
+              "list",
+              "$oil.id"
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$recipe.preset",
+          "note"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.cellsByKey",
+              "input": {
+                "state": "$temple.state"
+              }
+            },
+            "into": "cells"
+          },
+          {
+            "port": "text.replace",
+            "args": {
+              "value": [
+                "or",
+                [
+                  "at",
+                  "$recipe",
+                  "note"
+                ],
+                ""
+              ],
+              "pattern": "[\u0000-\u001f]",
+              "flags": "g",
+              "replacement": ""
+            },
+            "into": "note"
+          },
+          {
+            "port": "text.trim",
+            "args": {
+              "value": "$note"
+            },
+            "into": "note"
+          },
+          {
+            "fold": "$cells",
+            "as": "cell",
+            "accumulator": "notes",
+            "initial": 0,
+            "steps": [
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$cell.key",
+                  "pattern": "^note\\."
+                },
+                "into": "isNote"
+              }
+            ],
+            "yield": [
+              "add",
+              "$notes",
+              [
+                "if",
+                "$isNote",
+                1,
+                0
+              ]
+            ],
+            "into": "noteCount"
+          },
+          {
+            "let": "create",
+            "value": [
+              "list",
+              {
+                "key": [
+                  "concat",
+                  "note.",
+                  [
+                    "add",
+                    "$noteCount",
+                    1
+                  ]
+                ],
+                "value": [
+                  "or",
+                  "$note",
+                  "Thank you for the light."
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$recipe.preset",
+          "appoint"
+        ],
+        "then": [
+          {
+            "let": "consume",
+            "value": [
+              "list",
+              "$role.id"
+            ]
+          },
+          {
+            "let": "create",
+            "value": [
+              "list",
+              {
+                "key": "role.steward",
+                "value": "$recipe.identity"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$recipe.preset",
+          "amend"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "canonical.identify",
+              "input": {
+                "kind": "predicate",
+                "value": [
+                  "at",
+                  [
+                    "at",
+                    "$configuration.covenants",
+                    1
+                  ],
+                  "ast"
+                ]
+              }
+            },
+            "into": "amendedId"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "canonical.identify",
+              "input": {
+                "kind": "predicate",
+                "value": [
+                  "at",
+                  [
+                    "at",
+                    "$configuration.covenants",
+                    0
+                  ],
+                  "ast"
+                ]
+              }
+            },
+            "into": "originalId"
+          },
+          {
+            "let": "successor",
+            "value": [
+              "at",
+              "$eventInput.registry",
+              [
+                "if",
+                [
+                  "eq",
+                  "$temple.state.predicateId",
+                  "$amendedId"
+                ],
+                "$originalId",
+                "$amendedId"
+              ]
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$role",
+                null
+              ]
+            ],
+            "then": [
+              {
+                "let": "read",
+                "value": [
+                  "list",
+                  "$role.id"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$recipe.preset",
+          "amend-beyond"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "canonical.identify",
+              "input": {
+                "kind": "predicate",
+                "value": [
+                  "at",
+                  [
+                    "at",
+                    "$configuration.covenants",
+                    2
+                  ],
+                  "ast"
+                ]
+              }
+            },
+            "into": "unboundedId"
+          },
+          {
+            "let": "successor",
+            "value": [
+              "at",
+              "$eventInput.registry",
+              "$unboundedId"
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$role",
+                null
+              ]
+            ],
+            "then": [
+              {
+                "let": "read",
+                "value": [
+                  "list",
+                  "$role.id"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greater",
+          "values": [
+            "list",
+            [
+              "count",
+              "$temple.roots"
+            ],
+            1
+          ]
+        },
+        "into": "canStale"
+      },
+      {
+        "let": "basis",
+        "value": [
+          "if",
+          [
+            "and",
+            [
+              "or",
+              [
+                "at",
+                "$recipe",
+                "stale"
+              ],
+              false
+            ],
+            "$canStale"
+          ],
+          [
+            "at",
+            "$temple.roots",
+            [
+              "add",
+              [
+                "count",
+                "$temple.roots"
+              ],
+              -2
+            ]
+          ],
+          "$temple.root"
+        ]
+      },
+      {
+        "let": "delta",
+        "value": {
+          "read": "$read",
+          "consume": "$consume",
+          "create": "$create"
+        }
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.applyUnchecked",
+          "input": {
+            "temple": "$temple",
+            "delta": "$delta",
+            "successorId": [
+              "if",
+              [
+                "eq",
+                "$successor",
+                null
+              ],
+              null,
+              [
+                "at",
+                "$successor",
+                "id"
+              ]
+            ]
+          }
+        },
+        "into": "nextState"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.stateRoot",
+          "input": {
+            "state": "$nextState"
+          }
+        },
+        "into": "honest"
+      },
+      {
+        "let": "claimed",
+        "value": "$honest.root"
+      },
+      {
+        "when": [
+          "or",
+          [
+            "at",
+            "$recipe",
+            "falseClaim"
+          ],
+          false
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "address.flip",
+              "input": {
+                "id": "$claimed"
+              }
+            },
+            "into": "claimed"
+          }
+        ]
+      },
+      {
+        "let": "preset",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$configuration.presets",
+            "preset",
+            [
+              "eq",
+              "$preset.id",
+              "$recipe.preset"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "result",
+        "value": {
+          "recipe": "$recipe",
+          "successor": "$successor",
+          "wire": {
+            "identity": "$recipe.identity",
+            "context": {
+              "purpose": "$preset.title"
+            },
+            "delta": {
+              "basis": "$basis",
+              "read": "$read",
+              "consume": "$consume",
+              "create": "$create",
+              "nextPredicate": [
+                "if",
+                [
+                  "eq",
+                  "$successor",
+                  null
+                ],
+                null,
+                [
+                  "at",
+                  "$successor",
+                  "id"
+                ]
+              ],
+              "claimedFinalStateRoot": "$claimed"
+            }
+          }
+        }
+      }
+    ],
+    "lamp.checkCanonical": [
+      {
+        "let": "proposal",
+        "value": "$eventInput.proposal"
+      },
+      {
+        "let": "limits",
+        "value": "$eventInput.configuration.limits"
+      },
+      {
+        "let": "bad",
+        "value": null
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "canonical.is",
+          "input": {
+            "value": "$proposal.wire"
+          }
+        },
+        "into": "canonical"
+      },
+      {
+        "when": [
+          "not",
+          "$canonical"
+        ],
+        "then": [
+          {
+            "let": "bad",
+            "value": "Proposal contains a non-canonical value."
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$bad",
+          null
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "canonical.encode",
+              "input": {
+                "value": "$proposal.wire",
+                "numbers": false
+              }
+            },
+            "into": "wireJSON"
+          },
+          {
+            "port": "text.utf8Length",
+            "args": {
+              "value": "$wireJSON"
+            },
+            "into": "bytes"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$bytes",
+                "$limits.contextBytes"
+              ]
+            },
+            "into": "tooMany"
+          },
+          {
+            "when": "$tooMany",
+            "then": [
+              {
+                "let": "bad",
+                "value": [
+                  "concat",
+                  "Proposal is ",
+                  "$bytes",
+                  " bytes; the bound is ",
+                  "$limits.contextBytes",
+                  "."
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "fold": [
+          "list",
+          "read",
+          "consume",
+          "create"
+        ],
+        "as": "list",
+        "accumulator": "issue",
+        "initial": "$bad",
+        "steps": [
+          {
+            "let": "next",
+            "value": "$issue"
+          },
+          {
+            "when": [
+              "eq",
+              "$issue",
+              null
+            ],
+            "then": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greater",
+                  "values": [
+                    "list",
+                    [
+                      "count",
+                      [
+                        "at",
+                        "$proposal.wire.delta",
+                        "$list"
+                      ]
+                    ],
+                    "$limits.deltaCells"
+                  ]
+                },
+                "into": "tooMany"
+              },
+              {
+                "when": "$tooMany",
+                "then": [
+                  {
+                    "let": "next",
+                    "value": [
+                      "concat",
+                      "Too many cells in ",
+                      "$list",
+                      "."
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": "$next",
+        "into": "bad"
+      },
+      {
+        "fold": "$proposal.wire.delta.create",
+        "as": "cell",
+        "accumulator": "issue",
+        "initial": "$bad",
+        "steps": [
+          {
+            "let": "next",
+            "value": "$issue"
+          },
+          {
+            "when": [
+              "eq",
+              "$issue",
+              null
+            ],
+            "then": [
+              {
+                "port": "value.type",
+                "args": {
+                  "value": "$cell.key"
+                },
+                "into": "keyType"
+              },
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$cell.key",
+                  "pattern": "^[a-z]+(\\.[a-z0-9-]+)+$"
+                },
+                "into": "validKey"
+              },
+              {
+                "when": [
+                  "or",
+                  [
+                    "not",
+                    [
+                      "eq",
+                      "$keyType",
+                      "string"
+                    ]
+                  ],
+                  [
+                    "not",
+                    "$validKey"
+                  ]
+                ],
+                "then": [
+                  {
+                    "port": "json.stringify",
+                    "args": {
+                      "value": "$cell.key"
+                    },
+                    "into": "keyJSON"
+                  },
+                  {
+                    "let": "next",
+                    "value": [
+                      "concat",
+                      "Malformed cell key ",
+                      "$keyJSON",
+                      "."
+                    ]
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "eq",
+                  "$next",
+                  null
+                ],
+                "then": [
+                  {
+                    "port": "value.type",
+                    "args": {
+                      "value": "$cell.value"
+                    },
+                    "into": "valueType"
+                  },
+                  {
+                    "when": [
+                      "not",
+                      [
+                        "eq",
+                        "$valueType",
+                        "string"
+                      ]
+                    ],
+                    "then": [
+                      {
+                        "let": "next",
+                        "value": "Cell values must be strings."
+                      }
+                    ]
+                  },
+                  {
+                    "when": [
+                      "eq",
+                      "$valueType",
+                      "string"
+                    ],
+                    "then": [
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "greater",
+                          "values": [
+                            "list",
+                            [
+                              "count",
+                              "$cell.value"
+                            ],
+                            "$limits.valueLength"
+                          ]
+                        },
+                        "into": "tooLong"
+                      },
+                      {
+                        "when": "$tooLong",
+                        "then": [
+                          {
+                            "let": "next",
+                            "value": [
+                              "concat",
+                              "A value exceeds ",
+                              "$limits.valueLength",
+                              " characters."
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": "$next",
+        "into": "bad"
+      },
+      {
+        "let": "result",
+        "value": "$bad"
+      }
+    ],
+    "lamp.judge": [
+      {
+        "let": "temple",
+        "value": "$eventInput.temple"
+      },
+      {
+        "let": "proposal",
+        "value": "$eventInput.proposal"
+      },
+      {
+        "let": "configuration",
+        "value": "$eventInput.configuration"
+      },
+      {
+        "let": "wire",
+        "value": "$proposal.wire"
+      },
+      {
+        "let": "delta",
+        "value": "$wire.delta"
+      },
+      {
+        "let": "stages",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "let": "failure",
+        "value": null
+      },
+      {
+        "let": "nextState",
+        "value": null
+      },
+      {
+        "let": "nextRoot",
+        "value": null
+      },
+      {
+        "let": "tree",
+        "value": null
+      },
+      {
+        "let": "covenantReport",
+        "value": null
+      },
+      {
+        "let": "created",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.checkCanonical",
+          "input": {
+            "proposal": "$proposal",
+            "configuration": "$configuration"
+          }
+        },
+        "into": "bad"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            "$bad",
+            null
+          ]
+        ],
+        "then": [
+          {
+            "let": "failure",
+            "value": {
+              "stage": 1,
+              "code": "NONCANONICAL",
+              "detail": "$bad"
+            }
+          },
+          {
+            "let": "stages",
+            "value": [
+              "append",
+              "$stages",
+              [
+                "list",
+                {
+                  "n": 1,
+                  "ok": false,
+                  "detail": "$bad"
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$bad",
+          null
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "canonical.encode",
+              "input": {
+                "value": "$wire",
+                "numbers": false
+              }
+            },
+            "into": "wireJSON"
+          },
+          {
+            "port": "text.utf8Length",
+            "args": {
+              "value": "$wireJSON"
+            },
+            "into": "bytes"
+          },
+          {
+            "let": "stages",
+            "value": [
+              "append",
+              "$stages",
+              [
+                "list",
+                {
+                  "n": 1,
+                  "ok": true,
+                  "detail": [
+                    "concat",
+                    "$bytes",
+                    " bytes, within bounds."
+                  ]
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$failure",
+          null
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "address.short",
+              "input": {
+                "id": "$delta.basis",
+                "head": 8,
+                "tail": 0
+              }
+            },
+            "into": "basisShort"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "address.short",
+              "input": {
+                "id": "$temple.root",
+                "head": 8,
+                "tail": 0
+              }
+            },
+            "into": "rootShort"
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$delta.basis",
+                "$temple.root"
+              ]
+            ],
+            "then": [
+              {
+                "let": "failure",
+                "value": {
+                  "stage": 2,
+                  "code": "STALE_BASIS",
+                  "detail": [
+                    "concat",
+                    "Basis ",
+                    "$basisShort",
+                    " is not the current root ",
+                    "$rootShort",
+                    "."
+                  ]
+                }
+              },
+              {
+                "let": "stages",
+                "value": [
+                  "append",
+                  "$stages",
+                  [
+                    "list",
+                    {
+                      "n": 2,
+                      "ok": false,
+                      "detail": [
+                        "concat",
+                        "Basis ",
+                        "$basisShort",
+                        " is not the current root ",
+                        "$rootShort",
+                        "."
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$delta.basis",
+              "$temple.root"
+            ],
+            "then": [
+              {
+                "let": "stages",
+                "value": [
+                  "append",
+                  "$stages",
+                  [
+                    "list",
+                    {
+                      "n": 2,
+                      "ok": true,
+                      "detail": [
+                        "concat",
+                        "Basis ",
+                        "$basisShort",
+                        " is current."
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$failure",
+          null
+        ],
+        "then": [
+          {
+            "let": "cells",
+            "value": "$temple.state.cells"
+          },
+          {
+            "fold": "$delta.consume",
+            "as": "id",
+            "accumulator": "applying",
+            "initial": {
+              "cells": "$cells",
+              "failure": null,
+              "stages": "$stages"
+            },
+            "steps": [
+              {
+                "let": "next",
+                "value": "$applying"
+              },
+              {
+                "when": [
+                  "eq",
+                  "$applying.failure",
+                  null
+                ],
+                "then": [
+                  {
+                    "port": "record.get",
+                    "args": {
+                      "record": "$temple.state.cells",
+                      "key": "$id"
+                    },
+                    "into": "cell"
+                  },
+                  {
+                    "when": [
+                      "eq",
+                      "$cell",
+                      null
+                    ],
+                    "then": [
+                      {
+                        "port": "kernel.invoke",
+                        "args": {
+                          "query": "address.short",
+                          "input": {
+                            "id": "$id",
+                            "head": 8,
+                            "tail": 0
+                          }
+                        },
+                        "into": "idShort"
+                      },
+                      {
+                        "let": "detail",
+                        "value": [
+                          "concat",
+                          "Consumed cell ",
+                          "$idShort",
+                          " is not in S₀."
+                        ]
+                      },
+                      {
+                        "let": "next",
+                        "value": {
+                          "cells": "$applying.cells",
+                          "failure": {
+                            "stage": 3,
+                            "code": "CONSUMED_CELL_ABSENT",
+                            "detail": "$detail"
+                          },
+                          "stages": [
+                            "append",
+                            "$applying.stages",
+                            [
+                              "list",
+                              {
+                                "n": 3,
+                                "ok": false,
+                                "detail": "$detail"
+                              }
+                            ]
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "when": [
+                      "not",
+                      [
+                        "eq",
+                        "$cell",
+                        null
+                      ]
+                    ],
+                    "then": [
+                      {
+                        "port": "kernel.invoke",
+                        "args": {
+                          "query": "record.remove",
+                          "input": {
+                            "record": "$applying.cells",
+                            "key": "$id"
+                          }
+                        },
+                        "into": "remainingCells"
+                      },
+                      {
+                        "port": "record.put",
+                        "args": {
+                          "record": "$applying",
+                          "key": "cells",
+                          "value": "$remainingCells"
+                        },
+                        "into": "next"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": "$next",
+            "into": "applying"
+          },
+          {
+            "let": "cells",
+            "value": "$applying.cells"
+          },
+          {
+            "let": "failure",
+            "value": "$applying.failure"
+          },
+          {
+            "let": "stages",
+            "value": "$applying.stages"
+          },
+          {
+            "fold": "$delta.read",
+            "as": "id",
+            "accumulator": "reading",
+            "initial": {
+              "failure": "$failure",
+              "stages": "$stages"
+            },
+            "steps": [
+              {
+                "let": "next",
+                "value": "$reading"
+              },
+              {
+                "when": [
+                  "eq",
+                  "$reading.failure",
+                  null
+                ],
+                "then": [
+                  {
+                    "port": "record.get",
+                    "args": {
+                      "record": "$temple.state.cells",
+                      "key": "$id"
+                    },
+                    "into": "cell"
+                  },
+                  {
+                    "when": [
+                      "eq",
+                      "$cell",
+                      null
+                    ],
+                    "then": [
+                      {
+                        "port": "kernel.invoke",
+                        "args": {
+                          "query": "address.short",
+                          "input": {
+                            "id": "$id",
+                            "head": 8,
+                            "tail": 0
+                          }
+                        },
+                        "into": "idShort"
+                      },
+                      {
+                        "let": "detail",
+                        "value": [
+                          "concat",
+                          "Read cell ",
+                          "$idShort",
+                          " is not in S₀."
+                        ]
+                      },
+                      {
+                        "let": "next",
+                        "value": {
+                          "failure": {
+                            "stage": 3,
+                            "code": "READ_CELL_ABSENT",
+                            "detail": "$detail"
+                          },
+                          "stages": [
+                            "append",
+                            "$reading.stages",
+                            [
+                              "list",
+                              {
+                                "n": 3,
+                                "ok": false,
+                                "detail": "$detail"
+                              }
+                            ]
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": "$next",
+            "into": "reading"
+          },
+          {
+            "let": "failure",
+            "value": "$reading.failure"
+          },
+          {
+            "let": "stages",
+            "value": "$reading.stages"
+          },
+          {
+            "when": [
+              "eq",
+              "$failure",
+              null
+            ],
+            "then": [
+              {
+                "fold": "$delta.create",
+                "as": "cell",
+                "accumulator": "createdCells",
+                "initial": [
+                  "list"
+                ],
+                "steps": [
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "lamp.cellId",
+                      "input": {
+                        "cell": "$cell"
+                      }
+                    },
+                    "into": "id"
+                  },
+                  {
+                    "port": "record.put",
+                    "args": {
+                      "record": "$cell",
+                      "key": "id",
+                      "value": "$id"
+                    },
+                    "into": "identified"
+                  }
+                ],
+                "yield": [
+                  "append",
+                  "$createdCells",
+                  [
+                    "list",
+                    "$identified"
+                  ]
+                ],
+                "into": "created"
+              },
+              {
+                "fold": "$created",
+                "as": "cell",
+                "accumulator": "creating",
+                "initial": {
+                  "cells": "$cells",
+                  "failure": null,
+                  "stages": "$stages"
+                },
+                "steps": [
+                  {
+                    "let": "next",
+                    "value": "$creating"
+                  },
+                  {
+                    "when": [
+                      "eq",
+                      "$creating.failure",
+                      null
+                    ],
+                    "then": [
+                      {
+                        "port": "record.get",
+                        "args": {
+                          "record": "$creating.cells",
+                          "key": "$cell.id"
+                        },
+                        "into": "existing"
+                      },
+                      {
+                        "when": [
+                          "not",
+                          [
+                            "eq",
+                            "$existing",
+                            null
+                          ]
+                        ],
+                        "then": [
+                          {
+                            "let": "detail",
+                            "value": [
+                              "concat",
+                              "Created cell ",
+                              "$cell.key",
+                              " already exists."
+                            ]
+                          },
+                          {
+                            "let": "next",
+                            "value": {
+                              "cells": "$creating.cells",
+                              "failure": {
+                                "stage": 3,
+                                "code": "CELL_ALREADY_PRESENT",
+                                "detail": "$detail"
+                              },
+                              "stages": [
+                                "append",
+                                "$creating.stages",
+                                [
+                                  "list",
+                                  {
+                                    "n": 3,
+                                    "ok": false,
+                                    "detail": "$detail"
+                                  }
+                                ]
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "when": [
+                          "eq",
+                          "$existing",
+                          null
+                        ],
+                        "then": [
+                          {
+                            "port": "record.put",
+                            "args": {
+                              "record": "$creating.cells",
+                              "key": "$cell.id",
+                              "value": {
+                                "key": "$cell.key",
+                                "value": "$cell.value"
+                              }
+                            },
+                            "into": "inserted"
+                          },
+                          {
+                            "port": "record.put",
+                            "args": {
+                              "record": "$creating",
+                              "key": "cells",
+                              "value": "$inserted"
+                            },
+                            "into": "next"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "yield": "$next",
+                "into": "creating"
+              },
+              {
+                "let": "cells",
+                "value": "$creating.cells"
+              },
+              {
+                "let": "failure",
+                "value": "$creating.failure"
+              },
+              {
+                "let": "stages",
+                "value": "$creating.stages"
+              }
+            ]
+          },
+          {
+            "let": "predicateId",
+            "value": "$temple.state.predicateId"
+          },
+          {
+            "when": [
+              "and",
+              [
+                "eq",
+                "$failure",
+                null
+              ],
+              [
+                "not",
+                [
+                  "eq",
+                  "$delta.nextPredicate",
+                  null
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "let": "expected",
+                "value": null
+              },
+              {
+                "when": [
+                  "not",
+                  [
+                    "eq",
+                    "$proposal.successor",
+                    null
+                  ]
+                ],
+                "then": [
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "canonical.identify",
+                      "input": {
+                        "kind": "predicate",
+                        "value": "$proposal.successor.ast"
+                      }
+                    },
+                    "into": "expected"
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "not",
+                  [
+                    "eq",
+                    "$expected",
+                    "$delta.nextPredicate"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "failure",
+                    "value": {
+                      "stage": 3,
+                      "code": "SUCCESSOR_UNRESOLVED",
+                      "detail": "The successor predicate does not match its id."
+                    }
+                  },
+                  {
+                    "let": "stages",
+                    "value": [
+                      "append",
+                      "$stages",
+                      [
+                        "list",
+                        {
+                          "n": 3,
+                          "ok": false,
+                          "detail": "The successor predicate does not match its id."
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "eq",
+                  "$expected",
+                  "$delta.nextPredicate"
+                ],
+                "then": [
+                  {
+                    "let": "predicateId",
+                    "value": "$delta.nextPredicate"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "let": "nextState",
+            "value": {
+              "cells": "$cells",
+              "predicateId": "$predicateId"
+            }
+          },
+          {
+            "when": [
+              "eq",
+              "$failure",
+              null
+            ],
+            "then": [
+              {
+                "let": "stages",
+                "value": [
+                  "append",
+                  "$stages",
+                  [
+                    "list",
+                    {
+                      "n": 3,
+                      "ok": true,
+                      "detail": [
+                        "concat",
+                        "−",
+                        [
+                          "count",
+                          "$delta.consume"
+                        ],
+                        " cell",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            [
+                              "count",
+                              "$delta.consume"
+                            ],
+                            1
+                          ],
+                          "",
+                          "s"
+                        ],
+                        ", +",
+                        [
+                          "count",
+                          "$delta.create"
+                        ],
+                        " cell",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            [
+                              "count",
+                              "$delta.create"
+                            ],
+                            1
+                          ],
+                          "",
+                          "s"
+                        ],
+                        [
+                          "if",
+                          "$delta.nextPredicate",
+                          ", successor covenant attached",
+                          ""
+                        ],
+                        "."
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$failure",
+          null
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.stateRoot",
+              "input": {
+                "state": "$nextState"
+              }
+            },
+            "into": "commitment"
+          },
+          {
+            "let": "nextRoot",
+            "value": "$commitment.root"
+          },
+          {
+            "let": "tree",
+            "value": "$commitment.tree"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "address.short",
+              "input": {
+                "id": "$delta.claimedFinalStateRoot",
+                "head": 8,
+                "tail": 0
+              }
+            },
+            "into": "claimedShort"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "address.short",
+              "input": {
+                "id": "$nextRoot",
+                "head": 8,
+                "tail": 0
+              }
+            },
+            "into": "nextShort"
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$delta.claimedFinalStateRoot",
+                "$nextRoot"
+              ]
+            ],
+            "then": [
+              {
+                "let": "failure",
+                "value": {
+                  "stage": 4,
+                  "code": "CLAIMED_ROOT_MISMATCH",
+                  "detail": [
+                    "concat",
+                    "Claimed ",
+                    "$claimedShort",
+                    ", computed ",
+                    "$nextShort",
+                    "."
+                  ]
+                }
+              },
+              {
+                "let": "stages",
+                "value": [
+                  "append",
+                  "$stages",
+                  [
+                    "list",
+                    {
+                      "n": 4,
+                      "ok": false,
+                      "detail": [
+                        "concat",
+                        "Claimed ",
+                        "$claimedShort",
+                        ", computed ",
+                        "$nextShort",
+                        "."
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$delta.claimedFinalStateRoot",
+              "$nextRoot"
+            ],
+            "then": [
+              {
+                "let": "stages",
+                "value": [
+                  "append",
+                  "$stages",
+                  [
+                    "list",
+                    {
+                      "n": 4,
+                      "ok": true,
+                      "detail": [
+                        "concat",
+                        "Claimed and computed: ",
+                        "$nextShort",
+                        "."
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$failure",
+          null
+        ],
+        "then": [
+          {
+            "let": "covenant",
+            "value": [
+              "at",
+              "$temple.predicates",
+              "$temple.state.predicateId"
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.namedCells",
+              "input": {
+                "state": "$temple.state",
+                "ids": "$delta.read"
+              }
+            },
+            "into": "readCells"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.namedCells",
+              "input": {
+                "state": "$temple.state",
+                "ids": "$delta.consume"
+              }
+            },
+            "into": "consumeCells"
+          },
+          {
+            "port": "record.fromEntries",
+            "args": {
+              "entries": [
+                "map",
+                "$delta.create",
+                "cell",
+                [
+                  "list",
+                  "$cell.key",
+                  "$cell.value"
+                ]
+              ]
+            },
+            "into": "createCells"
+          },
+          {
+            "let": "view",
+            "value": {
+              "identity": "$wire.identity",
+              "read": "$readCells",
+              "consume": "$consumeCells",
+              "create": "$createCells",
+              "successor": [
+                "or",
+                "$delta.nextPredicate",
+                null
+              ]
+            }
+          },
+          {
+            "fold": "$covenant.rules",
+            "as": "rule",
+            "accumulator": "rules",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "lamp.evaluate",
+                  "input": {
+                    "node": "$rule.ast",
+                    "view": "$view",
+                    "fuel": "$configuration.limits.fuel"
+                  }
+                },
+                "into": "evaluated"
+              }
+            ],
+            "yield": [
+              "append",
+              "$rules",
+              [
+                "list",
+                {
+                  "name": "$rule.name",
+                  "text": "$rule.text",
+                  "ok": "$evaluated.value"
+                }
+              ]
+            ],
+            "into": "rules"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.evaluate",
+              "input": {
+                "node": "$covenant.ast",
+                "view": "$view",
+                "fuel": "$configuration.limits.fuel"
+              }
+            },
+            "into": "whole"
+          },
+          {
+            "let": "covenantReport",
+            "value": {
+              "covenant": "$covenant.title",
+              "rules": "$rules",
+              "fuel": "$whole.fuelUsed",
+              "view": "$view"
+            }
+          },
+          {
+            "let": "broken",
+            "value": [
+              "filter",
+              "$rules",
+              "rule",
+              [
+                "not",
+                "$rule.ok"
+              ]
+            ]
+          },
+          {
+            "when": [
+              "not",
+              "$whole.value"
+            ],
+            "then": [
+              {
+                "port": "text.join",
+                "args": {
+                  "values": [
+                    "map",
+                    "$broken",
+                    "rule",
+                    "$rule.name"
+                  ],
+                  "separator": ", "
+                },
+                "into": "brokenNames"
+              },
+              {
+                "let": "firstBroken",
+                "value": [
+                  "at",
+                  "$broken",
+                  0
+                ]
+              },
+              {
+                "let": "failure",
+                "value": {
+                  "stage": 5,
+                  "code": "COVENANT_FALSE",
+                  "detail": [
+                    "concat",
+                    "Rule ",
+                    "$brokenNames",
+                    ": ",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        [
+                          "count",
+                          "$broken"
+                        ],
+                        0
+                      ],
+                      "the covenant returned false.",
+                      [
+                        "at",
+                        "$firstBroken",
+                        "text"
+                      ]
+                    ]
+                  ],
+                  "rules": [
+                    "map",
+                    "$broken",
+                    "rule",
+                    "$rule.name"
+                  ]
+                }
+              },
+              {
+                "let": "stages",
+                "value": [
+                  "append",
+                  "$stages",
+                  [
+                    "list",
+                    {
+                      "n": 5,
+                      "ok": false,
+                      "detail": [
+                        "concat",
+                        "Rule ",
+                        "$brokenNames",
+                        ": ",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            [
+                              "count",
+                              "$broken"
+                            ],
+                            0
+                          ],
+                          "the covenant returned false.",
+                          [
+                            "at",
+                            "$firstBroken",
+                            "text"
+                          ]
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "when": "$whole.value",
+            "then": [
+              {
+                "let": "stages",
+                "value": [
+                  "append",
+                  "$stages",
+                  [
+                    "list",
+                    {
+                      "n": 5,
+                      "ok": true,
+                      "detail": [
+                        "concat",
+                        "All ",
+                        [
+                          "count",
+                          "$rules"
+                        ],
+                        " rules hold · fuel ",
+                        "$whole.fuelUsed",
+                        " of ",
+                        "$configuration.limits.fuel",
+                        "."
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$failure",
+          null
+        ],
+        "then": [
+          {
+            "let": "arkIssue",
+            "value": null
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$proposal.successor",
+                null
+              ]
+            ],
+            "then": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "lamp.measure",
+                  "input": {
+                    "node": "$proposal.successor.ast"
+                  }
+                },
+                "into": "measurement"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greater",
+                  "values": [
+                    "list",
+                    "$measurement.depth",
+                    "$configuration.limits.depth"
+                  ]
+                },
+                "into": "deep"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greater",
+                  "values": [
+                    "list",
+                    "$measurement.nodes",
+                    "$configuration.limits.nodes"
+                  ]
+                },
+                "into": "large"
+              },
+              {
+                "let": "arkIssue",
+                "value": [
+                  "if",
+                  [
+                    "not",
+                    "$measurement.closed"
+                  ],
+                  "The successor covenant uses an operator outside the closed set.",
+                  [
+                    "if",
+                    "$deep",
+                    [
+                      "concat",
+                      "The successor covenant is ",
+                      "$measurement.depth",
+                      " deep; the Ark allows ",
+                      "$configuration.limits.depth",
+                      "."
+                    ],
+                    [
+                      "if",
+                      "$large",
+                      [
+                        "concat",
+                        "The successor covenant has ",
+                        "$measurement.nodes",
+                        " nodes; the Ark allows ",
+                        "$configuration.limits.nodes",
+                        "."
+                      ],
+                      null
+                    ]
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$arkIssue",
+                null
+              ]
+            ],
+            "then": [
+              {
+                "let": "failure",
+                "value": {
+                  "stage": 6,
+                  "code": "ARK_INVARIANT",
+                  "detail": "$arkIssue"
+                }
+              },
+              {
+                "let": "stages",
+                "value": [
+                  "append",
+                  "$stages",
+                  [
+                    "list",
+                    {
+                      "n": 6,
+                      "ok": false,
+                      "detail": "$arkIssue"
+                    }
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$arkIssue",
+              null
+            ],
+            "then": [
+              {
+                "let": "stages",
+                "value": [
+                  "append",
+                  "$stages",
+                  [
+                    "list",
+                    {
+                      "n": 6,
+                      "ok": true,
+                      "detail": "Bounds, operators and structure are within the Ark."
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "let": "accepted",
+        "value": [
+          "eq",
+          "$failure",
+          null
+        ]
+      },
+      {
+        "let": "body",
+        "value": {
+          "kind": "witness",
+          "temple": "$temple.id",
+          "predicate": "$temple.state.predicateId",
+          "identity": "$wire.identity",
+          "context": "$wire.context",
+          "initialStateRoot": "$temple.root",
+          "delta": {
+            "basis": "$delta.basis",
+            "read": "$delta.read",
+            "consume": "$delta.consume",
+            "create": "$delta.create",
+            "nextPredicate": [
+              "or",
+              "$delta.nextPredicate",
+              null
+            ],
+            "claimedFinalStateRoot": "$delta.claimedFinalStateRoot"
+          },
+          "outcome": [
+            "if",
+            "$accepted",
+            "accepted",
+            "rejected"
+          ],
+          "failure": [
+            "if",
+            "$accepted",
+            null,
+            {
+              "stage": [
+                "concat",
+                [
+                  "at",
+                  "$failure",
+                  "stage"
+                ]
+              ],
+              "code": [
+                "at",
+                "$failure",
+                "code"
+              ]
+            }
+          ],
+          "finalStateRoot": [
+            "if",
+            "$accepted",
+            "$nextRoot",
+            null
+          ],
+          "sequence": [
+            "if",
+            "$accepted",
+            [
+              "concat",
+              [
+                "add",
+                "$temple.sequence",
+                1
+              ]
+            ],
+            null
+          ],
+          "previousWitness": "$temple.tip"
+        }
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "canonical.identify",
+          "input": {
+            "kind": "witness",
+            "value": "$body"
+          }
+        },
+        "into": "witnessId"
+      },
+      {
+        "let": "result",
+        "value": {
+          "accepted": "$accepted",
+          "stages": "$stages",
+          "failure": "$failure",
+          "covenantReport": "$covenantReport",
+          "witness": {
+            "id": "$witnessId",
+            "body": "$body"
+          },
+          "S1": [
+            "if",
+            "$accepted",
+            "$nextState",
+            null
+          ],
+          "S1root": "$nextRoot",
+          "tree": "$tree",
+          "created": "$created"
+        }
+      }
+    ],
+    "lamp.namedCells": [
+      {
+        "port": "record.fromEntries",
+        "args": {
+          "entries": [
+            "map",
+            "$eventInput.ids",
+            "id",
+            [
+              "list",
+              [
+                "at",
+                [
+                  "at",
+                  "$eventInput.state.cells",
+                  "$id"
+                ],
+                "key"
+              ],
+              [
+                "at",
+                [
+                  "at",
+                  "$eventInput.state.cells",
+                  "$id"
+                ],
+                "value"
+              ]
+            ]
+          ]
+        },
+        "into": "result"
+      }
+    ],
+    "lamp.commit": [
+      {
+        "port": "record.put",
+        "args": {
+          "record": "$eventInput.temple",
+          "key": "tip",
+          "value": "$eventInput.result.witness.id"
+        },
+        "into": "temple"
+      },
+      {
+        "when": "$eventInput.result.accepted",
+        "then": [
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$temple",
+              "key": "state",
+              "value": "$eventInput.result.S1"
+            },
+            "into": "temple"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$temple",
+              "key": "root",
+              "value": "$eventInput.result.S1root"
+            },
+            "into": "temple"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$temple",
+              "key": "sequence",
+              "value": [
+                "add",
+                "$temple.sequence",
+                1
+              ]
+            },
+            "into": "temple"
+          }
+        ]
+      },
+      {
+        "let": "result",
+        "value": "$temple"
+      }
+    ],
+    "lamp.propose": [
+      {
+        "let": "world",
+        "value": "$eventInput.world"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.buildProposal",
+          "input": {
+            "temple": "$world.temple",
+            "registry": "$world.registry",
+            "recipe": "$eventInput.recipe",
+            "configuration": "$eventInput.configuration"
+          }
+        },
+        "into": "proposal"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.judge",
+          "input": {
+            "temple": "$world.temple",
+            "proposal": "$proposal",
+            "configuration": "$eventInput.configuration"
+          }
+        },
+        "into": "judgment"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.commit",
+          "input": {
+            "temple": "$world.temple",
+            "result": "$judgment"
+          }
+        },
+        "into": "temple"
+      },
+      {
+        "when": "$judgment.accepted",
+        "then": [
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$temple",
+              "key": "tree",
+              "value": "$judgment.tree"
+            },
+            "into": "temple"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$temple",
+              "key": "roots",
+              "value": [
+                "append",
+                "$temple.roots",
+                [
+                  "list",
+                  "$judgment.S1root"
+                ]
+              ]
+            },
+            "into": "temple"
+          }
+        ]
+      },
+      {
+        "port": "record.put",
+        "args": {
+          "record": "$world",
+          "key": "temple",
+          "value": "$temple"
+        },
+        "into": "world"
+      },
+      {
+        "port": "record.put",
+        "args": {
+          "record": "$world",
+          "key": "journal",
+          "value": [
+            "append",
+            "$world.journal",
+            [
+              "list",
+              {
+                "id": "$judgment.witness.id",
+                "body": "$judgment.witness.body",
+                "recipe": "$eventInput.recipe"
+              }
+            ]
+          ]
+        },
+        "into": "world"
+      },
+      {
+        "let": "result",
+        "value": {
+          "world": "$world",
+          "proposal": "$proposal",
+          "result": "$judgment"
+        }
+      }
+    ],
+    "lamp.freshTemple": [
+      {
+        "let": "g",
+        "value": "$eventInput.world.genesis"
+      },
+      {
+        "let": "result",
+        "value": {
+          "id": "$g.id",
+          "arkId": "$g.arkId",
+          "state": "$g.state",
+          "root": "$g.root",
+          "predicates": "$eventInput.world.registry",
+          "sequence": 0,
+          "tip": null,
+          "roots": [
+            "list",
+            "$g.root"
+          ]
+        }
+      }
+    ],
+    "lamp.replay": [
+      {
+        "let": "world",
+        "value": "$eventInput.world"
+      },
+      {
+        "let": "journal",
+        "value": "$eventInput.journal"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.freshTemple",
+          "input": {
+            "world": "$world"
+          }
+        },
+        "into": "temple"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "canonical.identify",
+          "input": {
+            "kind": "context",
+            "value": {
+              "name": "The Temple of the Lamp",
+              "purpose": "A miniature running in your browser, for illustration."
+            }
+          }
+        },
+        "into": "contextId"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "canonical.identify",
+          "input": {
+            "kind": "temple",
+            "value": {
+              "ark": "$world.genesis.arkId",
+              "initialStateRoot": "$temple.root",
+              "genesisContext": "$contextId"
+            }
+          }
+        },
+        "into": "templeCheck"
+      },
+      {
+        "let": "result",
+        "value": {
+          "ok": false,
+          "lines": [
+            "list",
+            {
+              "ok": false,
+              "text": "Genesis does not reproduce this Temple’s identity."
+            }
+          ]
+        }
+      },
+      {
+        "when": [
+          "eq",
+          "$templeCheck",
+          "$world.id"
+        ],
+        "then": [
+          {
+            "fold": [
+              "range",
+              [
+                "count",
+                "$journal"
+              ]
+            ],
+            "as": "position",
+            "accumulator": "checking",
+            "initial": {
+              "temple": "$temple",
+              "lines": [
+                "list",
+                {
+                  "ok": true,
+                  "text": "Genesis reproduces the Temple’s identity."
+                }
+              ],
+              "ok": true,
+              "at": null,
+              "accepted": 0,
+              "refused": 0
+            },
+            "steps": [
+              {
+                "let": "next",
+                "value": "$checking"
+              },
+              {
+                "when": "$checking.ok",
+                "then": [
+                  {
+                    "let": "index",
+                    "value": [
+                      "add",
+                      "$position",
+                      -1
+                    ]
+                  },
+                  {
+                    "let": "entry",
+                    "value": [
+                      "at",
+                      "$journal",
+                      "$index"
+                    ]
+                  },
+                  {
+                    "let": "label",
+                    "value": [
+                      "concat",
+                      "Witness ",
+                      "$position"
+                    ]
+                  },
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "canonical.identify",
+                      "input": {
+                        "kind": "witness",
+                        "value": "$entry.body"
+                      }
+                    },
+                    "into": "id"
+                  },
+                  {
+                    "let": "problem",
+                    "value": null
+                  },
+                  {
+                    "when": [
+                      "not",
+                      [
+                        "eq",
+                        "$id",
+                        "$entry.id"
+                      ]
+                    ],
+                    "then": [
+                      {
+                        "let": "problem",
+                        "value": [
+                          "concat",
+                          "$label",
+                          ": its contents no longer match its hash. The record was altered."
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "when": [
+                      "and",
+                      [
+                        "eq",
+                        "$problem",
+                        null
+                      ],
+                      [
+                        "not",
+                        [
+                          "eq",
+                          "$entry.body.previousWitness",
+                          "$checking.temple.tip"
+                        ]
+                      ]
+                    ],
+                    "then": [
+                      {
+                        "let": "problem",
+                        "value": [
+                          "concat",
+                          "$label",
+                          ": it does not follow the witness before it."
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "when": [
+                      "eq",
+                      "$problem",
+                      null
+                    ],
+                    "then": [
+                      {
+                        "let": "proposal",
+                        "value": {
+                          "wire": {
+                            "identity": "$entry.body.identity",
+                            "context": "$entry.body.context",
+                            "delta": "$entry.body.delta"
+                          },
+                          "successor": [
+                            "if",
+                            "$entry.body.delta.nextPredicate",
+                            [
+                              "at",
+                              "$world.registry",
+                              "$entry.body.delta.nextPredicate"
+                            ],
+                            null
+                          ]
+                        }
+                      },
+                      {
+                        "port": "kernel.invoke",
+                        "args": {
+                          "query": "lamp.judge",
+                          "input": {
+                            "temple": "$checking.temple",
+                            "proposal": "$proposal",
+                            "configuration": "$eventInput.configuration"
+                          }
+                        },
+                        "into": "again"
+                      },
+                      {
+                        "when": [
+                          "not",
+                          [
+                            "eq",
+                            "$again.witness.id",
+                            "$entry.id"
+                          ]
+                        ],
+                        "then": [
+                          {
+                            "let": "problem",
+                            "value": [
+                              "concat",
+                              "$label",
+                              ": re-judging it from genesis gives a different witness."
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "when": [
+                      "not",
+                      [
+                        "eq",
+                        "$problem",
+                        null
+                      ]
+                    ],
+                    "then": [
+                      {
+                        "let": "next",
+                        "value": {
+                          "temple": "$checking.temple",
+                          "lines": [
+                            "append",
+                            "$checking.lines",
+                            [
+                              "list",
+                              {
+                                "ok": false,
+                                "text": "$problem"
+                              }
+                            ]
+                          ],
+                          "ok": false,
+                          "at": "$index",
+                          "accepted": "$checking.accepted",
+                          "refused": "$checking.refused"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "when": [
+                      "eq",
+                      "$problem",
+                      null
+                    ],
+                    "then": [
+                      {
+                        "port": "kernel.invoke",
+                        "args": {
+                          "query": "lamp.commit",
+                          "input": {
+                            "temple": "$checking.temple",
+                            "result": "$again"
+                          }
+                        },
+                        "into": "temple"
+                      },
+                      {
+                        "when": "$again.accepted",
+                        "then": [
+                          {
+                            "port": "record.put",
+                            "args": {
+                              "record": "$temple",
+                              "key": "roots",
+                              "value": [
+                                "append",
+                                "$temple.roots",
+                                [
+                                  "list",
+                                  "$again.S1root"
+                                ]
+                              ]
+                            },
+                            "into": "temple"
+                          }
+                        ]
+                      },
+                      {
+                        "let": "next",
+                        "value": {
+                          "temple": "$temple",
+                          "lines": [
+                            "append",
+                            "$checking.lines",
+                            [
+                              "list",
+                              {
+                                "ok": true,
+                                "text": [
+                                  "concat",
+                                  "$label",
+                                  ": re-judged — ",
+                                  [
+                                    "if",
+                                    "$again.accepted",
+                                    [
+                                      "concat",
+                                      "accepted, sequence ",
+                                      "$again.witness.body.sequence"
+                                    ],
+                                    [
+                                      "concat",
+                                      "refused at stage ",
+                                      [
+                                        "at",
+                                        "$again.failure",
+                                        "stage"
+                                      ],
+                                      ", state unchanged"
+                                    ]
+                                  ],
+                                  "."
+                                ]
+                              }
+                            ]
+                          ],
+                          "ok": true,
+                          "at": null,
+                          "accepted": [
+                            "add",
+                            "$checking.accepted",
+                            [
+                              "if",
+                              "$again.accepted",
+                              1,
+                              0
+                            ]
+                          ],
+                          "refused": [
+                            "add",
+                            "$checking.refused",
+                            [
+                              "if",
+                              "$again.accepted",
+                              0,
+                              1
+                            ]
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": "$next",
+            "into": "checking"
+          },
+          {
+            "let": "result",
+            "value": {
+              "ok": false,
+              "lines": "$checking.lines",
+              "at": "$checking.at"
+            }
+          },
+          {
+            "when": "$checking.ok",
+            "then": [
+              {
+                "let": "summary",
+                "value": [
+                  "concat",
+                  [
+                    "count",
+                    "$journal"
+                  ],
+                  " witness",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      [
+                        "count",
+                        "$journal"
+                      ],
+                      1
+                    ],
+                    "",
+                    "es"
+                  ],
+                  " replayed from genesis: ",
+                  "$checking.accepted",
+                  " accepted, ",
+                  "$checking.refused",
+                  " refused."
+                ]
+              },
+              {
+                "when": [
+                  "eq",
+                  "$checking.temple.root",
+                  "$eventInput.publishedHead"
+                ],
+                "then": [
+                  {
+                    "let": "result",
+                    "value": {
+                      "ok": true,
+                      "lines": [
+                        "append",
+                        "$checking.lines",
+                        [
+                          "list",
+                          {
+                            "ok": true,
+                            "text": [
+                              "concat",
+                              "$summary",
+                              " The final root matches the head."
+                            ]
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "not",
+                  [
+                    "eq",
+                    "$checking.temple.root",
+                    "$eventInput.publishedHead"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "result",
+                    "value": {
+                      "ok": false,
+                      "lines": [
+                        "append",
+                        "$checking.lines",
+                        [
+                          "list",
+                          {
+                            "ok": false,
+                            "text": [
+                              "concat",
+                              "$summary",
+                              " Internally consistent — but its head is not the head already witnessed. This is a different history, not a continuation of this Temple."
+                            ]
+                          }
+                        ]
+                      ],
+                      "forked": true
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "lamp.forge": [
+      {
+        "let": "world",
+        "value": "$eventInput.world"
+      },
+      {
+        "fold": [
+          "range",
+          [
+            "count",
+            "$world.journal"
+          ]
+        ],
+        "as": "position",
+        "accumulator": "found",
+        "initial": -1,
+        "steps": [
+          {
+            "let": "entry",
+            "value": [
+              "at",
+              "$world.journal",
+              [
+                "add",
+                "$position",
+                -1
+              ]
+            ]
+          },
+          {
+            "let": "oilCreation",
+            "value": [
+              "some",
+              "$entry.body.delta.create",
+              "cell",
+              [
+                "eq",
+                "$cell.key",
+                "lamp.oil"
+              ]
+            ]
+          }
+        ],
+        "yield": [
+          "if",
+          [
+            "and",
+            [
+              "eq",
+              "$found",
+              -1
+            ],
+            [
+              "eq",
+              "$entry.body.outcome",
+              "accepted"
+            ],
+            "$oilCreation"
+          ],
+          [
+            "add",
+            "$position",
+            -1
+          ],
+          "$found"
+        ],
+        "into": "index"
+      },
+      {
+        "let": "result",
+        "value": null
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            "$index",
+            -1
+          ]
+        ],
+        "then": [
+          {
+            "when": [
+              "eq",
+              "$eventInput.mode",
+              "edit"
+            ],
+            "then": [
+              {
+                "fold": [
+                  "range",
+                  [
+                    "count",
+                    "$world.journal"
+                  ]
+                ],
+                "as": "position",
+                "accumulator": "journal",
+                "initial": [
+                  "list"
+                ],
+                "steps": [
+                  {
+                    "let": "entry",
+                    "value": [
+                      "at",
+                      "$world.journal",
+                      [
+                        "add",
+                        "$position",
+                        -1
+                      ]
+                    ]
+                  },
+                  {
+                    "when": [
+                      "eq",
+                      [
+                        "add",
+                        "$position",
+                        -1
+                      ],
+                      "$index"
+                    ],
+                    "then": [
+                      {
+                        "fold": "$entry.body.delta.create",
+                        "as": "cell",
+                        "accumulator": "created",
+                        "initial": {
+                          "cells": [
+                            "list"
+                          ],
+                          "changed": false
+                        },
+                        "steps": [
+                          {
+                            "let": "nextCell",
+                            "value": "$cell"
+                          },
+                          {
+                            "let": "changed",
+                            "value": "$created.changed"
+                          },
+                          {
+                            "when": [
+                              "and",
+                              [
+                                "not",
+                                "$changed"
+                              ],
+                              [
+                                "eq",
+                                "$cell.key",
+                                "lamp.oil"
+                              ]
+                            ],
+                            "then": [
+                              {
+                                "port": "record.put",
+                                "args": {
+                                  "record": "$cell",
+                                  "key": "value",
+                                  "value": "9"
+                                },
+                                "into": "nextCell"
+                              },
+                              {
+                                "let": "changed",
+                                "value": true
+                              }
+                            ]
+                          }
+                        ],
+                        "yield": {
+                          "cells": [
+                            "append",
+                            "$created.cells",
+                            [
+                              "list",
+                              "$nextCell"
+                            ]
+                          ],
+                          "changed": "$changed"
+                        },
+                        "into": "created"
+                      },
+                      {
+                        "port": "record.put",
+                        "args": {
+                          "record": "$entry.body.delta",
+                          "key": "create",
+                          "value": "$created.cells"
+                        },
+                        "into": "delta"
+                      },
+                      {
+                        "port": "record.put",
+                        "args": {
+                          "record": "$entry.body",
+                          "key": "delta",
+                          "value": "$delta"
+                        },
+                        "into": "body"
+                      },
+                      {
+                        "port": "record.put",
+                        "args": {
+                          "record": "$entry",
+                          "key": "body",
+                          "value": "$body"
+                        },
+                        "into": "entry"
+                      }
+                    ]
+                  }
+                ],
+                "yield": [
+                  "append",
+                  "$journal",
+                  [
+                    "list",
+                    "$entry"
+                  ]
+                ],
+                "into": "journal"
+              },
+              {
+                "let": "result",
+                "value": {
+                  "journal": "$journal",
+                  "index": "$index",
+                  "description": [
+                    "concat",
+                    "Changed witness ",
+                    [
+                      "add",
+                      "$index",
+                      1
+                    ],
+                    " so the lamp kept 9 measures of oil — without touching its hash."
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$eventInput.mode",
+                "edit"
+              ]
+            ],
+            "then": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "lamp.freshTemple",
+                  "input": {
+                    "world": "$world"
+                  }
+                },
+                "into": "temple"
+              },
+              {
+                "port": "record.put",
+                "args": {
+                  "record": "$world",
+                  "key": "temple",
+                  "value": "$temple"
+                },
+                "into": "shadow"
+              },
+              {
+                "port": "record.put",
+                "args": {
+                  "record": "$shadow",
+                  "key": "journal",
+                  "value": [
+                    "list"
+                  ]
+                },
+                "into": "shadow"
+              },
+              {
+                "fold": [
+                  "range",
+                  [
+                    "count",
+                    "$world.journal"
+                  ]
+                ],
+                "as": "position",
+                "accumulator": "shadow",
+                "initial": "$shadow",
+                "steps": [
+                  {
+                    "let": "recipe",
+                    "value": [
+                      "at",
+                      [
+                        "at",
+                        "$world.journal",
+                        [
+                          "add",
+                          "$position",
+                          -1
+                        ]
+                      ],
+                      "recipe"
+                    ]
+                  },
+                  {
+                    "when": [
+                      "eq",
+                      [
+                        "add",
+                        "$position",
+                        -1
+                      ],
+                      "$index"
+                    ],
+                    "then": [
+                      {
+                        "port": "record.put",
+                        "args": {
+                          "record": "$recipe",
+                          "key": "forgeOil",
+                          "value": "9"
+                        },
+                        "into": "recipe"
+                      }
+                    ]
+                  },
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "lamp.propose",
+                      "input": {
+                        "world": "$shadow",
+                        "recipe": "$recipe",
+                        "configuration": "$eventInput.configuration"
+                      }
+                    },
+                    "into": "proposal"
+                  }
+                ],
+                "yield": "$proposal.world",
+                "into": "shadow"
+              },
+              {
+                "let": "result",
+                "value": {
+                  "journal": "$shadow.journal",
+                  "index": "$index",
+                  "description": [
+                    "concat",
+                    "Rewrote history from witness ",
+                    [
+                      "add",
+                      "$index",
+                      1
+                    ],
+                    ": the lamp kept 9 measures, and every later hash and root was recomputed to match."
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

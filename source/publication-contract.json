@@ -7,12 +7,12 @@
     "semantics": "source/expedition.rel",
     "presentation": "source/presentation.rel",
     "policy": "algebra/publication.process.json",
-    "mechanisms": "unchanged Temple bootstrap closure",
+    "mechanisms": "Existing Temple seed, lowering and admission, with an explicitly pinned generic browser-effects successor",
     "compatibility": "retained/"
   },
   "boundaries": [
     "The retained interactive reader and workshop are unchanged compatibility components.",
-    "New page policy runs through Temple algebra; no new application JavaScript is introduced.",
+    "New page and microsite application policy runs through Temple algebra; generated browser bundles execute those programmes. Original microsite application scripts remain verification-only.",
     "Build admission is not scientific validation or a claim that all legacy code is algebra-authored.",
     "Generated HTML and CSS are disposable. The current 20,000,000-step budget and kernel are unchanged.",
     "Existing workshop, module and research-library URLs are preserved as exact-byte compatibility aliases. The original reader also remains at /reader.html."
@@ -124,6 +124,33 @@
       "bootstrap/hosts/runtime.cjs": "a2ee150fc8d6c3052789bba41ee64e72118970b03ffa1c1e2fff3e7e105a8d00",
       "bootstrap/ports/programme.cjs": "88d1c4d2aefe341533af1f967268e1c9da555d556db34adb7eea6b5838a5c1ec",
       "bootstrap/ports/kernel.cjs": "0ab9faa6dbd5c6d3d811171d46301037436c53b6fd5e11afab4769246d121c5c"
+    }
+  },
+  "nativeSuccessor": {
+    "reason": "Generic browser observations, scheduling, geometry effects, numeric mechanisms and SHA-256 fallback required to recompose the original microsites through algebra.",
+    "predecessor": "source/microsites/predecessor-native/publication-contract.json",
+    "predecessorSha256": "793733c371eb50255063ff0cf5e463144e1536f73deccc160ec1caaddb9b09fd",
+    "changed": [
+      "bootstrap/hosts/runtime.cjs"
+    ],
+    "added": [
+      "bootstrap/ports/browser-effects.cjs"
+    ],
+    "sha256": {
+      "bootstrap/run.cjs": "b90c8a76ae4100a1d1b593cd350ef9d43aff269f3cd0ab8ba94d1d4a92ccafc2",
+      "bootstrap/temple-seed.cjs": "c1fdf47cb183a0c8e69d000d091ada457fdc8333b34a2a5bba4bcc51d53ac71e",
+      "bootstrap/ports/node.cjs": "39acb141698930dbeae89adde8770abff6b0ef7d9de1b0a6193cfbb57f778463",
+      "bootstrap/ports/rel-codec.cjs": "d5ee4b037d6ca556822bde3e3a55cbfdee449b708d45f03ffe3508e8ec2b692e",
+      "bootstrap/ports/algebra-lower.cjs": "8cc997c2bc965c85b7b5615e796277a485bb1e64765c7df3031f9a30385a3ec2",
+      "bootstrap/ports/fact-index.cjs": "7fe2c41afc600bf6f4b066e6295034d3529d71b674e6ab8d1d489484c999037a",
+      "bootstrap/ports/value.cjs": "0f7d884a3eb5bd8eb33bcdc236560e4156c2c7498ac3ae39afc1702853fd8ca2",
+      "bootstrap/ports/register.cjs": "43c668d783ccd74137dfb0c286be55ac0e8cd2413f648c5c43a1244a5beab9ae",
+      "bootstrap/ports/browser.cjs": "ff320be4c37276a6f4e5ad5979b6eaf7f9d3a3d1190be40b32021356240abf72",
+      "bootstrap/ports/worker.cjs": "10fd9a4424ef7e49fd4c924a900332c3978231c2a929ea36e97a38ca75c58c7c",
+      "bootstrap/hosts/runtime.cjs": "5afe01fefeafa9f4f3ea0f41c9da9ef026ad780afc2652635324a3885b297b1b",
+      "bootstrap/ports/programme.cjs": "88d1c4d2aefe341533af1f967268e1c9da555d556db34adb7eea6b5838a5c1ec",
+      "bootstrap/ports/kernel.cjs": "0ab9faa6dbd5c6d3d811171d46301037436c53b6fd5e11afab4769246d121c5c",
+      "bootstrap/ports/browser-effects.cjs": "5e77920df39355b78ae033e3c857c9babf3bd675704d1ecdf62d521782142389"
     }
   }
 }

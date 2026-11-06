@@ -1,0 +1,520 @@
+{
+  "stopWords": [
+    "a",
+    "an",
+    "the",
+    "our",
+    "my",
+    "your",
+    "their",
+    "his",
+    "her",
+    "its",
+    "which",
+    "what",
+    "who",
+    "whom",
+    "whose",
+    "each",
+    "every",
+    "all",
+    "this",
+    "that",
+    "these",
+    "those",
+    "last",
+    "went",
+    "go",
+    "goes",
+    "going",
+    "gone",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "have",
+    "has",
+    "had",
+    "need",
+    "needs",
+    "needed",
+    "get",
+    "gets",
+    "got",
+    "do",
+    "does",
+    "did",
+    "over",
+    "under",
+    "before",
+    "after",
+    "when",
+    "where",
+    "why",
+    "how",
+    "to",
+    "for",
+    "with",
+    "and",
+    "or",
+    "of",
+    "in",
+    "on",
+    "at",
+    "by",
+    "from",
+    "about",
+    "into",
+    "than",
+    "then",
+    "so",
+    "if",
+    "holds",
+    "hold",
+    "held",
+    "runs",
+    "run",
+    "ran",
+    "borrowed",
+    "borrow",
+    "borrows",
+    "lent",
+    "lend",
+    "took",
+    "take",
+    "takes",
+    "came",
+    "come",
+    "left",
+    "leave",
+    "arrived",
+    "arrive",
+    "due",
+    "ordered",
+    "order",
+    "orders",
+    "out",
+    "up",
+    "down",
+    "off",
+    "anything",
+    "something",
+    "everything",
+    "whether",
+    "keep",
+    "kept",
+    "track",
+    "tell",
+    "show",
+    "let",
+    "me",
+    "us"
+  ],
+  "archetypes": [
+    {
+      "key": "claim",
+      "re": {
+        "pattern": "\\b(true|claim|evidence|prove|holds? up|fact|sources?|research)\\b",
+        "flags": "i"
+      }
+    },
+    {
+      "key": "approval",
+      "re": {
+        "pattern": "\\b(approv\\w*|sign[- ]?off|permission|authori[sz]\\w*|over \\$?\\d)",
+        "flags": "i"
+      }
+    },
+    {
+      "key": "loan",
+      "re": {
+        "pattern": "\\b(borrow\\w*|lend|lent|loan\\w*|who has|returned|check(?:ed)? out)\\b",
+        "flags": "i"
+      }
+    },
+    {
+      "key": "inventory",
+      "re": {
+        "pattern": "\\b(stock|inventory|how many|supplies|running low|run out|count)\\b",
+        "flags": "i"
+      }
+    },
+    {
+      "key": "schedule",
+      "re": {
+        "pattern": "\\b(schedul\\w*|roster|shifts?|book(?:ing)?s?|calendar|appointments?)\\b",
+        "flags": "i"
+      }
+    },
+    {
+      "key": "queue",
+      "re": {
+        "pattern": "\\b(list|to-?dos?|tasks?|queue|backlog|chores?)\\b",
+        "flags": "i"
+      }
+    },
+    {
+      "key": "log",
+      "re": {
+        "pattern": "\\b(when|last|since|log|track|record|how long|history|keep an eye)\\b",
+        "flags": "i"
+      }
+    }
+  ],
+  "events": [
+    {
+      "pattern": "\\bwent out\\b|\\bgo out\\b|\\blet (?:them|him|her|it) out\\b",
+      "flags": "",
+      "noun": "outing"
+    },
+    {
+      "pattern": "\\bwalk(?:ed|s)?\\b",
+      "flags": "",
+      "noun": "walk"
+    },
+    {
+      "pattern": "\\bfed\\b|\\bfeed(?:ing)?\\b",
+      "flags": "",
+      "noun": "feed"
+    },
+    {
+      "pattern": "\\bwater(?:ed|ing)\\b",
+      "flags": "",
+      "noun": "watering"
+    },
+    {
+      "pattern": "\\bclean(?:ed|ing)?\\b",
+      "flags": "",
+      "noun": "clean"
+    },
+    {
+      "pattern": "\\bcall(?:ed|s)?\\b",
+      "flags": "",
+      "noun": "call"
+    },
+    {
+      "pattern": "\\bvisit(?:ed|s)?\\b",
+      "flags": "",
+      "noun": "visit"
+    },
+    {
+      "pattern": "\\bmedication\\b|\\bmeds\\b|\\bpills?\\b|\\bdose\\b",
+      "flags": "",
+      "noun": "dose"
+    },
+    {
+      "pattern": "\\bservic(?:ed|e)\\b",
+      "flags": "",
+      "noun": "service"
+    },
+    {
+      "pattern": "\\bpaid\\b|\\bpay(?:ment)?\\b",
+      "flags": "",
+      "noun": "payment"
+    },
+    {
+      "pattern": "\\bcheck(?:ed)?\\b",
+      "flags": "",
+      "noun": "check"
+    },
+    {
+      "pattern": "\\bchang(?:ed|e)\\b",
+      "flags": "",
+      "noun": "change"
+    }
+  ],
+  "templates": {
+    "log": {
+      "pattern": "an event log",
+      "title": "A little log for {{subject}}",
+      "creates": [
+        [
+          "Record",
+          "{{capitalNoun}}",
+          "when it happened, what kind, who noted it"
+        ],
+        [
+          "Action",
+          "Note {{article}} {{noun}} now",
+          "one tap; the time fills itself in"
+        ],
+        [
+          "Action",
+          "Correct an entry",
+          "the original stays on the record"
+        ],
+        [
+          "View",
+          "Time since the last {{noun}}",
+          "readable at a glance"
+        ]
+      ],
+      "rules": [
+        "Every {{noun}} has a time and a person",
+        "Corrections supersede entries; they never delete them"
+      ],
+      "asks": [
+        "How long is too long between {{pluralNoun}}?"
+      ],
+      "wont": [
+        "Guess who did something it didn’t see"
+      ],
+      "fallback": "it"
+    },
+    "loan": {
+      "pattern": "a custody ledger",
+      "title": "Who has {{subject}}?",
+      "creates": [
+        [
+          "Record",
+          "Loan",
+          "which item, who has it, since when"
+        ],
+        [
+          "Action",
+          "Lend",
+          "names the person and the item"
+        ],
+        [
+          "Action",
+          "Mark returned",
+          "keeps the loan’s history"
+        ],
+        [
+          "View",
+          "Who has what",
+          "and what’s been out longest"
+        ]
+      ],
+      "rules": [
+        "An item can be with only one person at a time",
+        "Returning closes a loan; it doesn’t erase it"
+      ],
+      "asks": [
+        "When does a loan count as overdue?"
+      ],
+      "wont": [
+        "Chase anyone on your behalf"
+      ],
+      "fallback": "the tools"
+    },
+    "approval": {
+      "pattern": "an approval gate",
+      "title": "A gate{{amountPrefix}} before anything goes out",
+      "creates": [
+        [
+          "Record",
+          "Request",
+          "what, how much, and why"
+        ],
+        [
+          "Record",
+          "Decision",
+          "who decided, when, under which rule"
+        ],
+        [
+          "Action",
+          "Ask for sign-off",
+          "goes to a named approver"
+        ],
+        [
+          "View",
+          "Waiting for me",
+          "and everything decided this month"
+        ]
+      ],
+      "rules": [
+        "{{approvalSubject}} need a named approver",
+        "Approving is not ordering: placing the order is a separate, recorded step"
+      ],
+      "asks": [
+        "Who can approve, and up to what amount?"
+      ],
+      "wont": [
+        "Approve anything itself",
+        "Place orders"
+      ],
+      "fallback": "this"
+    },
+    "inventory": {
+      "pattern": "a conservation ledger",
+      "title": "A count of {{subject}} that adds up",
+      "creates": [
+        [
+          "Record",
+          "Stock movement",
+          "in or out, how many, why"
+        ],
+        [
+          "Action",
+          "Receive",
+          "adds stock with a reason"
+        ],
+        [
+          "Action",
+          "Use",
+          "takes stock with a reason"
+        ],
+        [
+          "View",
+          "On hand, running low",
+          "derived from the movements"
+        ]
+      ],
+      "rules": [
+        "Stock can’t go below zero",
+        "Counts are derived from movements, never typed over"
+      ],
+      "asks": [
+        "What counts as “running low” for each thing?"
+      ],
+      "wont": [
+        "Reorder anything automatically"
+      ],
+      "fallback": "the supplies"
+    },
+    "schedule": {
+      "pattern": "a planned occurrence",
+      "title": "A calendar for {{subject}}",
+      "creates": [
+        [
+          "Record",
+          "Booking",
+          "who, what, when, where"
+        ],
+        [
+          "Action",
+          "Book",
+          "a booking can exist before it has a time"
+        ],
+        [
+          "Action",
+          "Reschedule",
+          "keeps the original on record"
+        ],
+        [
+          "View",
+          "This week, and still unscheduled",
+          "side by side"
+        ]
+      ],
+      "rules": [
+        "Nobody is booked in two places at once",
+        "Rescheduling supersedes; it never erases"
+      ],
+      "asks": [
+        "Who may book on someone else’s behalf?"
+      ],
+      "wont": [
+        "Confirm anything with other people for you"
+      ],
+      "fallback": "the bookings"
+    },
+    "queue": {
+      "pattern": "an ordered queue",
+      "title": "An ordered list for {{subject}}",
+      "creates": [
+        [
+          "Record",
+          "Item",
+          "what it is, who it’s for, its status"
+        ],
+        [
+          "Action",
+          "Add, reorder, mark done",
+          "one order for the whole list"
+        ],
+        [
+          "View",
+          "Up next",
+          "and a quiet pile of done"
+        ]
+      ],
+      "rules": [
+        "There is one order for the whole list",
+        "Done stays done unless someone reopens it, with a note"
+      ],
+      "asks": [
+        "Can anyone add to the list, or only you?"
+      ],
+      "wont": [
+        "Assign items to people who didn’t agree"
+      ],
+      "fallback": "the list"
+    },
+    "claim": {
+      "pattern": "claims and evidence (Claimipedia’s kind of spell)",
+      "title": "A fair hearing for {{subject}}",
+      "creates": [
+        [
+          "Record",
+          "Claim",
+          "a permanent address; the wording can be versioned"
+        ],
+        [
+          "Record",
+          "Evidence",
+          "source, direction, and where it came from"
+        ],
+        [
+          "Action",
+          "Run a review method",
+          "written down, versioned, repeatable"
+        ],
+        [
+          "View",
+          "Why this result?",
+          "every step, in order"
+        ]
+      ],
+      "rules": [
+        "Methods are published before they judge anything",
+        "No universal truth score: each result names its method"
+      ],
+      "asks": [
+        "Which review method should count, and whose?"
+      ],
+      "wont": [
+        "Declare what’s true for everyone"
+      ],
+      "fallback": "the claim"
+    },
+    "generic": {
+      "pattern": "a plain record with history",
+      "title": "A careful home for {{subject}}",
+      "creates": [
+        [
+          "Record",
+          "{{recordName}}",
+          "the thing you care about"
+        ],
+        [
+          "Action",
+          "Create and update",
+          "every change keeps its history"
+        ],
+        [
+          "View",
+          "Everything, newest first",
+          "with who changed what"
+        ]
+      ],
+      "rules": [
+        "Every change says who made it, and when"
+      ],
+      "asks": [
+        "Who else should be able to see or change this?"
+      ],
+      "wont": [
+        "Share anything outside this workspace"
+      ],
+      "fallback": "this"
+    }
+  },
+  "subjectPattern": "\\b(the|our|my|your|their|which|each|every|all)\\s+([a-z][a-z'’-]*(?:\\s+[a-z][a-z'’-]*){0,2})",
+  "refusalPattern": "\\b(?:no|without|don['’]?t|do not|never)\\s+([a-z]+(?:\\s+(?:or|and)\\s+[a-z]+)?)",
+  "amountPattern": "\\$\\s?\\d[\\d,]*(?:\\.\\d+)?"
+}

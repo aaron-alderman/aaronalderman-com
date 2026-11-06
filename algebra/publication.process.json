@@ -18,6 +18,9 @@
         "message": "Publication must retain all forty places."
       },
       {
+        "call": "microsites.build"
+      },
+      {
         "each": [
           "subjects",
           "isa",
@@ -333,6 +336,31 @@
               "one",
               "$sitemapPlace",
               "route"
+            ],
+            "</loc></url>"
+          ]
+        ]
+      },
+      {
+        "let": "sitemap",
+        "value": [
+          "fold",
+          [
+            "subjects",
+            "isa",
+            "MicrositeDocument"
+          ],
+          "document",
+          "xml",
+          "$sitemap",
+          [
+            "concat",
+            "$xml",
+            "<url><loc>",
+            [
+              "one",
+              "$document",
+              "canonical"
             ],
             "</loc></url>"
           ]

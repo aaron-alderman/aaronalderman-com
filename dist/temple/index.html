@@ -1,0 +1,494 @@
+<!doctype html><html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Covenant · Sourcery</title>
+    <meta name="description" content="Temple is the ground Sourcery stands on: law you can execute, and history no one can quietly rewrite. A speculative film about the Ark, the covenant and the witness — with a working gate you can try to break.">
+    <meta name="theme-color" content="#07080f">
+    <meta name="color-scheme" content="dark">
+    <link rel="icon" href="assets/favicon.svg">
+    <link rel="preload" href="fonts/cormorant-garamond-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="fonts/cinzel-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin="">
+    
+    <script src="early.js"></script><link rel="stylesheet" href="assets/covenant.css">
+    
+    
+    
+  <script type="module" src="runtime.js"></script><link rel="canonical" href="https://aaronalderman.com/temple/"><meta property="og:type" content="website"><meta property="og:title" content="The Covenant · Sourcery"><meta property="og:description" content="Temple is the ground Sourcery stands on: law you can execute, and history no one can quietly rewrite. A speculative film about the Ark, the covenant and the witness — with a working gate you can try to break."><meta property="og:url" content="https://aaronalderman.com/temple/"><meta property="og:image" content="https://aaronalderman.com/temple/films/the-film-poster.jpg"><meta property="og:image:alt" content="The Covenant: a Temple in lamplight."><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="The Covenant · Sourcery"><meta name="twitter:description" content="Temple is the ground Sourcery stands on: law you can execute, and history no one can quietly rewrite. A speculative film about the Ark, the covenant and the witness — with a working gate you can try to break."><meta name="twitter:image" content="https://aaronalderman.com/temple/films/the-film-poster.jpg"></head>
+  <body>
+    <a class="skip-link" href="#gate">Skip to the gate</a>
+    <canvas id="sky" class="sky" aria-hidden="true"></canvas>
+
+    <header class="masthead">
+      <a class="wordmark" href="#top" aria-label="Sourcery, back to the top">
+        <svg viewBox="0 0 64 40" aria-hidden="true"><path d="M6 16 L32 4 L58 16 Z"></path><path d="M13 20 V34 M25 20 V34 M39 20 V34 M51 20 V34 M6 37 H58"></path></svg>
+        <span>Sourcery</span>
+      </a>
+      <nav aria-label="Scenes">
+        <a href="#judgment">The judgment</a>
+        <a href="#commandments">Commandments</a>
+        <a href="#gate">Try the gate</a>
+        <a href="films/">The film</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <!-- Hero -->
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Sourcery · Temple</p>
+          <h1 id="hero-title">Law you can execute.<br><span class="soft">History no one can quietly rewrite.</span></h1>
+          <p class="lead">Temple is the ground Sourcery stands on — a kernel where every change is proposed, judged against declared law, and witnessed, whether it is accepted or refused.</p>
+          <p class="hero-note">A speculative film, with a working gate you can try to break. <a href="films/">Or watch the 41-second film.</a></p>
+        </div>
+        <svg class="temple" viewBox="0 0 640 380" role="img" aria-labelledby="temple-title">
+          <title id="temple-title">A temple drawn in lines of lamplight, its doorway lit from within.</title>
+          <defs>
+            <radialGradient id="door-light" cx="50%" cy="70%" r="70%">
+              <stop offset="0" stop-color="#fff1c9"></stop>
+              <stop offset=".45" stop-color="#f2c96f" stop-opacity=".85"></stop>
+              <stop offset="1" stop-color="#b8792a" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="spill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#f6d58c" stop-opacity=".5"></stop>
+              <stop offset="1" stop-color="#f6d58c" stop-opacity="0"></stop>
+            </linearGradient>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="b"></feGaussianBlur>
+              <feMerge><feMergeNode in="b"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+            </filter>
+          </defs>
+          <polygon class="spill" points="292,318 348,318 470,380 170,380" fill="url(#spill)"></polygon>
+          <rect class="door" x="292" y="176" width="56" height="130" rx="2" fill="url(#door-light)"></rect>
+          <g class="lines" filter="url(#glow)">
+            <path d="M92 118 L320 42 L548 118 Z"></path>
+            <path d="M126 112 L320 58 L514 112"></path>
+            <path d="M92 118 H548 V138 H92 Z"></path>
+            <path d="M104 144 H536"></path>
+            <g class="columns">
+              <path d="M118 150 V300 M142 150 V300"></path>
+              <path d="M186 150 V300 M210 150 V300"></path>
+              <path d="M254 150 V300 M278 150 V300"></path>
+              <path d="M362 150 V300 M386 150 V300"></path>
+              <path d="M430 150 V300 M454 150 V300"></path>
+              <path d="M498 150 V300 M522 150 V300"></path>
+            </g>
+            <path d="M292 306 V176 H348 V306"></path>
+            <path d="M78 306 H562 M64 320 H576 M50 334 H590"></path>
+          </g>
+        </svg>
+        <a class="descend" href="#distance"><span>Enter</span></a>
+      </section>
+
+      <!-- I · The distance -->
+      <section id="distance" class="scene-text distance" aria-labelledby="distance-title" data-progress="">
+        <p class="eyebrow">I · The distance</p>
+        <h2 id="distance-title" class="statement" data-reveal="">Artificial intelligence makes ideas easier to express, combine, and execute.</h2>
+        <p class="statement soft" data-reveal="">That is its promise, but also its danger.</p>
+        <figure class="gap" aria-labelledby="gap-caption" data-reveal="">
+          <div class="gap-track" aria-hidden="true">
+            <span class="gap-end gap-sentence"><i></i><b>a sentence</b></span>
+            <span class="gap-line"></span>
+            <span class="gap-end gap-action"><i></i><b>an action</b></span>
+          </div>
+          <figcaption id="gap-caption">The distance between a sentence and a consequential action is shrinking.</figcaption>
+        </figure>
+        <p class="body-wide" data-reveal="">A suggestion can become a policy, a database migration, a financial decision, a public narrative, or a deployed system before the people affected by it understand what happened or who authorized it.</p>
+      </section>
+
+      <!-- II · The substitutions -->
+      <section id="substitutions" class="scene-text" aria-labelledby="subs-title">
+        <p class="eyebrow">II · The quiet substitutions</p>
+        <h2 id="subs-title" data-reveal="">In ordinary software, meaning slides.</h2>
+        <p class="body-wide" data-reveal="">Authority hides in permissions, defaults and deployment scripts — or in the simple fact that someone happened to act first. And so, without anyone deciding it:</p>
+        <ul class="subs">
+          <li data-reveal=""><span class="a">generated</span> <span class="slide"><s>becomes treated as</s><em>is not</em></span> <span class="b">intended</span></li>
+          <li data-reveal=""><span class="a">stored</span> <span class="slide"><s>becomes treated as</s><em>is not</em></span> <span class="b">true</span></li>
+          <li data-reveal=""><span class="a">repeated</span> <span class="slide"><s>becomes treated as</s><em>is not</em></span> <span class="b">supported</span></li>
+          <li data-reveal=""><span class="a">attributed</span> <span class="slide"><s>becomes treated as</s><em>is not</em></span> <span class="b">endorsed</span></li>
+          <li data-reveal=""><span class="a">reviewed</span> <span class="slide"><s>becomes treated as</s><em>is not</em></span> <span class="b">believed</span></li>
+          <li data-reveal=""><span class="a">authorized</span> <span class="slide"><s>becomes treated as</s><em>is not</em></span> <span class="b">executed</span></li>
+          <li data-reveal=""><span class="a">causally involved</span> <span class="slide"><s>becomes treated as</s><em>is not</em></span> <span class="b">responsible</span></li>
+          <li data-reveal=""><span class="a">technically possible</span> <span class="slide"><s>becomes treated as</s><em>is not</em></span> <span class="b">permissible</span></li>
+        </ul>
+        <p class="body-wide" data-reveal="">These are not merely data-quality mistakes. They are changes in the political and moral meaning of a system.</p>
+        <blockquote class="question" data-reveal="">
+          <p>How can representations become procedures without silently changing their epistemic, political, or moral type?</p>
+        </blockquote>
+      </section>
+
+      <!-- III · The judgment -->
+      <section id="judgment" class="scene static" aria-labelledby="judgment-title" data-scene="" data-step="all">
+        <div class="scene-sticky">
+          <header class="scene-head">
+            <p class="eyebrow">III · The judgment</p>
+            <h2 id="judgment-title">One sentence of law.</h2>
+            <p class="scene-lead">Temple answers with a single judgment. Every change in a Temple must satisfy it — no exceptions, no side doors.</p>
+          </header>
+          <p class="inscription" role="img" aria-label="The kernel judgment: C, turnstile, subscripted by the Ark and P, and i; S zero, an arrow labelled d over W, to S one.">
+            <span class="sym" data-k="c">C</span><span class="turn"><svg class="sym" data-k="turn" viewBox="0 0 40 64" aria-hidden="true"><path d="M9 8 V56 M9 32 H35"></path></svg><span class="subscript"><span class="sym" data-k="ark">Ark</span><svg class="sym wedge" data-k="ark" viewBox="0 0 30 30" aria-hidden="true"><path d="M5 26 L15 6 L25 26"></path></svg><span class="sym" data-k="ark">P</span><span class="comma">,</span><span class="sym" data-k="i">i</span></span></span><span class="sym" data-k="s0">S<sub>0</sub></span><span class="arrow"><span class="arrow-label"><span class="sym" data-k="d">d</span><span class="slash">/</span><span class="sym" data-k="w">W</span></span><svg class="sym arrow-line" data-k="d" viewBox="0 0 220 24" preserveAspectRatio="none" aria-hidden="true"><path d="M2 12 H208 M196 3 L210 12 L196 21"></path></svg></span><span class="sym" data-k="s1">S<sub>1</sub></span>
+          </p>
+          <ol class="captions" aria-label="The judgment, symbol by symbol">
+            <li data-k="all"><h3>Read aloud</h3><p>Given context <i>C</i>, under the Ark and this Temple’s predicate <i>P</i>, identity <i>i</i>’s delta <i>d</i> takes state <i>S₀</i> to <i>S₁</i> — and witness <i>W</i> records the judgment.</p></li>
+            <li data-k="c"><h3><i>C</i> — the evidence on the table</h3><p>Everything the judgment may consider sits inside one canonical, bounded context: at most 65,536 bytes. Nothing ambient.</p><p class="ref">Commandment IV · No ambient context</p></li>
+            <li data-k="turn"><h3>⊢ — is judged valid</h3><p>A total, deterministic decision. The same inputs always yield the same judgment, on any conforming machine.</p></li>
+            <li data-k="ark"><h3>Ark ∧ <i>P</i> — universal law, and local law</h3><p>Effective validity is Ark validity <em>and</em> covenant validity. A Temple may narrow the Ark. It can never widen it.</p><p class="ref">Commandment II · No absolute local policy</p></li>
+            <li data-k="i"><h3><i>i</i> — who is asking</h3><p>An identity bound to a key. “Key possession is necessary for authentication, never sufficient for covenant authorization.”</p><p class="ref">Commandment I · No implicit authority</p></li>
+            <li data-k="s0"><h3><i>S₀</i> — the exact starting point</h3><p>Named by its state root: one fingerprint of everything. Propose against a stale basis and you are refused.</p></li>
+            <li data-k="d"><h3><i>d</i> — an itemized change order</h3><p>What it reads, what it consumes, what it creates. <span class="nowrap"><i>S₁</i> = (<i>S₀</i> − consume) ∪ create</span>. Programs may construct proposals; only the fixed algebra applies them.</p><p class="ref">Commandment III · No hidden mutation</p></li>
+            <li data-k="w"><h3><i>W</i> — the witness</h3><p>A deterministic receipt binding Temple, predicate, identity, initial state, delta, context and final state. Refusals receive one too — and never advance the state.</p><p class="ref">Commandment VIII · No silent failure</p></li>
+            <li data-k="s1"><h3><i>S₁</i> — the result</h3><p>Its root must equal the root the proposal claimed. Anyone holding the rules can recompute it, from genesis onward.</p><p class="ref">Commandment IX · No unwitnessed continuation</p></li>
+            <li data-k="six"><h3>Accepted exactly when</h3>
+              <ol class="six">
+                <li>all inputs are canonical and bounded;</li>
+                <li>the proposal’s basis equals the current state root;</li>
+                <li>the fixed algebra applies the delta;</li>
+                <li>the claimed final root equals the computed root;</li>
+                <li>the active covenant returns true;</li>
+                <li>every Ark invariant holds.</li>
+              </ol>
+            </li>
+          </ol>
+          <div class="scene-rail" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+      </section>
+
+      <!-- IV · The Ark and the covenant -->
+      <section id="ark" class="scene-text ark-scene" aria-labelledby="ark-title">
+        <div class="split">
+          <div>
+            <p class="eyebrow">IV · The Ark and the covenant</p>
+            <h2 id="ark-title" data-reveal="">Universal law. Local law. Only ever narrower.</h2>
+            <p class="body" data-reveal="">The Ark defines the universal transition boundary. A Temple’s covenant defines its local permitted relation.</p>
+            <p class="formula" data-reveal=""><span>effective validity</span> = <span>Ark validity</span> <b>and</b> <span>covenant validity</span></p>
+            <p class="body" data-reveal="">So a covenant can be as particular as its community needs — a laboratory, a guild, a council, a family business — and still never grant what the Ark forbids.</p>
+          </div>
+          <svg class="ark-svg" viewBox="0 0 640 540" role="img" aria-labelledby="ark-svg-title" data-reveal="">
+            <title id="ark-svg-title">A great circle, the Ark, encloses every permitted transition. A covenant is drawn inside it; where it reaches past the Ark, it fades to a dashed outline that grants nothing.</title>
+            <defs>
+              <clipPath id="ark-clip"><circle cx="280" cy="270" r="220"></circle></clipPath>
+              <radialGradient id="ark-fill" cx="50%" cy="45%" r="60%">
+                <stop offset="0" stop-color="#1c2150" stop-opacity=".9"></stop>
+                <stop offset="1" stop-color="#0b0d22" stop-opacity=".2"></stop>
+              </radialGradient>
+              <radialGradient id="cov-fill" cx="45%" cy="45%" r="65%">
+                <stop offset="0" stop-color="#f3d693" stop-opacity=".42"></stop>
+                <stop offset="1" stop-color="#c9a25a" stop-opacity=".12"></stop>
+              </radialGradient>
+              <path id="ark-text-path" d="M 280 270 m -236 0 a 236 236 0 1 1 472 0 a 236 236 0 1 1 -472 0"></path>
+            </defs>
+            <circle cx="280" cy="270" r="220" fill="url(#ark-fill)" class="ark-ring"></circle>
+            <text class="ark-label"><textPath href="#ark-text-path" startOffset="4%">THE ARK · EVERY PERMITTED TRANSITION · UNIVERSAL · NOT YET SEALED ·</textPath></text>
+            <g class="cov-breathe">
+              <path class="cov-ghost" d="M178 196 C 208 116, 338 96, 428 136 C 528 176, 580 262, 520 336 C 470 396, 340 416, 258 386 C 178 356, 148 266, 178 196 Z"></path>
+            </g>
+            <g clip-path="url(#ark-clip)">
+              <g class="cov-breathe">
+                <path class="cov-fill" d="M178 196 C 208 116, 338 96, 428 136 C 528 176, 580 262, 520 336 C 470 396, 340 416, 258 386 C 178 356, 148 266, 178 196 Z"></path>
+              </g>
+            </g>
+            <text class="cov-label" x="330" y="262">A COVENANT</text>
+            <text class="cov-sub" x="330" y="290">this Temple’s law</text>
+            <text class="cov-cannot" x="566" y="250">cannot</text>
+            <text class="cov-cannot" x="566" y="272">widen</text>
+          </svg>
+        </div>
+        <div class="axioms">
+          <figure data-reveal=""><blockquote>“Preparation is provenance, not authority.”</blockquote><figcaption>Whoever prepares a Temple’s founding state holds no power over it afterwards — unless the covenant says so.</figcaption></figure>
+          <figure data-reveal=""><blockquote>“Information access is authority too.”</blockquote><figcaption>A covenant sees only the cells a proposal names. Holding a complete copy never widens what it may inspect.</figcaption></figure>
+          <figure data-reveal=""><blockquote>The Ark names no priesthood.</blockquote><figcaption>It prescribes no distinguished authority grant, priest, role, membership, consent, quorum, arbitration or succession. Those are choices each Temple writes into its own covenant.</figcaption></figure>
+        </div>
+      </section>
+
+      <!-- V · The commandments -->
+      <section id="commandments" class="scene-text commandments" aria-labelledby="cmd-title">
+        <p class="eyebrow">V · The commandments</p>
+        <h2 id="cmd-title" data-reveal="">Ten candidate commandments.</h2>
+        <p class="stamp-line" data-reveal="">Candidate Ark commandments · v0.1 · not yet sealed</p>
+        <div class="tablets">
+          <article class="tablet" aria-label="Commandments one to five" data-reveal="">
+            <ol>
+              <li><span class="num" aria-hidden="true">I</span><h3>No implicit authority.</h3><p>Identity, possession, capability, computation, custody and knowledge do not themselves authorize mutation.</p></li>
+              <li><span class="num" aria-hidden="true">II</span><h3>No absolute local policy.</h3><p>A Temple predicate may narrow the Ark’s permitted relation but cannot widen it.</p></li>
+              <li><span class="num" aria-hidden="true">III</span><h3>No hidden mutation.</h3><p>Every proposed change is represented by a finite, canonical delta against an identified initial state.</p></li>
+              <li><span class="num" aria-hidden="true">IV</span><h3>No ambient context.</h3><p>Every semantic input visible during judgment is contained in a canonical, bounded context.</p></li>
+              <li><span class="num" aria-hidden="true">V</span><h3>No executable mutation authority.</h3><p>Programs may construct proposals; only the fixed state algebra applies them.</p></li>
+            </ol>
+          </article>
+          <article class="tablet" aria-label="Commandments six to ten" data-reveal="">
+            <ol start="6">
+              <li><span class="num" aria-hidden="true">VI</span><h3>No self-enlargement during judgment.</h3><p>The Ark, active predicate, initial state and context are fixed for the complete evaluation.</p></li>
+              <li><span class="num" aria-hidden="true">VII</span><h3>No retrospective law.</h3><p>A newly admitted predicate becomes active only in the resulting state and cannot authorize its own installation.</p></li>
+              <li><span class="num" aria-hidden="true">VIII</span><h3>No silent failure.</h3><p>Acceptance, rejection, conflict and unresolved outcomes remain explicit and attributable.</p></li>
+              <li><span class="num" aria-hidden="true">IX</span><h3>No unwitnessed continuation.</h3><p>Every operative successor binds its Temple, predicate, identity, initial state, delta, context and final state.</p></li>
+              <li><span class="num" aria-hidden="true">X</span><h3>No ambient foreign sovereignty.</h3><p>A foreign Temple’s witness is bounded context; local consequences still require local admission.</p></li>
+            </ol>
+          </article>
+        </div>
+        <div class="unsealed" data-reveal="">
+          <svg class="seal" viewBox="0 0 120 120" aria-hidden="true">
+            <defs><path id="seal-ring" d="M60 60 m -44 0 a 44 44 0 1 1 88 0 a 44 44 0 1 1 -88 0"></path></defs>
+            <circle cx="60" cy="60" r="54" class="seal-rim"></circle>
+            <path class="seal-wax" d="M60 22 C 82 20, 99 38, 97 60 C 99 84, 80 100, 58 98 C 36 99, 21 82, 23 60 C 21 38, 38 23, 60 22 Z"></path>
+            <path class="seal-crack" d="M60 30 L56 48 L64 58 L57 74 L62 90"></path>
+            <text><textPath href="#seal-ring" startOffset="3%">NOT YET SEALED · NOT YET SEALED ·</textPath></text>
+          </svg>
+          <div>
+            <p class="body">These commandments govern the form of valid Temples. Membership, authority, consent, exit, custody, reconciliation and succession policies remain per-Temple covenant choices expressed inside this space.</p>
+            <p class="fine">“No gate authorizes sealing the Ark. Sealing requires independent implementations, adversarial review and a separate explicit decision.”</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VI · The gate -->
+      <section id="gate" class="gate" aria-labelledby="gate-title">
+        <header class="gate-head">
+          <p class="eyebrow">VI · The gate</p>
+          <h2 id="gate-title">Try the gate.</h2>
+          <p class="scene-lead">A miniature Temple, running in your browser. Choose who you are and what you propose. Watch the six conditions judge it and keep the witness. Then try to rewrite history.</p>
+          <p class="magic">Magic that shows its work: every judgment below comes with its reasons and its receipt.</p>
+        </header>
+
+        <div class="gate-grid">
+          <section class="panel temple-panel" aria-labelledby="lamp-title">
+            <div class="lamp-row">
+              <svg class="lamp" id="lamp" viewBox="0 0 160 120" aria-hidden="true" data-lit="false">
+                <defs>
+                  <radialGradient id="flame-glow" cx="50%" cy="60%" r="50%"><stop offset="0" stop-color="#ffe7a8" stop-opacity=".9"></stop><stop offset="1" stop-color="#ffb347" stop-opacity="0"></stop></radialGradient>
+                  <linearGradient id="flame-core" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff6d8"></stop><stop offset=".5" stop-color="#ffd27a"></stop><stop offset="1" stop-color="#ff9a3c"></stop></linearGradient>
+                </defs>
+                <circle class="halo" cx="104" cy="38" r="36" fill="url(#flame-glow)"></circle>
+                <path class="flame" d="M104 16 C 111 28, 114 36, 110 44 C 107 50, 101 50, 98 44 C 95 37, 99 28, 104 16 Z" fill="url(#flame-core)"></path>
+                <path class="smoke" d="M104 44 C 99 36, 108 30, 102 22 C 98 16, 104 10, 101 4"></path>
+                <path class="vessel" d="M18 70 C 24 56, 56 50, 84 56 C 96 58, 102 52, 106 48 L112 52 C 108 60, 104 70, 96 76 C 80 88, 40 92, 24 84 C 14 80, 13 76, 18 70 Z"></path>
+                <path class="vessel-line" d="M26 72 C 40 66, 70 64, 92 66"></path>
+                <path class="foot" d="M44 88 L40 100 H80 L76 88"></path>
+              </svg>
+              <div>
+                <h3 id="lamp-title">The Temple of the Lamp</h3>
+                <p class="oil" aria-live="polite"><span id="oil-label">Oil: 3 measures</span><span class="oil-drops" id="oil-drops" aria-hidden="true"></span></p>
+              </div>
+            </div>
+            <dl class="facts">
+              <div><dt>Temple</dt><dd><code id="t-id">computing…</code></dd></div>
+              <div><dt>State root</dt><dd><code id="t-root">computing…</code></dd></div>
+              <div><dt>Sequence</dt><dd id="t-seq">0</dd></div>
+              <div><dt>Active covenant</dt><dd id="t-cov">…</dd></div>
+            </dl>
+            <figure class="tree">
+              <svg id="tree" viewBox="0 0 360 170" role="img" aria-label="The cells, committed under one root."></svg>
+              <figcaption>Every cell is content-addressed; one root commits to them all. <span class="fine">Simplified Merkle tree.</span></figcaption>
+            </figure>
+            <ul class="cells" id="cells" aria-label="Cells in the current state"></ul>
+          </section>
+
+          <form class="panel composer" id="composer" aria-labelledby="composer-title">
+            <h3 id="composer-title">Compose a proposal</h3>
+            <fieldset class="identities">
+              <legend>Who proposes</legend>
+              <div class="seg" id="identities"></div>
+            </fieldset>
+            <fieldset class="presets">
+              <legend>What they propose</legend>
+              <div id="presets" class="preset-list"></div>
+              <p class="preset-blurb" id="preset-blurb"></p>
+              <label class="note-field" id="note-field" hidden="">Your note <input id="note-text" type="text" maxlength="60" value="Thank you for the light."></label>
+            </fieldset>
+            <fieldset class="mischief">
+              <legend>Mischief</legend>
+              <label><input type="checkbox" id="stale"><span>Build it on an old basis <span class="hint" id="stale-hint">(accept a change first)</span></span></label>
+              <label><input type="checkbox" id="false-claim"><span>Claim a result the algebra won’t produce</span></label>
+            </fieldset>
+            <button class="btn-gold" type="submit" id="propose">Propose to the gate</button>
+            <p class="availability" id="availability" role="status"></p>
+            <details class="wire">
+              <summary>The proposal, as canonical bytes</summary>
+              <pre id="wire" tabindex="0"></pre>
+            </details>
+          </form>
+
+          <section class="panel judgment" aria-labelledby="judgment-panel-title">
+            <h3 id="judgment-panel-title">The judgment</h3>
+            <ol class="stages" id="stages"></ol>
+            <div class="verdict" id="verdict" role="status" aria-live="polite">
+              <p class="verdict-idle">Propose something. The gate will say yes or no — and either way, it will say why.</p>
+            </div>
+          </section>
+        </div>
+
+        <div class="gate-lower">
+          <section class="panel covenant-panel" aria-labelledby="covenant-title">
+            <h3 id="covenant-title">The covenant</h3>
+            <p class="fine" id="covenant-name"></p>
+            <ol class="rules" id="rules"></ol>
+            <details>
+              <summary>In the kernel’s operator vocabulary</summary>
+              <pre id="ast" tabindex="0"></pre>
+              <p class="fine" id="ast-size"></p>
+            </details>
+          </section>
+          <section class="panel journal-panel" aria-labelledby="journal-title">
+            <div class="journal-head">
+              <h3 id="journal-title">The journal</h3>
+              <p class="fine" id="journal-count">No witnesses yet.</p>
+            </div>
+            <ol class="journal" id="journal" reversed=""></ol>
+            <div class="replay">
+              <button type="button" class="btn-line" id="replay">Replay from genesis</button>
+              <button type="button" class="btn-line" id="forge-edit">Alter a witness</button>
+              <button type="button" class="btn-line" id="forge-rewrite">Rewrite history</button>
+              <button type="button" class="btn-line" id="restore" hidden="">Restore the true history</button>
+            </div>
+            <p class="forgery" id="forgery" hidden=""></p>
+            <ol class="replay-lines" id="replay-lines" aria-live="polite"></ol>
+          </section>
+        </div>
+        <p class="disclaimer">A miniature running in your browser — an illustration of Temple3’s kernel, not Temple3 itself. It uses real SHA-256 over canonical bytes, a simplified Merkle commitment, its own error codes, and a covenant written in the kernel’s operator vocabulary: literal, read, eq, not, all, any.</p>
+      </section>
+
+      <!-- VII · The witness -->
+      <section id="witness" class="scene-text witness" aria-labelledby="witness-title">
+        <div class="split">
+          <div>
+            <p class="eyebrow">VII · The witness</p>
+            <h2 id="witness-title" data-reveal="">Every judgment leaves a witness.</h2>
+            <p class="body" data-reveal="">Acceptance, rejection, conflict and unresolved outcomes remain explicit and attributable. Anyone holding the rules can replay a Temple from its genesis and re-judge every step.</p>
+            <blockquote class="quote" data-reveal="">“A machine owner may destroy or fork local bytes, but cannot produce a continuation under the original identity without a valid witnessed transition.”</blockquote>
+          </div>
+          <figure class="chain" data-reveal="">
+            <svg id="chain" viewBox="0 0 420 360" role="img" aria-labelledby="chain-summary"></svg>
+            <figcaption id="chain-summary">Your Temple so far: genesis, and nothing else yet. Try the gate above.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- VIII · Many Temples -->
+      <section id="federation" class="scene-text federation" aria-labelledby="fed-title">
+        <p class="eyebrow">VIII · Many Temples</p>
+        <h2 id="fed-title" data-reveal="">Many Temples. No emperor.</h2>
+        <div class="fed-wrap">
+          <canvas id="constellation" aria-hidden="true"></canvas>
+          <div class="fed-copy">
+            <p class="body" data-reveal="">Temples relate only through explicit covenants. A foreign witness is bounded evidence — “never a command”. Local consequences still require local admission.</p>
+            <ul class="maxims">
+              <li data-reveal="">“Trust and authority are non-transitive by default.”</li>
+              <li data-reveal="">“Physical nesting, hosting, storage or discovery does not create authority.”</li>
+              <li data-reveal="">“Dissolution is not automatic: no timeout destroys state or grants emergency authority.”</li>
+            </ul>
+            <p class="fine" data-reveal="">In the laboratory: two Temples, west and east, joined by a blocking prepare-and-commit protocol — through a restart, a partial commit, and recovery.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- IX · The promise -->
+      <section id="promise" class="scene-text promise" aria-labelledby="promise-title">
+        <p class="eyebrow">IX · The promise</p>
+        <h2 id="promise-title" data-reveal="">What this ground makes possible.</h2>
+        <p class="body-wide" data-reveal="">The success case is not merely preventing unauthorized AI action. It is creating systems capable of:</p>
+        <ul class="litany">
+          <li data-reveal=""><span>Distributed authorship</span> <em>without</em> <span>dissolved responsibility.</span></li>
+          <li data-reveal=""><span>Automation</span> <em>without</em> <span>fabricated human review or endorsement.</span></li>
+          <li data-reveal=""><span>Privacy</span> <em>without</em> <span>unaccountable anonymity.</span></li>
+          <li data-reveal=""><span>Plural inquiry</span> <em>without</em> <span>epistemic chaos.</span></li>
+          <li data-reveal=""><span>Shared protocols</span> <em>without</em> <span>universal centralized judgment.</span></li>
+          <li data-reveal=""><span>Disagreement</span> <em>without</em> <span>historical erasure.</span></li>
+          <li data-reveal=""><span>Correction</span> <em>without</em> <span>silent rewriting.</span></li>
+          <li data-reveal=""><span>Powerful execution</span> <em>without</em> <span>hidden sovereignty.</span></li>
+          <li data-reveal=""><span>Human judgment informed by computation</span> <em>without</em> <span>being replaced by it.</span></li>
+        </ul>
+        <p class="coda" data-reveal="">The project is not fundamentally about making AI more powerful. It is about ensuring that increasing power does not require decreasing human intelligibility, plurality, responsibility, or capacity for correction.</p>
+      </section>
+
+      <!-- X · What stands on it -->
+      <section id="built" class="scene-text built" aria-labelledby="built-title">
+        <p class="eyebrow">X · What stands on it</p>
+        <h2 id="built-title" data-reveal="">The workshop and the library.</h2>
+        <p class="body-wide stack" data-reveal=""><b>Temple</b> makes explicit meaning executable. <b>Sourcery</b> makes the path from human intention to executable consequence governable. <b>Claimipedia</b> makes the epistemic, political, and moral distinctions within that path inspectable.</p>
+        <div class="cards">
+          <article class="card" data-reveal="">
+            <p class="card-kicker">Sourcery · the workshop</p>
+            <h3>Say what you need. Keep the receipt.</h3>
+            <p>You describe the work in conversation. People and AI emissaries draft, test and propose; nothing becomes real until it passes the gate and someone accountable says yes. Generation is not commitment.</p>
+            <p class="card-line">“Author the meaning once. Let the system handle the app.”</p>
+            <p class="fine">AI here is an emissary — capable, attributed, bounded, and never sovereign.</p>
+          </article>
+          <article class="card card-soon" data-reveal="">
+            <p class="card-kicker">Claimipedia · the library · <span class="soon">opening soon</span></p>
+            <h3>Disagreement you can read.</h3>
+            <p>Claims judged under stated, versioned review methods — with the reasoning shown. The same evidence can be Accepted under one method, Conflicted under another and Undecided under a third, and you can see exactly why.</p>
+            <p class="card-line">“The platform does not produce a universal truth score.”</p>
+            <p class="fine">AI contributions arrive as proposals. Only a human reviewer can accept them.</p>
+          </article>
+          <article class="card" data-reveal="">
+            <p class="card-kicker">For the people who do the work</p>
+            <h3>Not a machine that thinks for you.</h3>
+            <p>A discipline that lets scientists, stewards, reviewers and whole communities work alongside AI — and still answer for what happens. We suspect it grows new crafts, too: covenant architects, evidence stewards, wardens of emissaries.</p>
+            <p class="card-line">“AI may propose; Temple decides admissibility.”</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- XI · The ledger -->
+      <section id="ledger" class="scene-text ledger" aria-labelledby="ledger-title">
+        <p class="eyebrow">XI · The ledger</p>
+        <h2 id="ledger-title" data-reveal="">Where it stands, honestly.</h2>
+        <div class="ledger-grid">
+          <ul class="status" data-reveal="">
+            <li><b>Temple3 is a v0.1 laboratory.</b> It is not a production system, and it has not been independently audited.</li>
+            <li><b>101 of 101 checks</b> passed in its latest integrated qualification run.</li>
+            <li><b>Three implementations</b> — a JavaScript model, a Python verifier and a Rust library — are cross-checked on shared vectors. They share design lineage, so correlated mistakes remain possible.</li>
+            <li><b>486 hostile cases</b> in a differential corpus surfaced 26 semantic mismatches between them. After repair: zero.</li>
+            <li><b>Two Temples</b> have federated in the lab. Networking, key rotation, encryption and zero-knowledge proofs are not built.</li>
+            <li><b>Today</b>, Sourcery and Claimipedia run on Temple2 — the fact runtime Temple3 learns from.</li>
+            <li><b>The Ark is not yet sealed.</b></li>
+          </ul>
+          <table class="promises" data-reveal="">
+            <caption>Four promises, and how far they have come</caption>
+            <thead><tr><th scope="col">Promise</th><th scope="col">Status</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Anyone can check the history.</th><td>Demonstrated in the lab: replay and re-judge from genesis.</td></tr>
+              <tr><th scope="row">AI proposes; people decide.</th><td>Enforced in Claimipedia today.</td></tr>
+              <tr><th scope="row">Communities keep their own laws and still cooperate.</th><td>A two-Temple laboratory demonstration.</td></tr>
+              <tr><th scope="row">Nobody owns the foundation.</th><td>A draft public-good charter; not yet adopted.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- XII · The film -->
+      <section id="film" class="scene-text screening-home" aria-labelledby="film-title">
+        <p class="eyebrow">XII · The film</p>
+        <h2 id="film-title" data-reveal="">Forty seconds, rendered from code.</h2>
+        <p class="body-wide" data-reveal="">No cameras and no stock footage: a sky computed pixel by pixel, lights that leave trails, the commandments set in type, and a drone synthesised from sine waves. Every frame can be rendered again from the site’s own source — and the film carries a witness of its own.</p>
+        <figure class="screen" data-screen="" data-reveal="">
+          <div class="screen-frame">
+            <video controls="" playsinline="" muted="" preload="none" poster="films/the-film-poster.jpg" aria-label="The Covenant, a 41-second film">
+              <source src="films/the-film.webm" type="video/webm">
+              <source src="films/the-film.mp4" type="video/mp4">
+              <track kind="captions" src="films/the-film.en.vtt" srclang="en" label="English (on-screen text)">
+              Your browser can’t play this video. <a href="films/the-film.mp4">Download the MP4</a>.
+            </video>
+          </div>
+          <figcaption class="screen-bar">
+            <span>The Covenant · 41 seconds · muted until you choose</span>
+            <span class="screen-actions"><button type="button" class="btn-line sound" data-sound="" aria-pressed="false">Sound off</button><a class="screen-link" href="films/">How it was made</a></span>
+          </figcaption>
+        </figure>
+      </section>
+
+      <!-- XIII · Follow the Ark -->
+      <section id="follow" class="follow" aria-labelledby="follow-title">
+        <p class="eyebrow">XIII · Follow the Ark</p>
+        <h2 id="follow-title" data-reveal="">The Ark is unsealed. Watch it being sealed.</h2>
+        <p class="lead" data-reveal="">The commandments are candidates. They will be tested, argued over and, one day, sealed. Follow along — and be there when Claimipedia opens.</p>
+        <button type="button" class="btn-gold big" id="follow-btn" aria-controls="follow-note" aria-expanded="false">Follow the Ark</button>
+        <p class="follow-note" id="follow-note" role="status" hidden="">Thank you. Claimipedia opens soon — this preview doesn’t collect details yet.</p>
+      </section>
+    </main>
+
+    <footer class="colophon">
+      <p class="wordmark-foot">Sourcery · Temple · Claimipedia</p>
+      <p class="fine">A speculative design. The gate is a miniature running in your browser — an illustration of Temple3’s kernel, not Temple3 itself. Quotations are from Sourcery’s and Temple’s own working documents.</p>
+    </footer>
+  
+
+</body></html>

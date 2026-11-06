@@ -39,7 +39,7 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  const b=await fs.readFile(path.join(root,'dist/assets/sourcerer-threshold.png'));
  assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b.readUInt32BE(16),1672);assert.equal(b.readUInt32BE(20),941);
  assert.ok(b.length<5_000_000);
- const xml=await read('dist/sitemap.xml');assert.equal((xml.match(/<loc>/g)||[]).length,42);
+ const xml=await read('dist/sitemap.xml');assert.equal((xml.match(/<loc>/g)||[]).length,46);
  assert.ok(xml.includes('https://aaronalderman.com/gate.html'));
  for(const id of Object.keys(scenes))assert.ok(xml.includes(`https://aaronalderman.com/places/${id}.html`));
 });
@@ -56,23 +56,27 @@ test('all local links and assets in the new static pages resolve within the publ
  }
 });
 
-test('the retained reader, workshop, research and reused Temple mechanisms remain byte-identical',async()=>{
+test('compatibility bytes and the explicit Temple mechanism predecessor/successor remain pinned',async()=>{
  for(const [file,hash]of Object.entries(contract.compatibilityOrigin.sha256)){
   assert.equal(sha(await fs.readFile(path.join(root,file))),hash,file+' source');
   assert.equal(sha(await fs.readFile(path.join(root,'dist',file))),hash,file+' output');
   const original=file.slice('retained/'.length);
   if(original!=='CNAME')assert.equal(sha(await fs.readFile(path.join(root,'dist',original==='index.html'?'reader.html':original))),hash,original+' compatibility URL');
  }
- for(const [file,hash]of Object.entries(contract.nativeOrigin.sha256))assert.equal(sha(await fs.readFile(path.join(root,file))),hash,file);
- assert.deepEqual(receipt.nativeSources,contract.nativeOrigin.sha256);
+ for(const [file,hash]of Object.entries(contract.nativeOrigin.sha256))if(!contract.nativeSuccessor.changed.includes(file))assert.equal(sha(await fs.readFile(path.join(root,file))),hash,file);
+ assert.equal(sha(await fs.readFile(path.join(root,'source/microsites/predecessor-native/runtime.cjs'))),contract.nativeOrigin.sha256['bootstrap/hosts/runtime.cjs']);
+ assert.equal(sha(await fs.readFile(path.join(root,contract.nativeSuccessor.predecessor))),contract.nativeSuccessor.predecessorSha256);
+ assert.deepEqual(receipt.nativeSources,contract.nativeSuccessor.sha256);
+ assert.deepEqual(contract.nativeSuccessor.changed,['bootstrap/hosts/runtime.cjs']);assert.deepEqual(contract.nativeSuccessor.added,['bootstrap/ports/browser-effects.cjs']);
 });
 
 test('algebra owns the publication with the existing admission rules, ports and budget',async()=>{
  assert.equal(receipt.assurance.places,40);assert.equal(receipt.assurance.sourceNotes,29);
  assert.equal(receipt.execution.limit,20_000_000);assert.ok(receipt.execution.totalSteps<20_000_000);
- assert.equal(receipt.admission.passes,5);assert.deepEqual(receipt.mjsImports,[]);
+ assert.equal(receipt.admission.passes,11);assert.deepEqual(receipt.mjsImports,[]);
  for(const file of ['source/expedition.rel','source/presentation.rel','algebra/publication.process.json','source/gateway.rel','source/gateway-presentation.rel','algebra/gateway.process.json'])assert.equal(receipt.sources[file],sha(await fs.readFile(path.join(root,file))));
  for(const [file,hash]of Object.entries(receipt.artifacts))if(/\.(?:js|mjs|cjs)$/.test(file)){
+  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js'].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
   const retained=file.startsWith('retained/')?file:'retained/'+file;
   assert.equal(hash,contract.compatibilityOrigin.sha256[retained],file+' is unchanged compatibility code');
  }

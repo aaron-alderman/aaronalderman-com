@@ -1,0 +1,352 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "microsites.preview": [
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "PublicationAsset"
+        ],
+        "as": "msAsset",
+        "steps": [
+          {
+            "when": [
+              "or",
+              [
+                "includes",
+                [
+                  "one",
+                  "$msAsset",
+                  "path"
+                ],
+                "temple/"
+              ],
+              [
+                "includes",
+                [
+                  "one",
+                  "$msAsset",
+                  "path"
+                ],
+                "sourcery/"
+              ]
+            ],
+            "then": [
+              {
+                "port": "file.copy",
+                "args": {
+                  "path": [
+                    "one",
+                    "$msAsset",
+                    "path"
+                  ]
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "call": "microsites.project"
+      }
+    ],
+    "microsites.build": [
+      {
+        "assert": [
+          "eq",
+          [
+            "one",
+            "microsites.release",
+            "status"
+          ],
+          "qualified"
+        ],
+        "message": "Microsite fidelity qualification is incomplete. Use the local preview manifest; do not publish this as the faithful replacement."
+      },
+      {
+        "call": "microsites.project"
+      }
+    ],
+    "microsites.project": [
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "MicrositeStylesheet"
+        ],
+        "as": "msSheet",
+        "steps": [
+          {
+            "let": "input",
+            "value": [
+              "one",
+              "$msSheet",
+              "root"
+            ]
+          },
+          {
+            "call": "source.css"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": [
+                "one",
+                "$msSheet",
+                "path"
+              ],
+              "text": "$result"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "MicrositeDocument"
+        ],
+        "as": "msDocument",
+        "steps": [
+          {
+            "let": "input",
+            "value": [
+              "one",
+              "$msDocument",
+              "root"
+            ]
+          },
+          {
+            "call": "source.markup"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": [
+                "one",
+                "$msDocument",
+                "path"
+              ],
+              "text": "$result"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "Microsite"
+        ],
+        "as": "msSite",
+        "steps": [
+          {
+            "port": "json.parse",
+            "args": {
+              "text": [
+                "one",
+                "$msSite",
+                "configuration"
+              ]
+            },
+            "into": "msConfiguration"
+          },
+          {
+            "port": "runtime.bundle",
+            "args": {
+              "entry": "microsite.boot",
+              "mode": "browser",
+              "grantProfile": "micrositesBrowser",
+              "queries": [
+                "objects",
+                "$msSite",
+                "runtimeQuery"
+              ],
+              "factSubjects": [
+                "list"
+              ],
+              "data": {
+                "site": [
+                  "one",
+                  "$msSite",
+                  "name"
+                ],
+                "configuration": "$msConfiguration"
+              },
+              "budget": 20000000
+            },
+            "into": "msRuntime"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": [
+                "concat",
+                [
+                  "one",
+                  "$msSite",
+                  "name"
+                ],
+                "/runtime.js"
+              ],
+              "text": "$msRuntime"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "microsite.early",
+          "mode": "browser",
+          "grantProfile": "micrositesEarly",
+          "queries": [
+            "list",
+            "microsite.early"
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "budget": 20000000
+        },
+        "into": "msEarly"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "temple/early.js",
+          "text": "$msEarly"
+        },
+        "into": "_"
+      }
+    ],
+    "microsite.early": [
+      {
+        "port": "dom.classToggle",
+        "args": {
+          "selector": "html",
+          "name": "js",
+          "value": true
+        },
+        "into": "_"
+      }
+    ],
+    "microsite.boot": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "configuration",
+          "value": "$data.configuration"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "#spell-form"
+        },
+        "into": "spell"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$spell"
+            ],
+            0
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.sourcery.init",
+              "input": {}
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$data.site",
+          "sourcery"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.sourcery.init",
+              "input": {}
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "#composer"
+        },
+        "into": "composer"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$composer"
+            ],
+            0
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.init",
+              "input": {}
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$data.site",
+          "temple"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.temple.init",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "media.screens.init",
+              "input": {}
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ]
+  }
+}

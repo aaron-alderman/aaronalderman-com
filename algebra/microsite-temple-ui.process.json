@@ -1,0 +1,6241 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "ui.temple.recipe": [
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "input[name=preset]:checked"
+        },
+        "into": "preset"
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "input[name=identity]:checked"
+        },
+        "into": "identity"
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#stale"
+        },
+        "into": "stale"
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#false-claim"
+        },
+        "into": "falseClaim"
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#note-text"
+        },
+        "into": "note"
+      },
+      {
+        "let": "result",
+        "value": {
+          "preset": [
+            "at",
+            "$preset",
+            "value"
+          ],
+          "identity": [
+            "at",
+            "$identity",
+            "value"
+          ],
+          "stale": [
+            "and",
+            [
+              "at",
+              "$stale",
+              "checked"
+            ],
+            [
+              "not",
+              [
+                "at",
+                "$stale",
+                "disabled"
+              ]
+            ]
+          ],
+          "falseClaim": [
+            "at",
+            "$falseClaim",
+            "checked"
+          ],
+          "note": [
+            "at",
+            "$note",
+            "value"
+          ]
+        }
+      }
+    ],
+    "ui.temple.init": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "configuration"
+        },
+        "into": "configuration"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "at",
+            "$env",
+            "crypto"
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.html",
+              "input": {
+                "node": {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "verdict-idle"
+                  },
+                  "children": [
+                    "list",
+                    "This miniature needs Web Crypto (a secure context such as https:// or localhost)."
+                  ]
+                }
+              }
+            },
+            "into": "html"
+          },
+          {
+            "port": "browser.content",
+            "args": {
+              "ref": "#verdict",
+              "html": "$html"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "when": [
+          "at",
+          "$env",
+          "crypto"
+        ],
+        "then": [
+          {
+            "port": "state.set",
+            "args": {
+              "key": "busy",
+              "value": false
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "forged",
+              "value": null
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "seenCells",
+              "value": [
+                "list"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "seenDigests",
+              "value": [
+                "list"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.html",
+              "input": {
+                "node": [
+                  "map",
+                  [
+                    "at",
+                    "$configuration",
+                    "identities"
+                  ],
+                  "person",
+                  {
+                    "tag": "label",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      {
+                        "tag": "input",
+                        "attrs": {
+                          "type": "radio",
+                          "name": "identity",
+                          "value": [
+                            "at",
+                            "$person",
+                            "id"
+                          ],
+                          "checked": [
+                            "eq",
+                            [
+                              "at",
+                              "$person",
+                              "id"
+                            ],
+                            "steward"
+                          ]
+                        },
+                        "children": [
+                          "list"
+                        ]
+                      },
+                      "\n      ",
+                      {
+                        "tag": "b",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "at",
+                            "$person",
+                            "label"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "small",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "at",
+                            "$person",
+                            "note"
+                          ]
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "into": "html"
+          },
+          {
+            "port": "browser.content",
+            "args": {
+              "ref": "#identities",
+              "html": "$html"
+            },
+            "into": "_"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.html",
+              "input": {
+                "node": [
+                  "map",
+                  [
+                    "at",
+                    "$configuration",
+                    "presets"
+                  ],
+                  "preset",
+                  {
+                    "tag": "label",
+                    "attrs": {
+                      "class": "preset",
+                      "data-preset": [
+                        "at",
+                        "$preset",
+                        "id"
+                      ],
+                      "title": [
+                        "at",
+                        "$preset",
+                        "blurb"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "input",
+                        "attrs": {
+                          "type": "radio",
+                          "name": "preset",
+                          "value": [
+                            "at",
+                            "$preset",
+                            "id"
+                          ],
+                          "checked": [
+                            "eq",
+                            [
+                              "at",
+                              "$preset",
+                              "id"
+                            ],
+                            "tend"
+                          ]
+                        },
+                        "children": [
+                          "list"
+                        ]
+                      },
+                      "\n      ",
+                      {
+                        "tag": "b",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "at",
+                            "$preset",
+                            "title"
+                          ]
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "into": "html"
+          },
+          {
+            "port": "browser.content",
+            "args": {
+              "ref": "#presets",
+              "html": "$html"
+            },
+            "into": "_"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.createWorld",
+              "input": {
+                "configuration": "$configuration"
+              }
+            },
+            "into": "world"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "world",
+              "value": "$world"
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "stageStates",
+              "value": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.stages",
+              "input": {}
+            },
+            "into": "result"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.render",
+              "input": {
+                "fresh": false
+              }
+            },
+            "into": "result"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.covenant",
+              "input": {}
+            },
+            "into": "result"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.journal",
+              "input": {}
+            },
+            "into": "result"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.preview",
+              "input": {}
+            },
+            "into": "result"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#composer",
+              "event": "submit",
+              "query": "ui.temple.propose",
+              "input": {},
+              "preventDefault": true
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#composer",
+              "event": "change",
+              "query": "ui.temple.preview",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#note-text",
+              "event": "input",
+              "query": "ui.temple.preview",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#replay",
+              "event": "click",
+              "query": "ui.temple.replay",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#forge-edit",
+              "event": "click",
+              "query": "ui.temple.replay",
+              "input": {
+                "mode": "edit"
+              }
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#forge-rewrite",
+              "event": "click",
+              "query": "ui.temple.replay",
+              "input": {
+                "mode": "rewrite"
+              }
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#restore",
+              "event": "click",
+              "query": "ui.temple.restore",
+              "input": {}
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "ui.temple.stages": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "configuration"
+        },
+        "into": "configuration"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "stageStates"
+        },
+        "into": "stageStates"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.html",
+          "input": {
+            "node": [
+              "map",
+              [
+                "at",
+                "$configuration",
+                "stages"
+              ],
+              "s",
+              {
+                "tag": "li",
+                "attrs": {
+                  "class": [
+                    "at",
+                    [
+                      "at",
+                      "$stageStates",
+                      [
+                        "at",
+                        "$s",
+                        "n"
+                      ]
+                    ],
+                    "state"
+                  ]
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "span",
+                    "attrs": {
+                      "class": "dot",
+                      "aria-hidden": "true"
+                    },
+                    "children": [
+                      "list",
+                      [
+                        "if",
+                        [
+                          "eq",
+                          [
+                            "at",
+                            [
+                              "at",
+                              "$stageStates",
+                              [
+                                "at",
+                                "$s",
+                                "n"
+                              ]
+                            ],
+                            "state"
+                          ],
+                          "ok"
+                        ],
+                        "✓",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            [
+                              "at",
+                              [
+                                "at",
+                                "$stageStates",
+                                [
+                                  "at",
+                                  "$s",
+                                  "n"
+                                ]
+                              ],
+                              "state"
+                            ],
+                            "fail"
+                          ],
+                          "✗",
+                          [
+                            "at",
+                            "$s",
+                            "n"
+                          ]
+                        ]
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "span",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      {
+                        "tag": "b",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "at",
+                            "$s",
+                            "title"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "small",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "or",
+                            [
+                              "at",
+                              [
+                                "at",
+                                "$stageStates",
+                                [
+                                  "at",
+                                  "$s",
+                                  "n"
+                                ]
+                              ],
+                              "detail"
+                            ],
+                            [
+                              "at",
+                              "$s",
+                              "gloss"
+                            ]
+                          ]
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "into": "html"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#stages",
+          "html": "$html"
+        },
+        "into": "_"
+      }
+    ],
+    "ui.temple.preview": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "world"
+        },
+        "into": "world"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "configuration"
+        },
+        "into": "configuration"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "busy"
+        },
+        "into": "busy"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.recipe",
+          "input": {}
+        },
+        "into": "recipe"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#note-field",
+          "name": "hidden",
+          "value": [
+            "not",
+            [
+              "eq",
+              [
+                "at",
+                "$recipe",
+                "preset"
+              ],
+              "note"
+            ]
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "preset",
+        "value": [
+          "at",
+          [
+            "filter",
+            [
+              "at",
+              "$configuration",
+              "presets"
+            ],
+            "p",
+            [
+              "eq",
+              [
+                "at",
+                "$p",
+                "id"
+              ],
+              [
+                "at",
+                "$recipe",
+                "preset"
+              ]
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#preset-blurb",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$preset",
+            "blurb"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greater",
+          "values": [
+            "list",
+            [
+              "count",
+              [
+                "at",
+                [
+                  "at",
+                  "$world",
+                  "temple"
+                ],
+                "roots"
+              ]
+            ],
+            1
+          ]
+        },
+        "into": "canStale"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#stale",
+          "name": "disabled",
+          "value": [
+            "not",
+            "$canStale"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "when": [
+          "not",
+          "$canStale"
+        ],
+        "then": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#stale",
+              "name": "checked",
+              "value": false
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#stale-hint",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$canStale",
+            "(the state before the last acceptance)",
+            "(accept a change first)"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": ".preset"
+        },
+        "into": "presets"
+      },
+      {
+        "each": "$presets",
+        "as": "option",
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.availability",
+              "input": {
+                "temple": [
+                  "at",
+                  "$world",
+                  "temple"
+                ],
+                "preset": [
+                  "at",
+                  [
+                    "at",
+                    "$option",
+                    "attributes"
+                  ],
+                  "data-preset"
+                ]
+              }
+            },
+            "into": "blocked"
+          },
+          {
+            "port": "browser.class",
+            "args": {
+              "ref": [
+                "at",
+                "$option",
+                "ref"
+              ],
+              "name": "unavailable",
+              "value": [
+                "not",
+                [
+                  "not",
+                  "$blocked"
+                ]
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.availability",
+          "input": {
+            "temple": [
+              "at",
+              "$world",
+              "temple"
+            ],
+            "preset": [
+              "at",
+              "$recipe",
+              "preset"
+            ]
+          }
+        },
+        "into": "blocked"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#availability",
+          "name": "textContent",
+          "value": [
+            "or",
+            "$blocked",
+            ""
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#propose",
+          "name": "disabled",
+          "value": [
+            "or",
+            [
+              "not",
+              [
+                "not",
+                "$blocked"
+              ]
+            ],
+            "$busy"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "try": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.buildProposal",
+              "input": {
+                "temple": [
+                  "at",
+                  "$world",
+                  "temple"
+                ],
+                "registry": [
+                  "at",
+                  "$world",
+                  "registry"
+                ],
+                "recipe": "$recipe",
+                "configuration": "$configuration"
+              }
+            },
+            "into": "proposal"
+          },
+          {
+            "port": "json.stringify",
+            "args": {
+              "value": [
+                "at",
+                "$proposal",
+                "wire"
+              ],
+              "space": 1
+            },
+            "into": "wire"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "canonical.encode",
+              "input": {
+                "value": [
+                  "at",
+                  "$proposal",
+                  "wire"
+                ],
+                "numbers": false
+              }
+            },
+            "into": "canonical"
+          },
+          {
+            "port": "text.utf8Length",
+            "args": {
+              "value": "$canonical"
+            },
+            "into": "bytes"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#wire",
+              "name": "textContent",
+              "value": [
+                "concat",
+                "$wire",
+                "\n\n— ",
+                "$bytes",
+                " canonical bytes. The witness hashes the canonical form."
+              ]
+            },
+            "into": "_"
+          }
+        ],
+        "catch": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#wire",
+              "name": "textContent",
+              "value": [
+                "or",
+                "$blocked",
+                [
+                  "at",
+                  "$error",
+                  "message"
+                ]
+              ]
+            },
+            "into": "_"
+          }
+        ],
+        "error": "error"
+      }
+    ],
+    "ui.temple.render": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "world"
+        },
+        "into": "world"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "seenCells"
+        },
+        "into": "seenCells"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "seenDigests"
+        },
+        "into": "seenDigests"
+      },
+      {
+        "let": "t",
+        "value": [
+          "at",
+          "$world",
+          "temple"
+        ]
+      },
+      {
+        "let": "covenant",
+        "value": [
+          "at",
+          [
+            "at",
+            "$world",
+            "registry"
+          ],
+          [
+            "at",
+            [
+              "at",
+              "$t",
+              "state"
+            ],
+            "predicateId"
+          ]
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "address.short",
+          "input": {
+            "id": [
+              "at",
+              "$world",
+              "id"
+            ],
+            "head": 10,
+            "tail": 6
+          }
+        },
+        "into": "id"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#t-id",
+          "name": "textContent",
+          "value": "$id"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#t-id",
+          "name": "title",
+          "value": [
+            "at",
+            "$world",
+            "id"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#t-root"
+        },
+        "into": "root"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "address.short",
+          "input": {
+            "id": [
+              "at",
+              "$t",
+              "root"
+            ],
+            "head": 10,
+            "tail": 6
+          }
+        },
+        "into": "id"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#t-root",
+          "name": "textContent",
+          "value": "$id"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#t-root",
+          "name": "title",
+          "value": [
+            "at",
+            "$t",
+            "root"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "when": [
+          "and",
+          [
+            "at",
+            [
+              "at",
+              "$root",
+              "attributes"
+            ],
+            "title"
+          ],
+          [
+            "not",
+            [
+              "eq",
+              [
+                "at",
+                [
+                  "at",
+                  "$root",
+                  "attributes"
+                ],
+                "title"
+              ],
+              [
+                "at",
+                "$t",
+                "root"
+              ]
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "browser.class",
+            "args": {
+              "ref": "#t-root",
+              "name": "pulse",
+              "value": false
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.reflow",
+            "args": {
+              "ref": "#t-root"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.class",
+            "args": {
+              "ref": "#t-root",
+              "name": "pulse",
+              "value": true
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#t-seq",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$t",
+            "sequence"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#t-cov",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$covenant",
+            "title"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.cellsByKey",
+          "input": {
+            "state": [
+              "at",
+              "$t",
+              "state"
+            ]
+          }
+        },
+        "into": "cells"
+      },
+      {
+        "port": "value.sort",
+        "args": {
+          "values": [
+            "map",
+            "$cells",
+            "cell",
+            [
+              "at",
+              "$cell",
+              "id"
+            ]
+          ],
+          "mode": "locale"
+        },
+        "into": "ids"
+      },
+      {
+        "let": "cells",
+        "value": [
+          "map",
+          "$ids",
+          "id",
+          [
+            "at",
+            [
+              "filter",
+              "$cells",
+              "cell",
+              [
+                "eq",
+                [
+                  "at",
+                  "$cell",
+                  "id"
+                ],
+                "$id"
+              ]
+            ],
+            0
+          ]
+        ]
+      },
+      {
+        "let": "oil",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$cells",
+            "cell",
+            [
+              "eq",
+              [
+                "at",
+                "$cell",
+                "key"
+              ],
+              "lamp.oil"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "flame",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$cells",
+            "cell",
+            [
+              "eq",
+              [
+                "at",
+                "$cell",
+                "key"
+              ],
+              "lamp.flame"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#lamp",
+          "name": "data-lit",
+          "value": [
+            "if",
+            [
+              "eq",
+              [
+                "at",
+                "$flame",
+                "value"
+              ],
+              "lit"
+            ],
+            "true",
+            "false"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "number.parse",
+        "args": {
+          "value": [
+            "or",
+            [
+              "at",
+              "$oil",
+              "value"
+            ],
+            0
+          ]
+        },
+        "into": "measures"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#oil-label",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Oil: ",
+            "$measures",
+            " measure",
+            [
+              "if",
+              [
+                "eq",
+                "$measures",
+                1
+              ],
+              "",
+              "s"
+            ],
+            " · flame ",
+            [
+              "or",
+              [
+                "at",
+                "$flame",
+                "value"
+              ],
+              "absent"
+            ]
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            "$measures",
+            12
+          ]
+        },
+        "into": "arithmetic1"
+      },
+      {
+        "let": "dropCount",
+        "value": "$arithmetic1"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.html",
+          "input": {
+            "node": [
+              "map",
+              [
+                "range",
+                "$dropCount"
+              ],
+              "drop",
+              {
+                "tag": "i",
+                "attrs": {},
+                "children": [
+                  "list"
+                ]
+              }
+            ]
+          }
+        },
+        "into": "html"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#oil-drops",
+          "html": "$html"
+        },
+        "into": "_"
+      },
+      {
+        "fold": "$cells",
+        "as": "cell",
+        "accumulator": "items",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "address.digest",
+              "input": {
+                "id": [
+                  "at",
+                  "$cell",
+                  "id"
+                ]
+              }
+            },
+            "into": "digest"
+          },
+          {
+            "port": "text.slice",
+            "args": {
+              "value": "$digest",
+              "start": 0,
+              "end": 12
+            },
+            "into": "digest"
+          }
+        ],
+        "yield": [
+          "append",
+          "$items",
+          [
+            "list",
+            {
+              "tag": "li",
+              "attrs": {
+                "class": [
+                  "if",
+                  [
+                    "and",
+                    [
+                      "at",
+                      "$eventInput",
+                      "fresh"
+                    ],
+                    [
+                      "not",
+                      [
+                        "includes",
+                        "$seenCells",
+                        [
+                          "at",
+                          "$cell",
+                          "id"
+                        ]
+                      ]
+                    ]
+                  ],
+                  "new",
+                  ""
+                ],
+                "title": [
+                  "at",
+                  "$cell",
+                  "id"
+                ]
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "k"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "at",
+                      "$cell",
+                      "key"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "v"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "at",
+                      "$cell",
+                      "value"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "id"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "$digest",
+                      "…"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        ],
+        "into": "items"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.html",
+          "input": {
+            "node": "$items"
+          }
+        },
+        "into": "html"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#cells",
+          "html": "$html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "seenCells",
+          "value": [
+            "map",
+            "$cells",
+            "cell",
+            [
+              "at",
+              "$cell",
+              "id"
+            ]
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.tree",
+          "input": {
+            "tree": [
+              "at",
+              "$t",
+              "tree"
+            ],
+            "root": [
+              "at",
+              "$t",
+              "root"
+            ],
+            "predicateId": [
+              "at",
+              [
+                "at",
+                "$t",
+                "state"
+              ],
+              "predicateId"
+            ],
+            "fresh": [
+              "at",
+              "$eventInput",
+              "fresh"
+            ],
+            "seen": "$seenDigests"
+          }
+        },
+        "into": "tree"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.html",
+          "input": {
+            "node": [
+              "at",
+              "$tree",
+              "nodes"
+            ]
+          }
+        },
+        "into": "html"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#tree",
+          "html": "$html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "seenDigests",
+          "value": [
+            "at",
+            "$tree",
+            "seen"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "ui.temple.tree": [
+      {
+        "let": "levels",
+        "value": [
+          "at",
+          [
+            "at",
+            "$eventInput",
+            "tree"
+          ],
+          "levels"
+        ]
+      },
+      {
+        "let": "leaves",
+        "value": [
+          "at",
+          "$levels",
+          0
+        ]
+      },
+      {
+        "let": "L",
+        "value": [
+          "count",
+          "$levels"
+        ]
+      },
+      {
+        "let": "positions",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "fold": [
+          "range",
+          "$L"
+        ],
+        "as": "levelNumber",
+        "accumulator": "positions",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "level",
+            "value": [
+              "add",
+              "$levelNumber",
+              -1
+            ]
+          },
+          {
+            "let": "values",
+            "value": [
+              "at",
+              "$levels",
+              "$level"
+            ]
+          },
+          {
+            "let": "last",
+            "value": [
+              "at",
+              "$positions",
+              [
+                "add",
+                "$level",
+                -1
+              ]
+            ]
+          },
+          {
+            "fold": [
+              "range",
+              [
+                "count",
+                "$values"
+              ]
+            ],
+            "as": "itemNumber",
+            "accumulator": "row",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "let": "index",
+                "value": [
+                  "add",
+                  "$itemNumber",
+                  -1
+                ]
+              },
+              {
+                "let": "x",
+                "value": 180
+              },
+              {
+                "when": [
+                  "eq",
+                  "$level",
+                  0
+                ],
+                "then": [
+                  {
+                    "when": [
+                      "not",
+                      [
+                        "eq",
+                        [
+                          "count",
+                          "$leaves"
+                        ],
+                        1
+                      ]
+                    ],
+                    "then": [
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "multiply",
+                          "values": [
+                            "list",
+                            "$index",
+                            292
+                          ]
+                        },
+                        "into": "arithmetic2"
+                      },
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "subtract",
+                          "values": [
+                            "list",
+                            [
+                              "count",
+                              "$leaves"
+                            ],
+                            1
+                          ]
+                        },
+                        "into": "arithmetic3"
+                      },
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "divide",
+                          "values": [
+                            "list",
+                            "$arithmetic2",
+                            "$arithmetic3"
+                          ]
+                        },
+                        "into": "arithmetic4"
+                      },
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "add",
+                          "values": [
+                            "list",
+                            34,
+                            "$arithmetic4"
+                          ]
+                        },
+                        "into": "arithmetic5"
+                      },
+                      {
+                        "let": "x",
+                        "value": "$arithmetic5"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "not",
+                  [
+                    "eq",
+                    "$level",
+                    0
+                  ]
+                ],
+                "then": [
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "multiply",
+                      "values": [
+                        "list",
+                        "$index",
+                        2
+                      ]
+                    },
+                    "into": "arithmetic6"
+                  },
+                  {
+                    "let": "firstIndex",
+                    "value": "$arithmetic6"
+                  },
+                  {
+                    "let": "a",
+                    "value": [
+                      "at",
+                      "$last",
+                      "$firstIndex"
+                    ]
+                  },
+                  {
+                    "let": "b",
+                    "value": [
+                      "at",
+                      "$last",
+                      [
+                        "add",
+                        "$firstIndex",
+                        1
+                      ]
+                    ]
+                  },
+                  {
+                    "let": "x",
+                    "value": "$a"
+                  },
+                  {
+                    "when": [
+                      "not",
+                      [
+                        "or",
+                        [
+                          "eq",
+                          "$b",
+                          null
+                        ],
+                        [
+                          "eq",
+                          "$b",
+                          [
+                            "at",
+                            {},
+                            "absent"
+                          ]
+                        ]
+                      ]
+                    ],
+                    "then": [
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "add",
+                          "values": [
+                            "list",
+                            "$a",
+                            "$b"
+                          ]
+                        },
+                        "into": "arithmetic7"
+                      },
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "divide",
+                          "values": [
+                            "list",
+                            "$arithmetic7",
+                            2
+                          ]
+                        },
+                        "into": "arithmetic8"
+                      },
+                      {
+                        "let": "x",
+                        "value": "$arithmetic8"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": [
+              "append",
+              "$row",
+              [
+                "list",
+                "$x"
+              ]
+            ],
+            "into": "row"
+          }
+        ],
+        "yield": [
+          "append",
+          "$positions",
+          [
+            "list",
+            "$row"
+          ]
+        ],
+        "into": "positions"
+      },
+      {
+        "let": "nodes",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "fold": [
+          "range",
+          "$L"
+        ],
+        "as": "levelNumber",
+        "accumulator": "nodes",
+        "initial": "$nodes",
+        "steps": [
+          {
+            "let": "level",
+            "value": [
+              "add",
+              "$levelNumber",
+              -1
+            ]
+          },
+          {
+            "let": "values",
+            "value": [
+              "at",
+              "$levels",
+              "$level"
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.treeY",
+              "input": {
+                "level": "$level",
+                "count": "$L"
+              }
+            },
+            "into": "y"
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$level",
+                0
+              ]
+            ],
+            "then": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "ui.temple.treeY",
+                  "input": {
+                    "level": [
+                      "add",
+                      "$level",
+                      -1
+                    ],
+                    "count": "$L"
+                  }
+                },
+                "into": "childY"
+              },
+              {
+                "fold": [
+                  "range",
+                  [
+                    "count",
+                    "$values"
+                  ]
+                ],
+                "as": "itemNumber",
+                "accumulator": "nodes",
+                "initial": "$nodes",
+                "steps": [
+                  {
+                    "let": "index",
+                    "value": [
+                      "add",
+                      "$itemNumber",
+                      -1
+                    ]
+                  },
+                  {
+                    "let": "d",
+                    "value": [
+                      "at",
+                      "$values",
+                      "$index"
+                    ]
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "multiply",
+                      "values": [
+                        "list",
+                        "$index",
+                        2
+                      ]
+                    },
+                    "into": "arithmetic9"
+                  },
+                  {
+                    "let": "firstIndex",
+                    "value": "$arithmetic9"
+                  },
+                  {
+                    "fold": [
+                      "list",
+                      "$firstIndex",
+                      [
+                        "add",
+                        "$firstIndex",
+                        1
+                      ]
+                    ],
+                    "as": "child",
+                    "accumulator": "nodes",
+                    "initial": "$nodes",
+                    "steps": [
+                      {
+                        "let": "x",
+                        "value": [
+                          "at",
+                          [
+                            "at",
+                            "$positions",
+                            [
+                              "add",
+                              "$level",
+                              -1
+                            ]
+                          ],
+                          "$child"
+                        ]
+                      },
+                      {
+                        "when": [
+                          "not",
+                          [
+                            "or",
+                            [
+                              "eq",
+                              "$x",
+                              null
+                            ],
+                            [
+                              "eq",
+                              "$x",
+                              [
+                                "at",
+                                {},
+                                "absent"
+                              ]
+                            ]
+                          ]
+                        ],
+                        "then": [
+                          {
+                            "let": "nodes",
+                            "value": [
+                              "append",
+                              "$nodes",
+                              [
+                                "list",
+                                {
+                                  "tag": "line",
+                                  "attrs": {
+                                    "class": [
+                                      "concat",
+                                      "edge",
+                                      [
+                                        "if",
+                                        [
+                                          "and",
+                                          [
+                                            "and",
+                                            [
+                                              "at",
+                                              "$eventInput",
+                                              "fresh"
+                                            ],
+                                            [
+                                              "not",
+                                              [
+                                                "includes",
+                                                [
+                                                  "at",
+                                                  "$eventInput",
+                                                  "seen"
+                                                ],
+                                                "$d"
+                                              ]
+                                            ]
+                                          ],
+                                          [
+                                            "and",
+                                            [
+                                              "at",
+                                              "$eventInput",
+                                              "fresh"
+                                            ],
+                                            [
+                                              "not",
+                                              [
+                                                "includes",
+                                                [
+                                                  "at",
+                                                  "$eventInput",
+                                                  "seen"
+                                                ],
+                                                [
+                                                  "at",
+                                                  [
+                                                    "at",
+                                                    "$levels",
+                                                    [
+                                                      "add",
+                                                      "$level",
+                                                      -1
+                                                    ]
+                                                  ],
+                                                  "$child"
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ],
+                                        " hot",
+                                        ""
+                                      ]
+                                    ],
+                                    "x1": "$x",
+                                    "y1": "$childY",
+                                    "x2": [
+                                      "at",
+                                      [
+                                        "at",
+                                        "$positions",
+                                        "$level"
+                                      ],
+                                      "$index"
+                                    ],
+                                    "y2": "$y"
+                                  },
+                                  "children": [
+                                    "list"
+                                  ]
+                                }
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "yield": "$nodes",
+                    "into": "nodes"
+                  }
+                ],
+                "yield": "$nodes",
+                "into": "nodes"
+              }
+            ]
+          }
+        ],
+        "yield": "$nodes",
+        "into": "nodes"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "address.digest",
+          "input": {
+            "id": [
+              "at",
+              "$eventInput",
+              "predicateId"
+            ]
+          }
+        },
+        "into": "predicate"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "address.digest",
+          "input": {
+            "id": [
+              "at",
+              "$eventInput",
+              "root"
+            ]
+          }
+        },
+        "into": "root"
+      },
+      {
+        "let": "cellRoot",
+        "value": [
+          "at",
+          [
+            "at",
+            "$levels",
+            [
+              "add",
+              "$L",
+              -1
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "nodes",
+        "value": [
+          "append",
+          "$nodes",
+          [
+            "list",
+            {
+              "tag": "line",
+              "attrs": {
+                "class": [
+                  "concat",
+                  "edge",
+                  [
+                    "if",
+                    [
+                      "and",
+                      [
+                        "at",
+                        "$eventInput",
+                        "fresh"
+                      ],
+                      [
+                        "not",
+                        [
+                          "includes",
+                          [
+                            "at",
+                            "$eventInput",
+                            "seen"
+                          ],
+                          "$cellRoot"
+                        ]
+                      ]
+                    ],
+                    " hot",
+                    ""
+                  ]
+                ],
+                "x1": [
+                  "at",
+                  [
+                    "at",
+                    "$positions",
+                    [
+                      "add",
+                      "$L",
+                      -1
+                    ]
+                  ],
+                  0
+                ],
+                "y1": 66,
+                "x2": 180,
+                "y2": 30
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "line",
+              "attrs": {
+                "class": [
+                  "concat",
+                  "edge",
+                  [
+                    "if",
+                    [
+                      "and",
+                      [
+                        "at",
+                        "$eventInput",
+                        "fresh"
+                      ],
+                      [
+                        "not",
+                        [
+                          "includes",
+                          [
+                            "at",
+                            "$eventInput",
+                            "seen"
+                          ],
+                          "$predicate"
+                        ]
+                      ]
+                    ],
+                    " hot",
+                    ""
+                  ]
+                ],
+                "x1": 300,
+                "y1": 66,
+                "x2": 200,
+                "y2": 30
+              },
+              "children": [
+                "list"
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "fold": [
+          "range",
+          "$L"
+        ],
+        "as": "levelNumber",
+        "accumulator": "nodes",
+        "initial": "$nodes",
+        "steps": [
+          {
+            "let": "level",
+            "value": [
+              "add",
+              "$levelNumber",
+              -1
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.treeY",
+              "input": {
+                "level": "$level",
+                "count": "$L"
+              }
+            },
+            "into": "y"
+          },
+          {
+            "fold": [
+              "range",
+              [
+                "count",
+                [
+                  "at",
+                  "$levels",
+                  "$level"
+                ]
+              ]
+            ],
+            "as": "itemNumber",
+            "accumulator": "nodes",
+            "initial": "$nodes",
+            "steps": [
+              {
+                "let": "index",
+                "value": [
+                  "add",
+                  "$itemNumber",
+                  -1
+                ]
+              },
+              {
+                "let": "d",
+                "value": [
+                  "at",
+                  [
+                    "at",
+                    "$levels",
+                    "$level"
+                  ],
+                  "$index"
+                ]
+              },
+              {
+                "let": "x",
+                "value": [
+                  "at",
+                  [
+                    "at",
+                    "$positions",
+                    "$level"
+                  ],
+                  "$index"
+                ]
+              },
+              {
+                "let": "nodes",
+                "value": [
+                  "append",
+                  "$nodes",
+                  [
+                    "list",
+                    {
+                      "tag": "circle",
+                      "attrs": {
+                        "class": [
+                          "concat",
+                          "node",
+                          [
+                            "if",
+                            [
+                              "and",
+                              [
+                                "at",
+                                "$eventInput",
+                                "fresh"
+                              ],
+                              [
+                                "not",
+                                [
+                                  "includes",
+                                  [
+                                    "at",
+                                    "$eventInput",
+                                    "seen"
+                                  ],
+                                  "$d"
+                                ]
+                              ]
+                            ],
+                            " hot",
+                            ""
+                          ]
+                        ],
+                        "cx": "$x",
+                        "cy": "$y",
+                        "r": [
+                          "if",
+                          [
+                            "eq",
+                            "$level",
+                            0
+                          ],
+                          5,
+                          4
+                        ]
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    }
+                  ]
+                ]
+              },
+              {
+                "when": [
+                  "eq",
+                  "$level",
+                  0
+                ],
+                "then": [
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "remainder",
+                      "values": [
+                        "list",
+                        "$index",
+                        2
+                      ]
+                    },
+                    "into": "odd"
+                  },
+                  {
+                    "port": "text.slice",
+                    "args": {
+                      "value": "$d",
+                      "start": 0,
+                      "end": 5
+                    },
+                    "into": "label"
+                  },
+                  {
+                    "let": "nodes",
+                    "value": [
+                      "append",
+                      "$nodes",
+                      [
+                        "list",
+                        {
+                          "tag": "text",
+                          "attrs": {
+                            "class": "leaf-label",
+                            "x": "$x",
+                            "y": [
+                              "if",
+                              "$odd",
+                              158,
+                              148
+                            ],
+                            "text-anchor": "middle"
+                          },
+                          "children": [
+                            "list",
+                            "$label"
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": "$nodes",
+            "into": "nodes"
+          }
+        ],
+        "yield": "$nodes",
+        "into": "nodes"
+      },
+      {
+        "port": "text.slice",
+        "args": {
+          "value": "$root",
+          "start": 0,
+          "end": 8
+        },
+        "into": "label"
+      },
+      {
+        "let": "nodes",
+        "value": [
+          "append",
+          "$nodes",
+          [
+            "list",
+            {
+              "tag": "rect",
+              "attrs": {
+                "class": [
+                  "concat",
+                  "node",
+                  [
+                    "if",
+                    [
+                      "and",
+                      [
+                        "at",
+                        "$eventInput",
+                        "fresh"
+                      ],
+                      [
+                        "not",
+                        [
+                          "includes",
+                          [
+                            "at",
+                            "$eventInput",
+                            "seen"
+                          ],
+                          "$predicate"
+                        ]
+                      ]
+                    ],
+                    " hot",
+                    ""
+                  ]
+                ],
+                "x": 295,
+                "y": 61,
+                "width": 10,
+                "height": 10,
+                "transform": "rotate(45 300 66)"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "text",
+              "attrs": {
+                "class": "leaf-label",
+                "x": 312,
+                "y": 69
+              },
+              "children": [
+                "list",
+                "covenant"
+              ]
+            },
+            {
+              "tag": "path",
+              "attrs": {
+                "class": [
+                  "concat",
+                  "keystone",
+                  [
+                    "if",
+                    [
+                      "and",
+                      [
+                        "at",
+                        "$eventInput",
+                        "fresh"
+                      ],
+                      [
+                        "not",
+                        [
+                          "includes",
+                          [
+                            "at",
+                            "$eventInput",
+                            "seen"
+                          ],
+                          "$root"
+                        ]
+                      ]
+                    ],
+                    " hot",
+                    ""
+                  ]
+                ],
+                "d": "M138 6 H222 L214 30 H146 Z"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "text",
+              "attrs": {
+                "class": "root-label",
+                "x": 180,
+                "y": 21,
+                "text-anchor": "middle"
+              },
+              "children": [
+                "list",
+                [
+                  "concat",
+                  "root ",
+                  "$label"
+                ]
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "let": "seen",
+        "value": [
+          "list",
+          "$root",
+          "$predicate"
+        ]
+      },
+      {
+        "fold": "$levels",
+        "as": "row",
+        "accumulator": "seen",
+        "initial": "$seen",
+        "steps": [
+          {
+            "let": "seen",
+            "value": [
+              "append",
+              "$seen",
+              "$row"
+            ]
+          }
+        ],
+        "yield": "$seen",
+        "into": "seen"
+      },
+      {
+        "let": "result",
+        "value": {
+          "nodes": "$nodes",
+          "seen": "$seen"
+        }
+      }
+    ],
+    "ui.temple.treeY": [
+      {
+        "let": "result",
+        "value": 66
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "at",
+              "$eventInput",
+              "count"
+            ],
+            1
+          ]
+        ],
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput",
+                  "level"
+                ],
+                66
+              ]
+            },
+            "into": "arithmetic10"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput",
+                  "count"
+                ],
+                1
+              ]
+            },
+            "into": "arithmetic11"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$arithmetic10",
+                "$arithmetic11"
+              ]
+            },
+            "into": "arithmetic12"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                132,
+                "$arithmetic12"
+              ]
+            },
+            "into": "arithmetic13"
+          },
+          {
+            "let": "result",
+            "value": "$arithmetic13"
+          }
+        ]
+      }
+    ],
+    "ui.temple.covenant": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "world"
+        },
+        "into": "world"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "configuration"
+        },
+        "into": "configuration"
+      },
+      {
+        "let": "cov",
+        "value": [
+          "at",
+          [
+            "at",
+            "$world",
+            "registry"
+          ],
+          [
+            "at",
+            [
+              "at",
+              [
+                "at",
+                "$world",
+                "temple"
+              ],
+              "state"
+            ],
+            "predicateId"
+          ]
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#covenant-name",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$cov",
+            "title"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "states",
+        "value": [
+          "or",
+          [
+            "at",
+            [
+              "at",
+              "$eventInput",
+              "report"
+            ],
+            "rules"
+          ],
+          [
+            "list"
+          ]
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.html",
+          "input": {
+            "node": [
+              "map",
+              [
+                "at",
+                "$cov",
+                "rules"
+              ],
+              "rule",
+              {
+                "tag": "li",
+                "attrs": {
+                  "class": [
+                    "concat",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        [
+                          "at",
+                          [
+                            "at",
+                            [
+                              "filter",
+                              "$states",
+                              "s",
+                              [
+                                "eq",
+                                [
+                                  "at",
+                                  "$s",
+                                  "name"
+                                ],
+                                [
+                                  "at",
+                                  "$rule",
+                                  "name"
+                                ]
+                              ]
+                            ],
+                            0
+                          ],
+                          "ok"
+                        ],
+                        true
+                      ],
+                      "held",
+                      [
+                        "if",
+                        [
+                          "eq",
+                          [
+                            "at",
+                            [
+                              "at",
+                              [
+                                "filter",
+                                "$states",
+                                "s",
+                                [
+                                  "eq",
+                                  [
+                                    "at",
+                                    "$s",
+                                    "name"
+                                  ],
+                                  [
+                                    "at",
+                                    "$rule",
+                                    "name"
+                                  ]
+                                ]
+                              ],
+                              0
+                            ],
+                            "ok"
+                          ],
+                          false
+                        ],
+                        "broken",
+                        ""
+                      ]
+                    ],
+                    [
+                      "if",
+                      [
+                        "at",
+                        "$eventInput",
+                        "fresh"
+                      ],
+                      " changed",
+                      ""
+                    ]
+                  ]
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "span",
+                    "attrs": {
+                      "class": "rule-name"
+                    },
+                    "children": [
+                      "list",
+                      [
+                        "at",
+                        "$rule",
+                        "name"
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "span",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      [
+                        "at",
+                        "$rule",
+                        "text"
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "span",
+                    "attrs": {
+                      "class": "rule-state"
+                    },
+                    "children": [
+                      "list",
+                      [
+                        "if",
+                        [
+                          "eq",
+                          [
+                            "at",
+                            [
+                              "at",
+                              [
+                                "filter",
+                                "$states",
+                                "s",
+                                [
+                                  "eq",
+                                  [
+                                    "at",
+                                    "$s",
+                                    "name"
+                                  ],
+                                  [
+                                    "at",
+                                    "$rule",
+                                    "name"
+                                  ]
+                                ]
+                              ],
+                              0
+                            ],
+                            "ok"
+                          ],
+                          true
+                        ],
+                        "✓ held",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            [
+                              "at",
+                              [
+                                "at",
+                                [
+                                  "filter",
+                                  "$states",
+                                  "s",
+                                  [
+                                    "eq",
+                                    [
+                                      "at",
+                                      "$s",
+                                      "name"
+                                    ],
+                                    [
+                                      "at",
+                                      "$rule",
+                                      "name"
+                                    ]
+                                  ]
+                                ],
+                                0
+                              ],
+                              "ok"
+                            ],
+                            false
+                          ],
+                          "✗ broken",
+                          ""
+                        ]
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "into": "html"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#rules",
+          "html": "$html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.render",
+          "input": {
+            "node": [
+              "at",
+              "$cov",
+              "ast"
+            ],
+            "indent": ""
+          }
+        },
+        "into": "ast"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#ast",
+          "name": "textContent",
+          "value": "$ast"
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lamp.measure",
+          "input": {
+            "node": [
+              "at",
+              "$cov",
+              "ast"
+            ]
+          }
+        },
+        "into": "size"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#ast-size",
+          "name": "textContent",
+          "value": [
+            "concat",
+            [
+              "at",
+              "$size",
+              "nodes"
+            ],
+            " nodes · depth ",
+            [
+              "at",
+              "$size",
+              "depth"
+            ],
+            " · the Ark allows 512 nodes and depth 32",
+            [
+              "if",
+              [
+                "at",
+                "$eventInput",
+                "report"
+              ],
+              [
+                "concat",
+                " · this judgment used ",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$eventInput",
+                    "report"
+                  ],
+                  "fuel"
+                ],
+                " of 2048 fuel"
+              ],
+              ""
+            ],
+            ". Every operator is from the closed set."
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "ui.temple.lesson": [
+      {
+        "let": "r",
+        "value": [
+          "at",
+          "$eventInput",
+          "recipe"
+        ]
+      },
+      {
+        "let": "v",
+        "value": [
+          "at",
+          "$eventInput",
+          "verdict"
+        ]
+      },
+      {
+        "let": "result",
+        "value": {
+          "text": "The covenant said no.",
+          "ref": ""
+        }
+      },
+      {
+        "when": [
+          "at",
+          "$v",
+          "accepted"
+        ],
+        "then": [
+          {
+            "let": "result",
+            "value": {
+              "text": "Accepted, and witnessed.",
+              "ref": ""
+            }
+          },
+          {
+            "when": [
+              "includes",
+              [
+                "list",
+                "tend",
+                "tend-unseen"
+              ],
+              [
+                "at",
+                "$r",
+                "preset"
+              ]
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": [
+                    "if",
+                    [
+                      "eq",
+                      [
+                        "at",
+                        "$r",
+                        "identity"
+                      ],
+                      "visitor"
+                    ],
+                    "The amended covenant welcomes a visitor’s hand on the oil. The law changed first — by a witnessed act — and only then did this become possible.",
+                    "The steward’s hand is on the oil. The proposal named the role cell, the covenant could see it, and the fixed algebra did the rest."
+                  ],
+                  "ref": "The lamp is lit"
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              [
+                "at",
+                "$r",
+                "preset"
+              ],
+              "refill"
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "The oil cell was consumed and a fuller one created — the only way anything changes here. Cells are never edited in place.",
+                  "ref": "III · No hidden mutation"
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              [
+                "at",
+                "$r",
+                "preset"
+              ],
+              "note"
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "Creation is open to anyone — even an AI emissary. What it cannot do is move what the covenant guards.",
+                  "ref": "Creation is open; consumption is governed"
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              [
+                "at",
+                "$r",
+                "preset"
+              ],
+              "amend"
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": [
+                    "concat",
+                    "The covenant is now “",
+                    [
+                      "at",
+                      "$eventInput",
+                      "activeTitle"
+                    ],
+                    "”. It becomes active only in the resulting state — it did not judge its own installation. Try tending the lamp as the visitor."
+                  ],
+                  "ref": "VII · No retrospective law"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": [
+          "not",
+          [
+            "at",
+            "$v",
+            "accepted"
+          ]
+        ],
+        "then": [
+          {
+            "let": "rules",
+            "value": [
+              "or",
+              [
+                "at",
+                [
+                  "at",
+                  "$v",
+                  "failure"
+                ],
+                "rules"
+              ],
+              [
+                "list"
+              ]
+            ]
+          },
+          {
+            "when": [
+              "includes",
+              "$rules",
+              "A"
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "Oil moves only by the hands this covenant names.",
+                  "ref": "Covenant rule A"
+                }
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$r",
+                      "identity"
+                    ],
+                    "visitor"
+                  ],
+                  [
+                    "not",
+                    [
+                      "includes",
+                      [
+                        "at",
+                        "$eventInput",
+                        "beforeTitle"
+                      ],
+                      "amended"
+                    ]
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "result",
+                    "value": {
+                      "text": "Under this covenant, oil moves only by the steward’s hand. The steward could amend the covenant to welcome visitors — try it.",
+                      "ref": "Covenant rule A"
+                    }
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$r",
+                      "identity"
+                    ],
+                    "steward"
+                  ],
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$r",
+                      "preset"
+                    ],
+                    "tend-unseen"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "result",
+                    "value": {
+                      "text": "Refused — even for the steward. The proposal never named the role cell, so the covenant could not see who the steward is. A covenant sees only what a proposal names.",
+                      "ref": "Information access is authority too"
+                    }
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "eq",
+                  [
+                    "at",
+                    "$r",
+                    "identity"
+                  ],
+                  "emissary"
+                ],
+                "then": [
+                  {
+                    "let": "result",
+                    "value": {
+                      "text": "The emissary holds a full copy of the Temple and a capable mind — and neither is authority. Acting for the visitor is not being the visitor.",
+                      "ref": "I · No implicit authority"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "includes",
+              "$rules",
+              "B"
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "Oil never simply vanishes here. Consuming it means creating it again, fuller or emptier, in plain sight.",
+                  "ref": "Covenant rule B"
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "includes",
+              "$rules",
+              "D"
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "Only the steward may amend the covenant — and the steward must be seen to be the steward.",
+                  "ref": "Covenant rule D"
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "includes",
+              "$rules",
+              "C"
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "The steward’s role is fixed in this covenant. No one proposes their way into it.",
+                  "ref": "Covenant rule C"
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              [
+                "at",
+                [
+                  "at",
+                  "$v",
+                  "failure"
+                ],
+                "stage"
+              ],
+              1
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "Something in the proposal was not canonical or not bounded. It never reached the law.",
+                  "ref": "IV · No ambient context"
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              [
+                "at",
+                [
+                  "at",
+                  "$v",
+                  "failure"
+                ],
+                "stage"
+              ],
+              2
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "The proposal was built on a state that no longer exists. A stale basis is never applied — no one can slip a change in “before” another.",
+                  "ref": "Stage 2 · the exact starting point"
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              [
+                "at",
+                [
+                  "at",
+                  "$v",
+                  "failure"
+                ],
+                "stage"
+              ],
+              3
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "The fixed algebra could not apply this delta to the current state.",
+                  "ref": "V · No executable mutation authority"
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              [
+                "at",
+                [
+                  "at",
+                  "$v",
+                  "failure"
+                ],
+                "stage"
+              ],
+              4
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "The proposer claimed a result the algebra does not produce. What you say will happen must be what happens.",
+                  "ref": "A supplied answer cannot stand in for verification"
+                }
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              [
+                "at",
+                [
+                  "at",
+                  "$v",
+                  "failure"
+                ],
+                "stage"
+              ],
+              6
+            ],
+            "then": [
+              {
+                "let": "result",
+                "value": {
+                  "text": "Refused — even for the steward. A covenant may narrow the Ark; it can never exceed it. This one was nested beyond the Ark’s bound.",
+                  "ref": "II · No absolute local policy"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "ui.temple.propose": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "busy"
+        },
+        "into": "busy"
+      },
+      {
+        "when": [
+          "not",
+          "$busy"
+        ],
+        "then": [
+          {
+            "port": "state.get",
+            "args": {
+              "key": "world"
+            },
+            "into": "world"
+          },
+          {
+            "port": "state.get",
+            "args": {
+              "key": "configuration"
+            },
+            "into": "configuration"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.recipe",
+              "input": {}
+            },
+            "into": "recipe"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.availability",
+              "input": {
+                "temple": [
+                  "at",
+                  "$world",
+                  "temple"
+                ],
+                "preset": [
+                  "at",
+                  "$recipe",
+                  "preset"
+                ]
+              }
+            },
+            "into": "blocked"
+          },
+          {
+            "when": [
+              "not",
+              "$blocked"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "busy",
+                  "value": true
+                },
+                "into": "_"
+              },
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "#propose",
+                  "name": "disabled",
+                  "value": true
+                },
+                "into": "_"
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "ui.temple.restore",
+                  "input": {}
+                },
+                "into": "result"
+              },
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "stageStates",
+                  "value": {}
+                },
+                "into": "_"
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "ui.temple.stages",
+                  "input": {}
+                },
+                "into": "result"
+              },
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "#verdict",
+                  "name": "className",
+                  "value": "verdict"
+                },
+                "into": "_"
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "ui.html",
+                  "input": {
+                    "node": {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "verdict-idle"
+                      },
+                      "children": [
+                        "list",
+                        "Judging…"
+                      ]
+                    }
+                  }
+                },
+                "into": "html"
+              },
+              {
+                "port": "browser.content",
+                "args": {
+                  "ref": "#verdict",
+                  "html": "$html"
+                },
+                "into": "_"
+              },
+              {
+                "let": "beforeTitle",
+                "value": [
+                  "at",
+                  [
+                    "at",
+                    [
+                      "at",
+                      "$world",
+                      "registry"
+                    ],
+                    [
+                      "at",
+                      [
+                        "at",
+                        [
+                          "at",
+                          "$world",
+                          "temple"
+                        ],
+                        "state"
+                      ],
+                      "predicateId"
+                    ]
+                  ],
+                  "title"
+                ]
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "lamp.propose",
+                  "input": {
+                    "world": "$world",
+                    "recipe": "$recipe",
+                    "configuration": "$configuration"
+                  }
+                },
+                "into": "proposed"
+              },
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "world",
+                  "value": [
+                    "at",
+                    "$proposed",
+                    "world"
+                  ]
+                },
+                "into": "_"
+              },
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "pendingProposal",
+                  "value": {
+                    "recipe": "$recipe",
+                    "result": [
+                      "at",
+                      "$proposed",
+                      "result"
+                    ],
+                    "beforeTitle": "$beforeTitle"
+                  }
+                },
+                "into": "_"
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "ui.temple.animateStage",
+                  "input": {
+                    "n": 1
+                  }
+                },
+                "into": "result"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "ui.temple.animateStage": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "stageStates"
+        },
+        "into": "stageStates"
+      },
+      {
+        "port": "record.put",
+        "args": {
+          "record": "$stageStates",
+          "key": [
+            "at",
+            "$eventInput",
+            "n"
+          ],
+          "value": {
+            "state": "running"
+          }
+        },
+        "into": "stageStates"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "stageStates",
+          "value": "$stageStates"
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.stages",
+          "input": {}
+        },
+        "into": "result"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "port": "browser.timer",
+        "args": {
+          "milliseconds": [
+            "if",
+            [
+              "at",
+              "$env",
+              "reduced"
+            ],
+            0,
+            210
+          ],
+          "query": "ui.temple.finishStage",
+          "input": {
+            "n": [
+              "at",
+              "$eventInput",
+              "n"
+            ]
+          }
+        },
+        "into": "_"
+      }
+    ],
+    "ui.temple.finishStage": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "pendingProposal"
+        },
+        "into": "pendingProposal"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "stageStates"
+        },
+        "into": "stageStates"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "configuration"
+        },
+        "into": "configuration"
+      },
+      {
+        "let": "got",
+        "value": [
+          "at",
+          [
+            "filter",
+            [
+              "at",
+              [
+                "at",
+                "$pendingProposal",
+                "result"
+              ],
+              "stages"
+            ],
+            "s",
+            [
+              "eq",
+              [
+                "at",
+                "$s",
+                "n"
+              ],
+              [
+                "at",
+                "$eventInput",
+                "n"
+              ]
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "when": [
+          "not",
+          [
+            "or",
+            [
+              "eq",
+              "$got",
+              null
+            ],
+            [
+              "eq",
+              "$got",
+              [
+                "at",
+                {},
+                "absent"
+              ]
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$stageStates",
+              "key": [
+                "at",
+                "$eventInput",
+                "n"
+              ],
+              "value": {
+                "state": [
+                  "if",
+                  [
+                    "at",
+                    "$got",
+                    "ok"
+                  ],
+                  "ok",
+                  "fail"
+                ],
+                "detail": [
+                  "at",
+                  "$got",
+                  "detail"
+                ]
+              }
+            },
+            "into": "stageStates"
+          }
+        ]
+      },
+      {
+        "when": [
+          "or",
+          [
+            "or",
+            [
+              "eq",
+              "$got",
+              null
+            ],
+            [
+              "eq",
+              "$got",
+              [
+                "at",
+                {},
+                "absent"
+              ]
+            ]
+          ],
+          [
+            "not",
+            [
+              "at",
+              "$got",
+              "ok"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "fold": [
+              "at",
+              "$configuration",
+              "stages"
+            ],
+            "as": "s",
+            "accumulator": "stageStates",
+            "initial": "$stageStates",
+            "steps": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": [
+                    "if",
+                    [
+                      "or",
+                      [
+                        "eq",
+                        "$got",
+                        null
+                      ],
+                      [
+                        "eq",
+                        "$got",
+                        [
+                          "at",
+                          {},
+                          "absent"
+                        ]
+                      ]
+                    ],
+                    "greaterEqual",
+                    "greater"
+                  ],
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$s",
+                      "n"
+                    ],
+                    [
+                      "at",
+                      "$eventInput",
+                      "n"
+                    ]
+                  ]
+                },
+                "into": "skipped"
+              },
+              {
+                "when": "$skipped",
+                "then": [
+                  {
+                    "port": "record.put",
+                    "args": {
+                      "record": "$stageStates",
+                      "key": [
+                        "at",
+                        "$s",
+                        "n"
+                      ],
+                      "value": {
+                        "state": "skipped",
+                        "detail": "Not reached."
+                      }
+                    },
+                    "into": "stageStates"
+                  }
+                ]
+              }
+            ],
+            "yield": "$stageStates",
+            "into": "stageStates"
+          }
+        ]
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "stageStates",
+          "value": "$stageStates"
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.stages",
+          "input": {}
+        },
+        "into": "result"
+      },
+      {
+        "let": "continue",
+        "value": [
+          "and",
+          [
+            "at",
+            "$got",
+            "ok"
+          ],
+          [
+            "not",
+            [
+              "eq",
+              [
+                "at",
+                "$eventInput",
+                "n"
+              ],
+              6
+            ]
+          ]
+        ]
+      },
+      {
+        "when": "$continue",
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.animateStage",
+              "input": {
+                "n": [
+                  "add",
+                  [
+                    "at",
+                    "$eventInput",
+                    "n"
+                  ],
+                  1
+                ]
+              }
+            },
+            "into": "result"
+          }
+        ]
+      },
+      {
+        "when": [
+          "not",
+          "$continue"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.finishProposal",
+              "input": {}
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "ui.temple.finishProposal": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "pendingProposal"
+        },
+        "into": "pendingProposal"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "world"
+        },
+        "into": "world"
+      },
+      {
+        "let": "v",
+        "value": [
+          "at",
+          "$pendingProposal",
+          "result"
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.lesson",
+          "input": {
+            "recipe": [
+              "at",
+              "$pendingProposal",
+              "recipe"
+            ],
+            "verdict": "$v",
+            "beforeTitle": [
+              "at",
+              "$pendingProposal",
+              "beforeTitle"
+            ],
+            "activeTitle": [
+              "at",
+              [
+                "at",
+                [
+                  "at",
+                  "$world",
+                  "registry"
+                ],
+                [
+                  "at",
+                  [
+                    "at",
+                    [
+                      "at",
+                      "$world",
+                      "temple"
+                    ],
+                    "state"
+                  ],
+                  "predicateId"
+                ]
+              ],
+              "title"
+            ]
+          }
+        },
+        "into": "lesson"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#verdict",
+          "name": "className",
+          "value": [
+            "if",
+            [
+              "at",
+              "$v",
+              "accepted"
+            ],
+            "verdict accepted",
+            "verdict refused"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.html",
+          "input": {
+            "node": [
+              "list",
+              {
+                "tag": "h4",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "if",
+                    [
+                      "at",
+                      "$v",
+                      "accepted"
+                    ],
+                    [
+                      "concat",
+                      "Accepted · sequence ",
+                      [
+                        "at",
+                        [
+                          "at",
+                          [
+                            "at",
+                            "$v",
+                            "witness"
+                          ],
+                          "body"
+                        ],
+                        "sequence"
+                      ]
+                    ],
+                    [
+                      "concat",
+                      "Refused at stage ",
+                      [
+                        "at",
+                        [
+                          "at",
+                          "$v",
+                          "failure"
+                        ],
+                        "stage"
+                      ],
+                      " · ",
+                      [
+                        "at",
+                        [
+                          "at",
+                          "$v",
+                          "failure"
+                        ],
+                        "code"
+                      ]
+                    ]
+                  ]
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "at",
+                    "$lesson",
+                    "text"
+                  ]
+                ]
+              },
+              [
+                "if",
+                [
+                  "at",
+                  "$v",
+                  "accepted"
+                ],
+                null,
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "The refusal has its own witness. The state did not move."
+                  ]
+                }
+              ],
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "ref"
+                },
+                "children": [
+                  "list",
+                  [
+                    "if",
+                    [
+                      "at",
+                      "$v",
+                      "accepted"
+                    ],
+                    [
+                      "at",
+                      "$lesson",
+                      "ref"
+                    ],
+                    [
+                      "concat",
+                      [
+                        "at",
+                        "$lesson",
+                        "ref"
+                      ],
+                      [
+                        "if",
+                        [
+                          "at",
+                          "$lesson",
+                          "ref"
+                        ],
+                        " · ",
+                        ""
+                      ],
+                      "VIII · No silent failure"
+                    ]
+                  ]
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  {
+                    "tag": "code",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      [
+                        "at",
+                        [
+                          "at",
+                          "$v",
+                          "witness"
+                        ],
+                        "id"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "into": "html"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#verdict",
+          "html": "$html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.render",
+          "input": {
+            "fresh": [
+              "at",
+              "$v",
+              "accepted"
+            ]
+          }
+        },
+        "into": "result"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.covenant",
+          "input": {
+            "fresh": true,
+            "report": [
+              "at",
+              "$v",
+              "covenantReport"
+            ]
+          }
+        },
+        "into": "result"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.journal",
+          "input": {}
+        },
+        "into": "result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#replay-lines",
+          "html": ""
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "busy",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.preview",
+          "input": {}
+        },
+        "into": "result"
+      }
+    ],
+    "ui.temple.label": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "configuration"
+        },
+        "into": "configuration"
+      },
+      {
+        "let": "person",
+        "value": [
+          "at",
+          [
+            "filter",
+            [
+              "at",
+              "$configuration",
+              "identities"
+            ],
+            "person",
+            [
+              "eq",
+              [
+                "at",
+                "$person",
+                "id"
+              ],
+              [
+                "at",
+                "$eventInput",
+                "id"
+              ]
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "result",
+        "value": [
+          "or",
+          [
+            "at",
+            "$person",
+            "label"
+          ],
+          [
+            "at",
+            "$eventInput",
+            "id"
+          ]
+        ]
+      }
+    ],
+    "ui.temple.journal": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "world"
+        },
+        "into": "world"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "forged"
+        },
+        "into": "forged"
+      },
+      {
+        "let": "journal",
+        "value": [
+          "if",
+          "$forged",
+          [
+            "at",
+            "$forged",
+            "journal"
+          ],
+          [
+            "at",
+            "$world",
+            "journal"
+          ]
+        ]
+      },
+      {
+        "let": "forgedIndex",
+        "value": [
+          "if",
+          "$forged",
+          [
+            "at",
+            "$forged",
+            "index"
+          ],
+          -1
+        ]
+      },
+      {
+        "fold": [
+          "range",
+          [
+            "count",
+            "$journal"
+          ]
+        ],
+        "as": "position",
+        "accumulator": "items",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "count",
+                  "$journal"
+                ],
+                "$position"
+              ]
+            },
+            "into": "arithmetic14"
+          },
+          {
+            "let": "index",
+            "value": "$arithmetic14"
+          },
+          {
+            "let": "e",
+            "value": [
+              "at",
+              "$journal",
+              "$index"
+            ]
+          },
+          {
+            "let": "b",
+            "value": [
+              "at",
+              "$e",
+              "body"
+            ]
+          },
+          {
+            "let": "accepted",
+            "value": [
+              "eq",
+              [
+                "at",
+                "$b",
+                "outcome"
+              ],
+              "accepted"
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.label",
+              "input": {
+                "id": [
+                  "at",
+                  "$b",
+                  "identity"
+                ]
+              }
+            },
+            "into": "label"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "address.short",
+              "input": {
+                "id": [
+                  "at",
+                  "$e",
+                  "id"
+                ],
+                "head": 12,
+                "tail": 6
+              }
+            },
+            "into": "witness"
+          },
+          {
+            "let": "out",
+            "value": [
+              "concat",
+              "refused at stage ",
+              [
+                "at",
+                [
+                  "at",
+                  "$b",
+                  "failure"
+                ],
+                "stage"
+              ],
+              " · ",
+              [
+                "at",
+                [
+                  "at",
+                  "$b",
+                  "failure"
+                ],
+                "code"
+              ],
+              " · state unchanged"
+            ]
+          },
+          {
+            "when": "$accepted",
+            "then": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "address.short",
+                  "input": {
+                    "id": [
+                      "at",
+                      "$b",
+                      "finalStateRoot"
+                    ],
+                    "head": 8,
+                    "tail": 0
+                  }
+                },
+                "into": "root"
+              },
+              {
+                "let": "out",
+                "value": [
+                  "concat",
+                  "accepted · sequence ",
+                  [
+                    "at",
+                    "$b",
+                    "sequence"
+                  ],
+                  " · root → ",
+                  "$root"
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": [
+          "append",
+          "$items",
+          [
+            "list",
+            {
+              "tag": "li",
+              "attrs": {
+                "class": [
+                  "concat",
+                  [
+                    "if",
+                    "$accepted",
+                    "accepted",
+                    "rejected"
+                  ],
+                  [
+                    "if",
+                    [
+                      "and",
+                      [
+                        "eq",
+                        "$position",
+                        1
+                      ],
+                      [
+                        "eq",
+                        "$forgedIndex",
+                        -1
+                      ]
+                    ],
+                    " fresh",
+                    ""
+                  ],
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$index",
+                      "$forgedIndex"
+                    ],
+                    " forged",
+                    ""
+                  ]
+                ]
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "seq"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "if",
+                      "$accepted",
+                      [
+                        "concat",
+                        "#",
+                        [
+                          "at",
+                          "$b",
+                          "sequence"
+                        ]
+                      ],
+                      "—"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "span",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "span",
+                      "attrs": {
+                        "class": "what"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "b",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "$label"
+                          ]
+                        },
+                        " · ",
+                        [
+                          "at",
+                          [
+                            "at",
+                            "$b",
+                            "context"
+                          ],
+                          "purpose"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "span",
+                      "attrs": {
+                        "class": "out"
+                      },
+                      "children": [
+                        "list",
+                        "$out"
+                      ]
+                    },
+                    {
+                      "tag": "code",
+                      "attrs": {
+                        "class": "wid",
+                        "title": [
+                          "at",
+                          "$e",
+                          "id"
+                        ]
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "witness ",
+                          "$witness"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        ],
+        "into": "items"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.html",
+          "input": {
+            "node": [
+              "if",
+              [
+                "eq",
+                [
+                  "count",
+                  "$journal"
+                ],
+                0
+              ],
+              {
+                "tag": "li",
+                "attrs": {
+                  "class": "empty"
+                },
+                "children": [
+                  "list",
+                  "No witnesses yet. The first proposal — accepted or refused — will leave one."
+                ]
+              },
+              "$items"
+            ]
+          }
+        },
+        "into": "html"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#journal",
+          "html": "$html"
+        },
+        "into": "_"
+      },
+      {
+        "let": "accepted",
+        "value": [
+          "count",
+          [
+            "filter",
+            [
+              "at",
+              "$world",
+              "journal"
+            ],
+            "e",
+            [
+              "eq",
+              [
+                "at",
+                [
+                  "at",
+                  "$e",
+                  "body"
+                ],
+                "outcome"
+              ],
+              "accepted"
+            ]
+          ]
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            [
+              "count",
+              [
+                "at",
+                "$world",
+                "journal"
+              ]
+            ],
+            "$accepted"
+          ]
+        },
+        "into": "arithmetic15"
+      },
+      {
+        "let": "refused",
+        "value": "$arithmetic15"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#journal-count",
+          "name": "textContent",
+          "value": [
+            "if",
+            [
+              "eq",
+              [
+                "count",
+                [
+                  "at",
+                  "$world",
+                  "journal"
+                ]
+              ],
+              0
+            ],
+            "No witnesses yet.",
+            [
+              "concat",
+              [
+                "count",
+                [
+                  "at",
+                  "$world",
+                  "journal"
+                ]
+              ],
+              " witness",
+              [
+                "if",
+                [
+                  "eq",
+                  [
+                    "count",
+                    [
+                      "at",
+                      "$world",
+                      "journal"
+                    ]
+                  ],
+                  1
+                ],
+                "",
+                "es"
+              ],
+              " · ",
+              "$accepted",
+              " accepted · ",
+              "$refused",
+              " refused"
+            ]
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.chain",
+          "input": {}
+        },
+        "into": "result"
+      }
+    ],
+    "ui.temple.restore": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "forged",
+          "value": null
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#forgery",
+          "name": "hidden",
+          "value": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#restore",
+          "name": "hidden",
+          "value": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#replay-lines",
+          "html": ""
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.journal",
+          "input": {}
+        },
+        "into": "result"
+      }
+    ],
+    "ui.temple.replayBusy": [
+      {
+        "each": [
+          "list",
+          "replay",
+          "forge-edit",
+          "forge-rewrite",
+          "restore"
+        ],
+        "as": "id",
+        "steps": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": [
+                "concat",
+                "#",
+                "$id"
+              ],
+              "name": "disabled",
+              "value": [
+                "at",
+                "$eventInput",
+                "value"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "ui.temple.replay": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ui.temple.replayBusy",
+          "input": {
+            "value": true
+          }
+        },
+        "into": "result"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "world"
+        },
+        "into": "world"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "forged"
+        },
+        "into": "forged"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "configuration"
+        },
+        "into": "configuration"
+      },
+      {
+        "let": "journal",
+        "value": [
+          "if",
+          "$forged",
+          [
+            "at",
+            "$forged",
+            "journal"
+          ],
+          [
+            "at",
+            "$world",
+            "journal"
+          ]
+        ]
+      },
+      {
+        "let": "proceed",
+        "value": true
+      },
+      {
+        "when": [
+          "at",
+          "$eventInput",
+          "mode"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.restore",
+              "input": {}
+            },
+            "into": "result"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.forge",
+              "input": {
+                "world": "$world",
+                "mode": [
+                  "at",
+                  "$eventInput",
+                  "mode"
+                ],
+                "configuration": "$configuration"
+              }
+            },
+            "into": "forged"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "forged",
+              "value": "$forged"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#forgery",
+              "name": "hidden",
+              "value": false
+            },
+            "into": "_"
+          },
+          {
+            "when": [
+              "or",
+              [
+                "eq",
+                "$forged",
+                null
+              ],
+              [
+                "eq",
+                "$forged",
+                [
+                  "at",
+                  {},
+                  "absent"
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "#forgery",
+                  "name": "textContent",
+                  "value": "There is no history worth forging yet. Tend the lamp first, as the steward."
+                },
+                "into": "_"
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "ui.temple.replayBusy",
+                  "input": {
+                    "value": false
+                  }
+                },
+                "into": "result"
+              },
+              {
+                "let": "proceed",
+                "value": false
+              }
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "or",
+                [
+                  "eq",
+                  "$forged",
+                  null
+                ],
+                [
+                  "eq",
+                  "$forged",
+                  [
+                    "at",
+                    {},
+                    "absent"
+                  ]
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "#forgery",
+                  "name": "textContent",
+                  "value": [
+                    "concat",
+                    [
+                      "at",
+                      "$forged",
+                      "description"
+                    ],
+                    " Now a verifier replays it:"
+                  ]
+                },
+                "into": "_"
+              },
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "#restore",
+                  "name": "hidden",
+                  "value": false
+                },
+                "into": "_"
+              },
+              {
+                "let": "journal",
+                "value": [
+                  "at",
+                  "$forged",
+                  "journal"
+                ]
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "ui.temple.journal",
+                  "input": {}
+                },
+                "into": "result"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "when": "$proceed",
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "lamp.replay",
+              "input": {
+                "world": "$world",
+                "journal": "$journal",
+                "publishedHead": [
+                  "at",
+                  [
+                    "at",
+                    "$world",
+                    "temple"
+                  ],
+                  "root"
+                ],
+                "configuration": "$configuration"
+              }
+            },
+            "into": "replay"
+          },
+          {
+            "port": "browser.content",
+            "args": {
+              "ref": "#replay-lines",
+              "html": ""
+            },
+            "into": "_"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.replayLine",
+              "input": {
+                "lines": [
+                  "at",
+                  "$replay",
+                  "lines"
+                ],
+                "index": 0
+              }
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "ui.temple.replayLine": [
+      {
+        "let": "line",
+        "value": [
+          "at",
+          [
+            "at",
+            "$eventInput",
+            "lines"
+          ],
+          [
+            "at",
+            "$eventInput",
+            "index"
+          ]
+        ]
+      },
+      {
+        "when": [
+          "not",
+          [
+            "or",
+            [
+              "eq",
+              "$line",
+              null
+            ],
+            [
+              "eq",
+              "$line",
+              [
+                "at",
+                {},
+                "absent"
+              ]
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.html",
+              "input": {
+                "node": {
+                  "tag": "li",
+                  "attrs": {
+                    "class": [
+                      "concat",
+                      [
+                        "if",
+                        [
+                          "at",
+                          "$line",
+                          "ok"
+                        ],
+                        "",
+                        "bad"
+                      ],
+                      [
+                        "if",
+                        [
+                          "eq",
+                          [
+                            "add",
+                            [
+                              "at",
+                              "$eventInput",
+                              "index"
+                            ],
+                            1
+                          ],
+                          [
+                            "count",
+                            [
+                              "at",
+                              "$eventInput",
+                              "lines"
+                            ]
+                          ]
+                        ],
+                        " final",
+                        ""
+                      ]
+                    ]
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "at",
+                      "$line",
+                      "text"
+                    ]
+                  ]
+                }
+              }
+            },
+            "into": "html"
+          },
+          {
+            "port": "browser.insert",
+            "args": {
+              "ref": "#replay-lines",
+              "position": "beforeend",
+              "html": "$html"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.environment",
+            "args": {},
+            "into": "env"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                [
+                  "count",
+                  [
+                    "at",
+                    "$eventInput",
+                    "lines"
+                  ]
+                ],
+                12
+              ]
+            },
+            "into": "many"
+          },
+          {
+            "port": "browser.timer",
+            "args": {
+              "query": "ui.temple.replayLine",
+              "input": {
+                "lines": [
+                  "at",
+                  "$eventInput",
+                  "lines"
+                ],
+                "index": [
+                  "add",
+                  [
+                    "at",
+                    "$eventInput",
+                    "index"
+                  ],
+                  1
+                ]
+              },
+              "milliseconds": [
+                "if",
+                [
+                  "at",
+                  "$env",
+                  "reduced"
+                ],
+                0,
+                [
+                  "if",
+                  "$many",
+                  60,
+                  120
+                ]
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "when": [
+          "or",
+          [
+            "eq",
+            "$line",
+            null
+          ],
+          [
+            "eq",
+            "$line",
+            [
+              "at",
+              {},
+              "absent"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.temple.replayBusy",
+              "input": {
+                "value": false
+              }
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "ui.temple.chain": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "world"
+        },
+        "into": "world"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "#chain"
+        },
+        "into": "targets"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$targets"
+            ],
+            0
+          ]
+        ],
+        "then": [
+          {
+            "port": "text.slice",
+            "args": {
+              "value": [
+                "at",
+                "$world",
+                "journal"
+              ],
+              "start": -11
+            },
+            "into": "shown"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "count",
+                  [
+                    "at",
+                    "$world",
+                    "journal"
+                  ]
+                ],
+                [
+                  "count",
+                  "$shown"
+                ]
+              ]
+            },
+            "into": "arithmetic16"
+          },
+          {
+            "let": "hidden",
+            "value": "$arithmetic16"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "max",
+              "values": [
+                "list",
+                1,
+                [
+                  "count",
+                  "$shown"
+                ]
+              ]
+            },
+            "into": "arithmetic17"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$arithmetic17",
+                28
+              ]
+            },
+            "into": "arithmetic18"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                78,
+                "$arithmetic18"
+              ]
+            },
+            "into": "arithmetic19"
+          },
+          {
+            "let": "height",
+            "value": "$arithmetic19"
+          },
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "#chain",
+              "name": "viewBox",
+              "value": [
+                "concat",
+                "0 0 420 ",
+                "$height"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "let": "nodes",
+            "value": [
+              "list",
+              {
+                "tag": "line",
+                "attrs": {
+                  "class": "spine",
+                  "x1": 96,
+                  "y1": 34,
+                  "x2": 96,
+                  "y2": [
+                    "add",
+                    "$height",
+                    -18
+                  ]
+                },
+                "children": [
+                  "list"
+                ]
+              },
+              {
+                "tag": "circle",
+                "attrs": {
+                  "class": "genesis",
+                  "cx": 96,
+                  "cy": 34,
+                  "r": 8
+                },
+                "children": [
+                  "list"
+                ]
+              },
+              {
+                "tag": "text",
+                "attrs": {
+                  "class": "lbl-caps",
+                  "x": 116,
+                  "y": 38
+                },
+                "children": [
+                  "list",
+                  "GENESIS"
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$hidden",
+                0
+              ]
+            ],
+            "then": [
+              {
+                "let": "nodes",
+                "value": [
+                  "append",
+                  "$nodes",
+                  [
+                    "list",
+                    {
+                      "tag": "text",
+                      "attrs": {
+                        "x": 116,
+                        "y": 56
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "… ",
+                          "$hidden",
+                          " earlier witness",
+                          [
+                            "if",
+                            [
+                              "eq",
+                              "$hidden",
+                              1
+                            ],
+                            "",
+                            "es"
+                          ]
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "fold": [
+              "range",
+              [
+                "count",
+                "$shown"
+              ]
+            ],
+            "as": "position",
+            "accumulator": "nodes",
+            "initial": "$nodes",
+            "steps": [
+              {
+                "let": "b",
+                "value": [
+                  "at",
+                  [
+                    "at",
+                    "$shown",
+                    [
+                      "add",
+                      "$position",
+                      -1
+                    ]
+                  ],
+                  "body"
+                ]
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "ui.temple.label",
+                  "input": {
+                    "id": [
+                      "at",
+                      "$b",
+                      "identity"
+                    ]
+                  }
+                },
+                "into": "identity"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    "$position",
+                    28
+                  ]
+                },
+                "into": "arithmetic20"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    58,
+                    "$arithmetic20",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$hidden",
+                        0
+                      ],
+                      -6,
+                      0
+                    ]
+                  ]
+                },
+                "into": "arithmetic21"
+              },
+              {
+                "let": "y",
+                "value": "$arithmetic21"
+              },
+              {
+                "when": [
+                  "eq",
+                  [
+                    "at",
+                    "$b",
+                    "outcome"
+                  ],
+                  "accepted"
+                ],
+                "then": [
+                  {
+                    "let": "nodes",
+                    "value": [
+                      "append",
+                      "$nodes",
+                      [
+                        "list",
+                        {
+                          "tag": "circle",
+                          "attrs": {
+                            "class": "acc",
+                            "cx": 96,
+                            "cy": "$y",
+                            "r": 6
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "text",
+                          "attrs": {
+                            "x": 116,
+                            "y": [
+                              "add",
+                              "$y",
+                              4
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            [
+                              "concat",
+                              "#",
+                              [
+                                "at",
+                                "$b",
+                                "sequence"
+                              ],
+                              " · ",
+                              "$identity",
+                              " · ",
+                              [
+                                "at",
+                                [
+                                  "at",
+                                  "$b",
+                                  "context"
+                                ],
+                                "purpose"
+                              ]
+                            ]
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "not",
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$b",
+                      "outcome"
+                    ],
+                    "accepted"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "nodes",
+                    "value": [
+                      "append",
+                      "$nodes",
+                      [
+                        "list",
+                        {
+                          "tag": "line",
+                          "attrs": {
+                            "class": "rej-link",
+                            "x1": 96,
+                            "y1": "$y",
+                            "x2": 130,
+                            "y2": "$y"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "circle",
+                          "attrs": {
+                            "class": "rej",
+                            "cx": 136,
+                            "cy": "$y",
+                            "r": 5
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "text",
+                          "attrs": {
+                            "x": 152,
+                            "y": [
+                              "add",
+                              "$y",
+                              4
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            [
+                              "concat",
+                              "refused · ",
+                              "$identity",
+                              " · stage ",
+                              [
+                                "at",
+                                [
+                                  "at",
+                                  "$b",
+                                  "failure"
+                                ],
+                                "stage"
+                              ]
+                            ]
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": "$nodes",
+            "into": "nodes"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "ui.html",
+              "input": {
+                "node": "$nodes"
+              }
+            },
+            "into": "html"
+          },
+          {
+            "port": "browser.content",
+            "args": {
+              "ref": "#chain",
+              "html": "$html"
+            },
+            "into": "_"
+          },
+          {
+            "let": "accepted",
+            "value": [
+              "count",
+              [
+                "filter",
+                [
+                  "at",
+                  "$world",
+                  "journal"
+                ],
+                "e",
+                [
+                  "eq",
+                  [
+                    "at",
+                    [
+                      "at",
+                      "$e",
+                      "body"
+                    ],
+                    "outcome"
+                  ],
+                  "accepted"
+                ]
+              ]
+            ]
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "count",
+                  [
+                    "at",
+                    "$world",
+                    "journal"
+                  ]
+                ],
+                "$accepted"
+              ]
+            },
+            "into": "arithmetic22"
+          },
+          {
+            "let": "refused",
+            "value": "$arithmetic22"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#chain-summary",
+              "name": "textContent",
+              "value": [
+                "if",
+                [
+                  "eq",
+                  [
+                    "count",
+                    [
+                      "at",
+                      "$world",
+                      "journal"
+                    ]
+                  ],
+                  0
+                ],
+                "Your Temple so far: genesis, and nothing else yet. Try the gate above.",
+                [
+                  "concat",
+                  "Your Temple so far: genesis, ",
+                  "$accepted",
+                  " accepted transition",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$accepted",
+                      1
+                    ],
+                    "",
+                    "s"
+                  ],
+                  " and ",
+                  "$refused",
+                  " refusal",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$refused",
+                      1
+                    ],
+                    "",
+                    "s"
+                  ],
+                  " — every one witnessed. Only acceptances advance the state."
+                ]
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ]
+  }
+}
