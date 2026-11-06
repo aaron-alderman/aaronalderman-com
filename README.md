@@ -47,3 +47,10 @@ Each encounter has server-visible title/description, canonical URL, Open Graph a
 GitHub Pages runs the algebra build and portable checks in .github/workflows/pages.yml, then publishes dist/. node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs checks the portable publication, unchanged mechanisms, links, metadata, retained bytes and reproducibility. npm test also checks the scientific examples and workshop against the surrounding research checkout. node serve.mjs previews the compiled site locally.
 
 source/publication-contract.json records the reason, target, goal, ownership boundaries and original compatibility/native hashes. Research source snapshots remain byte-identical to the prior public edition.
+
+
+The homepage hierarchy is owned by `source/hierarchy.json`, `source/hierarchy.rel` and `algebra/hierarchy.process.json`. It separates foundation/platform, substantial applications and programmes, applications in progress, and compact tooling. Every entrance has a microsite and source-bound Inspect page.
+
+`source/hierarchy-evidence.json` records exact snapshots, upstream/snapshot hashes and original source lines. The existing `source.rel` parser extracts `dependsOn` and `pack` edges. Sharing matches exact relation and target identity, counts each consumer once, and produces no inferred edge when no declaration is present. The existing Encounter lexer and presenter highlight source through the admitted read-only kernel. Snapshots record selected source versions; they do not claim live synchronization or deployed use. The only additional build grant is the existing pure `text.indexOf` operation required by `source.rel`. Native implementations and the 20,000,000-step budget are unchanged.
+
+`hierarchy.test.mjs` verifies all sixteen routes, source hashes and lines, extracted declarations, exact-identity sharing, duplicate handling, refusals and shared source presentation. `source/hierarchy-contract.json` records ownership and scope.

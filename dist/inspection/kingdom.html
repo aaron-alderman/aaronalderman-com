@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Inspect Kingdom</title><meta name="description" content="Exact source bindings and declared shared capabilities."><link rel="canonical" href="https://aaronalderman.com/inspection/kingdom.html"><link rel="stylesheet" href="../expedition.css?v=hierarchy-1"><meta property="og:title" content="Inspect Kingdom"><meta property="og:description" content="Exact source bindings and declared shared capabilities."><meta property="og:url" content="https://aaronalderman.com/inspection/kingdom.html"></head><body><a class="skip" href="#main">Skip to content</a><header class="masthead"><a class="brand" href="../index.html">Aaron Alderman</a><nav aria-label="Site"><a href="../index.html#microsites">The work</a><a href="../atlas.html">The atlas</a></nav></header><main class="hierarchy-page hierarchy-inspector" id="main"><p class="eyebrow">Inspect / source-bound</p><h1>Kingdom</h1><p>Faith, formation and the shape of shared life.</p><p class="hierarchy-scope">These connections are extracted from recorded source declarations. Exact identity establishes declared reuse; it does not establish deployment or equivalent behaviour.</p><a href="../kingdom/">Open Kingdom ↗</a><h2>Shared capabilities &amp; dependencies</h2><p>No shared capability identity is declared in the selected sources. The source bindings below remain inspectable.</p><h2>Source bindings</h2><div class="hierarchy-table-wrap"><table class="hierarchy-table"><thead><tr><th>Source binding</th><th>Snapshot</th></tr></thead><tbody><tr><td><code>sourcery/sourcery-applications/applications/claimipedia/king-way-kingdom.test.mjs</code><p>Source snapshot; no shared-capability declaration is inferred from descriptive text.</p><small>Upstream SHA-256: 7efdc58ab2f4e361e28fef71dca665c086a1b4e1e8625fce89eecf155ff7b04c</small></td><td><a href="../source/hierarchy-evidence/kingdom-0.txt">Read exact snapshot</a><small>Snapshot SHA-256: 7efdc58ab2f4e361e28fef71dca665c086a1b4e1e8625fce89eecf155ff7b04c</small></td></tr></tbody></table></div><h2>Readable source</h2><input id="hierarchy-language" type="hidden" value="text"><style id="hierarchy-source-style"></style><pre id="hierarchy-source" class="hierarchy-source">import assert from &quot;node:assert/strict&quot;;
+import { mkdtempSync, readFileSync, rmSync } from &quot;node:fs&quot;;
+import { tmpdir } from &quot;node:os&quot;;
+import { join } from &quot;node:path&quot;;
+import test from &quot;node:test&quot;;
+
+import { parseRawFacts } from &quot;../../node_modules/@temple2/platform-sdk/core/rel-core.mjs&quot;;
+import { startClaimipediaServer } from &quot;./server.mjs&quot;;
+
+const domainSource = readFileSync(new URL(&quot;./domain.rel&quot;, import.meta.url), &quot;utf8&quot;);
+const schemaSource = readFileSync(new URL(&quot;./schema.rel&quot;, import.meta.url), &quot;utf8&quot;);
+const routesSource = readFileSync(new URL(&quot;./routes.frontend.rel&quot;, import.meta.url), &quot;utf8&quot;);
+const appSource = readFileSync(new URL(&quot;./ui/app.js&quot;, import.meta.url), &quot;utf8&quot;);
+const styleSource = readFileSync(new URL(&quot;./ui/styles.css&quot;, import.meta.url), &quot;utf8&quot;);
+const serverSource = readFileSync(new URL(&quot;./server.mjs&quot;, import.meta.url), &quot;utf8&quot;);
+const facts = parseRawFacts(domainSource);
+const directory = JSON.parse(readFileSync(new URL(&quot;./kingdom-directory.json&quot;, import.meta.url), &quot;utf8&quot;));
+const directoryFacts = parseRawFacts(readFileSync(new URL(&quot;./kingdom-directory.facts.rel&quot;, import.meta.url), &quot;utf8&quot;));
+
+function hasFact(s, p, o) {
+  return facts.some(fact =&gt; fact.s === s &amp;&amp; fact.p === p &amp;&amp; (o === undefined || fact.o === o));
+}
+
+test(&quot;King–Way–Kingdom separates formation scale from influence order&quot;, () =&gt; {
+  const architecture = &quot;architecture.claimipedia.kingWayKingdom.v1&quot;;
+  assert.equal(hasFact(architecture, &quot;scaleAxis&quot;, &quot;axis.claimipedia.kingWayKingdom.scale&quot;), true);
+  assert.equal(hasFact(architecture, &quot;influenceAxis&quot;, &quot;axis.claimipedia.influenceOrder&quot;), true);
+  assert.equal(hasFact(&quot;axis.claimipedia.kingWayKingdom.scale&quot;, &quot;isa&quot;, &quot;FormationScaleAxis&quot;), true);
+  assert.equal(hasFact(&quot;axis.claimipedia.influenceOrder&quot;, &quot;isa&quot;, &quot;InfluenceOrderAxis&quot;), true);
+  for (const [movement, index, scale] of [
+    [&quot;movement.claimipedia.kingWayKingdom.orientation&quot;, &quot;1&quot;, &quot;personal&quot;],
+    [&quot;movement.claimipedia.kingWayKingdom.formation&quot;, &quot;2&quot;, &quot;relational&quot;],
+    [&quot;movement.claimipedia.kingWayKingdom.communion&quot;, &quot;3&quot;, &quot;communal&quot;],
+  ]) {
+    assert.equal(hasFact(movement, &quot;movementIndex&quot;, index), true);
+    assert.equal(hasFact(movement, &quot;scale&quot;, scale), true);
+    assert.equal(hasFact(movement, &quot;order&quot;), false, `${movement} must not overload influence order`);
+  }
+});
+
+test(&quot;all three movements are load-bearing claims and Kingdom has symmetric valences&quot;, () =&gt; {
+  const claims = [
+    &quot;claim.claimipedia.loadBearing.jesusIsKing&quot;,
+    &quot;claim.claimipedia.loadBearing.followMeThirdOrder&quot;,
+    &quot;claim.claimipedia.loadBearing.kingdom&quot;,
+  ];
+  for (const claim of claims) assert.equal(hasFact(claim, &quot;weight&quot;, &quot;load-bearing&quot;), true, claim);
+  assert.equal(hasFact(claims[2], &quot;route&quot;, &quot;/claim/the-kingdom&quot;), true);
+  assert.equal(hasFact(claims[2], &quot;proValence&quot;, &quot;claim.claimipedia.loadBearing.kingdom.pro&quot;), true);
+  assert.equal(hasFact(claims[2], &quot;conValence&quot;, &quot;claim.claimipedia.loadBearing.kingdom.con&quot;), true);
+  assert.equal(hasFact(&quot;relationship.claimipedia.kingdom.pro&quot;, &quot;relationType&quot;, &quot;Supports&quot;), true);
+  assert.equal(hasFact(&quot;relationship.claimipedia.kingdom.con&quot;, &quot;relationType&quot;, &quot;Challenges&quot;), true);
+});
+
+test(&quot;the invitation claims keep stable breadcrumbs and five-axis hero language&quot;, () =&gt; {
+  for (const [route, title] of [
+    [&quot;claim/jesus-is-king&quot;, &quot;Jesus is King&quot;],
+    [&quot;claim/follow-me-third-order-influence&quot;, &quot;Follow me&quot;],
+    [&quot;claim/the-kingdom&quot;, &quot;The Kingdom&quot;],
+  ]) assert.match(appSource, new RegExp(`&quot;${route}&quot;:&quot;${title}&quot;`, &quot;u&quot;));
+  assert.match(appSource, /href=&quot;\/#\/invitation&quot;&gt;Invitation&lt;\/a&gt;&lt;span aria-hidden=&quot;true&quot;&gt;›&lt;\/span&gt;&lt;b&gt;Jesus is King&lt;\/b&gt;/u);
+  assert.match(appSource, /href=&quot;\/#\/invitation&quot;&gt;Invitation&lt;\/a&gt;&lt;span aria-hidden=&quot;true&quot;&gt;›&lt;\/span&gt;&lt;b&gt;Follow me&lt;\/b&gt;/u);
+  assert.match(appSource, /function kingdomClaimBreadcrumbTitle\(currentRoute\).*&quot;claim\/the-kingdom&quot;\?&quot;The Kingdom&quot;.*&quot;kingdom\/about&quot;\?&quot;About&quot;/u);
+  assert.match(appSource, /class=&quot;jik-axis&quot; aria-hidden=&quot;true&quot;&gt;&lt;img src=&quot;\/jesus-five-axis\.svg&quot; alt=&quot;&quot;&gt;/u);
+  assert.match(styleSource, /\.jik-hero-with-axis\{grid-template-columns:/u);
+});
+
+test(&quot;people links resolve to scoped Claimipedia accounts while Kingdom keeps its own directory&quot;, () =&gt; {
+  assert.match(schemaSource, /&quot;iface\.PlatformIdentity&quot;, &quot;mode&quot;, &quot;closed&quot;/u);
+  assert.match(schemaSource, /&quot;iface\.AttributionRelationship&quot;, &quot;mode&quot;, &quot;closed&quot;/u);
+  for (const relationType of [&quot;author&quot;, &quot;editor&quot;, &quot;reviewer&quot;, &quot;source&quot;, &quot;mentioned&quot;, &quot;affected&quot;, &quot;member&quot;, &quot;represents&quot;]) {
+    assert.match(schemaSource, new RegExp(`&quot;slot\\.AttributionRelationship\\.relationType&quot;, &quot;allowed&quot;, &quot;${relationType}&quot;`, &quot;u&quot;));
+  }
+  assert.equal(hasFact(&quot;identity.claimipedia.aaronAlderman&quot;, &quot;actor&quot;, &quot;actor.claimipedia.aaronAlderman&quot;), true);
+  assert.equal(hasFact(&quot;identity.claimipedia.jessicaAlderman&quot;, &quot;actor&quot;, &quot;actor.claimipedia.jessicaAlderman&quot;), true);
+  assert.equal(hasFact(&quot;attribution.claimipedia.jessica.simulationRupture.author&quot;, &quot;subjectIdentity&quot;, &quot;identity.claimipedia.jessicaAlderman&quot;), true);
+  assert.equal(hasFact(&quot;attribution.claimipedia.jessica.simulationRupture.author&quot;, &quot;object&quot;, &quot;claim.biblicalResurrection.simulationRupture&quot;), true);
+  assert.equal(hasFact(&quot;attribution.claimipedia.jessica.simulationRupture.author&quot;, &quot;status&quot;, &quot;verified&quot;), true);
+  assert.equal(hasFact(&quot;attribution.claimipedia.jessica.simulationRupture.author&quot;, &quot;correctionRoute&quot;, &quot;/#/contributions&quot;), true);
+  assert.equal(hasFact(&quot;identity.claimipedia.author&quot;, &quot;serverAccess&quot;), true);
+  assert.equal(hasFact(&quot;identity.claimipedia.aiContributor&quot;, &quot;mcpAccess&quot;), true);
+  assert.match(routesSource, /&quot;path&quot;, &quot;\/account&quot;/u);
+  assert.match(appSource, /function claimipediaAccountView\(slug = &quot;&quot;\)/u);
+  assert.match(appSource, /&lt;p class=&quot;portal-eyebrow&quot;&gt;CLAIMIPEDIA ACCOUNT&lt;\/p&gt;/u);
+  assert.match(appSource, /There is no general Claimipedia people directory/u);
+  assert.match(appSource, /href=&quot;\/kingdom\/directory\/people&quot;&gt;Kingdom directory · People/u);
+  assert.match(appSource, /articleIdentityByline\(projection\.version\)/u);
+});
+
+test(&quot;resurrection and relational-field claims bridge orientation, formation, and communion&quot;, () =&gt; {
+  const expected = [
+    [&quot;relationship.claimipedia.kingWayKingdom.resurrectionOrientation&quot;, &quot;claim.biblicalResurrection.simulationRupture&quot;, &quot;claim.claimipedia.loadBearing.jesusIsKing&quot;, &quot;Qualifies&quot;],
+    [&quot;relationship.claimipedia.kingWayKingdom.resurrectionFormation&quot;, &quot;claim.biblicalResurrection.relationalFieldRupture&quot;, &quot;claim.claimipedia.loadBearing.followMeThirdOrder&quot;, &quot;Supports&quot;],
+    [&quot;relationship.claimipedia.kingWayKingdom.resurrectionCommunion&quot;, &quot;claim.biblicalResurrection.relationalFieldRupture&quot;, &quot;claim.claimipedia.loadBearing.kingdom&quot;, &quot;Qualifies&quot;],
+  ];
+  for (const [relationship, source, target, type] of expected) {
+    assert.equal(hasFact(relationship, &quot;source&quot;, source), true);
+    assert.equal(hasFact(relationship, &quot;target&quot;, target), true);
+    assert.equal(hasFact(relationship, &quot;relationType&quot;, type), true);
+  }
+});
+
+test(&quot;Kingdom evidence keeps support, qualification, challenge, and comparison distinct&quot;, () =&gt; {
+  const evidence = facts.filter(fact =&gt; fact.p === &quot;relevantClaim&quot; &amp;&amp; fact.o === &quot;claim.claimipedia.loadBearing.kingdom&quot;).map(fact =&gt; fact.s);
+  assert.ok(evidence.length &gt;= 11, `expected at least 11 Kingdom evidence records, found ${evidence.length}`);
+  const directions = new Set(evidence.flatMap(subject =&gt; facts.filter(fact =&gt; fact.s === subject &amp;&amp; fact.p === &quot;direction&quot;).map(fact =&gt; fact.o)));
+  assert.deepEqual([...directions].sort(), [&quot;Challenges&quot;, &quot;Qualifies&quot;, &quot;Supports&quot;]);
+  assert.equal(hasFact(&quot;evidence.claimipedia.kingdom.royalCommission&quot;, &quot;sourceIndependent&quot;, &quot;true&quot;), true);
+  assert.equal(hasFact(&quot;evidence.claimipedia.kingdom.udhr&quot;, &quot;evidenceType&quot;, &quot;LegalRecord&quot;), true);
+  assert.equal(hasFact(&quot;evidence.claimipedia.kingdom.pirkeiAvot&quot;, &quot;evidenceType&quot;, &quot;Observation&quot;), true);
+});
+
+test(&quot;canonical Kingdom version carries the complete institutional safeguarding case&quot;, () =&gt; {
+  const version = &quot;claimVersion.claimipedia.loadBearing.kingdom.v1&quot;;
+  for (const predicate of [&quot;workedCaseTitle&quot;, &quot;workedCaseContext&quot;, &quot;workedCaseStanding&quot;, &quot;workedCaseBoundary&quot;, &quot;workedCaseAgency&quot;, &quot;workedCaseTelos&quot;, &quot;workedCaseCorrection&quot;, &quot;workedCaseVerdict&quot;]) {
+    assert.equal(hasFact(version, predicate), true, predicate);
+  }
+  assert.equal(hasFact(version, &quot;workedCaseBoundary&quot;, undefined), true);
+  assert.match(facts.find(fact =&gt; fact.s === version &amp;&amp; fact.p === &quot;workedCaseBoundary&quot;).o, /mandatory reporting|independent/u);
+  assert.match(facts.find(fact =&gt; fact.s === version &amp;&amp; fact.p === &quot;workedCaseAgency&quot;).o, /Do not make disclosure|price of care/u);
+});
+
+test(&quot;third-order influence audits are canonical, non-compensatory, and cross-domain&quot;, () =&gt; {
+  const audits = [...new Set(facts.filter(fact =&gt; fact.p === &quot;isa&quot; &amp;&amp; fact.o === &quot;ThirdOrderInfluenceAudit&quot;).map(fact =&gt; fact.s))];
+  assert.equal(audits.length, 6);
+  const dimensions = [&quot;standing&quot;, &quot;boundary&quot;, &quot;agency&quot;, &quot;telos&quot;, &quot;correction&quot;];
+  const domains = new Set();
+  const verdicts = [];
+  for (const subject of audits) {
+    const record = Object.fromEntries(facts.filter(fact =&gt; fact.s === subject).map(fact =&gt; [fact.p, fact.o]));
+    domains.add(record.domain);
+    verdicts.push(record.verdict);
+    for (const dimension of dimensions) {
+      assert.ok(record[dimension], `${subject} ${dimension}`);
+      assert.match(record[`${dimension}Result`], /^(pass|watch|fail)$/u, `${subject} ${dimension} result`);
+    }
+    const results = dimensions.map(dimension =&gt; record[`${dimension}Result`]);
+    if (results.includes(&quot;fail&quot;)) assert.equal(record.verdict, &quot;illegitimate&quot;, subject);
+    else if (results.includes(&quot;watch&quot;)) assert.equal(record.verdict, &quot;conditional&quot;, subject);
+    else assert.equal(record.verdict, &quot;legitimate&quot;, subject);
+  }
+  assert.equal(domains.size, 6);
+  assert.deepEqual(verdicts.sort(), [&quot;conditional&quot;, &quot;conditional&quot;, &quot;conditional&quot;, &quot;illegitimate&quot;, &quot;legitimate&quot;, &quot;legitimate&quot;]);
+  assert.equal(hasFact(&quot;audit.claimipedia.thirdOrder.recommender&quot;, &quot;boundaryResult&quot;, &quot;fail&quot;), true);
+  assert.equal(hasFact(&quot;audit.claimipedia.thirdOrder.selfAuthoredLearning&quot;, &quot;agencyResult&quot;, &quot;pass&quot;), true);
+  assert.equal(hasFact(&quot;audit.claimipedia.thirdOrder.games&quot;, &quot;verdict&quot;, &quot;conditional&quot;), true);
+});
+
+test(&quot;third-order audit authorship is visibly proposal-first&quot;, () =&gt; {
+  assert.match(schemaSource, /&quot;iface\.ThirdOrderInfluenceAuditCandidate&quot;, &quot;mode&quot;, &quot;closed&quot;/u);
+  assert.match(appSource, /id=&quot;third-order-audit-form&quot;/u);
+  assert.match(appSource, /name=&quot;affectedParties&quot;/u);
+  assert.match(appSource, /name=&quot;dissent&quot;/u);
+  assert.match(appSource, /name=&quot;uncertainty&quot;/u);
+  assert.match(appSource, /Evidence for this judgment/u);
+  assert.match(appSource, /propose_third_order_audit/u);
+  assert.match(appSource, /not canonical/u);
+});
+
+test(&quot;Kingdom claim is a focused invitation and the application owns the heavier surfaces&quot;, () =&gt; {
+  assert.match(appSource, /function canonicalClaimSurface\(subject, fallback/u);
+  assert.match(appSource, /version\.workedCaseTitle/u);
+  assert.match(appSource, /function kingdomClaimView\(\)/u);
+  assert.match(appSource, /data-claim-id=&quot;\$\{KINGDOM_CLAIM_ID\}&quot;/u);
+  assert.match(appSource, /Open the concept demo/u);
+  assert.match(appSource, /functional concept demo/u);
+  assert.match(appSource, /The digital Kingdom is not the real Kingdom/u);
+  assert.match(appSource, /Possible future Kingdom functionality/u);
+  assert.match(appSource, /This page is not currently functional/u);
+  assert.match(appSource, /&lt;a href=&quot;\/claim\/the-kingdom&quot;&gt;Read The Kingdom claim/u);
+  assert.match(appSource, /&lt;a href=&quot;\/claim\/jesus-is-king&quot;&gt;Read Jesus is King/u);
+  assert.match(appSource, /&lt;a href=&quot;\/#\/invitation&quot;&gt;Read the three-part invitation/u);
+  assert.match(appSource, /function isKingdomClaimRoute\(currentRoute\)/u);
+  assert.match(appSource, /&lt;a href=&quot;\/&quot;&gt;Home&lt;\/a&gt;&lt;span aria-hidden=&quot;true&quot;&gt;›&lt;\/span&gt;&lt;a href=&quot;\/kingdom&quot;&gt;Kingdom&lt;\/a&gt;&lt;span aria-hidden=&quot;true&quot;&gt;›&lt;\/span&gt;&lt;b&gt;\$\{esc\(breadcrumbTitle\)\}&lt;\/b&gt;/u);
+  assert.match(appSource, /function kingdomApplicationView\(\)/u);
+  assert.match(appSource, /function kingdomDirectoryAppView\(category = &quot;&quot;, record = &quot;&quot;\)/u);
+  assert.match(appSource, /data-directory-search/u);
+  assert.match(appSource, /slug: &quot;aaron-alderman&quot;/u);
+  assert.match(appSource, /mark: &quot;KC&quot;/u);
+  assert.match(appSource, /logo: &quot;\/kingdomcity-logo\.svg&quot;/u);
+  assert.match(appSource, /function kingdomDirectoryNoun\(category, count\)/u);
+  assert.match(appSource, /href=&quot;\/kingdom\/directory\/people\/aaron-alderman&quot;&gt;Aaron Alderman →&lt;\/a&gt;/u);
+  assert.match(appSource, /href=&quot;\/kingdom\/directory\/people\/jessica-alderman&quot;&gt;Jessica Alderman →&lt;\/a&gt;/u);
+  assert.match(appSource, /href=&quot;\/kingdom\/directory\/people\/callan-bright&quot;&gt;Callan Bright →&lt;\/a&gt;/u);
+  assert.match(appSource, /https:\/\/www\.linkedin\.com\/in\/aaron-alderman/u);
+  assert.match(appSource, /Technology Consultant/u);
+  assert.match(appSource, /Chief Technology Officer/u);
+  assert.match(appSource, /Lead AI Software Engineer/u);
+  assert.match(appSource, /Consultant \/ Full Stack Engineer/u);
+  assert.match(appSource, /Doctor of Philosophy \(PhD\), Physics/u);
+  assert.match(appSource, /Bachelor of Science with Honours/u);
+  assert.doesNotMatch(appSource, /linkedin\.com\/in\/aaron-alderman\/details\/(?:experience|education)\/edit/u);
+  assert.match(styleSource, /\.kdm-professional-profile\{margin-top:/u);
+  assert.match(appSource, /id=&quot;professional-profile&quot; aria-labelledby=&quot;aaron-professional-title&quot;/u);
+  assert.match(appSource, /src=&quot;\/aaron-alderman-ai-portrait\.png&quot; alt=&quot;AI illustration of Aaron Alderman in a sunlit field&quot;/u);
+  assert.match(styleSource, /\.kdm-professional-portrait img\{[^}]*object-fit:cover;object-position:50% 26%/u);
+  assert.match(serverSource, /pathname === &quot;\/aaron-alderman-ai-portrait\.png&quot;/u);
+  assert.doesNotMatch(appSource, /COMPANY 01|GOVERNMENT-REGISTER PROFILE|PUBLIC-RECORD PROFILE|Government-register identity/u);
+  assert.doesNotMatch(appSource, /Five people, distinct evidence postures|PEOPLE · CORPUS LINKS|LIVING PERSON · CORPUS-GROUNDED|LIVING PERSON · TASK-GROUNDED|REQUESTED SEED · NEW ENTITY/u);
+  assert.doesNotMatch(appSource, /with each evidence posture kept visible|Put institutions, persons, claims and testimony on different edges|Last bounded public-source review/u);
+  assert.doesNotMatch(appSource, /&gt;0[1-4] · (?:Denomination|Church|Business|People)/u);
+  assert.doesNotMatch(appSource, /KINGDOM ARTICLES · CONTESTABLE PRACTICE|STANDALONE ARTICLE · PROPOSED APPROACH/u);
+  assert.match(styleSource, /\.kingdom-directory-detail \.kdm-people\{margin-top:0;padding-top:/u);
+  assert.match(appSource, /aria-label=&quot;Breadcrumb&quot; data-breadcrumb=&quot;primary&quot;/u);
+  assert.match(appSource, /function kingdomRoomsView\(\)/u);
+  assert.match(appSource, /function kingdomSafeguardingArticleView\(\)/u);
+  assert.match(appSource, /id=&quot;kingdom-worked-case&quot;/u);
+  assert.match(appSource, /id=&quot;audit&quot; aria-labelledby=&quot;fmi-audit-title&quot;/u);
+  assert.match(appSource, /state\?\.thirdOrderAudits/u);
+  assert.match(appSource, /ANY FAIL/u);
+  assert.match(appSource, /Correctability asks whether structures/u);
+  assert.match(appSource, /data-audit-id=/u);
+  assert.match(appSource, /id=&quot;resurrection-bridge&quot;/u);
+  for (const principle of [&quot;Standing&quot;, &quot;Boundary&quot;, &quot;Agency&quot;, &quot;Telos&quot;, &quot;Correction&quot;]) {
+    assert.match(appSource, new RegExp(`&gt;${principle}&lt;`, &quot;u&quot;));
+  }
+});
+
+test(&quot;responsive contracts collapse the movement, bridge, Kingdom constitution, practice, and evidence grids&quot;, () =&gt; {
+  assert.match(styleSource, /@media\(max-width:1050px\)[^{]*\{[^}]*\.fmi-bridge-flow\{grid-template-columns:1fr\}/u);
+  assert.match(styleSource, /\.kdm-hero,\.kdm-case&gt;header\{grid-template-columns:1fr\}/u);
+  assert.match(styleSource, /\.kdm-tension&gt;div,\.kdm-practice&gt;div,\.kdm-constitution,\.kdm-case&gt;div\{grid-template-columns:1fr\}/u);
+  assert.match(styleSource, /\.fmi-sources&gt;div,\.kdm-evidence&gt;div\{grid-template-columns:1fr\}/u);
+  assert.match(styleSource, /\.kdm-constitution,\.kdm-case&gt;div\{grid-template-columns:1fr\}/u);
+  assert.match(styleSource, /\.fmi-audit-rule[^}]*grid-template-columns:repeat\(3,1fr\)/u);
+  assert.match(styleSource, /\.fmi-audit-case summary,\.fmi-audit-case li,\.fmi-audit-draft&gt;header,\.fmi-audit-draft li\{grid-template-columns:1fr\}/u);
+  assert.match(styleSource, /@media\(prefers-reduced-motion:reduce\)/u);
+});
+
+test(&quot;Kingdom directory keeps churches, people, provenance, and testimony status explicit&quot;, () =&gt; {
+  assert.equal(directory.protocol, &quot;claimipedia-kingdom-directory/1&quot;);
+  assert.equal(directory.denominations[0].id, &quot;denomination.pentecostal&quot;);
+  assert.deepEqual(directory.denominations[0].churches, [&quot;church.kingdomcity&quot;]);
+  assert.equal(directory.churches[0].id, &quot;church.kingdomcity&quot;);
+  assert.equal(directory.people.length, 5);
+  assert.deepEqual(directory.people.slice(0, 2).map(person =&gt; person.church.id), [&quot;church.kingdomcity&quot;, &quot;church.kingdomcity&quot;]);
+  assert.ok(directory.people.slice(0, 2).every(person =&gt; person.church.provenance === &quot;user-supplied in this task&quot;));
+  assert.equal(directory.people.find(person =&gt; person.id === &quot;person.mary-mother-of-jesus&quot;).corpus.length, 0);
+  assert.equal(directory.companies[0].abn, &quot;22660729484&quot;);
+  assert.equal(directory.people.find(person =&gt; person.id === &quot;person.callan-bright&quot;).company.id, &quot;company.sourcery-tech-pty-ltd&quot;);
+  assert.ok(directory.churches[0].publicAccounts.some(account =&gt; account.verification.startsWith(&quot;Anecdotal&quot;)));
+  assert.match(directory.churches[0].accountability.foi, /No Kingdomcity-specific FOI disclosure/u);
+  assert.ok(directory.sources.some(source =&gt; source.sourceClass === &quot;government-register&quot;));
+  assert.ok(directory.sources.some(source =&gt; source.sourceClass === &quot;unverified-public-testimony&quot;));
+  assert.ok(directoryFacts.some(fact =&gt; fact.s === &quot;relationship.claimipedia.aaronAlderman.kingdomcity&quot; &amp;&amp; fact.p === &quot;verificationStatus&quot; &amp;&amp; fact.o === &quot;not independently verified&quot;));
+  assert.ok(directoryFacts.some(fact =&gt; fact.s === &quot;relationship.claimipedia.mary.jesus&quot; &amp;&amp; fact.p === &quot;relationType&quot; &amp;&amp; fact.o === &quot;MotherOf&quot;));
+  assert.ok(directoryFacts.some(fact =&gt; fact.s === &quot;company.claimipedia.sourceryTech&quot; &amp;&amp; fact.p === &quot;abn&quot; &amp;&amp; fact.o === &quot;22660729484&quot;));
+  assert.ok(directoryFacts.some(fact =&gt; fact.s === &quot;relationship.claimipedia.callanBright.sourceryTech&quot; &amp;&amp; fact.p === &quot;verificationStatus&quot; &amp;&amp; fact.o === &quot;not established by the ABR record&quot;));
+  assert.ok(directoryFacts.some(fact =&gt; fact.s === &quot;relationship.claimipedia.kingdomcity.pentecostal&quot; &amp;&amp; fact.p === &quot;source&quot; &amp;&amp; fact.o === &quot;source.kingdomcity.accwa-directory&quot;));
+  assert.match(appSource, /id=&quot;kingdom-directory&quot;/u);
+  assert.match(appSource, /id=&quot;kingdomcity-profile&quot;/u);
+  assert.doesNotMatch(appSource, /CHURCH 01/u);
+  assert.match(appSource, /src=&quot;\/kingdomcity-logo\.svg&quot; alt=&quot;kingdomcity official logo&quot;/u);
+  assert.match(appSource, /mediaProjectIds: \[&quot;kingdomcity-ziklag-20261003&quot;\]/u);
+  assert.match(appSource, /Watch and inspect lineage/u);
+  assert.match(appSource, /class=&quot;media-video-subjects&quot;/u);
+  assert.match(appSource, /aria-label=&quot;Official Kingdomcity channels&quot;/u);
+  assert.match(appSource, /https:\/\/www\.youtube\.com\/kingdomcity/u);
+  assert.match(appSource, /https:\/\/www\.instagram\.com\/kingdomcity\//u);
+  assert.match(appSource, /https:\/\/www\.facebook\.com\/kingdomcity\//u);
+  assert.match(appSource, /data-icon=&quot;navigation\.youtube&quot;/u);
+  assert.match(appSource, /data-icon=&quot;navigation\.instagram&quot;/u);
+  assert.match(appSource, /data-icon=&quot;navigation\.facebook&quot;/u);
+  assert.match(appSource, /Official public logo/u);
+  assert.match(appSource, /id=&quot;kingdom-people&quot;/u);
+  assert.match(appSource, /id=&quot;kingdom-companies&quot;/u);
+  assert.match(appSource, /title: &quot;Game \/ One World&quot;/u);
+  assert.match(appSource, /sourcery-game-loadout\.jpg/u);
+  assert.match(appSource, /sourcery-game-port\.jpg/u);
+  assert.match(appSource, /sourcery-game-operations\.jpg/u);
+  assert.match(appSource, /game-cinderwake-overview\.jpg/u);
+  assert.match(appSource, /game-cinderwake-practice-guide\.jpg/u);
+  assert.match(appSource, /Simulation is a bounded world/u);
+  assert.match(styleSource, /\.kdm-directory/u);
+  assert.match(styleSource, /\.kdm-church-logo/u);
+});
+
+test(&quot;real server serves every custom claim route through the versioned SPA shell&quot;, async t =&gt; {
+  const dataDir = mkdtempSync(join(tmpdir(), &quot;claimipedia-king-way-kingdom-&quot;));
+  const started = await startClaimipediaServer({ dataDir, port: 0 });
+  t.after(async () =&gt; {
+    await new Promise(resolve =&gt; started.server.close(resolve));
+    await started.service.drainEvaluationJobs();
+    rmSync(dataDir, { recursive: true, force: true });
+  });
+  const stateResponse = await fetch(new URL(&quot;api/state&quot;, started.url));
+  assert.equal(stateResponse.status, 200);
+  const canonicalState = await stateResponse.json();
+  const kingdomVersion = canonicalState.claimVersions.find(item =&gt; item.subject === &quot;claimVersion.claimipedia.loadBearing.kingdom.v1&quot;);
+  assert.equal(kingdomVersion.workedCaseTitle, &quot;When a trusted church leader is accused of abusing a child&quot;);
+  assert.match(kingdomVersion.workedCaseCorrection, /independent review|restitution/u);
+  assert.equal(canonicalState.thirdOrderAudits.length, 6);
+  assert.equal(canonicalState.thirdOrderAudits.find(item =&gt; item.subject === &quot;audit.claimipedia.thirdOrder.games&quot;).verdict, &quot;conditional&quot;);
+  assert.ok(canonicalState.claims.some(item =&gt; item.subject === &quot;claim.claimipedia.games.restorativePotential&quot;));
+  assert.equal(canonicalState.thirdOrderAudits.find(item =&gt; item.subject === &quot;audit.claimipedia.thirdOrder.recommender&quot;).verdict, &quot;illegitimate&quot;);
+  const revisionBeforeDraft = started.service.revision;
+  const draft = await started.service.proposeThirdOrderAudit({
+    actor: &quot;actor.claimipedia.author&quot;,
+    expectedRevision: revisionBeforeDraft,
+    domain: &quot;Housing allocation&quot;,
+    title: &quot;A transparent housing triage process&quot;,
+    intervention: &quot;Applicants and public-interest reviewers inspect and challenge a rules-based priority order.&quot;,
+    affectedParties: &quot;Applicants, dependants, housing staff, people unable to complete the process, and residents affected by allocation.&quot;,
+    standing: &quot;Support is not conditioned on moral worth or agreement.&quot;, standingResult: &quot;pass&quot;, standingEvidence: &quot;Published eligibility rules and applicant testimony.&quot;,
+    boundary: &quot;Anti-discrimination and emergency safeguards constrain allocation.&quot;, boundaryResult: &quot;pass&quot;, boundaryEvidence: &quot;Policy controls and audit samples.&quot;,
+    agency: &quot;Applicants can inspect, correct, appeal, and use assisted routes.&quot;, agencyResult: &quot;pass&quot;, agencyEvidence: &quot;Appeal records and accessibility testing.&quot;,
+    telos: &quot;The process serves safe housing, though scarcity can distort priorities.&quot;, telosResult: &quot;watch&quot;, telosEvidence: &quot;Outcome data are incomplete for people who leave the queue.&quot;,
+    correction: &quot;Independent appeal can change rank and remedy an allocation.&quot;, correctionResult: &quot;pass&quot;, correctionEvidence: &quot;Appeal decisions and restitution records.&quot;,
+    dissent: &quot;Some affected people argue that any queue normalises an unjust shortage.&quot;,
+    uncertainty: &quot;Long-term outcomes for unsuccessful and non-digital applicants are not yet known.&quot;,
+    rationale: &quot;The case tests a public allocation field without treating procedural transparency as sufficient.&quot;,
+  });
+  assert.equal(draft.suggestedVerdict, &quot;conditional&quot;);
+  assert.equal(started.service.revision, revisionBeforeDraft, &quot;proposal must not change the canonical revision&quot;);
+  const stateWithDraft = started.service.state();
+  assert.equal(stateWithDraft.thirdOrderAuditDrafts.length, 1);
+  assert.equal(stateWithDraft.thirdOrderAuditDrafts[0].dissent, &quot;Some affected people argue that any queue normalises an unjust shortage.&quot;);
+  assert.equal(stateWithDraft.thirdOrderAudits.length, 6, &quot;canonical audits remain unchanged&quot;);
+  for (const route of [
+    &quot;/claim/jesus-is-king&quot;,
+    &quot;/claim/follow-me-third-order-influence&quot;,
+    &quot;/claim/the-kingdom&quot;,
+    &quot;/claim/claim.biblicalResurrection.simulationRupture&quot;,
+    &quot;/application/kingdom&quot;,
+    &quot;/application/kingdom-directory&quot;,
+    &quot;/application/kingdom-rooms&quot;,
+    &quot;/application/kingdom-safeguarding&quot;,
+  ]) {
+    assert.match(routesSource, new RegExp(`\\(&quot;[^&quot;]+&quot;, &quot;path&quot;, &quot;${route.replaceAll(&quot;.&quot;, &quot;\\.&quot;)}&quot;`, &quot;u&quot;));
+    const response = await fetch(new URL(route.slice(1), started.url));
+    assert.equal(response.status, 200, route);
+    assert.match(response.headers.get(&quot;content-type&quot;), /text\/html/u, route);
+    const html = await response.text();
+    assert.match(html, /id=&quot;content&quot;/u, route);
+    assert.match(html, /src=&quot;\/app\.js\?v=[^&quot;]+&quot;/u, route);
+  }
+});
+</pre><p id="hierarchy-source-hash" class="hierarchy-source-digest">Source highlighting uses the shared Encounter presenter.</p><p>Snapshots preserve the observed source version. An excerpt retains its upstream file hash and original line locations. This is source inspection, not an execution trace.</p><script src="runtime.js" defer=""></script></main></body></html>

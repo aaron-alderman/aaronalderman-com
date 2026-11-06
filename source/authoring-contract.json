@@ -35,7 +35,10 @@
     "algebra/encounter.process.json",
     "algebra/atlas.process.json",
     "source/encounter/example.json",
-    "source/encounter/presentation.json"
+    "source/encounter/presentation.json",
+    "source/hierarchy.json",
+    "source/hierarchy.rel",
+    "algebra/hierarchy.process.json"
   ],
   "grants": [
     "value.describe",
@@ -69,7 +72,8 @@
     "encounter-microsite.test.mjs",
     "activity-layout.test.mjs",
     "atlas.test.mjs",
-    "authoring.test.mjs"
+    "authoring.test.mjs",
+    "hierarchy.test.mjs"
   ],
   "owners": {
     "facts": [
@@ -84,7 +88,8 @@
       "source/claimipedia-example.rel",
       "source/social-sharing.rel",
       "source/encounter.rel",
-      "source/atlas.rel"
+      "source/atlas.rel",
+      "source/hierarchy.rel"
     ],
     "applicationProcesses": [
       "algebra/publication.process.json",
@@ -105,7 +110,8 @@
       "algebra/encounter-demo.process.json",
       "algebra/encounter-source.process.json",
       "algebra/encounter.process.json",
-      "algebra/atlas.process.json"
+      "algebra/atlas.process.json",
+      "algebra/hierarchy.process.json"
     ],
     "authoringPolicy": "algebra/authoring.process.json",
     "mechanism": "tooling/author.mjs"
