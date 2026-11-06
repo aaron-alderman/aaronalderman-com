@@ -2,18 +2,18 @@
   "protocol": "worldwright/microsite-qualification/1",
   "status": "qualified-correspondence-baseline",
   "sourceClosureSha256": "894fa0defb30b442af5c36d4c9c44789220be77ceb8d3fcf583afb7aa5db5245",
-  "presentationReceiptSha256": "8844803f23f3bed4fe016681b8cebf3efaa921aeed075935038b598838249237",
+  "presentationReceiptSha256": "dccaa5dea3800f3141fd5ae38531005eb28fca85405c06001ad1414bfd1daa47",
   "functionCorrespondenceSha256": "dc3a032bb37a5cb5202e20118a78f1883bc6e9608c073dded8378d92ff58021f",
   "validation": {
     "command": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs",
-    "passed": 33,
+    "passed": 34,
     "failed": 0,
-    "reproducibleArtifacts": 261,
+    "reproducibleArtifacts": 265,
     "seedSha256": "c1fdf47cb183a0c8e69d000d091ada457fdc8333b34a2a5bba4bcc51d53ac71e",
     "execution": {
-      "indexSteps": 2863720,
-      "applicationSteps": 4041646,
-      "totalSteps": 6905366,
+      "indexSteps": 2870262,
+      "applicationSteps": 4052790,
+      "totalSteps": 6923052,
       "limit": 20000000
     }
   },
@@ -62,7 +62,8 @@
         "Worldwright storytelling definition and development boundary"
       ],
       "mobile": "Temple grid constrained to the viewport; introductions remain readable; original stylesheets unchanged."
-    }
+    },
+    "socialSharing": "Four purpose-first raster cards visually inspected; all image dimensions, hashes and Open Graph/Twitter bindings checked by publication tests. No third-party preview crawler was invoked."
   },
   "limits": "Finite correspondence cases against the captured originals, not a formal proof across every event interleaving or host. Media/font bytes remain retained assets. See RECOMPOSITION.md.",
   "editorialSuccessorSha256": "4ce485cad17065f1cc60e3f920f134af02e2551ebd75ac42306230b2a5df8265"

@@ -127,7 +127,21 @@ test('Claimipedia has its own three-lens identity with accessible sections, loca
  assert.ok(css.includes('(prefers-reduced-motion: reduce)'));assert.ok(css.includes('animation:none !important'));assert.ok(css.includes('@keyframes arrival'));assert.ok(!css.includes('infinite'));
  for(const match of css.matchAll(/url\(['"]?([^)'"\s]+)['"]?\)/g)){const file=path.resolve(root,'dist/claimipedia',match[1]);assert.ok((await fs.stat(file)).isFile());}
  const motif=JSON.parse(await read('source/claimipedia-motif.json'));assert.equal(sha(await fs.readFile(path.join(root,'dist',motif.landscape.path))),motif.landscape.sha256);
- assert.equal(meta(html,'og:image'),'https://aaronalderman.com/assets/claimipedia/landscape-v1.png');
+ assert.equal(meta(html,'og:image'),'https://aaronalderman.com/assets/sharing/claimipedia-purpose-v1.png');
+});
+
+test('purpose-first sharing cards have real raster bytes and consistent server-visible metadata',async()=>{
+ const sharing=JSON.parse(await read('source/social-sharing.json'));
+ assert.equal(sharing.images.length,4);
+ for(const card of sharing.images){
+  const html=await read('dist/'+card.slug+'/index.html'),bytes=await fs.readFile(path.join(root,'dist',card.path));
+  assert.equal(bytes.subarray(1,4).toString(),'PNG');assert.equal(sha(bytes),card.sha256);
+  assert.equal(bytes.readUInt32BE(16),card.width);assert.equal(bytes.readUInt32BE(20),card.height);
+  assert.ok(card.width/card.height>1.85&&card.width/card.height<1.96);
+  assert.equal(meta(html,'og:image'),'https://aaronalderman.com/'+card.path);assert.equal(meta(html,'twitter:image'),meta(html,'og:image'));
+  for(const [key,value]of Object.entries({'og:title':card.title,'og:description':card.description,'og:image:alt':card.alt,'og:image:width':String(card.width),'og:image:height':String(card.height),'og:image:type':'image/png','twitter:image:alt':card.alt}))assert.equal(meta(html,key),escape(value),card.slug+' '+key);
+  for(const key of ['og:image','twitter:image','twitter:card'])assert.equal((html.match(new RegExp('(?:name|property)="'+key+'"','g'))||[]).length,1,card.slug+' '+key+' is unambiguous');
+ }
 });
 
 test('a fresh algebra build reproduces every publication artifact',async()=>{
