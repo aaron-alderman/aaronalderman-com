@@ -71,6 +71,9 @@
     ],
     "microsites.project": [
       {
+        "call": "microsite.return.styles"
+      },
+      {
         "each": [
           "subjects",
           "isa",
@@ -121,6 +124,9 @@
           },
           {
             "call": "source.markup"
+          },
+          {
+            "call": "microsite.return.project"
           },
           {
             "port": "file.write",

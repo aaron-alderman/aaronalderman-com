@@ -314,7 +314,7 @@
     ]
   },
   "sources": {
-    "bootstrap/site.json": "719c6ba18226ddf6ac9c1f6fed16f1e1a2aeedfeb858528a051b24afe3a77992",
+    "bootstrap/site.json": "c0cbe60d9018fd2c0559d08113aebc58ee4be45af03c7082391f960e4e0de361",
     "bootstrap/native.json": "39c1405b8d7eca883c5fefd425ce564ad8d9eb6ee6ec3d948cdc42d912a68105",
     "bootstrap/run.cjs": "b90c8a76ae4100a1d1b593cd350ef9d43aff269f3cd0ab8ba94d1d4a92ccafc2",
     "bootstrap/temple-seed.cjs": "c1fdf47cb183a0c8e69d000d091ada457fdc8333b34a2a5bba4bcc51d53ac71e",
@@ -341,7 +341,7 @@
     "algebra/admission.process.json": "c459c0aacbb5905b6aca01a6e8344b9e645f854c35244f59c1ea7ac1c1bf662b",
     "algebra/lowering.process.json": "616c1c5860d0245bad4df16de9e04074e44a601a716d99b641e7fec07d43bbd8",
     "algebra/microsite-projection.process.json": "b9448dd1a2425f1a937dbb38669718aa0ce3e0c9cc34b9baed138d80a5b9422f",
-    "algebra/microsites.process.json": "a52c7d3ad4aff5a26a8fdd93969b049be7b5e8c02f54555f72a57ede7a873375",
+    "algebra/microsites.process.json": "24311035a534f5a0b51a12b017c8c9c761fc365f2de0e128de0f231994ff1530",
     "algebra/microsite-values.process.json": "1f995db6a7b6855aab6d80f279488345988c90997e6dfaaea75e304dfe036069",
     "algebra/microsite-lamp.process.json": "fc4d07d31f82924b36fb9a921229c0b2f5f93b84727b52b4884b58144feecd5b",
     "algebra/microsite-sourcery.process.json": "4e1c5995c7dc334043cc345ee9684139ac705d3772ad34f70c79ea79dcd3323c",
@@ -368,6 +368,7 @@
     "algebra/workshop-session.process.json": "9a3391282abf6fee9760d2d6be0dc35aad941f639a01e59762fd367354b1a3be",
     "algebra/reader-workshop-publication.process.json": "d0792852d12439d101709dedc210519f56b1b9efe8374ee5f2e3d82a7393004b",
     "algebra/hierarchy.process.json": "52c1557df23494e0498b4d4860c1e802903a0b07c9bdd48c4db75c66c9e40428",
+    "algebra/microsite-return.process.json": "4b85950b52b1d7f4721b02712c6833bf3917474eb27ab40fd0beeaee32d64afd",
     "algebra/operators.expression.json": "b03c2c863cab748899675ffb4afd8f7ead0979f5e992923a086d19ad89a2c7f2",
     "bootstrap/kernel-profile.json": "3067678f68016886d77569c62523c101d299648f37697df51c4524c83647a875",
     "source/expedition.rel": "bbd407b0ab457f141ebefebcde3434d230bc6846f53b3a8d0cf63d6ddfd07d2c",
@@ -529,12 +530,13 @@
     "source/workshop/README.txt": "1b23bde16066acb50ae6732828a50bedf5386b1d9be69285dec6c964a3b63364"
   },
   "artifacts": {
+    "assets/microsite-return.css": "fc636c68f930a02d3dce6bd9e70365918bb7b39d7abcecc1baff2a2fce204a4f",
     "temple/assets/covenant.css": "64e189820f4aea0b91bc820a9d5006317f93d8bbc315358b08bec5587460141c",
     "sourcery/assets/css/story.css": "529d84e31dc439d43efa46b0b2cc64935b0581e07e830e93c6bda013753e0642",
-    "temple/index.html": "54e8bfa3211958f00871a4517803e26542cbc3c9eac28a9b247d5e0c34530b78",
-    "temple/films/index.html": "a21eac2e4e8067d4e7260b72cf77edd39a4a399532112868c4753fb179c00d1b",
-    "sourcery/index.html": "21767b2cbec385b80e793fc090850d4ec18d279d2e5cb50f4680482fc48c0ec0",
-    "sourcery/films/index.html": "b9114d0f555cd91be3cf6c2a5ba62a0aca8d433c22ffe4a413f46d0bbc209abd",
+    "temple/index.html": "75e8b75738b18c9cb9b0d69af8ccde2e68f5d4dde7ed4d8ed4ebeb38b04c261f",
+    "temple/films/index.html": "aabc3c9cdaf6a09d9941d08845948843862a3e0107feb07552244d318cd68499",
+    "sourcery/index.html": "beae785a5c1eb39962a0f957ae22d05f87d9257b885f1df8df33c9f6ea1d8533",
+    "sourcery/films/index.html": "6910fb80d7edee5a62f8632bcfc3466bbf2322a99d716650866519c65beba5a9",
     "temple/runtime.js": "5f47d0053d791ac92ec1fe14e8211424175b71355f04331729e53bbf56a4ff7b",
     "sourcery/runtime.js": "19134a4f738b8476eb7e28f89f86fe8635436138bbe784a8c2e15bf4adeba1f7",
     "temple/early.js": "90000f969e272bf04d0f6e2f0e5a8ca38c102ffa535ae89ce53914a8a72397de",
@@ -861,8 +863,8 @@
   },
   "execution": {
     "indexSteps": 3913611,
-    "applicationSteps": 7393631,
-    "totalSteps": 11307242,
+    "applicationSteps": 7401880,
+    "totalSteps": 11315491,
     "limit": 20000000
   },
   "factSnapshot": {
@@ -873,8 +875,8 @@
   "admission": {
     "passes": 25,
     "steps": [
-      6225450,
-      50880,
+      6258529,
+      52645,
       62753,
       11191,
       496895,
