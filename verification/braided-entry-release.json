@@ -1,0 +1,22 @@
+{
+  "protocol": "worldwright/braided-entry-release/1",
+  "owners": [
+    "algebra/hierarchy.process.json",
+    "source/hierarchy.rel"
+  ],
+  "checks": {
+    "existingHierarchyTests": 15,
+    "homepageCheck": 1,
+    "failed": 0,
+    "browser": [
+      "Six compact top rows; icon and labels share the row on desktop and mobile",
+      "All six desktop names begin 82px from their card top",
+      "No horizontal overflow on mobile",
+      "Braided masked border renders on all three entrances",
+      "Keyboard focus applies the border shift and 4px lift; Enter opens Questions"
+    ],
+    "motion": "Finite hover/focus transitions. Reduced-motion CSS removes transitions and transforms.",
+    "forcedColours": "Pattern layers are hidden; native solid border remains."
+  },
+  "boundary": "Markup and CSS only; no new application JavaScript or native mechanism changes."
+}

@@ -1280,20 +1280,20 @@
                           {
                             "tag": "div",
                             "attrs": {
-                              "class": "hierarchy-emblem"
+                              "class": "progress-card-top"
                             },
                             "children": [
                               "list",
-                              "$hItem.icon"
-                            ]
-                          },
-                          {
-                            "tag": "div",
-                            "attrs": {
-                              "class": "hierarchy-card-content"
-                            },
-                            "children": [
-                              "list",
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "hierarchy-emblem"
+                                },
+                                "children": [
+                                  "list",
+                                  "$hItem.icon"
+                                ]
+                              },
                               {
                                 "tag": "p",
                                 "attrs": {
@@ -1322,7 +1322,16 @@
                                     ]
                                   }
                                 ]
-                              },
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "hierarchy-card-content"
+                            },
+                            "children": [
+                              "list",
                               {
                                 "tag": "h3",
                                 "attrs": {},
@@ -2235,7 +2244,7 @@
                     "href": [
                       "concat",
                       "../",
-                      "expedition.css?v=card-types-1"
+                      "expedition.css?v=braided-1"
                     ]
                   },
                   "children": [
@@ -2989,7 +2998,7 @@
                             "href": [
                               "concat",
                               "../",
-                              "expedition.css?v=card-types-1"
+                              "expedition.css?v=braided-1"
                             ]
                           },
                           "children": [
@@ -3576,7 +3585,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "expedition.css?v=card-types-1"
+                    "href": "expedition.css?v=braided-1"
                   },
                   "children": [
                     "list"
@@ -4003,7 +4012,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "../expedition.css?v=card-types-1"
+                    "href": "../expedition.css?v=braided-1"
                   },
                   "children": [
                     "list"
