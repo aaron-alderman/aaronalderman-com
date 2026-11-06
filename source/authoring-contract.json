@@ -37,6 +37,19 @@
     "source/encounter/example.json",
     "source/encounter/presentation.json",
     "algebra/atlas-journey.process.json",
+    "algebra/reader-models.process.json",
+    "algebra/reader-activities.process.json",
+    "algebra/reader-navigation.process.json",
+    "algebra/workshop-lab.process.json",
+    "algebra/workshop-session.process.json",
+    "algebra/reader-workshop-publication.process.json",
+    "source/reader/activities.json",
+    "source/reader/document.html",
+    "source/reader/activity.html",
+    "source/reader/reader.css",
+    "source/workshop/document.html",
+    "source/reader/navigation.json",
+    "source/workshop/README.txt",
     "source/hierarchy.json",
     "source/hierarchy.rel",
     "algebra/hierarchy.process.json"
@@ -75,6 +88,7 @@
     "atlas.test.mjs",
     "atlas-journey.test.mjs",
     "authoring.test.mjs",
+    "reader-workshop-algebra.test.mjs",
     "hierarchy.test.mjs"
   ],
   "owners": {
@@ -114,10 +128,16 @@
       "algebra/encounter.process.json",
       "algebra/atlas.process.json",
       "algebra/atlas-journey.process.json",
+      "algebra/reader-models.process.json",
+      "algebra/reader-activities.process.json",
+      "algebra/reader-navigation.process.json",
+      "algebra/workshop-lab.process.json",
+      "algebra/workshop-session.process.json",
+      "algebra/reader-workshop-publication.process.json",
       "algebra/hierarchy.process.json"
     ],
     "authoringPolicy": "algebra/authoring.process.json",
     "mechanism": "tooling/author.mjs"
   },
-  "boundary": "The retained reader and workshop remain byte-pinned compatibility inputs. Archived generator text is historical evidence, never executable or authoritative."
+  "boundary": "Original JavaScript is a local comparison oracle, excluded from the published execution graph. All current reader/workshop authoring sources are edited through the same algebra proposal path."
 }

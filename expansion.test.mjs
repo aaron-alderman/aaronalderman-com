@@ -4,11 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {scenes,sources,territories} from './dist/retained/world.js';
-import {regions,coverage} from './dist/retained/expansion.js';
-import {renderWorldEncounter} from './dist/retained/world-encounters.js';
-import {sourceReceipts} from './dist/retained/source-receipts.js';
-import {allowedPairs,positivePairs,inflatePair,decodeRepetition,weightedOptions,memoryTrace,coarseCells,reportedRates} from './dist/retained/world-models.js';
+import {scenes,sources,territories} from './retained/world.js';
+import {regions,coverage} from './retained/expansion.js';
+import {renderWorldEncounter} from './retained/world-encounters.js';
+import {sourceReceipts} from './retained/source-receipts.js';
+import {allowedPairs,positivePairs,inflatePair,decodeRepetition,weightedOptions,memoryTrace,coarseCells,reportedRates} from './retained/world-models.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 test('each of the ten identified areas has a distinct, sourced and rendered entrance and continuation',()=>{
  assert.equal(regions.length,10);

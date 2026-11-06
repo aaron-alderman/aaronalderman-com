@@ -47,25 +47,22 @@
         "as": "asset",
         "steps": [
           {
-            "port": "file.copy",
+            "port": "text.matches",
             "args": {
-              "path": [
+              "value": [
                 "one",
                 "$asset",
                 "path"
-              ]
+              ],
+              "pattern": "\\.(?:m?js)$|/regenerate\\.cjs$"
             },
-            "into": "_"
+            "into": "legacyExecutable"
           },
           {
-            "when": [
-              "optional",
-              "$asset",
-              "legacyAlias"
-            ],
+            "when": "$legacyExecutable",
             "then": [
               {
-                "port": "file.read",
+                "port": "file.remove",
                 "args": {
                   "path": [
                     "one",
@@ -73,19 +70,78 @@
                     "path"
                   ]
                 },
-                "into": "legacyBytes"
+                "into": "_"
               },
               {
-                "port": "file.write",
+                "when": [
+                  "optional",
+                  "$asset",
+                  "legacyAlias"
+                ],
+                "then": [
+                  {
+                    "port": "file.remove",
+                    "args": {
+                      "path": [
+                        "one",
+                        "$asset",
+                        "legacyAlias"
+                      ]
+                    },
+                    "into": "_"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "not",
+              "$legacyExecutable"
+            ],
+            "then": [
+              {
+                "port": "file.copy",
                 "args": {
                   "path": [
                     "one",
                     "$asset",
-                    "legacyAlias"
-                  ],
-                  "text": "$legacyBytes"
+                    "path"
+                  ]
                 },
                 "into": "_"
+              },
+              {
+                "when": [
+                  "optional",
+                  "$asset",
+                  "legacyAlias"
+                ],
+                "then": [
+                  {
+                    "port": "file.read",
+                    "args": {
+                      "path": [
+                        "one",
+                        "$asset",
+                        "path"
+                      ]
+                    },
+                    "into": "legacyBytes"
+                  },
+                  {
+                    "port": "file.write",
+                    "args": {
+                      "path": [
+                        "one",
+                        "$asset",
+                        "legacyAlias"
+                      ],
+                      "text": "$legacyBytes"
+                    },
+                    "into": "_"
+                  }
+                ]
               }
             ]
           }
@@ -121,30 +177,6 @@
         "args": {
           "path": "activity.css",
           "text": "$css"
-        },
-        "into": "_"
-      },
-      {
-        "port": "file.read",
-        "args": {
-          "path": "retained/index.html"
-        },
-        "into": "legacyHTML"
-      },
-      {
-        "port": "text.replaceAll",
-        "args": {
-          "value": "$legacyHTML",
-          "search": "</head>",
-          "replacement": "<meta name=\"robots\" content=\"noindex\"><link rel=\"stylesheet\" href=\"../activity.css?v=layout-2\">\n</head>"
-        },
-        "into": "legacyHTML"
-      },
-      {
-        "port": "file.write",
-        "args": {
-          "path": "retained/activity.html",
-          "text": "$legacyHTML"
         },
         "into": "_"
       },
@@ -422,6 +454,9 @@
         "into": "_"
       },
       {
+        "call": "readerworkshop.build"
+      },
+      {
         "let": "assurance",
         "value": {
           "places": [
@@ -441,7 +476,7 @@
             ]
           ],
           "policy": "Temple process algebra",
-          "compatibility": "retained reader and workshop",
+          "compatibility": "historical source oracles; algebra-owned reader and workshop",
           "budget": 20000000
         }
       }
@@ -1779,7 +1814,7 @@
                     "attrs": {
                       "src": [
                         "concat",
-                        "../retained/activity.html?v=layout-2#",
+                        "../retained/activity.html?v=algebra-1#",
                         [
                           "one",
                           "$place",

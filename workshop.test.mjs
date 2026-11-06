@@ -3,16 +3,16 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
-import {createSession} from './dist/retained/workshop/engine.js';
-import * as native from './dist/retained/workshop/temple-native.js';
-import {scenes,sources} from './dist/retained/world.js';
-import {regions} from './dist/retained/expansion.js';
+import {createSession} from './retained/workshop/engine.js';
+import * as native from './retained/workshop/temple-native.js';
+import {scenes,sources} from './retained/world.js';
+import {regions} from './retained/expansion.js';
 const read=path=>fs.readFileSync(new URL(path,import.meta.url),'utf8');
-const bundle=()=>JSON.parse(read('./dist/retained/workshop/fixture.json'));
-test('packaging preserves the exact kernel and native function bodies',()=>{
+const bundle=()=>JSON.parse(read('./retained/workshop/fixture.json'));
+test('the historical workshop oracle preserves its exact kernel and native function bodies',()=>{
  const require=createRequire(import.meta.url);
  for(const [name,file]of [['createKernel','bootstrap/temple-seed.cjs'],['valuePorts','bootstrap/ports/value.cjs'],['kernelPorts','bootstrap/ports/kernel.cjs'],['invoke','bootstrap/ports/programme.cjs']]){
-  const original=require('./dist/retained/workshop/sources/'+file)[name];assert.equal(native[name].toString(),original.toString(),name);
+  const original=require('./retained/workshop/sources/'+file)[name];assert.equal(native[name].toString(),original.toString(),name);
  }
 });
 test('workshop is a connected tour stop with real static resources',()=>{
@@ -41,9 +41,9 @@ test('portable engine preserves source/overlay ownership and unchanged-state ref
  await t.test('new session starts independently',async()=>assert.equal((await createSession(bundle())).state().title,'What happened'));
 });
 test('portable execution agrees with direct native fixture execution for the same edits',async()=>{
- const require=createRequire(import.meta.url),{fixture}=require('./dist/retained/workshop/sources/bootstrap/encounter-code-fixture.cjs');
- const {lower}=require('./dist/retained/workshop/sources/bootstrap/ports/algebra-lower.cjs'),{valuePorts}=require('./dist/retained/workshop/sources/bootstrap/ports/value.cjs');
- const modelFile=name=>JSON.parse(read('./dist/retained/workshop/sources/algebra/'+name+'.process.json'));
+ const require=createRequire(import.meta.url),{fixture}=require('./retained/workshop/sources/bootstrap/encounter-code-fixture.cjs');
+ const {lower}=require('./retained/workshop/sources/bootstrap/ports/algebra-lower.cjs'),{valuePorts}=require('./retained/workshop/sources/bootstrap/ports/value.cjs');
+ const modelFile=name=>JSON.parse(read('./retained/workshop/sources/algebra/'+name+'.process.json'));
  const f=await fixture(),lab=modelFile('lab'),added={entry:'lab.snapshot',queries:{...modelFile('language').queries,...lab.queries}};
  const lowered=await lower({compiler:modelFile('lowering'),definitions:f.inputs.definitions,primitives:f.inputs.primitives,input:added,mode:'model',ports:valuePorts()});
  Object.assign(f.model.queries,lowered.queries);

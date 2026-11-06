@@ -357,7 +357,7 @@ function browserEffects(host,dispatch) {
   const reference=el=>{let handle=nodes.get(el);if(!handle){handle=allocate();nodes.set(el,handle);records.set(handle,{kind:'node',node:el});}return {handle};};
   const target=spec=>spec==='window'?win:spec==='document'?doc:spec==='fonts'?doc.fonts:spec?.media?win.matchMedia(spec.media):element(spec);
   const describe=el=>({ref:reference(el),tag:el.tagName,attributes:Object.fromEntries([...el.attributes].map(a=>[a.name,a.value])),text:el.textContent,rect:rect(el.getBoundingClientRect()),value:el.value??null,checked:Boolean(el.checked),disabled:Boolean(el.disabled),hidden:Boolean(el.hidden)});
-  const eventValue=e=>({type:e.type,key:e.key??'',code:e.code??'',matches:e.matches??null,timeStamp:e.timeStamp,target:e.target?.nodeType===1?describe(e.target):null});
+  const eventValue=e=>({type:e.type,key:e.key??'',code:e.code??'',matches:e.matches??null,timeStamp:e.timeStamp,clientX:e.clientX??0,clientY:e.clientY??0,target:e.target?.nodeType===1?describe(e.target):null});
   return {
     'storage.read': ({key,maxLength=65536}) => {try{const value=(host.storage??win.localStorage).getItem(key);if(value!==null&&value.length>maxLength)return {ok:false,value:null};return {ok:true,value};}catch{return {ok:false,value:null};}},
     'storage.write': ({key,value}) => {if(typeof value!=='string')throw Error('Storage requires text');try{(host.storage??win.localStorage).setItem(key,value);return {ok:true};}catch{return {ok:false};}},
@@ -368,7 +368,7 @@ function browserEffects(host,dispatch) {
     'browser.read': ({ref}) => describe(element(ref)),
     'browser.relative': ({ref,relation,selector}) => {const el=element(ref);const found=relation==='parent'?el.parentElement:relation==='closest'?el.closest(selector):relation==='query'?el.querySelector(selector):null;if(!['parent','closest','query'].includes(relation))throw Error('Unknown DOM relationship');return found?describe(found):null;},
     'browser.property': ({ref,name}) => {const value=element(ref)[name];if(!['string','number','boolean'].includes(typeof value)&&value!==null)throw Error('Nonportable DOM property observation');return value;},
-    'browser.write': ({ref,name,value}) => {const allowed=['value','checked','disabled','hidden','readOnly','tabIndex','textContent','className'];if(!allowed.includes(name))throw Error('Undeclared DOM property effect');element(ref)[name]=value;return true;},
+    'browser.write': ({ref,name,value}) => {const allowed=['value','checked','disabled','hidden','readOnly','tabIndex','textContent','className','open','max','min','title'];if(!allowed.includes(name))throw Error('Undeclared DOM property effect');element(ref)[name]=value;return true;},
     'browser.attribute': ({ref,name,value}) => {const el=element(ref);if(/^on/i.test(name)||['srcdoc'].includes(name))throw Error('Executable attribute effect refused');if(value===null)el.removeAttribute(name);else el.setAttribute(name,String(value));return true;},
     'browser.style': ({ref,name,value}) => {const el=element(ref);if(value===null)el.style.removeProperty(name);else el.style.setProperty(name,String(value));return true;},
     'browser.class': ({ref,name,value}) => {element(ref).classList.toggle(name,Boolean(value));return true;},
@@ -393,6 +393,27 @@ function browserEffects(host,dispatch) {
     'browser.delay': ({milliseconds}) => new Promise(resolve=>win.setTimeout(()=>resolve(true),milliseconds)),
     'browser.timer': ({query,input,milliseconds}) => {const id=allocate(),handle=win.setTimeout(()=>{records.delete(id);dispatch(query,input).catch(error=>host.reportError?.(error,query));},milliseconds);records.set(id,{kind:'timer',handle});return id;},
     'browser.fontsReady': async () => {await doc.fonts?.ready;return true;},
+    'browser.location': () => ({hash:win.location.hash,href:win.location.href,origin:win.location.origin,path:win.location.pathname,base:doc.baseURI}),
+    'browser.navigate': ({hash}) => {win.location.hash=String(hash);return true;},
+    'browser.title': ({value}) => {doc.title=String(value);return true;},
+    'browser.scroll': ({top=0,left=0,behavior='instant'}) => {win.scrollTo({top,left,behavior});return true;},
+    'browser.dialog': ({ref,open}) => {const node=element(ref);if(open&&!node.open)node.showModal();if(!open&&node.open)node.close();return true;},
+    'document.fragment': ({html,selector,base}) => {
+      const parsed=new win.DOMParser().parseFromString(html,'text/html');
+      for(const script of parsed.querySelectorAll('script'))script.remove();
+      if(base)for(const node of parsed.querySelectorAll('[href],[src]'))for(const name of ['href','src']){
+        const value=node.getAttribute(name);if(value&&!value.startsWith('#'))node.setAttribute(name,new win.URL(value,base).href);
+      }
+      const selected=parsed.querySelector(selector);if(!selected)throw Error('Missing document fragment');return selected.innerHTML;
+    },
+    'browser.frameContent': ({ref,html,bindings=[]}) => {
+      const frame=element(ref);frame.setAttribute('sandbox','allow-same-origin');
+      frame.onload=()=>{for(const binding of bindings)frame.contentDocument.addEventListener(binding.event,event=>{
+        const matched=binding.delegate?event.target.closest?.(binding.delegate):event.target;
+        if(!matched)return;if(binding.preventDefault)event.preventDefault();
+        dispatch(binding.query,{...binding.input,event:eventValue(event),matched:describe(matched),frame:reference(frame)}).catch(error=>host.reportError?.(error,binding.query));
+      });};frame.srcdoc=html;return true;
+    },
     'canvas.draw': ({ref,width,height,dpr,commands}) => {
       const canvas=element(ref);if(width!==undefined)canvas.width=width;if(height!==undefined)canvas.height=height;const ctx=canvas.getContext('2d'),gradients=new Map();if(dpr!==undefined)ctx.setTransform(dpr,0,0,dpr,0,0);
       const methods=['clearRect','fillRect','strokeRect','beginPath','closePath','moveTo','lineTo','arc','fill','stroke','fillText','setLineDash','save','restore','translate','rotate','scale','setTransform'];const properties=['globalAlpha','fillStyle','strokeStyle','lineWidth','font','textAlign','lineCap','lineJoin'];
@@ -407,6 +428,7 @@ function browserEffects(host,dispatch) {
     'browser.once': ({ref,event}) => new Promise(resolve=>target(ref).addEventListener(event,e=>resolve(eventValue(e)),{once:true})),
     'asset.blobURL': async ({url}) => {const response=await (host.fetch??win.fetch)(url);if(!response.ok)throw Error('Asset request failed: '+response.status);return win.URL.createObjectURL(await response.blob());},
     'asset.json': async ({url,cache}) => {const response=await (host.fetch??win.fetch)(url,{cache});if(!response.ok)throw Error('Asset request failed: '+response.status);return response.json();},
+    'asset.text': async ({url,cache}) => {const response=await (host.fetch??win.fetch)(url,{cache});if(!response.ok)throw Error('Asset request failed: '+response.status);return response.text();},
   };
 }
 async function startBrowser(model, factIndex, grants) {

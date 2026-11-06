@@ -1,0 +1,997 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "reader.model.calibration": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.angle"
+        },
+        "into": "angle"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$angle",
+            0.017453292519943295
+          ]
+        },
+        "into": "radians"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "sin",
+          "values": [
+            "list",
+            "$radians"
+          ]
+        },
+        "into": "sine"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$sine",
+            100
+          ]
+        },
+        "into": "scaled"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "round",
+          "values": [
+            "list",
+            "$scaled"
+          ]
+        },
+        "into": "rounded"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            "$rounded",
+            100
+          ]
+        },
+        "into": "result"
+      }
+    ],
+    "reader.model.pairs": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.value"
+        },
+        "into": "value"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$value",
+            "$value"
+          ]
+        },
+        "into": "square"
+      },
+      {
+        "fold": [
+          "range",
+          25
+        ],
+        "as": "n",
+        "accumulator": "pairs",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$n",
+                1
+              ]
+            },
+            "into": "index"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "remainder",
+              "values": [
+                "list",
+                "$index",
+                5
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$index",
+                5
+              ]
+            },
+            "into": "row"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "floor",
+              "values": [
+                "list",
+                "$row"
+              ]
+            },
+            "into": "y"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$x",
+                "$y"
+              ]
+            },
+            "into": "sum"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$x",
+                "$y"
+              ]
+            },
+            "into": "product"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                "$sum",
+                "$value"
+              ]
+            },
+            "into": "budget"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greaterEqual",
+              "values": [
+                "list",
+                "$product",
+                "$square"
+              ]
+            },
+            "into": "positive"
+          }
+        ],
+        "yield": [
+          "if",
+          [
+            "if",
+            [
+              "eq",
+              "$eventInput.mode",
+              "positive"
+            ],
+            "$positive",
+            "$budget"
+          ],
+          [
+            "append",
+            "$pairs",
+            [
+              "list",
+              [
+                "list",
+                "$x",
+                "$y"
+              ]
+            ]
+          ],
+          "$pairs"
+        ],
+        "into": "result"
+      }
+    ],
+    "reader.model.inflate": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.step"
+        },
+        "into": "step"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "max",
+          "values": [
+            "list",
+            0,
+            "$step"
+          ]
+        },
+        "into": "step"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            5,
+            "$step"
+          ]
+        },
+        "into": "step"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "ceil",
+          "values": [
+            "list",
+            "$step"
+          ]
+        },
+        "into": "step"
+      },
+      {
+        "fold": [
+          "range",
+          "$step"
+        ],
+        "as": "iteration",
+        "accumulator": "pair",
+        "initial": {
+          "a": 1,
+          "b": 1
+        },
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                2,
+                "$pair.a"
+              ]
+            },
+            "into": "double"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$double",
+                "$pair.b"
+              ]
+            },
+            "into": "a"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$pair.a",
+                "$pair.b"
+              ]
+            },
+            "into": "b"
+          }
+        ],
+        "yield": {
+          "a": "$a",
+          "b": "$b"
+        },
+        "into": "pair"
+      },
+      {
+        "let": "result",
+        "value": [
+          "list",
+          "$pair.a",
+          "$pair.b"
+        ]
+      }
+    ],
+    "reader.model.decode": [
+      {
+        "fold": "$eventInput.bits",
+        "as": "bit",
+        "accumulator": "sum",
+        "initial": 0,
+        "steps": [],
+        "yield": [
+          "add",
+          "$sum",
+          "$bit"
+        ],
+        "into": "sum"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greaterEqual",
+          "values": [
+            "list",
+            "$sum",
+            2
+          ]
+        },
+        "into": "majority"
+      },
+      {
+        "let": "result",
+        "value": [
+          "if",
+          "$majority",
+          1,
+          0
+        ]
+      }
+    ],
+    "reader.model.weights": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.percent"
+        },
+        "into": "percent"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            "$percent",
+            100
+          ]
+        },
+        "into": "weight"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            6,
+            "$weight"
+          ]
+        },
+        "into": "delta"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            2,
+            "$delta"
+          ]
+        },
+        "into": "a"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            8,
+            "$delta"
+          ]
+        },
+        "into": "b"
+      },
+      {
+        "let": "result",
+        "value": {
+          "a": "$a",
+          "b": "$b"
+        }
+      }
+    ],
+    "reader.model.memory": [
+      {
+        "let": "coupling",
+        "value": [
+          "if",
+          "$eventInput.coupled",
+          0.6,
+          0
+        ]
+      },
+      {
+        "fold": [
+          "range",
+          400
+        ],
+        "as": "iteration",
+        "accumulator": "memory",
+        "initial": {
+          "x": 1,
+          "h": 1.2,
+          "samples": [
+            "list",
+            {
+              "t": 0,
+              "x": 1,
+              "h": 1.2
+            }
+          ]
+        },
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$coupling",
+                "$memory.h"
+              ]
+            },
+            "into": "cx"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$cx",
+                "$memory.x"
+              ]
+            },
+            "into": "dx"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                -0.8,
+                "$memory.h"
+              ]
+            },
+            "into": "decay"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$coupling",
+                "$memory.x"
+              ]
+            },
+            "into": "ch"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$decay",
+                "$ch"
+              ]
+            },
+            "into": "dh"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                0.02,
+                "$dx"
+              ]
+            },
+            "into": "dx"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                0.02,
+                "$dh"
+              ]
+            },
+            "into": "dh"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$memory.x",
+                "$dx"
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$memory.h",
+                "$dh"
+              ]
+            },
+            "into": "h"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$iteration",
+                0.02
+              ]
+            },
+            "into": "time"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "remainder",
+              "values": [
+                "list",
+                "$iteration",
+                4
+              ]
+            },
+            "into": "remainder"
+          }
+        ],
+        "yield": {
+          "x": "$x",
+          "h": "$h",
+          "samples": [
+            "if",
+            [
+              "eq",
+              "$remainder",
+              0
+            ],
+            [
+              "append",
+              "$memory.samples",
+              [
+                "list",
+                {
+                  "t": "$time",
+                  "x": "$x",
+                  "h": "$h"
+                }
+              ]
+            ],
+            "$memory.samples"
+          ]
+        },
+        "into": "memory"
+      },
+      {
+        "let": "result",
+        "value": "$memory.samples"
+      }
+    ],
+    "reader.model.line": [
+      {
+        "fold": "$eventInput.samples",
+        "as": "sample",
+        "accumulator": "path",
+        "initial": "",
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$sample.t",
+                39
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                25,
+                "$x"
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$sample",
+                  "$eventInput.coordinate"
+                ],
+                135
+              ]
+            },
+            "into": "y"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                215,
+                "$y"
+              ]
+            },
+            "into": "y"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$x",
+              "digits": 2
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$y",
+              "digits": 2
+            },
+            "into": "y"
+          }
+        ],
+        "yield": [
+          "concat",
+          "$path",
+          [
+            "if",
+            [
+              "eq",
+              "$path",
+              ""
+            ],
+            "M",
+            " L"
+          ],
+          "$x",
+          ",",
+          "$y"
+        ],
+        "into": "result"
+      }
+    ],
+    "reader.model.coarse": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.block"
+        },
+        "into": "block"
+      },
+      {
+        "assert": [
+          "includes",
+          [
+            "list",
+            1,
+            2,
+            4
+          ],
+          "$block"
+        ],
+        "message": "READER-CELL: Choose block size 1, 2 or 4."
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            4,
+            "$block"
+          ]
+        },
+        "into": "side"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$side",
+            "$side"
+          ]
+        },
+        "into": "blocks"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$block",
+            "$block"
+          ]
+        },
+        "into": "area"
+      },
+      {
+        "fold": [
+          "range",
+          "$blocks"
+        ],
+        "as": "blockIndex",
+        "accumulator": "cells",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$blockIndex",
+                1
+              ]
+            },
+            "into": "bi"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$bi",
+                "$side"
+              ]
+            },
+            "into": "row"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "floor",
+              "values": [
+                "list",
+                "$row"
+              ]
+            },
+            "into": "row"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$row",
+                "$block"
+              ]
+            },
+            "into": "row"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "remainder",
+              "values": [
+                "list",
+                "$bi",
+                "$side"
+              ]
+            },
+            "into": "col"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$col",
+                "$block"
+              ]
+            },
+            "into": "col"
+          },
+          {
+            "fold": [
+              "range",
+              "$area"
+            ],
+            "as": "pixel",
+            "accumulator": "sum",
+            "initial": 0,
+            "steps": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    "$pixel",
+                    1
+                  ]
+                },
+                "into": "index"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "divide",
+                  "values": [
+                    "list",
+                    "$index",
+                    "$block"
+                  ]
+                },
+                "into": "y"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "floor",
+                  "values": [
+                    "list",
+                    "$y"
+                  ]
+                },
+                "into": "y"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "remainder",
+                  "values": [
+                    "list",
+                    "$index",
+                    "$block"
+                  ]
+                },
+                "into": "x"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    "$row",
+                    "$y"
+                  ]
+                },
+                "into": "y"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    "$y",
+                    4
+                  ]
+                },
+                "into": "offset"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    "$offset",
+                    "$col",
+                    "$x"
+                  ]
+                },
+                "into": "offset"
+              }
+            ],
+            "yield": [
+              "add",
+              "$sum",
+              [
+                "at",
+                "$data.cellPattern",
+                "$offset"
+              ]
+            ],
+            "into": "sum"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$sum",
+                "$area"
+              ]
+            },
+            "into": "mean"
+          }
+        ],
+        "yield": [
+          "append",
+          "$cells",
+          [
+            "list",
+            {
+              "mean": "$mean",
+              "total": "$sum"
+            }
+          ]
+        ],
+        "into": "result"
+      }
+    ]
+  }
+}

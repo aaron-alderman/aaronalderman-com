@@ -65,9 +65,11 @@ test('all local links and assets in the new static pages resolve within the publ
  }
 });
 
-test('compatibility bytes and the explicit Temple mechanism predecessor/successor remain pinned',async()=>{
+test('historical oracle bytes, passive resources and declared mechanism successors remain pinned',async()=>{
  for(const [file,hash]of Object.entries(contract.compatibilityOrigin.sha256)){
   assert.equal(sha(await fs.readFile(path.join(root,file))),hash,file+' source');
+  if(/\.(?:m?js)$|\/regenerate\.cjs$/.test(file)){await assert.rejects(fs.stat(path.join(root,'dist',file)),{code:'ENOENT'});continue;}
+  if(contract.readerWorkshopSuccessor.replacedDocuments.includes(file))continue;
   assert.equal(sha(await fs.readFile(path.join(root,'dist',file))),hash,file+' output');
   const original=file.slice('retained/'.length);
   if(original!=='CNAME')assert.equal(sha(await fs.readFile(path.join(root,'dist',original==='index.html'?'reader.html':original))),hash,original+' compatibility URL');
@@ -76,16 +78,18 @@ test('compatibility bytes and the explicit Temple mechanism predecessor/successo
  assert.equal(sha(await fs.readFile(path.join(root,'source/microsites/predecessor-native/runtime.cjs'))),contract.nativeOrigin.sha256['bootstrap/hosts/runtime.cjs']);
  assert.equal(sha(await fs.readFile(path.join(root,contract.nativeSuccessor.predecessor))),contract.nativeSuccessor.predecessorSha256);
  assert.deepEqual(receipt.nativeSources,contract.nativeSuccessor.sha256);assert.equal(sha(await fs.readFile(path.join(root,contract.atlasStorageSuccessor.predecessor))),contract.atlasStorageSuccessor.predecessorSha256);
- assert.deepEqual(contract.nativeSuccessor.changed,['bootstrap/hosts/runtime.cjs']);assert.deepEqual(contract.nativeSuccessor.added,['bootstrap/ports/browser-effects.cjs']);
+ assert.deepEqual(contract.nativeSuccessor.changed,['bootstrap/hosts/runtime.cjs','bootstrap/ports/node.cjs']);assert.deepEqual(contract.nativeSuccessor.added,['bootstrap/ports/browser-effects.cjs']);
+ for(const predecessor of Object.values(contract.readerWorkshopSuccessor.predecessors))assert.equal(sha(await fs.readFile(path.join(root,predecessor.path))),predecessor.sha256);
+ assert.equal(contract.readerWorkshopSuccessor.seedUnchanged,true);
 });
 
 test('algebra owns the publication with the existing admission rules, ports and budget',async()=>{
  assert.equal(receipt.assurance.places,40);assert.equal(receipt.assurance.sourceNotes,29);
  assert.equal(receipt.execution.limit,20_000_000);assert.ok(receipt.execution.totalSteps<20_000_000);
- assert.equal(receipt.admission.passes,19);assert.deepEqual(receipt.mjsImports,[]);
+ assert.equal(receipt.admission.passes,25);assert.deepEqual(receipt.mjsImports,[]);
  for(const file of ['source/expedition.rel','source/presentation.rel','algebra/publication.process.json','source/gateway.rel','source/gateway-presentation.rel','algebra/gateway.process.json'])assert.equal(receipt.sources[file],sha(await fs.readFile(path.join(root,file))));
  for(const [file,hash]of Object.entries(receipt.artifacts))if(/\.(?:js|mjs|cjs)$/.test(file)){
-  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js','inspection/runtime.js'].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
+  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js','inspection/runtime.js',...contract.readerWorkshopSuccessor.runtimes].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
   const retained=file.startsWith('retained/')?file:'retained/'+file;
   assert.equal(hash,contract.compatibilityOrigin.sha256[retained],file+' is unchanged compatibility code');
  }
@@ -117,7 +121,7 @@ test('the homepage presents the hierarchy and preserves existing project entranc
  for(const id of ['foundation','applications','taking-shape','tooling'])assert.ok(home.includes('id="'+id+'"'));
  for(const href of ['temple/','sourcery/','claimipedia/','claimipedia-science/','worldwright/','kingdom/','world-modelling/','tradie/','foundry/','encounter/','the-field/','supercrm/','timesheet/','workgarden/','harborboard/','relationship-manager/'])assert.ok(home.includes('href="'+href+'"'),href);
  assert.equal((home.match(/class="hierarchy-inspect"/g)||[]).length,18);
- assert.ok(!home.includes('hero-capabilities'));assert.ok(home.includes('expedition.css?v=document-1'));
+ assert.ok(!home.includes('hero-capabilities'));assert.ok(home.includes('expedition.css?v=card-types-1'));
  const stub=await read('dist/claimipedia/index.html');assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(stub.includes('runtime.js?v=review-1'));
 });
 

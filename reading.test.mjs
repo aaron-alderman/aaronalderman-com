@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {scenes,sources} from './dist/retained/world.js';
-import {readings,wordMeanings,sourceGuides,sourceTitles,readingFor,activityInstructions} from './dist/retained/reading-guide.js';
-import {renderWorldEncounter} from './dist/retained/world-encounters.js';
+import {scenes,sources} from './retained/world.js';
+import {readings,wordMeanings,sourceGuides,sourceTitles,readingFor,activityInstructions} from './retained/reading-guide.js';
+import {renderWorldEncounter} from './retained/world-encounters.js';
 test('every stop has an authored reading and every offered term has a definition',()=>{
  assert.deepEqual(Object.keys(readings).sort(),Object.keys(scenes).sort());
  for(const [id,scene]of Object.entries(scenes)){
@@ -16,9 +16,10 @@ test('every stop has an authored reading and every offered term has a definition
 test('all sources have a plain introduction while original research and full source notes remain available',async()=>{
  assert.deepEqual(Object.keys(sourceGuides).sort(),Object.keys(sources).sort());
  assert.deepEqual(Object.keys(sourceTitles).sort(),Object.keys(sources).sort());
- const app=await readFile(new URL('./dist/retained/app.js',import.meta.url),'utf8');
- assert.ok(app.includes('s.body.map('));assert.ok(app.includes('escape(source.note)'));
- assert.ok(app.includes('Read the fuller explanation'));assert.ok(app.includes('Read the original source'));
+ const reader=await readFile(new URL('./dist/reader/runtime.js',import.meta.url),'utf8');
+ const place=await readFile(new URL('./dist/places/observation.html',import.meta.url),'utf8');
+ assert.ok(place.includes('Read the fuller explanation'));assert.ok(reader.includes('Read the original source'));
+ assert.ok(reader.includes('reader.notes'));assert.ok(reader.includes('reader.route'));
 });
 test('rate cards explain the same reported values as rounded percentages',()=>{
  const html=renderWorldEncounter(scenes.cost);

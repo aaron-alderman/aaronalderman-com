@@ -1,0 +1,2500 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "workshop.boot": [
+      {
+        "let": "busy",
+        "value": true
+      },
+      {
+        "call": "workshop.busy"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "ec.prepare",
+          "input": "$data.inputs"
+        },
+        "into": "candidate"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "workshop.snapshot",
+          "input": {
+            "candidate": "$candidate",
+            "revision": 0,
+            "receipt": null
+          }
+        },
+        "into": "snapshot"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "workshop",
+          "value": "$snapshot"
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "activeTab",
+          "value": "source"
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "sourceHighlight",
+          "value": null
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#title-form",
+          "event": "submit",
+          "query": "workshop.apply",
+          "input": {
+            "kind": "title"
+          },
+          "preventDefault": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#web-form",
+          "event": "submit",
+          "query": "workshop.apply",
+          "input": {
+            "kind": "web-label"
+          },
+          "preventDefault": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "document",
+          "event": "click",
+          "query": "workshop.tab",
+          "input": {},
+          "delegate": "[data-tab]"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "document",
+          "event": "keydown",
+          "query": "workshop.key",
+          "input": {},
+          "delegate": "[data-tab]",
+          "preventKeys": [
+            "list",
+            "ArrowRight",
+            "ArrowLeft",
+            "Home",
+            "End"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "document",
+          "event": "click",
+          "query": "workshop.route",
+          "input": {},
+          "delegate": "[data-route],[data-source]"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#source-file",
+          "event": "change",
+          "query": "workshop.source",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#process-file",
+          "event": "change",
+          "query": "workshop.process",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "call": "workshop.render"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#status",
+          "name": "textContent",
+          "value": "Ready. Try changing the story title in step 1."
+        },
+        "into": "_"
+      },
+      {
+        "let": "busy",
+        "value": false
+      },
+      {
+        "call": "workshop.busy"
+      }
+    ],
+    "workshop.snapshot": [
+      {
+        "let": "candidate",
+        "value": "$eventInput.candidate"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lab.snapshot",
+          "input": {
+            "candidate": "$candidate"
+          }
+        },
+        "into": "measured"
+      },
+      {
+        "let": "panels",
+        "value": "$measured.rendered"
+      },
+      {
+        "let": "page",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$panels",
+            "panel",
+            [
+              "eq",
+              "$panel.projection.output.type",
+              "Page"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "web",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$panels",
+            "panel",
+            [
+              "eq",
+              "$panel.projection.output.type",
+              "WebLink"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "result",
+        "value": {
+          "candidate": "$candidate",
+          "revision": "$eventInput.revision",
+          "receipt": "$eventInput.receipt",
+          "title": [
+            "at",
+            "$page.projection.output.values",
+            "P.title"
+          ],
+          "webLabel": [
+            "at",
+            "$web.projection.output.values",
+            "W.text"
+          ],
+          "panels": "$panels",
+          "sources": {
+            "facts": "$candidate.inputs.factText",
+            "encounter": "$candidate.inputs.codeText",
+            "contracts": "$candidate.inputs.contractText"
+          }
+        }
+      }
+    ],
+    "workshop.change": [
+      {
+        "assert": [
+          "eq",
+          "$eventInput.request.revision",
+          "$eventInput.snapshot.revision"
+        ],
+        "message": "LAB-STALE: This view is out of date. Reload the current state before editing."
+      },
+      {
+        "let": "before",
+        "value": "$eventInput.snapshot"
+      },
+      {
+        "let": "request",
+        "value": "$eventInput.request"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "lab.edit",
+          "input": {
+            "candidate": "$before.candidate",
+            "kind": "$request.kind",
+            "value": "$request.value"
+          }
+        },
+        "into": "changed"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "workshop.diff",
+          "input": {
+            "before": "$before.sources.facts",
+            "after": "$changed.candidate.inputs.factText"
+          }
+        },
+        "into": "factDiff"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "workshop.diff",
+          "input": {
+            "before": "$before.sources.encounter",
+            "after": "$changed.candidate.inputs.codeText"
+          }
+        },
+        "into": "codeDiff"
+      },
+      {
+        "let": "receipt",
+        "value": {
+          "kind": "$request.kind",
+          "value": "$request.value",
+          "basis": "$before.revision",
+          "destination": "$changed.destination",
+          "factDiff": "$factDiff",
+          "codeDiff": "$codeDiff",
+          "reason": "Change one visible value at its declared semantic owner.",
+          "target": [
+            "if",
+            [
+              "eq",
+              "$request.kind",
+              "title"
+            ],
+            "TheStory / S.Title",
+            "experiment.nav.story / experiment.WebMainMenu / N.label"
+          ],
+          "goal": "Reproduce the requested value through the existing checked projection."
+        }
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "workshop.snapshot",
+          "input": {
+            "candidate": "$changed.candidate",
+            "revision": [
+              "add",
+              "$before.revision",
+              1
+            ],
+            "receipt": "$receipt"
+          }
+        },
+        "into": "result"
+      }
+    ],
+    "workshop.diff": [
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$eventInput.before",
+          "pattern": "\\r?\\n"
+        },
+        "into": "before"
+      },
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$eventInput.after",
+          "pattern": "\\r?\\n"
+        },
+        "into": "after"
+      },
+      {
+        "fold": [
+          "range",
+          [
+            "count",
+            "$before"
+          ]
+        ],
+        "as": "line",
+        "accumulator": "diff",
+        "initial": "",
+        "steps": [
+          {
+            "let": "index",
+            "value": [
+              "add",
+              "$line",
+              -1
+            ]
+          },
+          {
+            "let": "old",
+            "value": [
+              "at",
+              "$before",
+              "$index"
+            ]
+          },
+          {
+            "let": "next",
+            "value": [
+              "at",
+              "$after",
+              "$index"
+            ]
+          }
+        ],
+        "yield": [
+          "concat",
+          "$diff",
+          [
+            "if",
+            [
+              "eq",
+              "$old",
+              "$next"
+            ],
+            "",
+            [
+              "concat",
+              [
+                "if",
+                [
+                  "eq",
+                  "$diff",
+                  ""
+                ],
+                "",
+                "\n"
+              ],
+              "− ",
+              "$old",
+              "\n+ ",
+              "$next"
+            ]
+          ]
+        ],
+        "into": "diff"
+      },
+      {
+        "let": "result",
+        "value": [
+          "or",
+          "$diff",
+          "No change."
+        ]
+      }
+    ],
+    "workshop.apply": [
+      {
+        "let": "busy",
+        "value": true
+      },
+      {
+        "call": "workshop.busy"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "workshop"
+        },
+        "into": "snapshot"
+      },
+      {
+        "let": "kind",
+        "value": "$eventInput.kind"
+      },
+      {
+        "port": "browser.property",
+        "args": {
+          "ref": [
+            "if",
+            [
+              "eq",
+              "$kind",
+              "title"
+            ],
+            "#story-title",
+            "#web-label"
+          ],
+          "name": "value"
+        },
+        "into": "value"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#error",
+          "name": "hidden",
+          "value": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#status",
+          "name": "textContent",
+          "value": "Checking your change and updating the previews…"
+        },
+        "into": "_"
+      },
+      {
+        "try": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "workshop.change",
+              "input": {
+                "snapshot": "$snapshot",
+                "request": {
+                  "revision": "$snapshot.revision",
+                  "kind": "$kind",
+                  "value": "$value"
+                }
+              }
+            },
+            "into": "next"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "workshop",
+              "value": "$next"
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "sourceHighlight",
+              "value": null
+            },
+            "into": "_"
+          },
+          {
+            "call": "workshop.render"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#status",
+              "name": "textContent",
+              "value": [
+                "concat",
+                "Change ",
+                "$next.revision",
+                " applied. See what changed in steps 4 and 5."
+              ]
+            },
+            "into": "_"
+          }
+        ],
+        "error": "fault",
+        "catch": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#error",
+              "name": "hidden",
+              "value": false
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#error",
+              "name": "textContent",
+              "value": "$fault.message"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#status",
+              "name": "textContent",
+              "value": "The change could not be applied. Your last accepted version is still shown."
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "let": "busy",
+        "value": false
+      },
+      {
+        "call": "workshop.busy"
+      }
+    ],
+    "workshop.selectTab": [
+      {
+        "let": "tab",
+        "value": "$eventInput.tab"
+      },
+      {
+        "assert": [
+          "includes",
+          [
+            "list",
+            "source",
+            "pure",
+            "process",
+            "html",
+            "receipt"
+          ],
+          "$tab"
+        ],
+        "message": "WORKSHOP-TAB: Unknown tab."
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "activeTab",
+          "value": "$tab"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-tab]"
+        },
+        "into": "tabs"
+      },
+      {
+        "each": "$tabs",
+        "as": "button",
+        "steps": [
+          {
+            "let": "selected",
+            "value": [
+              "eq",
+              [
+                "at",
+                "$button.attributes",
+                "data-tab"
+              ],
+              "$tab"
+            ]
+          },
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$button.ref",
+              "name": "aria-selected",
+              "value": "$selected"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$button.ref",
+              "name": "tabIndex",
+              "value": [
+                "if",
+                "$selected",
+                0,
+                -1
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[role=\"tabpanel\"]"
+        },
+        "into": "panels"
+      },
+      {
+        "each": "$panels",
+        "as": "panel",
+        "steps": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$panel.ref",
+              "name": "hidden",
+              "value": [
+                "not",
+                [
+                  "eq",
+                  [
+                    "at",
+                    "$panel.attributes",
+                    "id"
+                  ],
+                  [
+                    "concat",
+                    "panel-",
+                    "$tab"
+                  ]
+                ]
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "when": [
+          "or",
+          "$eventInput.focus",
+          false
+        ],
+        "then": [
+          {
+            "port": "browser.focus",
+            "args": {
+              "ref": [
+                "concat",
+                "#tab-",
+                "$tab"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "workshop.tab": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "workshop.selectTab",
+          "input": {
+            "tab": [
+              "at",
+              "$eventInput.matched.attributes",
+              "data-tab"
+            ],
+            "focus": false
+          }
+        },
+        "into": "result"
+      }
+    ],
+    "workshop.key": [
+      {
+        "let": "key",
+        "value": "$eventInput.event.key"
+      },
+      {
+        "let": "tabs",
+        "value": [
+          "list",
+          "source",
+          "pure",
+          "process",
+          "html",
+          "receipt"
+        ]
+      },
+      {
+        "let": "current",
+        "value": [
+          "at",
+          "$eventInput.matched.attributes",
+          "data-tab"
+        ]
+      },
+      {
+        "fold": [
+          "range",
+          5
+        ],
+        "as": "n",
+        "accumulator": "index",
+        "initial": 0,
+        "steps": [],
+        "yield": [
+          "if",
+          [
+            "eq",
+            [
+              "at",
+              "$tabs",
+              [
+                "add",
+                "$n",
+                -1
+              ]
+            ],
+            "$current"
+          ],
+          [
+            "add",
+            "$n",
+            -1
+          ],
+          "$index"
+        ],
+        "into": "index"
+      },
+      {
+        "let": "move",
+        "value": [
+          "includes",
+          [
+            "list",
+            "ArrowRight",
+            "ArrowLeft",
+            "Home",
+            "End"
+          ],
+          "$key"
+        ]
+      },
+      {
+        "when": "$move",
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$index",
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$key",
+                    "ArrowRight"
+                  ],
+                  1,
+                  4
+                ]
+              ]
+            },
+            "into": "index"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "remainder",
+              "values": [
+                "list",
+                "$index",
+                5
+              ]
+            },
+            "into": "index"
+          },
+          {
+            "let": "index",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$key",
+                "Home"
+              ],
+              0,
+              [
+                "if",
+                [
+                  "eq",
+                  "$key",
+                  "End"
+                ],
+                4,
+                "$index"
+              ]
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "workshop.selectTab",
+              "input": {
+                "tab": [
+                  "at",
+                  "$tabs",
+                  "$index"
+                ],
+                "focus": true
+              }
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "workshop.source": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "workshop"
+        },
+        "into": "snapshot"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "sourceHighlight"
+        },
+        "into": "sourceHighlight"
+      },
+      {
+        "port": "browser.property",
+        "args": {
+          "ref": "#source-file",
+          "name": "value"
+        },
+        "into": "key"
+      },
+      {
+        "port": "text.split",
+        "args": {
+          "value": [
+            "at",
+            "$snapshot.sources",
+            "$key"
+          ],
+          "pattern": "\\r?\\n"
+        },
+        "into": "lines"
+      },
+      {
+        "fold": "$lines",
+        "as": "line",
+        "accumulator": "rendered",
+        "initial": {
+          "index": 0,
+          "nodes": [
+            "list"
+          ]
+        },
+        "steps": [],
+        "yield": {
+          "index": [
+            "add",
+            "$rendered.index",
+            1
+          ],
+          "nodes": [
+            "append",
+            "$rendered.nodes",
+            [
+              "list",
+              {
+                "tag": "span",
+                "attrs": {
+                  "class": [
+                    "concat",
+                    "source-line",
+                    [
+                      "if",
+                      [
+                        "and",
+                        "$sourceHighlight",
+                        [
+                          "eq",
+                          [
+                            "at",
+                            "$sourceHighlight",
+                            "file"
+                          ],
+                          "$key"
+                        ],
+                        [
+                          "eq",
+                          [
+                            "at",
+                            "$sourceHighlight",
+                            "line"
+                          ],
+                          [
+                            "add",
+                            "$rendered.index",
+                            1
+                          ]
+                        ]
+                      ],
+                      " highlight",
+                      ""
+                    ]
+                  ]
+                },
+                "children": [
+                  "list",
+                  [
+                    "or",
+                    "$line",
+                    " "
+                  ]
+                ]
+              }
+            ]
+          ]
+        },
+        "into": "rendered"
+      },
+      {
+        "let": "input",
+        "value": "$rendered.nodes"
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#source-code",
+          "html": "$markup"
+        },
+        "into": "_"
+      }
+    ],
+    "workshop.routeFor": [
+      {
+        "let": "snapshot",
+        "value": "$eventInput.snapshot"
+      },
+      {
+        "let": "kind",
+        "value": "$eventInput.kind"
+      },
+      {
+        "let": "panel",
+        "value": [
+          "if",
+          [
+            "eq",
+            "$kind",
+            "title"
+          ],
+          [
+            "at",
+            [
+              "filter",
+              "$snapshot.panels",
+              "p",
+              [
+                "eq",
+                "$p.projection.output.type",
+                "Page"
+              ]
+            ],
+            0
+          ],
+          [
+            "at",
+            [
+              "filter",
+              "$snapshot.panels",
+              "p",
+              [
+                "eq",
+                "$p.projection.output.type",
+                "WebLink"
+              ]
+            ],
+            0
+          ]
+        ]
+      },
+      {
+        "let": "route",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$panel.projection.edits",
+            "edit",
+            [
+              "eq",
+              "$edit.field",
+              [
+                "if",
+                [
+                  "eq",
+                  "$kind",
+                  "title"
+                ],
+                "P.title",
+                "N.label"
+              ]
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "result",
+        "value": "$route.destination"
+      }
+    ],
+    "workshop.route": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "workshop"
+        },
+        "into": "snapshot"
+      },
+      {
+        "let": "routeKind",
+        "value": [
+          "at",
+          "$eventInput.matched.attributes",
+          "data-route"
+        ]
+      },
+      {
+        "let": "file",
+        "value": [
+          "at",
+          "$eventInput.matched.attributes",
+          "data-source"
+        ]
+      },
+      {
+        "when": "$routeKind",
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "workshop.routeFor",
+              "input": {
+                "snapshot": "$snapshot",
+                "kind": "$routeKind"
+              }
+            },
+            "into": "route"
+          },
+          {
+            "let": "file",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$route.kind",
+                "source"
+              ],
+              "facts",
+              "encounter"
+            ]
+          },
+          {
+            "let": "line",
+            "value": 1
+          },
+          {
+            "when": [
+              "eq",
+              "$route.kind",
+              "source"
+            ],
+            "then": [
+              {
+                "port": "text.split",
+                "args": {
+                  "value": "$snapshot.sources.facts",
+                  "pattern": "\\r?\\n"
+                },
+                "into": "lines"
+              },
+              {
+                "fold": "$lines",
+                "as": "sourceLine",
+                "accumulator": "index",
+                "initial": {
+                  "n": 1,
+                  "line": 1
+                },
+                "steps": [
+                  {
+                    "port": "text.indexOf",
+                    "args": {
+                      "value": "$sourceLine",
+                      "search": [
+                        "concat",
+                        "(\"TheStory\", \"",
+                        "$route.field",
+                        "\","
+                      ]
+                    },
+                    "into": "match"
+                  }
+                ],
+                "yield": {
+                  "n": [
+                    "add",
+                    "$index.n",
+                    1
+                  ],
+                  "line": [
+                    "if",
+                    [
+                      "eq",
+                      "$match",
+                      0
+                    ],
+                    "$index.n",
+                    "$index.line"
+                  ]
+                },
+                "into": "index"
+              },
+              {
+                "let": "line",
+                "value": "$index.line"
+              }
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$route.kind",
+                "source"
+              ]
+            ],
+            "then": [
+              {
+                "let": "line",
+                "value": "$route.node.line"
+              }
+            ]
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "sourceHighlight",
+              "value": {
+                "file": "$file",
+                "line": "$line"
+              }
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "when": [
+          "not",
+          "$routeKind"
+        ],
+        "then": [
+          {
+            "port": "state.set",
+            "args": {
+              "key": "sourceHighlight",
+              "value": null
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#source-file",
+          "name": "value",
+          "value": "$file"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#technical",
+          "name": "open",
+          "value": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "workshop.selectTab",
+          "input": {
+            "tab": "source",
+            "focus": false
+          }
+        },
+        "into": "result"
+      },
+      {
+        "call": "workshop.source"
+      },
+      {
+        "port": "browser.scrollIntoView",
+        "args": {
+          "ref": "#source-code",
+          "behavior": "smooth",
+          "block": "center"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.focus",
+        "args": {
+          "ref": "#panel-source",
+          "preventScroll": true
+        },
+        "into": "_"
+      }
+    ],
+    "workshop.process": [
+      {
+        "let": "spPolicy",
+        "value": "$data.presentation.spPolicy"
+      },
+      {
+        "let": "spGrammar",
+        "value": "$data.presentation.spGrammar"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "workshop"
+        },
+        "into": "snapshot"
+      },
+      {
+        "port": "browser.property",
+        "args": {
+          "ref": "#process-file",
+          "name": "value"
+        },
+        "into": "selection"
+      },
+      {
+        "let": "query",
+        "value": [
+          "at",
+          {
+            "navigation": "code.story.view.experiment.nav.story",
+            "web": "code.story.representation.WebLink",
+            "row": "code.story.representation.MainframeRow",
+            "resolve": "ec.resolve",
+            "patch": "ec.patch",
+            "corePatch": "ec.patch",
+            "serialize": "html.serialize",
+            "live": "lab.edit"
+          },
+          "$selection"
+        ]
+      },
+      {
+        "let": "programme",
+        "value": [
+          "or",
+          [
+            "at",
+            "$snapshot.candidate.model.queries",
+            "$query"
+          ],
+          [
+            "at",
+            "$data.processes",
+            "$query"
+          ]
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sp.listing",
+          "input": {
+            "programme": "$programme",
+            "origin": {
+              "file": "algebra",
+              "query": "$query"
+            }
+          }
+        },
+        "into": "listing"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#process-code",
+          "name": "textContent",
+          "value": "$listing.text"
+        },
+        "into": "_"
+      }
+    ],
+    "workshop.render": [
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-workshop-details][open]"
+        },
+        "into": "openDetails"
+      },
+      {
+        "let": "openKeys",
+        "value": [
+          "map",
+          "$openDetails",
+          "detail",
+          [
+            "at",
+            "$detail.attributes",
+            "data-workshop-details"
+          ]
+        ]
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "workshop"
+        },
+        "into": "snapshot"
+      },
+      {
+        "let": "page",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$snapshot.panels",
+            "p",
+            [
+              "eq",
+              "$p.projection.output.type",
+              "Page"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "web",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$snapshot.panels",
+            "p",
+            [
+              "eq",
+              "$p.projection.output.type",
+              "WebLink"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "row",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$snapshot.panels",
+            "p",
+            [
+              "eq",
+              "$p.projection.output.type",
+              "MainframeRow"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#revision",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "CHANGES APPLIED: ",
+            "$snapshot.revision"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#story-title",
+          "name": "value",
+          "value": "$snapshot.title"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#web-label",
+          "name": "value",
+          "value": "$snapshot.webLabel"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#base-label",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$web.projection.base",
+            "N.label"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#row-label",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$row.projection.output.values",
+            "R.label"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#page-title",
+          "name": "textContent",
+          "value": "$snapshot.title"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#page-current",
+          "name": "textContent",
+          "value": "$snapshot.title"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#page-route",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "P.route → ",
+            [
+              "at",
+              "$page.projection.output.values",
+              "P.route"
+            ]
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#title-route",
+          "name": "textContent",
+          "value": "Where this title is changed ↗"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#web-route",
+          "name": "textContent",
+          "value": "Where this menu label is changed ↗"
+        },
+        "into": "_"
+      },
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$snapshot.sources.facts",
+          "pattern": "\\r?\\n"
+        },
+        "into": "lines"
+      },
+      {
+        "fold": "$lines",
+        "as": "line",
+        "accumulator": "found",
+        "initial": "",
+        "steps": [
+          {
+            "port": "text.indexOf",
+            "args": {
+              "value": "$line",
+              "search": "(\"TheStory\", \"S.Title\","
+            },
+            "into": "position"
+          }
+        ],
+        "yield": [
+          "if",
+          [
+            "eq",
+            "$position",
+            0
+          ],
+          "$line",
+          "$found"
+        ],
+        "into": "found"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#fact-inline",
+          "name": "textContent",
+          "value": "$found"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": [
+          "map",
+          [
+            "at",
+            "$page.projection.output.values",
+            "P.paragraphs"
+          ],
+          "paragraph",
+          {
+            "tag": "p",
+            "attrs": {},
+            "children": [
+              "list",
+              "$paragraph"
+            ]
+          }
+        ]
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#content-inline",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#overlay-inline",
+          "name": "textContent",
+          "value": "$snapshot.sources.encounter"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": [
+          "list",
+          {
+            "tag": "article",
+            "attrs": {
+              "class": "output web-output"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "h3",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Menu link"
+                ]
+              },
+              {
+                "tag": "iframe",
+                "attrs": {
+                  "id": "workshop-web",
+                  "title": "Menu link preview"
+                },
+                "children": [
+                  "list"
+                ]
+              },
+              {
+                "tag": "details",
+                "attrs": {
+                  "data-workshop-details": "output web-output-html",
+                  "open": [
+                    "includes",
+                    "$openKeys",
+                    "output web-output-html"
+                  ]
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "summary",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Read the generated HTML"
+                    ]
+                  },
+                  {
+                    "tag": "pre",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "$web.html"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "article",
+            "attrs": {
+              "class": "output row-output"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "h3",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "List row"
+                ]
+              },
+              {
+                "tag": "iframe",
+                "attrs": {
+                  "id": "workshop-row",
+                  "title": "List row preview"
+                },
+                "children": [
+                  "list"
+                ]
+              },
+              {
+                "tag": "details",
+                "attrs": {
+                  "data-workshop-details": "output row-output-html",
+                  "open": [
+                    "includes",
+                    "$openKeys",
+                    "output row-output-html"
+                  ]
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "summary",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Read the generated HTML"
+                    ]
+                  },
+                  {
+                    "tag": "pre",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "$row.html"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#diagram-outputs",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "article",
+          "attrs": {
+            "class": "output page-output"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "h3",
+              "attrs": {},
+              "children": [
+                "list",
+                "Story page"
+              ]
+            },
+            {
+              "tag": "iframe",
+              "attrs": {
+                "id": "workshop-page",
+                "title": "Story page preview"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "details",
+              "attrs": {
+                "data-workshop-details": "output page-output-html",
+                "open": [
+                  "includes",
+                  "$openKeys",
+                  "output page-output-html"
+                ]
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "summary",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Read the generated HTML"
+                  ]
+                },
+                {
+                  "tag": "pre",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$page.html"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#diagram-page",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.frameContent",
+        "args": {
+          "ref": "#workshop-web",
+          "html": "$web.html",
+          "bindings": [
+            "map",
+            [
+              "filter",
+              "$web.projection.output.events",
+              "descriptor",
+              [
+                "or",
+                [
+                  "at",
+                  "$descriptor",
+                  "open"
+                ],
+                false
+              ]
+            ],
+            "descriptor",
+            {
+              "event": "click",
+              "delegate": "$descriptor.selector",
+              "preventDefault": true,
+              "query": "workshop.open",
+              "input": {
+                "type": "WebLink"
+              }
+            }
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.frameContent",
+        "args": {
+          "ref": "#workshop-row",
+          "html": "$row.html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.frameContent",
+        "args": {
+          "ref": "#workshop-page",
+          "html": "$page.html"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": [
+          "map",
+          "$snapshot.panels",
+          "panel",
+          {
+            "tag": "section",
+            "attrs": {},
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "inspection-item"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "h3",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "$panel.projection.output.type"
+                    ]
+                  },
+                  {
+                    "tag": "pre",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "$panel.html"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#html-values",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": [
+            "at",
+            "$snapshot.candidate.model.queries",
+            "code.story.view.experiment.nav.story"
+          ],
+          "space": 2
+        },
+        "into": "navigation"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "div",
+          "attrs": {
+            "class": "inspection-item"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "h3",
+              "attrs": {},
+              "children": [
+                "list",
+                "Current generated navigation expressions"
+              ]
+            },
+            {
+              "tag": "pre",
+              "attrs": {},
+              "children": [
+                "list",
+                "$navigation"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#pure-values",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "div",
+          "attrs": {
+            "class": "inspection-item"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "h3",
+              "attrs": {},
+              "children": [
+                "list",
+                "Current generated navigation expressions"
+              ]
+            },
+            {
+              "tag": "pre",
+              "attrs": {},
+              "children": [
+                "list",
+                "$navigation"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#inline-pure",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": [
+          "map",
+          "$data.hashes",
+          "source",
+          {
+            "tag": "p",
+            "attrs": {},
+            "children": [
+              "list",
+              "$source.file",
+              "\nSHA-256 ",
+              "$source.hash",
+              {
+                "tag": "a",
+                "attrs": {
+                  "href": [
+                    "concat",
+                    "sources/",
+                    "$source.file"
+                  ],
+                  "target": "_blank",
+                  "rel": "noopener"
+                },
+                "children": [
+                  "list",
+                  "Read this source ↗"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hashes",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "call": "workshop.source"
+      },
+      {
+        "call": "workshop.process"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "section",
+          "attrs": {},
+          "children": [
+            "list",
+            {
+              "tag": "h3",
+              "attrs": {},
+              "children": [
+                "list",
+                [
+                  "if",
+                  "$snapshot.receipt",
+                  [
+                    "concat",
+                    "Revision ",
+                    [
+                      "at",
+                      "$snapshot.receipt",
+                      "basis"
+                    ],
+                    " → ",
+                    "$snapshot.revision"
+                  ],
+                  "Nothing has changed yet."
+                ]
+              ]
+            },
+            [
+              "if",
+              "$snapshot.receipt",
+              [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "at",
+                      "$snapshot.receipt",
+                      "reason"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "at",
+                      "$snapshot.receipt",
+                      "target"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "at",
+                      "$snapshot.receipt",
+                      "goal"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "inspection-item"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h3",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "story.rel"
+                      ]
+                    },
+                    {
+                      "tag": "pre",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "at",
+                          "$snapshot.receipt",
+                          "factDiff"
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "inspection-item"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h3",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "story.encounter"
+                      ]
+                    },
+                    {
+                      "tag": "pre",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "at",
+                          "$snapshot.receipt",
+                          "codeDiff"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Apply either value to see the exact source diff and the checked route back."
+                ]
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#receipt",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.property",
+        "args": {
+          "ref": "#receipt",
+          "name": "innerHTML"
+        },
+        "into": "receiptHTML"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#diagram-receipt",
+          "html": "$receiptHTML"
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": [
+            "at",
+            "$data.processes",
+            "ec.run"
+          ],
+          "space": 2
+        },
+        "into": "processText"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#inline-navigation",
+          "name": "textContent",
+          "value": "$processText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": [
+            "at",
+            "$data.processes",
+            "ec.resolve"
+          ],
+          "space": 2
+        },
+        "into": "processText"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#inline-resolve",
+          "name": "textContent",
+          "value": "$processText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": [
+            "at",
+            "$data.processes",
+            "html.serialize"
+          ],
+          "space": 2
+        },
+        "into": "processText"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#inline-serialize",
+          "name": "textContent",
+          "value": "$processText"
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": [
+            "at",
+            "$data.processes",
+            "ec.patch"
+          ],
+          "space": 2
+        },
+        "into": "processText"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#inline-patch",
+          "name": "textContent",
+          "value": "$processText"
+        },
+        "into": "_"
+      }
+    ],
+    "workshop.open": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "workshop"
+        },
+        "into": "snapshot"
+      },
+      {
+        "let": "origin",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$snapshot.panels",
+            "panel",
+            [
+              "eq",
+              "$panel.projection.output.type",
+              "$eventInput.type"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "matches",
+        "value": [
+          "filter",
+          "$origin.projection.output.events",
+          "descriptor",
+          [
+            "or",
+            [
+              "at",
+              "$descriptor",
+              "open"
+            ],
+            false
+          ]
+        ]
+      },
+      {
+        "assert": [
+          "eq",
+          [
+            "count",
+            "$matches"
+          ],
+          1
+        ],
+        "message": "LAB-OPEN: The checked preview needs exactly one declared page-open descriptor."
+      },
+      {
+        "let": "descriptor",
+        "value": [
+          "at",
+          "$matches",
+          0
+        ]
+      },
+      {
+        "let": "target",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$snapshot.panels",
+            "panel",
+            [
+              "eq",
+              "$panel.projection.view",
+              "$descriptor.open"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "assert": "$target",
+        "message": "LAB-OPEN: This declared page has no current projection."
+      },
+      {
+        "port": "browser.frameContent",
+        "args": {
+          "ref": "$eventInput.frame",
+          "html": "$target.html"
+        },
+        "into": "_"
+      }
+    ],
+    "workshop.busy": [
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "form input,form button[type=\"submit\"]"
+        },
+        "into": "controls"
+      },
+      {
+        "each": "$controls",
+        "as": "control",
+        "steps": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$control.ref",
+              "name": "disabled",
+              "value": "$busy"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".flow",
+          "name": "aria-busy",
+          "value": "$busy"
+        },
+        "into": "_"
+      }
+    ]
+  }
+}
