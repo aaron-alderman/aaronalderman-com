@@ -3535,6 +3535,83 @@
       },
       {
         "when": [
+          "and",
+          [
+            "not",
+            "$done"
+          ],
+          [
+            "includes",
+            "$keys",
+            "try"
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "sp.programme",
+              "input": {
+                "programme": [
+                  "at",
+                  "$st",
+                  "try"
+                ],
+                "depth": [
+                  "add",
+                  "$depth",
+                  1
+                ]
+              }
+            },
+            "into": "tryBody"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "sp.programme",
+              "input": {
+                "programme": [
+                  "at",
+                  "$st",
+                  "catch"
+                ],
+                "depth": [
+                  "add",
+                  "$depth",
+                  1
+                ]
+              }
+            },
+            "into": "catchBody"
+          },
+          {
+            "let": "text",
+            "value": [
+              "concat",
+              "$indent",
+              "try:\n",
+              "$tryBody",
+              "\n",
+              "$indent",
+              "catch ",
+              [
+                "at",
+                "$st",
+                "error"
+              ],
+              ":\n",
+              "$catchBody"
+            ]
+          },
+          {
+            "let": "done",
+            "value": true
+          }
+        ]
+      },
+      {
+        "when": [
           "not",
           "$done"
         ],
@@ -5932,6 +6009,325 @@
             "class": "markdown-preview"
           },
           "children": "$mdState.nodes"
+        }
+      }
+    ],
+    "sp.structure": [
+      {
+        "let": "structureDepth",
+        "value": "$eventInput.depth"
+      },
+      {
+        "assert": [
+          "includes",
+          [
+            "range",
+            65
+          ],
+          [
+            "add",
+            "$structureDepth",
+            1
+          ]
+        ],
+        "message": "SP-STRUCTURE: Programme nesting exceeds its declared bound."
+      },
+      {
+        "fold": [
+          "range",
+          [
+            "count",
+            "$eventInput.programme"
+          ]
+        ],
+        "as": "structureI",
+        "accumulator": "structureRows",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "structureStatement",
+            "value": [
+              "at",
+              "$eventInput.programme",
+              [
+                "add",
+                "$structureI",
+                -1
+              ]
+            ]
+          },
+          {
+            "port": "record.entries",
+            "args": {
+              "value": "$structureStatement"
+            },
+            "into": "structureFields"
+          },
+          {
+            "let": "structureKeys",
+            "value": [
+              "map",
+              "$structureFields",
+              "structureField",
+              [
+                "at",
+                "$structureField",
+                0
+              ]
+            ]
+          },
+          {
+            "let": "structureForms",
+            "value": [
+              "filter",
+              [
+                "list",
+                "let",
+                "assert",
+                "port",
+                "call",
+                "when",
+                "fold",
+                "each",
+                "try"
+              ],
+              "structureForm",
+              [
+                "includes",
+                "$structureKeys",
+                "$structureForm"
+              ]
+            ]
+          },
+          {
+            "assert": [
+              "eq",
+              [
+                "count",
+                "$structureForms"
+              ],
+              1
+            ],
+            "message": "SP-STRUCTURE: Exactly one supported statement form is required."
+          },
+          {
+            "let": "structurePointer",
+            "value": [
+              "concat",
+              "$eventInput.pointer",
+              "/",
+              [
+                "add",
+                "$structureI",
+                -1
+              ]
+            ]
+          },
+          {
+            "let": "structureRows",
+            "value": [
+              "append",
+              "$structureRows",
+              [
+                "list",
+                {
+                  "form": [
+                    "at",
+                    "$structureForms",
+                    0
+                  ],
+                  "pointer": "$structurePointer"
+                }
+              ]
+            ]
+          },
+          {
+            "fold": [
+              "list",
+              "then",
+              "steps",
+              "try",
+              "catch"
+            ],
+            "as": "structureChild",
+            "accumulator": "structureChildren",
+            "initial": "$structureRows",
+            "steps": [
+              {
+                "when": [
+                  "includes",
+                  "$structureKeys",
+                  "$structureChild"
+                ],
+                "then": [
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "sp.structure",
+                      "input": {
+                        "programme": [
+                          "at",
+                          "$structureStatement",
+                          "$structureChild"
+                        ],
+                        "pointer": [
+                          "concat",
+                          "$structurePointer",
+                          "/",
+                          "$structureChild"
+                        ],
+                        "depth": [
+                          "add",
+                          "$structureDepth",
+                          1
+                        ]
+                      }
+                    },
+                    "into": "structureNested"
+                  },
+                  {
+                    "let": "structureChildren",
+                    "value": [
+                      "append",
+                      "$structureChildren",
+                      "$structureNested"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": "$structureChildren",
+            "into": "structureRows"
+          }
+        ],
+        "yield": "$structureRows",
+        "into": "structureRows"
+      },
+      {
+        "let": "result",
+        "value": "$structureRows"
+      }
+    ],
+    "sp.moduleView": [
+      {
+        "let": "moduleValue",
+        "value": "$eventInput.module"
+      },
+      {
+        "assert": [
+          "eq",
+          "$moduleValue.protocol",
+          "temple/surface-process-module/1"
+        ],
+        "message": "SP-MODULE: A surface-process module is required."
+      },
+      {
+        "port": "record.entries",
+        "args": {
+          "value": "$moduleValue.queries"
+        },
+        "into": "moduleEntries"
+      },
+      {
+        "let": "moduleMatches",
+        "value": [
+          "filter",
+          "$moduleEntries",
+          "moduleEntry",
+          [
+            "eq",
+            [
+              "at",
+              "$moduleEntry",
+              0
+            ],
+            "$eventInput.name"
+          ]
+        ]
+      },
+      {
+        "assert": [
+          "eq",
+          [
+            "count",
+            "$moduleMatches"
+          ],
+          1
+        ],
+        "message": "SP-MODULE: The selected query does not exist."
+      },
+      {
+        "let": "moduleName",
+        "value": "$eventInput.name"
+      },
+      {
+        "let": "moduleProgramme",
+        "value": [
+          "at",
+          [
+            "at",
+            "$moduleMatches",
+            0
+          ],
+          1
+        ]
+      },
+      {
+        "let": "modulePointer",
+        "value": [
+          "concat",
+          "/queries/",
+          "$moduleName"
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sp.programme",
+          "input": {
+            "programme": "$moduleProgramme",
+            "depth": 1
+          }
+        },
+        "into": "moduleText"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sp.structure",
+          "input": {
+            "programme": "$moduleProgramme",
+            "pointer": "$modulePointer",
+            "depth": 0
+          }
+        },
+        "into": "moduleStatements"
+      },
+      {
+        "let": "result",
+        "value": {
+          "name": "$moduleName",
+          "text": [
+            "concat",
+            "process ",
+            "$moduleName",
+            ":\n",
+            "$moduleText"
+          ],
+          "pointer": "$modulePointer",
+          "statements": "$moduleStatements",
+          "forms": [
+            "distinct",
+            [
+              "map",
+              "$moduleStatements",
+              "moduleStatement",
+              "$moduleStatement.form"
+            ]
+          ],
+          "scope": "generated-readable-projection; JSON remains authoritative"
         }
       }
     ]

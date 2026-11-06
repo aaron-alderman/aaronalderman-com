@@ -380,14 +380,6 @@
       {
         "port": "browser.property",
         "args": {
-          "ref": "#hierarchy-source",
-          "name": "textContent"
-        },
-        "into": "hSource"
-      },
-      {
-        "port": "browser.property",
-        "args": {
           "ref": "#hierarchy-language",
           "name": "value"
         },
@@ -397,22 +389,95 @@
         "when": [
           "eq",
           "$hLanguage",
-          "markdown"
+          "process-module"
         ],
         "then": [
           {
+            "call": "hierarchy.module.boot"
+          }
+        ]
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            "$hLanguage",
+            "process-module"
+          ]
+        ],
+        "then": [
+          {
+            "port": "browser.property",
+            "args": {
+              "ref": "#hierarchy-source",
+              "name": "textContent"
+            },
+            "into": "hSource"
+          },
+          {
+            "when": [
+              "eq",
+              "$hLanguage",
+              "markdown"
+            ],
+            "then": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "md.preview",
+                  "input": {
+                    "text": "$hSource"
+                  }
+                },
+                "into": "hPreview"
+              },
+              {
+                "let": "input",
+                "value": "$hPreview"
+              },
+              {
+                "call": "html.serialize"
+              },
+              {
+                "port": "browser.content",
+                "args": {
+                  "ref": "#hierarchy-preview",
+                  "html": "$result"
+                },
+                "into": "_"
+              }
+            ]
+          },
+          {
+            "port": "digest.sha256",
+            "args": {
+              "text": "$hSource"
+            },
+            "into": "hDigest"
+          },
+          {
             "port": "kernel.invoke",
             "args": {
-              "query": "md.preview",
+              "query": "sp.present",
               "input": {
-                "text": "$hSource"
+                "text": "$hSource",
+                "file": "selected-source-bindings",
+                "language": "$hLanguage",
+                "theme": "dark",
+                "expectedHash": "$hDigest",
+                "lineNumbers": true,
+                "selectedLine": null,
+                "origin": {
+                  "scope": "source-snapshot; not an execution trace"
+                }
               }
             },
-            "into": "hPreview"
+            "into": "hPresentation"
           },
           {
             "let": "input",
-            "value": "$hPreview"
+            "value": "$hPresentation.tree"
           },
           {
             "call": "html.serialize"
@@ -420,134 +485,93 @@
           {
             "port": "browser.content",
             "args": {
-              "ref": "#hierarchy-preview",
+              "ref": "#hierarchy-source",
+              "html": "$result"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#hierarchy-source-hash",
+              "name": "textContent",
+              "value": [
+                "concat",
+                "Displayed source SHA-256 ",
+                "$hDigest"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "sp.listing",
+              "input": {
+                "programme": [
+                  "at",
+                  "$data.processes",
+                  "hierarchy.shared"
+                ],
+                "origin": {
+                  "file": "algebra/hierarchy.process.json",
+                  "query": "hierarchy.shared"
+                }
+              }
+            },
+            "into": "hDefinition"
+          },
+          {
+            "let": "hDefinitionText",
+            "value": [
+              "concat",
+              "process hierarchy.shared:\n",
+              "$hDefinition.text"
+            ]
+          },
+          {
+            "port": "digest.sha256",
+            "args": {
+              "text": "$hDefinitionText"
+            },
+            "into": "hDefinitionDigest"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "sp.present",
+              "input": {
+                "text": "$hDefinitionText",
+                "file": "hierarchy-shared.process",
+                "language": "process",
+                "theme": "dark",
+                "lineNumbers": true,
+                "selectedLine": null,
+                "origin": {
+                  "file": "algebra/hierarchy.process.json",
+                  "query": "hierarchy.shared"
+                },
+                "expectedHash": "$hDefinitionDigest"
+              }
+            },
+            "into": "hDefinitionView"
+          },
+          {
+            "let": "input",
+            "value": "$hDefinitionView.tree"
+          },
+          {
+            "call": "html.serialize"
+          },
+          {
+            "port": "browser.content",
+            "args": {
+              "ref": "#hierarchy-process",
               "html": "$result"
             },
             "into": "_"
           }
         ]
-      },
-      {
-        "port": "digest.sha256",
-        "args": {
-          "text": "$hSource"
-        },
-        "into": "hDigest"
-      },
-      {
-        "port": "kernel.invoke",
-        "args": {
-          "query": "sp.present",
-          "input": {
-            "text": "$hSource",
-            "file": "selected-source-bindings",
-            "language": "$hLanguage",
-            "theme": "dark",
-            "expectedHash": "$hDigest",
-            "lineNumbers": true,
-            "selectedLine": null,
-            "origin": {
-              "scope": "source-snapshot; not an execution trace"
-            }
-          }
-        },
-        "into": "hPresentation"
-      },
-      {
-        "let": "input",
-        "value": "$hPresentation.tree"
-      },
-      {
-        "call": "html.serialize"
-      },
-      {
-        "port": "browser.content",
-        "args": {
-          "ref": "#hierarchy-source",
-          "html": "$result"
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.write",
-        "args": {
-          "ref": "#hierarchy-source-hash",
-          "name": "textContent",
-          "value": [
-            "concat",
-            "Displayed source SHA-256 ",
-            "$hDigest"
-          ]
-        },
-        "into": "_"
-      },
-      {
-        "port": "kernel.invoke",
-        "args": {
-          "query": "sp.listing",
-          "input": {
-            "programme": [
-              "at",
-              "$data.processes",
-              "hierarchy.shared"
-            ],
-            "origin": {
-              "file": "algebra/hierarchy.process.json",
-              "query": "hierarchy.shared"
-            }
-          }
-        },
-        "into": "hDefinition"
-      },
-      {
-        "let": "hDefinitionText",
-        "value": [
-          "concat",
-          "process hierarchy.shared:\n",
-          "$hDefinition.text"
-        ]
-      },
-      {
-        "port": "digest.sha256",
-        "args": {
-          "text": "$hDefinitionText"
-        },
-        "into": "hDefinitionDigest"
-      },
-      {
-        "port": "kernel.invoke",
-        "args": {
-          "query": "sp.present",
-          "input": {
-            "text": "$hDefinitionText",
-            "file": "hierarchy-shared.process",
-            "language": "process",
-            "theme": "dark",
-            "lineNumbers": true,
-            "selectedLine": null,
-            "origin": {
-              "file": "algebra/hierarchy.process.json",
-              "query": "hierarchy.shared"
-            },
-            "expectedHash": "$hDefinitionDigest"
-          }
-        },
-        "into": "hDefinitionView"
-      },
-      {
-        "let": "input",
-        "value": "$hDefinitionView.tree"
-      },
-      {
-        "call": "html.serialize"
-      },
-      {
-        "port": "browser.content",
-        "args": {
-          "ref": "#hierarchy-process",
-          "html": "$result"
-        },
-        "into": "_"
       }
     ],
     "hierarchy.viewer.build": [
@@ -599,6 +623,27 @@
           "text": "$hText"
         },
         "into": "hPresentationData"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "algebra/encounter-source.process.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "algebra/encounter-source.process.json"
+        },
+        "into": "hSourceModuleText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$hSourceModuleText"
+        },
+        "into": "hSourceModule"
       },
       {
         "port": "runtime.bundle",
@@ -668,7 +713,11 @@
               "hierarchy.viewer.boot",
               "md.inline",
               "md.block",
-              "md.preview"
+              "md.preview",
+              "sp.structure",
+              "sp.moduleView",
+              "hierarchy.module.boot",
+              "hierarchy.module.select"
             ]
           ],
           "factSubjects": [
@@ -676,7 +725,15 @@
           ],
           "data": {
             "presentation": "$hPresentationData",
-            "processes": "$hProcesses.queries"
+            "processes": {
+              "hierarchy.shared": [
+                "at",
+                "$hProcesses.queries",
+                "hierarchy.shared"
+              ]
+            },
+            "sourceModule": "$hSourceModule",
+            "sourceText": "$hSourceModuleText"
           },
           "budget": 20000000
         },
@@ -2855,7 +2912,7 @@
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "../algebra/encounter-source.process.json"
+                            "href": "source-algebra.html"
                           },
                           "children": [
                             "list",
@@ -2901,6 +2958,9 @@
       },
       {
         "call": "hierarchy.viewer.build"
+      },
+      {
+        "call": "hierarchy.module.build"
       },
       {
         "each": "$hCatalogue.items",
@@ -4114,6 +4174,801 @@
         "port": "file.write",
         "args": {
           "path": "relational-geometry/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "hierarchy.module.boot": [
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#module-query",
+          "event": "change",
+          "query": "hierarchy.module.select",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "digest.sha256",
+        "args": {
+          "text": "$data.sourceText"
+        },
+        "into": "moduleHash"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#module-hash",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Exact module SHA-256 ",
+            "$moduleHash"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "call": "hierarchy.module.select"
+      }
+    ],
+    "hierarchy.module.select": [
+      {
+        "let": "spPolicy",
+        "value": "$data.presentation.spPolicy"
+      },
+      {
+        "let": "spGrammar",
+        "value": "$data.presentation.spGrammar"
+      },
+      {
+        "let": "lexPolicy",
+        "value": "$data.presentation.lexPolicy"
+      },
+      {
+        "let": "lexGrammar",
+        "value": "$data.presentation.lexGrammar"
+      },
+      {
+        "port": "browser.property",
+        "args": {
+          "ref": "#module-query",
+          "name": "value"
+        },
+        "into": "selectedQuery"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sp.moduleView",
+          "input": {
+            "module": "$data.sourceModule",
+            "name": "$selectedQuery"
+          }
+        },
+        "into": "selectedView"
+      },
+      {
+        "port": "digest.sha256",
+        "args": {
+          "text": "$selectedView.text"
+        },
+        "into": "selectedHash"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sp.present",
+          "input": {
+            "text": "$selectedView.text",
+            "file": "selected-query.process",
+            "language": "process",
+            "theme": "dark",
+            "expectedHash": "$selectedHash",
+            "lineNumbers": true,
+            "selectedLine": null,
+            "origin": {
+              "file": "algebra/encounter-source.process.json",
+              "pointer": "$selectedView.pointer",
+              "scope": "derived readable projection; not an execution trace"
+            }
+          }
+        },
+        "into": "selectedPresentation"
+      },
+      {
+        "let": "input",
+        "value": "$selectedPresentation.tree"
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#module-readable",
+          "html": "$result"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#module-title",
+          "name": "textContent",
+          "value": "$selectedQuery"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#module-pointer",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "algebra/encounter-source.process.json",
+            " · ",
+            "$selectedView.pointer"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "ul",
+          "attrs": {},
+          "children": [
+            "map",
+            "$selectedView.forms",
+            "selectedForm",
+            {
+              "tag": "li",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "code",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$selectedForm"
+                  ]
+                },
+                " · ",
+                [
+                  "count",
+                  [
+                    "filter",
+                    "$selectedView.statements",
+                    "selectedStatement",
+                    [
+                      "eq",
+                      "$selectedStatement.form",
+                      "$selectedForm"
+                    ]
+                  ]
+                ],
+                " statements"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#module-forms",
+          "html": "$result"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "ol",
+          "attrs": {},
+          "children": [
+            "map",
+            "$selectedView.statements",
+            "selectedStatement",
+            {
+              "tag": "li",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "code",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$selectedStatement.form"
+                  ]
+                },
+                " · ",
+                {
+                  "tag": "code",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$selectedStatement.pointer"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#module-coordinates",
+          "html": "$result"
+        },
+        "into": "_"
+      }
+    ],
+    "hierarchy.module.build": [
+      {
+        "port": "record.entries",
+        "args": {
+          "value": "$hSourceModule.queries"
+        },
+        "into": "hModuleEntries"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Shared Markdown, lexer and formatting algebra"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "Read the actual process queries behind Markdown preview, syntax highlighting and readable definitions."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "https://aaronalderman.com/inspection/source-algebra.html"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "../expedition.css?v=triple-braid-1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": "Shared Markdown, lexer and formatting algebra"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": "Read the actual processes behind Markdown preview, syntax highlighting and readable definitions."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": "https://aaronalderman.com/inspection/source-algebra.html"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "#main",
+                    "class": "skip"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to content"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {
+                    "class": "masthead"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../index.html",
+                        "class": "brand"
+                      },
+                      "children": [
+                        "list",
+                        "Aaron Alderman"
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Return to the work"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "worldwright.html"
+                          },
+                          "children": [
+                            "list",
+                            "Worldwright Inspect"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../encounter/"
+                          },
+                          "children": [
+                            "list",
+                            "Encounter"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "id": "main",
+                    "class": "hierarchy-page hierarchy-inspector module-page"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "eyebrow"
+                      },
+                      "children": [
+                        "list",
+                        "Inspect / the shared machinery"
+                      ]
+                    },
+                    {
+                      "tag": "h1",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Markdown, lexer & formatting"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "lead"
+                      },
+                      "children": [
+                        "list",
+                        "Read the processes that turn source into a document, coloured tokens and readable definitions."
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "module-status"
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          [
+                            "count",
+                            "$hModuleEntries"
+                          ],
+                          " named queries · one existing process algebra · read-only inspection"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "input",
+                      "attrs": {
+                        "id": "hierarchy-language",
+                        "type": "hidden",
+                        "value": "process-module"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "style",
+                      "attrs": {
+                        "id": "hierarchy-source-style"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "section",
+                      "attrs": {
+                        "class": "module-reader"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "label",
+                          "attrs": {
+                            "class": "module-selector"
+                          },
+                          "children": [
+                            "list",
+                            "Choose an actual query",
+                            {
+                              "tag": "select",
+                              "attrs": {
+                                "id": "module-query"
+                              },
+                              "children": [
+                                "map",
+                                "$hModuleEntries",
+                                "hModuleEntry",
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": [
+                                      "at",
+                                      "$hModuleEntry",
+                                      0
+                                    ],
+                                    "selected": [
+                                      "if",
+                                      [
+                                        "eq",
+                                        [
+                                          "at",
+                                          "$hModuleEntry",
+                                          0
+                                        ],
+                                        "md.preview"
+                                      ],
+                                      true,
+                                      null
+                                    ]
+                                  },
+                                  "children": [
+                                    "list",
+                                    [
+                                      "at",
+                                      "$hModuleEntry",
+                                      0
+                                    ]
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "h2",
+                          "attrs": {
+                            "id": "module-title"
+                          },
+                          "children": [
+                            "list",
+                            "md.preview"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "id": "module-pointer",
+                            "class": "hierarchy-source-digest"
+                          },
+                          "children": [
+                            "list",
+                            [
+                              "concat",
+                              "algebra/encounter-source.process.json",
+                              " · /queries/md.preview"
+                            ]
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "md-note"
+                          },
+                          "children": [
+                            "list",
+                            "This is a formatted projection of the bound JSON definition. It does not execute the selected process or grant its ports."
+                          ]
+                        },
+                        {
+                          "tag": "pre",
+                          "attrs": {
+                            "id": "module-readable",
+                            "class": "hierarchy-source",
+                            "tabindex": "0",
+                            "aria-label": "Readable process definition"
+                          },
+                          "children": [
+                            "list",
+                            "Readable definition loads through the shared algebra."
+                          ]
+                        },
+                        {
+                          "tag": "details",
+                          "attrs": {
+                            "class": "module-disclosure"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "summary",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Statement forms in this query"
+                              ]
+                            },
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "id": "module-forms"
+                              },
+                              "children": [
+                                "list",
+                                "Inspecting actual statement forms…"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "details",
+                          "attrs": {
+                            "class": "module-disclosure"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "summary",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Exact statement coordinates"
+                              ]
+                            },
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "id": "module-coordinates"
+                              },
+                              "children": [
+                                "list",
+                                "JSON pointers load from the actual query structure."
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "section",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "h2",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Could this be authored in Encounter?"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Yes: named queries, nested statements, expressions and explicit port calls already form a structured language. JSON is the current encoding, not a lack of language structure."
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "The existing readable process compiler pilot covers let, when and port, with a bounded operator set. This module also needs fold, assert, call and try/catch; it uses additional operators and dotted references. The Encounter view/representation dialect is another frontend and does not accept this whole module."
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "The route to authoring is to extend the existing algebra-owned process frontend, then check exact JSON structure, lowering, results, faults and effect order. Only after those correspondence checks should a declared source-owner switch make readable text authoritative. This page performs no such switch."
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "module-status"
+                          },
+                          "children": [
+                            "list",
+                            "Readable inspection available · complete text-to-module authoring correspondence not yet qualified"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "section",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "h2",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Source binding"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "algebra/encounter-source.process.json"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "id": "module-hash",
+                            "class": "hierarchy-source-digest"
+                          },
+                          "children": [
+                            "list",
+                            "Computing the exact module hash…"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../algebra/encounter-source.process.json"
+                          },
+                          "children": [
+                            "list",
+                            "Download authoritative JSON"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "All definitions above come from this exact module. The selector and page composition belong to algebra/hierarchy.process.json. Colours and layout do not decide process semantics."
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../algebra/hierarchy.process.json"
+                          },
+                          "children": [
+                            "list",
+                            "Inspect the page composition source"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "script",
+                      "attrs": {
+                        "src": "runtime.js",
+                        "defer": true
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "inspection/source-algebra.html",
           "text": [
             "concat",
             "<!doctype html>\n",

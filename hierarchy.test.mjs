@@ -53,7 +53,7 @@ test('malformed, unsupported and stale source-line bindings refuse rather than f
 test('source inspection exposes receipts, consumers and honest missing edges with the existing source presenter',()=>{
  const work=fs.readFileSync('dist/inspection/harborboard.html','utf8');assert.ok(work.includes('pack.sourcery.workItemPlanning.v1'));assert.ok(work.includes('href="supercrm.html"'));assert.ok(work.includes('Upstream SHA-256'));assert.ok(work.includes('source line '));assert.ok(work.includes('src="runtime.js"'));
  const worldwright=fs.readFileSync('dist/inspection/worldwright.html','utf8');assert.ok(worldwright.includes('No shared capability identity is declared'));assert.ok(worldwright.includes('worldwright-storytelling/README.md'));assert.ok(!worldwright.includes('Proposed connections'));
- const programme=read('algebra/hierarchy.process.json');const boot=programme.queries['hierarchy.viewer.boot'];assert.ok(boot.some(s=>s.port==='kernel.invoke'&&s.args.query==='sp.present'));assert.ok(boot.some(s=>s.call==='html.serialize'));assert.ok(!Object.keys(programme.queries).some(n=>/editor|patch|mutat/.test(n)));assert.equal(read('bootstrap/site.json').executionBudget,20000000);
+ const programme=read('algebra/hierarchy.process.json');const boot=JSON.stringify(programme.queries['hierarchy.viewer.boot']);assert.ok(boot.includes('sp.present'));assert.ok(boot.includes('html.serialize'));assert.ok(!Object.keys(programme.queries).some(n=>/editor|patch|mutat/.test(n)));assert.equal(read('bootstrap/site.json').executionBudget,20000000);
 });
 
 test('the admitted viewer highlights source and its actual sharing definition with separate exact hash bases',async()=>{

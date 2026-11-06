@@ -46,3 +46,38 @@ test('Markdown projection refuses documents outside its declared bounds',async()
  await assert.rejects(run('md.preview',{text:'x\n'.repeat(2001)}),/MD-LINES/);
 });
 
+test('every source query has a readable definition and exact structural statement coordinates',async()=>{
+ const module=source('algebra/encounter-source.process.json'),before=JSON.stringify(module);
+ const forms=new Set();
+ for(const [name,programme]of Object.entries(module.queries)){
+  const view=await run('sp.moduleView',{module,name});assert.ok(view.text.startsWith('process '+name+':\n  '));assert.equal(view.pointer,'/queries/'+name);
+  const expected=[];function walk(body,pointer){body.forEach((st,i)=>{const keys=['let','assert','port','call','when','fold','each','try'].filter(k=>Object.hasOwn(st,k));assert.equal(keys.length,1);expected.push({form:keys[0],pointer:pointer+'/'+i});for(const child of ['then','steps','try','catch'])if(Object.hasOwn(st,child))walk(st[child],pointer+'/'+i+'/'+child);});}walk(programme,view.pointer);
+  assert.deepEqual(view.statements,expected,name);view.forms.forEach(f=>forms.add(f));
+ }
+ assert.deepEqual([...forms].sort(),['assert','call','fold','let','port','try','when']);assert.equal(JSON.stringify(module),before);
+ const scanner=await run('sp.moduleView',{module,name:'sp.scan'});assert.ok(scanner.text.includes('try:\n'));assert.ok(scanner.text.includes('catch predicateFault:\n'));
+});
+
+test('readable module inspection refuses missing queries and does not execute source effects',async()=>{
+ const module={protocol:'temple/surface-process-module/1',queries:{probe:[{port:'forbidden.effect',args:{},into:'ignored'}]}};
+ const view=await run('sp.moduleView',{module,name:'probe'});assert.ok(view.text.includes('port forbidden.effect'));
+ await assert.rejects(run('sp.moduleView',{module,name:'missing'}),/SP-MODULE/);
+ await assert.rejects(run('sp.moduleView',{module:{...module,protocol:'unknown'},name:'probe'}),/SP-MODULE/);
+ await assert.rejects(run('sp.structure',{programme:[{unknown:true}],pointer:'/queries/probe',depth:0}),/SP-STRUCTURE/);
+});
+
+test('the module selector projects the bound query through the shared presenter using read-only DOM effects',async()=>{
+ const module=source('algebra/encounter-source.process.json'),effects=[];
+ await invoke({model,entry:'hierarchy.module.select',input:{data:{presentation:policy,sourceModule:module}},ports:{...valuePorts(),...computationalPorts(),'browser.property':()=> 'md.preview','browser.write':x=>{effects.push(x);return true},'browser.content':x=>{effects.push(x);return true}},nested:['kernel.invoke','kernel.execute','kernel.evaluate'],limit:20000000});
+ assert.ok(effects.find(x=>x.ref==='#module-readable').html.includes('md.preview'));assert.ok(effects.find(x=>x.ref==='#module-coordinates').html.includes('/queries/md.preview/'));
+ assert.ok(effects.find(x=>x.ref==='#module-pointer').value.includes('algebra/encounter-source.process.json'));
+});
+
+test('the standalone module page replaces the raw-JSON entrance and states the authoring boundary',()=>{
+ if(proposal)return; // The authoritative build is checked after the transaction stages it.
+ const page=fs.readFileSync('dist/inspection/source-algebra.html','utf8'),worldwright=fs.readFileSync('dist/inspection/worldwright.html','utf8');
+ assert.ok(worldwright.includes('href="source-algebra.html"'));assert.ok(page.includes('id="module-query"'));
+ for(const name of Object.keys(source('algebra/encounter-source.process.json').queries))assert.ok(page.includes('value="'+name+'"'));
+ assert.ok(page.includes('complete text-to-module authoring correspondence not yet qualified'));assert.ok(page.includes('Download authoritative JSON'));
+});
+
