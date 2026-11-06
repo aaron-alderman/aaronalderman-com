@@ -1,0 +1,37 @@
+{
+  "protocol": "encounter/process-batch-correspondence/1",
+  "baseline": "59242ea8cead1bd88dd741729305f71f2f774d1b",
+  "status": "JSON authoritative until author.run correspondence and validation pass",
+  "entries": [
+    {
+      "name": "microsite-projection",
+      "json": "algebra/microsite-projection.process.json",
+      "source": "source/microsites/projection.encounter",
+      "candidate": "source/process-authoring/batch-04/candidates/microsite-projection.encounter",
+      "frontend": "bootstrap/frontends/microsite-projection.json",
+      "profile": "source/process-authoring/batch-04/microsite-projection.profile.json",
+      "originalSha256": "b9448dd1a2425f1a937dbb38669718aa0ce3e0c9cc34b9baed138d80a5b9422f",
+      "queries": 3
+    },
+    {
+      "name": "microsites",
+      "json": "algebra/microsites.process.json",
+      "source": "source/microsites/publication.encounter",
+      "candidate": "source/process-authoring/batch-04/candidates/microsites.encounter",
+      "frontend": "bootstrap/frontends/microsites.json",
+      "profile": "source/process-authoring/batch-04/microsites.profile.json",
+      "originalSha256": "24311035a534f5a0b51a12b017c8c9c761fc365f2de0e128de0f231994ff1530",
+      "queries": 5
+    },
+    {
+      "name": "microsite-return",
+      "json": "algebra/microsite-return.process.json",
+      "source": "source/microsites/return.encounter",
+      "candidate": "source/process-authoring/batch-04/candidates/microsite-return.encounter",
+      "frontend": "bootstrap/frontends/microsite-return.json",
+      "profile": "source/process-authoring/batch-04/microsite-return.profile.json",
+      "originalSha256": "b1577362072e15d8033caf9ac5efeb80ce642a1ff8914762f4960816fea86c93",
+      "queries": 4
+    }
+  ]
+}

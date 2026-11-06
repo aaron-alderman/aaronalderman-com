@@ -17,8 +17,6 @@
     "source/atlas.rel",
     "algebra/publication.process.json",
     "algebra/gateway.process.json",
-    "algebra/microsite-projection.process.json",
-    "algebra/microsites.process.json",
     "algebra/front-doors.process.json",
     "algebra/claimipedia.process.json",
     "algebra/claimipedia-review.process.json",
@@ -44,7 +42,6 @@
     "source/hierarchy.rel",
     "algebra/hierarchy.process.json",
     "source/encounter/source-algebra.encounter",
-    "algebra/microsite-return.process.json",
     "source/encounter/encounter.encounter",
     "source/algebra/source.encounter",
     "source/microsites/ui.encounter",
@@ -55,7 +52,10 @@
     "source/microsites/motion.encounter",
     "source/microsites/temple-motion.encounter",
     "source/microsites/media.encounter",
-    "source/questions.rel"
+    "source/questions.rel",
+    "source/microsites/projection.encounter",
+    "source/microsites/publication.encounter",
+    "source/microsites/return.encounter"
   ],
   "grants": [
     "value.describe",
@@ -113,7 +113,8 @@
     "expansion.test.mjs",
     "expedition.test.mjs",
     "workshop.test.mjs",
-    "microsite-process-authoring.test.mjs"
+    "microsite-process-authoring.test.mjs",
+    "microsite-publication-process-authoring.test.mjs"
   ],
   "owners": {
     "facts": [
@@ -135,8 +136,6 @@
     "applicationProcesses": [
       "algebra/publication.process.json",
       "algebra/gateway.process.json",
-      "algebra/microsite-projection.process.json",
-      "algebra/microsites.process.json",
       "algebra/front-doors.process.json",
       "algebra/claimipedia.process.json",
       "algebra/claimipedia-review.process.json",
@@ -151,7 +150,6 @@
       "algebra/reader-workshop-publication.process.json",
       "algebra/hierarchy.process.json",
       "source/encounter/source-algebra.encounter",
-      "algebra/microsite-return.process.json",
       "source/encounter/encounter.encounter",
       "source/algebra/source.encounter",
       "source/microsites/ui.encounter",
@@ -161,7 +159,10 @@
       "source/microsites/lamp.encounter",
       "source/microsites/motion.encounter",
       "source/microsites/temple-motion.encounter",
-      "source/microsites/media.encounter"
+      "source/microsites/media.encounter",
+      "source/microsites/projection.encounter",
+      "source/microsites/publication.encounter",
+      "source/microsites/return.encounter"
     ],
     "authoringPolicy": [
       "algebra/authoring.process.json",
@@ -214,6 +215,18 @@
     "algebra/microsite-media.process.json": {
       "source": "source/microsites/media.encounter",
       "frontend": "bootstrap/frontends/microsite-media.json"
+    },
+    "algebra/microsite-projection.process.json": {
+      "source": "source/microsites/projection.encounter",
+      "frontend": "bootstrap/frontends/microsite-projection.json"
+    },
+    "algebra/microsites.process.json": {
+      "source": "source/microsites/publication.encounter",
+      "frontend": "bootstrap/frontends/microsites.json"
+    },
+    "algebra/microsite-return.process.json": {
+      "source": "source/microsites/return.encounter",
+      "frontend": "bootstrap/frontends/microsite-return.json"
     }
   },
   "processSources": [
@@ -238,7 +251,10 @@
       "bootstrap/frontends/microsite-lamp.json",
       "bootstrap/frontends/microsite-motion.json",
       "bootstrap/frontends/microsite-temple-motion.json",
-      "bootstrap/frontends/microsite-media.json"
+      "bootstrap/frontends/microsite-media.json",
+      "bootstrap/frontends/microsite-projection.json",
+      "bootstrap/frontends/microsites.json",
+      "bootstrap/frontends/microsite-return.json"
     ],
     "archiveRoot": "source/process-authoring/history"
   },
