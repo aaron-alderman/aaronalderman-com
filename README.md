@@ -1,5 +1,13 @@
 # Aaron Alderman — a personal expedition
 
+Encounter has its own microsite at `/encounter/`, alongside Temple, Sourcery, Claimipedia and Worldwright. Its live title example uses the existing `ec.prepare`, `ec.run` and `ec.patch` contracts. The story and row inherit the source title; the web menu retains its local label. Changes last for the browser session only; Reset restores the original source.
+
+`algebra/encounter-demo.process.json` owns the events, transitions, inspection choices and projections. `algebra/encounter.process.json` composes the page and admitted browser runtime through the main publication algebra. The three `encounter-code-*` modules are exact copies of the retained Encounter engine. No new interpreter, editor, native port implementation or execution-budget extension is introduced. `source/encounter/reuse.json` records reuse origins and hashes.
+
+Inspect exposes the Encounter definition, current session facts, closed type contracts, change process and inspector's own process. Shared `source.lex`, `sp.present`, `sp.listing`, HTML and CSS algebras provide highlighting and readable process listings. The digest identifies the displayed text; definitions are not execution traces. Raw authoritative sources are linked below the inspector.
+
+`tooling/author-encounter.mjs` is development-time notation that emits the page/demo process definitions and presentation facts. It is not loaded in the browser or required by the build. After changing it, run `node tooling/author-encounter.mjs`, then `npm run build`. `node --test encounter-microsite.test.mjs` checks admission, contract-routed edits, refusals, source fidelity, highlighting, self-inspection and reset, and pins the reused engine and unchanged kernel budget.
+
 “Inside the mind of a modern-day sourcerer.” A static personal site at https://aaronalderman.com/, with Worldwright credited as its supporting platform.
 
 The current publication is owned by source/expedition.rel (identity, readings, sources, routes and compatibility aliases), source/presentation.rel (colour, layout, responsive rules and finite motion), and algebra/publication.process.json (page compilation, metadata, navigation and output policy). Edit these owners; dist/ is disposable output.

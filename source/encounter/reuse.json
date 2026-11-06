@@ -1,0 +1,26 @@
+{
+  "protocol": "encounter/microsite-reuse/1",
+  "kernel": "bootstrap/temple-seed.cjs unchanged",
+  "authoring": [
+    "ec.prepare",
+    "ec.run",
+    "ec.patch"
+  ],
+  "origin": "The existing retained Encounter workshop contracts, compiler and runtime. Copied without semantic changes into the main publication model.",
+  "presentation": "Shared sp.* and source.* lexical processes; only the text.sha256 port name maps to the already-admitted digest.sha256 mechanism.",
+  "sources": [
+    {
+      "file": "algebra/encounter-code-types.process.json",
+      "sha256": "1289d28de383f0b00e06d9e7ae323da31ad8460668afbb6c9e49e6b6daa79b05"
+    },
+    {
+      "file": "algebra/encounter-code-compiler.process.json",
+      "sha256": "4e2559bb1b560f30a245a9e71566005e7425825cb6f15e056a626ea1178582d9"
+    },
+    {
+      "file": "algebra/encounter-code-runtime.process.json",
+      "sha256": "4c7f7e56e0eb303b1419970f7895903b2e0581a3a27d3bb180a56424bdb64ffc"
+    }
+  ],
+  "boundary": "One bounded title-edit view through existing contracts. Session only. No persistence, general editor or second interpreter."
+}
