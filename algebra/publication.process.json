@@ -594,6 +594,13 @@
                       "$theme",
                       "key"
                     ],
+                    "\"]",
+                    ", .identity-catalogue[data-perspective=\"",
+                    [
+                      "one",
+                      "$theme",
+                      "key"
+                    ],
                     "\"]"
                   ],
                   "declarations": [
@@ -1479,9 +1486,10 @@
                                   "id": "identity-switch",
                                   "class": "identity-switch",
                                   "disabled": true,
-                                  "aria-label": "Discover another side of Aaron: change the theme",
+                                  "aria-label": "Discover another side of Aaron: change the perspective and projects",
                                   "aria-describedby": "identity-status",
-                                  "title": "A different side. Press to discover."
+                                  "title": "A different side. Press to discover.",
+                                  "aria-controls": "microsites"
                                 },
                                 "children": [
                                   "list",
@@ -1816,7 +1824,7 @@
           {
             "tag": "script",
             "attrs": {
-              "src": "identity-runtime.js?v=identity-cards-questions-1",
+              "src": "identity-runtime.js?v=identity-collections-1",
               "defer": true
             },
             "children": [
@@ -3226,15 +3234,41 @@
         "into": "_"
       },
       {
+        "port": "browser.content",
+        "args": {
+          "ref": "#microsites",
+          "html": "$chosen.catalogueHTML"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#microsites",
+          "name": "data-perspective",
+          "value": "$chosen.key"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#microsites",
+          "name": "aria-label",
+          "value": "$chosen.catalogueIntro"
+        },
+        "into": "_"
+      },
+      {
         "port": "browser.write",
         "args": {
           "ref": "#identity-status",
           "name": "textContent",
           "value": [
             "concat",
-            "Current theme: ",
+            "Now viewing Aaron as ",
             "$chosen.label",
-            ". Press again to discover another side."
+            ". Project selections and descriptions updated. Press again to discover another side."
           ]
         },
         "into": "_"
@@ -3277,6 +3311,113 @@
     ],
     "identity.runtime.build": [
       {
+        "port": "file.read",
+        "args": {
+          "path": "source/hierarchy.json"
+        },
+        "into": "identityText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$identityText"
+        },
+        "into": "identityCatalogue"
+      },
+      {
+        "fold": [
+          "subjects",
+          "isa",
+          "IdentityTheme"
+        ],
+        "as": "identitySubject",
+        "accumulator": "identityViews",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "identityKey",
+            "value": [
+              "one",
+              "$identitySubject",
+              "key"
+            ]
+          },
+          {
+            "call": "identity.catalogue.view"
+          },
+          {
+            "let": "input",
+            "value": "$result"
+          },
+          {
+            "call": "html.serialize"
+          }
+        ],
+        "yield": [
+          "append",
+          "$identityViews",
+          [
+            "list",
+            {
+              "key": [
+                "one",
+                "$identitySubject",
+                "key"
+              ],
+              "label": [
+                "one",
+                "$identitySubject",
+                "label"
+              ],
+              "copy": [
+                "one",
+                "$identitySubject",
+                "copy"
+              ],
+              "questionHref": [
+                "one",
+                "$identitySubject",
+                "questionHref"
+              ],
+              "questionCopy": [
+                "one",
+                "$identitySubject",
+                "questionCopy"
+              ],
+              "image": [
+                "one",
+                "$identitySubject",
+                "image"
+              ],
+              "questionsImage": [
+                "one",
+                "$identitySubject",
+                "questionsImage"
+              ],
+              "threadsImage": [
+                "one",
+                "$identitySubject",
+                "threadsImage"
+              ],
+              "atlasImage": [
+                "one",
+                "$identitySubject",
+                "atlasImage"
+              ],
+              "catalogueHTML": "$result",
+              "catalogueIntro": [
+                "one",
+                "$identitySubject",
+                "catalogueIntro"
+              ]
+            }
+          ]
+        ],
+        "into": "identityThemes"
+      },
+      {
         "port": "runtime.bundle",
         "args": {
           "entry": "identity.boot",
@@ -3291,62 +3432,7 @@
             "list"
           ],
           "data": {
-            "themes": [
-              "map",
-              [
-                "subjects",
-                "isa",
-                "IdentityTheme"
-              ],
-              "t",
-              {
-                "key": [
-                  "one",
-                  "$t",
-                  "key"
-                ],
-                "label": [
-                  "one",
-                  "$t",
-                  "label"
-                ],
-                "copy": [
-                  "one",
-                  "$t",
-                  "copy"
-                ],
-                "questionHref": [
-                  "one",
-                  "$t",
-                  "questionHref"
-                ],
-                "questionCopy": [
-                  "one",
-                  "$t",
-                  "questionCopy"
-                ],
-                "image": [
-                  "one",
-                  "$t",
-                  "image"
-                ],
-                "questionsImage": [
-                  "one",
-                  "$t",
-                  "questionsImage"
-                ],
-                "threadsImage": [
-                  "one",
-                  "$t",
-                  "threadsImage"
-                ],
-                "atlasImage": [
-                  "one",
-                  "$t",
-                  "atlasImage"
-                ]
-              }
-            ]
+            "themes": "$identityThemes"
           },
           "budget": 2000000
         },
