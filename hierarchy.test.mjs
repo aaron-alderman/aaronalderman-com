@@ -67,11 +67,27 @@ test('the opening fold has three illustrated entrances and moves questions and a
  const home=fs.readFileSync('dist/index.html','utf8'),hero=home.match(/<section class="hero home-entrance-fold"[\s\S]*?<\/section>/)?.[0];assert.ok(hero);
  assert.equal((hero.match(/class="begin-door"/g)||[]).length,3);
  for(const [href,label]of [['questions-sourcerer.html','Questions'],['gate.html','Threads'],['atlas.html','Atlas / Map']]){assert.ok(hero.includes('href="'+href+'"'));assert.ok(hero.includes('<h2>'+label+'</h2>'));}
- assert.equal((hero.match(/assets\/atlas\//g)||[]).length,3);assert.ok(!hero.includes('data-item='));assert.ok(home.indexOf('data-item="temple"')>home.indexOf('</section>'));
+ assert.equal((hero.match(/id="identity-card-(?:questions|threads|atlas)"/g)||[]).length,3);assert.ok(!hero.includes('data-item='));assert.ok(home.indexOf('data-item="temple"')>home.indexOf('</section>'));
  assert.ok(!home.includes('class="section first-trails"'));assert.ok(!home.includes('class="section atlas-portal"'));assert.equal((home.match(/class="hierarchy-section home-fold /g)||[]).length,4);
  const questions=fs.readFileSync('dist/questions.html','utf8');assert.ok(questions.includes('live like Jesus?'));for(const slug of ['laboratory','kenosis','care'])assert.ok(questions.includes('href="places/'+slug+'.html"'));
  const science=fs.readFileSync('dist/claimipedia-science/index.html','utf8');assert.ok(science.includes('<h1>Claimipedia Science</h1>'));assert.ok(science.includes('First use case'));assert.ok(science.includes('Relational Geometry Programme'));assert.ok(science.includes('href="https://aaron-alderman.github.io/spin23-relational-geometry/"'));
  const item=catalogue.items.find(i=>i.id==='worldwright');assert.equal(item.icon.tag,'svg');assert.ok(fs.existsSync('dist/relational-geometry/index.html'));
+});
+
+test('homepage bitmap emblems are deferred, size-bounded WebP thumbnails',()=>{
+ const emblems=catalogue.items.filter(item=>item.icon?.tag==='img');
+ assert.ok(emblems.length>0);
+ let total=0;
+ for(const item of emblems){
+  const {src,loading}=item.icon.attrs;
+  assert.equal(loading,'lazy',item.id);
+  assert.match(src,/^assets\/world-emblems\/optimized\/.*\.webp$/);
+  const bytes=fs.readFileSync('dist/'+src);total+=bytes.length;
+  assert.equal(bytes.subarray(0,4).toString(),'RIFF');
+  assert.equal(bytes.subarray(8,12).toString(),'WEBP');
+  assert.ok(bytes.length<80_000,item.id+' stays within the emblem budget');
+ }
+ assert.ok(total<250_000,'all homepage bitmap emblems stay below 250 kB');
 });
 
 test('Mission Control is a first-class Sourcery tool, linked from Science, with inspected sources and native workflow disclosure',()=>{
@@ -83,7 +99,7 @@ test('Mission Control is a first-class Sourcery tool, linked from Science, with 
  const icon=catalogue.items.find(i=>i.name==='Claimipedia Science').icon;assert.ok(icon.attrs.class.includes('science-emblem'));
 });
 
-test('purpose types distinguish all cards while Creator Studio completes six developing entries',()=>{const items=catalogue.items,home=fs.readFileSync('dist/index.html','utf8'),types=read('source/card-types.json').types;assert.equal(items.filter(i=>i.group==='progress').length,6);for(const item of items){assert.ok(types[item.type],item.id);assert.equal(item.typeLabel,types[item.type].label);assert.ok(home.includes('data-type="'+item.type+'"'));}const science=items.find(i=>i.id==='relational-geometry');assert.equal(science.icon.tag,'img');assert.ok(science.icon.attrs.src.endsWith('.png'));for(const asset of read('source/entry-card-art.json').assets){const b=fs.readFileSync('dist/'+asset.path);assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b[25],6);assert.equal(sha(b),asset.sha256);}const studio=fs.readFileSync('dist/creator-studio/index.html','utf8');assert.ok(studio.includes('<h1>Creator Studio</h1>'));assert.ok(studio.includes('still taking shape'));assert.ok(studio.includes('href="../encounter/"'));});
+test('purpose types distinguish all cards while Creator Studio completes six developing entries',()=>{const items=catalogue.items,home=fs.readFileSync('dist/index.html','utf8'),types=read('source/card-types.json').types;assert.equal(items.filter(i=>i.group==='progress').length,6);for(const item of items){assert.ok(types[item.type],item.id);assert.equal(item.typeLabel,types[item.type].label);assert.ok(home.includes('data-type="'+item.type+'"'));}const science=items.find(i=>i.id==='relational-geometry');assert.equal(science.icon.tag,'img');assert.ok(science.icon.attrs.src.endsWith('.webp'));for(const asset of read('source/entry-card-art.json').assets){const b=fs.readFileSync('dist/'+asset.path);assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b[25],6);assert.equal(sha(b),asset.sha256);}const studio=fs.readFileSync('dist/creator-studio/index.html','utf8');assert.ok(studio.includes('<h1>Creator Studio</h1>'));assert.ok(studio.includes('still taking shape'));assert.ok(studio.includes('href="../encounter/"'));});
 
 test('lived questions retain a personal Christian centre and open the bounded Field encounter',()=>{
  const questions=fs.readFileSync('dist/questions.html','utf8'),field=fs.readFileSync('dist/the-field/index.html','utf8');

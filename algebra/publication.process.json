@@ -1408,7 +1408,7 @@
                   "class": "hero-image",
                   "src": [
                     "one",
-                    "site",
+                    "identity.sourcerer",
                     "image"
                   ],
                   "alt": "",
@@ -1580,10 +1580,14 @@
                               {
                                 "tag": "img",
                                 "attrs": {
-                                  "src": "assets/atlas/unseen-v1.png",
+                                  "src": [
+                                    "one",
+                                    "identity.sourcerer",
+                                    "questionsImage"
+                                  ],
                                   "alt": "",
-                                  "width": 1774,
-                                  "height": 887,
+                                  "width": 768,
+                                  "height": 384,
                                   "decoding": "async",
                                   "id": "identity-card-questions"
                                 },
@@ -1646,10 +1650,14 @@
                               {
                                 "tag": "img",
                                 "attrs": {
-                                  "src": "assets/atlas/human-v1.png",
+                                  "src": [
+                                    "one",
+                                    "identity.sourcerer",
+                                    "threadsImage"
+                                  ],
                                   "alt": "",
-                                  "width": 1774,
-                                  "height": 887,
+                                  "width": 768,
+                                  "height": 384,
                                   "decoding": "async",
                                   "id": "identity-card-threads"
                                 },
@@ -1706,10 +1714,14 @@
                               {
                                 "tag": "img",
                                 "attrs": {
-                                  "src": "assets/atlas/overview-v1.png",
+                                  "src": [
+                                    "one",
+                                    "identity.sourcerer",
+                                    "atlasImage"
+                                  ],
                                   "alt": "",
-                                  "width": 1942,
-                                  "height": 809,
+                                  "width": 768,
+                                  "height": 320,
                                   "decoding": "async",
                                   "id": "identity-card-atlas"
                                 },
@@ -1824,98 +1836,11 @@
           {
             "tag": "script",
             "attrs": {
-              "src": "identity-runtime.js?v=identity-collections-1",
+              "src": "identity-runtime.js?v=identity-collections-optimized-1",
               "defer": true
             },
             "children": [
               "list"
-            ]
-          },
-          {
-            "tag": "div",
-            "attrs": {
-              "hidden": true,
-              "aria-hidden": "true"
-            },
-            "children": [
-              "map",
-              [
-                "subjects",
-                "isa",
-                "IdentityTheme"
-              ],
-              "theme",
-              {
-                "tag": "div",
-                "attrs": {},
-                "children": [
-                  "list",
-                  {
-                    "tag": "img",
-                    "attrs": {
-                      "src": [
-                        "one",
-                        "$theme",
-                        "image"
-                      ],
-                      "alt": "",
-                      "decoding": "async",
-                      "fetchpriority": "low"
-                    },
-                    "children": [
-                      "list"
-                    ]
-                  },
-                  {
-                    "tag": "img",
-                    "attrs": {
-                      "src": [
-                        "one",
-                        "$theme",
-                        "questionsImage"
-                      ],
-                      "alt": "",
-                      "decoding": "async",
-                      "fetchpriority": "low"
-                    },
-                    "children": [
-                      "list"
-                    ]
-                  },
-                  {
-                    "tag": "img",
-                    "attrs": {
-                      "src": [
-                        "one",
-                        "$theme",
-                        "threadsImage"
-                      ],
-                      "alt": "",
-                      "decoding": "async",
-                      "fetchpriority": "low"
-                    },
-                    "children": [
-                      "list"
-                    ]
-                  },
-                  {
-                    "tag": "img",
-                    "attrs": {
-                      "src": [
-                        "one",
-                        "$theme",
-                        "atlasImage"
-                      ],
-                      "alt": "",
-                      "decoding": "async",
-                      "fetchpriority": "low"
-                    },
-                    "children": [
-                      "list"
-                    ]
-                  }
-                ]
-              }
             ]
           }
         ]
