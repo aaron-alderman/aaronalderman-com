@@ -59,16 +59,18 @@ test('each identity can randomly reach every other identity without an immediate
    const ports={...valuePorts(),...computationalPorts({random:()=>random}),
     'state.get':({key})=>state.get(key),'state.set':({key,value})=>state.set(key,value),
     'browser.attribute':({ref,name,value})=>attributes[ref+':'+name]=value,
-    'browser.write':({ref,name,value})=>writes[ref+':'+name]=value};
+    'browser.write':({ref,name,value})=>writes[ref+':'+name]=value,'browser.content':({ref,html})=>writes[ref+':html']=html};
    await createKernel(ports,model.budget).run(model.queries['identity.change'],{model,data:model.data});
    const next=state.get('identity');assert.notEqual(next,current.key);reached.add(next);
    assert.equal(attributes['body:data-identity'],next);
+   assert.equal(attributes['#microsites:data-perspective'],next);
+   assert.equal(writes['#microsites:html'],model.data.themes.find(t=>t.key===next).catalogueHTML);
    assert.equal(attributes['#first-trails:href'],model.data.themes.find(t=>t.key===next).questionHref);
    assert.equal(attributes['#identity-background:src'],model.data.themes.find(t=>t.key===next).image);
    for(const card of ['questions','threads','atlas'])assert.equal(attributes['#identity-card-'+card+':src'],model.data.themes.find(t=>t.key===next)[card+'Image']);
    assert.equal(writes['#identity-word:textContent'],next+'.');
    assert.equal(writes['#identity-copy:textContent'],model.data.themes.find(t=>t.key===next).copy);
-   assert.match(writes['#identity-status:textContent'],new RegExp('Current theme: '+next));
+   assert.match(writes['#identity-status:textContent'],new RegExp('Now viewing Aaron as '+next));
   }
   assert.equal(reached.size,3);
  }
@@ -76,9 +78,9 @@ test('each identity can randomly reach every other identity without an immediate
 test('the homepage provides a native keyboard button and an announced theme status',()=>{
  const html=fs.readFileSync('dist/index.html','utf8');
  assert.match(html,/<button[^>]*id="identity-switch"/);
- assert.match(html,/aria-label="Discover another side of Aaron: change the theme"/);
+ assert.match(html,/aria-label="Discover another side of Aaron: change the perspective and projects"/);
  assert.match(html,/id="identity-status"[^>]*aria-live="polite"/);
- assert.match(html,/src="identity-runtime.js\?v=identity-lazy-webp-1" defer/);
+ assert.match(html,/src="identity-runtime.js\?v=identity-collections-optimized-1" defer/);
  assert.match(html,/<img[^>]*id="identity-background"/);
 });
 test('every identity publishes a distinct optimized hero image',()=>{
@@ -114,7 +116,10 @@ test('initial HTML requests only the active world; inactive artwork remains in t
  const fields=['image','questionsImage','threadsImage','atlasImage'];
  const all=model.data.themes.flatMap(theme=>fields.map(field=>theme[field]));
  const initial=fields.map(field=>model.data.themes[0][field]);
- const requested=Array.from(html.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g),m=>m[1]).filter(src=>all.includes(src));
+ const imageTags=Array.from(html.matchAll(/<img\b[^>]*>/g),m=>m[0]);
+ const worldTags=imageTags.filter(tag=>all.some(src=>tag.includes('src="'+src+'"')));
+ assert.ok(worldTags.every(tag=>initial.some(src=>tag.includes('src="'+src+'"'))),'inactive worlds do not enter the initial DOM');
+ const requested=worldTags.filter(tag=>!tag.includes('loading="lazy"')).map(tag=>tag.match(/src="([^"]+)"/)[1]);
  assert.deepEqual(requested,initial);
  assert.equal(requested.length,4);
  assert.ok(!html.includes('fetchpriority="low"'),'no eager offscreen world preload');

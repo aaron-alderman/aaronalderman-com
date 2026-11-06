@@ -122,15 +122,16 @@ test('lived questions retain a personal Christian centre and open the bounded Fi
 
 
 test('another side changes the question destination and label through the algebra for every role',async()=>{
- const programme=read('algebra/publication.process.json'),facts=parseRel(fs.readFileSync('source/hierarchy.rel','utf8'));
- const themes=facts.filter(f=>f.p==='isa'&&f.o==='IdentityTheme').map(f=>Object.fromEntries(['key','label','copy','image','questionHref','questionCopy','questionsImage','threadsImage','atlasImage'].map(p=>[p,facts.find(x=>x.s===f.s&&x.p===p)?.o])));
+ const programme=read('algebra/publication.process.json'),vm=require('node:vm'),context=vm.createContext({console});
+ const code=fs.readFileSync('dist/identity-runtime.js','utf8').replace(/startBrowser\(model,factIndex,grants\)\.catch[^\n]+/,'')+'\nglobalThis.capture=model;';vm.runInContext(code,context);
+ const themes=JSON.parse(JSON.stringify(context.capture.data.themes));
  assert.deepEqual(themes.map(t=>t.key),['sourcerer','author','dad','christian']);
  assert.equal(new Set(themes.map(t=>t.questionHref)).size,4);
  const model=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:'identity.change',queries:{'identity.change':programme.queries['identity.change']}},mode:'model',ports:valuePorts(),limit:20000000});
  const {computationalPorts}=require('./bootstrap/ports/browser-effects.cjs');
  for(const current of themes){const choices=themes.filter(t=>t.key!==current.key);for(let i=0;i<choices.length;i++){
   const effects=[],chosen=choices[i];
-  await invoke({model,entry:'identity.change',input:{data:{themes}},ports:{...valuePorts(),...computationalPorts(),'state.get':()=>current.key,'state.set':x=>{effects.push(x);return true},'random.values':()=>[(i+.1)/choices.length],'browser.attribute':x=>{effects.push(x);return true},'browser.write':x=>{effects.push(x);return true}},limit:20000000});
+  await invoke({model,entry:'identity.change',input:{data:{themes}},ports:{...valuePorts(),...computationalPorts(),'state.get':()=>current.key,'state.set':x=>{effects.push(x);return true},'random.values':()=>[(i+.1)/choices.length],'browser.attribute':x=>{effects.push(x);return true},'browser.write':x=>{effects.push(x);return true},'browser.content':x=>{effects.push(x);return true}},limit:20000000});
   assert.ok(effects.some(x=>x.ref==='#first-trails'&&x.name==='href'&&x.value===chosen.questionHref));
   assert.ok(effects.some(x=>x.ref==='#identity-question-copy'&&x.value===chosen.questionCopy));
   assert.ok(effects.some(x=>x.ref==='body'&&x.value===chosen.key));
@@ -166,4 +167,30 @@ test('four Questions worlds have their own admitted PNG, sharing metadata and re
  assert.ok(css.includes('prefers-reduced-motion: reduce'));assert.ok(css.includes('var(--q-focus)'));
  const field=fs.readFileSync('dist/the-field/index.html','utf8');assert.ok(field.includes('assets/questions/open-workshop-daylight-v2.png'));assert.ok(!field.includes('data-question-identity='));
  const programmes=read('algebra/publication.process.json');assert.ok(JSON.stringify(programmes.queries['publication.styles']).includes('questionColour'));assert.equal(read('bootstrap/site.json').executionBudget,20000000);
+});
+
+test('each homepage perspective curates real projects without changing their purpose or maturity',async()=>{
+ const {parseFragment}=await import('parse5'),vm=require('node:vm'),context=vm.createContext({console});
+ vm.runInContext(fs.readFileSync('dist/identity-runtime.js','utf8').replace(/startBrowser\(model,factIndex,grants\)\.catch[^\n]+/,'')+'\nglobalThis.capture=model;',context);
+ const themes=JSON.parse(JSON.stringify(context.capture.data.themes)),all=tree=>[tree,...(tree.childNodes??[]).flatMap(all)],attr=(node,name)=>node.attrs?.find(a=>a.name===name)?.value,text=node=>(node.value??'')+(node.childNodes??[]).map(text).join('');
+ const expected={sourcerer:['claimipedia','relational-geometry'],christian:['the-field','relationship-manager','claimipedia'],dad:['relationship-manager','the-field','workgarden'],author:['encounter','the-field','claimipedia']};
+ const shapes={sourcerer:['worldwright','kingdom','world-modelling','tradie','foundry','creator-studio'],christian:['kingdom','worldwright','creator-studio'],dad:['creator-studio','worldwright','kingdom'],author:['worldwright','creator-studio','world-modelling']};
+ const headlines=new Set();
+ for(const theme of themes){
+  const nodes=all(parseFragment(theme.catalogueHTML)),sections=nodes.filter(n=>n.nodeName==='section'),cards=nodes.filter(n=>n.nodeName==='article'),directory=nodes.find(n=>attr(n,'id')==='all-projects');
+  assert.equal(sections.length,4);assert.ok(directory);assert.equal(all(directory).filter(n=>n.nodeName==='a').length,catalogue.items.length);
+  assert.ok(!theme.catalogueHTML.includes('id="microsites"'));
+  const ids=nodes.map(n=>attr(n,'id')).filter(Boolean);assert.equal(new Set(ids).size,ids.length);
+  const section=key=>sections.find(n=>attr(n,'data-collection')===key),items=n=>all(n).filter(n=>n.nodeName==='article').map(n=>attr(n,'data-item'));
+  assert.deepEqual(items(section('foundation')),['temple','sourcery']);assert.deepEqual(items(section('application')),expected[theme.key]);assert.deepEqual(items(section('progress')),shapes[theme.key]);
+  headlines.add(text(all(section('application')).find(n=>n.nodeName==='h2')));
+  assert.equal(new Set(cards.map(n=>attr(n,'data-item'))).size,cards.length);
+  for(const card of cards){const id=attr(card,'data-item'),original=catalogue.items.find(x=>x.id===id);assert.ok(original);assert.equal(attr(card,'data-type'),original.type);assert.equal(attr(card,'data-perspective'),theme.key);assert.ok(text(card).includes(original.description),theme.key+' '+id+' definition');assert.ok(text(card).includes(original.status),theme.key+' '+id+' maturity');assert.ok(all(card).some(n=>n.nodeName==='a'&&attr(n,'href')===original.href));assert.ok(all(card).some(n=>attr(n,'class')==='identity-card-note'&&text(n).length>20));}
+  for(const img of nodes.filter(n=>n.nodeName==='img'))assert.ok(fs.existsSync('dist/'+attr(img,'src')),attr(img,'src'));
+  for(const link of nodes.filter(n=>n.nodeName==='a')){const href=attr(link,'href');if(href&&!/^(https?:|#)/.test(href))assert.ok(fs.existsSync('dist/'+href.split('#')[0]),href);}
+ }
+ assert.equal(headlines.size,4);
+ const home=fs.readFileSync('dist/index.html','utf8');assert.ok(home.includes(themes.find(t=>t.key==='sourcerer').catalogueHTML));assert.equal((home.match(/id="microsites"/g)||[]).length,1);assert.ok(home.includes('aria-controls="microsites"'));
+ const css=fs.readFileSync('dist/expedition.css','utf8');for(const type of Object.keys(read('source/card-types.json').types))assert.ok(css.includes('#microsites.identity-catalogue .hierarchy-card[data-type="'+type+'"]'));
+ const programme=read('algebra/publication.process.json');assert.ok(JSON.stringify(programme.queries['identity.runtime.build']).includes('identity.catalogue.view'));assert.ok(JSON.stringify(read('algebra/hierarchy.process.json').queries['hierarchy.home']).includes('identity.catalogue.view'));assert.equal(read('bootstrap/site.json').executionBudget,20000000);
 });
