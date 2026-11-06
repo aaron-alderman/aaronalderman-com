@@ -107,7 +107,7 @@ test('lived questions retain a personal Christian centre and open the bounded Fi
 
 test('another side changes the question destination and label through the algebra for every role',async()=>{
  const programme=read('algebra/publication.process.json'),facts=parseRel(fs.readFileSync('source/hierarchy.rel','utf8'));
- const themes=facts.filter(f=>f.p==='isa'&&f.o==='IdentityTheme').map(f=>Object.fromEntries(['key','label','copy','image','questionsImage','threadsImage','atlasImage','questionHref','questionCopy'].map(p=>[p,facts.find(x=>x.s===f.s&&x.p===p)?.o])));
+ const themes=facts.filter(f=>f.p==='isa'&&f.o==='IdentityTheme').map(f=>Object.fromEntries(['key','label','copy','image','questionHref','questionCopy','questionsImage','threadsImage','atlasImage'].map(p=>[p,facts.find(x=>x.s===f.s&&x.p===p)?.o])));
  assert.deepEqual(themes.map(t=>t.key),['sourcerer','author','dad','christian']);
  assert.equal(new Set(themes.map(t=>t.questionHref)).size,4);
  const model=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:'identity.change',queries:{'identity.change':programme.queries['identity.change']}},mode:'model',ports:valuePorts(),limit:20000000});
@@ -118,6 +118,7 @@ test('another side changes the question destination and label through the algebr
   assert.ok(effects.some(x=>x.ref==='#first-trails'&&x.name==='href'&&x.value===chosen.questionHref));
   assert.ok(effects.some(x=>x.ref==='#identity-question-copy'&&x.value===chosen.questionCopy));
   assert.ok(effects.some(x=>x.ref==='body'&&x.value===chosen.key));
+  for(const card of ['questions','threads','atlas'])assert.ok(effects.some(x=>x.ref==='#identity-card-'+card&&x.name==='src'&&x.value===chosen[card+'Image']));
  }}
  const home=fs.readFileSync('dist/index.html','utf8');assert.ok(home.includes('href="questions-sourcerer.html"'));assert.ok(home.includes('How do I build software that earns trust?'));
  for(const theme of themes){const html=fs.readFileSync('dist/'+theme.questionHref,'utf8');assert.ok(html.includes('<h1'));assert.ok(html.includes('Questions from another side'));for(const other of themes)assert.ok(html.includes('href="'+other.questionHref+'"'));}
