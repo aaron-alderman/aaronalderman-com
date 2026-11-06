@@ -23,7 +23,9 @@
           "list"
         ]
       },
-      "links": []
+      "links": [],
+      "type": "execution",
+      "typeLabel": "Execution"
     },
     {
       "id": "sourcery",
@@ -47,7 +49,9 @@
           "list"
         ]
       },
-      "links": []
+      "links": [],
+      "type": "platform",
+      "typeLabel": "Platform"
     },
     {
       "id": "claimipedia",
@@ -71,7 +75,9 @@
           "list"
         ]
       },
-      "links": []
+      "links": [],
+      "type": "knowledge",
+      "typeLabel": "Knowledge"
     },
     {
       "id": "relational-geometry",
@@ -81,35 +87,18 @@
       "description": "Scientific inquiry with explicit models, evidence and reproducible checks.",
       "status": "Science & research",
       "icon": {
-        "tag": "svg",
+        "tag": "img",
         "attrs": {
-          "viewBox": "0 0 48 48",
-          "fill": "none",
-          "stroke": "currentColor",
-          "stroke-width": 1.6,
-          "stroke-linecap": "round",
-          "stroke-linejoin": "round",
-          "aria-hidden": "true",
-          "class": "hierarchy-icon science-emblem"
+          "src": "assets/world-emblems/claimipedia-science-v1.png",
+          "class": "world-emblem science-emblem",
+          "width": 128,
+          "height": 128,
+          "alt": "",
+          "decoding": "async",
+          "aria-hidden": "true"
         },
         "children": [
-          {
-            "tag": "circle",
-            "attrs": {
-              "cx": 24,
-              "cy": 24,
-              "r": 21,
-              "opacity": 0.35
-            },
-            "children": []
-          },
-          {
-            "tag": "path",
-            "attrs": {
-              "d": "M18 9h8v15h-8ZM22 24l-8 10M13 34h21M12 40h26M31 16a11 11 0 0 1 0 22H16M20 9V6h4v3M15 14h3"
-            },
-            "children": []
-          }
+          "list"
         ]
       },
       "links": [
@@ -130,7 +119,24 @@
       ],
       "relatedTools": [
         "mission-control"
-      ]
+      ],
+      "pageIcon": {
+        "tag": "img",
+        "attrs": {
+          "src": "../assets/world-emblems/claimipedia-science-v1.png",
+          "class": "world-emblem science-emblem",
+          "width": 128,
+          "height": 128,
+          "alt": "",
+          "decoding": "async",
+          "aria-hidden": "true"
+        },
+        "children": [
+          "list"
+        ]
+      },
+      "type": "research",
+      "typeLabel": "Research"
     },
     {
       "id": "worldwright",
@@ -170,7 +176,9 @@
           }
         ]
       },
-      "links": []
+      "links": [],
+      "type": "creation",
+      "typeLabel": "Creation"
     },
     {
       "id": "kingdom",
@@ -210,7 +218,9 @@
           "../gate.html#path-kingdom",
           "Read the sources"
         ]
-      ]
+      ],
+      "type": "coordination",
+      "typeLabel": "Coordination"
     },
     {
       "id": "world-modelling",
@@ -259,7 +269,9 @@
           "../places/possibility.html",
           "Explore possibility"
         ]
-      ]
+      ],
+      "type": "simulation",
+      "typeLabel": "Simulation"
     },
     {
       "id": "tradie",
@@ -299,7 +311,9 @@
           "../timesheet/",
           "Follow time and approval"
         ]
-      ]
+      ],
+      "type": "practice",
+      "typeLabel": "Practice"
     },
     {
       "id": "foundry",
@@ -339,7 +353,67 @@
           "../places/cost.html",
           "Consider constraints and cost"
         ]
-      ]
+      ],
+      "type": "simulation",
+      "typeLabel": "Simulation"
+    },
+    {
+      "id": "creator-studio",
+      "name": "Creator Studio",
+      "group": "progress",
+      "href": "creator-studio/",
+      "description": "Shape an idea as a story, a film or an interactive experience.",
+      "status": "In progress",
+      "icon": {
+        "tag": "img",
+        "attrs": {
+          "src": "assets/world-emblems/creator-studio-v1.png",
+          "class": "world-emblem",
+          "width": 128,
+          "height": 128,
+          "alt": "",
+          "decoding": "async",
+          "aria-hidden": "true"
+        },
+        "children": [
+          "list"
+        ]
+      },
+      "pageIcon": {
+        "tag": "img",
+        "attrs": {
+          "src": "../assets/world-emblems/creator-studio-v1.png",
+          "class": "world-emblem",
+          "width": 128,
+          "height": 128,
+          "alt": "",
+          "decoding": "async",
+          "aria-hidden": "true"
+        },
+        "children": [
+          "list"
+        ]
+      },
+      "links": [
+        [
+          "../claimipedia/",
+          "Explore Claimipedia"
+        ],
+        [
+          "../worldwright/",
+          "Explore Worldwright"
+        ],
+        [
+          "../creativity/",
+          "Follow the creative possibilities"
+        ],
+        [
+          "../encounter/",
+          "Try an editable encounter"
+        ]
+      ],
+      "type": "creation",
+      "typeLabel": "Creation"
     },
     {
       "id": "encounter",
@@ -379,7 +453,9 @@
           }
         ]
       },
-      "links": []
+      "links": [],
+      "type": "creation",
+      "typeLabel": "Creation"
     },
     {
       "id": "mission-control",
@@ -419,7 +495,9 @@
           "../claimipedia-science/",
           "Explore the science use case"
         ]
-      ]
+      ],
+      "type": "coordination",
+      "typeLabel": "Coordination"
     },
     {
       "id": "the-field",
@@ -459,7 +537,9 @@
           "../relationship-manager/",
           "Explore rupture and repair"
         ]
-      ]
+      ],
+      "type": "simulation",
+      "typeLabel": "Simulation"
     },
     {
       "id": "supercrm",
@@ -499,7 +579,9 @@
           "../harborboard/",
           "Explore work planning"
         ]
-      ]
+      ],
+      "type": "practice",
+      "typeLabel": "Practice"
     },
     {
       "id": "timesheet",
@@ -544,7 +626,9 @@
           "../tradie/",
           "Explore work and commitments"
         ]
-      ]
+      ],
+      "type": "practice",
+      "typeLabel": "Practice"
     },
     {
       "id": "workgarden",
@@ -580,7 +664,9 @@
           "../harborboard/",
           "Explore dependencies"
         ]
-      ]
+      ],
+      "type": "coordination",
+      "typeLabel": "Coordination"
     },
     {
       "id": "harborboard",
@@ -616,7 +702,9 @@
           "../workgarden/",
           "Explore the work queue"
         ]
-      ]
+      ],
+      "type": "coordination",
+      "typeLabel": "Coordination"
     },
     {
       "id": "relationship-manager",
@@ -656,8 +744,66 @@
           "../places/care.html",
           "Remember care"
         ]
-      ]
+      ],
+      "type": "care",
+      "typeLabel": "Care"
     }
   ],
-  "sourceBindings": "source/hierarchy-evidence.json"
+  "sourceBindings": "source/hierarchy-evidence.json",
+  "cardTypes": {
+    "execution": {
+      "label": "Execution",
+      "light": "#f1cf87",
+      "wash": "#9e762d24",
+      "edge": "#c5a15a70"
+    },
+    "platform": {
+      "label": "Platform",
+      "light": "#d6b5f3",
+      "wash": "#9666bb24",
+      "edge": "#b58bd270"
+    },
+    "knowledge": {
+      "label": "Knowledge",
+      "light": "#a9dec8",
+      "wash": "#3d9f7d24",
+      "edge": "#7dbfa670"
+    },
+    "research": {
+      "label": "Research",
+      "light": "#a7d9ff",
+      "wash": "#397fae2b",
+      "edge": "#78bae570"
+    },
+    "creation": {
+      "label": "Creation",
+      "light": "#f4b8d0",
+      "wash": "#b85f8b29",
+      "edge": "#d28aa970"
+    },
+    "simulation": {
+      "label": "Simulation",
+      "light": "#c7c0ff",
+      "wash": "#7463c42b",
+      "edge": "#a598e770"
+    },
+    "coordination": {
+      "label": "Coordination",
+      "light": "#edcc9b",
+      "wash": "#b88b4229",
+      "edge": "#d3ab6e70"
+    },
+    "practice": {
+      "label": "Practice",
+      "light": "#ffc5a3",
+      "wash": "#b9663926",
+      "edge": "#db9e7b70"
+    },
+    "care": {
+      "label": "Care",
+      "light": "#a5dfdf",
+      "wash": "#3e9f9f26",
+      "edge": "#7abbbb70"
+    }
+  }
 }

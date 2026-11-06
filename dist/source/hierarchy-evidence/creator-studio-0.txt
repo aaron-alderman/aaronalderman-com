@@ -1,0 +1,35 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+test("Creative Studio is a scan-first responsive workspace index", async () => {
+  const [runtime, styles] = await Promise.all([
+    readFile("applications/claimipedia/ui/app.js", "utf8"),
+    readFile("applications/claimipedia/ui/styles.css", "utf8"),
+  ]);
+
+  assert.match(runtime, /class="studio-library"/u);
+  assert.match(runtime, /class="studio-grid"/u);
+  assert.match(runtime, /class="studio-card" data-state=/u);
+  assert.match(runtime, /data-icon="navigation\.next"/u);
+  assert.match(runtime, /Creative force is not evidence\./u);
+  assert.match(runtime, /Bounded · '\+esc\(project\.localCustody\?\.availableAssets/u);
+  assert.match(runtime, /no publication permission/u);
+
+  for (const destination of [
+    "/media/how-sourcery-works-cartoon-program.html",
+    "/media/how-sourcery-works-continuous-animatic.html",
+    "/artifact/claimipedia-origin/movie",
+    "/media/interactive-story-compositor.html",
+    "/#/studio/media/",
+  ]) {
+    assert.ok(runtime.includes(destination), `${destination} is absent from the Studio`);
+  }
+
+  assert.match(styles, /\.studio-grid\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/u);
+  assert.match(styles, /\.studio-card:hover,\.studio-card:focus-visible/u);
+  assert.match(styles, /\.studio-card h2\{min-height:4\.32em/u);
+  assert.match(styles, /\.studio-card\[data-state="ready"\] small\{color:var\(--path-cyan\)\}/u);
+  assert.match(styles, /@media\(max-width:1100px\)\{\.studio-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/u);
+  assert.match(styles, /@media\(max-width:700px\)[^}]*\{[^}]*\.studio-library>header,\.studio-boundary\{grid-template-columns:1fr\}\.studio-grid\{grid-template-columns:1fr\}/u);
+});
