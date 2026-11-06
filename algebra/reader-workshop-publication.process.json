@@ -1,0 +1,823 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "readerworkshop.build": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/reader/navigation.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/reader/navigation.json"
+        },
+        "into": "sourceText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$sourceText"
+        },
+        "into": "navigation"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/reader/source-receipts.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/reader/source-receipts.json"
+        },
+        "into": "sourceText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$sourceText"
+        },
+        "into": "readerReceipts"
+      },
+      {
+        "fold": [
+          "subjects",
+          "isa",
+          "SourceNote"
+        ],
+        "as": "note",
+        "accumulator": "notes",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "text.slice",
+            "args": {
+              "value": "$note",
+              "start": 5
+            },
+            "into": "sourceKey"
+          }
+        ],
+        "yield": [
+          "append",
+          "$notes",
+          [
+            "list",
+            {
+              "id": "$note",
+              "title": [
+                "one",
+                "$note",
+                "title"
+              ],
+              "kind": [
+                "one",
+                "$note",
+                "kind"
+              ],
+              "note": [
+                "one",
+                "$note",
+                "note"
+              ],
+              "paragraphs": [
+                "objects",
+                "$note",
+                "paragraph"
+              ],
+              "href": [
+                "optional",
+                "$note",
+                "href"
+              ],
+              "receipt": [
+                "or",
+                [
+                  "at",
+                  "$readerReceipts",
+                  "$sourceKey"
+                ],
+                null
+              ]
+            }
+          ]
+        ],
+        "into": "notes"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/reader/activities.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/reader/activities.json"
+        },
+        "into": "sourceText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$sourceText"
+        },
+        "into": "activities"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/workshop/provenance.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/workshop/provenance.json"
+        },
+        "into": "sourceText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$sourceText"
+        },
+        "into": "provenance"
+      },
+      {
+        "port": "record.fromEntries",
+        "args": {
+          "entries": [
+            "map",
+            [
+              "subjects",
+              "isa",
+              "Place"
+            ],
+            "place",
+            [
+              "list",
+              [
+                "one",
+                "$place",
+                "slug"
+              ],
+              {
+                "region": [
+                  "one",
+                  "$place",
+                  "region"
+                ],
+                "title": [
+                  "one",
+                  "$place",
+                  "title"
+                ],
+                "lead": [
+                  "one",
+                  "$place",
+                  "lead"
+                ],
+                "light": [
+                  "one",
+                  "$place",
+                  "light"
+                ],
+                "sourceTitle": [
+                  "one",
+                  [
+                    "one",
+                    "$place",
+                    "source"
+                  ],
+                  "title"
+                ]
+              }
+            ]
+          ]
+        },
+        "into": "places"
+      },
+      {
+        "let": "readerData",
+        "value": {
+          "ids": [
+            "map",
+            [
+              "subjects",
+              "isa",
+              "Place"
+            ],
+            "place",
+            [
+              "one",
+              "$place",
+              "slug"
+            ]
+          ],
+          "places": "$places",
+          "echoes": "$activities.echoes",
+          "notes": "$notes",
+          "navigation": "$navigation"
+        }
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "reader.boot",
+          "mode": "browser",
+          "grantProfile": "readerBrowser",
+          "queries": [
+            "list",
+            "reader.boot",
+            "reader.motion.sync",
+            "reader.route",
+            "reader.click",
+            "reader.atlas",
+            "reader.search",
+            "reader.notes",
+            "html.escape",
+            "html.serialize",
+            "html.observe",
+            "html.inspect",
+            "html.cssText",
+            "reader.hashLink",
+            "reader.skip",
+            "reader.backdrop"
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "data": "$readerData",
+          "budget": 20000000
+        },
+        "into": "bundle"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "reader/runtime.js",
+          "text": "$bundle"
+        },
+        "into": "_"
+      },
+      {
+        "port": "record.fromEntries",
+        "args": {
+          "entries": [
+            "map",
+            "$notes",
+            "note",
+            [
+              "list",
+              "$note.id",
+              "$note"
+            ]
+          ]
+        },
+        "into": "sourceNotes"
+      },
+      {
+        "port": "record.put",
+        "args": {
+          "record": "$activities",
+          "key": "notes",
+          "value": "$sourceNotes"
+        },
+        "into": "activities"
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "activity.boot",
+          "mode": "browser",
+          "grantProfile": "activityBrowser",
+          "queries": [
+            "list",
+            "reader.model.calibration",
+            "reader.model.pairs",
+            "reader.model.inflate",
+            "reader.model.decode",
+            "reader.model.weights",
+            "reader.model.memory",
+            "reader.model.line",
+            "reader.model.coarse",
+            "activity.boot",
+            "activity.motion",
+            "activity.calculations",
+            "activity.click",
+            "activity.input",
+            "activity.action.reply",
+            "activity.action.door",
+            "activity.action.quiet",
+            "activity.action.cabinet",
+            "activity.action.layer",
+            "activity.action.revision",
+            "activity.action.deck",
+            "activity.action.garden-mode",
+            "activity.garden",
+            "activity.action.gate",
+            "activity.action.hide-memory",
+            "activity.action.couple-memory",
+            "activity.action.origin",
+            "activity.action.enrich",
+            "activity.erasure",
+            "activity.action.attention",
+            "activity.action.inflate",
+            "activity.action.reset-pattern",
+            "activity.action.original-bit",
+            "activity.action.flip-bit",
+            "activity.code",
+            "activity.action.rate",
+            "activity.action.scale",
+            "activity.action.amplitude",
+            "activity.action.phase",
+            "activity.action.loop-reset",
+            "activity.action.loop",
+            "activity.loop.frame",
+            "html.escape",
+            "html.serialize",
+            "html.observe",
+            "html.inspect",
+            "html.cssText",
+            "activity.source",
+            "activity.source.close",
+            "activity.source.backdrop"
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "data": "$activities",
+          "budget": 20000000
+        },
+        "into": "bundle"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "reader/activity-runtime.js",
+          "text": "$bundle"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/encounter/example.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/encounter/example.json"
+        },
+        "into": "sourceText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$sourceText"
+        },
+        "into": "workshopInputs"
+      },
+      {
+        "port": "record.fromEntries",
+        "args": {
+          "entries": [
+            "list",
+            [
+              "list",
+              "ec.resolve",
+              [
+                "at",
+                "$model.queries",
+                "ec.resolve"
+              ]
+            ],
+            [
+              "list",
+              "ec.patch",
+              [
+                "at",
+                "$model.queries",
+                "ec.patch"
+              ]
+            ],
+            [
+              "list",
+              "html.serialize",
+              [
+                "at",
+                "$model.queries",
+                "html.serialize"
+              ]
+            ],
+            [
+              "list",
+              "lab.edit",
+              [
+                "at",
+                "$model.queries",
+                "lab.edit"
+              ]
+            ],
+            [
+              "list",
+              "ec.run",
+              [
+                "at",
+                "$model.queries",
+                "ec.run"
+              ]
+            ],
+            [
+              "list",
+              "workshop.change",
+              [
+                "at",
+                "$model.queries",
+                "workshop.change"
+              ]
+            ],
+            [
+              "list",
+              "workshop.snapshot",
+              [
+                "at",
+                "$model.queries",
+                "workshop.snapshot"
+              ]
+            ]
+          ]
+        },
+        "into": "processes"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/encounter/presentation.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/encounter/presentation.json"
+        },
+        "into": "presentationJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$presentationJSON"
+        },
+        "into": "workshopPresentation"
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "workshop.boot",
+          "mode": "browser",
+          "grantProfile": "workshopBrowser",
+          "queries": [
+            "append",
+            [
+              "list",
+              "source.rel",
+              "source.compile",
+              "source.encode",
+              "source.patch",
+              "source.jsonSpan",
+              "facts.index",
+              "lower.scan",
+              "lower.fresh",
+              "lower.template",
+              "lower.expression",
+              "lower.programme",
+              "lower.model",
+              "lower.start",
+              "admit.binding",
+              "admit.expression",
+              "admit.programme",
+              "admit.model",
+              "admit.effects.programme",
+              "admit.effects",
+              "admit.ownership",
+              "html.escape",
+              "html.serialize",
+              "html.observe",
+              "html.inspect",
+              "html.cssText",
+              "ec.schema",
+              "ec.slot",
+              "ec.scalar",
+              "ec.check",
+              "ec.referenceType",
+              "ec.fact",
+              "ec.reference",
+              "ec.argument",
+              "ec.lex",
+              "ec.header",
+              "ec.expression",
+              "ec.fields",
+              "ec.data",
+              "ec.record",
+              "ec.representation",
+              "ec.view",
+              "ec.edits",
+              "ec.show",
+              "ec.emitView",
+              "ec.emitRepresentation",
+              "ec.compile",
+              "ec.attempt",
+              "ec.complete",
+              "ec.verifyShow",
+              "ec.verify",
+              "ec.oneField",
+              "ec.prepare",
+              "ec.resolve",
+              "ec.safeTree",
+              "ec.events",
+              "ec.run",
+              "ec.patch",
+              "ec.findElement",
+              "language.refuse",
+              "language.line",
+              "language.module",
+              "language.entity",
+              "language.property"
+            ],
+            [
+              "list",
+              "language.compile",
+              "lab.snapshot",
+              "lab.edit",
+              "workshop.boot",
+              "workshop.snapshot",
+              "workshop.change",
+              "workshop.diff",
+              "workshop.apply",
+              "workshop.selectTab",
+              "workshop.tab",
+              "workshop.key",
+              "workshop.source",
+              "workshop.routeFor",
+              "workshop.route",
+              "workshop.process",
+              "workshop.render",
+              "workshop.open",
+              "sp.role",
+              "sp.scan",
+              "sp.observed",
+              "sp.clip",
+              "sp.line",
+              "sp.render",
+              "sp.present",
+              "sp.expression",
+              "sp.programme",
+              "sp.statement",
+              "sp.listing",
+              "sp.style",
+              "sp.outline",
+              "sp.metadata",
+              "sp.stylePlan",
+              "source.split",
+              "source.lex",
+              "s01.portable",
+              "css.renderPlan",
+              "workshop.busy"
+            ]
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "data": {
+            "inputs": "$workshopInputs",
+            "hashes": "$provenance.hashes",
+            "processes": "$processes",
+            "presentation": "$workshopPresentation"
+          },
+          "budget": 20000000
+        },
+        "into": "bundle"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "workshop/runtime.js",
+          "text": "$bundle"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "retained/workshop/runtime.js",
+          "text": "$bundle"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/reader/document.html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/reader/document.html"
+        },
+        "into": "document"
+      },
+      {
+        "port": "text.replaceAll",
+        "args": {
+          "value": "$document",
+          "search": "__READER_BASE__",
+          "replacement": "./"
+        },
+        "into": "projectedDocument"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "reader.html",
+          "text": "$projectedDocument"
+        },
+        "into": "_"
+      },
+      {
+        "port": "text.replaceAll",
+        "args": {
+          "value": "$document",
+          "search": "__READER_BASE__",
+          "replacement": "../"
+        },
+        "into": "projectedDocument"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "retained/index.html",
+          "text": "$projectedDocument"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/reader/activity.html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/reader/activity.html"
+        },
+        "into": "document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "retained/activity.html",
+          "text": "$document"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/reader/reader.css"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/reader/reader.css"
+        },
+        "into": "document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "reader/reader.css",
+          "text": "$document"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/workshop/document.html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/workshop/document.html"
+        },
+        "into": "document"
+      },
+      {
+        "port": "text.replaceAll",
+        "args": {
+          "value": "$document",
+          "search": "__READER_RETURN__",
+          "replacement": "../reader.html#workshop"
+        },
+        "into": "projectedDocument"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "workshop/index.html",
+          "text": "$projectedDocument"
+        },
+        "into": "_"
+      },
+      {
+        "port": "text.replaceAll",
+        "args": {
+          "value": "$document",
+          "search": "__READER_RETURN__",
+          "replacement": "../../reader.html#workshop"
+        },
+        "into": "projectedDocument"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "retained/workshop/index.html",
+          "text": "$projectedDocument"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.remove",
+        "args": {
+          "path": "source/reader/document.html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.remove",
+        "args": {
+          "path": "source/reader/activity.html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.remove",
+        "args": {
+          "path": "source/workshop/document.html"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/workshop/README.txt"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/workshop/README.txt"
+        },
+        "into": "workshopReadme"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "workshop/README.txt",
+          "text": "$workshopReadme"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "retained/workshop/README.txt",
+          "text": "$workshopReadme"
+        },
+        "into": "_"
+      }
+    ]
+  }
+}

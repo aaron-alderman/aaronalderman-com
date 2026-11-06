@@ -46,6 +46,7 @@ async function createNodeHost({root: inputRoot, output = 'dist'}) {
   const ports = {
     'file.write': ({path: file, text}) => write(file, text),
     'file.read': async ({path: file}) => fs.readFile(await checked(out, file), 'utf8'),
+    'file.remove': async ({path:file}) => {try{await fs.unlink(await checked(out,file));}catch(error){if(error.code!=='ENOENT')throw error;}delete artifacts[file];return true;},
     'file.copy': async ({path: file}) => {
       const bytes = await fs.readFile(await checked(root, file));
       sources[file] = digest(bytes);

@@ -10,7 +10,7 @@ test('every embedded activity keeps its artwork visible independently of reader 
  assert.ok(fs.readFileSync('dist/retained/activity.html','utf8').includes('../activity.css?v=layout-2'));
  for(const id of Object.keys(scenes)){
   const html=fs.readFileSync('dist/places/'+id+'.html','utf8');
-  assert.ok(html.includes('../retained/activity.html?v=layout-2#'+id),id+' requests the corrected embed document');
+  assert.ok(html.includes('../retained/activity.html?v=algebra-1#'+id),id+' requests the corrected embed document');
   assert.ok(html.includes('loading="lazy"'),id+' retains deferred loading');
  }
 });

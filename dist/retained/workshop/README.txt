@@ -1,18 +1,25 @@
 THE WORKSHOP
 
-This is a supplied explanatory example, not the complete authoring environment.
-Serve this directory with any static HTTP server; no external account or API is needed.
-The Temple kernel and existing algebra run in a browser worker. Changes stay in
-that tab and reset on reload. Presentation and volatile retention are native host code.
+The current workshop is composed from source/workshop/document.html and the
+workshop-session.process.json and workshop-lab.process.json algebras. The checked
+language, types and reverse routes reuse ec.prepare, ec.run and ec.patch.
 
-All pinned semantic owners and native sources are in sources/.
-To change the supplied facts, contracts or projection rules, edit their owners
-under sources/ and run: node regenerate.cjs
-This recompiles, lowers and admits the fixture; no dependency install or external
-checkout is needed. To change the native implementation itself, repackage the
-corresponding ESM boundaries in temple-native.js and review their new identities.
+The session, its revisions, stale-basis checks, source/overlay edits, HTML views,
+source inspection, tabs, receipts and preview navigation all run as admitted
+Temple processes. Changes remain in this tab and reset on reload. No worker or
+application JavaScript interpreter is used. Generic native ports observe or
+modify browser elements, present sandboxed checked HTML, and invoke the kernel.
 
-The two GUI edits invoke lab.edit -> ec.patch, then rebuild and forward-check.
-The web preview binds the checked page-open descriptor; row actions are not
-bound. No shared state, publication, repository mutation or external effects
-are granted by this example. Automated checks are not independent verification.
+The authoritative input is source/encounter/example.json in the site repository.
+Propose source, presentation or process changes with npm run author -- proposal.json
+from the repository root; npm run build regenerates the publication. The old
+regenerate.cjs and browser application modules are not published.
+
+Files under sources/ are the byte-pinned predecessor contracts, programmes and
+mechanisms used to qualify this bounded example. Their hashes identify that
+retained basis; they do not identify later volatile session edits. Comparison
+tests against one predecessor are one evidence family, not independent assurance.
+
+No account, shared record, repository mutation, network submission or external
+effect is granted by the workshop. A row action is displayed but not bound; the
+menu's checked page-open descriptor is the only preview navigation action.
