@@ -60,3 +60,5 @@ const view=gateway.queries['gateway.view'][0].value,gateHero=view[1],hall=view[2
 const card=hall.children[2].children[3];card.attrs.id=C('path-',one('$door','slug'));card.children.find(v=>v?.tag==='h3').children[1].children=L(one('$door','readingName'));
 hall.children[3].children=L('The paths through faith, open questions and shared worlds are editorial invitations; they do not define future microsites.');
 const bottom=view[3].children[2].children[2];bottom.attrs.href='index.html#microsites';bottom.children=L('Explore the project microsites →');save('algebra/gateway.process.json',gateway);
+
+await import('./author-world-entrances.mjs');

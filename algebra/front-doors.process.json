@@ -3,6 +3,171 @@
   "queries": {
     "frontdoors.home": [
       {
+        "fold": [
+          "subjects",
+          "isa",
+          "PublishedMicrosite"
+        ],
+        "as": "world",
+        "accumulator": "cards",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "json.parse",
+            "args": {
+              "text": [
+                "one",
+                "$world",
+                "icon"
+              ]
+            },
+            "into": "emblem"
+          }
+        ],
+        "yield": [
+          "append",
+          "$cards",
+          [
+            "list",
+            {
+              "tag": "a",
+              "attrs": {
+                "class": "microsite-link",
+                "href": [
+                  "one",
+                  "$world",
+                  "href"
+                ],
+                "data-world": [
+                  "one",
+                  "$world",
+                  "light"
+                ]
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "world-card-top"
+                  },
+                  "children": [
+                    "list",
+                    "$emblem",
+                    {
+                      "tag": "span",
+                      "attrs": {
+                        "class": "world-card-status"
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "one",
+                          "$world",
+                          "statusLabel"
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "strong",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "one",
+                      "$world",
+                      "name"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "world-card-note"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "one",
+                      "$world",
+                      "note"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "world-card-description"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "one",
+                      "$world",
+                      "description"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "world-card-detail"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "one",
+                      "$world",
+                      "detail"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "world-card-action"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "span",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "Explore ",
+                          [
+                            "one",
+                            "$world",
+                            "name"
+                          ]
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "span",
+                      "attrs": {
+                        "aria-hidden": "true"
+                      },
+                      "children": [
+                        "list",
+                        "↗"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        ],
+        "into": "cards"
+      },
+      {
         "let": "result",
         "value": {
           "tag": "nav",
@@ -30,73 +195,7 @@
               },
               "children": [
                 "list",
-                [
-                  "map",
-                  [
-                    "subjects",
-                    "isa",
-                    "PublishedMicrosite"
-                  ],
-                  "world",
-                  {
-                    "tag": "a",
-                    "attrs": {
-                      "class": "microsite-link",
-                      "href": [
-                        "one",
-                        "$world",
-                        "href"
-                      ],
-                      "data-world": [
-                        "one",
-                        "$world",
-                        "light"
-                      ]
-                    },
-                    "children": [
-                      "list",
-                      {
-                        "tag": "span",
-                        "attrs": {
-                          "class": "world-symbol",
-                          "aria-hidden": "true"
-                        },
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$world",
-                            "symbol"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "strong",
-                        "attrs": {},
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$world",
-                            "name"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "small",
-                        "attrs": {},
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$world",
-                            "note"
-                          ]
-                        ]
-                      }
-                    ]
-                  }
-                ]
+                "$cards"
               ]
             }
           ]
@@ -106,6 +205,391 @@
     "frontdoors.claimipedia": [
       {
         "call": "claimipedia.build"
+      }
+    ],
+    "frontdoors.worldwright": [
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Worldwright — A world taking shape"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "The supporting platform behind a growing family of worlds. A Worldwright microsite is taking shape."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "https://aaronalderman.com/worldwright/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "../expedition.css?v=worlds-2"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:type",
+                    "content": "website"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": "Worldwright — A world taking shape"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": "The supporting platform behind a growing family of worlds."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": "https://aaronalderman.com/worldwright/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image",
+                    "content": "https://aaronalderman.com/assets/sourcerer-threshold.png"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "twitter:card",
+                    "content": "summary_large_image"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "#main",
+                    "class": "skip"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to content"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {
+                    "class": "masthead"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "class": "brand",
+                        "href": "../index.html"
+                      },
+                      "children": [
+                        "list",
+                        "Aaron Alderman"
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Worldwright"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../index.html#microsites"
+                          },
+                          "children": [
+                            "list",
+                            "Explore the worlds"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../gate.html"
+                          },
+                          "children": [
+                            "list",
+                            "Reading paths"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "id": "main",
+                    "class": "worldwright-placeholder"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "svg",
+                      "attrs": {
+                        "viewBox": "0 0 80 80",
+                        "class": "world-emblem",
+                        "fill": "none",
+                        "stroke": "currentColor",
+                        "stroke-width": 1.25,
+                        "stroke-linecap": "round",
+                        "stroke-linejoin": "round",
+                        "aria-hidden": "true"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "circle",
+                          "attrs": {
+                            "cx": 40,
+                            "cy": 35,
+                            "r": 25
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "ellipse",
+                          "attrs": {
+                            "cx": 40,
+                            "cy": 35,
+                            "rx": 11,
+                            "ry": 25
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "path",
+                          "attrs": {
+                            "d": "M15 35h50M20 21q20 12 40 0M20 49q20-12 40 0M6 67h68M19 67v-7h42v7M40 5V1M10 9l6 6M64 15l6-6M40 35l8-8"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "circle",
+                          "attrs": {
+                            "cx": 40,
+                            "cy": 35,
+                            "r": 4
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "eyebrow"
+                      },
+                      "children": [
+                        "list",
+                        "Worldwright / In preparation"
+                      ]
+                    },
+                    {
+                      "tag": "h1",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "A world taking shape."
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "lead"
+                      },
+                      "children": [
+                        "list",
+                        "A supporting platform for ideas that become worlds."
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Temple, Sourcery and Claimipedia are distinct experiences. Worldwright is the supporting platform: a place to bring their shared language, tools and possibilities into view."
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "This is a placeholder for the future Worldwright microsite. For now, explore the worlds already open, or follow the research behind them."
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "class": "worldwright-links"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "class": "button",
+                            "href": "../temple/"
+                          },
+                          "children": [
+                            "list",
+                            "Temple ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "class": "button",
+                            "href": "../sourcery/"
+                          },
+                          "children": [
+                            "list",
+                            "Sourcery ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "class": "button",
+                            "href": "../claimipedia/"
+                          },
+                          "children": [
+                            "list",
+                            "Claimipedia ↗"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../gate.html"
+                      },
+                      "children": [
+                        "list",
+                        "Follow a thread through the corpus →"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "worldwright/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
       }
     ]
   }

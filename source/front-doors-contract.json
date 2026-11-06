@@ -20,5 +20,18 @@
     "motif": "source/claimipedia-motif.json",
     "stylesheet": "claimipedia/claimipedia.css?v=motif-2",
     "review": "algebra/claimipedia-review.process.json"
+  },
+  "entrances": {
+    "authoring": "tooling/author-world-entrances.mjs",
+    "icons": "Four inline SVG illustrations stored as REL plans and serialized by the algebra.",
+    "presentation": "Distinct gold, rose, sage and blue light; decorative orbital backgrounds; explanatory copy and native anchor cards.",
+    "worldwright": "worldwright/index.html is an explicitly labelled placeholder for the supporting platform.",
+    "stylesheet": "expedition.css?v=worlds-2",
+    "checks": [
+      "Desktop two-column and mobile single-column layout",
+      "No horizontal overflow at 390 CSS pixels",
+      "Keyboard Enter follows the Worldwright card",
+      "Reduced-motion CSS removes card animation and movement"
+    ]
   }
 }
