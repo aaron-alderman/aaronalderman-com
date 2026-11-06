@@ -31,7 +31,7 @@ node bootstrap/run.cjs . dist bootstrap/site.json
 node --test microsite-fidelity.test.mjs microsite-publication.test.mjs
 ```
 
-The authoring-only HTML/CSS/JavaScript parsers are listed with registry integrities in `authoring-tools.json`. They are installed under ignored `.build/authoring-deps/node_modules/`; they do not enter the build or browser closure. With those tools available, `node tooling/verify-microsite-presentation.mjs dist` repeats the complete parsed-document comparison. `tooling/author-*.mjs` are authoring shorthand that emits reviewable process JSON, not an alternative runtime.
+The authoring-only HTML/CSS/JavaScript parsers are listed with registry integrities in `authoring-tools.json`. They are installed under ignored `.build/authoring-deps/node_modules/`; they do not enter the build or browser closure. With those tools available, `node tooling/verify-microsite-presentation.mjs dist` repeats the complete parsed-document comparison. REL and process JSON are the sole current authoring definitions. Use `npm run author -- proposal.json` for algebra-governed changes. Previous generators are preserved as inert `.txt` evidence under `source/authoring-predecessors/`.
 
 ## Author-requested editorial successor
 

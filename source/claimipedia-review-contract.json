@@ -9,8 +9,7 @@
     "referenceResults": "source/claimipedia-correspondence.json"
   },
   "authoring": [
-    "node tooling/author-claimipedia-motif.mjs",
-    "node tooling/author-claimipedia-review.mjs"
+    "npm run author -- proposal.json; authoritative definitions are REL and process JSON, governed by source/authoring-contract.json"
   ],
   "semantics": [
     "All three methods read the same selected evidence IDs and claim version.",
