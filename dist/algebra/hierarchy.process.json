@@ -671,7 +671,7 @@
             {
               "tag": "section",
               "attrs": {
-                "class": "hierarchy-section",
+                "class": "hierarchy-section home-fold home-fold-foundation",
                 "id": "foundation"
               },
               "children": [
@@ -733,66 +733,113 @@
                         },
                         "children": [
                           "list",
-                          "$hItem.icon",
                           {
-                            "tag": "p",
+                            "tag": "div",
                             "attrs": {
-                              "class": "hierarchy-status"
+                              "class": "hierarchy-emblem"
                             },
                             "children": [
                               "list",
-                              "$hItem.status"
-                            ]
-                          },
-                          {
-                            "tag": "h3",
-                            "attrs": {},
-                            "children": [
-                              "list",
-                              "$hItem.name"
-                            ]
-                          },
-                          {
-                            "tag": "p",
-                            "attrs": {
-                              "class": "hierarchy-description"
-                            },
-                            "children": [
-                              "list",
-                              "$hItem.description"
+                              "$hItem.icon"
                             ]
                           },
                           {
                             "tag": "div",
                             "attrs": {
-                              "class": "hierarchy-actions"
+                              "class": "hierarchy-card-content"
                             },
                             "children": [
                               "list",
                               {
-                                "tag": "a",
+                                "tag": "p",
                                 "attrs": {
-                                  "href": "$hItem.href"
+                                  "class": "hierarchy-status"
                                 },
                                 "children": [
                                   "list",
-                                  "Explore ↗"
+                                  "$hItem.status"
                                 ]
                               },
                               {
-                                "tag": "a",
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$hItem.name"
+                                ]
+                              },
+                              {
+                                "tag": "p",
                                 "attrs": {
-                                  "class": "hierarchy-inspect",
-                                  "href": [
-                                    "concat",
-                                    "inspection/",
-                                    "$hItem.id",
-                                    ".html"
-                                  ]
+                                  "class": "hierarchy-description"
                                 },
                                 "children": [
                                   "list",
-                                  "Inspect"
+                                  "$hItem.description"
+                                ]
+                              },
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "hierarchy-usecase"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "First use case: ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Relational Geometry Programme"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                null
+                              ],
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "hierarchy-actions"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "$hItem.href"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Explore ↗"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "hierarchy-inspect",
+                                      "href": [
+                                        "concat",
+                                        "inspection/",
+                                        "$hItem.id",
+                                        ".html"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Inspect"
+                                    ]
+                                  }
                                 ]
                               }
                             ]
@@ -807,7 +854,7 @@
             {
               "tag": "section",
               "attrs": {
-                "class": "hierarchy-section",
+                "class": "hierarchy-section home-fold home-fold-applications",
                 "id": "applications"
               },
               "children": [
@@ -868,66 +915,113 @@
                         },
                         "children": [
                           "list",
-                          "$hItem.icon",
                           {
-                            "tag": "p",
+                            "tag": "div",
                             "attrs": {
-                              "class": "hierarchy-status"
+                              "class": "hierarchy-emblem"
                             },
                             "children": [
                               "list",
-                              "$hItem.status"
-                            ]
-                          },
-                          {
-                            "tag": "h3",
-                            "attrs": {},
-                            "children": [
-                              "list",
-                              "$hItem.name"
-                            ]
-                          },
-                          {
-                            "tag": "p",
-                            "attrs": {
-                              "class": "hierarchy-description"
-                            },
-                            "children": [
-                              "list",
-                              "$hItem.description"
+                              "$hItem.icon"
                             ]
                           },
                           {
                             "tag": "div",
                             "attrs": {
-                              "class": "hierarchy-actions"
+                              "class": "hierarchy-card-content"
                             },
                             "children": [
                               "list",
                               {
-                                "tag": "a",
+                                "tag": "p",
                                 "attrs": {
-                                  "href": "$hItem.href"
+                                  "class": "hierarchy-status"
                                 },
                                 "children": [
                                   "list",
-                                  "Explore ↗"
+                                  "$hItem.status"
                                 ]
                               },
                               {
-                                "tag": "a",
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$hItem.name"
+                                ]
+                              },
+                              {
+                                "tag": "p",
                                 "attrs": {
-                                  "class": "hierarchy-inspect",
-                                  "href": [
-                                    "concat",
-                                    "inspection/",
-                                    "$hItem.id",
-                                    ".html"
-                                  ]
+                                  "class": "hierarchy-description"
                                 },
                                 "children": [
                                   "list",
-                                  "Inspect"
+                                  "$hItem.description"
+                                ]
+                              },
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "hierarchy-usecase"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "First use case: ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Relational Geometry Programme"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                null
+                              ],
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "hierarchy-actions"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "$hItem.href"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Explore ↗"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "hierarchy-inspect",
+                                      "href": [
+                                        "concat",
+                                        "inspection/",
+                                        "$hItem.id",
+                                        ".html"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Inspect"
+                                    ]
+                                  }
                                 ]
                               }
                             ]
@@ -942,7 +1036,7 @@
             {
               "tag": "section",
               "attrs": {
-                "class": "hierarchy-section",
+                "class": "hierarchy-section home-fold home-fold-progress",
                 "id": "taking-shape"
               },
               "children": [
@@ -1003,66 +1097,113 @@
                         },
                         "children": [
                           "list",
-                          "$hItem.icon",
                           {
-                            "tag": "p",
+                            "tag": "div",
                             "attrs": {
-                              "class": "hierarchy-status"
+                              "class": "hierarchy-emblem"
                             },
                             "children": [
                               "list",
-                              "$hItem.status"
-                            ]
-                          },
-                          {
-                            "tag": "h3",
-                            "attrs": {},
-                            "children": [
-                              "list",
-                              "$hItem.name"
-                            ]
-                          },
-                          {
-                            "tag": "p",
-                            "attrs": {
-                              "class": "hierarchy-description"
-                            },
-                            "children": [
-                              "list",
-                              "$hItem.description"
+                              "$hItem.icon"
                             ]
                           },
                           {
                             "tag": "div",
                             "attrs": {
-                              "class": "hierarchy-actions"
+                              "class": "hierarchy-card-content"
                             },
                             "children": [
                               "list",
                               {
-                                "tag": "a",
+                                "tag": "p",
                                 "attrs": {
-                                  "href": "$hItem.href"
+                                  "class": "hierarchy-status"
                                 },
                                 "children": [
                                   "list",
-                                  "Explore ↗"
+                                  "$hItem.status"
                                 ]
                               },
                               {
-                                "tag": "a",
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$hItem.name"
+                                ]
+                              },
+                              {
+                                "tag": "p",
                                 "attrs": {
-                                  "class": "hierarchy-inspect",
-                                  "href": [
-                                    "concat",
-                                    "inspection/",
-                                    "$hItem.id",
-                                    ".html"
-                                  ]
+                                  "class": "hierarchy-description"
                                 },
                                 "children": [
                                   "list",
-                                  "Inspect"
+                                  "$hItem.description"
+                                ]
+                              },
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "hierarchy-usecase"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "First use case: ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Relational Geometry Programme"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                null
+                              ],
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "hierarchy-actions"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "$hItem.href"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Explore ↗"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "hierarchy-inspect",
+                                      "href": [
+                                        "concat",
+                                        "inspection/",
+                                        "$hItem.id",
+                                        ".html"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Inspect"
+                                    ]
+                                  }
                                 ]
                               }
                             ]
@@ -1077,7 +1218,7 @@
             {
               "tag": "section",
               "attrs": {
-                "class": "hierarchy-section",
+                "class": "hierarchy-section home-fold home-fold-tooling",
                 "id": "tooling"
               },
               "children": [
@@ -1138,66 +1279,113 @@
                         },
                         "children": [
                           "list",
-                          "$hItem.icon",
                           {
-                            "tag": "p",
+                            "tag": "div",
                             "attrs": {
-                              "class": "hierarchy-status"
+                              "class": "hierarchy-emblem"
                             },
                             "children": [
                               "list",
-                              "$hItem.status"
-                            ]
-                          },
-                          {
-                            "tag": "h3",
-                            "attrs": {},
-                            "children": [
-                              "list",
-                              "$hItem.name"
-                            ]
-                          },
-                          {
-                            "tag": "p",
-                            "attrs": {
-                              "class": "hierarchy-description"
-                            },
-                            "children": [
-                              "list",
-                              "$hItem.description"
+                              "$hItem.icon"
                             ]
                           },
                           {
                             "tag": "div",
                             "attrs": {
-                              "class": "hierarchy-actions"
+                              "class": "hierarchy-card-content"
                             },
                             "children": [
                               "list",
                               {
-                                "tag": "a",
+                                "tag": "p",
                                 "attrs": {
-                                  "href": "$hItem.href"
+                                  "class": "hierarchy-status"
                                 },
                                 "children": [
                                   "list",
-                                  "Explore ↗"
+                                  "$hItem.status"
                                 ]
                               },
                               {
-                                "tag": "a",
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$hItem.name"
+                                ]
+                              },
+                              {
+                                "tag": "p",
                                 "attrs": {
-                                  "class": "hierarchy-inspect",
-                                  "href": [
-                                    "concat",
-                                    "inspection/",
-                                    "$hItem.id",
-                                    ".html"
-                                  ]
+                                  "class": "hierarchy-description"
                                 },
                                 "children": [
                                   "list",
-                                  "Inspect"
+                                  "$hItem.description"
+                                ]
+                              },
+                              [
+                                "if",
+                                [
+                                  "eq",
+                                  "$hItem.id",
+                                  "relational-geometry"
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "hierarchy-usecase"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "First use case: ",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Relational Geometry Programme"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                null
+                              ],
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "hierarchy-actions"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "$hItem.href"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Explore ↗"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "class": "hierarchy-inspect",
+                                      "href": [
+                                        "concat",
+                                        "inspection/",
+                                        "$hItem.id",
+                                        ".html"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Inspect"
+                                    ]
+                                  }
                                 ]
                               }
                             ]
@@ -1709,7 +1897,7 @@
                     "href": [
                       "concat",
                       "../",
-                      "expedition.css?v=hierarchy-1"
+                      "expedition.css?v=folds-1"
                     ]
                   },
                   "children": [
@@ -1856,6 +2044,25 @@
                         "$hItem.description"
                       ]
                     },
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$hItem.id",
+                        "relational-geometry"
+                      ],
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "hierarchy-scope"
+                        },
+                        "children": [
+                          "list",
+                          "The source bindings below describe the first use case: the Relational Geometry Programme."
+                        ]
+                      },
+                      null
+                    ],
                     {
                       "tag": "p",
                       "attrs": {
@@ -2330,7 +2537,7 @@
                             "href": [
                               "concat",
                               "../",
-                              "expedition.css?v=hierarchy-1"
+                              "expedition.css?v=folds-1"
                             ]
                           },
                           "children": [
@@ -2519,6 +2726,60 @@
                                 "Inspect sources & shared capabilities →"
                               ]
                             },
+                            [
+                              "if",
+                              [
+                                "eq",
+                                "$hItem.id",
+                                "relational-geometry"
+                              ],
+                              {
+                                "tag": "section",
+                                "attrs": {
+                                  "class": "science-usecase"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "eyebrow"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "First use case"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Relational Geometry Programme"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "An audited Spin(2,3) relational and response geometry research corpus. Explore its models, evidence and open questions."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Explore the programme ↗"
+                                    ]
+                                  }
+                                ]
+                              },
+                              null
+                            ],
                             {
                               "tag": "nav",
                               "attrs": {
@@ -2581,6 +2842,616 @@
             ]
           }
         ]
+      },
+      {
+        "call": "hierarchy.questions.build"
+      },
+      {
+        "call": "hierarchy.usecase.build"
+      }
+    ],
+    "hierarchy.questions.build": [
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Begin with a question. — Aaron Alderman"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "Three ways into the same world: measurement, power and care."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "https://aaronalderman.com/questions.html"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "expedition.css?v=folds-1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": "Begin with a question."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": "Three ways into the same world: measurement, power and care."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": "https://aaronalderman.com/questions.html"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image",
+                    "content": "https://aaronalderman.com/assets/atlas/unseen-v1.png"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "class": "skip",
+                    "href": "#main"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to content"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {
+                    "class": "masthead"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "class": "brand",
+                        "href": "index.html"
+                      },
+                      "children": [
+                        "list",
+                        "Aaron Alderman"
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Site"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "questions.html"
+                          },
+                          "children": [
+                            "list",
+                            "Questions"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "gate.html"
+                          },
+                          "children": [
+                            "list",
+                            "Threads"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "atlas.html"
+                          },
+                          "children": [
+                            "list",
+                            "Atlas / Map"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "id": "main",
+                    "class": "questions-page"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "section",
+                      "attrs": {
+                        "class": "questions-intro"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "eyebrow"
+                          },
+                          "children": [
+                            "list",
+                            "Questions / A place to begin"
+                          ]
+                        },
+                        {
+                          "tag": "h1",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Begin with a question."
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "lead"
+                          },
+                          "children": [
+                            "list",
+                            "Start with what you’re wondering. Follow it wherever it leads."
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "section",
+                      "attrs": {
+                        "class": "section first-trails questions-choices",
+                        "id": "questions-choices"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "div",
+                          "attrs": {
+                            "class": "trail-grid"
+                          },
+                          "children": [
+                            "map",
+                            [
+                              "subjects",
+                              "isa",
+                              "Entrance"
+                            ],
+                            "entrance",
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "class": "trail",
+                                "href": [
+                                  "concat",
+                                  "places/",
+                                  [
+                                    "one",
+                                    [
+                                      "one",
+                                      "$entrance",
+                                      "destination"
+                                    ],
+                                    "slug"
+                                  ],
+                                  ".html"
+                                ],
+                                "data-light": [
+                                  "one",
+                                  [
+                                    "one",
+                                    "$entrance",
+                                    "destination"
+                                  ],
+                                  "light"
+                                ]
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "span",
+                                  "attrs": {
+                                    "class": "eyebrow"
+                                  },
+                                  "children": [
+                                    "list",
+                                    [
+                                      "concat",
+                                      [
+                                        "one",
+                                        "$entrance",
+                                        "number"
+                                      ],
+                                      " / ",
+                                      [
+                                        "one",
+                                        "$entrance",
+                                        "name"
+                                      ]
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "tag": "span",
+                                  "attrs": {
+                                    "class": "trail-glyph",
+                                    "aria-hidden": "true"
+                                  },
+                                  "children": [
+                                    "list",
+                                    [
+                                      "one",
+                                      "$entrance",
+                                      "symbol"
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "tag": "h3",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    [
+                                      "one",
+                                      "$entrance",
+                                      "question"
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    [
+                                      "one",
+                                      "$entrance",
+                                      "note"
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "tag": "span",
+                                  "attrs": {
+                                    "class": "arrow",
+                                    "aria-hidden": "true"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "↗"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "class": "questions-return",
+                        "aria-label": "Other ways in"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "gate.html"
+                          },
+                          "children": [
+                            "list",
+                            "Follow a thread →"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "atlas.html"
+                          },
+                          "children": [
+                            "list",
+                            "Explore the atlas →"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "index.html"
+                          },
+                          "children": [
+                            "list",
+                            "Return to the homepage →"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "questions.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "hierarchy.usecase.build": [
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Relational Geometry Programme — Claimipedia Science"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "Explore relational structure, physical models and the tests that could distinguish them."
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "https://aaronalderman.com/relational-geometry/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "../expedition.css?v=folds-1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "class": "hierarchy-page"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "eyebrow"
+                      },
+                      "children": [
+                        "list",
+                        "Claimipedia Science / First use case"
+                      ]
+                    },
+                    {
+                      "tag": "h1",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Relational Geometry Programme"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "lead"
+                      },
+                      "children": [
+                        "list",
+                        "Explore relational structure, physical models and the tests that could distinguish them."
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "class": "hierarchy-page-links"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "class": "button",
+                            "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                          },
+                          "children": [
+                            "list",
+                            "Explore the programme ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../claimipedia-science/"
+                          },
+                          "children": [
+                            "list",
+                            "Claimipedia Science →"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../inspection/relational-geometry.html"
+                          },
+                          "children": [
+                            "list",
+                            "Inspect the source bindings →"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "relational-geometry/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
       }
     ]
   }

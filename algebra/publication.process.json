@@ -1261,7 +1261,7 @@
           {
             "tag": "section",
             "attrs": {
-              "class": "hero",
+              "class": "hero home-entrance-fold",
               "aria-labelledby": "hero-title"
             },
             "children": [
@@ -1314,7 +1314,7 @@
                         "attrs": {},
                         "children": [
                           "list",
-                          "Inside the mind"
+                          "Inside the mind of a"
                         ]
                       },
                       {
@@ -1322,15 +1322,15 @@
                         "attrs": {},
                         "children": [
                           "list",
-                          "of a modern-day"
-                        ]
-                      },
-                      {
-                        "tag": "em",
-                        "attrs": {},
-                        "children": [
-                          "list",
-                          "sourcerer."
+                          "modern-day ",
+                          {
+                            "tag": "em",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "sourcerer."
+                            ]
+                          }
                         ]
                       }
                     ]
@@ -1345,16 +1345,211 @@
                       "Physics, faith, machines, and the work of remembering care."
                     ]
                   },
-                  "$micrositeNav",
                   {
-                    "tag": "a",
+                    "tag": "nav",
                     "attrs": {
-                      "href": "#first-trails",
-                      "class": "button secondary-button"
+                      "class": "begin-with",
+                      "aria-labelledby": "begin-with-title"
                     },
                     "children": [
                       "list",
-                      "Follow an idea ↓"
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "eyebrow",
+                          "id": "begin-with-title"
+                        },
+                        "children": [
+                          "list",
+                          "Begin with"
+                        ]
+                      },
+                      {
+                        "tag": "div",
+                        "attrs": {
+                          "class": "begin-with-grid"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "id": "first-trails",
+                              "class": "begin-door",
+                              "href": "questions.html"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "img",
+                                "attrs": {
+                                  "src": "assets/atlas/unseen-v1.png",
+                                  "alt": "",
+                                  "width": 1774,
+                                  "height": 887,
+                                  "decoding": "async"
+                                },
+                                "children": [
+                                  "list"
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "begin-door-copy"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Questions"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Start with something you wonder."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "↗"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "id": "threads",
+                              "class": "begin-door",
+                              "href": "gate.html"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "img",
+                                "attrs": {
+                                  "src": "assets/atlas/human-v1.png",
+                                  "alt": "",
+                                  "width": 1774,
+                                  "height": 887,
+                                  "decoding": "async"
+                                },
+                                "children": [
+                                  "list"
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "begin-door-copy"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Threads"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Follow an idea across the work."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "↗"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "id": "atlas",
+                              "class": "begin-door",
+                              "href": "atlas.html"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "img",
+                                "attrs": {
+                                  "src": "assets/atlas/overview-v1.png",
+                                  "alt": "",
+                                  "width": 1942,
+                                  "height": 809,
+                                  "decoding": "async"
+                                },
+                                "children": [
+                                  "list"
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "begin-door-copy"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Atlas / Map"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Find a place. Choose your own path."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "↗"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     ]
                   },
                   {
@@ -1368,314 +1563,10 @@
                     ]
                   }
                 ]
-              },
-              {
-                "tag": "p",
-                "attrs": {
-                  "class": "hero-coordinate",
-                  "aria-hidden": "true"
-                },
-                "children": [
-                  "list",
-                  "FIELD NOTES / ALWAYS UNFOLDING"
-                ]
               }
             ]
           },
-          {
-            "tag": "section",
-            "attrs": {
-              "class": "section first-trails",
-              "id": "first-trails"
-            },
-            "children": [
-              "list",
-              {
-                "tag": "div",
-                "attrs": {
-                  "class": "section-heading"
-                },
-                "children": [
-                  "list",
-                  {
-                    "tag": "p",
-                    "attrs": {
-                      "class": "eyebrow"
-                    },
-                    "children": [
-                      "list",
-                      "Three ways into the same world"
-                    ]
-                  },
-                  {
-                    "tag": "h2",
-                    "attrs": {},
-                    "children": [
-                      "list",
-                      "Begin with a question."
-                    ]
-                  }
-                ]
-              },
-              {
-                "tag": "div",
-                "attrs": {
-                  "class": "trail-grid"
-                },
-                "children": [
-                  "map",
-                  [
-                    "subjects",
-                    "isa",
-                    "Entrance"
-                  ],
-                  "entrance",
-                  {
-                    "tag": "a",
-                    "attrs": {
-                      "class": "trail",
-                      "href": [
-                        "concat",
-                        "places/",
-                        [
-                          "one",
-                          [
-                            "one",
-                            "$entrance",
-                            "destination"
-                          ],
-                          "slug"
-                        ],
-                        ".html"
-                      ],
-                      "data-light": [
-                        "one",
-                        [
-                          "one",
-                          "$entrance",
-                          "destination"
-                        ],
-                        "light"
-                      ]
-                    },
-                    "children": [
-                      "list",
-                      {
-                        "tag": "span",
-                        "attrs": {
-                          "class": "eyebrow"
-                        },
-                        "children": [
-                          "list",
-                          [
-                            "concat",
-                            [
-                              "one",
-                              "$entrance",
-                              "number"
-                            ],
-                            " / ",
-                            [
-                              "one",
-                              "$entrance",
-                              "name"
-                            ]
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "span",
-                        "attrs": {
-                          "class": "trail-glyph",
-                          "aria-hidden": "true"
-                        },
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$entrance",
-                            "symbol"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "h3",
-                        "attrs": {},
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$entrance",
-                            "question"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "p",
-                        "attrs": {},
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$entrance",
-                            "note"
-                          ]
-                        ]
-                      },
-                      {
-                        "tag": "span",
-                        "attrs": {
-                          "class": "arrow",
-                          "aria-hidden": "true"
-                        },
-                        "children": [
-                          "list",
-                          "↗"
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "tag": "section",
-            "attrs": {
-              "class": "threshold"
-            },
-            "children": [
-              "list",
-              {
-                "tag": "p",
-                "attrs": {
-                  "class": "eyebrow"
-                },
-                "children": [
-                  "list",
-                  "Inside the corpus"
-                ]
-              },
-              {
-                "tag": "h2",
-                "attrs": {},
-                "children": [
-                  "list",
-                  "Follow a thread."
-                ]
-              },
-              {
-                "tag": "p",
-                "attrs": {},
-                "children": [
-                  "list",
-                  "Questions connect across the worlds. Follow an idea through the research, sources and unfinished work behind it."
-                ]
-              },
-              {
-                "tag": "a",
-                "attrs": {
-                  "href": "gate.html",
-                  "class": "button"
-                },
-                "children": [
-                  "list",
-                  "Explore the reading paths ↗"
-                ]
-              },
-              {
-                "tag": "p",
-                "attrs": {
-                  "class": "image-note"
-                },
-                "children": [
-                  "list",
-                  "An imagined landscape of inquiry. The evidence lives in the source notes."
-                ]
-              }
-            ]
-          },
-          {
-            "tag": "section",
-            "attrs": {
-              "class": "section atlas-portal",
-              "id": "atlas"
-            },
-            "children": [
-              "list",
-              {
-                "tag": "a",
-                "attrs": {
-                  "href": "atlas.html",
-                  "aria-label": "Explore the illustrated atlas"
-                },
-                "children": [
-                  "list",
-                  {
-                    "tag": "img",
-                    "attrs": {
-                      "src": [
-                        "one",
-                        "atlas",
-                        "image"
-                      ],
-                      "alt": "An illustrated island with three territories and branching golden trails.",
-                      "loading": "lazy",
-                      "width": 1942,
-                      "height": 809
-                    },
-                    "children": [
-                      "list"
-                    ]
-                  }
-                ]
-              },
-              {
-                "tag": "div",
-                "attrs": {},
-                "children": [
-                  "list",
-                  {
-                    "tag": "p",
-                    "attrs": {
-                      "class": "eyebrow"
-                    },
-                    "children": [
-                      "list",
-                      "The atlas / Forty places to explore"
-                    ]
-                  },
-                  {
-                    "tag": "h2",
-                    "attrs": {},
-                    "children": [
-                      "list",
-                      "The world keeps opening."
-                    ]
-                  },
-                  {
-                    "tag": "p",
-                    "attrs": {},
-                    "children": [
-                      "list",
-                      "Leave the front door behind. Follow a question through the unseen, the human and the boundary—three territories with many possible paths."
-                    ]
-                  },
-                  {
-                    "tag": "a",
-                    "attrs": {
-                      "class": "button",
-                      "href": "atlas.html"
-                    },
-                    "children": [
-                      "list",
-                      "Explore the atlas ↗"
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
+          "$micrositeNav"
         ]
       }
     ],

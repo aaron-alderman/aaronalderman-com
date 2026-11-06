@@ -13,7 +13,7 @@ const run=async(entry,eventInput)=>(await invoke({model,entry,input:{eventInput}
 
 test('the homepage hierarchy preserves the author order and routes every tool to its own microsite',()=>{
  const groups=Object.fromEntries(['foundation','platform','application','progress','tool'].map(g=>[g,catalogue.items.filter(i=>i.group===g).map(i=>i.name)]));
- assert.deepEqual(groups,{foundation:['Temple'],platform:['Sourcery'],application:['Claimipedia','Relational Geometry Programme'],progress:['Worldwright','Kingdom','World Modelling','Tradie','Foundry'],tool:['Encounter','The Field','SuperCRM','Timesheet','Workgarden','Harborboard','Relationship Manager']});
+ assert.deepEqual(groups,{foundation:['Temple'],platform:['Sourcery'],application:['Claimipedia','Claimipedia Science'],progress:['Worldwright','Kingdom','World Modelling','Tradie','Foundry'],tool:['Encounter','The Field','SuperCRM','Timesheet','Workgarden','Harborboard','Relationship Manager']});
  const home=fs.readFileSync('dist/index.html','utf8');
  for(const item of catalogue.items){assert.ok(home.includes('data-item="'+item.id+'"'));assert.ok(home.includes('href="'+item.href+'"'));assert.ok(home.includes('href="inspection/'+item.id+'.html"'));assert.ok(fs.existsSync('dist/'+item.href+'index.html'));assert.ok(fs.existsSync('dist/inspection/'+item.id+'.html'));}
  assert.ok(!home.includes('Shared capabilities'));assert.ok(!home.includes('Proposed connections'));
@@ -61,4 +61,15 @@ test('the admitted viewer highlights source and its actual sharing definition wi
  const viewer=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:'hierarchy.viewer.boot',queries:Object.fromEntries(names.map(n=>[n,queries[n]]))},mode:'model',ports:valuePorts(),limit:20000000});
  const effects=[];await invoke({model:viewer,entry:'hierarchy.viewer.boot',input:{data:{presentation:read('source/encounter/presentation.json'),processes:read('algebra/hierarchy.process.json').queries}},ports:{...valuePorts(),...computationalPorts(),'browser.property':({ref})=>ref==='#hierarchy-language'?'rel':'("example", "pack", "pack.shared")','browser.write':x=>{effects.push(x);return true},'browser.content':x=>{effects.push(x);return true}},nested:['kernel.invoke','kernel.execute','kernel.evaluate'],limit:20000000});
  const source=effects.find(x=>x.ref==='#hierarchy-source'),definition=effects.find(x=>x.ref==='#hierarchy-process');assert.ok(source.html.includes('example'));assert.ok(definition.html.includes('hierarchy.shared'));assert.ok(definition.html.includes('hTarget'));assert.ok(effects.some(x=>x.ref==='#hierarchy-source-hash'));
+});
+
+test('the opening fold has three illustrated entrances and moves questions and applications to their own destinations',()=>{
+ const home=fs.readFileSync('dist/index.html','utf8'),hero=home.match(/<section class="hero home-entrance-fold"[\s\S]*?<\/section>/)?.[0];assert.ok(hero);
+ assert.equal((hero.match(/class="begin-door"/g)||[]).length,3);
+ for(const [href,label]of [['questions.html','Questions'],['gate.html','Threads'],['atlas.html','Atlas / Map']]){assert.ok(hero.includes('href="'+href+'"'));assert.ok(hero.includes('<h2>'+label+'</h2>'));}
+ assert.equal((hero.match(/assets\/atlas\//g)||[]).length,3);assert.ok(!hero.includes('data-item='));assert.ok(home.indexOf('data-item="temple"')>home.indexOf('</section>'));
+ assert.ok(!home.includes('class="section first-trails"'));assert.ok(!home.includes('class="section atlas-portal"'));assert.equal((home.match(/class="hierarchy-section home-fold /g)||[]).length,4);
+ const questions=fs.readFileSync('dist/questions.html','utf8');assert.ok(questions.includes('<h1>Begin with a question.</h1>'));for(const slug of ['observation','kenosis','care'])assert.ok(questions.includes('href="places/'+slug+'.html"'));
+ const science=fs.readFileSync('dist/claimipedia-science/index.html','utf8');assert.ok(science.includes('<h1>Claimipedia Science</h1>'));assert.ok(science.includes('First use case'));assert.ok(science.includes('Relational Geometry Programme'));assert.ok(science.includes('href="https://aaron-alderman.github.io/spin23-relational-geometry/"'));
+ const item=catalogue.items.find(i=>i.id==='worldwright');assert.equal(item.icon.tag,'svg');assert.ok(fs.existsSync('dist/relational-geometry/index.html'));
 });

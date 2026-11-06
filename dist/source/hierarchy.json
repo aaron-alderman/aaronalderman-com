@@ -75,11 +75,11 @@
     },
     {
       "id": "relational-geometry",
-      "name": "Relational Geometry Programme",
+      "name": "Claimipedia Science",
       "group": "application",
-      "href": "relational-geometry/",
-      "description": "Explore relational structure, physical models and the tests that could distinguish them.",
-      "status": "Research programme",
+      "href": "claimipedia-science/",
+      "description": "Scientific inquiry with explicit models, evidence and reproducible checks.",
+      "status": "Science & research",
       "icon": {
         "tag": "svg",
         "attrs": {
@@ -104,13 +104,19 @@
       },
       "links": [
         [
-          "https://aaron-alderman.github.io/spin23-relational-geometry/edition-3/",
-          "Read the programme"
+          "https://aaron-alderman.github.io/spin23-relational-geometry/",
+          "Explore the Relational Geometry Programme"
         ],
         [
           "../gate.html",
-          "Follow the research paths"
+          "Follow the research threads"
         ]
+      ],
+      "useCases": [
+        {
+          "name": "Relational Geometry Programme",
+          "href": "https://aaron-alderman.github.io/spin23-relational-geometry/"
+        }
       ]
     },
     {
@@ -121,18 +127,34 @@
       "description": "Compose stories with more than one way through.",
       "status": "In progress",
       "icon": {
-        "tag": "img",
+        "tag": "svg",
         "attrs": {
-          "src": "assets/world-emblems/worldwright-v1.png",
-          "class": "world-emblem",
-          "width": 128,
-          "height": 128,
-          "alt": "",
-          "decoding": "async",
-          "aria-hidden": "true"
+          "viewBox": "0 0 32 32",
+          "fill": "none",
+          "stroke": "currentColor",
+          "stroke-width": 1.5,
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "aria-hidden": "true",
+          "class": "hierarchy-icon"
         },
         "children": [
-          "list"
+          {
+            "tag": "circle",
+            "attrs": {
+              "cx": 16,
+              "cy": 16,
+              "r": 10
+            },
+            "children": []
+          },
+          {
+            "tag": "path",
+            "attrs": {
+              "d": "M6 16h20M16 6c-7 6-7 14 0 20 7-6 7-14 0-20ZM5 27h22M16 26v1"
+            },
+            "children": []
+          }
         ]
       },
       "links": []
