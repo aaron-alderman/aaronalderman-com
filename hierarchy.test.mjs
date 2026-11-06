@@ -142,7 +142,7 @@ test('four Questions worlds have their own admitted PNG, sharing metadata and re
   assert.ok(html.includes('name="theme-color" content="'+asset.palette.paper+'"'));
   assert.ok(html.includes('og:image:alt" content="'+asset.alt+'"'));
   for(const [name,value] of Object.entries(asset.palette))assert.equal(source.find(f=>f.s==='questions.palette.'+asset.role+'.'+name&&f.p==='value')?.o,value);
-  for(const token of ['ink','muted','accent'])assert.ok(contrast(asset.palette[token],asset.palette.paper)>=4.5,asset.role+' '+token+' contrast');
+  for(const background of ['paper','surface','wash'])for(const token of ['ink','muted','accent','action'])assert.ok(contrast(asset.palette[token],asset.palette[background])>=4.5,asset.role+' '+token+' on '+background+' contrast');
   assert.ok(contrast('#ffffff',asset.palette.action)>=4.5,asset.role+' button contrast');
   assert.ok(contrast(asset.palette.focus,asset.palette.paper)>=3,asset.role+' focus contrast');
  }
