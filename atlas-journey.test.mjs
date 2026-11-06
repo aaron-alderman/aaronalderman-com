@@ -78,17 +78,18 @@ test('the homepage provides a native keyboard button and an announced theme stat
  assert.match(html,/<button[^>]*id="identity-switch"/);
  assert.match(html,/aria-label="Discover another side of Aaron: change the theme"/);
  assert.match(html,/id="identity-status"[^>]*aria-live="polite"/);
- assert.match(html,/src="identity-runtime.js\?v=identity-cards-questions-1" defer/);
+ assert.match(html,/src="identity-runtime.js\?v=identity-lazy-webp-1" defer/);
  assert.match(html,/<img[^>]*id="identity-background"/);
 });
-test('every identity publishes its own distinct image and preloads it through the homepage algebra',()=>{
- const html=fs.readFileSync('dist/index.html','utf8'),images=model.data.themes.map(t=>t.image);
+test('every identity publishes a distinct optimized hero image',()=>{
+ const images=model.data.themes.map(t=>t.image);
  assert.equal(new Set(images).size,4);
- assert.equal(images[0],'assets/sourcerer-threshold.png');
+ assert.equal(images[0],'assets/identities/optimized/sourcerer-hero-v2.webp');
  const hashes=images.map(image=>{
   const bytes=fs.readFileSync('dist/'+image);
-  assert.equal(bytes.subarray(1,4).toString(),'PNG');
-  assert.ok(html.includes('src="'+image+'"'));
+  assert.equal(bytes.subarray(0,4).toString(),'RIFF');
+  assert.equal(bytes.subarray(8,12).toString(),'WEBP');
+  assert.ok(bytes.length<400_000,image+' stays within the hero image budget');
   return require('node:crypto').createHash('sha256').update(bytes).digest('hex');
  });
  assert.equal(new Set(hashes).size,4);
@@ -99,13 +100,29 @@ test('Questions, Threads and Atlas publish distinct world artwork while preservi
  assert.equal(new Set(images).size,12);
  const hashes=images.map(image=>{
   const bytes=fs.readFileSync('dist/'+image);
-  assert.ok(html.includes('src="'+image+'"'),image+' is preloaded');
-  if(image.endsWith('.webp')){assert.equal(bytes.subarray(0,4).toString(),'RIFF');assert.equal(bytes.subarray(8,12).toString(),'WEBP');}
+  assert.ok(bytes.length<150_000,image+' stays within the navigation image budget');
+  assert.equal(bytes.subarray(0,4).toString(),'RIFF');assert.equal(bytes.subarray(8,12).toString(),'WEBP');
   return require('node:crypto').createHash('sha256').update(bytes).digest('hex');
  });
  assert.equal(new Set(hashes).size,12);
  for(const [id,href]of [['first-trails','questions-sourcerer.html'],['threads','gate.html'],['atlas','atlas.html']])assert.match(html,new RegExp('<a[^>]*id="'+id+'"[^>]*href="'+href+'"'));
  for(const card of ['questions','threads','atlas'])assert.match(html,new RegExp('<img[^>]*id="identity-card-'+card+'"'));
+});
+
+test('initial HTML requests only the active world; inactive artwork remains in the admitted runtime data',()=>{
+ const html=fs.readFileSync('dist/index.html','utf8');
+ const fields=['image','questionsImage','threadsImage','atlasImage'];
+ const all=model.data.themes.flatMap(theme=>fields.map(field=>theme[field]));
+ const initial=fields.map(field=>model.data.themes[0][field]);
+ const requested=Array.from(html.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g),m=>m[1]).filter(src=>all.includes(src));
+ assert.deepEqual(requested,initial);
+ assert.equal(requested.length,4);
+ assert.ok(!html.includes('fetchpriority="low"'),'no eager offscreen world preload');
+ for(const theme of model.data.themes){
+  const total=fields.reduce((bytes,field)=>bytes+fs.statSync('dist/'+theme[field]).size,0);
+  assert.ok(total<700_000,theme.key+' artwork stays below 700 kB');
+ }
+ assert.ok(initial.reduce((bytes,image)=>bytes+fs.statSync('dist/'+image).size,0)<600_000,'initial world stays below 600 kB');
 });
 
 }
