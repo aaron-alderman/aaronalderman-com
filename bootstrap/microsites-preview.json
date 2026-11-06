@@ -31,7 +31,6 @@
     "algebra/claimipedia.process.json",
     "algebra/claimipedia-review.process.json",
     "algebra/encounter-demo.process.json",
-    "algebra/encounter-source.process.json",
     "algebra/encounter-code-types.process.json",
     "algebra/encounter-code-compiler.process.json",
     "algebra/encounter-code-runtime.process.json",
@@ -64,5 +63,12 @@
   "kernelProfile": "bootstrap/kernel-profile.json",
   "admission": "algebra/admission.process.json",
   "languageCompiler": "algebra/language.process.json",
-  "languageSources": []
+  "languageSources": [],
+  "processModules": [
+    {
+      "file": "source/encounter/source-algebra.encounter",
+      "output": "algebra/encounter-source.process.json",
+      "frontend": "bootstrap/process-frontend.json"
+    }
+  ]
 }

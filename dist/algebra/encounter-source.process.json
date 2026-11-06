@@ -2755,6 +2755,45 @@
                 "into": "field"
               },
               {
+                "port": "text.matches",
+                "args": {
+                  "value": [
+                    "at",
+                    "$entry",
+                    0
+                  ],
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                },
+                "into": "plainKey"
+              },
+              {
+                "let": "fieldKey",
+                "value": [
+                  "at",
+                  "$entry",
+                  0
+                ]
+              },
+              {
+                "when": [
+                  "not",
+                  "$plainKey"
+                ],
+                "then": [
+                  {
+                    "port": "json.stringify",
+                    "args": {
+                      "value": [
+                        "at",
+                        "$entry",
+                        0
+                      ]
+                    },
+                    "into": "fieldKey"
+                  }
+                ]
+              },
+              {
                 "let": "fields",
                 "value": [
                   "append",
@@ -2763,11 +2802,7 @@
                     "list",
                     [
                       "concat",
-                      [
-                        "at",
-                        "$entry",
-                        0
-                      ],
+                      "$fieldKey",
                       " = ",
                       "$field"
                     ]
@@ -4277,7 +4312,7 @@
               ],
               "|",
               "$jsonInner",
-              "|#[^\\r\\n]*|[()=]|→|[^\\S\\r\\n]+)"
+              "|#[^\\r\\n]*|[()=;]|→|[^\\S\\r\\n]+)"
             ]
           }
         ]

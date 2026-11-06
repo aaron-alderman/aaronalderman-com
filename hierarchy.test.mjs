@@ -57,7 +57,7 @@ test('source inspection exposes receipts, consumers and honest missing edges wit
 });
 
 test('the admitted viewer highlights source and its actual sharing definition with separate exact hash bases',async()=>{
- const {computationalPorts}=require('./bootstrap/ports/browser-effects.cjs'),manifest=read('bootstrap/site.json'),queries=Object.assign({},...manifest.modules.map(f=>read(f).queries));
+ const {computationalPorts}=require('./bootstrap/ports/browser-effects.cjs'),manifest=read('bootstrap/site.json'),queries=Object.assign({},...manifest.modules.map(f=>read(f).queries),...(manifest.processModules??[]).map(s=>read('dist/'+s.output).queries));
  const bundle=queries['hierarchy.viewer.build'].find(s=>s.port==='runtime.bundle').args,names=[...bundle.queries[1].slice(1),...bundle.queries[2].slice(1)];
  const viewer=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:'hierarchy.viewer.boot',queries:Object.fromEntries(names.map(n=>[n,queries[n]]))},mode:'model',ports:valuePorts(),limit:20000000});
  const effects=[];await invoke({model:viewer,entry:'hierarchy.viewer.boot',input:{data:{presentation:read('source/encounter/presentation.json'),processes:read('algebra/hierarchy.process.json').queries}},ports:{...valuePorts(),...computationalPorts(),'browser.property':({ref})=>ref==='#hierarchy-language'?'rel':'("example", "pack", "pack.shared")','browser.write':x=>{effects.push(x);return true},'browser.content':x=>{effects.push(x);return true}},nested:['kernel.invoke','kernel.execute','kernel.evaluate'],limit:20000000});

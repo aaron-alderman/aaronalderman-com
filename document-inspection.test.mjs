@@ -6,8 +6,8 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 const {createKernel}=require('./bootstrap/temple-seed.cjs'),{valuePorts}=require('./bootstrap/ports/value.cjs'),{computationalPorts}=require('./bootstrap/ports/browser-effects.cjs'),{lower}=require('./bootstrap/ports/algebra-lower.cjs'),{invoke}=require('./bootstrap/ports/programme.cjs');
 const proposal=process.env.DOCUMENT_PROPOSAL?read(process.env.DOCUMENT_PROPOSAL):null;
-const source=p=>{const change=proposal?.changes.find(c=>c.file===p);return change?JSON.parse(change.text):read(p)};
-const queries=Object.assign({},...read('bootstrap/site.json').modules.map(p=>source(p).queries));
+const source=p=>{const change=proposal?.changes.find(c=>c.file===p);return change?JSON.parse(change.text):read(p==='algebra/encounter-source.process.json'?'dist/'+p:p)};
+const queries=Object.assign({},...read('bootstrap/site.json').modules.map(p=>source(p).queries),...read('bootstrap/site.json').processModules.map(s=>source(s.output).queries));
 const names=[...queries['hierarchy.viewer.build'].find(s=>s.port==='runtime.bundle').args.queries.slice(1).flatMap(x=>x.slice(1))];
 const model=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:'md.preview',queries:Object.fromEntries(names.map(n=>[n,queries[n]]))},mode:'model',ports:valuePorts(),limit:20000000});
 const policy=source('source/encounter/presentation.json');
@@ -78,6 +78,6 @@ test('the standalone module page replaces the raw-JSON entrance and states the a
  const page=fs.readFileSync('dist/inspection/source-algebra.html','utf8'),worldwright=fs.readFileSync('dist/inspection/worldwright.html','utf8');
  assert.ok(worldwright.includes('href="source-algebra.html"'));assert.ok(page.includes('id="module-query"'));
  for(const name of Object.keys(source('algebra/encounter-source.process.json').queries))assert.ok(page.includes('value="'+name+'"'));
- assert.ok(page.includes('complete text-to-module authoring correspondence not yet qualified'));assert.ok(page.includes('Download authoritative JSON'));
+ assert.ok(page.includes('Readable Encounter source is authoritative'));assert.ok(page.includes('Download generated JSON'));
 });
 

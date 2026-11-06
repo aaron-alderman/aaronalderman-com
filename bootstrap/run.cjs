@@ -10,6 +10,7 @@ const {createRuntimePort} = require('./hosts/runtime.cjs');
 const {lower} = require('./ports/algebra-lower.cjs');
 const {indexFacts} = require('./ports/fact-index.cjs');
 const {invoke} = require('./ports/programme.cjs');
+const {createProcessCompiler} = require('./ports/process-source.cjs');
 
 async function build({root = __dirname + '/..', output = 'dist', manifestFile = 'bootstrap/site.json'} = {}) {
   const host = await createNodeHost({root,output});
@@ -22,7 +23,19 @@ async function build({root = __dirname + '/..', output = 'dist', manifestFile = 
   const policy = JSON.parse(await host.read(manifest.hostPorts));
   if (policy.protocol !== 'temple/native-port-grants/1') throw Error('Unknown native port policy');
   const model = {queries:Object.create(null),entry:manifest.entry};
+  const generatedModules = new Map(), processLanguage = [], frontends = new Map(), processCandidates=[];
+  for (const spec of manifest.processModules ?? []) {
+    if (!frontends.has(spec.frontend)) frontends.set(spec.frontend,await createProcessCompiler(host,spec.frontend,manifest.executionBudget));
+    const frontend=frontends.get(spec.frontend),text=await host.read(spec.file),result=await frontend.compile(spec.file,text);
+    processCandidates.push({frontend,surface:result.surface});
+    if(generatedModules.has(spec.output))throw Error('Duplicate generated module: '+spec.output);
+    const json=JSON.stringify(result.surface,null,2)+'\n';generatedModules.set(spec.output,json);
+    await host.write(spec.output,json);await host.write(spec.file,text);
+    await host.write(spec.output+'.map.json',JSON.stringify({file:spec.file,sourceHash:result.sourceHash,basis:result.basis,origins:result.origins},null,2)+'\n');
+    processLanguage.push({file:spec.file,output:spec.output,sourceHash:result.sourceHash,moduleHash:host.digest(json),basis:result.basis,steps:result.steps,compilerAdmissions:frontend.admissions});
+  }
   for (const file of manifest.modules) {
+    if(generatedModules.has(file))throw Error('Generated process module also selected as JSON authority: '+file);
     const text=await host.read(file);
     const module = JSON.parse(text);
     if (module.protocol !== 'temple/surface-process-module/1') throw Error('Unknown module protocol');
@@ -31,6 +44,10 @@ async function build({root = __dirname + '/..', output = 'dist', manifestFile = 
       model.queries[name] = programme;
     }
   }
+  for(const text of generatedModules.values())for(const [name,programme]of Object.entries(JSON.parse(text).queries)){
+    if(Object.hasOwn(model.queries,name))throw Error('Duplicate programme: '+name);model.queries[name]=programme;
+  }
+  for(const [index,candidate]of processCandidates.entries())processLanguage[index].linkSteps=(await candidate.frontend.link(candidate.surface,model.queries)).usage.steps;
   const definitions=JSON.parse(await host.read(manifest.operatorDefinitions));
   const compiler=JSON.parse(await host.read(manifest.operatorCompiler));
   if(compiler.protocol!=='temple/surface-process-module/1')throw Error('Unknown lowering programme protocol');
@@ -77,6 +94,7 @@ async function build({root = __dirname + '/..', output = 'dist', manifestFile = 
   let kernel;
   const makeIndex=input=>indexFacts(kernel,indexer,input);
   const ports = selectPorts({...valuePorts(),...host.ports,
+    'file.copy': args => generatedModules.has(args.path) ? host.write(args.path,generatedModules.get(args.path)) : host.ports['file.copy'](args),
     'runtime.bundle':createRuntimePort(compiled,facts,policy.profiles,makeIndex,admit)},policy.profiles.build);
   kernel=createKernel(ports,manifest.executionBudget);
   const factIndex=await makeIndex(facts),indexSteps=kernel.usage.steps;
@@ -94,7 +112,7 @@ async function build({root = __dirname + '/..', output = 'dist', manifestFile = 
     factSnapshot:{protocol:factIndex.protocol,factCount:factIndex.factCount},
     kernelProfile:profile.protocol,admission:{passes:admissionUsage.length,steps:admissionUsage},
     language:languageResults.map(result=>({file:result.file,module:result.module,facts:result.facts.length,steps:result.steps,origins:result.origins})),
-    mjsImports:[],assurance:env.assurance};
+    processLanguage,mjsImports:[],assurance:env.assurance};
   await host.write('build-receipt.json',JSON.stringify(receipt,null,2)+'\n');
   return {output:host.outputName,artifacts:Object.keys(receipt.artifacts).length,assurance:env.assurance};
 }

@@ -646,6 +646,27 @@
         "into": "hSourceModule"
       },
       {
+        "port": "file.read",
+        "args": {
+          "path": "algebra/encounter-source.process.json.map.json"
+        },
+        "into": "hAuthorMapText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$hAuthorMapText"
+        },
+        "into": "hAuthorMap"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/encounter/source-algebra.encounter"
+        },
+        "into": "hAuthorText"
+      },
+      {
         "port": "runtime.bundle",
         "args": {
           "entry": "hierarchy.viewer.boot",
@@ -733,7 +754,9 @@
               ]
             },
             "sourceModule": "$hSourceModule",
-            "sourceText": "$hSourceModuleText"
+            "sourceText": "$hSourceModuleText",
+            "authorText": "$hAuthorText",
+            "sourceOrigins": "$hAuthorMap.origins"
           },
           "budget": 20000000
         },
@@ -4215,6 +4238,26 @@
         "into": "_"
       },
       {
+        "port": "digest.sha256",
+        "args": {
+          "text": "$data.authorText"
+        },
+        "into": "authorHash"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#module-author-hash",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Authoritative Encounter SHA-256 ",
+            "$authorHash"
+          ]
+        },
+        "into": "_"
+      },
+      {
         "call": "hierarchy.module.select"
       }
     ],
@@ -4255,9 +4298,79 @@
         "into": "selectedView"
       },
       {
+        "let": "selectedText",
+        "value": "$selectedView.text"
+      },
+      {
+        "let": "selectedFile",
+        "value": "algebra/encounter-source.process.json"
+      },
+      {
+        "when": [
+          "at",
+          "$data",
+          "authorText"
+        ],
+        "then": [
+          {
+            "let": "sourceRanges",
+            "value": [
+              "filter",
+              "$data.sourceOrigins",
+              "sourceRange",
+              [
+                "and",
+                [
+                  "eq",
+                  "$sourceRange.kind",
+                  "process-definition"
+                ],
+                [
+                  "eq",
+                  "$sourceRange.pointer",
+                  "$selectedView.pointer"
+                ]
+              ]
+            ]
+          },
+          {
+            "assert": [
+              "eq",
+              [
+                "count",
+                "$sourceRanges"
+              ],
+              1
+            ],
+            "message": "SOURCE-RANGE: Exactly one authored process range is required."
+          },
+          {
+            "let": "sourceRange",
+            "value": [
+              "at",
+              "$sourceRanges",
+              0
+            ]
+          },
+          {
+            "port": "text.slice",
+            "args": {
+              "value": "$data.authorText",
+              "start": "$sourceRange.start",
+              "end": "$sourceRange.end"
+            },
+            "into": "selectedText"
+          },
+          {
+            "let": "selectedFile",
+            "value": "source/encounter/source-algebra.encounter"
+          }
+        ]
+      },
+      {
         "port": "digest.sha256",
         "args": {
-          "text": "$selectedView.text"
+          "text": "$selectedText"
         },
         "into": "selectedHash"
       },
@@ -4266,7 +4379,7 @@
         "args": {
           "query": "sp.present",
           "input": {
-            "text": "$selectedView.text",
+            "text": "$selectedText",
             "file": "selected-query.process",
             "language": "process",
             "theme": "dark",
@@ -4274,9 +4387,9 @@
             "lineNumbers": true,
             "selectedLine": null,
             "origin": {
-              "file": "algebra/encounter-source.process.json",
+              "file": "$selectedFile",
               "pointer": "$selectedView.pointer",
-              "scope": "derived readable projection; not an execution trace"
+              "scope": "authored source slice; not an execution trace"
             }
           }
         },
@@ -4313,7 +4426,7 @@
           "name": "textContent",
           "value": [
             "concat",
-            "algebra/encounter-source.process.json",
+            "$selectedFile",
             " · ",
             "$selectedView.pointer"
           ]
@@ -4762,7 +4875,7 @@
                           },
                           "children": [
                             "list",
-                            "This is a formatted projection of the bound JSON definition. It does not execute the selected process or grant its ports."
+                            "This is the exact authored Encounter definition, selected using compiler source coordinates. Inspecting it does not execute the selected process."
                           ]
                         },
                         {
@@ -4844,7 +4957,7 @@
                           "attrs": {},
                           "children": [
                             "list",
-                            "Could this be authored in Encounter?"
+                            "Authored in Encounter"
                           ]
                         },
                         {
@@ -4852,7 +4965,7 @@
                           "attrs": {},
                           "children": [
                             "list",
-                            "Yes: named queries, nested statements, expressions and explicit port calls already form a structured language. JSON is the current encoding, not a lack of language structure."
+                            "Readable Encounter source is authoritative. The existing algebra-owned process frontend compiles all 23 queries into the JSON module used by the normal lowerer and kernel."
                           ]
                         },
                         {
@@ -4860,7 +4973,7 @@
                           "attrs": {},
                           "children": [
                             "list",
-                            "The existing readable process compiler pilot covers let, when and port, with a bounded operator set. This module also needs fold, assert, call and try/catch; it uses additional operators and dotted references. The Encounter view/representation dialect is another frontend and does not accept this whole module."
+                            "The selected process profile covers let, when, port, fold/yield, assert/otherwise, call and try/catch, with the existing operators and dotted references. It does not introduce another interpreter or change the kernel budget."
                           ]
                         },
                         {
@@ -4868,7 +4981,7 @@
                           "attrs": {},
                           "children": [
                             "list",
-                            "The route to authoring is to extend the existing algebra-owned process frontend, then check exact JSON structure, lowering, results, faults and effect order. Only after those correspondence checks should a declared source-owner switch make readable text authoritative. This page performs no such switch."
+                            "The authority switch followed exact ordered JSON correspondence, whole-module lowering equality, source-coordinate coverage, behaviour/effect/fault comparisons and refusal checks. A pinned predecessor supplies compiler bootstrap only; application definitions come from this readable source."
                           ]
                         },
                         {
@@ -4878,7 +4991,7 @@
                           },
                           "children": [
                             "list",
-                            "Readable inspection available · complete text-to-module authoring correspondence not yet qualified"
+                            "Readable Encounter source is authoritative"
                           ]
                         }
                       ]
@@ -4912,7 +5025,7 @@
                           },
                           "children": [
                             "list",
-                            "Computing the exact module hash…"
+                            "Generated module hash loads through the shared kernel."
                           ]
                         },
                         {
@@ -4922,7 +5035,7 @@
                           },
                           "children": [
                             "list",
-                            "Download authoritative JSON"
+                            "Download generated JSON"
                           ]
                         },
                         {
@@ -4930,7 +5043,7 @@
                           "attrs": {},
                           "children": [
                             "list",
-                            "All definitions above come from this exact module. The selector and page composition belong to algebra/hierarchy.process.json. Colours and layout do not decide process semantics."
+                            "Definitions above are exact slices of the authoritative Encounter file. The generated JSON and its source map remain inspectable. The selector and page composition belong to algebra/hierarchy.process.json."
                           ]
                         },
                         {
@@ -4941,6 +5054,52 @@
                           "children": [
                             "list",
                             "Inspect the page composition source"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "section",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "h2",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Authoritative source"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../source/encounter/source-algebra.encounter"
+                          },
+                          "children": [
+                            "list",
+                            "Read the complete Encounter source"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "id": "module-author-hash",
+                            "class": "hierarchy-source-digest"
+                          },
+                          "children": [
+                            "list",
+                            "Checking the authoritative source hash…"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../algebra/encounter-source.process.json.map.json"
+                          },
+                          "children": [
+                            "list",
+                            "Inspect compiler source coordinates"
                           ]
                         }
                       ]

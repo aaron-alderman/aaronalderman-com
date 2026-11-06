@@ -11,7 +11,7 @@ import {createSession} from './retained/workshop/engine.js';
 import {sourceReceipts} from './retained/source-receipts.js';
 const require=createRequire(import.meta.url),read=f=>JSON.parse(fs.readFileSync(new URL(f,import.meta.url)));
 const {lower}=require('./bootstrap/ports/algebra-lower.cjs'),{createKernel}=require('./bootstrap/temple-seed.cjs'),{valuePorts}=require('./bootstrap/ports/value.cjs'),{computationalPorts,browserEffects}=require('./bootstrap/ports/browser-effects.cjs'),{invoke}=require('./bootstrap/ports/programme.cjs');
-const manifest=read('bootstrap/site.json'),queries=Object.assign({},...manifest.modules.map(f=>read(f).queries));
+const manifest=read('bootstrap/site.json'),queries=Object.assign({},...manifest.modules.map(f=>read(f).queries),...(manifest.processModules??[]).map(s=>read('dist/'+s.output).queries));
 const model=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{queries,entry:'workshop.boot'},mode:'model',ports:valuePorts(),limit:20000000});
 const data=read('source/reader/activities.json');
 const portable=value=>JSON.parse(JSON.stringify(value));

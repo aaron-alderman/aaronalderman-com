@@ -31,7 +31,6 @@
     "algebra/claimipedia.process.json",
     "algebra/claimipedia-review.process.json",
     "algebra/encounter-demo.process.json",
-    "algebra/encounter-source.process.json",
     "algebra/encounter.process.json",
     "algebra/atlas.process.json",
     "source/encounter/example.json",
@@ -52,7 +51,8 @@
     "source/workshop/README.txt",
     "source/hierarchy.json",
     "source/hierarchy.rel",
-    "algebra/hierarchy.process.json"
+    "algebra/hierarchy.process.json",
+    "source/encounter/source-algebra.encounter"
   ],
   "grants": [
     "value.describe",
@@ -89,7 +89,8 @@
     "atlas-journey.test.mjs",
     "authoring.test.mjs",
     "reader-workshop-algebra.test.mjs",
-    "hierarchy.test.mjs"
+    "hierarchy.test.mjs",
+    "process-authoring.test.mjs"
   ],
   "owners": {
     "facts": [
@@ -124,7 +125,6 @@
       "algebra/claimipedia.process.json",
       "algebra/claimipedia-review.process.json",
       "algebra/encounter-demo.process.json",
-      "algebra/encounter-source.process.json",
       "algebra/encounter.process.json",
       "algebra/atlas.process.json",
       "algebra/atlas-journey.process.json",
@@ -134,10 +134,17 @@
       "algebra/workshop-lab.process.json",
       "algebra/workshop-session.process.json",
       "algebra/reader-workshop-publication.process.json",
-      "algebra/hierarchy.process.json"
+      "algebra/hierarchy.process.json",
+      "source/encounter/source-algebra.encounter"
     ],
     "authoringPolicy": "algebra/authoring.process.json",
     "mechanism": "tooling/author.mjs"
   },
-  "boundary": "Original JavaScript is a local comparison oracle, excluded from the published execution graph. All current reader/workshop authoring sources are edited through the same algebra proposal path."
+  "boundary": "Original JavaScript is a local comparison oracle, excluded from the published execution graph. All current reader/workshop authoring sources are edited through the same algebra proposal path.",
+  "generated": {
+    "algebra/encounter-source.process.json": {
+      "source": "source/encounter/source-algebra.encounter",
+      "frontend": "bootstrap/process-frontend.json"
+    }
+  }
 }

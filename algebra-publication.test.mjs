@@ -78,7 +78,7 @@ test('historical oracle bytes, passive resources and declared mechanism successo
  assert.equal(sha(await fs.readFile(path.join(root,'source/microsites/predecessor-native/runtime.cjs'))),contract.nativeOrigin.sha256['bootstrap/hosts/runtime.cjs']);
  assert.equal(sha(await fs.readFile(path.join(root,contract.nativeSuccessor.predecessor))),contract.nativeSuccessor.predecessorSha256);
  assert.deepEqual(receipt.nativeSources,contract.nativeSuccessor.sha256);assert.equal(sha(await fs.readFile(path.join(root,contract.atlasStorageSuccessor.predecessor))),contract.atlasStorageSuccessor.predecessorSha256);
- assert.deepEqual(contract.nativeSuccessor.changed,['bootstrap/hosts/runtime.cjs','bootstrap/ports/node.cjs']);assert.deepEqual(contract.nativeSuccessor.added,['bootstrap/ports/browser-effects.cjs']);
+ assert.deepEqual(contract.nativeSuccessor.changed,['bootstrap/hosts/runtime.cjs','bootstrap/ports/node.cjs','bootstrap/run.cjs']);assert.deepEqual(contract.nativeSuccessor.added,['bootstrap/ports/browser-effects.cjs','bootstrap/ports/process-source.cjs']);
  for(const predecessor of Object.values(contract.readerWorkshopSuccessor.predecessors))assert.equal(sha(await fs.readFile(path.join(root,predecessor.path))),predecessor.sha256);
  assert.equal(contract.readerWorkshopSuccessor.seedUnchanged,true);
 });
