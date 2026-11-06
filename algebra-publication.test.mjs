@@ -39,18 +39,20 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  const b=await fs.readFile(path.join(root,'dist/assets/sourcerer-threshold.png'));
  assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b.readUInt32BE(16),1672);assert.equal(b.readUInt32BE(20),941);
  assert.ok(b.length<5_000_000);
- const xml=await read('dist/sitemap.xml');assert.equal((xml.match(/<loc>/g)||[]).length,46);
+ const xml=await read('dist/sitemap.xml');assert.equal((xml.match(/<loc>/g)||[]).length,47);
+ assert.ok(xml.includes('https://aaronalderman.com/claimipedia/'));
  assert.ok(xml.includes('https://aaronalderman.com/gate.html'));
  for(const id of Object.keys(scenes))assert.ok(xml.includes(`https://aaronalderman.com/places/${id}.html`));
 });
 
 test('all local links and assets in the new static pages resolve within the publication',async()=>{
- for(const file of ['index.html','gate.html',...Object.keys(scenes).map(id=>`places/${id}.html`)]){
+ for(const file of ['index.html','gate.html','claimipedia/index.html',...Object.keys(scenes).map(id=>`places/${id}.html`)]){
   const html=await read('dist/'+file);
   for(const match of html.matchAll(/(?:src|href)="([^"]+)"/g)){
    const href=match[1];if(/^(?:https?:|#)/.test(href))continue;
-   const target=path.resolve(root,'dist',path.dirname(file),href.split('#')[0]);
+   let target=path.resolve(root,'dist',path.dirname(file),href.split('#')[0]);
    assert.ok(target.startsWith(path.join(root,'dist')+path.sep),file+': '+href);
+   if((await fs.stat(target)).isDirectory())target=path.join(target,'index.html');
    assert.ok((await fs.stat(target)).isFile(),file+': '+href);
   }
  }
@@ -84,21 +86,31 @@ test('algebra owns the publication with the existing admission rules, ports and 
  assert.ok(css.includes('arrival 1.2s ease-out both'));assert.ok(!css.includes('infinite'));
 });
 
-test('the seven-door gateway connects the guided journey to the real corpus without inventing project identities',async()=>{
+test('reading paths connect the guided journey to research while microsites keep their own entrances',async()=>{
  const html=await read('dist/gate.html'),home=await read('dist/index.html');
  assert.equal(meta(html,'og:url'),'https://aaronalderman.com/gate.html');
  assert.equal(meta(html,'twitter:card'),'summary_large_image');
  assert.ok(!html.includes('<script'));
  assert.ok(html.includes('https://aaron-alderman.github.io/spin23-relational-geometry/edition-3/library/'));
- for(const name of ['Temple','Sourcery','Claimipedia','Worldwright','Kingdom','The Field','World'])assert.ok(html.includes('>'+name+'</a></h3>'),name);
+ for(const name of ['Executable meaning','Software &amp; agency','Claims &amp; evidence','Stories &amp; encounters','Faith &amp; responsibility','Open questions','Shared worlds'])assert.ok(html.includes('>'+name+'</a></h3>'),name);
  assert.equal((html.match(/class="corpus-door"/g)||[]).length,7);
  assert.equal((html.match(/>Suggested reading path</g)||[]).length,3);
- assert.ok(html.includes('their wider identities remain open'));
- assert.ok(home.includes('href="gate.html" class="button gate-primary"'));
+ assert.ok(html.includes('they do not define future microsites'));
+ assert.ok(home.includes('Explore the reading paths'));
+ assert.ok(html.includes('id="path-claimipedia"'));
+ assert.ok(!html.includes('href="temple/index.html"'));assert.ok(!html.includes('href="sourcery/index.html"'));
  for(const id of Object.keys(scenes))assert.ok((await read(`dist/places/${id}.html`)).includes('href="../gate.html" class="gate-nav"'),id+' can reach the corpus');
  const provenance=JSON.parse(await read('source/gateway-provenance.json'));
  assert.deepEqual(provenance.sourceIntent.names,['Temple','Sourcery','Claimipedia','Worldright','Kingdom','The Field','World']);
  assert.deepEqual(provenance.interpretation.proposedReadingPaths,['Kingdom','The Field','World']);
+});
+
+test('the homepage links directly to published microsites and Claimipedia has an honest standalone stub',async()=>{
+ const home=await read('dist/index.html'),menu=home.match(/<nav class="hero-microsites"[\s\S]*?<\/nav>/)?.[0];assert.ok(menu);
+ assert.equal((menu.match(/<a /g)||[]).length,3);
+ for(const [name,href]of [['Temple','temple/'],['Sourcery','sourcery/'],['Claimipedia','claimipedia/']])assert.ok(menu.includes(`href="${href}"`)&&menu.includes(`<strong>${name}</strong>`));
+ assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));
+ const stub=await read('dist/claimipedia/index.html');assert.ok(stub.includes('<h1 id="claimipedia-title">Claimipedia</h1>'));assert.ok(stub.includes('Microsite in preparation'));assert.ok(stub.includes('href="../gate.html#path-claimipedia"'));assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(!stub.includes('<script'));
 });
 
 test('a fresh algebra build reproduces every publication artifact',async()=>{

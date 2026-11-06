@@ -21,6 +21,9 @@
         "call": "microsites.build"
       },
       {
+        "call": "frontdoors.claimipedia"
+      },
+      {
         "each": [
           "subjects",
           "isa",
@@ -360,6 +363,31 @@
             [
               "one",
               "$document",
+              "canonical"
+            ],
+            "</loc></url>"
+          ]
+        ]
+      },
+      {
+        "let": "sitemap",
+        "value": [
+          "fold",
+          [
+            "subjects",
+            "isa",
+            "StandalonePage"
+          ],
+          "page",
+          "xml",
+          "$sitemap",
+          [
+            "concat",
+            "$xml",
+            "<url><loc>",
+            [
+              "one",
+              "$page",
               "canonical"
             ],
             "</loc></url>"
@@ -847,7 +875,7 @@
                           },
                           "children": [
                             "list",
-                            "Enter the corpus ↗"
+                            "Reading paths ↗"
                           ]
                         },
                         {
@@ -976,6 +1004,13 @@
     ],
     "publication.home": [
       {
+        "call": "frontdoors.home"
+      },
+      {
+        "let": "micrositeNav",
+        "value": "$result"
+      },
+      {
         "let": "result",
         "value": [
           "list",
@@ -1066,17 +1101,7 @@
                       "Physics, faith, machines, and the work of remembering care."
                     ]
                   },
-                  {
-                    "tag": "a",
-                    "attrs": {
-                      "href": "gate.html",
-                      "class": "button gate-primary"
-                    },
-                    "children": [
-                      "list",
-                      "Enter the corpus ↗"
-                    ]
-                  },
+                  "$micrositeNav",
                   {
                     "tag": "a",
                     "attrs": {
@@ -1085,7 +1110,7 @@
                     },
                     "children": [
                       "list",
-                      "Find your first trail  ↓"
+                      "Follow an idea ↓"
                     ]
                   },
                   {
@@ -1284,7 +1309,7 @@
                 },
                 "children": [
                   "list",
-                  "Beyond the personal expedition"
+                  "Inside the corpus"
                 ]
               },
               {
@@ -1292,7 +1317,7 @@
                 "attrs": {},
                 "children": [
                   "list",
-                  "There is a larger world behind this one."
+                  "Follow a thread."
                 ]
               },
               {
@@ -1300,15 +1325,7 @@
                 "attrs": {},
                 "children": [
                   "list",
-                  "Temple. Sourcery. Claimipedia. Worldwright. Kingdom. The Field. World."
-                ]
-              },
-              {
-                "tag": "p",
-                "attrs": {},
-                "children": [
-                  "list",
-                  "Open a doorway into the research, software, stories and questions behind these trails."
+                  "Questions connect across the worlds. Follow an idea through the research, sources and unfinished work behind it."
                 ]
               },
               {
@@ -1319,7 +1336,7 @@
                 },
                 "children": [
                   "list",
-                  "Find your way into the corpus ↗"
+                  "Explore the reading paths ↗"
                 ]
               },
               {

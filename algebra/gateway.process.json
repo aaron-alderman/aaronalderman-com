@@ -23,7 +23,7 @@
       },
       {
         "let": "pageTitle",
-        "value": "Enter the corpus — Aaron Alderman"
+        "value": "Reading paths — Aaron Alderman"
       },
       {
         "let": "description",
@@ -100,7 +100,7 @@
                 },
                 "children": [
                   "list",
-                  "Aaron Alderman / The larger world"
+                  "Aaron Alderman / Inside the corpus"
                 ]
               },
               {
@@ -110,20 +110,13 @@
                 },
                 "children": [
                   "list",
-                  "Beyond the first",
-                  {
-                    "tag": "br",
-                    "attrs": {},
-                    "children": [
-                      "list"
-                    ]
-                  },
+                  "Follow a ",
                   {
                     "tag": "em",
                     "attrs": {},
                     "children": [
                       "list",
-                      "doorway."
+                      "thread."
                     ]
                   }
                 ]
@@ -215,7 +208,7 @@
                     },
                     "children": [
                       "list",
-                      "Seven names. More than one way in."
+                      "Questions, sources, connections"
                     ]
                   },
                   {
@@ -225,7 +218,7 @@
                     },
                     "children": [
                       "list",
-                      "Choose a doorway."
+                      "Choose a reading path."
                     ]
                   },
                   {
@@ -233,7 +226,7 @@
                     "attrs": {},
                     "children": [
                       "list",
-                      "Research, software, stories and ways of seeing. Each door offers a place to begin and a way to look more closely."
+                      "These paths follow ideas across the corpus. Each offers a research starting point and a smaller encounter to think with."
                     ]
                   }
                 ]
@@ -264,6 +257,15 @@
                         "one",
                         "$door",
                         "slug"
+                      ],
+                      "id": [
+                        "concat",
+                        "path-",
+                        [
+                          "one",
+                          "$door",
+                          "slug"
+                        ]
                       ]
                     },
                     "children": [
@@ -319,7 +321,7 @@
                               [
                                 "one",
                                 "$door",
-                                "name"
+                                "readingName"
                               ]
                             ]
                           }
@@ -433,7 +435,7 @@
                 },
                 "children": [
                   "list",
-                  "Kingdom, The Field and World are suggested reading paths in this edition; their wider identities remain open."
+                  "The paths through faith, open questions and shared worlds are editorial invitations; they do not define future microsites."
                 ]
               }
             ]
@@ -503,11 +505,11 @@
                   {
                     "tag": "a",
                     "attrs": {
-                      "href": "index.html#first-trails"
+                      "href": "index.html#microsites"
                     },
                     "children": [
                       "list",
-                      "Return to the personal expedition →"
+                      "Explore the project microsites →"
                     ]
                   }
                 ]

@@ -1,0 +1,16 @@
+{
+  "protocol": "worldwright/front-doors/1",
+  "reason": "Give each project its own homepage entrance and distinguish those worlds from the corpus reading paths.",
+  "owners": {
+    "catalog": "source/front-doors.rel",
+    "projection": "algebra/front-doors.process.json",
+    "readingPaths": "source/gateway.rel"
+  },
+  "extension": "Register another PublishedMicrosite only when its microsite has a published landing page. The homepage renders the catalog; no additional homepage rendering policy is required.",
+  "boundaries": [
+    "Homepage project entries each link only to their microsite.",
+    "Claimipedia is explicitly a stub; no application functionality is implied.",
+    "The corpus gate follows topics, research and encounters, rather than acting as a second project directory.",
+    "The seven original project names remain recorded as provenance; reading-path labels do not define future microsite identities."
+  ]
+}
