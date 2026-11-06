@@ -44,7 +44,7 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b.readUInt32BE(16),1672);assert.equal(b.readUInt32BE(20),941);
  assert.ok(b.length<5_000_000);
  const xml=await read('dist/sitemap.xml'),urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
- const expected=['','gate.html','atlas.html','questions.html','relational-geometry/','inspection/source-algebra.html',...Object.keys(scenes).map(id=>`places/${id}.html`),...['temple','temple/films','sourcery','sourcery/films','claimipedia','worldwright','encounter','kingdom','world-modelling','creativity','the-field'].map(slug=>slug+'/')].map(route=>'https://aaronalderman.com/'+route);
+ const expected=['','gate.html','atlas.html','questions.html','questions-sourcerer.html','questions-author.html','questions-dad.html','relational-geometry/','inspection/source-algebra.html',...Object.keys(scenes).map(id=>`places/${id}.html`),...['temple','temple/films','sourcery','sourcery/films','claimipedia','worldwright','encounter','kingdom','world-modelling','creativity','the-field'].map(slug=>slug+'/')].map(route=>'https://aaronalderman.com/'+route);
  for(const item of JSON.parse(await read('source/hierarchy.json')).items)for(const route of [item.href,'inspection/'+item.id+'.html']){const url='https://aaronalderman.com/'+route;if(!expected.includes(url))expected.push(url);}
  assert.deepEqual([...urls].sort(),expected.sort());assert.equal(new Set(urls).size,urls.length);
  assert.ok(xml.includes('https://aaronalderman.com/claimipedia/'));

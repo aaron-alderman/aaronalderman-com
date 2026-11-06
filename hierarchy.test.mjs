@@ -107,7 +107,7 @@ test('lived questions retain a personal Christian centre and open the bounded Fi
 
 test('another side changes the question destination and label through the algebra for every role',async()=>{
  const programme=read('algebra/publication.process.json'),facts=parseRel(fs.readFileSync('source/hierarchy.rel','utf8'));
- const themes=facts.filter(f=>f.p==='isa'&&f.o==='IdentityTheme').map(f=>Object.fromEntries(['key','label','copy','questionHref','questionCopy'].map(p=>[p,facts.find(x=>x.s===f.s&&x.p===p)?.o])));
+ const themes=facts.filter(f=>f.p==='isa'&&f.o==='IdentityTheme').map(f=>Object.fromEntries(['key','label','copy','image','questionHref','questionCopy'].map(p=>[p,facts.find(x=>x.s===f.s&&x.p===p)?.o])));
  assert.deepEqual(themes.map(t=>t.key),['sourcerer','author','dad','christian']);
  assert.equal(new Set(themes.map(t=>t.questionHref)).size,4);
  const model=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:'identity.change',queries:{'identity.change':programme.queries['identity.change']}},mode:'model',ports:valuePorts(),limit:20000000});
