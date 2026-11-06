@@ -15,6 +15,35 @@ async function input(selector,value){await evaluate(`(()=>{const element=documen
 async function clean(label){assert.deepEqual(errors,[],label);const fault=await evaluate('document.querySelector("[data-temple-errors]")?.textContent??""');assert.equal(fault,'',label);checks.push(label);}
 await send('Page.enable');await send('Runtime.enable');
 try{
+ // Parse every published HTML/SVG document inertly using the browser parser.
+ // This includes template contents and srcdoc, whose code is not a top-level
+ // script element. Live runs use the independently hash-verified dist inputs.
+ const receipt=JSON.parse(fs.readFileSync('dist/build-receipt.json'));
+ const documents=Object.keys(receipt.artifacts).filter(file=>/\.(html|svg)$/.test(file)).map(file=>({file,source:fs.readFileSync('dist/'+file,'utf8')}));
+ const bundles=Object.keys(receipt.artifacts).filter(file=>file.endsWith('.js'));
+ const violations=await evaluate(`(${function(documents,bundles){
+  const failures=[];
+  for(const {file,source} of documents){
+   const url=new URL(file,'https://publication.invalid/');
+   const parsed=new DOMParser().parseFromString(source,file.endsWith('.svg')?'image/svg+xml':'text/html');
+   const base=new URL(parsed.querySelector('base[href]')?.getAttribute('href')??'',url);
+   const visit=root=>{for(const element of root.querySelectorAll('*')){
+    for(const attribute of element.attributes){
+     if(/^on/i.test(attribute.name))failures.push(file+': event attribute '+attribute.name);
+     if(/^(href|src|action|formaction|xlink:href)$/i.test(attribute.name)&&/^\s*(javascript:|data:(text\/html|image\/svg\+xml))/i.test(attribute.value))failures.push(file+': executable URL');
+    }
+    const tag=element.localName;
+    if(tag==='script'&&!['application/json','application/ld+json'].includes(element.getAttribute('type'))){
+     const src=element.getAttribute('src'),target=src?new URL(src,base):null;
+     if(!target||target.origin!==url.origin||!bundles.includes(target.pathname.slice(1))||element.textContent.trim())failures.push(file+': unowned script');
+    }
+    if(['object','embed'].includes(tag))failures.push(file+': embedded executable surface');
+    if(tag==='template'&&element.content)visit(element.content);
+    if(element.hasAttribute('srcdoc'))visit(new DOMParser().parseFromString(element.getAttribute('srcdoc'),'text/html'));
+   }};visit(parsed);
+  }return failures;
+ }.toString()})(${JSON.stringify(documents)},${JSON.stringify(bundles)})`);
+ assert.deepEqual(violations,[]);checks.push('all '+documents.length+' HTML/SVG documents have no application code outside owned bundles');
  const activities=JSON.parse(fs.readFileSync('source/reader/activities.json')).activities;
  await navigate('retained/activity.html#observation');await wait('document.body.dataset.activity==="observation"','first activity');
  for(const id of Object.keys(activities)){

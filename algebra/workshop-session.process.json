@@ -1886,6 +1886,10 @@
                 "type": "WebLink"
               }
             }
+          ],
+          "sandbox": [
+            "list",
+            "allow-same-origin"
           ]
         },
         "into": "_"
@@ -1894,7 +1898,11 @@
         "port": "browser.frameContent",
         "args": {
           "ref": "#workshop-row",
-          "html": "$row.html"
+          "html": "$row.html",
+          "sandbox": [
+            "list",
+            "allow-same-origin"
+          ]
         },
         "into": "_"
       },
@@ -1902,7 +1910,11 @@
         "port": "browser.frameContent",
         "args": {
           "ref": "#workshop-page",
-          "html": "$page.html"
+          "html": "$page.html",
+          "sandbox": [
+            "list",
+            "allow-same-origin"
+          ]
         },
         "into": "_"
       },
@@ -2458,7 +2470,11 @@
         "port": "browser.frameContent",
         "args": {
           "ref": "$eventInput.frame",
-          "html": "$target.html"
+          "html": "$target.html",
+          "sandbox": [
+            "list",
+            "allow-same-origin"
+          ]
         },
         "into": "_"
       }

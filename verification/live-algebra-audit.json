@@ -1,0 +1,66 @@
+{
+  "protocol": "worldwright/live-algebra-audit/1",
+  "date": "2026-11-06",
+  "site": "https://aaronalderman.com/",
+  "baseline": {
+    "commit": "53cb24cc3a21cb106fe8f109ca7a7ca5a7ddb112",
+    "publicArtifactHashesVerified": 321,
+    "retiredExecutableUrlsReturning404": 35,
+    "exactNativeEnvelopes": 11
+  },
+  "findings": [
+    {
+      "owner": "algebra/reader-navigation.process.json",
+      "gap": "document.fragment hardcoded script removal, href/src rebasing and fragment preservation in its native mechanism.",
+      "fix": "Explicit removeSelectors, urlAttributes and keepFragmentLinks supplied by admitted algebra. Default mechanism performs no transformations."
+    },
+    {
+      "owner": "algebra/workshop-session.process.json",
+      "gap": "browser.frameContent hardcoded the workshop sandbox token.",
+      "fix": "All four frame plans supply sandbox tokens from algebra; native code only enforces the script-free capability ceiling."
+    },
+    {
+      "owner": "reader-workshop-algebra.test.mjs",
+      "gap": "A valid snapshot marker could conceal additional native JavaScript.",
+      "fix": "Reproduce and compare the entire bundle from canonical native factories and inert decoded snapshots. Reject appended, prepended and altered executable envelopes; accept code-looking inert prose."
+    }
+  ],
+  "coverage": {
+    "executableBundles": 11,
+    "htmlAndSvgDocuments": 100,
+    "checks": [
+      "Fresh algebra build and all 25 model/effect admission passes.",
+      "Exact whole-script native-envelope comparison for every shipped JavaScript file.",
+      "Browser DOMParser traversal of all HTML/SVG, template contents and srcdoc: no inline handlers, executable URLs, unowned scripts or object/embed surfaces.",
+      "108 tests including bundle-tampering and parameterized native mechanism cases.",
+      "5 document-inspection tests.",
+      "139 local browser checks, no runtime errors."
+    ],
+    "remainingNativeBoundary": [
+      "Temple kernel and primitive value/numeric/cryptographic mechanisms.",
+      "Generic DOM, storage, media, scheduling, network and event bridges; application decisions supplied as admitted query inputs.",
+      "Generic host fault diagnostics, runtime serialization and capability ceilings."
+    ],
+    "ungrantedMechanisms": [
+      "dom.bindings",
+      "http.json"
+    ],
+    "qualification": "The audit covers the generated publication and its native mechanisms. Generic JavaScript mechanisms intentionally remain. These are same-run engineering checks, not independent assurance."
+  },
+  "build": {
+    "receiptSha256": "c47956a5fc5fb3dfb4e07434ff7000a8694b0354be83fe351849ca08a1f042de",
+    "artifacts": 323,
+    "admissionPasses": 25,
+    "execution": {
+      "indexSteps": 3764754,
+      "applicationSteps": 7264668,
+      "totalSteps": 11029422,
+      "limit": 20000000
+    }
+  },
+  "verificationSources": {
+    "tooling/audit-browser-bundle.mjs": "42480f7d5cae7497d00400821ca4cb7922b468bfc72a3c1064c74582c7e1854d",
+    "tooling/verify-reader-workshop-browser.mjs": "ab18a4d245093f9b714bc848a3819d865bf84afe8304023413dee85603df209b",
+    "reader-workshop-algebra.test.mjs": "305a1067ccdef3add75c097710569077e69ba03ac93546854c46e4ccc195fec5"
+  }
+}

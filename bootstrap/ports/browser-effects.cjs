@@ -149,16 +149,18 @@ function browserEffects(host,dispatch) {
     'browser.title': ({value}) => {doc.title=String(value);return true;},
     'browser.scroll': ({top=0,left=0,behavior='instant'}) => {win.scrollTo({top,left,behavior});return true;},
     'browser.dialog': ({ref,open}) => {const node=element(ref);if(open&&!node.open)node.showModal();if(!open&&node.open)node.close();return true;},
-    'document.fragment': ({html,selector,base}) => {
+    'document.fragment': ({html,selector,base,removeSelectors=[],urlAttributes=[],keepFragmentLinks=false}) => {
       const parsed=new win.DOMParser().parseFromString(html,'text/html');
-      for(const script of parsed.querySelectorAll('script'))script.remove();
-      if(base)for(const node of parsed.querySelectorAll('[href],[src]'))for(const name of ['href','src']){
-        const value=node.getAttribute(name);if(value&&!value.startsWith('#'))node.setAttribute(name,new win.URL(value,base).href);
+      for(const removeSelector of removeSelectors)for(const node of parsed.querySelectorAll(removeSelector))node.remove();
+      if(base)for(const name of urlAttributes)for(const node of parsed.querySelectorAll('['+name+']')){
+        const value=node.getAttribute(name);if(value&&!(keepFragmentLinks&&value.startsWith('#')))node.setAttribute(name,new win.URL(value,base).href);
       }
       const selected=parsed.querySelector(selector);if(!selected)throw Error('Missing document fragment');return selected.innerHTML;
     },
-    'browser.frameContent': ({ref,html,bindings=[]}) => {
-      const frame=element(ref);frame.setAttribute('sandbox','allow-same-origin');
+    'browser.frameContent': ({ref,html,bindings=[],sandbox=[]}) => {
+      // Native capability ceiling: this bridge never permits frame scripts.
+      if(!Array.isArray(sandbox)||sandbox.some(token=>token!=='allow-same-origin'))throw Error('Unsupported frame capability');
+      const frame=element(ref);frame.setAttribute('sandbox',sandbox.join(' '));
       frame.onload=()=>{for(const binding of bindings)frame.contentDocument.addEventListener(binding.event,event=>{
         const matched=binding.delegate?event.target.closest?.(binding.delegate):event.target;
         if(!matched)return;if(binding.preventDefault)event.preventDefault();

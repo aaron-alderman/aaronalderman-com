@@ -738,7 +738,17 @@
                 "places/",
                 "$id",
                 ".html"
-              ]
+              ],
+              "removeSelectors": [
+                "list",
+                "script"
+              ],
+              "urlAttributes": [
+                "list",
+                "href",
+                "src"
+              ],
+              "keepFragmentLinks": true
             },
             "into": "fragment"
           },

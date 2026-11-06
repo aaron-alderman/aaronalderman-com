@@ -151,7 +151,7 @@
       "bootstrap/hosts/runtime.cjs": "5afe01fefeafa9f4f3ea0f41c9da9ef026ad780afc2652635324a3885b297b1b",
       "bootstrap/ports/programme.cjs": "88d1c4d2aefe341533af1f967268e1c9da555d556db34adb7eea6b5838a5c1ec",
       "bootstrap/ports/kernel.cjs": "0ab9faa6dbd5c6d3d811171d46301037436c53b6fd5e11afab4769246d121c5c",
-      "bootstrap/ports/browser-effects.cjs": "0aff8087df6c6e7f1d8f83e20012a26e82d880a96b38f75e0385f562b5b37c49"
+      "bootstrap/ports/browser-effects.cjs": "23d5aece795c7a6338ab4b302853682996797418dbdb4122b08454ce4dbb7c0d"
     }
   },
   "atlasStorageSuccessor": {
@@ -197,5 +197,17 @@
       "workshop/runtime.js",
       "retained/workshop/runtime.js"
     ]
+  },
+  "nativePolicyAuditSuccessor": {
+    "protocol": "worldwright/native-policy-audit/1",
+    "baselineCommit": "53cb24cc3a21cb106fe8f109ca7a7ca5a7ddb112",
+    "predecessor": "source/audit-native-predecessor/browser-effects.cjs",
+    "predecessorSha256": "0aff8087df6c6e7f1d8f83e20012a26e82d880a96b38f75e0385f562b5b37c49",
+    "changed": [
+      "bootstrap/ports/browser-effects.cjs"
+    ],
+    "reason": "Reader fragment removal, URL attributes, fragment-link preservation and workshop frame sandbox tokens are explicit admitted algebra inputs. Native code executes generic DOM plans and enforces a script-free frame capability ceiling.",
+    "seedUnchanged": true,
+    "executionBudget": 20000000
   }
 }
