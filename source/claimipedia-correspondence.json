@@ -1,0 +1,536 @@
+{
+  "protocol": "claimipedia/bounded-example-correspondence/1",
+  "scope": "Four fictional evidence items; three original methods; all 16 subsets. One source family, not independent scientific confirmation.",
+  "sourceFiles": {
+    "domain.rel": "b8481e681bfcff0d9b312496ea57a479b904c930cff05a08e102b964ac91f189",
+    "runtime.mjs": "8c0471c95f3e78e5c6eaaa86ef77b930684591510bd84740ec5730e335b32c7d"
+  },
+  "reproduce": "node tooling/capture-claimipedia-example.mjs <original-checkout>",
+  "vectors": [
+    {
+      "selected": [],
+      "method": "programVersion.credentialReview.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.northStudy"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Accepted",
+      "support": 800000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Undecided",
+      "support": 500000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 450000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.southDataset"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.southDataset"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Undecided",
+      "support": 500000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.southDataset"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 450000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Accepted",
+      "support": 800000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Accepted",
+      "support": 1000000,
+      "challenge": 0,
+      "independentSources": 2
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 900000,
+      "challenge": 0,
+      "independentSources": 2
+    },
+    {
+      "selected": [
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 500000,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Accepted",
+      "support": 800000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Undecided",
+      "support": 500000,
+      "challenge": 500000,
+      "independentSources": 2
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 450000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.southDataset",
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.southDataset",
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Undecided",
+      "support": 500000,
+      "challenge": 500000,
+      "independentSources": 2
+    },
+    {
+      "selected": [
+        "evidence.southDataset",
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 450000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset",
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Accepted",
+      "support": 800000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset",
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Accepted",
+      "support": 1000000,
+      "challenge": 500000,
+      "independentSources": 3
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset",
+        "evidence.communityTestimony"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 900000,
+      "challenge": 0,
+      "independentSources": 2
+    },
+    {
+      "selected": [
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 500000,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Accepted",
+      "support": 800000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Undecided",
+      "support": 500000,
+      "challenge": 500000,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 450000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.southDataset",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.southDataset",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Undecided",
+      "support": 500000,
+      "challenge": 500000,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.southDataset",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 450000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Accepted",
+      "support": 800000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Accepted",
+      "support": 1000000,
+      "challenge": 500000,
+      "independentSources": 2
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 900000,
+      "challenge": 0,
+      "independentSources": 2
+    },
+    {
+      "selected": [
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Rejected",
+      "support": 0,
+      "challenge": 1000000,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Accepted",
+      "support": 800000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Rejected",
+      "support": 500000,
+      "challenge": 1000000,
+      "independentSources": 2
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 450000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.southDataset",
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Undecided",
+      "support": 0,
+      "challenge": 0,
+      "independentSources": 0
+    },
+    {
+      "selected": [
+        "evidence.southDataset",
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Rejected",
+      "support": 500000,
+      "challenge": 1000000,
+      "independentSources": 2
+    },
+    {
+      "selected": [
+        "evidence.southDataset",
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 450000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset",
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.credentialReview.1",
+      "result": "Accepted",
+      "support": 800000,
+      "challenge": 0,
+      "independentSources": 1
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset",
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.equalEvidence.1",
+      "result": "Conflicted",
+      "support": 1000000,
+      "challenge": 1000000,
+      "independentSources": 3
+    },
+    {
+      "selected": [
+        "evidence.northStudy",
+        "evidence.southDataset",
+        "evidence.communityTestimony",
+        "evidence.retractedStudy"
+      ],
+      "method": "programVersion.independentSource.1",
+      "result": "Undecided",
+      "support": 900000,
+      "challenge": 0,
+      "independentSources": 2
+    }
+  ]
+}

@@ -3,6 +3,57 @@
   "queries": {
     "claimipedia.build": [
       {
+        "port": "json.parse",
+        "args": {
+          "text": [
+            "one",
+            "claimipedia.example",
+            "configuration"
+          ]
+        },
+        "into": "claimConfiguration"
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "claim.review.boot",
+          "mode": "browser",
+          "grantProfile": "micrositesBrowser",
+          "queries": [
+            "list",
+            "claim.review.item",
+            "claim.review.method",
+            "claim.review.compare",
+            "claim.review.html",
+            "claim.review.boot",
+            "claim.review.change",
+            "claim.review.reset",
+            "claim.review.render",
+            "html.escape",
+            "html.serialize",
+            "html.observe",
+            "html.inspect",
+            "html.cssText"
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "data": {
+            "configuration": "$claimConfiguration"
+          },
+          "budget": 20000000
+        },
+        "into": "claimRuntime"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "claimipedia/runtime.js",
+          "text": "$claimRuntime"
+        },
+        "into": "_"
+      },
+      {
         "let": "projection",
         "value": "claimipedia"
       },
@@ -136,7 +187,7 @@
                   "tag": "meta",
                   "attrs": {
                     "name": "description",
-                    "content": "A shared world of inquiry: connecting ideas, evidence and the choices we make. A first glimpse of the Claimipedia microsite."
+                    "content": "A shared world of inquiry: connecting ideas, evidence and the choices we make. Compare three review methods on the same evidence."
                   },
                   "children": [
                     "list"
@@ -177,7 +228,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "claimipedia.css?v=motif-1"
+                    "href": "claimipedia.css?v=motif-2"
                   },
                   "children": [
                     "list"
@@ -310,7 +361,7 @@
                   "tag": "meta",
                   "attrs": {
                     "name": "twitter:description",
-                    "content": "A shared world of inquiry. A first glimpse of Claimipedia."
+                    "content": "A shared world of inquiry. Explore how different methods read the same evidence."
                   },
                   "children": [
                     "list"
@@ -444,11 +495,11 @@
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "#inquiry"
+                            "href": "#example"
                           },
                           "children": [
                             "list",
-                            "The inquiry"
+                            "Try the example"
                           ]
                         },
                         {
@@ -499,7 +550,7 @@
                             },
                             "children": [
                               "list",
-                              "Microsite in preparation"
+                              "An interactive introduction"
                             ]
                           },
                           {
@@ -729,11 +780,11 @@
                                 "tag": "a",
                                 "attrs": {
                                   "class": "claim-button",
-                                  "href": "#idea"
+                                  "href": "#example"
                                 },
                                 "children": [
                                   "list",
-                                  "Explore the idea ↓"
+                                  "Try the shared evidence ↓"
                                 ]
                               },
                               {
@@ -905,6 +956,632 @@
                                     "children": [
                                       "list",
                                       "Bring what we learn back to shared choices. Keep the reasons for a decision, then revisit them when the world answers back."
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "section",
+                        "attrs": {
+                          "id": "example",
+                          "class": "review-workbench",
+                          "aria-labelledby": "review-title"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "claim-section"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "claim-section-heading"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "claim-eyebrow"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "A living example / Try it yourself"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {
+                                      "id": "review-title"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Same evidence.",
+                                      {
+                                        "tag": "br",
+                                        "attrs": {},
+                                        "children": [
+                                          "list"
+                                        ]
+                                      },
+                                      "Different ways of reading."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "A method decides what counts, how much it counts, and when there is enough to reach a conclusion. Change the evidence below. Watch all three methods read the same snapshot."
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "review-claim"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "claim-eyebrow"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Fictional demonstration · Claim version 1"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "blockquote",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "The North River restoration reduced mean nitrate concentration by at least 15 percent during 2025."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "In everyday terms: did the restoration lower the average amount of nitrate measured in the river’s water by at least 15%?"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "North River monitoring sites; 2025 compared with 2024."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "review-small"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "All names, evidence and conclusions in this example are invented. This demonstrates review rules; it establishes no environmental finding."
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "fieldset",
+                                "attrs": {
+                                  "id": "review-evidence"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "legend",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "01 / Choose the evidence in this snapshot"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "class": "review-small"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Uncheck an item to explore its effect. The original record remains visible."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "div",
+                                    "attrs": {
+                                      "class": "review-evidence-grid"
+                                    },
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "label",
+                                        "attrs": {
+                                          "class": "review-evidence-card",
+                                          "for": "evidence-0"
+                                        },
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "div",
+                                            "attrs": {
+                                              "class": "review-evidence-top"
+                                            },
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "input",
+                                                "attrs": {
+                                                  "id": "evidence-0",
+                                                  "type": "checkbox",
+                                                  "checked": true,
+                                                  "data-evidence": "evidence.northStudy"
+                                                },
+                                                "children": [
+                                                  "list"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "span",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "↗ Supports"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "tag": "strong",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              "North laboratory study"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "span",
+                                            "attrs": {
+                                              "class": "review-evidence-copy"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "A credentialed, independent, peer-reviewed study. Not retracted."
+                                            ]
+                                          },
+                                          {
+                                            "tag": "span",
+                                            "attrs": {
+                                              "class": "review-source"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Source / North laboratory"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "tag": "label",
+                                        "attrs": {
+                                          "class": "review-evidence-card",
+                                          "for": "evidence-1"
+                                        },
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "div",
+                                            "attrs": {
+                                              "class": "review-evidence-top"
+                                            },
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "input",
+                                                "attrs": {
+                                                  "id": "evidence-1",
+                                                  "type": "checkbox",
+                                                  "checked": true,
+                                                  "data-evidence": "evidence.southDataset"
+                                                },
+                                                "children": [
+                                                  "list"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "span",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "↗ Supports"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "tag": "strong",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              "South laboratory dataset"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "span",
+                                            "attrs": {
+                                              "class": "review-evidence-copy"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "An independently collected dataset from a second laboratory. Source is not credentialed."
+                                            ]
+                                          },
+                                          {
+                                            "tag": "span",
+                                            "attrs": {
+                                              "class": "review-source"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Source / South laboratory"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "tag": "label",
+                                        "attrs": {
+                                          "class": "review-evidence-card",
+                                          "for": "evidence-2"
+                                        },
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "div",
+                                            "attrs": {
+                                              "class": "review-evidence-top"
+                                            },
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "input",
+                                                "attrs": {
+                                                  "id": "evidence-2",
+                                                  "type": "checkbox",
+                                                  "checked": true,
+                                                  "data-evidence": "evidence.communityTestimony"
+                                                },
+                                                "children": [
+                                                  "list"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "span",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "↘ Challenges"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "tag": "strong",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              "Community observations"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "span",
+                                            "attrs": {
+                                              "class": "review-evidence-copy"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "An independent community panel’s observations. Retraction status is not recorded."
+                                            ]
+                                          },
+                                          {
+                                            "tag": "span",
+                                            "attrs": {
+                                              "class": "review-source"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Source / Community panel"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "tag": "label",
+                                        "attrs": {
+                                          "class": "review-evidence-card",
+                                          "for": "evidence-3"
+                                        },
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "div",
+                                            "attrs": {
+                                              "class": "review-evidence-top"
+                                            },
+                                            "children": [
+                                              "list",
+                                              {
+                                                "tag": "input",
+                                                "attrs": {
+                                                  "id": "evidence-3",
+                                                  "type": "checkbox",
+                                                  "checked": true,
+                                                  "data-evidence": "evidence.retractedStudy"
+                                                },
+                                                "children": [
+                                                  "list"
+                                                ]
+                                              },
+                                              {
+                                                "tag": "span",
+                                                "attrs": {},
+                                                "children": [
+                                                  "list",
+                                                  "↘ Challenges"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "tag": "strong",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              "Retracted North study"
+                                            ]
+                                          },
+                                          {
+                                            "tag": "span",
+                                            "attrs": {
+                                              "class": "review-evidence-copy"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "A retracted, credentialed study from the same North laboratory. Not an independent source."
+                                            ]
+                                          },
+                                          {
+                                            "tag": "span",
+                                            "attrs": {
+                                              "class": "review-source"
+                                            },
+                                            "children": [
+                                              "list",
+                                              "Source / North laboratory"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "review-small"
+                                },
+                                "children": [
+                                  "list",
+                                  "Here, “credentialed” means the source is marked as having recognised expertise. “Peer reviewed” means other researchers checked the work. “Independent” is a recorded source property in this fictional example; the page does not verify it."
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "review-toolbar"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "02 / Compare the methods"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "button",
+                                    "attrs": {
+                                      "id": "review-reset",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Restore all evidence"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "id": "review-announcement",
+                                  "class": "review-small",
+                                  "role": "status",
+                                  "aria-live": "polite",
+                                  "aria-atomic": "true"
+                                },
+                                "children": [
+                                  "list",
+                                  "The comparison will appear below."
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "id": "review-loading"
+                                },
+                                "children": [
+                                  "list",
+                                  "Loading the algebraic comparison…"
+                                ]
+                              },
+                              {
+                                "tag": "noscript",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Turn on JavaScript to change the evidence and inspect the comparison. The claim and evidence above remain readable."
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "id": "review-results",
+                                  "class": "review-results",
+                                  "aria-label": "Three review methods"
+                                },
+                                "children": [
+                                  "list"
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "review-small"
+                                },
+                                "children": [
+                                  "list",
+                                  "Points are authored weights, not probabilities or percentages of truth. The marker on each bar is that method’s decision threshold. Independent sources are counted only among the evidence that the method admits."
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "review-lessons"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "article",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "h3",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "03 / Ask what the method misses."
+                                        ]
+                                      },
+                                      {
+                                        "tag": "p",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "Remove the retracted study. Equal weight changes because it counted that item. The other methods already excluded it. A transparent rule can still be a poor rule for a particular question."
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "tag": "article",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "h3",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "“Undecided” is information."
+                                        ]
+                                      },
+                                      {
+                                        "tag": "p",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "The independent-source method can admit two supporting items and still withhold judgment: 0.9 points is below its 1.2-point threshold. More evidence and a lower threshold are different changes."
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "details",
+                                "attrs": {
+                                  "class": "review-algebra"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "summary",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "How the algebra makes this inspectable"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "One versioned claim and one selected evidence set feed three versioned methods. For each item, the process checks every condition, selects the highest-priority matching rule, then adds its weight to support or challenge. It counts distinct independent sources before testing the thresholds."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Missing information fails a condition. A retracted item stays in the record even when a method excludes it. Method results remain separate; they are never averaged into a universal score."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "The page, styles, review rules, interaction and reasoning display are process queries and REL data, running on the same algebra as Temple and Sourcery. This bounded example is checked against all 48 original method-and-evidence combinations."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "a",
+                                    "attrs": {
+                                      "href": "https://github.com/aaron-alderman/aaronalderman-com/blob/main/algebra/claimipedia-review.process.json"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Inspect the process queries ↗"
                                     ]
                                   }
                                 ]
@@ -1092,6 +1769,16 @@
                   ]
                 },
                 {
+                  "tag": "script",
+                  "attrs": {
+                    "type": "module",
+                    "src": "runtime.js?v=review-1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
                   "tag": "footer",
                   "attrs": {
                     "class": "claim-footer",
@@ -1120,7 +1807,7 @@
                           "attrs": {},
                           "children": [
                             "list",
-                            "A first glimpse. The microsite is taking shape."
+                            "Shared evidence. Visible methods. Room to revise."
                           ]
                         }
                       ]

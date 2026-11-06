@@ -6,7 +6,7 @@ const read=f=>JSON.parse(fs.readFileSync(f)),save=(f,v)=>fs.writeFileSync(f,JSON
 const L=(...v)=>['list',...v],C=(...v)=>['concat',...v],one=(s,p)=>['one',s,p],E=(tag,attrs={},...children)=>({tag,attrs,children:L(...children)}),el=(tag,cls,...children)=>E(tag,cls?{class:cls}:{},...children);
 const facts=[],fact=(s,p,o)=>facts.push([s,p,o]);
 for(const [slug,name,symbol,note,light]of [['temple','Temple','⌂','Law, change and the witness.','gold'],['sourcery','Sourcery','✦','Magic that shows its work.','rose'],['claimipedia','Claimipedia','◈','Claims, evidence and honest disagreement.','sage']]){
- const s='microsite.entry.'+slug;for(const [p,o]of Object.entries({isa:'PublishedMicrosite',name,symbol,note,light,href:slug+'/',status:slug==='claimipedia'?'stub':'published'}))fact(s,p,o);
+ const s='microsite.entry.'+slug;for(const [p,o]of Object.entries({isa:'PublishedMicrosite',name,symbol,note,light,href:slug+'/',status:'published'}))fact(s,p,o);
 }
 fact('page.claimipedia','isa','StandalonePage');fact('page.claimipedia','canonical','https://aaronalderman.com/claimipedia/');
 let index=0;

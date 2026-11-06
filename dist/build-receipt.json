@@ -152,7 +152,7 @@
     ]
   },
   "sources": {
-    "bootstrap/site.json": "5d89ba22cd29787cf2bf1f5d7e5f071ca8b0e0f51dde8272daff2bb083926275",
+    "bootstrap/site.json": "116b5ec8fd946d8e0653abbc9dd1024227768ec6ecc414716130f736de97c8ea",
     "bootstrap/native.json": "39c1405b8d7eca883c5fefd425ce564ad8d9eb6ee6ec3d948cdc42d912a68105",
     "bootstrap/run.cjs": "b90c8a76ae4100a1d1b593cd350ef9d43aff269f3cd0ab8ba94d1d4a92ccafc2",
     "bootstrap/temple-seed.cjs": "c1fdf47cb183a0c8e69d000d091ada457fdc8333b34a2a5bba4bcc51d53ac71e",
@@ -189,7 +189,8 @@
     "algebra/microsite-temple-motion.process.json": "16197e683130c5cab6cc6ba7112fd74354fd1126d0bc461553b426f75d73c864",
     "algebra/microsite-media.process.json": "a8581be25a23c46ad8eaae9cb178f3055d74f8b1f759cde17b7550e08e13629b",
     "algebra/front-doors.process.json": "b6f6af0d7f173d46c6be249bd772b1a697c0e306b391c038bca1573ebd4791da",
-    "algebra/claimipedia.process.json": "dad24fbd8786ea87524469535fe4653a30811a47bec83b6517484d6cda500332",
+    "algebra/claimipedia.process.json": "272666d0b4ec11f2557f9155f4487aa4387edf2ee87bd3690dd514fd40ff8aef",
+    "algebra/claimipedia-review.process.json": "c356e4691f2788337b251cebec2cbc08f1857ec45e797e9c3eacc471a13d2a17",
     "algebra/operators.expression.json": "b03c2c863cab748899675ffb4afd8f7ead0979f5e992923a086d19ad89a2c7f2",
     "bootstrap/kernel-profile.json": "3067678f68016886d77569c62523c101d299648f37697df51c4524c83647a875",
     "source/expedition.rel": "4550717fe7baff7a2baff200708e463cb8507d5ae98cf9ed53a21b8a4a0f5535",
@@ -198,8 +199,9 @@
     "source/gateway-presentation.rel": "2bbf23f5c7d174aba22ada48b1b9fb0ed527d49259f6fde78cd2e446347d4c1d",
     "source/microsites/presentation.rel": "663fbf06c4516b28de788b6b61e51947e44b8c3404210c60bf70c4eb48bce53b",
     "source/microsites/release.rel": "c8aaedf9256c9ee3900f1b66ee639dee982c4ab4ba8a140d1090f644ba30ece5",
-    "source/front-doors.rel": "a31072a735e1b34cc4d389e526b711d4cd9f47b0f5c44b3bae8fb7f2cac6c674",
-    "source/claimipedia.rel": "5f257d9ce48e73675fcff6ae642a1fc55a6341d07a31471377816b19f4c36b9a",
+    "source/front-doors.rel": "f9649a63cba3983320963df84eeba34dffde7e20c305616b587e20a42513e562",
+    "source/claimipedia.rel": "d839cea6b9dd0b72bb254584be4095032fa90f71f3c40055eb6e24ac4d105879",
+    "source/claimipedia-example.rel": "d95f26dcb518bc5cc9aeef306f648ab3d261429634052d7d4ec59ddec08e49e9",
     "retained/.nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "retained/app.js": "c3f56f316cb8e7fd8fff0da3d4195b8879d92997fc951ad252d7767dd8f299c0",
     "retained/assets/atlas-grid.svg": "083e40637c96a76c26024a961a60266a17be77bbd35215634cc4f89b13cd09a1",
@@ -322,9 +324,10 @@
     "temple/runtime.js": "f67a25a74bcd1d12ae987ee6b30c36876fb3b7ea56adbb3c72e93391d53ba366",
     "sourcery/runtime.js": "5e4f240d4655a8fe6a47e803896e63bd56ddd87cd338a9a260bd7608ab3be742",
     "temple/early.js": "d729cfd3fc90e7fcb6bef2a2a8ee6042dbbd0a470f10f555679d7b5b36d4a572",
-    "claimipedia/claimipedia.css": "ada9f6aa96efb540257569a99e3f136364b55086ccfca7d6382ffb7c44a1f406",
+    "claimipedia/runtime.js": "11aa0244a04f614cde8ab4464ca9863fb3ad21080163f802675b74b71e39e7e3",
+    "claimipedia/claimipedia.css": "871b77f370a0112dd7f7366f2d034eb2b2010855d3e46ef2575af4a8932bf510",
     "claimipedia/mark.svg": "b633f6d21438a1e60ba7a52f0aebdc47400e752291e5e9bb24abbe426a16e733",
-    "claimipedia/index.html": "6e461d86e4774a26b2ba086af3f1aa7b75e3ef807da4bb802425585533701720",
+    "claimipedia/index.html": "d4078bea29b8bb3803bc496918d7897c18f189e76acfb6ce6651b7e1a3bf4659",
     "retained/.nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "retained/app.js": "c3f56f316cb8e7fd8fff0da3d4195b8879d92997fc951ad252d7767dd8f299c0",
@@ -570,30 +573,32 @@
     "sitemap.xml": "228c2942fe69eeb53dca72a7dc5a2a56b9d28fbcbb87200df2cd2a7658fc5634"
   },
   "execution": {
-    "indexSteps": 2642576,
-    "applicationSteps": 3944129,
-    "totalSteps": 6586705,
+    "indexSteps": 2766285,
+    "applicationSteps": 3995597,
+    "totalSteps": 6761882,
     "limit": 20000000
   },
   "factSnapshot": {
     "protocol": "temple/fact-index/1",
-    "factCount": 14197
+    "factCount": 14900
   },
   "kernelProfile": "temple/kernel-profile/1",
   "admission": {
-    "passes": 11,
+    "passes": 13,
     "steps": [
-      3065390,
-      22193,
+      3185665,
+      22523,
       62753,
       11191,
-      334433,
+      350165,
       1839914,
       240551,
       1839914,
       240551,
       724,
-      237
+      237,
+      195858,
+      16593
     ]
   },
   "language": [],

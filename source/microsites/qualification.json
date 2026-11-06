@@ -5,15 +5,15 @@
   "presentationReceiptSha256": "2613e7a270f957dfb3a67f8e0e403204b6668e205efde3ecc2989f593f614ed7",
   "functionCorrespondenceSha256": "dc3a032bb37a5cb5202e20118a78f1883bc6e9608c073dded8378d92ff58021f",
   "validation": {
-    "command": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs",
-    "passed": 31,
+    "command": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs",
+    "passed": 33,
     "failed": 0,
-    "reproducibleArtifacts": 255,
+    "reproducibleArtifacts": 256,
     "seedSha256": "c1fdf47cb183a0c8e69d000d091ada457fdc8333b34a2a5bba4bcc51d53ac71e",
     "execution": {
-      "indexSteps": 2642576,
-      "applicationSteps": 3944129,
-      "totalSteps": 6586705,
+      "indexSteps": 2766285,
+      "applicationSteps": 3995597,
+      "totalSteps": 6761882,
       "limit": 20000000
     }
   },
@@ -38,7 +38,7 @@
     ],
     "homepageSuccessor": [
       "Direct homepage Temple, Sourcery and Claimipedia entrances",
-      "Claimipedia clearly labelled microsite in preparation",
+      "Claimipedia now offers an explicitly fictional interactive introduction",
       "Mobile Claimipedia link to the claims/evidence reading path",
       "Reading-path research destinations all return HTTP 200"
     ],
@@ -49,7 +49,8 @@
       "Desktop and 390-pixel mobile layouts with no horizontal overflow",
       "Lens-to-section anchors and inquiry cycle",
       "Reduced-motion CSS disables animation, transitions and smooth scrolling"
-    ]
+    ],
+    "claimipediaReview": "See source/claimipedia-review-contract.json: executable comparison, 48 original-evaluator vectors, keyboard and responsive browser checks."
   },
   "limits": "Finite correspondence cases against the captured originals, not a formal proof across every event interleaving or host. Media/font bytes remain retained assets. See RECOMPOSITION.md.",
   "editorialSuccessorSha256": "a4767414079fe17b90e1b64d47b915a6fa7a05cea04701d88c8a19cc92fb14dd"
