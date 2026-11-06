@@ -125,18 +125,23 @@
             ]
           },
           {
-            "assert": [
-              "not",
-              [
-                "includes",
-                [
-                  "list",
-                  0
-                ],
-                "$hOriginalLine"
-              ]
-            ],
-            "message": "HIERARCHY-003: Missing source line binding."
+            "port": "value.string",
+            "args": {
+              "value": "$hOriginalLine"
+            },
+            "into": "hLineText"
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$hLineText",
+              "pattern": "^[1-9][0-9]*$"
+            },
+            "into": "hLineValid"
+          },
+          {
+            "assert": "$hLineValid",
+            "message": "HIERARCHY-003: Missing or invalid source line binding."
           },
           {
             "assert": [
@@ -441,9 +446,105 @@
           ]
         },
         "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sp.listing",
+          "input": {
+            "programme": [
+              "at",
+              "$data.processes",
+              "hierarchy.shared"
+            ],
+            "origin": {
+              "file": "algebra/hierarchy.process.json",
+              "query": "hierarchy.shared"
+            }
+          }
+        },
+        "into": "hDefinition"
+      },
+      {
+        "let": "hDefinitionText",
+        "value": [
+          "concat",
+          "process hierarchy.shared:\n",
+          "$hDefinition.text"
+        ]
+      },
+      {
+        "port": "digest.sha256",
+        "args": {
+          "text": "$hDefinitionText"
+        },
+        "into": "hDefinitionDigest"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "sp.present",
+          "input": {
+            "text": "$hDefinitionText",
+            "file": "hierarchy-shared.process",
+            "language": "process",
+            "theme": "dark",
+            "lineNumbers": true,
+            "selectedLine": null,
+            "origin": {
+              "file": "algebra/hierarchy.process.json",
+              "query": "hierarchy.shared"
+            },
+            "expectedHash": "$hDefinitionDigest"
+          }
+        },
+        "into": "hDefinitionView"
+      },
+      {
+        "let": "input",
+        "value": "$hDefinitionView.tree"
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hierarchy-process",
+          "html": "$result"
+        },
+        "into": "_"
       }
     ],
     "hierarchy.viewer.build": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "algebra/hierarchy.process.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "algebra/hierarchy.process.json"
+        },
+        "into": "hProcessText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$hProcessText"
+        },
+        "into": "hProcesses"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/hierarchy.rel"
+        },
+        "into": "_"
+      },
       {
         "port": "file.copy",
         "args": {
@@ -537,7 +638,8 @@
             "list"
           ],
           "data": {
-            "presentation": "$hPresentationData"
+            "presentation": "$hPresentationData",
+            "processes": "$hProcesses.queries"
           },
           "budget": 20000000
         },
@@ -2024,6 +2126,64 @@
                       "children": [
                         "list",
                         "Snapshots preserve the observed source version. An excerpt retains its upstream file hash and original line locations. This is source inspection, not an execution trace."
+                      ]
+                    },
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "How sharing is computed"
+                      ]
+                    },
+                    {
+                      "tag": "pre",
+                      "attrs": {
+                        "id": "hierarchy-process",
+                        "class": "hierarchy-source"
+                      },
+                      "children": [
+                        "list",
+                        "Readable process definition loads through the shared source presenter."
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../algebra/hierarchy.process.json"
+                          },
+                          "children": [
+                            "list",
+                            "Authoritative inspection algebra"
+                          ]
+                        },
+                        " · ",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../source/hierarchy.json"
+                          },
+                          "children": [
+                            "list",
+                            "Homepage source catalogue"
+                          ]
+                        },
+                        " · ",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../source/hierarchy.rel"
+                          },
+                          "children": [
+                            "list",
+                            "Presentation facts"
+                          ]
+                        }
                       ]
                     },
                     {

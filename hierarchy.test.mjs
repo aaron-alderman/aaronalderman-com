@@ -45,6 +45,7 @@ test('malformed, unsupported and stale source-line bindings refuse rather than f
  await assert.rejects(run('hierarchy.parse',{binding,text:'not a REL declaration'}),/HIERARCHY-001/);
  await assert.rejects(run('hierarchy.parse',{binding:{...binding,lines:['("a", "label", "p")']},text:'("a", "label", "p")'}),/HIERARCHY-002/);
  await assert.rejects(run('hierarchy.parse',{binding,text:'("a", "pack", "changed")'}),/HIERARCHY-004/);
+ for(const lineMap of [[],[0],[-1]])await assert.rejects(run('hierarchy.parse',{binding:{...binding,lineMap},text:binding.lines[0]}),/HIERARCHY-003/);
  const rows=await run('hierarchy.parse',{binding:{...binding,lines:['("a", "pack", "changed")']},text:'("a", "pack", "changed")'});assert.equal(rows[0].target,'changed');
 });
 
@@ -52,4 +53,12 @@ test('source inspection exposes receipts, consumers and honest missing edges wit
  const work=fs.readFileSync('dist/inspection/harborboard.html','utf8');assert.ok(work.includes('pack.sourcery.workItemPlanning.v1'));assert.ok(work.includes('href="supercrm.html"'));assert.ok(work.includes('Upstream SHA-256'));assert.ok(work.includes('source line '));assert.ok(work.includes('src="runtime.js"'));
  const worldwright=fs.readFileSync('dist/inspection/worldwright.html','utf8');assert.ok(worldwright.includes('No shared capability identity is declared'));assert.ok(worldwright.includes('worldwright-storytelling/README.md'));assert.ok(!worldwright.includes('Proposed connections'));
  const programme=read('algebra/hierarchy.process.json');const boot=programme.queries['hierarchy.viewer.boot'];assert.ok(boot.some(s=>s.port==='kernel.invoke'&&s.args.query==='sp.present'));assert.ok(boot.some(s=>s.call==='html.serialize'));assert.ok(!Object.keys(programme.queries).some(n=>/editor|patch|mutat/.test(n)));assert.equal(read('bootstrap/site.json').executionBudget,20000000);
+});
+
+test('the admitted viewer highlights source and its actual sharing definition with separate exact hash bases',async()=>{
+ const {computationalPorts}=require('./bootstrap/ports/browser-effects.cjs'),manifest=read('bootstrap/site.json'),queries=Object.assign({},...manifest.modules.map(f=>read(f).queries));
+ const bundle=queries['hierarchy.viewer.build'].find(s=>s.port==='runtime.bundle').args,names=[...bundle.queries[1].slice(1),...bundle.queries[2].slice(1)];
+ const viewer=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:'hierarchy.viewer.boot',queries:Object.fromEntries(names.map(n=>[n,queries[n]]))},mode:'model',ports:valuePorts(),limit:20000000});
+ const effects=[];await invoke({model:viewer,entry:'hierarchy.viewer.boot',input:{data:{presentation:read('source/encounter/presentation.json'),processes:read('algebra/hierarchy.process.json').queries}},ports:{...valuePorts(),...computationalPorts(),'browser.property':({ref})=>ref==='#hierarchy-language'?'rel':'("example", "pack", "pack.shared")','browser.write':x=>{effects.push(x);return true},'browser.content':x=>{effects.push(x);return true}},nested:['kernel.invoke','kernel.execute','kernel.evaluate'],limit:20000000});
+ const source=effects.find(x=>x.ref==='#hierarchy-source'),definition=effects.find(x=>x.ref==='#hierarchy-process');assert.ok(source.html.includes('example'));assert.ok(definition.html.includes('hierarchy.shared'));assert.ok(definition.html.includes('hTarget'));assert.ok(effects.some(x=>x.ref==='#hierarchy-source-hash'));
 });
