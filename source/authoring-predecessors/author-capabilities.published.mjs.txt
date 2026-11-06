@@ -1,0 +1,58 @@
+// Authoring notation only. Pages, icons and cards execute through the publication algebra.
+import fs from 'node:fs';
+import {createRequire} from 'node:module';
+const {parseRel}=createRequire(import.meta.url)('../bootstrap/ports/rel-codec.cjs');
+const L=(...x)=>['list',...x],C=(...x)=>['concat',...x],one=(s,p)=>['one',s,p],E=(tag,attrs={},...children)=>({tag,attrs,children:L(...children)});
+const file='source/front-doors.rel',facts=parseRel(fs.readFileSync(file,'utf8'),file);
+const put=(s,p,o)=>{const f=facts.find(f=>f.s===s&&f.p===p);if(f)f.o=o;else facts.push({s,p,o});};
+const svg=(...children)=>E('svg',{viewBox:'0 0 32 32',fill:'none',stroke:'currentColor','stroke-width':1.5,'stroke-linecap':'round','stroke-linejoin':'round',class:'capability-icon','aria-hidden':'true',focusable:'false'},...children);
+const raw=v=>Array.isArray(v)?(v[0]==='list'?v.slice(1):v).map(raw):v&&typeof v==='object'?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,raw(x)])):v;
+const path=d=>E('path',{d}),circle=(cx,cy,r)=>E('circle',{cx,cy,r});
+const capabilities=[
+ ['microsite.entry.encounter','encounter','Encounter','Inspect meaning. Follow a change.',svg(circle(16,16,11),circle(16,16,4),path('M16 2v3M16 27v3M2 16h3M27 16h3'))],
+ ['capability.kingdom','kingdom','Kingdom','Make room for agency, care and responsibility.',svg(path('M5 26V13l6 4 5-11 5 11 6-4v13ZM10 22h12'))],
+ ['capability.world-modelling','world-modelling','World Modelling','Build models. Keep their limits visible.',svg(circle(16,16,12),E('ellipse',{cx:16,cy:16,rx:5,ry:12}),path('M4 16h24M7 9h18M7 23h18'))],
+ ['capability.creativity','creativity','Creativity','Find patterns. Explore what could be.',svg(path('M16 3l3.5 9.5L29 16l-9.5 3.5L16 29l-3.5-9.5L3 16l9.5-3.5ZM25 3v6M22 6h6'))],
+ ['capability.field','the-field','The Field','Ask open questions. Find ways to test them.',svg(path('M3 23c5-12 8 10 13-2s8 7 13-8M3 15c5-12 8 10 13-2s8 7 13-8M4 29h24'))]
+];
+for(const [id,slug,name,description,icon]of capabilities){for(const [p,o]of Object.entries({isa:'CapabilitySet',slug,name,href:slug+'/',description,icon:JSON.stringify(raw(icon))}))put(id,p,o);if(slug!=='encounter'){put('page.capability.'+slug,'isa','StandalonePage');put('page.capability.'+slug,'canonical','https://aaronalderman.com/'+slug+'/');}}
+const copy={
+ kingdom:{lead:'What should power make room for?',paragraphs:['Kingdom brings together questions of agency, restraint, faith and care. The recurring question is how power can help others flourish while leaving them room to act.','Begin with kenosis, then follow its difficult boundary: when does restraint protect freedom, and when does care require intervention?'],links:[['../places/kenosis.html','Begin with power and agency'],['../places/care.html','Remember to care'],['../gate.html#path-kingdom','Follow the research and sources']]},
+ 'world-modelling':{lead:'A model is a way of seeing. What does it leave out?',paragraphs:['World Modelling connects representation, possibility, memory and scale. A useful model makes some distinctions available and leaves others outside its frame.','Explore how those choices affect what can be observed, compared and changed. Keep the conditions and limits of the model beside its results.'],links:[['../places/representation.html','Start with the mapmaker’s debt'],['../places/possibility.html','Explore what can exist together'],['../places/scale.html','Change the scale']]},
+ creativity:{lead:'What else could this become?',paragraphs:['Creativity is a set of ways to explore possibilities: notice a pattern, try a different arrangement, follow a surprising connection, and see what survives the change.','Begin with a small pattern you can grow and count, then follow the larger questions of intention, authorship and composing a world someone else can explore.'],links:[['../places/tiling.html','Grow a pattern'],['../places/will.html','Follow an intention'],['../worldwright/','Explore storytelling with Worldwright']]},
+ 'the-field':{lead:'Where the questions are still alive.',paragraphs:['The Field brings open questions into contact with ways to investigate them. What is uncertain? Which observation would help? What could another person check?','Enter through a working laboratory, follow the limits of a measurement, or return to the research programme and its unfinished questions.'],links:[['../places/laboratory.html','Think through a test'],['../places/observation.html','Ask what the measurement missed'],['../gate.html#path-field','Explore the open research']]}
+};
+for(const [id,slug]of capabilities)if(copy[slug]){const c=copy[slug];put(id,'lead',c.lead);put(id,'paragraphs',JSON.stringify(raw(c.paragraphs.map(text=>E('p',{},text)))));put(id,'links',JSON.stringify(raw(c.links.map(([href,label])=>E('a',{class:'button',href},label+' →')))));}
+for(let n=facts.length-1;n>=0;n--)if(facts[n].s.startsWith('capabilities.style.'))facts.splice(n,1);
+let i=0;function style(selector,declarations,context){const s='capabilities.style.'+(++i);put(s,'isa','StyleRule');put(s,'projection','main');put(s,'selector',selector);if(context)put(s,'context',context);for(const [p,value]of Object.entries(declarations)){const d=s+'.'+p;facts.push({s,p:'declaration',o:d});put(d,'property',p);put(d,'value',value);}}
+style('.hero-capabilities',{'max-width':'820px',margin:'0 0 28px',padding:'20px 0 0','border-top':'1px solid #ffffff26'});
+style('.hero-capabilities .eyebrow',{'font-size':'10px','letter-spacing':'.18em',color:'#e4d6bb',margin:'0 0 8px'});
+style('.capability-intro',{'font-size':'12px','line-height':'1.6',color:'#c0c8d4',margin:'0 0 14px'});
+style('.capability-list',{display:'grid','grid-template-columns':'repeat(4,minmax(0,1fr))',gap:'8px','list-style':'none',padding:'0',margin:'0'});
+style('.capability-list li',{'min-width':'0',display:'flex'});
+style('.capability-card',{display:'flex','flex-direction':'column','box-sizing':'border-box',width:'100%','min-height':'206px',padding:'17px 16px',color:'#e7dfd0','text-decoration':'none',border:'1px solid #ffffff28','border-radius':'12px',background:'linear-gradient(145deg,#1c2539dd,#0c121ee8)',transition:'border-color .2s ease,background .2s ease'});
+style('.capability-icon',{width:'28px',height:'28px',color:'#cbb78f','flex-shrink':'0',margin:'0 0 13px'});
+style('.capability-card strong',{'font-family':'var(--serif)','font-size':'19px','line-height':'1.15','font-weight':'400',margin:'0 0 9px'});
+style('.capability-blurb',{'font-size':'12px','line-height':'1.55',color:'#c0c8d4',margin:'0'});
+style('.capability-arrow',{'font-size':'14px',color:'#cbb78f',margin:'auto 0 0','padding-top':'10px','align-self':'flex-end'});
+style('.capability-card:hover,.capability-card:focus-visible',{'border-color':'#d6ba7b',background:'linear-gradient(145deg,#283147ee,#111a29f2)'});
+style('.capability-list',{'grid-template-columns':'repeat(2,minmax(0,1fr))'},'(max-width: 560px)');
+style('.capability-card',{transition:'none'},'(prefers-reduced-motion: reduce)');
+style('.capability-page',{'max-width':'820px',margin:'0 auto',padding:'90px 7%'});
+style('.capability-page>.capability-icon',{width:'46px',height:'46px',margin:'0 0 24px'});
+style('.capability-page h1',{'font-size':'clamp(42px,7vw,74px)','line-height':'1.1',margin:'0 0 24px'});
+style('.capability-page .lead',{'font-family':'var(--serif)','font-size':'clamp(24px,3vw,32px)','line-height':'1.4',color:'#d6c8aa'});
+style('.capability-page p',{'max-width':'650px'});
+style('.capability-page-links',{display:'flex','flex-wrap':'wrap',gap:'12px',margin:'32px 0'});
+style('.capability-siblings',{display:'flex','flex-wrap':'wrap',gap:'12px 20px',margin:'48px 0 0','padding-top':'22px','border-top':'1px solid #ffffff26','font-size':'13px'});
+fs.writeFileSync(file,facts.map(f=>'('+[f.s,f.p,f.o].map(JSON.stringify).join(', ')+')').join('\n')+'\n');
+const moduleFile='algebra/front-doors.process.json',module=JSON.parse(fs.readFileSync(moduleFile)),home=module.queries['frontdoors.home'];
+const previous=home.at(-1).value,products=previous.attrs?.class==='hero-entrances'?previous.children[1]:previous;
+const old=home.findIndex(s=>s.into==='capabilityCards');if(old>=0)home.splice(old,1);
+home.splice(home.length-1,0,{fold:['subjects','isa','CapabilitySet'],as:'capability',accumulator:'capabilityCards',initial:L(),steps:[{port:'json.parse',args:{text:one('$capability','icon')},into:'capabilityIcon'}],yield:['append','$capabilityCards',L(E('li',{},E('a',{class:'capability-card',href:one('$capability','href')},'$capabilityIcon',E('strong',{},one('$capability','name')),E('p',{class:'capability-blurb'},one('$capability','description')),E('span',{class:'capability-arrow','aria-hidden':'true'},'↗'))))],into:'capabilityCards'});
+home.at(-1).value=E('div',{class:'hero-entrances'},products,E('nav',{class:'hero-capabilities',id:'capabilities','aria-label':'Capabilities'},E('p',{class:'eyebrow'},'Capabilities'),E('p',{class:'capability-intro'},'Ways of working that connect across the projects.'),E('ul',{class:'capability-list'},'$capabilityCards')));
+const doc=E('html',{lang:'en'},E('head',{},E('meta',{charset:'utf-8'}),E('meta',{name:'viewport',content:'width=device-width, initial-scale=1'}),E('title',{},C(one('$capability','name'),' — Aaron Alderman')),E('meta',{name:'description',content:one('$capability','description')}),E('link',{rel:'canonical',href:C('https://aaronalderman.com/',one('$capability','href'))}),E('link',{rel:'stylesheet',href:'../expedition.css?v=capabilities-2'}),E('meta',{property:'og:title',content:one('$capability','name')}),E('meta',{property:'og:description',content:one('$capability','description')}),E('meta',{property:'og:url',content:C('https://aaronalderman.com/',one('$capability','href'))})),E('body',{},E('a',{class:'skip',href:'#main'},'Skip to content'),E('header',{class:'masthead'},E('a',{class:'brand',href:'../index.html'},'Aaron Alderman'),E('nav',{'aria-label':'Site'},E('a',{href:'../index.html#capabilities'},'Capabilities'),E('a',{href:'../index.html#microsites'},'Explore the worlds'))),E('main',{id:'main',class:'capability-page'},'$capabilityIcon',E('p',{class:'eyebrow'},'A connected set of capabilities'),E('h1',{},one('$capability','name')),E('p',{class:'lead'},one('$capability','lead')),'$paragraphs',E('nav',{class:'capability-page-links','aria-label':'Explore this capability'},'$links'),E('nav',{class:'capability-siblings','aria-label':'Other capabilities'},...capabilities.map(([,slug,name])=>E('a',{href:'../'+slug+'/'},name))))));
+module.queries['frontdoors.capabilities']=[{each:['subjects','isa','CapabilitySet'],as:'capability',steps:[{when:['not',['eq',one('$capability','slug'),'encounter']],then:[{port:'json.parse',args:{text:one('$capability','icon')},into:'capabilityIcon'},{port:'json.parse',args:{text:one('$capability','paragraphs')},into:'paragraphs'},{port:'json.parse',args:{text:one('$capability','links')},into:'links'},{let:'input',value:doc},{call:'html.serialize'},{port:'file.write',args:{path:C(one('$capability','href'),'index.html'),text:C('<!doctype html>\n','$result')},into:'_'}]}]}];
+fs.writeFileSync(moduleFile,JSON.stringify(module,null,2)+'\n');
+const p='algebra/publication.process.json',publication=JSON.parse(fs.readFileSync(p));if(!publication.queries['publication.build'].some(s=>s.call==='frontdoors.capabilities'))publication.queries['publication.build'].splice(4,0,{call:'frontdoors.capabilities'});fs.writeFileSync(p,JSON.stringify(publication,null,2)+'\n');
+const expedition='source/expedition.rel';fs.writeFileSync(expedition,fs.readFileSync(expedition,'utf8').replace(/"stylesheetVersion", "[^"]+"/,'"stylesheetVersion", "capabilities-2"'));
