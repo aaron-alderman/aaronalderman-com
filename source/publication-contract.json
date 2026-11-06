@@ -150,7 +150,16 @@
       "bootstrap/hosts/runtime.cjs": "5afe01fefeafa9f4f3ea0f41c9da9ef026ad780afc2652635324a3885b297b1b",
       "bootstrap/ports/programme.cjs": "88d1c4d2aefe341533af1f967268e1c9da555d556db34adb7eea6b5838a5c1ec",
       "bootstrap/ports/kernel.cjs": "0ab9faa6dbd5c6d3d811171d46301037436c53b6fd5e11afab4769246d121c5c",
-      "bootstrap/ports/browser-effects.cjs": "5e77920df39355b78ae033e3c857c9babf3bd675704d1ecdf62d521782142389"
+      "bootstrap/ports/browser-effects.cjs": "eddfd7a9dfae629982fd1ba74793d02d4a35afb4ce92b859b7a88892197c3428"
     }
+  },
+  "atlasStorageSuccessor": {
+    "reason": "Three generic localStorage text operations; all application state and persistence decisions remain process algebra.",
+    "changed": [
+      "bootstrap/ports/browser-effects.cjs"
+    ],
+    "predecessor": "source/atlas-native-predecessor/browser-effects.cjs",
+    "predecessorSha256": "5e77920df39355b78ae033e3c857c9babf3bd675704d1ecdf62d521782142389",
+    "seedUnchanged": true
   }
 }

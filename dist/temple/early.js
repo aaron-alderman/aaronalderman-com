@@ -359,6 +359,9 @@ function browserEffects(host,dispatch) {
   const describe=el=>({ref:reference(el),tag:el.tagName,attributes:Object.fromEntries([...el.attributes].map(a=>[a.name,a.value])),text:el.textContent,rect:rect(el.getBoundingClientRect()),value:el.value??null,checked:Boolean(el.checked),disabled:Boolean(el.disabled),hidden:Boolean(el.hidden)});
   const eventValue=e=>({type:e.type,key:e.key??'',code:e.code??'',matches:e.matches??null,timeStamp:e.timeStamp,target:e.target?.nodeType===1?describe(e.target):null});
   return {
+    'storage.read': ({key,maxLength=65536}) => {try{const value=(host.storage??win.localStorage).getItem(key);if(value!==null&&value.length>maxLength)return {ok:false,value:null};return {ok:true,value};}catch{return {ok:false,value:null};}},
+    'storage.write': ({key,value}) => {if(typeof value!=='string')throw Error('Storage requires text');try{(host.storage??win.localStorage).setItem(key,value);return {ok:true};}catch{return {ok:false};}},
+    'storage.remove': ({key}) => {try{(host.storage??win.localStorage).removeItem(key);return {ok:true};}catch{return {ok:false};}},
     'browser.environment': () => ({width:win.innerWidth,height:win.innerHeight,dpr:win.devicePixelRatio??1,scrollX:win.scrollX,scrollY:win.scrollY,hidden:doc.hidden,visibility:doc.visibilityState,reduced:win.matchMedia('(prefers-reduced-motion: reduce)').matches,secure:win.isSecureContext,crypto:Boolean((host.crypto??win.crypto)?.subtle),intersection:typeof win.IntersectionObserver==='function'}),
     'browser.mediaQuery': ({query}) => win.matchMedia(query).matches,
     'browser.select': ({selector}) => [...doc.querySelectorAll(selector)].map(describe),

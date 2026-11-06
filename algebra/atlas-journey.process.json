@@ -1,0 +1,803 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "atlas.seen.clean": [
+      {
+        "let": "clean",
+        "value": [
+          "distinct",
+          [
+            "filter",
+            "$candidate",
+            "id",
+            [
+              "includes",
+              "$data.ids",
+              "$id"
+            ]
+          ]
+        ]
+      }
+    ],
+    "atlas.seen.load": [
+      {
+        "port": "storage.read",
+        "args": {
+          "key": "worldwright.atlas.seen.v1",
+          "maxLength": 4096
+        },
+        "into": "stored"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "seen"
+        },
+        "into": "previous"
+      },
+      {
+        "port": "text.split",
+        "args": {
+          "value": [
+            "if",
+            "$stored.value",
+            "$stored.value",
+            ""
+          ],
+          "pattern": "\\n"
+        },
+        "into": "items"
+      },
+      {
+        "let": "candidate",
+        "value": [
+          "if",
+          "$stored.ok",
+          "$items",
+          [
+            "or",
+            "$previous",
+            [
+              "list"
+            ]
+          ]
+        ]
+      },
+      {
+        "call": "atlas.seen.clean"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "seen",
+          "value": "$clean"
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "saved",
+          "value": "$stored.ok"
+        },
+        "into": "_"
+      }
+    ],
+    "atlas.seen.save": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "seen"
+        },
+        "into": "seen"
+      },
+      {
+        "port": "text.join",
+        "args": {
+          "values": "$seen",
+          "separator": "\n"
+        },
+        "into": "text"
+      },
+      {
+        "port": "storage.write",
+        "args": {
+          "key": "worldwright.atlas.seen.v1",
+          "value": "$text"
+        },
+        "into": "saved"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "saved",
+          "value": "$saved.ok"
+        },
+        "into": "_"
+      }
+    ],
+    "atlas.seen.mark": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "seen"
+        },
+        "into": "seen"
+      },
+      {
+        "let": "candidate",
+        "value": [
+          "append",
+          "$seen",
+          [
+            "list",
+            "$current"
+          ]
+        ]
+      },
+      {
+        "call": "atlas.seen.clean"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "seen",
+          "value": "$clean"
+        },
+        "into": "_"
+      },
+      {
+        "call": "atlas.seen.save"
+      }
+    ],
+    "atlas.seen.paint": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "seen"
+        },
+        "into": "seen"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-atlas-id]"
+        },
+        "into": "links"
+      },
+      {
+        "each": "$links",
+        "as": "link",
+        "steps": [
+          {
+            "let": "id",
+            "value": [
+              "at",
+              "$link.attributes",
+              "data-atlas-id"
+            ]
+          },
+          {
+            "let": "isSeen",
+            "value": [
+              "includes",
+              "$seen",
+              "$id"
+            ]
+          },
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$link.ref",
+              "name": "data-seen",
+              "value": [
+                "if",
+                "$isSeen",
+                "true",
+                "false"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$link.ref",
+              "name": "aria-label",
+              "value": [
+                "concat",
+                [
+                  "at",
+                  "$data.labels",
+                  "$id"
+                ],
+                [
+                  "if",
+                  "$isSeen",
+                  " — seen",
+                  ""
+                ]
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "dom.exists",
+        "args": {
+          "selector": "#atlas-memory"
+        },
+        "into": "onAtlas"
+      },
+      {
+        "when": "$onAtlas",
+        "then": [
+          {
+            "port": "dom.hidden",
+            "args": {
+              "selector": "#atlas-memory",
+              "value": false
+            },
+            "into": "_"
+          },
+          {
+            "port": "dom.text",
+            "args": {
+              "selector": "#atlas-progress",
+              "text": [
+                "concat",
+                [
+                  "count",
+                  "$seen"
+                ],
+                " of 40 places seen"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.get",
+            "args": {
+              "key": "saved"
+            },
+            "into": "saved"
+          },
+          {
+            "port": "dom.text",
+            "args": {
+              "selector": "#atlas-storage-note",
+              "text": [
+                "if",
+                "$saved",
+                "Remembered only in this browser. Pale green lights mark places you’ve opened.",
+                "Browser storage is unavailable. Seen places are kept only while this page stays open."
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "atlas.seen.refresh": [
+      {
+        "call": "atlas.seen.load"
+      },
+      {
+        "call": "atlas.seen.paint"
+      }
+    ],
+    "atlas.seen.reset": [
+      {
+        "port": "storage.remove",
+        "args": {
+          "key": "worldwright.atlas.seen.v1"
+        },
+        "into": "removed"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "seen",
+          "value": [
+            "list"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "saved",
+          "value": "$removed.ok"
+        },
+        "into": "_"
+      },
+      {
+        "call": "atlas.seen.paint"
+      },
+      {
+        "port": "dom.text",
+        "args": {
+          "selector": "#atlas-progress",
+          "text": "Your map is clear. 0 of 40 places seen."
+        },
+        "into": "_"
+      }
+    ],
+    "atlas.pin.dismiss": [
+      {
+        "when": [
+          "eq",
+          "$eventInput.event.key",
+          "Escape"
+        ],
+        "then": [
+          {
+            "port": "browser.class",
+            "args": {
+              "ref": "$eventInput.matched.ref",
+              "name": "is-dismissed",
+              "value": true
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "atlas.pin.reveal": [
+      {
+        "port": "browser.class",
+        "args": {
+          "ref": "$eventInput.matched.ref",
+          "name": "is-dismissed",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "call": "atlas.pin.preview"
+      }
+    ],
+    "atlas.journey.boot": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "seen",
+          "value": [
+            "list"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "call": "atlas.journey.resume"
+      },
+      {
+        "when": "$onAtlas",
+        "then": [
+          {
+            "port": "dom.on",
+            "args": {
+              "selector": "#atlas-reset",
+              "event": "click",
+              "query": "atlas.seen.reset"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "document",
+              "event": "keydown",
+              "delegate": ".atlas-pin",
+              "query": "atlas.pin.dismiss"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "document",
+              "event": "focusin",
+              "delegate": ".atlas-pin",
+              "query": "atlas.pin.reveal"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "document",
+              "event": "pointerover",
+              "delegate": ".atlas-pin",
+              "query": "atlas.pin.reveal"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "window",
+              "event": "storage",
+              "query": "atlas.seen.refresh"
+            },
+            "into": "_"
+          },
+          {
+            "call": "atlas.pin.mode"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": {
+                "media": "(max-width: 760px)"
+              },
+              "event": "change",
+              "query": "atlas.pin.mode"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "window",
+          "event": "pageshow",
+          "query": "atlas.journey.resume"
+        },
+        "into": "_"
+      }
+    ],
+    "atlas.runtime.build": [
+      {
+        "port": "record.fromEntries",
+        "args": {
+          "entries": [
+            "map",
+            [
+              "subjects",
+              "isa",
+              "Place"
+            ],
+            "p",
+            [
+              "list",
+              [
+                "one",
+                "$p",
+                "slug"
+              ],
+              [
+                "concat",
+                [
+                  "or",
+                  [
+                    "optional",
+                    "$p",
+                    "atlasLabel"
+                  ],
+                  [
+                    "one",
+                    "$p",
+                    "region"
+                  ]
+                ],
+                ". ",
+                [
+                  "one",
+                  "$p",
+                  "title"
+                ]
+              ]
+            ]
+          ]
+        },
+        "into": "atlasLabels"
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "atlas.journey.boot",
+          "mode": "browser",
+          "grantProfile": "atlasBrowser",
+          "queries": [
+            "list",
+            "atlas.seen.clean",
+            "atlas.seen.load",
+            "atlas.seen.save",
+            "atlas.seen.mark",
+            "atlas.seen.paint",
+            "atlas.seen.refresh",
+            "atlas.seen.reset",
+            "atlas.pin.dismiss",
+            "atlas.pin.reveal",
+            "atlas.journey.boot",
+            "atlas.pin.preview",
+            "atlas.pin.mode",
+            "atlas.journey.resume"
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "data": {
+            "ids": [
+              "map",
+              [
+                "subjects",
+                "isa",
+                "Place"
+              ],
+              "p",
+              [
+                "one",
+                "$p",
+                "slug"
+              ]
+            ],
+            "labels": "$atlasLabels",
+            "places": [
+              "map",
+              [
+                "subjects",
+                "isa",
+                "Place"
+              ],
+              "p",
+              {
+                "id": [
+                  "one",
+                  "$p",
+                  "slug"
+                ],
+                "name": [
+                  "or",
+                  [
+                    "optional",
+                    "$p",
+                    "atlasLabel"
+                  ],
+                  [
+                    "one",
+                    "$p",
+                    "region"
+                  ]
+                ],
+                "question": [
+                  "one",
+                  "$p",
+                  "title"
+                ]
+              }
+            ]
+          },
+          "budget": 2000000
+        },
+        "into": "atlasRuntime"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "atlas-runtime.js",
+          "text": "$atlasRuntime"
+        },
+        "into": "_"
+      }
+    ],
+    "atlas.pin.preview": [
+      {
+        "let": "id",
+        "value": [
+          "at",
+          "$eventInput.matched.attributes",
+          "data-atlas-id"
+        ]
+      },
+      {
+        "when": [
+          "includes",
+          "$data.ids",
+          "$id"
+        ],
+        "then": [
+          {
+            "let": "place",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$data.places",
+                "p",
+                [
+                  "eq",
+                  "$p.id",
+                  "$id"
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "port": "dom.text",
+            "args": {
+              "selector": "#atlas-preview-title",
+              "text": "$place.name"
+            },
+            "into": "_"
+          },
+          {
+            "port": "dom.text",
+            "args": {
+              "selector": "#atlas-preview-question",
+              "text": "$place.question"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "#atlas-preview-link",
+              "name": "href",
+              "value": [
+                "concat",
+                "places/",
+                "$id",
+                ".html"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "dom.hidden",
+            "args": {
+              "selector": "#atlas-preview-link",
+              "value": false
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "atlas.pin.mode": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "mobileClick"
+        },
+        "into": "binding"
+      },
+      {
+        "when": "$binding",
+        "then": [
+          {
+            "port": "browser.cancel",
+            "args": {
+              "id": "$binding"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "mobileClick",
+          "value": null
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.mediaQuery",
+        "args": {
+          "query": "(max-width: 760px)"
+        },
+        "into": "small"
+      },
+      {
+        "when": "$small",
+        "then": [
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "document",
+              "event": "click",
+              "delegate": ".atlas-pin",
+              "preventDefault": true,
+              "query": "atlas.pin.preview"
+            },
+            "into": "binding"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "mobileClick",
+              "value": "$binding"
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "atlas.journey.resume": [
+      {
+        "call": "atlas.seen.load"
+      },
+      {
+        "port": "dom.exists",
+        "args": {
+          "selector": "[data-atlas-current]"
+        },
+        "into": "isPlace"
+      },
+      {
+        "when": "$isPlace",
+        "then": [
+          {
+            "port": "dom.attribute",
+            "args": {
+              "selector": "[data-atlas-current]",
+              "name": "data-atlas-current"
+            },
+            "into": "current"
+          },
+          {
+            "when": [
+              "includes",
+              "$data.ids",
+              "$current"
+            ],
+            "then": [
+              {
+                "call": "atlas.seen.mark"
+              },
+              {
+                "port": "dom.hidden",
+                "args": {
+                  "selector": "#atlas-visit-note",
+                  "value": false
+                },
+                "into": "_"
+              },
+              {
+                "port": "state.get",
+                "args": {
+                  "key": "saved"
+                },
+                "into": "saved"
+              },
+              {
+                "port": "dom.text",
+                "args": {
+                  "selector": "#atlas-visit-note",
+                  "text": [
+                    "if",
+                    "$saved",
+                    "✓ Seen on your map. Your visit is remembered in this browser.",
+                    "Your browser couldn’t save this visit. You can still explore every place."
+                  ]
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "port": "dom.exists",
+        "args": {
+          "selector": "#atlas-memory"
+        },
+        "into": "onAtlas"
+      },
+      {
+        "when": "$onAtlas",
+        "then": [
+          {
+            "call": "atlas.seen.paint"
+          }
+        ]
+      }
+    ]
+  }
+}

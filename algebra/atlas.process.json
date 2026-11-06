@@ -3,6 +3,9 @@
   "queries": {
     "atlas.build": [
       {
+        "call": "atlas.runtime.build"
+      },
+      {
         "let": "input",
         "value": {
           "tag": "html",
@@ -67,7 +70,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "expedition.css?v=atlas-1"
+                    "href": "expedition.css?v=atlas-journey-1"
                   },
                   "children": [
                     "list"
@@ -362,102 +365,434 @@
                         ]
                       },
                       {
-                        "tag": "nav",
+                        "tag": "section",
                         "attrs": {
-                          "aria-label": "Choose a territory",
-                          "class": "atlas-overview",
-                          "id": "map"
+                          "class": "atlas-map",
+                          "id": "map",
+                          "aria-label": "Interactive atlas"
                         },
                         "children": [
                           "list",
                           {
-                            "tag": "img",
+                            "tag": "div",
                             "attrs": {
-                              "src": [
-                                "one",
-                                "atlas",
-                                "image"
-                              ],
-                              "alt": "An imagined island links a blue observatory range, a rose woodland and violet highlands with golden trails.",
-                              "width": 1942,
-                              "height": 809,
-                              "fetchpriority": "high",
-                              "decoding": "async"
+                              "class": "atlas-map-intro"
                             },
                             "children": [
-                              "list"
+                              "list",
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Every light is a place. Hover or use Tab to discover it, then click or press Enter to explore."
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "atlas-mobile-hint"
+                                },
+                                "children": [
+                                  "list",
+                                  "Swipe or scroll sideways to discover more, or use the full list below."
+                                ]
+                              },
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "href": "#unseen",
+                                  "class": "atlas-list-link"
+                                },
+                                "children": [
+                                  "list",
+                                  "Browse the places as a list ↓"
+                                ]
+                              }
                             ]
                           },
                           {
                             "tag": "div",
                             "attrs": {
-                              "class": "atlas-beacons"
+                              "class": "atlas-map-scroll",
+                              "tabindex": 0,
+                              "aria-label": "Scrollable map of forty places"
                             },
                             "children": [
                               "list",
-                              [
-                                "map",
-                                [
-                                  "subjects",
-                                  "isa",
-                                  "Territory"
-                                ],
-                                "t",
-                                {
-                                  "tag": "a",
-                                  "attrs": {
-                                    "class": "atlas-beacon",
-                                    "href": [
-                                      "concat",
-                                      "#",
-                                      [
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "atlas-overview"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "img",
+                                    "attrs": {
+                                      "src": [
                                         "one",
-                                        "$t",
-                                        "atlasSlug"
-                                      ]
-                                    ],
-                                    "data-light": [
-                                      "one",
-                                      "$t",
-                                      "light"
+                                        "atlas",
+                                        "image"
+                                      ],
+                                      "alt": "An imagined island links a blue observatory range, a rose woodland and violet highlands with golden trails.",
+                                      "width": 1942,
+                                      "height": 809,
+                                      "fetchpriority": "high",
+                                      "decoding": "async"
+                                    },
+                                    "children": [
+                                      "list"
                                     ]
                                   },
-                                  "children": [
-                                    "list",
-                                    {
-                                      "tag": "span",
-                                      "attrs": {},
-                                      "children": [
-                                        "list",
+                                  {
+                                    "tag": "nav",
+                                    "attrs": {
+                                      "class": "atlas-pins",
+                                      "aria-label": "Explore forty places on the map"
+                                    },
+                                    "children": [
+                                      "list",
+                                      [
+                                        "map",
                                         [
+                                          "subjects",
+                                          "isa",
+                                          "Place"
+                                        ],
+                                        "p",
+                                        {
+                                          "tag": "a",
+                                          "attrs": {
+                                            "class": "atlas-pin",
+                                            "href": [
+                                              "concat",
+                                              "places/",
+                                              [
+                                                "one",
+                                                "$p",
+                                                "slug"
+                                              ],
+                                              ".html"
+                                            ],
+                                            "data-atlas-id": [
+                                              "one",
+                                              "$p",
+                                              "slug"
+                                            ],
+                                            "data-light": [
+                                              "one",
+                                              "$p",
+                                              "light"
+                                            ],
+                                            "style": [
+                                              "concat",
+                                              "left:",
+                                              [
+                                                "one",
+                                                "$p",
+                                                "mapX"
+                                              ],
+                                              "%;top:",
+                                              [
+                                                "one",
+                                                "$p",
+                                                "mapY"
+                                              ],
+                                              "%;"
+                                            ],
+                                            "aria-label": [
+                                              "concat",
+                                              [
+                                                "or",
+                                                [
+                                                  "optional",
+                                                  "$p",
+                                                  "atlasLabel"
+                                                ],
+                                                [
+                                                  "one",
+                                                  "$p",
+                                                  "region"
+                                                ]
+                                              ],
+                                              ". ",
+                                              [
+                                                "one",
+                                                "$p",
+                                                "title"
+                                              ]
+                                            ],
+                                            "data-tip-above": [
+                                              "one",
+                                              "$p",
+                                              "mapTipAbove"
+                                            ]
+                                          },
+                                          "children": [
+                                            "list",
+                                            {
+                                              "tag": "span",
+                                              "attrs": {
+                                                "class": "atlas-pin-number",
+                                                "aria-hidden": "true"
+                                              },
+                                              "children": [
+                                                "list",
+                                                [
+                                                  "one",
+                                                  "$p",
+                                                  "chapter"
+                                                ]
+                                              ]
+                                            },
+                                            {
+                                              "tag": "span",
+                                              "attrs": {
+                                                "class": "atlas-pin-tip",
+                                                "aria-hidden": "true"
+                                              },
+                                              "children": [
+                                                "list",
+                                                {
+                                                  "tag": "strong",
+                                                  "attrs": {},
+                                                  "children": [
+                                                    "list",
+                                                    [
+                                                      "or",
+                                                      [
+                                                        "optional",
+                                                        "$p",
+                                                        "atlasLabel"
+                                                      ],
+                                                      [
+                                                        "one",
+                                                        "$p",
+                                                        "region"
+                                                      ]
+                                                    ]
+                                                  ]
+                                                },
+                                                {
+                                                  "tag": "span",
+                                                  "attrs": {},
+                                                  "children": [
+                                                    "list",
+                                                    [
+                                                      "one",
+                                                      "$p",
+                                                      "title"
+                                                    ]
+                                                  ]
+                                                },
+                                                {
+                                                  "tag": "small",
+                                                  "attrs": {},
+                                                  "children": [
+                                                    "list",
+                                                    "Click to explore ↗"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "aside",
+                            "attrs": {
+                              "class": "atlas-place-preview",
+                              "aria-label": "Selected place"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "h2",
+                                "attrs": {
+                                  "id": "atlas-preview-title"
+                                },
+                                "children": [
+                                  "list",
+                                  "Choose a light on the map."
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "id": "atlas-preview-question"
+                                },
+                                "children": [
+                                  "list",
+                                  "Tap for a preview, then choose Explore to open the place."
+                                ]
+                              },
+                              {
+                                "tag": "a",
+                                "attrs": {
+                                  "id": "atlas-preview-link",
+                                  "href": "#",
+                                  "hidden": true
+                                },
+                                "children": [
+                                  "list",
+                                  "Explore this place ↗"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "atlas-memory",
+                              "id": "atlas-memory",
+                              "hidden": true
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "div",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "id": "atlas-progress",
+                                      "role": "status",
+                                      "aria-live": "polite"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Your journey is beginning."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "id": "atlas-storage-note"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Seen places are remembered only in this browser."
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "tag": "button",
+                                "attrs": {
+                                  "type": "button",
+                                  "id": "atlas-reset"
+                                },
+                                "children": [
+                                  "list",
+                                  "Reset seen places"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "nav",
+                            "attrs": {
+                              "class": "atlas-territory-jumps",
+                              "aria-label": "Jump to a territory"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "atlas-beacons"
+                                },
+                                "children": [
+                                  "list",
+                                  [
+                                    "map",
+                                    [
+                                      "subjects",
+                                      "isa",
+                                      "Territory"
+                                    ],
+                                    "t",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "class": "atlas-beacon",
+                                        "href": [
+                                          "concat",
+                                          "#",
+                                          [
+                                            "one",
+                                            "$t",
+                                            "atlasSlug"
+                                          ]
+                                        ],
+                                        "data-light": [
                                           "one",
                                           "$t",
-                                          "name"
+                                          "light"
                                         ]
-                                      ]
-                                    },
-                                    {
-                                      "tag": "small",
-                                      "attrs": {},
+                                      },
                                       "children": [
                                         "list",
-                                        [
-                                          "concat",
-                                          [
-                                            "count",
+                                        {
+                                          "tag": "span",
+                                          "attrs": {},
+                                          "children": [
+                                            "list",
                                             [
-                                              "objects",
+                                              "one",
                                               "$t",
-                                              "place"
+                                              "name"
                                             ]
-                                          ],
-                                          " places · Explore ↗"
-                                        ]
+                                          ]
+                                        },
+                                        {
+                                          "tag": "small",
+                                          "attrs": {},
+                                          "children": [
+                                            "list",
+                                            [
+                                              "concat",
+                                              [
+                                                "count",
+                                                [
+                                                  "objects",
+                                                  "$t",
+                                                  "place"
+                                                ]
+                                              ],
+                                              " places · Explore ↗"
+                                            ]
+                                          ]
+                                        }
                                       ]
                                     }
                                   ]
-                                }
-                              ]
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "noscript",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Without JavaScript, each light opens its place directly; visits aren’t remembered."
+                                ]
+                              }
                             ]
                           }
                         ]
@@ -691,6 +1026,11 @@
                                               "slug"
                                             ],
                                             ".html"
+                                          ],
+                                          "data-atlas-id": [
+                                            "one",
+                                            "$p",
+                                            "slug"
                                           ]
                                         },
                                         "children": [
@@ -851,6 +1191,16 @@
                         }
                       ]
                     }
+                  ]
+                },
+                {
+                  "tag": "script",
+                  "attrs": {
+                    "src": "atlas-runtime.js?v=journey-1",
+                    "defer": true
+                  },
+                  "children": [
+                    "list"
                   ]
                 }
               ]

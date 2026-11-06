@@ -25,7 +25,7 @@ test('every encounter has a crawler-readable canonical page and complete sharing
   assert.equal(meta(html,'og:url'),url);assert.equal(meta(html,'og:description'),escape(r.lead));
   assert.equal(meta(html,'twitter:card'),'summary_large_image');assert.equal(meta(html,'twitter:title'),meta(html,'og:title'));
   assert.equal(meta(html,'twitter:image'),meta(html,'og:image'));assert.ok(meta(html,'og:image:alt'));
-  assert.ok(!html.includes('<script'),id+' works without parent-page JavaScript');
+  assert.ok(html.includes('src="../atlas-runtime.js?v=journey-1" defer'));assert.ok(!html.match(/<script[^>]*>[^<]+/),id+' has no inline application logic');
   for(const paragraph of [...r.body,...scene.body])assert.ok(html.includes(escape(paragraph)),id+' preserves its reading and full explanation');
   for(const word of r.words){assert.ok(html.includes(escape(word)));assert.ok(html.includes(escape(wordMeanings[word])));}
   for(const choice of scene.choices)assert.ok(html.includes(`href="${choice.to}.html"`),id+' retains '+choice.to);
@@ -68,17 +68,17 @@ test('compatibility bytes and the explicit Temple mechanism predecessor/successo
  for(const [file,hash]of Object.entries(contract.nativeOrigin.sha256))if(!contract.nativeSuccessor.changed.includes(file))assert.equal(sha(await fs.readFile(path.join(root,file))),hash,file);
  assert.equal(sha(await fs.readFile(path.join(root,'source/microsites/predecessor-native/runtime.cjs'))),contract.nativeOrigin.sha256['bootstrap/hosts/runtime.cjs']);
  assert.equal(sha(await fs.readFile(path.join(root,contract.nativeSuccessor.predecessor))),contract.nativeSuccessor.predecessorSha256);
- assert.deepEqual(receipt.nativeSources,contract.nativeSuccessor.sha256);
+ assert.deepEqual(receipt.nativeSources,contract.nativeSuccessor.sha256);assert.equal(sha(await fs.readFile(path.join(root,contract.atlasStorageSuccessor.predecessor))),contract.atlasStorageSuccessor.predecessorSha256);
  assert.deepEqual(contract.nativeSuccessor.changed,['bootstrap/hosts/runtime.cjs']);assert.deepEqual(contract.nativeSuccessor.added,['bootstrap/ports/browser-effects.cjs']);
 });
 
 test('algebra owns the publication with the existing admission rules, ports and budget',async()=>{
  assert.equal(receipt.assurance.places,40);assert.equal(receipt.assurance.sourceNotes,29);
  assert.equal(receipt.execution.limit,20_000_000);assert.ok(receipt.execution.totalSteps<20_000_000);
- assert.equal(receipt.admission.passes,15);assert.deepEqual(receipt.mjsImports,[]);
+ assert.equal(receipt.admission.passes,17);assert.deepEqual(receipt.mjsImports,[]);
  for(const file of ['source/expedition.rel','source/presentation.rel','algebra/publication.process.json','source/gateway.rel','source/gateway-presentation.rel','algebra/gateway.process.json'])assert.equal(receipt.sources[file],sha(await fs.readFile(path.join(root,file))));
  for(const [file,hash]of Object.entries(receipt.artifacts))if(/\.(?:js|mjs|cjs)$/.test(file)){
-  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js'].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
+  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js'].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
   const retained=file.startsWith('retained/')?file:'retained/'+file;
   assert.equal(hash,contract.compatibilityOrigin.sha256[retained],file+' is unchanged compatibility code');
  }
@@ -122,7 +122,7 @@ test('the homepage links directly to published microsites and Claimipedia has a 
  for(const slug of ['temple','sourcery','claimipedia','worldwright'])assert.ok(menu.includes('assets/world-emblems/'+slug+'-v1.png'));
  const worldwright=await read('dist/worldwright/index.html');assert.ok(worldwright.includes('Worldwright / In preparation'));assert.ok(worldwright.includes('This is a placeholder'));assert.equal(meta(worldwright,'og:url'),'https://aaronalderman.com/worldwright/');
  for(const [name,href]of [['Temple','temple/'],['Sourcery','sourcery/'],['Claimipedia','claimipedia/'],['Worldwright','worldwright/']])assert.ok(menu.includes(`href="${href}"`)&&menu.includes(`<strong>${name}</strong>`));
- assert.ok(home.includes('expedition.css?v=atlas-1'));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));const atlas=await read("dist/atlas.html");assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
+ assert.ok(home.includes('expedition.css?v=atlas-journey-1'));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));const atlas=await read("dist/atlas.html");assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
  const stub=await read('dist/claimipedia/index.html');assert.ok(stub.includes('id="claimipedia-title"'));assert.ok(stub.includes('Knowledge, connected.'));assert.ok(stub.includes('Understanding, evolving.'));assert.ok(stub.includes('An interactive introduction'));assert.ok(stub.includes('href="../gate.html#path-claimipedia"'));assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(stub.includes('runtime.js?v=review-1'));
 });
 
