@@ -5,15 +5,15 @@
   "presentationReceiptSha256": "dccaa5dea3800f3141fd5ae38531005eb28fca85405c06001ad1414bfd1daa47",
   "functionCorrespondenceSha256": "dc3a032bb37a5cb5202e20118a78f1883bc6e9608c073dded8378d92ff58021f",
   "validation": {
-    "command": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs",
-    "passed": 34,
+    "command": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs activity-layout.test.mjs",
+    "passed": 41,
     "failed": 0,
-    "reproducibleArtifacts": 266,
+    "reproducibleArtifacts": 283,
     "seedSha256": "c1fdf47cb183a0c8e69d000d091ada457fdc8333b34a2a5bba4bcc51d53ac71e",
     "execution": {
-      "indexSteps": 2871812,
-      "applicationSteps": 4067961,
-      "totalSteps": 6939773,
+      "indexSteps": 3070225,
+      "applicationSteps": 4217639,
+      "totalSteps": 7287864,
       "limit": 20000000
     }
   },
@@ -63,7 +63,8 @@
       ],
       "mobile": "Temple grid constrained to the viewport; introductions remain readable; original stylesheets unchanged."
     },
-    "socialSharing": "Five purpose-first raster cards visually inspected, including the personal homepage. Dimensions, hashes, unique Open Graph/Twitter bindings and home-specific projection checked by publication tests. No third-party preview crawler was invoked."
+    "socialSharing": "Five purpose-first raster cards visually inspected, including the personal homepage. Dimensions, hashes, unique Open Graph/Twitter bindings and home-specific projection checked by publication tests. No third-party preview crawler was invoked.",
+    "activityLayout": "See source/activity-qa.json: responsive personal-panel cause, 80 layout observations across all 40 activities, representative interactive controls and 180 successful live resource checks. Fix integrated with the Encounter release."
   },
   "limits": "Finite correspondence cases against the captured originals, not a formal proof across every event interleaving or host. Media/font bytes remain retained assets. See RECOMPOSITION.md.",
   "editorialSuccessorSha256": "4ce485cad17065f1cc60e3f920f134af02e2551ebd75ac42306230b2a5df8265"

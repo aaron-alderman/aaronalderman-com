@@ -127,7 +127,7 @@
         "args": {
           "value": "$legacyHTML",
           "search": "</head>",
-          "replacement": "<meta name=\"robots\" content=\"noindex\"><link rel=\"stylesheet\" href=\"../activity.css\">\n</head>"
+          "replacement": "<meta name=\"robots\" content=\"noindex\"><link rel=\"stylesheet\" href=\"../activity.css?v=layout-2\">\n</head>"
         },
         "into": "legacyHTML"
       },
@@ -1971,7 +1971,7 @@
                     "attrs": {
                       "src": [
                         "concat",
-                        "../retained/activity.html#",
+                        "../retained/activity.html?v=layout-2#",
                         [
                           "one",
                           "$place",
