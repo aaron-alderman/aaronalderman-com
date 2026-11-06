@@ -510,60 +510,139 @@
           "rules": [
             "append",
             [
-              "map",
+              "append",
               [
-                "filter",
+                "map",
                 [
-                  "subjects",
-                  "isa",
-                  "StyleRule"
+                  "filter",
+                  [
+                    "subjects",
+                    "isa",
+                    "StyleRule"
+                  ],
+                  "rule",
+                  [
+                    "eq",
+                    [
+                      "one",
+                      "$rule",
+                      "projection"
+                    ],
+                    "$projection"
+                  ]
                 ],
                 "rule",
-                [
-                  "eq",
-                  [
+                {
+                  "id": "$rule",
+                  "selector": [
                     "one",
                     "$rule",
-                    "projection"
+                    "selector"
                   ],
-                  "$projection"
-                ]
+                  "context": [
+                    "optional",
+                    "$rule",
+                    "context"
+                  ],
+                  "declarations": [
+                    "map",
+                    [
+                      "objects",
+                      "$rule",
+                      "declaration"
+                    ],
+                    "decl",
+                    {
+                      "property": [
+                        "one",
+                        "$decl",
+                        "property"
+                      ],
+                      "value": [
+                        "one",
+                        "$decl",
+                        "value"
+                      ]
+                    }
+                  ]
+                }
               ],
-              "rule",
-              {
-                "id": "$rule",
-                "selector": [
-                  "one",
-                  "$rule",
-                  "selector"
+              [
+                "if",
+                [
+                  "eq",
+                  "$projection",
+                  "main"
                 ],
-                "context": [
-                  "optional",
-                  "$rule",
-                  "context"
-                ],
-                "declarations": [
+                [
                   "map",
                   [
-                    "objects",
-                    "$rule",
-                    "declaration"
+                    "subjects",
+                    "isa",
+                    "IdentityTheme"
                   ],
-                  "decl",
+                  "theme",
                   {
-                    "property": [
-                      "one",
-                      "$decl",
-                      "property"
+                    "id": [
+                      "concat",
+                      "questions.palette.",
+                      [
+                        "one",
+                        "$theme",
+                        "key"
+                      ]
                     ],
-                    "value": [
-                      "one",
-                      "$decl",
-                      "value"
-                    ]
+                    "selector": [
+                      "concat",
+                      "html:has(body[data-question-identity=\"",
+                      [
+                        "one",
+                        "$theme",
+                        "key"
+                      ],
+                      "\"]),body[data-question-identity=\"",
+                      [
+                        "one",
+                        "$theme",
+                        "key"
+                      ],
+                      "\"]",
+                      ", .identity-catalogue[data-perspective=\"",
+                      [
+                        "one",
+                        "$theme",
+                        "key"
+                      ],
+                      "\"]"
+                    ],
+                    "declarations": [
+                      "map",
+                      [
+                        "objects",
+                        "$theme",
+                        "questionColour"
+                      ],
+                      "decl",
+                      {
+                        "property": [
+                          "one",
+                          "$decl",
+                          "property"
+                        ],
+                        "value": [
+                          "one",
+                          "$decl",
+                          "value"
+                        ]
+                      }
+                    ],
+                    "context": null
                   }
+                ],
+                [
+                  "list"
                 ]
-              }
+              ]
             ],
             [
               "if",
@@ -579,62 +658,45 @@
                   "isa",
                   "IdentityTheme"
                 ],
-                "theme",
+                "t",
                 {
                   "id": [
                     "concat",
-                    "questions.palette.",
+                    "identity.type.",
                     [
                       "one",
-                      "$theme",
+                      "$t",
                       "key"
                     ]
                   ],
                   "selector": [
                     "concat",
-                    "html:has(body[data-question-identity=\"",
+                    "body[data-identity=\"",
                     [
                       "one",
-                      "$theme",
+                      "$t",
                       "key"
                     ],
-                    "\"]),body[data-question-identity=\"",
+                    "\"],body[data-question-identity=\"",
                     [
                       "one",
-                      "$theme",
-                      "key"
-                    ],
-                    "\"]",
-                    ", .identity-catalogue[data-perspective=\"",
-                    [
-                      "one",
-                      "$theme",
+                      "$t",
                       "key"
                     ],
                     "\"]"
                   ],
+                  "context": null,
                   "declarations": [
-                    "map",
-                    [
-                      "objects",
-                      "$theme",
-                      "questionColour"
-                    ],
-                    "decl",
+                    "list",
                     {
-                      "property": [
-                        "one",
-                        "$decl",
-                        "property"
-                      ],
+                      "property": "--identity-display-font",
                       "value": [
                         "one",
-                        "$decl",
-                        "value"
+                        "$t",
+                        "displayFont"
                       ]
                     }
-                  ],
-                  "context": null
+                  ]
                 }
               ],
               [
@@ -669,6 +731,80 @@
       }
     ],
     "publication.document": [
+      {
+        "let": "documentWorld",
+        "value": [
+          "at",
+          [
+            "filter",
+            [
+              "subjects",
+              "isa",
+              "IdentityTheme"
+            ],
+            "t",
+            [
+              "includes",
+              [
+                "list",
+                [
+                  "concat",
+                  [
+                    "one",
+                    "site",
+                    "origin"
+                  ],
+                  [
+                    "one",
+                    "$t",
+                    "homeRoute"
+                  ]
+                ],
+                [
+                  "concat",
+                  [
+                    "one",
+                    "site",
+                    "origin"
+                  ],
+                  [
+                    "one",
+                    "$t",
+                    "threadsRoute"
+                  ]
+                ]
+              ],
+              "$canonical"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "documentIsThread",
+        "value": [
+          "if",
+          "$documentWorld",
+          [
+            "eq",
+            "$canonical",
+            [
+              "concat",
+              [
+                "one",
+                "site",
+                "origin"
+              ],
+              [
+                "one",
+                "$documentWorld",
+                "threadsRoute"
+              ]
+            ]
+          ],
+          false
+        ]
+      },
       {
         "let": "stewardshipInput",
         "value": "$result"
@@ -721,7 +857,16 @@
                   "tag": "meta",
                   "attrs": {
                     "name": "theme-color",
-                    "content": "#0c111b"
+                    "content": [
+                      "if",
+                      "$documentWorld",
+                      [
+                        "one",
+                        "$documentWorld",
+                        "homeThemeColor"
+                      ],
+                      "#0c111b"
+                    ]
                   },
                   "children": [
                     "list"
@@ -845,20 +990,7 @@
                     "property": "og:image",
                     "content": [
                       "if",
-                      [
-                        "eq",
-                        "$canonical",
-                        [
-                          "one",
-                          "site",
-                          "origin"
-                        ]
-                      ],
-                      [
-                        "one",
-                        "sharing.home",
-                        "image"
-                      ],
+                      "$documentWorld",
                       [
                         "concat",
                         [
@@ -868,8 +1000,43 @@
                         ],
                         [
                           "one",
-                          "site",
+                          "$documentWorld",
+                          [
+                            "if",
+                            "$documentIsThread",
+                            "threadsImage",
+                            "image"
+                          ]
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$canonical",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ]
+                        ],
+                        [
+                          "one",
+                          "sharing.home",
                           "image"
+                        ],
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "site",
+                            "image"
+                          ]
                         ]
                       ]
                     ]
@@ -884,24 +1051,33 @@
                     "property": "og:image:alt",
                     "content": [
                       "if",
+                      "$documentWorld",
                       [
-                        "eq",
-                        "$canonical",
+                        "one",
+                        "$documentWorld",
+                        "homeShareAlt"
+                      ],
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$canonical",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ]
+                        ],
+                        [
+                          "one",
+                          "sharing.home",
+                          "alt"
+                        ],
                         [
                           "one",
                           "site",
-                          "origin"
+                          "imageAlt"
                         ]
-                      ],
-                      [
-                        "one",
-                        "sharing.home",
-                        "alt"
-                      ],
-                      [
-                        "one",
-                        "site",
-                        "imageAlt"
                       ]
                     ]
                   },
@@ -979,20 +1155,7 @@
                     "name": "twitter:image",
                     "content": [
                       "if",
-                      [
-                        "eq",
-                        "$canonical",
-                        [
-                          "one",
-                          "site",
-                          "origin"
-                        ]
-                      ],
-                      [
-                        "one",
-                        "sharing.home",
-                        "image"
-                      ],
+                      "$documentWorld",
                       [
                         "concat",
                         [
@@ -1002,8 +1165,43 @@
                         ],
                         [
                           "one",
-                          "site",
+                          "$documentWorld",
+                          [
+                            "if",
+                            "$documentIsThread",
+                            "threadsImage",
+                            "image"
+                          ]
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$canonical",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ]
+                        ],
+                        [
+                          "one",
+                          "sharing.home",
                           "image"
+                        ],
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "site",
+                            "image"
+                          ]
                         ]
                       ]
                     ]
@@ -1018,24 +1216,33 @@
                     "name": "twitter:image:alt",
                     "content": [
                       "if",
+                      "$documentWorld",
                       [
-                        "eq",
-                        "$canonical",
+                        "one",
+                        "$documentWorld",
+                        "homeShareAlt"
+                      ],
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$canonical",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ]
+                        ],
+                        [
+                          "one",
+                          "sharing.home",
+                          "alt"
+                        ],
                         [
                           "one",
                           "site",
-                          "origin"
+                          "imageAlt"
                         ]
-                      ],
-                      [
-                        "one",
-                        "sharing.home",
-                        "alt"
-                      ],
-                      [
-                        "one",
-                        "site",
-                        "imageAlt"
                       ]
                     ]
                   },
@@ -1083,21 +1290,26 @@
                     "property": "og:image:width",
                     "content": [
                       "if",
+                      "$documentIsThread",
+                      "768",
                       [
-                        "eq",
-                        "$canonical",
+                        "if",
+                        [
+                          "eq",
+                          "$canonical",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ]
+                        ],
                         [
                           "one",
-                          "site",
-                          "origin"
-                        ]
-                      ],
-                      [
-                        "one",
-                        "sharing.home",
-                        "width"
-                      ],
-                      "1672"
+                          "sharing.home",
+                          "width"
+                        ],
+                        "1672"
+                      ]
                     ]
                   },
                   "children": [
@@ -1110,21 +1322,26 @@
                     "property": "og:image:height",
                     "content": [
                       "if",
+                      "$documentIsThread",
+                      "432",
                       [
-                        "eq",
-                        "$canonical",
+                        "if",
+                        [
+                          "eq",
+                          "$canonical",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ]
+                        ],
                         [
                           "one",
-                          "site",
-                          "origin"
-                        ]
-                      ],
-                      [
-                        "one",
-                        "sharing.home",
-                        "height"
-                      ],
-                      "941"
+                          "sharing.home",
+                          "height"
+                        ],
+                        "941"
+                      ]
                     ]
                   },
                   "children": [
@@ -1134,22 +1351,48 @@
                 [
                   "if",
                   [
-                    "eq",
-                    "$canonical",
+                    "or",
                     [
-                      "one",
-                      "site",
-                      "origin"
-                    ]
+                      "eq",
+                      "$canonical",
+                      [
+                        "one",
+                        "site",
+                        "origin"
+                      ]
+                    ],
+                    "$documentWorld"
                   ],
                   {
                     "tag": "meta",
                     "attrs": {
                       "property": "og:image:secure_url",
                       "content": [
-                        "one",
-                        "sharing.home",
-                        "image"
+                        "if",
+                        "$documentWorld",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$documentWorld",
+                            [
+                              "if",
+                              "$documentIsThread",
+                              "threadsImage",
+                              "image"
+                            ]
+                          ]
+                        ],
+                        [
+                          "one",
+                          "sharing.home",
+                          "image"
+                        ]
                       ]
                     },
                     "children": [
@@ -1161,22 +1404,35 @@
                 [
                   "if",
                   [
-                    "eq",
-                    "$canonical",
+                    "or",
                     [
-                      "one",
-                      "site",
-                      "origin"
-                    ]
+                      "eq",
+                      "$canonical",
+                      [
+                        "one",
+                        "site",
+                        "origin"
+                      ]
+                    ],
+                    "$documentWorld"
                   ],
                   {
                     "tag": "meta",
                     "attrs": {
                       "property": "og:image:type",
                       "content": [
-                        "one",
-                        "sharing.home",
-                        "type"
+                        "if",
+                        "$documentWorld",
+                        [
+                          "one",
+                          "$documentWorld",
+                          "homeShareType"
+                        ],
+                        [
+                          "one",
+                          "sharing.home",
+                          "type"
+                        ]
                       ]
                     },
                     "children": [
@@ -1366,7 +1622,7 @@
                           },
                           "children": [
                             "list",
-                            "The workshop ↗"
+                            "Shared workshop ↗"
                           ]
                         }
                       ]
@@ -1641,6 +1897,22 @@
                         "$homeIdentity",
                         "copy"
                       ]
+                    ]
+                  },
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "class": "identity-permalink",
+                      "id": "identity-permalink",
+                      "href": [
+                        "one",
+                        "$homeIdentity",
+                        "homeHref"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      "Link to this world ↗"
                     ]
                   },
                   {
@@ -1975,7 +2247,7 @@
           {
             "tag": "script",
             "attrs": {
-              "src": "identity-runtime.js?v=identity-journeys-1",
+              "src": "identity-runtime.js?v=identity-decisions-1",
               "defer": true
             },
             "children": [
@@ -3489,6 +3761,150 @@
         "into": "_"
       },
       {
+        "port": "browser.write",
+        "args": {
+          "ref": "head title",
+          "name": "textContent",
+          "value": "$chosen.homeTitle"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head link[rel=\"canonical\"]",
+          "name": "href",
+          "value": "$chosen.homeCanonical"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[name=\"description\"]",
+          "name": "content",
+          "value": "$chosen.copy"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[property=\"og:title\"]",
+          "name": "content",
+          "value": "$chosen.homeTitle"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[name=\"twitter:title\"]",
+          "name": "content",
+          "value": "$chosen.homeTitle"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[property=\"og:description\"]",
+          "name": "content",
+          "value": "$chosen.copy"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[name=\"twitter:description\"]",
+          "name": "content",
+          "value": "$chosen.copy"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[property=\"og:url\"]",
+          "name": "content",
+          "value": "$chosen.homeCanonical"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[property=\"og:image\"]",
+          "name": "content",
+          "value": "$chosen.homeShareImage"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[property=\"og:image:secure_url\"]",
+          "name": "content",
+          "value": "$chosen.homeShareImage"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[property=\"og:image:type\"]",
+          "name": "content",
+          "value": "$chosen.homeShareType"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[name=\"twitter:image\"]",
+          "name": "content",
+          "value": "$chosen.homeShareImage"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[property=\"og:image:alt\"]",
+          "name": "content",
+          "value": "$chosen.homeShareAlt"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[name=\"twitter:image:alt\"]",
+          "name": "content",
+          "value": "$chosen.homeShareAlt"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "head meta[name=\"theme-color\"]",
+          "name": "content",
+          "value": "$chosen.homeThemeColor"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#identity-permalink",
+          "name": "href",
+          "value": "$chosen.homeHref"
+        },
+        "into": "_"
+      },
+      {
         "port": "state.set",
         "args": {
           "key": "identity",
@@ -3647,6 +4063,36 @@
                 "one",
                 "$identitySubject",
                 "atlasCardCopy"
+              ],
+              "homeTitle": [
+                "one",
+                "$identitySubject",
+                "homeTitle"
+              ],
+              "homeCanonical": [
+                "one",
+                "$identitySubject",
+                "homeCanonical"
+              ],
+              "homeShareImage": [
+                "one",
+                "$identitySubject",
+                "homeShareImage"
+              ],
+              "homeShareType": [
+                "one",
+                "$identitySubject",
+                "homeShareType"
+              ],
+              "homeShareAlt": [
+                "one",
+                "$identitySubject",
+                "homeShareAlt"
+              ],
+              "homeThemeColor": [
+                "one",
+                "$identitySubject",
+                "homeThemeColor"
               ]
             }
           ]
@@ -3693,19 +4139,140 @@
         ],
         "steps": [
           {
+            "let": "needsReview",
+            "value": [
+              "includes",
+              [
+                "list",
+                "nav.routes",
+                "metadata",
+                "section.headings",
+                "cards.style",
+                "typography",
+                "aesthetics",
+                "footer",
+                "questions.article"
+              ],
+              "$p.id"
+            ]
+          },
+          {
+            "let": "review",
+            "value": [
+              "at",
+              [
+                "at",
+                "$eventInput",
+                "reviewEvidence"
+              ],
+              "$p.id"
+            ]
+          },
+          {
+            "let": "proofOk",
+            "value": [
+              "if",
+              [
+                "and",
+                "$needsReview",
+                "$review"
+              ],
+              [
+                "and",
+                "$review.ok",
+                [
+                  "eq",
+                  "$review.id",
+                  "$p.id"
+                ],
+                [
+                  "eq",
+                  "$review.intent",
+                  "$p.intent"
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    [
+                      "count",
+                      "$eventInput.identities"
+                    ],
+                    0
+                  ]
+                ],
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$review.worlds"
+                  ],
+                  [
+                    "count",
+                    "$eventInput.identities"
+                  ]
+                ],
+                [
+                  "every",
+                  "$eventInput.identities",
+                  "key",
+                  [
+                    "eq",
+                    [
+                      "count",
+                      [
+                        "filter",
+                        "$review.worlds",
+                        "w",
+                        [
+                          "and",
+                          [
+                            "eq",
+                            "$w.identity",
+                            "$key"
+                          ],
+                          "$w.ok"
+                        ]
+                      ]
+                    ],
+                    1
+                  ]
+                ]
+              ],
+              false
+            ]
+          },
+          {
             "let": "values",
             "value": [
-              "map",
-              "$eventInput.worlds",
-              "w",
-              {
-                "identity": "$w.key",
-                "value": [
-                  "at",
-                  "$w.values",
-                  "$p.id"
-                ]
-              }
+              "if",
+              [
+                "and",
+                "$needsReview",
+                "$review"
+              ],
+              [
+                "map",
+                "$review.worlds",
+                "w",
+                {
+                  "identity": "$w.identity",
+                  "value": "$w.value"
+                }
+              ],
+              [
+                "map",
+                "$eventInput.worlds",
+                "w",
+                {
+                  "identity": "$w.key",
+                  "value": [
+                    "at",
+                    "$w.values",
+                    "$p.id"
+                  ]
+                }
+              ]
             ]
           },
           {
@@ -3858,68 +4425,73 @@
           {
             "let": "complete",
             "value": [
-              "and",
+              "if",
+              "$needsReview",
+              "$proofOk",
               [
                 "and",
-                "$dataBound",
-                "$writerBound",
                 [
-                  "not",
+                  "and",
+                  "$dataBound",
+                  "$writerBound",
                   [
-                    "eq",
+                    "not",
                     [
-                      "count",
-                      "$eventInput.identities"
-                    ],
-                    0
-                  ]
-                ],
-                [
-                  "every",
-                  "$eventInput.identities",
-                  "key",
-                  [
-                    "eq",
-                    [
-                      "count",
+                      "eq",
                       [
-                        "filter",
-                        "$eventInput.worlds",
-                        "w",
+                        "count",
+                        "$eventInput.identities"
+                      ],
+                      0
+                    ]
+                  ],
+                  [
+                    "every",
+                    "$eventInput.identities",
+                    "key",
+                    [
+                      "eq",
+                      [
+                        "count",
                         [
-                          "eq",
-                          "$w.key",
-                          "$key"
+                          "filter",
+                          "$eventInput.worlds",
+                          "w",
+                          [
+                            "eq",
+                            "$w.key",
+                            "$key"
+                          ]
                         ]
-                      ]
-                    ],
-                    1
+                      ],
+                      1
+                    ]
+                  ],
+                  [
+                    "every",
+                    "$values",
+                    "v",
+                    "$v.value"
                   ]
                 ],
                 [
-                  "every",
-                  "$values",
-                  "v",
-                  "$v.value"
-                ]
-              ],
-              [
-                "if",
-                [
-                  "includes",
+                  "if",
                   [
-                    "list",
-                    "threads.context",
-                    "atlas.context"
+                    "includes",
+                    [
+                      "list",
+                      "threads.context",
+                      "atlas.context"
+                    ],
+                    "$p.id"
                   ],
-                  "$p.id"
-                ],
-                [
-                  "at",
-                  "$eventInput.journeyChecks",
-                  "$p.id"
-                ],
-                true
+                  [
+                    "at",
+                    "$eventInput.journeyChecks",
+                    "$p.id"
+                  ],
+                  true
+                ]
               ]
             ]
           },
@@ -3959,6 +4531,12 @@
                         "$writers"
                       ],
                       0
+                    ],
+                    [
+                      "if",
+                      "$needsReview",
+                      "$proofOk",
+                      true
                     ]
                   ],
                   "intentionally-invariant",
@@ -4001,21 +4579,31 @@
               "writerBound": "$writerBound",
               "boundary": [
                 "if",
+                "$needsReview",
                 [
-                  "eq",
-                  "$p.intent",
-                  "invariant"
+                  "if",
+                  "$review",
+                  "$review.boundary",
+                  "The declared decision has no generated-output verification receipt."
                 ],
-                "Declared policy; this is not an automated proof that every descendant is invariant.",
                 [
                   "if",
                   [
                     "eq",
-                    "$p.resolver",
-                    "style"
+                    "$p.intent",
+                    "invariant"
                   ],
-                  "Checks declared CSS values and the body identity writer; does not certify visual appearance.",
-                  "Checks authored world values, runtime field projection and matching browser writer; does not certify downstream meaning."
+                  "Declared policy; this is not an automated proof that every descendant is invariant.",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$p.resolver",
+                      "style"
+                    ],
+                    "Checks declared CSS values and the body identity writer; does not certify visual appearance.",
+                    "Checks authored world values, runtime field projection and matching browser writer; does not certify downstream meaning."
+                  ]
                 ]
               ],
               "destinationBound": [
@@ -4033,6 +4621,17 @@
                   "at",
                   "$eventInput.journeyChecks",
                   "$p.id"
+                ],
+                null
+              ],
+              "review": [
+                "if",
+                "$needsReview",
+                [
+                  "if",
+                  "$review",
+                  "$review",
+                  null
                 ],
                 null
               ]
@@ -4060,20 +4659,51 @@
           [
             "not",
             [
-              "some",
-              "$eventInput.policies",
-              "p",
+              "or",
               [
-                "and",
+                "some",
+                "$eventInput.policies",
+                "p",
                 [
-                  "eq",
-                  "$p.target",
-                  "$b.args.ref"
+                  "and",
+                  [
+                    "eq",
+                    "$p.target",
+                    "$b.args.ref"
+                  ],
+                  [
+                    "eq",
+                    "$p.sink",
+                    "$b.args.name"
+                  ]
+                ]
+              ],
+              [
+                "some",
+                [
+                  "or",
+                  [
+                    "at",
+                    "$eventInput",
+                    "reviewWriters"
+                  ],
+                  [
+                    "list"
+                  ]
                 ],
+                "w",
                 [
-                  "eq",
-                  "$p.sink",
-                  "$b.args.name"
+                  "and",
+                  [
+                    "eq",
+                    "$w.ref",
+                    "$b.args.ref"
+                  ],
+                  [
+                    "eq",
+                    "$w.name",
+                    "$b.args.name"
+                  ]
                 ]
               ]
             ]
@@ -4557,6 +5187,9 @@
         ]
       },
       {
+        "call": "identity.assurance.review"
+      },
+      {
         "let": "worlds",
         "value": [
           "map",
@@ -4907,7 +5540,9 @@
             }
           ],
           "themeFields": "$themeFields",
-          "journeyChecks": "$journeyChecks"
+          "journeyChecks": "$journeyChecks",
+          "reviewEvidence": "$reviewEvidence",
+          "reviewWriters": "$reviewWriters"
         }
       },
       {
@@ -4966,7 +5601,7 @@
           "protocol": "worldwright/identity-assurance/1",
           "scope": "Homepage, identity Threads and Maps, forty readings per identity, identity Questions return links, curated application collections, appearance, interaction and footer.",
           "policy": "Equal output never implies intentional invariance. Missing and undecided relationships remain open work.",
-          "boundary": "Declared surface inventory plus automatic discovery of unclassified top-level cross browser writers. Catalogue rows check collection facts, selected-app notes, the view/serializer pipeline and cross content writer; they do not prove every inner renderer dependency. This is not exhaustive DOM, transitive dependency, visual or semantic verification. Threads and Map route rows additionally require generated destination headings, copy, artwork, reading links and identity return navigation across all forty readings in each world. These checks do not certify semantic or visual correctness.",
+          "boundary": "Declared surface inventory plus automatic discovery of unclassified top-level cross browser writers. Catalogue rows check collection facts, selected-app notes, the view/serializer pipeline and cross content writer; they do not prove every inner renderer dependency. This is not exhaustive DOM, transitive dependency, visual or semantic verification. Threads and Map route rows additionally require generated destination headings, copy, artwork, reading links and identity return navigation across all forty readings in each world. These checks do not certify semantic or visual correctness. The eight reviewed relationships have explicit scopes and generated-output evidence. Semantic fit remains a human review obligation even when its assignments are identity-mapped.",
           "identities": [
             "map",
             "$resolved",
@@ -4975,7 +5610,8 @@
           ],
           "summary": "$summary",
           "rows": "$assuranceRows",
-          "journeys": "$journeyEvidence"
+          "journeys": "$journeyEvidence",
+          "decisions": "$reviewEvidence"
         }
       },
       {
@@ -5103,6 +5739,189 @@
                   ]
                 }
               ]
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "assurance-boundary"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "h2",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "The eight decisions"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Intent is declared separately from verification. These decisions do not turn structural evidence into a judgment of semantic or visual quality."
+                ]
+              },
+              [
+                "map",
+                [
+                  "list",
+                  "nav.routes",
+                  "metadata",
+                  "section.headings",
+                  "cards.style",
+                  "typography",
+                  "aesthetics",
+                  "footer",
+                  "questions.article"
+                ],
+                "id",
+                {
+                  "tag": "details",
+                  "attrs": {
+                    "class": "assurance-row"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "summary",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "one",
+                          [
+                            "concat",
+                            "identity.decision.",
+                            "$id"
+                          ],
+                          "label"
+                        ],
+                        " · ",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            [
+                              "one",
+                              [
+                                "concat",
+                                "identity.decision.",
+                                "$id"
+                              ],
+                              "intent"
+                            ],
+                            "invariant"
+                          ],
+                          "Intentionally invariant",
+                          "Identity mapped"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "class": "assurance-detail"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            [
+                              "one",
+                              [
+                                "concat",
+                                "identity.decision.",
+                                "$id"
+                              ],
+                              "reason"
+                            ]
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Scope: ",
+                            [
+                              "one",
+                              [
+                                "concat",
+                                "identity.decision.",
+                                "$id"
+                              ],
+                              "scope"
+                            ]
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Verification: ",
+                            [
+                              "if",
+                              [
+                                "at",
+                                [
+                                  "at",
+                                  "$reviewEvidence",
+                                  "$id"
+                                ],
+                                "ok"
+                              ],
+                              "passed",
+                              "missing"
+                            ]
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "assurance-limit"
+                          },
+                          "children": [
+                            "list",
+                            [
+                              "one",
+                              [
+                                "concat",
+                                "identity.decision.",
+                                "$id"
+                              ],
+                              "humanReview"
+                            ]
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "identity-decisions.json"
+                    },
+                    "children": [
+                      "list",
+                      "Download the decision evidence ↗"
+                    ]
+                  }
+                ]
+              }
             ]
           },
           {
@@ -5432,42 +6251,63 @@
                               "attrs": {},
                               "children": [
                                 "list",
-                                "Runtime field: ",
-                                [
-                                  "if",
-                                  "$r.dataBound",
-                                  "present",
-                                  "missing"
-                                ],
-                                " · Cross writer: ",
-                                [
-                                  "if",
-                                  "$r.writerBound",
-                                  "present",
-                                  "missing"
-                                ],
                                 [
                                   "if",
                                   [
-                                    "includes",
-                                    [
-                                      "list",
-                                      "threads.context",
-                                      "atlas.context"
-                                    ],
-                                    "$r.id"
+                                    "at",
+                                    "$r",
+                                    "review"
                                   ],
                                   [
                                     "concat",
-                                    " · Destination and return links: ",
+                                    "Generated-output verification: ",
                                     [
                                       "if",
-                                      "$r.destinationBound",
+                                      "$r.review.ok",
                                       "verified",
                                       "missing"
                                     ]
                                   ],
-                                  null
+                                  [
+                                    "concat",
+                                    "Runtime field: ",
+                                    [
+                                      "if",
+                                      "$r.dataBound",
+                                      "present",
+                                      "missing"
+                                    ],
+                                    " · Cross writer: ",
+                                    [
+                                      "if",
+                                      "$r.writerBound",
+                                      "present",
+                                      "missing"
+                                    ],
+                                    [
+                                      "if",
+                                      [
+                                        "includes",
+                                        [
+                                          "list",
+                                          "threads.context",
+                                          "atlas.context"
+                                        ],
+                                        "$r.id"
+                                      ],
+                                      [
+                                        "concat",
+                                        " · Destination and return links: ",
+                                        [
+                                          "if",
+                                          "$r.destinationBound",
+                                          "verified",
+                                          "missing"
+                                        ]
+                                      ],
+                                      null
+                                    ]
+                                  ]
                                 ]
                               ]
                             },
@@ -5482,7 +6322,42 @@
                               "list",
                               "$r.boundary"
                             ]
-                          }
+                          },
+                          [
+                            "if",
+                            [
+                              "at",
+                              "$r",
+                              "review"
+                            ],
+                            {
+                              "tag": "div",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "p",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "Scope: ",
+                                    "$r.review.scope"
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "assurance-limit"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "$r.review.humanReview"
+                                  ]
+                                }
+                              ]
+                            },
+                            null
+                          ]
                         ]
                       }
                     ]
@@ -6343,13 +7218,9 @@
           {
             "let": "pageTitle",
             "value": [
-              "concat",
-              [
-                "one",
-                "$journeyIdentity",
-                "label"
-              ],
-              " — Aaron Alderman"
+              "one",
+              "$journeyIdentity",
+              "homeTitle"
             ]
           },
           {
@@ -6422,40 +7293,7 @@
           {
             "port": "text.replaceAll",
             "args": {
-              "value": "$questionHtml",
-              "search": [
-                "concat",
-                [
-                  "one",
-                  "site",
-                  "origin"
-                ],
-                [
-                  "one",
-                  "site",
-                  "image"
-                ]
-              ],
-              "replacement": [
-                "concat",
-                [
-                  "one",
-                  "site",
-                  "origin"
-                ],
-                [
-                  "one",
-                  "$journeyIdentity",
-                  "image"
-                ]
-              ]
-            },
-            "into": "worldHtml"
-          },
-          {
-            "port": "text.replaceAll",
-            "args": {
-              "value": "$worldHtml",
+              "value": "$result",
               "search": "<body ",
               "replacement": [
                 "concat",
@@ -6549,39 +7387,6 @@
             "port": "text.replaceAll",
             "args": {
               "value": "$result",
-              "search": [
-                "concat",
-                [
-                  "one",
-                  "site",
-                  "origin"
-                ],
-                [
-                  "one",
-                  "site",
-                  "image"
-                ]
-              ],
-              "replacement": [
-                "concat",
-                [
-                  "one",
-                  "site",
-                  "origin"
-                ],
-                [
-                  "one",
-                  "$journeyIdentity",
-                  "threadsImage"
-                ]
-              ]
-            },
-            "into": "worldHtml"
-          },
-          {
-            "port": "text.replaceAll",
-            "args": {
-              "value": "$worldHtml",
               "search": "<body ",
               "replacement": [
                 "concat",
@@ -6705,6 +7510,39 @@
             "port": "text.replaceAll",
             "args": {
               "value": "$result",
+              "search": [
+                "concat",
+                [
+                  "one",
+                  "site",
+                  "origin"
+                ],
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "questionHref"
+                ]
+              ],
+              "replacement": [
+                "concat",
+                [
+                  "one",
+                  "site",
+                  "origin"
+                ],
+                [
+                  "one",
+                  "$journeyIdentity",
+                  "questionWorldRoute"
+                ]
+              ]
+            },
+            "into": "questionHtml"
+          },
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$questionHtml",
               "search": "<body ",
               "replacement": [
                 "concat",
@@ -6965,7 +7803,20 @@
                         "route"
                       ],
                       "\""
-                    ]
+                    ],
+                    [
+                      "concat",
+                      "href=\"/reader.html#",
+                      [
+                        "one",
+                        "$readingPlace",
+                        "slug"
+                      ],
+                      "\""
+                    ],
+                    "Open the shared interactive reader ↗",
+                    "href=\"/retained/workshop/index.html\"",
+                    "Shared workshop ↗"
                   ]
                 }
               },
@@ -7344,6 +8195,1845 @@
         "args": {
           "path": "assurance/identity-journeys.json",
           "text": "$journeyJson"
+        },
+        "into": "_"
+      }
+    ],
+    "identity.assurance.review": [
+      {
+        "port": "file.read",
+        "args": {
+          "path": "expedition.css"
+        },
+        "into": "reviewCss"
+      },
+      {
+        "let": "decisionIds",
+        "value": [
+          "list",
+          "nav.routes",
+          "metadata",
+          "section.headings",
+          "cards.style",
+          "typography",
+          "aesthetics",
+          "footer",
+          "questions.article"
+        ]
+      },
+      {
+        "let": "reviewWriters",
+        "value": [
+          "map",
+          [
+            "objects",
+            "identity.assurance.metadata",
+            "writer"
+          ],
+          "s",
+          {
+            "port": [
+              "one",
+              "$s",
+              "port"
+            ],
+            "ref": [
+              "one",
+              "$s",
+              "ref"
+            ],
+            "name": [
+              "one",
+              "$s",
+              "name"
+            ],
+            "field": [
+              "one",
+              "$s",
+              "field"
+            ],
+            "read": [
+              "one",
+              "$s",
+              "read"
+            ]
+          }
+        ]
+      },
+      {
+        "let": "metadataWritersBound",
+        "value": [
+          "and",
+          [
+            "eq",
+            [
+              "count",
+              "$reviewWriters"
+            ],
+            16
+          ],
+          [
+            "every",
+            "$reviewWriters",
+            "w",
+            [
+              "and",
+              [
+                "eq",
+                [
+                  "count",
+                  [
+                    "filter",
+                    "$change",
+                    "s",
+                    [
+                      "and",
+                      [
+                        "eq",
+                        [
+                          "at",
+                          "$s",
+                          "port"
+                        ],
+                        "$w.port"
+                      ],
+                      [
+                        "eq",
+                        [
+                          "at",
+                          [
+                            "at",
+                            "$s",
+                            "args"
+                          ],
+                          "ref"
+                        ],
+                        "$w.ref"
+                      ],
+                      [
+                        "eq",
+                        [
+                          "at",
+                          [
+                            "at",
+                            "$s",
+                            "args"
+                          ],
+                          "name"
+                        ],
+                        "$w.name"
+                      ],
+                      [
+                        "eq",
+                        [
+                          "at",
+                          [
+                            "at",
+                            "$s",
+                            "args"
+                          ],
+                          "value"
+                        ],
+                        "$w.read"
+                      ]
+                    ]
+                  ]
+                ],
+                1
+              ],
+              [
+                "eq",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$themeFields",
+                    "$w.field"
+                  ],
+                  0
+                ],
+                "one"
+              ],
+              [
+                "eq",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$themeFields",
+                    "$w.field"
+                  ],
+                  1
+                ],
+                [
+                  "one",
+                  "identity.assurance.scope",
+                  "subjectRead"
+                ]
+              ],
+              [
+                "eq",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$themeFields",
+                    "$w.field"
+                  ],
+                  2
+                ],
+                "$w.field"
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "port": "record.entries",
+        "args": {
+          "value": "$catalogue.cardTypes"
+        },
+        "into": "typeEntries"
+      },
+      {
+        "let": "typeChecks",
+        "value": [
+          "map",
+          "$typeEntries",
+          "e",
+          [
+            "let",
+            "type",
+            [
+              "at",
+              "$e",
+              0
+            ],
+            [
+              "let",
+              "selector",
+              [
+                "concat",
+                "#microsites.identity-catalogue .hierarchy-card[data-type=\"",
+                "$type",
+                "\"]"
+              ],
+              [
+                "let",
+                "rule",
+                [
+                  "at",
+                  [
+                    "filter",
+                    [
+                      "subjects",
+                      "isa",
+                      "StyleRule"
+                    ],
+                    "r",
+                    [
+                      "eq",
+                      [
+                        "one",
+                        "$r",
+                        "selector"
+                      ],
+                      "$selector"
+                    ]
+                  ],
+                  0
+                ],
+                [
+                  "let",
+                  "decl",
+                  [
+                    "at",
+                    [
+                      "filter",
+                      [
+                        "objects",
+                        "$rule",
+                        "declaration"
+                      ],
+                      "d",
+                      [
+                        "eq",
+                        [
+                          "one",
+                          "$d",
+                          "property"
+                        ],
+                        "--card-light"
+                      ]
+                    ],
+                    0
+                  ],
+                  [
+                    "concat",
+                    "$selector",
+                    "{--card-light:",
+                    [
+                      "one",
+                      "$decl",
+                      "value"
+                    ],
+                    ";"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "fold": [
+          "subjects",
+          "isa",
+          "IdentityTheme"
+        ],
+        "as": "reviewWorld",
+        "accumulator": "reviewWorlds",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "key",
+            "value": [
+              "one",
+              "$reviewWorld",
+              "key"
+            ]
+          },
+          {
+            "let": "root",
+            "value": [
+              "concat",
+              "worlds/",
+              "$key",
+              "/"
+            ]
+          },
+          {
+            "let": "journeyForWorld",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$journeyEvidence.worlds",
+                "w",
+                [
+                  "eq",
+                  "$w.identity",
+                  "$key"
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "let": "sharedToolRoutesBound",
+            "value": [
+              "and",
+              [
+                "eq",
+                [
+                  "count",
+                  "$journeyForWorld.readings"
+                ],
+                40
+              ],
+              [
+                "every",
+                "$journeyForWorld.readings",
+                "r",
+                "$r.ok"
+              ]
+            ]
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "concat",
+                "$root",
+                "index.html"
+              ]
+            },
+            "into": "home"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "concat",
+                "$root",
+                "threads.html"
+              ]
+            },
+            "into": "threads"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "concat",
+                "$root",
+                "atlas.html"
+              ]
+            },
+            "into": "map"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "concat",
+                "$root",
+                "questions.html"
+              ]
+            },
+            "into": "article"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "concat",
+                "$root",
+                "places/observation.html"
+              ]
+            },
+            "into": "reading"
+          },
+          {
+            "port": "text.split",
+            "args": {
+              "value": "$home",
+              "pattern": "(<head[\\s\\S]*?</head>)"
+            },
+            "into": "parts"
+          },
+          {
+            "let": "homeHead",
+            "value": [
+              "or",
+              [
+                "at",
+                "$parts",
+                1
+              ],
+              ""
+            ]
+          },
+          {
+            "port": "text.split",
+            "args": {
+              "value": "$threads",
+              "pattern": "(<head[\\s\\S]*?</head>)"
+            },
+            "into": "parts"
+          },
+          {
+            "let": "threadHead",
+            "value": [
+              "or",
+              [
+                "at",
+                "$parts",
+                1
+              ],
+              ""
+            ]
+          },
+          {
+            "port": "text.split",
+            "args": {
+              "value": "$map",
+              "pattern": "(<head[\\s\\S]*?</head>)"
+            },
+            "into": "parts"
+          },
+          {
+            "let": "mapHead",
+            "value": [
+              "or",
+              [
+                "at",
+                "$parts",
+                1
+              ],
+              ""
+            ]
+          },
+          {
+            "port": "text.split",
+            "args": {
+              "value": "$article",
+              "pattern": "(<head[\\s\\S]*?</head>)"
+            },
+            "into": "parts"
+          },
+          {
+            "let": "articleHead",
+            "value": [
+              "or",
+              [
+                "at",
+                "$parts",
+                1
+              ],
+              ""
+            ]
+          },
+          {
+            "port": "text.split",
+            "args": {
+              "value": "$reviewCss",
+              "pattern": [
+                "concat",
+                "(html:has\\(body\\[data-question-identity=\"",
+                "$key",
+                "\"\\]\\)[^{}]*\\{[^}]*\\})"
+              ]
+            },
+            "into": "parts"
+          },
+          {
+            "let": "paletteCss",
+            "value": [
+              "or",
+              [
+                "at",
+                "$parts",
+                1
+              ],
+              ""
+            ]
+          },
+          {
+            "let": "paletteChecks",
+            "value": [
+              "map",
+              [
+                "objects",
+                "$reviewWorld",
+                "questionColour"
+              ],
+              "d",
+              [
+                "concat",
+                [
+                  "one",
+                  "$d",
+                  "property"
+                ],
+                ":",
+                [
+                  "one",
+                  "$d",
+                  "value"
+                ],
+                ";"
+              ]
+            ]
+          },
+          {
+            "let": "fontRule",
+            "value": [
+              "concat",
+              "body[data-identity=\"",
+              "$key",
+              "\"],body[data-question-identity=\"",
+              "$key",
+              "\"]{--identity-display-font:",
+              [
+                "one",
+                "$reviewWorld",
+                "displayFont"
+              ],
+              ";"
+            ]
+          },
+          {
+            "let": "worldMarker",
+            "value": [
+              "concat",
+              "data-identity=\"",
+              "$key",
+              "\""
+            ]
+          },
+          {
+            "let": "reflections",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$key",
+                "christian"
+              ],
+              [
+                "subjects",
+                "isa",
+                "LivedQuestion"
+              ],
+              [
+                "objects",
+                "$reviewWorld",
+                "question"
+              ]
+            ]
+          },
+          {
+            "let": "articleStrings",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$key",
+                "christian"
+              ],
+              [
+                "list",
+                [
+                  "one",
+                  "questions",
+                  "subtitle"
+                ],
+                [
+                  "one",
+                  "questions",
+                  "intro"
+                ]
+              ],
+              [
+                "list",
+                [
+                  "one",
+                  "$reviewWorld",
+                  "questionTitle"
+                ],
+                [
+                  "one",
+                  "$reviewWorld",
+                  "questionEm"
+                ],
+                [
+                  "one",
+                  "$reviewWorld",
+                  "questionSubtitle"
+                ],
+                [
+                  "one",
+                  "$reviewWorld",
+                  "questionIntro"
+                ],
+                [
+                  "one",
+                  "$reviewWorld",
+                  "questionHeading"
+                ],
+                [
+                  "one",
+                  "$reviewWorld",
+                  "questionBody"
+                ]
+              ]
+            ]
+          },
+          {
+            "fold": "$reflections",
+            "as": "r",
+            "accumulator": "reflectionChecks",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "let": "href",
+                "value": [
+                  "one",
+                  "$r",
+                  "href"
+                ]
+              },
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$href",
+                  "pattern": "^places/"
+                },
+                "into": "isPlace"
+              },
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$href",
+                  "pattern": "^https?://"
+                },
+                "into": "external"
+              },
+              {
+                "let": "href",
+                "value": [
+                  "if",
+                  "$isPlace",
+                  [
+                    "concat",
+                    "/worlds/",
+                    "$key",
+                    "/",
+                    "$href"
+                  ],
+                  [
+                    "if",
+                    "$external",
+                    "$href",
+                    [
+                      "concat",
+                      "/",
+                      "$href"
+                    ]
+                  ]
+                ]
+              },
+              {
+                "let": "input",
+                "value": [
+                  "one",
+                  "$r",
+                  "title"
+                ]
+              },
+              {
+                "call": "html.escape"
+              },
+              {
+                "let": "reflectionTitle",
+                "value": "$result"
+              }
+            ],
+            "yield": [
+              "append",
+              "$reflectionChecks",
+              [
+                "list",
+                [
+                  "concat",
+                  "href=\"",
+                  "$href",
+                  "\""
+                ],
+                "$reflectionTitle"
+              ]
+            ],
+            "into": "reflectionChecks"
+          },
+          {
+            "fold": "$articleStrings",
+            "as": "s",
+            "accumulator": "articleChecks",
+            "initial": "$reflectionChecks",
+            "steps": [
+              {
+                "let": "input",
+                "value": "$s"
+              },
+              {
+                "call": "html.escape"
+              }
+            ],
+            "yield": [
+              "append",
+              "$articleChecks",
+              [
+                "list",
+                "$result"
+              ]
+            ],
+            "into": "articleChecks"
+          },
+          {
+            "let": "footerChecks",
+            "value": [
+              "list",
+              "Aaron Alderman",
+              "A few things I’ve built. A few things I’m still trying to understand.",
+              "href=\"https://github.com/aaron-alderman\"",
+              "href=\"https://www.linkedin.com/in/aaron-alderman/\"",
+              "href=\"https://worldwright.io/\"",
+              "CHRISTIAN_STEWARDSHIP_COVENANT.md",
+              "LICENSE.md",
+              "href=\"/assurance/\""
+            ]
+          },
+          {
+            "fold": [
+              "list",
+              {
+                "file": "home",
+                "html": "$home"
+              },
+              {
+                "file": "threads",
+                "html": "$threads"
+              },
+              {
+                "file": "questions",
+                "html": "$article"
+              },
+              {
+                "file": "map",
+                "html": "$map"
+              }
+            ],
+            "as": "p",
+            "accumulator": "footers",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "port": "text.split",
+                "args": {
+                  "value": "$p.html",
+                  "pattern": "(<footer[\\s\\S]*?</footer>)"
+                },
+                "into": "parts"
+              }
+            ],
+            "yield": [
+              "append",
+              "$footers",
+              [
+                "list",
+                {
+                  "file": [
+                    "concat",
+                    "$p.file",
+                    " footer"
+                  ],
+                  "html": [
+                    "or",
+                    [
+                      "at",
+                      "$parts",
+                      1
+                    ],
+                    ""
+                  ],
+                  "expected": [
+                    "if",
+                    [
+                      "eq",
+                      "$p.file",
+                      "map"
+                    ],
+                    [
+                      "list",
+                      "Return to Aaron Alderman",
+                      "An illustrated entrance to the work. Sources and limits stay with each question.",
+                      "CHRISTIAN_STEWARDSHIP_COVENANT.md",
+                      "LICENSE.md",
+                      "href=\"/assurance/\""
+                    ],
+                    "$footerChecks"
+                  ]
+                }
+              ]
+            ],
+            "into": "footers"
+          },
+          {
+            "let": "cases",
+            "value": [
+              "list",
+              {
+                "id": "nav.routes",
+                "value": "Shared workshop and full-screen reader; perspective changes use explicit identity URLs.",
+                "global": "$sharedToolRoutesBound",
+                "checks": [
+                  "list",
+                  {
+                    "file": "home",
+                    "html": "$home",
+                    "expected": [
+                      "list",
+                      "href=\"/retained/workshop/index.html\"",
+                      "Shared workshop ↗"
+                    ]
+                  },
+                  {
+                    "file": "threads",
+                    "html": "$threads",
+                    "expected": [
+                      "list",
+                      "href=\"/retained/workshop/index.html\"",
+                      "Shared workshop ↗"
+                    ]
+                  },
+                  {
+                    "file": "reading",
+                    "html": "$reading",
+                    "expected": [
+                      "list",
+                      "href=\"/reader.html#observation\"",
+                      "Open the shared interactive reader ↗"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "metadata",
+                "value": [
+                  "one",
+                  "$reviewWorld",
+                  "homeTitle"
+                ],
+                "global": "$metadataWritersBound",
+                "checks": [
+                  "list",
+                  {
+                    "file": "home head",
+                    "html": "$homeHead",
+                    "expected": [
+                      "list",
+                      [
+                        "concat",
+                        "<title>",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "homeTitle"
+                        ],
+                        "</title>"
+                      ],
+                      [
+                        "concat",
+                        "name=\"",
+                        "description",
+                        "\" content=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "copy"
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "rel=\"canonical\" href=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "homeCanonical"
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:url",
+                        "\" content=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "homeCanonical"
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:title",
+                        "\" content=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "homeTitle"
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:image",
+                        "\" content=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "homeShareImage"
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "name=\"",
+                        "twitter:image",
+                        "\" content=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "homeShareImage"
+                        ],
+                        "\""
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "Threads head",
+                    "html": "$threadHead",
+                    "expected": [
+                      "list",
+                      [
+                        "concat",
+                        "rel=\"canonical\" href=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "threadsRoute"
+                          ]
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:url",
+                        "\" content=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "threadsRoute"
+                          ]
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:title",
+                        "\" content=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "threadsTitle"
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "name=\"",
+                        "description",
+                        "\" content=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "threadsCopy"
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:image",
+                        "\" content=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "threadsImage"
+                          ]
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "name=\"",
+                        "twitter:image",
+                        "\" content=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "threadsImage"
+                          ]
+                        ],
+                        "\""
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "Map head",
+                    "html": "$mapHead",
+                    "expected": [
+                      "list",
+                      [
+                        "concat",
+                        "rel=\"canonical\" href=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "atlasRoute"
+                          ]
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:url",
+                        "\" content=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "atlasRoute"
+                          ]
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:title",
+                        "\" content=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "mapTitle"
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "name=\"",
+                        "description",
+                        "\" content=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "mapCopy"
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:image",
+                        "\" content=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "atlasImage"
+                          ]
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "name=\"",
+                        "twitter:image",
+                        "\" content=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "atlasImage"
+                          ]
+                        ],
+                        "\""
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "Questions head",
+                    "html": "$articleHead",
+                    "expected": [
+                      "list",
+                      [
+                        "concat",
+                        "rel=\"canonical\" href=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "questionWorldRoute"
+                          ]
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:url",
+                        "\" content=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "questionWorldRoute"
+                          ]
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "property=\"",
+                        "og:image",
+                        "\" content=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "questionHero"
+                          ]
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "name=\"",
+                        "twitter:image",
+                        "\" content=\"",
+                        [
+                          "concat",
+                          [
+                            "one",
+                            "site",
+                            "origin"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "questionHero"
+                          ]
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "name=\"",
+                        "description",
+                        "\" content=\"",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$key",
+                            "christian"
+                          ],
+                          [
+                            "one",
+                            "questions",
+                            "description"
+                          ],
+                          [
+                            "one",
+                            "$reviewWorld",
+                            "questionIntro"
+                          ]
+                        ],
+                        "\""
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "permalink",
+                    "html": "$home",
+                    "expected": [
+                      "list",
+                      "id=\"identity-permalink\"",
+                      [
+                        "concat",
+                        "href=\"",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "homeHref"
+                        ],
+                        "\""
+                      ],
+                      "Link to this world ↗"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "section.headings",
+                "value": "Stable four-section taxonomy and complete-project directory.",
+                "global": true,
+                "checks": [
+                  "list",
+                  {
+                    "file": "home",
+                    "html": "$home",
+                    "expected": [
+                      "list",
+                      "Foundation &amp; platform",
+                      "Applications &amp; programmes",
+                      "Taking shape",
+                      "Tools &amp; workbenches",
+                      "All projects · the complete catalogue"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "cards.style",
+                "value": "Purpose pigments, fine braid, slow hover/focus glisten and accessible motion rules.",
+                "global": true,
+                "checks": [
+                  "list",
+                  {
+                    "file": "stylesheet",
+                    "html": "$reviewCss",
+                    "expected": [
+                      "append",
+                      "$typeChecks",
+                      [
+                        "list",
+                        ".hierarchy-card[data-type]::before",
+                        "mask-composite:exclude",
+                        "var(--card-light)",
+                        "identity-braid-glisten 4.5s",
+                        "prefers-reduced-motion: no-preference",
+                        "prefers-reduced-motion: reduce",
+                        "forced-colors: active",
+                        "@keyframes identity-braid-glisten"
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "home",
+                    "html": "$home",
+                    "expected": [
+                      "list",
+                      "data-type=\"execution\"",
+                      "data-type=\"platform\""
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "typography",
+                "value": [
+                  "one",
+                  "$reviewWorld",
+                  "displayFont"
+                ],
+                "global": true,
+                "checks": [
+                  "list",
+                  {
+                    "file": "stylesheet",
+                    "html": "$reviewCss",
+                    "expected": [
+                      "list",
+                      "$fontRule",
+                      "font-family:var(--identity-display-font);"
+                    ]
+                  },
+                  {
+                    "file": "home",
+                    "html": "$home",
+                    "expected": [
+                      "list",
+                      "$worldMarker"
+                    ]
+                  },
+                  {
+                    "file": "Threads",
+                    "html": "$threads",
+                    "expected": [
+                      "list",
+                      "$worldMarker"
+                    ]
+                  },
+                  {
+                    "file": "Map",
+                    "html": "$map",
+                    "expected": [
+                      "list",
+                      "$worldMarker"
+                    ]
+                  },
+                  {
+                    "file": "Questions",
+                    "html": "$article",
+                    "expected": [
+                      "list",
+                      "$worldMarker"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "aesthetics",
+                "value": [
+                  "concat",
+                  [
+                    "one",
+                    "$reviewWorld",
+                    "paletteFamily"
+                  ],
+                  ". ",
+                  [
+                    "one",
+                    "$reviewWorld",
+                    "aestheticBrief"
+                  ]
+                ],
+                "global": true,
+                "checks": [
+                  "list",
+                  {
+                    "file": "home",
+                    "html": "$home",
+                    "expected": [
+                      "list",
+                      "$worldMarker",
+                      [
+                        "concat",
+                        "src=\"/",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "image"
+                        ],
+                        "\""
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "Threads",
+                    "html": "$threads",
+                    "expected": [
+                      "list",
+                      "$worldMarker",
+                      [
+                        "concat",
+                        "src=\"/",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "threadsImage"
+                        ],
+                        "\""
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "Map",
+                    "html": "$map",
+                    "expected": [
+                      "list",
+                      "$worldMarker",
+                      [
+                        "concat",
+                        "src=\"/",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "atlasImage"
+                        ],
+                        "\""
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "Questions",
+                    "html": "$article",
+                    "expected": [
+                      "list",
+                      "$worldMarker",
+                      [
+                        "concat",
+                        "src=\"/",
+                        [
+                          "one",
+                          "$reviewWorld",
+                          "questionHero"
+                        ],
+                        "\""
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "scoped palette",
+                    "html": "$paletteCss",
+                    "expected": "$paletteChecks"
+                  },
+                  {
+                    "file": "daylight contrast consumer",
+                    "html": "$reviewCss",
+                    "expected": [
+                      "list",
+                      "body[data-question-identity] main .eyebrow{color:var(--q-accent);}"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "footer",
+                "value": "Common owner, personal statement, utility links and stewardship; Map keeps its compact layout.",
+                "global": true,
+                "checks": "$footers"
+              },
+              {
+                "id": "questions.article",
+                "value": [
+                  "concat",
+                  [
+                    "one",
+                    "$reviewWorld",
+                    "questionCopy"
+                  ],
+                  " · ",
+                  [
+                    "count",
+                    "$reflections"
+                  ],
+                  " reflections"
+                ],
+                "global": true,
+                "checks": [
+                  "list",
+                  {
+                    "file": "Questions article",
+                    "html": "$article",
+                    "expected": [
+                      "append",
+                      "$articleChecks",
+                      [
+                        "append",
+                        [
+                          "list",
+                          [
+                            "concat",
+                            "src=\"/",
+                            [
+                              "one",
+                              "$reviewWorld",
+                              "questionHero"
+                            ],
+                            "\""
+                          ],
+                          [
+                            "concat",
+                            "data-question-identity=\"",
+                            "$key",
+                            "\""
+                          ]
+                        ],
+                        [
+                          "map",
+                          [
+                            "subjects",
+                            "isa",
+                            "IdentityTheme"
+                          ],
+                          "other",
+                          [
+                            "concat",
+                            "href=\"",
+                            [
+                              "one",
+                              "$other",
+                              "questionWorldHref"
+                            ],
+                            "\""
+                          ]
+                        ]
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "Questions theme colour and stylesheet",
+                    "html": "$articleHead",
+                    "expected": [
+                      "list",
+                      [
+                        "concat",
+                        "name=\"theme-color\" content=\"",
+                        [
+                          "one",
+                          [
+                            "concat",
+                            "questions.palette.",
+                            "$key",
+                            ".paper"
+                          ],
+                          "value"
+                        ],
+                        "\""
+                      ],
+                      [
+                        "concat",
+                        "href=\"/expedition.css?v=",
+                        [
+                          "one",
+                          "site",
+                          "stylesheetVersion"
+                        ],
+                        "\""
+                      ]
+                    ]
+                  },
+                  {
+                    "file": "scoped palette",
+                    "html": "$paletteCss",
+                    "expected": "$paletteChecks"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "fold": "$cases",
+            "as": "c",
+            "accumulator": "worldCases",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "fold": "$c.checks",
+                "as": "check",
+                "accumulator": "outputs",
+                "initial": [
+                  "list"
+                ],
+                "steps": [
+                  {
+                    "let": "eventInput",
+                    "value": {
+                      "html": "$check.html",
+                      "expected": "$check.expected"
+                    }
+                  },
+                  {
+                    "call": "identity.journey.check"
+                  }
+                ],
+                "yield": [
+                  "append",
+                  "$outputs",
+                  [
+                    "list",
+                    {
+                      "file": "$check.file",
+                      "ok": "$result.ok",
+                      "missing": "$result.missing"
+                    }
+                  ]
+                ],
+                "into": "outputs"
+              }
+            ],
+            "yield": [
+              "append",
+              "$worldCases",
+              [
+                "list",
+                {
+                  "id": "$c.id",
+                  "identity": "$key",
+                  "value": "$c.value",
+                  "ok": [
+                    "and",
+                    "$c.global",
+                    [
+                      "every",
+                      "$outputs",
+                      "o",
+                      "$o.ok"
+                    ]
+                  ],
+                  "outputs": "$outputs"
+                }
+              ]
+            ],
+            "into": "worldCases"
+          }
+        ],
+        "yield": [
+          "append",
+          "$reviewWorlds",
+          "$worldCases"
+        ],
+        "into": "reviewWorlds"
+      },
+      {
+        "fold": "$decisionIds",
+        "as": "id",
+        "accumulator": "reviewEvidence",
+        "initial": {},
+        "steps": [
+          {
+            "let": "worlds",
+            "value": [
+              "filter",
+              "$reviewWorlds",
+              "w",
+              [
+                "eq",
+                "$w.id",
+                "$id"
+              ]
+            ]
+          },
+          {
+            "let": "proof",
+            "value": {
+              "id": "$id",
+              "intent": [
+                "one",
+                [
+                  "concat",
+                  "identity.decision.",
+                  "$id"
+                ],
+                "intent"
+              ],
+              "ok": [
+                "and",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$worlds"
+                  ],
+                  4
+                ],
+                [
+                  "every",
+                  "$worlds",
+                  "w",
+                  "$w.ok"
+                ]
+              ],
+              "scope": [
+                "one",
+                [
+                  "concat",
+                  "identity.decision.",
+                  "$id"
+                ],
+                "scope"
+              ],
+              "humanReview": [
+                "one",
+                [
+                  "concat",
+                  "identity.decision.",
+                  "$id"
+                ],
+                "humanReview"
+              ],
+              "boundary": "Generated HTML, scoped CSS and declared source bindings are checked. Human semantic and visual judgments are not inferred from passing structural checks.",
+              "worlds": "$worlds"
+            }
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$reviewEvidence",
+              "key": "$id",
+              "value": "$proof"
+            },
+            "into": "reviewEvidence"
+          }
+        ],
+        "yield": "$reviewEvidence",
+        "into": "reviewEvidence"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": {
+            "protocol": "worldwright/identity-decisions/1",
+            "decisions": "$reviewEvidence"
+          }
+        },
+        "into": "reviewJson"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/identity-decisions.json",
+          "text": "$reviewJson"
         },
         "into": "_"
       }

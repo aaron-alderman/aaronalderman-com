@@ -76,6 +76,15 @@ test('each identity can randomly reach every other identity without an immediate
    assert.equal(attributes['#identity-background:src'],'/'+model.data.themes.find(t=>t.key===next).image);
    for(const card of ['questions','threads','atlas'])assert.equal(attributes['#identity-card-'+card+':src'],'/'+model.data.themes.find(t=>t.key===next)[card+'Image']);
    assert.equal(attributes['#threads:href'],`/worlds/${next}/threads.html`);assert.equal(attributes['#atlas:href'],`/worlds/${next}/atlas.html`);
+   const selected=model.data.themes.find(t=>t.key===next);
+   assert.equal(writes['head title:textContent'],selected.homeTitle);
+   assert.equal(attributes['head link[rel="canonical"]:href'],selected.homeCanonical);
+   assert.equal(attributes['head meta[property="og:title"]:content'],selected.homeTitle);
+   assert.equal(attributes['head meta[property="og:image"]:content'],selected.homeShareImage);
+   assert.equal(attributes['head meta[property="og:image:secure_url"]:content'],selected.homeShareImage);
+   assert.equal(attributes['head meta[property="og:image:type"]:content'],selected.homeShareType);
+   assert.equal(attributes['head meta[name="description"]:content'],selected.copy);
+   assert.equal(attributes['#identity-permalink:href'],selected.homeHref);
    assert.equal(writes['#identity-word:textContent'],next+'.');
    assert.equal(writes['#identity-copy:textContent'],model.data.themes.find(t=>t.key===next).copy);
    assert.match(writes['#identity-status:textContent'],new RegExp('Now viewing Aaron as '+next));
@@ -88,7 +97,7 @@ test('the homepage provides a native keyboard button and an announced theme stat
  assert.match(html,/<button[^>]*id="identity-switch"/);
  assert.match(html,/aria-label="Discover another side of Aaron: change the perspective and projects"/);
  assert.match(html,/id="identity-status"[^>]*aria-live="polite"/);
- assert.match(html,/src="identity-runtime.js\?v=identity-journeys-1" defer/);
+ assert.match(html,/src="identity-runtime.js\?v=identity-decisions-1" defer/);
  assert.match(html,/<img[^>]*id="identity-background"/);
 });
 test('every identity publishes a distinct optimized hero image',()=>{

@@ -46,6 +46,34 @@ test('generated identity assurance keeps navigation gaps visible and covers ever
  assert.ok(fs.readFileSync('dist/sitemap.xml','utf8').includes('https://aaronalderman.com/assurance/'));
 });
 
+test('the eight decisions distinguish scoped invariants from identity mappings with four-world evidence',()=>{
+ const report=JSON.parse(fs.readFileSync('dist/assurance/identity-mappings.json','utf8')),decisions=JSON.parse(fs.readFileSync('dist/assurance/identity-decisions.json','utf8')).decisions;
+ const invariant=['nav.routes','section.headings','cards.style','footer'],mapped=['metadata','typography','aesthetics','questions.article'];
+ for(const id of [...invariant,...mapped]){const row=report.rows.find(r=>r.id===id),proof=decisions[id];assert.equal(row.status,invariant.includes(id)?'intentionally-invariant':'identity-mapped',id);assert.equal(proof.ok,true,id);assert.equal(proof.worlds.length,4,id);assert.equal(new Set(proof.worlds.map(w=>w.identity)).size,4);assert.ok(proof.worlds.every(w=>w.ok&&w.outputs.every(o=>o.ok)),id);assert.ok(proof.scope.length>30);assert.ok(row.reason.length>30);}
+ assert.match(decisions.aesthetics.humanReview,/Required/);assert.match(decisions.aesthetics.boundary,/not inferred/);
+ assert.equal(report.rows.filter(r=>['missing','undecided'].includes(r.status)).length,0);
+ const css=fs.readFileSync('dist/expedition.css','utf8');assert.ok(css.includes('--q-paper:#f3f7ef;'));assert.ok(css.includes('--q-action:#365c40;'));assert.ok(!css.includes('infinite'));
+ const author=fs.readFileSync('dist/worlds/author/questions.html','utf8');assert.ok(author.includes('content="#f3f7ef"'));assert.ok(author.includes('rel="canonical" href="https://aaronalderman.com/worlds/author/questions.html"'));assert.ok(author.includes('href="/expedition.css?v=identity-decisions-1"'));
+});
+
+test('a declared decision stays missing without complete, matching per-identity verification',async()=>{
+ const entry='identity.assurance.classify',queries=read('algebra/publication.process.json').queries,compiled=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry,queries:{[entry]:queries[entry]}},mode:'model',ports:valuePorts(),limit:20000000});
+ const identities=['sourcerer','author','dad','christian'];const policy={id:'footer',area:'Footer',label:'Common footer',intent:'invariant',resolver:'declaration',field:'',target:'',sink:'',read:'',subjectRead:'',reason:'The same person owns all four perspectives.',next:'Restore evidence',source:'fixture'};
+ const input={policies:[policy],identities,worlds:identities.map(key=>({key,values:{footer:null}})),bindings:[],themeFields:{},reviewEvidence:{footer:{id:'footer',intent:'invariant',ok:true,scope:'Four identity footers',boundary:'Structural checks only',humanReview:'Declared intent',worlds:identities.map(identity=>({identity,value:'Shared owner and destinations',ok:true,outputs:[]}))}}};
+ const classify=async value=>(await invoke({model:compiled,entry,input:{eventInput:value},ports:valuePorts(),limit:20000000})).value;
+ assert.equal((await classify(input))[0].status,'intentionally-invariant');
+ for(const mutate of [x=>delete x.reviewEvidence,x=>x.reviewEvidence.footer.ok=false,x=>x.reviewEvidence.footer.worlds.pop(),x=>x.reviewEvidence.footer.worlds[0].ok=false,x=>x.reviewEvidence.footer.worlds[1]=x.reviewEvidence.footer.worlds[0],x=>x.reviewEvidence.footer.intent='identity',x=>x.reviewEvidence.footer.id='metadata']){const broken=structuredClone(input);mutate(broken);assert.equal((await classify(broken))[0].status,'missing');}
+});
+
+test('the actual review algebra detects an Author palette regression and incorrect Questions canonical metadata',async()=>{
+ const {indexFacts}=require('./bootstrap/ports/fact-index.cjs'),source=read('algebra/publication.process.json').queries,entry='review.test';
+ const compiled=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry,queries:{[entry]:[{call:'identity.assurance.review'},{let:'result',value:'$reviewEvidence'}],'identity.assurance.review':source['identity.assurance.review'],'identity.journey.check':source['identity.journey.check'],'html.escape':read('algebra/html.process.json').queries['html.escape']}},mode:'model',ports:valuePorts(),limit:20000000});
+ const facts=read('bootstrap/site.json').sources.flatMap(file=>parseRel(fs.readFileSync(file,'utf8'))),factIndex=await indexFacts(createKernel(valuePorts(),20000000),read('algebra/fact-index.process.json'),facts);
+ const themeFields=source['identity.runtime.build'].find(s=>s.into==='identityThemes').yield[2][1],input={factIndex,change:source['identity.change'],themeFields,catalogue:read('source/hierarchy.json'),journeyEvidence:JSON.parse(fs.readFileSync('dist/assurance/identity-journeys.json','utf8'))};
+ const review=async mode=>(await invoke({model:compiled,entry,input,ports:{...valuePorts(),'file.write':()=>true,'file.read':({path:file})=>{let text=fs.readFileSync('dist/'+file,'utf8');if(mode==='palette'&&file==='expedition.css')text=text.replaceAll('--q-paper:#f3f7ef;','--q-paper:#faf6fc;');if(mode==='canonical'&&file==='worlds/author/questions.html')text=text.replace('rel="canonical" href="https://aaronalderman.com/worlds/author/questions.html"','rel="canonical" href="https://aaronalderman.com/questions-author.html"');if(mode==='legacy-art'&&file==='worlds/author/questions.html')text=text.replaceAll('assets/identities/cards/author-questions-v1.webp','assets/questions/author-daylight-v1.png');return text;}},limit:20000000})).value;
+ const baseline=await review('ok');assert.ok(Object.values(baseline).every(p=>p.ok));const palette=await review('palette');assert.equal(palette.aesthetics.ok,false);assert.equal(palette['questions.article'].ok,false);assert.equal(palette.footer.ok,true);const canonical=await review('canonical');assert.equal(canonical.metadata.ok,false);assert.equal(canonical.typography.ok,true);const art=await review('legacy-art');assert.equal(art.aesthetics.ok,false);assert.equal(art.metadata.ok,false);assert.equal(art['questions.article'].ok,false);
+});
+
 test('every identity has distinct Threads content, Map highlights and complete reading returns',async()=>{
  const {parse}=await import('parse5'),all=n=>[n,...(n.childNodes??[]).flatMap(all)],attr=(n,k)=>n.attrs?.find(a=>a.name===k)?.value,text=n=>(n.value??'')+(n.childNodes??[]).map(text).join('');
  const facts=parseRel(fs.readFileSync('source/hierarchy.rel','utf8')),field=(s,p)=>facts.find(f=>f.s===s&&f.p===p)?.o;
@@ -223,7 +251,7 @@ test('another side changes the question destination and label through the algebr
   for(const card of ['questions','threads','atlas'])assert.ok(effects.some(x=>x.ref==='#identity-card-'+card&&x.name==='src'&&x.value==='/'+chosen[card+'Image']));
  }}
  const home=fs.readFileSync('dist/index.html','utf8');assert.ok(home.includes('href="/worlds/sourcerer/questions.html"'));assert.ok(home.includes('How do I build software that earns trust?'));
- for(const theme of themes){const html=fs.readFileSync('dist/'+theme.questionHref,'utf8');assert.ok(html.includes('<h1'));assert.ok(html.includes('Questions from another side'));for(const other of themes)assert.ok(html.includes('href="'+other.questionHref+'"'));}
+ for(const theme of themes){const html=fs.readFileSync('dist/'+theme.questionHref,'utf8');assert.ok(html.includes('<h1'));assert.ok(html.includes('Questions from another side'));for(const other of themes)assert.ok(html.includes('href="'+other.questionWorldHref+'"'));}
  const dad=fs.readFileSync('dist/questions-dad.html','utf8');assert.ok(dad.includes('present as Dad?'));assert.ok(!dad.includes('live like Jesus?'));assert.ok(!dad.includes('>Father'));
  const author=fs.readFileSync('dist/questions-author.html','utf8');assert.ok(author.includes('the people who enter my stories?'));assert.ok(author.includes('href="worldwright/"'));assert.ok(author.includes('href="creator-studio/"'));
  const sourcerer=fs.readFileSync('dist/questions-sourcerer.html','utf8');assert.ok(sourcerer.includes('software that earns trust?'));assert.ok(sourcerer.includes('href="sourcery/"'));assert.ok(sourcerer.includes('href="temple/"'));
@@ -239,16 +267,19 @@ test('four Questions worlds have their own admitted PNG, sharing metadata and re
  for(const asset of art.assets){
   const bytes=fs.readFileSync('dist/'+asset.path),html=fs.readFileSync('dist/'+route[asset.role],'utf8');
   assert.equal(bytes.subarray(1,4).toString(),'PNG');assert.equal(sha(bytes),asset.sha256);assert.equal(bytes.readUInt32BE(16),asset.width);assert.equal(bytes.readUInt32BE(20),asset.height);
-  assert.ok(html.includes('data-question-identity="'+asset.role+'"'));assert.ok(html.includes('class="q-hero-art" src="'+asset.path+'"'));
-  for(const key of ['og:image','twitter:image'])assert.ok(html.includes(key+'" content="https://aaronalderman.com/'+asset.path+'"'));
-  assert.ok(html.includes('name="theme-color" content="'+asset.palette.paper+'"'));
-  assert.ok(html.includes('og:image:alt" content="'+asset.alt+'"'));
-  for(const [name,value] of Object.entries(asset.palette))assert.equal(source.find(f=>f.s==='questions.palette.'+asset.role+'.'+name&&f.p==='value')?.o,value);
-  for(const background of ['paper','surface','wash'])for(const token of ['ink','muted','accent','action'])assert.ok(contrast(asset.palette[token],asset.palette[background])>=4.5,asset.role+' '+token+' on '+background+' contrast');
-  assert.ok(contrast('#ffffff',asset.palette.action)>=4.5,asset.role+' button contrast');
-  assert.ok(contrast(asset.palette.focus,asset.palette.paper)>=3,asset.role+' focus contrast');
+  const hero=source.find(f=>f.s==='identity.'+asset.role&&f.p==='questionHero')?.o,alt=source.find(f=>f.s==='identity.'+asset.role&&f.p==='questionHeroAlt')?.o;
+  assert.ok(html.includes('data-question-identity="'+asset.role+'"'));assert.ok(html.includes('class="q-hero-art" src="'+hero+'"'));
+  for(const key of ['og:image','twitter:image'])assert.ok(html.includes(key+'" content="https://aaronalderman.com/'+hero+'"'));
+  if(asset.role==='author'){const active=fs.readFileSync('dist/'+hero);assert.equal(active.subarray(0,4).toString(),'RIFF');assert.equal(active.subarray(8,12).toString(),'WEBP');assert.ok(active.length<400_000);assert.equal(sha(active),source.find(f=>f.s==='identity.author'&&f.p==='questionHeroSha256')?.o);}else assert.equal(hero,asset.path);
+  const palette=Object.fromEntries(Object.keys(asset.palette).map(name=>[name,source.find(f=>f.s==='questions.palette.'+asset.role+'.'+name&&f.p==='value')?.o]));
+  assert.ok(html.includes('name="theme-color" content="'+palette.paper+'"'));
+  assert.ok(html.includes('og:image:alt" content="'+alt+'"'));
+  for(const [name,value] of Object.entries(palette)){assert.ok(value,name+' has an active REL value');if(asset.role!=='author')assert.equal(value,asset.palette[name]);}
+  for(const background of ['paper','surface','wash'])for(const token of ['ink','muted','accent','action'])assert.ok(contrast(palette[token],palette[background])>=4.5,asset.role+' '+token+' on '+background+' contrast');
+  assert.ok(contrast('#ffffff',palette.action)>=4.5,asset.role+' button contrast');
+  assert.ok(contrast(palette.focus,palette.paper)>=3,asset.role+' focus contrast');
  }
- const css=fs.readFileSync('dist/expedition.css','utf8');for(const asset of art.assets){assert.ok(css.includes('body[data-question-identity="'+asset.role+'"]'));assert.ok(css.includes('--q-paper:'+asset.palette.paper));}
+ const css=fs.readFileSync('dist/expedition.css','utf8');for(const asset of art.assets){assert.ok(css.includes('body[data-question-identity="'+asset.role+'"]'));assert.ok(css.includes('--q-paper:'+source.find(f=>f.s==='questions.palette.'+asset.role+'.paper'&&f.p==='value')?.o));}
  assert.ok(css.includes('prefers-reduced-motion: reduce'));assert.ok(css.includes('var(--q-focus)'));
  const field=fs.readFileSync('dist/the-field/index.html','utf8');assert.ok(field.includes('assets/questions/open-workshop-daylight-v2.png'));assert.ok(!field.includes('data-question-identity='));
  const programmes=read('algebra/publication.process.json');assert.ok(JSON.stringify(programmes.queries['publication.styles']).includes('questionColour'));assert.equal(read('bootstrap/site.json').executionBudget,20000000);

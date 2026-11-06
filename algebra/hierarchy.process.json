@@ -3016,7 +3016,15 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "expedition.css?v=question-worlds-1"
+                    "href": [
+                      "concat",
+                      "expedition.css?v=",
+                      [
+                        "one",
+                        "site",
+                        "stylesheetVersion"
+                      ]
+                    ]
                   },
                   "children": [
                     "list"
@@ -3254,7 +3262,11 @@
                     {
                       "tag": "a",
                       "attrs": {
-                        "href": "index.html",
+                        "href": [
+                          "one",
+                          "identity.christian",
+                          "homeHref"
+                        ],
                         "class": "brand",
                         "aria-label": "Aaron Alderman"
                       },
@@ -3292,7 +3304,11 @@
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "questions.html"
+                            "href": [
+                              "one",
+                              "identity.christian",
+                              "questionWorldHref"
+                            ]
                           },
                           "children": [
                             "list",
@@ -3302,7 +3318,11 @@
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "gate.html"
+                            "href": [
+                              "one",
+                              "identity.christian",
+                              "threadsHref"
+                            ]
                           },
                           "children": [
                             "list",
@@ -3312,7 +3332,11 @@
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "atlas.html"
+                            "href": [
+                              "one",
+                              "identity.christian",
+                              "atlasHref"
+                            ]
                           },
                           "children": [
                             "list",
@@ -4012,7 +4036,11 @@
                                 {
                                   "tag": "a",
                                   "attrs": {
-                                    "href": "gate.html",
+                                    "href": [
+                                      "one",
+                                      "identity.christian",
+                                      "threadsHref"
+                                    ],
                                     "class": "q-text-link"
                                   },
                                   "children": [
@@ -4023,7 +4051,11 @@
                                 {
                                   "tag": "a",
                                   "attrs": {
-                                    "href": "atlas.html",
+                                    "href": [
+                                      "one",
+                                      "identity.christian",
+                                      "atlasHref"
+                                    ],
                                     "class": "q-text-link"
                                   },
                                   "children": [
@@ -4044,7 +4076,11 @@
                                 {
                                   "tag": "a",
                                   "attrs": {
-                                    "href": "questions-sourcerer.html",
+                                    "href": [
+                                      "one",
+                                      "identity.sourcerer",
+                                      "questionWorldHref"
+                                    ],
                                     "class": "q-text-link"
                                   },
                                   "children": [
@@ -4055,7 +4091,11 @@
                                 {
                                   "tag": "a",
                                   "attrs": {
-                                    "href": "questions-author.html",
+                                    "href": [
+                                      "one",
+                                      "identity.author",
+                                      "questionWorldHref"
+                                    ],
                                     "class": "q-text-link"
                                   },
                                   "children": [
@@ -4066,7 +4106,11 @@
                                 {
                                   "tag": "a",
                                   "attrs": {
-                                    "href": "questions-dad.html",
+                                    "href": [
+                                      "one",
+                                      "identity.dad",
+                                      "questionWorldHref"
+                                    ],
                                     "class": "q-text-link"
                                   },
                                   "children": [
@@ -4077,7 +4121,11 @@
                                 {
                                   "tag": "a",
                                   "attrs": {
-                                    "href": "questions.html",
+                                    "href": [
+                                      "one",
+                                      "identity.christian",
+                                      "questionWorldHref"
+                                    ],
                                     "class": "q-text-link"
                                   },
                                   "children": [
@@ -4160,6 +4208,16 @@
                           "children": [
                             "list",
                             "Built with Worldwright.io ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "assurance/"
+                          },
+                          "children": [
+                            "list",
+                            "Identity assurance"
                           ]
                         }
                       ]
@@ -6626,7 +6684,15 @@
                       "tag": "link",
                       "attrs": {
                         "rel": "stylesheet",
-                        "href": "expedition.css?v=question-worlds-1"
+                        "href": [
+                          "concat",
+                          "expedition.css?v=",
+                          [
+                            "one",
+                            "site",
+                            "stylesheetVersion"
+                          ]
+                        ]
                       },
                       "children": [
                         "list"
@@ -6918,7 +6984,11 @@
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "index.html",
+                            "href": [
+                              "one",
+                              "$identityPage",
+                              "homeHref"
+                            ],
                             "class": "brand",
                             "aria-label": "Aaron Alderman"
                           },
@@ -6959,7 +7029,7 @@
                                 "href": [
                                   "one",
                                   "$identityPage",
-                                  "questionHref"
+                                  "questionWorldHref"
                                 ]
                               },
                               "children": [
@@ -6978,7 +7048,11 @@
                             {
                               "tag": "a",
                               "attrs": {
-                                "href": "gate.html"
+                                "href": [
+                                  "one",
+                                  "$identityPage",
+                                  "threadsHref"
+                                ]
                               },
                               "children": [
                                 "list",
@@ -6988,7 +7062,11 @@
                             {
                               "tag": "a",
                               "attrs": {
-                                "href": "atlas.html"
+                                "href": [
+                                  "one",
+                                  "$identityPage",
+                                  "atlasHref"
+                                ]
                               },
                               "children": [
                                 "list",
@@ -7439,7 +7517,11 @@
                                     {
                                       "tag": "a",
                                       "attrs": {
-                                        "href": "questions-sourcerer.html",
+                                        "href": [
+                                          "one",
+                                          "identity.sourcerer",
+                                          "questionWorldHref"
+                                        ],
                                         "class": "q-text-link"
                                       },
                                       "children": [
@@ -7450,7 +7532,11 @@
                                     {
                                       "tag": "a",
                                       "attrs": {
-                                        "href": "questions-author.html",
+                                        "href": [
+                                          "one",
+                                          "identity.author",
+                                          "questionWorldHref"
+                                        ],
                                         "class": "q-text-link"
                                       },
                                       "children": [
@@ -7461,7 +7547,11 @@
                                     {
                                       "tag": "a",
                                       "attrs": {
-                                        "href": "questions-dad.html",
+                                        "href": [
+                                          "one",
+                                          "identity.dad",
+                                          "questionWorldHref"
+                                        ],
                                         "class": "q-text-link"
                                       },
                                       "children": [
@@ -7472,7 +7562,11 @@
                                     {
                                       "tag": "a",
                                       "attrs": {
-                                        "href": "questions.html",
+                                        "href": [
+                                          "one",
+                                          "identity.christian",
+                                          "questionWorldHref"
+                                        ],
                                         "class": "q-text-link"
                                       },
                                       "children": [
@@ -7555,6 +7649,16 @@
                               "children": [
                                 "list",
                                 "Built with Worldwright.io ↗"
+                              ]
+                            },
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": "assurance/"
+                              },
+                              "children": [
+                                "list",
+                                "Identity assurance"
                               ]
                             }
                           ]
