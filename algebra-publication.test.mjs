@@ -109,7 +109,7 @@ test('the homepage links directly to published microsites and Claimipedia has an
  const home=await read('dist/index.html'),menu=home.match(/<nav class="hero-microsites"[\s\S]*?<\/nav>/)?.[0];assert.ok(menu);
  assert.equal((menu.match(/<a /g)||[]).length,3);
  for(const [name,href]of [['Temple','temple/'],['Sourcery','sourcery/'],['Claimipedia','claimipedia/']])assert.ok(menu.includes(`href="${href}"`)&&menu.includes(`<strong>${name}</strong>`));
- assert.ok(home.includes('expedition.css?v=worlds-1'));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));
+ assert.ok(home.includes('expedition.css?v=worlds-1'));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));const atlas=home.slice(home.indexOf('<section class="section atlas"'));assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
  const stub=await read('dist/claimipedia/index.html');assert.ok(stub.includes('<h1 id="claimipedia-title">Claimipedia</h1>'));assert.ok(stub.includes('Microsite in preparation'));assert.ok(stub.includes('href="../gate.html#path-claimipedia"'));assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(!stub.includes('<script'));
 });
 

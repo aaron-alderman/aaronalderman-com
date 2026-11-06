@@ -1514,9 +1514,17 @@
                                         "children": [
                                           "list",
                                           [
-                                            "one",
-                                            "$p",
-                                            "region"
+                                            "or",
+                                            [
+                                              "optional",
+                                              "$p",
+                                              "atlasLabel"
+                                            ],
+                                            [
+                                              "one",
+                                              "$p",
+                                              "region"
+                                            ]
                                           ]
                                         ]
                                       },
