@@ -394,6 +394,40 @@
         "into": "hLanguage"
       },
       {
+        "when": [
+          "eq",
+          "$hLanguage",
+          "markdown"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "md.preview",
+              "input": {
+                "text": "$hSource"
+              }
+            },
+            "into": "hPreview"
+          },
+          {
+            "let": "input",
+            "value": "$hPreview"
+          },
+          {
+            "call": "html.serialize"
+          },
+          {
+            "port": "browser.content",
+            "args": {
+              "ref": "#hierarchy-preview",
+              "html": "$result"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
         "port": "digest.sha256",
         "args": {
           "text": "$hSource"
@@ -631,7 +665,10 @@
               "list",
               "language.property",
               "language.compile",
-              "hierarchy.viewer.boot"
+              "hierarchy.viewer.boot",
+              "md.inline",
+              "md.block",
+              "md.preview"
             ]
           ],
           "factSubjects": [
@@ -2021,6 +2058,23 @@
                 "text"
               ]
             ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$hFirst.file",
+              "pattern": "\\.md$"
+            },
+            "into": "hMarkdown"
+          },
+          {
+            "when": "$hMarkdown",
+            "then": [
+              {
+                "let": "hSourceLanguage",
+                "value": "markdown"
+              }
+            ]
           }
         ]
       },
@@ -2101,7 +2155,7 @@
                     "href": [
                       "concat",
                       "../",
-                      "expedition.css?v=polish-1"
+                      "expedition.css?v=document-1"
                     ]
                   },
                   "children": [
@@ -2510,14 +2564,111 @@
                       ]
                     },
                     {
-                      "tag": "pre",
+                      "tag": "div",
                       "attrs": {
-                        "id": "hierarchy-source",
-                        "class": "hierarchy-source"
+                        "class": [
+                          "if",
+                          [
+                            "eq",
+                            "$hSourceLanguage",
+                            "markdown"
+                          ],
+                          "inspection-document inspection-document-dual",
+                          "inspection-document"
+                        ]
                       },
                       "children": [
                         "list",
-                        "$hDisplayedSource"
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$hSourceLanguage",
+                            "markdown"
+                          ],
+                          {
+                            "tag": "section",
+                            "attrs": {
+                              "class": "inspection-preview-pane",
+                              "aria-label": "Markdown preview"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Preview"
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {
+                                  "class": "md-note"
+                                },
+                                "children": [
+                                  "list",
+                                  "Rendered from the exact snapshot. Source-relative links retain their target; unbundled documents do not navigate."
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "id": "hierarchy-preview",
+                                  "tabindex": "0",
+                                  "aria-label": "Scrollable Markdown preview"
+                                },
+                                "children": [
+                                  "list",
+                                  "Markdown preview loads through the shared algebra."
+                                ]
+                              }
+                            ]
+                          },
+                          null
+                        ],
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "inspection-source-pane",
+                            "aria-label": "Highlighted exact source"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "h3",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Source"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "md-note"
+                              },
+                              "children": [
+                                "list",
+                                "Exact source, with shared syntax highlighting. Line wrapping is visual; the snapshot and its SHA-256 remain unchanged."
+                              ]
+                            },
+                            {
+                              "tag": "pre",
+                              "attrs": {
+                                "id": "hierarchy-source",
+                                "class": "hierarchy-source",
+                                "tabindex": "0",
+                                "aria-label": "Scrollable highlighted source"
+                              },
+                              "children": [
+                                "list",
+                                "$hDisplayedSource"
+                              ]
+                            }
+                          ]
+                        }
                       ]
                     },
                     {
@@ -2605,6 +2756,23 @@
                       },
                       "children": [
                         "list"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../algebra/encounter-source.process.json"
+                          },
+                          "children": [
+                            "list",
+                            "Shared Markdown, lexer and formatting algebra"
+                          ]
+                        }
                       ]
                     }
                   ]
@@ -2741,7 +2909,7 @@
                             "href": [
                               "concat",
                               "../",
-                              "expedition.css?v=polish-1"
+                              "expedition.css?v=document-1"
                             ]
                           },
                           "children": [
@@ -3310,7 +3478,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "expedition.css?v=polish-1"
+                    "href": "expedition.css?v=document-1"
                   },
                   "children": [
                     "list"
@@ -3737,7 +3905,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "../expedition.css?v=polish-1"
+                    "href": "../expedition.css?v=document-1"
                   },
                   "children": [
                     "list"

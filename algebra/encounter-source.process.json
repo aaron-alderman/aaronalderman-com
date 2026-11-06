@@ -524,6 +524,87 @@
         ]
       },
       {
+        "when": [
+          "eq",
+          "$language",
+          "markdown"
+        ],
+        "then": [
+          {
+            "let": "role",
+            "value": "plain"
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$v",
+              "pattern": "^(?:#{1,6}|\\*\\*)"
+            },
+            "into": "mdHeading"
+          },
+          {
+            "when": "$mdHeading",
+            "then": [
+              {
+                "let": "role",
+                "value": "keyword"
+              }
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$v",
+              "pattern": "^`|^~~~"
+            },
+            "into": "mdCode"
+          },
+          {
+            "when": "$mdCode",
+            "then": [
+              {
+                "let": "role",
+                "value": "string"
+              }
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$v",
+              "pattern": "^\\["
+            },
+            "into": "mdLink"
+          },
+          {
+            "when": "$mdLink",
+            "then": [
+              {
+                "let": "role",
+                "value": "reference"
+              }
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$v",
+              "pattern": "^(?:\\||[-+>] |\\*)"
+            },
+            "into": "mdPunctuation"
+          },
+          {
+            "when": "$mdPunctuation",
+            "then": [
+              {
+                "let": "role",
+                "value": "operator"
+              }
+            ]
+          }
+        ]
+      },
+      {
         "let": "result",
         "value": "$role"
       }
@@ -2182,7 +2263,8 @@
               "rel",
               "encounter",
               "temple",
-              "process"
+              "process",
+              "markdown"
             ],
             "$language"
           ]
@@ -2426,6 +2508,32 @@
         "into": "type"
       },
       {
+        "let": "indent",
+        "value": [
+          "fold",
+          [
+            "range",
+            "$depth"
+          ],
+          "unused",
+          "indent",
+          "",
+          [
+            "concat",
+            "$indent",
+            "  "
+          ]
+        ]
+      },
+      {
+        "let": "childIndent",
+        "value": [
+          "concat",
+          "$indent",
+          "  "
+        ]
+      },
+      {
         "let": "text",
         "value": ""
       },
@@ -2454,7 +2562,9 @@
             ],
             "as": "oneIndex",
             "accumulator": "args",
-            "initial": "",
+            "initial": [
+              "list"
+            ],
             "steps": [
               {
                 "when": [
@@ -2492,19 +2602,12 @@
                   {
                     "let": "args",
                     "value": [
-                      "concat",
+                      "append",
                       "$args",
                       [
-                        "if",
-                        [
-                          "eq",
-                          "$oneIndex",
-                          2
-                        ],
-                        "",
-                        ", "
-                      ],
-                      "$arg"
+                        "list",
+                        "$arg"
+                      ]
                     ]
                   }
                 ]
@@ -2514,13 +2617,59 @@
             "into": "args"
           },
           {
+            "port": "text.join",
+            "args": {
+              "values": "$args",
+              "separator": ", "
+            },
+            "into": "inlineArgs"
+          },
+          {
             "let": "text",
             "value": [
               "concat",
               "$op",
               "(",
-              "$args",
+              "$inlineArgs",
               ")"
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$text",
+              "pattern": "[\\s\\S]{89}|\\n"
+            },
+            "into": "wide"
+          },
+          {
+            "when": "$wide",
+            "then": [
+              {
+                "port": "text.join",
+                "args": {
+                  "values": "$args",
+                  "separator": [
+                    "concat",
+                    ",\n",
+                    "$childIndent"
+                  ]
+                },
+                "into": "multilineArgs"
+              },
+              {
+                "let": "text",
+                "value": [
+                  "concat",
+                  "$op",
+                  "(\n",
+                  "$childIndent",
+                  "$multilineArgs",
+                  "\n",
+                  "$indent",
+                  ")"
+                ]
+              }
             ]
           },
           {
@@ -2582,7 +2731,9 @@
             "fold": "$entries",
             "as": "entry",
             "accumulator": "fields",
-            "initial": "",
+            "initial": [
+              "list"
+            ],
             "steps": [
               {
                 "port": "kernel.invoke",
@@ -2606,25 +2757,21 @@
               {
                 "let": "fields",
                 "value": [
-                  "concat",
+                  "append",
                   "$fields",
                   [
-                    "if",
+                    "list",
                     [
-                      "eq",
-                      "$fields",
-                      ""
-                    ],
-                    "",
-                    "; "
-                  ],
-                  [
-                    "at",
-                    "$entry",
-                    0
-                  ],
-                  " = ",
-                  "$field"
+                      "concat",
+                      [
+                        "at",
+                        "$entry",
+                        0
+                      ],
+                      " = ",
+                      "$field"
+                    ]
+                  ]
                 ]
               }
             ],
@@ -2632,12 +2779,57 @@
             "into": "fields"
           },
           {
+            "port": "text.join",
+            "args": {
+              "values": "$fields",
+              "separator": "; "
+            },
+            "into": "inlineFields"
+          },
+          {
             "let": "text",
             "value": [
               "concat",
               "{ ",
-              "$fields",
+              "$inlineFields",
               " }"
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$text",
+              "pattern": "[\\s\\S]{89}|\\n"
+            },
+            "into": "wide"
+          },
+          {
+            "when": "$wide",
+            "then": [
+              {
+                "port": "text.join",
+                "args": {
+                  "values": "$fields",
+                  "separator": [
+                    "concat",
+                    ";\n",
+                    "$childIndent"
+                  ]
+                },
+                "into": "multilineFields"
+              },
+              {
+                "let": "text",
+                "value": [
+                  "concat",
+                  "{\n",
+                  "$childIndent",
+                  "$multilineFields",
+                  "\n",
+                  "$indent",
+                  "}"
+                ]
+              }
             ]
           }
         ]
@@ -2900,7 +3092,7 @@
                   "$st",
                   "value"
                 ],
-                "depth": 0
+                "depth": "$depth"
               }
             },
             "into": "v"
@@ -2950,7 +3142,7 @@
                   "$st",
                   "assert"
                 ],
-                "depth": 0
+                "depth": "$depth"
               }
             },
             "into": "v"
@@ -3009,7 +3201,7 @@
                   "$st",
                   "args"
                 ],
-                "depth": 0
+                "depth": "$depth"
               }
             },
             "into": "v"
@@ -3098,7 +3290,7 @@
                   "$st",
                   "when"
                 ],
-                "depth": 0
+                "depth": "$depth"
               }
             },
             "into": "v"
@@ -3163,7 +3355,7 @@
                   "$st",
                   "fold"
                 ],
-                "depth": 0
+                "depth": "$depth"
               }
             },
             "into": "v"
@@ -3178,7 +3370,7 @@
                   "$st",
                   "initial"
                 ],
-                "depth": 0
+                "depth": "$depth"
               }
             },
             "into": "initial"
@@ -3193,7 +3385,7 @@
                   "$st",
                   "yield"
                 ],
-                "depth": 0
+                "depth": "$depth"
               }
             },
             "into": "yield"
@@ -3239,8 +3431,20 @@
               " starts ",
               "$initial",
               ":\n",
-              "$body",
-              "\n",
+              [
+                "if",
+                [
+                  "eq",
+                  "$body",
+                  ""
+                ],
+                "",
+                [
+                  "concat",
+                  "$body",
+                  "\n"
+                ]
+              ],
               "$indent",
               "  yield ",
               "$yield",
@@ -3282,7 +3486,7 @@
                   "$st",
                   "each"
                 ],
-                "depth": 0
+                "depth": "$depth"
               }
             },
             "into": "v"
@@ -3341,7 +3545,7 @@
               "query": "sp.expression",
               "input": {
                 "value": "$st",
-                "depth": 0
+                "depth": "$depth"
               }
             },
             "into": "v"
@@ -4002,6 +4206,19 @@
         ]
       },
       {
+        "when": [
+          "eq",
+          "$language",
+          "markdown"
+        ],
+        "then": [
+          {
+            "let": "pattern",
+            "value": "$lexPolicy.markdownPattern"
+          }
+        ]
+      },
+      {
         "port": "text.split",
         "args": {
           "value": "$text",
@@ -4445,6 +4662,1277 @@
       {
         "let": "result",
         "value": "$yes"
+      }
+    ],
+    "md.inline": [
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$eventInput.text",
+          "pattern": "$lexPolicy.markdownPattern"
+        },
+        "into": "mdTokens"
+      },
+      {
+        "fold": "$mdTokens",
+        "as": "mdToken",
+        "accumulator": "mdNodes",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "mdNode",
+            "value": "$mdToken"
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$mdToken",
+              "pattern": "^\\*\\*[^*]+\\*\\*$"
+            },
+            "into": "mdStrong"
+          },
+          {
+            "when": "$mdStrong",
+            "then": [
+              {
+                "port": "text.slice",
+                "args": {
+                  "value": "$mdToken",
+                  "start": 2,
+                  "end": [
+                    "add",
+                    [
+                      "count",
+                      "$mdToken"
+                    ],
+                    -2
+                  ]
+                },
+                "into": "mdLabel"
+              },
+              {
+                "let": "mdNode",
+                "value": {
+                  "tag": "strong",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$mdLabel"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$mdToken",
+              "pattern": "^\\*[^*]+\\*$"
+            },
+            "into": "mdEm"
+          },
+          {
+            "when": "$mdEm",
+            "then": [
+              {
+                "port": "text.slice",
+                "args": {
+                  "value": "$mdToken",
+                  "start": 1,
+                  "end": [
+                    "add",
+                    [
+                      "count",
+                      "$mdToken"
+                    ],
+                    -1
+                  ]
+                },
+                "into": "mdLabel"
+              },
+              {
+                "let": "mdNode",
+                "value": {
+                  "tag": "em",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$mdLabel"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$mdToken",
+              "pattern": "^`[^`]+`$"
+            },
+            "into": "mdCode"
+          },
+          {
+            "when": "$mdCode",
+            "then": [
+              {
+                "port": "text.slice",
+                "args": {
+                  "value": "$mdToken",
+                  "start": 1,
+                  "end": [
+                    "add",
+                    [
+                      "count",
+                      "$mdToken"
+                    ],
+                    -1
+                  ]
+                },
+                "into": "mdLabel"
+              },
+              {
+                "let": "mdNode",
+                "value": {
+                  "tag": "code",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$mdLabel"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$mdToken",
+              "pattern": "^\\[[^\\]]+\\]\\([^)]+\\)$"
+            },
+            "into": "mdLink"
+          },
+          {
+            "when": "$mdLink",
+            "then": [
+              {
+                "port": "text.indexOf",
+                "args": {
+                  "value": "$mdToken",
+                  "search": "]("
+                },
+                "into": "mdAt"
+              },
+              {
+                "port": "text.slice",
+                "args": {
+                  "value": "$mdToken",
+                  "start": 1,
+                  "end": "$mdAt"
+                },
+                "into": "mdLabel"
+              },
+              {
+                "port": "text.slice",
+                "args": {
+                  "value": "$mdToken",
+                  "start": [
+                    "add",
+                    "$mdAt",
+                    2
+                  ],
+                  "end": [
+                    "add",
+                    [
+                      "count",
+                      "$mdToken"
+                    ],
+                    -1
+                  ]
+                },
+                "into": "mdTarget"
+              },
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$mdTarget",
+                  "pattern": "^https?://[^\\s<>]+$"
+                },
+                "into": "mdSafe"
+              },
+              {
+                "let": "mdNode",
+                "value": [
+                  "if",
+                  "$mdSafe",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "$mdTarget",
+                      "rel": "noreferrer"
+                    },
+                    "children": [
+                      "list",
+                      "$mdLabel"
+                    ]
+                  },
+                  {
+                    "tag": "span",
+                    "attrs": {
+                      "class": "md-source-link",
+                      "title": [
+                        "concat",
+                        "Source-relative link; target is not bundled: ",
+                        "$mdTarget"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      "$mdLabel",
+                      {
+                        "tag": "small",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "concat",
+                            " [source: ",
+                            "$mdTarget",
+                            "]"
+                          ]
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$mdToken",
+              "pattern": "^  \\r?\\n$"
+            },
+            "into": "mdBreak"
+          },
+          {
+            "when": "$mdBreak",
+            "then": [
+              {
+                "let": "mdNode",
+                "value": {
+                  "tag": "br",
+                  "attrs": {},
+                  "children": [
+                    "list"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "let": "mdNodes",
+            "value": [
+              "append",
+              "$mdNodes",
+              [
+                "list",
+                "$mdNode"
+              ]
+            ]
+          }
+        ],
+        "yield": "$mdNodes",
+        "into": "mdNodes"
+      },
+      {
+        "let": "result",
+        "value": "$mdNodes"
+      }
+    ],
+    "md.block": [
+      {
+        "let": "mdLines",
+        "value": "$eventInput.lines"
+      },
+      {
+        "let": "mdKind",
+        "value": "$eventInput.kind"
+      },
+      {
+        "let": "mdTree",
+        "value": null
+      },
+      {
+        "port": "text.join",
+        "args": {
+          "values": "$mdLines",
+          "separator": "\n"
+        },
+        "into": "mdText"
+      },
+      {
+        "when": [
+          "eq",
+          "$mdKind",
+          "paragraph"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "md.inline",
+              "input": {
+                "text": "$mdText"
+              }
+            },
+            "into": "mdInline"
+          },
+          {
+            "let": "mdTree",
+            "value": {
+              "tag": "p",
+              "attrs": {},
+              "children": "$mdInline"
+            }
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$mdKind",
+          "heading"
+        ],
+        "then": [
+          {
+            "port": "text.split",
+            "args": {
+              "value": "$mdText",
+              "pattern": "^(#{1,6}) +"
+            },
+            "into": "mdHeadingParts"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "md.inline",
+              "input": {
+                "text": [
+                  "at",
+                  "$mdHeadingParts",
+                  2
+                ]
+              }
+            },
+            "into": "mdInline"
+          },
+          {
+            "let": "mdTree",
+            "value": {
+              "tag": [
+                "concat",
+                "h",
+                [
+                  "count",
+                  [
+                    "at",
+                    "$mdHeadingParts",
+                    1
+                  ]
+                ]
+              ],
+              "attrs": {},
+              "children": "$mdInline"
+            }
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$mdKind",
+          "code"
+        ],
+        "then": [
+          {
+            "port": "digest.sha256",
+            "args": {
+              "text": "$mdText"
+            },
+            "into": "mdHash"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "sp.present",
+              "input": {
+                "text": "$mdText",
+                "language": [
+                  "if",
+                  [
+                    "includes",
+                    [
+                      "list",
+                      "json",
+                      "rel",
+                      "process",
+                      "encounter",
+                      "temple"
+                    ],
+                    "$eventInput.language"
+                  ],
+                  "$eventInput.language",
+                  "text"
+                ],
+                "file": "markdown-fence",
+                "theme": "dark",
+                "expectedHash": "$mdHash",
+                "lineNumbers": false,
+                "selectedLine": null,
+                "origin": {
+                  "scope": "Markdown fenced code projection"
+                }
+              }
+            },
+            "into": "mdCodeView"
+          },
+          {
+            "let": "mdTree",
+            "value": {
+              "tag": "pre",
+              "attrs": {
+                "class": "md-code"
+              },
+              "children": [
+                "list",
+                "$mdCodeView.tree"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$mdKind",
+          "quote"
+        ],
+        "then": [
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$mdText",
+              "search": "> ",
+              "replacement": ""
+            },
+            "into": "mdText"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "md.inline",
+              "input": {
+                "text": "$mdText"
+              }
+            },
+            "into": "mdInline"
+          },
+          {
+            "let": "mdTree",
+            "value": {
+              "tag": "blockquote",
+              "attrs": {},
+              "children": "$mdInline"
+            }
+          }
+        ]
+      },
+      {
+        "when": [
+          "includes",
+          [
+            "list",
+            "ul",
+            "ol"
+          ],
+          "$mdKind"
+        ],
+        "then": [
+          {
+            "fold": "$mdLines",
+            "as": "mdLine",
+            "accumulator": "mdItems",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "port": "text.split",
+                "args": {
+                  "value": "$mdLine",
+                  "pattern": "^\\s*(?:[-+*]|[0-9]+\\.) +"
+                },
+                "into": "mdListParts"
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "md.inline",
+                  "input": {
+                    "text": [
+                      "at",
+                      "$mdListParts",
+                      1
+                    ]
+                  }
+                },
+                "into": "mdInline"
+              },
+              {
+                "let": "mdItems",
+                "value": [
+                  "append",
+                  "$mdItems",
+                  [
+                    "list",
+                    {
+                      "tag": "li",
+                      "attrs": {},
+                      "children": "$mdInline"
+                    }
+                  ]
+                ]
+              }
+            ],
+            "yield": "$mdItems",
+            "into": "mdItems"
+          },
+          {
+            "let": "mdTree",
+            "value": {
+              "tag": "$mdKind",
+              "attrs": {},
+              "children": "$mdItems"
+            }
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          "$mdKind",
+          "table"
+        ],
+        "then": [
+          {
+            "fold": [
+              "range",
+              [
+                "count",
+                "$mdLines"
+              ]
+            ],
+            "as": "mdI",
+            "accumulator": "mdRows",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "let": "mdLine",
+                "value": [
+                  "at",
+                  "$mdLines",
+                  [
+                    "add",
+                    "$mdI",
+                    -1
+                  ]
+                ]
+              },
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$mdLine",
+                  "pattern": "^\\s*\\|?[: \\-|]+\\|[: \\-|]*$"
+                },
+                "into": "mdSeparator"
+              },
+              {
+                "when": [
+                  "not",
+                  "$mdSeparator"
+                ],
+                "then": [
+                  {
+                    "port": "text.trim",
+                    "args": {
+                      "value": "$mdLine"
+                    },
+                    "into": "mdLine"
+                  },
+                  {
+                    "port": "text.slice",
+                    "args": {
+                      "value": "$mdLine",
+                      "start": 1,
+                      "end": [
+                        "add",
+                        [
+                          "count",
+                          "$mdLine"
+                        ],
+                        -1
+                      ]
+                    },
+                    "into": "mdLine"
+                  },
+                  {
+                    "port": "text.split",
+                    "args": {
+                      "value": "$mdLine",
+                      "pattern": "\\|"
+                    },
+                    "into": "mdCells"
+                  },
+                  {
+                    "fold": "$mdCells",
+                    "as": "mdCell",
+                    "accumulator": "mdCellViews",
+                    "initial": [
+                      "list"
+                    ],
+                    "steps": [
+                      {
+                        "port": "text.trim",
+                        "args": {
+                          "value": "$mdCell"
+                        },
+                        "into": "mdCell"
+                      },
+                      {
+                        "port": "kernel.invoke",
+                        "args": {
+                          "query": "md.inline",
+                          "input": {
+                            "text": "$mdCell"
+                          }
+                        },
+                        "into": "mdInline"
+                      },
+                      {
+                        "let": "mdCellViews",
+                        "value": [
+                          "append",
+                          "$mdCellViews",
+                          [
+                            "list",
+                            {
+                              "tag": [
+                                "if",
+                                [
+                                  "eq",
+                                  "$mdI",
+                                  1
+                                ],
+                                "th",
+                                "td"
+                              ],
+                              "attrs": [
+                                "if",
+                                [
+                                  "eq",
+                                  "$mdI",
+                                  1
+                                ],
+                                {
+                                  "scope": "col"
+                                },
+                                {}
+                              ],
+                              "children": "$mdInline"
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    "yield": "$mdCellViews",
+                    "into": "mdCellViews"
+                  },
+                  {
+                    "let": "mdRows",
+                    "value": [
+                      "append",
+                      "$mdRows",
+                      [
+                        "list",
+                        {
+                          "tag": "tr",
+                          "attrs": {},
+                          "children": "$mdCellViews"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": "$mdRows",
+            "into": "mdRows"
+          },
+          {
+            "let": "mdTree",
+            "value": {
+              "tag": "div",
+              "attrs": {
+                "class": "md-table-wrap"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "table",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "tbody",
+                      "attrs": {},
+                      "children": "$mdRows"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "let": "result",
+        "value": "$mdTree"
+      }
+    ],
+    "md.preview": [
+      {
+        "let": "mdInput",
+        "value": "$eventInput.text"
+      },
+      {
+        "assert": [
+          "includes",
+          [
+            "range",
+            160001
+          ],
+          [
+            "add",
+            [
+              "count",
+              "$mdInput"
+            ],
+            1
+          ]
+        ],
+        "message": "MD-BOUND: Document exceeds the shared source bound."
+      },
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$mdInput",
+          "pattern": "\\r?\\n"
+        },
+        "into": "mdLines"
+      },
+      {
+        "assert": [
+          "includes",
+          [
+            "range",
+            2001
+          ],
+          [
+            "add",
+            [
+              "count",
+              "$mdLines"
+            ],
+            1
+          ]
+        ],
+        "message": "MD-LINES: Preview exceeds 2000 lines."
+      },
+      {
+        "fold": [
+          "append",
+          "$mdLines",
+          [
+            "list",
+            ""
+          ]
+        ],
+        "as": "mdLine",
+        "accumulator": "mdState",
+        "initial": {
+          "nodes": [
+            "list"
+          ],
+          "lines": [
+            "list"
+          ],
+          "kind": "",
+          "fence": "",
+          "language": ""
+        },
+        "steps": [
+          {
+            "let": "mdNodes",
+            "value": "$mdState.nodes"
+          },
+          {
+            "let": "mdPending",
+            "value": "$mdState.lines"
+          },
+          {
+            "let": "mdKind",
+            "value": "$mdState.kind"
+          },
+          {
+            "let": "mdFence",
+            "value": "$mdState.fence"
+          },
+          {
+            "let": "mdWasFence",
+            "value": [
+              "not",
+              [
+                "eq",
+                "$mdFence",
+                ""
+              ]
+            ]
+          },
+          {
+            "let": "mdLanguage",
+            "value": "$mdState.language"
+          },
+          {
+            "let": "mdNext",
+            "value": "paragraph"
+          },
+          {
+            "let": "mdSkip",
+            "value": false
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$mdLine",
+              "pattern": "^\\s*$"
+            },
+            "into": "mdBlank"
+          },
+          {
+            "when": "$mdBlank",
+            "then": [
+              {
+                "let": "mdNext",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "when": true,
+            "then": [
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$mdLine",
+                  "pattern": "^#{1,6} +"
+                },
+                "into": "mdMatch"
+              },
+              {
+                "when": "$mdMatch",
+                "then": [
+                  {
+                    "let": "mdNext",
+                    "value": "heading"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "when": true,
+            "then": [
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$mdLine",
+                  "pattern": "^\\s*\\|.*\\|\\s*$"
+                },
+                "into": "mdMatch"
+              },
+              {
+                "when": "$mdMatch",
+                "then": [
+                  {
+                    "let": "mdNext",
+                    "value": "table"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "when": true,
+            "then": [
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$mdLine",
+                  "pattern": "^\\s*[-+*] +"
+                },
+                "into": "mdMatch"
+              },
+              {
+                "when": "$mdMatch",
+                "then": [
+                  {
+                    "let": "mdNext",
+                    "value": "ul"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "when": true,
+            "then": [
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$mdLine",
+                  "pattern": "^\\s*[0-9]+\\. +"
+                },
+                "into": "mdMatch"
+              },
+              {
+                "when": "$mdMatch",
+                "then": [
+                  {
+                    "let": "mdNext",
+                    "value": "ol"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "when": true,
+            "then": [
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$mdLine",
+                  "pattern": "^> ?"
+                },
+                "into": "mdMatch"
+              },
+              {
+                "when": "$mdMatch",
+                "then": [
+                  {
+                    "let": "mdNext",
+                    "value": "quote"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$mdLine",
+              "pattern": "^(?:```|~~~)"
+            },
+            "into": "mdMarker"
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$mdFence",
+                ""
+              ]
+            ],
+            "then": [
+              {
+                "let": "mdNext",
+                "value": "code"
+              },
+              {
+                "port": "text.slice",
+                "args": {
+                  "value": "$mdLine",
+                  "start": 0,
+                  "end": 3
+                },
+                "into": "mdPrefix"
+              },
+              {
+                "when": [
+                  "eq",
+                  "$mdPrefix",
+                  "$mdFence"
+                ],
+                "then": [
+                  {
+                    "let": "mdNext",
+                    "value": ""
+                  },
+                  {
+                    "let": "mdFence",
+                    "value": ""
+                  },
+                  {
+                    "let": "mdSkip",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "and",
+              "$mdMarker",
+              [
+                "not",
+                "$mdWasFence"
+              ]
+            ],
+            "then": [
+              {
+                "port": "text.slice",
+                "args": {
+                  "value": "$mdLine",
+                  "start": 0,
+                  "end": 3
+                },
+                "into": "mdFence"
+              },
+              {
+                "port": "text.slice",
+                "args": {
+                  "value": "$mdLine",
+                  "start": 3,
+                  "end": [
+                    "count",
+                    "$mdLine"
+                  ]
+                },
+                "into": "mdLanguage"
+              },
+              {
+                "port": "text.trim",
+                "args": {
+                  "value": "$mdLanguage"
+                },
+                "into": "mdLanguage"
+              },
+              {
+                "let": "mdNext",
+                "value": "code"
+              },
+              {
+                "let": "mdSkip",
+                "value": true
+              }
+            ]
+          },
+          {
+            "when": [
+              "and",
+              [
+                "not",
+                [
+                  "eq",
+                  "$mdNext",
+                  "$mdKind"
+                ]
+              ],
+              [
+                "not",
+                [
+                  "eq",
+                  "$mdKind",
+                  ""
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "md.block",
+                  "input": {
+                    "lines": "$mdPending",
+                    "kind": "$mdKind",
+                    "language": "$mdLanguage"
+                  }
+                },
+                "into": "mdBlock"
+              },
+              {
+                "let": "mdNodes",
+                "value": [
+                  "append",
+                  "$mdNodes",
+                  [
+                    "list",
+                    "$mdBlock"
+                  ]
+                ]
+              },
+              {
+                "let": "mdPending",
+                "value": [
+                  "list"
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "and",
+              [
+                "not",
+                [
+                  "eq",
+                  "$mdNext",
+                  ""
+                ]
+              ],
+              [
+                "not",
+                "$mdSkip"
+              ]
+            ],
+            "then": [
+              {
+                "let": "mdPending",
+                "value": [
+                  "append",
+                  "$mdPending",
+                  [
+                    "list",
+                    "$mdLine"
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$mdNext",
+              "heading"
+            ],
+            "then": [
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "md.block",
+                  "input": {
+                    "lines": "$mdPending",
+                    "kind": "heading"
+                  }
+                },
+                "into": "mdBlock"
+              },
+              {
+                "let": "mdNodes",
+                "value": [
+                  "append",
+                  "$mdNodes",
+                  [
+                    "list",
+                    "$mdBlock"
+                  ]
+                ]
+              },
+              {
+                "let": "mdPending",
+                "value": [
+                  "list"
+                ]
+              },
+              {
+                "let": "mdNext",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "yield": {
+          "nodes": "$mdNodes",
+          "lines": "$mdPending",
+          "kind": "$mdNext",
+          "fence": "$mdFence",
+          "language": "$mdLanguage"
+        },
+        "into": "mdState"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            "$mdState.kind",
+            ""
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "md.block",
+              "input": {
+                "lines": "$mdState.lines",
+                "kind": "$mdState.kind",
+                "language": "$mdState.language"
+              }
+            },
+            "into": "mdBlock"
+          },
+          {
+            "let": "mdState",
+            "value": {
+              "nodes": [
+                "append",
+                "$mdState.nodes",
+                [
+                  "list",
+                  "$mdBlock"
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "let": "result",
+        "value": {
+          "tag": "article",
+          "attrs": {
+            "class": "markdown-preview"
+          },
+          "children": "$mdState.nodes"
+        }
       }
     ]
   }

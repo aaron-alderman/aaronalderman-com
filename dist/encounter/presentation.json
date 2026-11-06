@@ -108,6 +108,10 @@
       {
         "pattern": "\\.(?:js|mjs|cjs)$",
         "language": "javascript"
+      },
+      {
+        "pattern": "\\.(?:md|markdown)$",
+        "language": "markdown"
       }
     ],
     "javascriptRoles": [
@@ -2178,7 +2182,8 @@
     ],
     "identifierPattern": "[@$]?[A-Za-z_][A-Za-z0-9_.-]*",
     "maxCodeUnits": 160000,
-    "maxParts": 18000
+    "maxParts": 18000,
+    "markdownPattern": "(\\[[^\\]\\r\\n]+\\]\\([^\\)\\r\\n]+\\)|`[^`\\r\\n]+`|\\*\\*[^*\\r\\n]+\\*\\*|\\*[^*\\r\\n]+\\*|#{1,6}(?= )|```[^\\r\\n]*|~~~[^\\r\\n]*|\\||^[ \\t]*[-+>] |  \\r?\\n)"
   },
   "lexGrammar": {
     "protocol": "temple/surface-process-module/1",
