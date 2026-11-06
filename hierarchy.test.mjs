@@ -107,7 +107,7 @@ test('lived questions retain a personal Christian centre and open the bounded Fi
 
 test('another side changes the question destination and label through the algebra for every role',async()=>{
  const programme=read('algebra/publication.process.json'),facts=parseRel(fs.readFileSync('source/hierarchy.rel','utf8'));
- const themes=facts.filter(f=>f.p==='isa'&&f.o==='IdentityTheme').map(f=>Object.fromEntries(['key','label','copy','image','questionHref','questionCopy'].map(p=>[p,facts.find(x=>x.s===f.s&&x.p===p)?.o])));
+ const themes=facts.filter(f=>f.p==='isa'&&f.o==='IdentityTheme').map(f=>Object.fromEntries(['key','label','copy','image','questionsImage','threadsImage','atlasImage','questionHref','questionCopy'].map(p=>[p,facts.find(x=>x.s===f.s&&x.p===p)?.o])));
  assert.deepEqual(themes.map(t=>t.key),['sourcerer','author','dad','christian']);
  assert.equal(new Set(themes.map(t=>t.questionHref)).size,4);
  const model=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:'identity.change',queries:{'identity.change':programme.queries['identity.change']}},mode:'model',ports:valuePorts(),limit:20000000});
@@ -125,4 +125,28 @@ test('another side changes the question destination and label through the algebr
  const author=fs.readFileSync('dist/questions-author.html','utf8');assert.ok(author.includes('the people who enter my stories?'));assert.ok(author.includes('href="worldwright/"'));assert.ok(author.includes('href="creator-studio/"'));
  const sourcerer=fs.readFileSync('dist/questions-sourcerer.html','utf8');assert.ok(sourcerer.includes('software that earns trust?'));assert.ok(sourcerer.includes('href="sourcery/"'));assert.ok(sourcerer.includes('href="temple/"'));
  for(const file of ['questions-dad.html','questions-author.html','questions-sourcerer.html']){const html=fs.readFileSync('dist/'+file,'utf8');assert.equal((html.match(/class="q-question"/g)||[]).length,4);assert.ok(!html.includes('<script'));assert.ok(html.includes('rel="canonical" href="https://aaronalderman.com/'+file+'"'));for(const m of html.matchAll(/(?:href|src)="([^"#]+)"/g)){if(!/^https?:/.test(m[1])){const target=m[1].split(/[?#]/)[0];assert.ok(fs.existsSync('dist/'+target),file+': '+target);}}}
+});
+
+test('four Questions worlds have their own admitted PNG, sharing metadata and readable algebra palettes',()=>{
+ const art=read('source/questions-identity-art.json'),source=parseRel(fs.readFileSync('source/questions.rel','utf8'));
+ const route={christian:'questions.html',dad:'questions-dad.html',sourcerer:'questions-sourcerer.html',author:'questions-author.html'};
+ const luminance=hex=>{const rgb=hex.slice(1).match(/../g).map(x=>parseInt(x,16)/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722;};
+ const contrast=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+ assert.equal(art.assets.length,4);assert.equal(new Set(art.assets.map(a=>a.sha256)).size,4);
+ for(const asset of art.assets){
+  const bytes=fs.readFileSync('dist/'+asset.path),html=fs.readFileSync('dist/'+route[asset.role],'utf8');
+  assert.equal(bytes.subarray(1,4).toString(),'PNG');assert.equal(sha(bytes),asset.sha256);assert.equal(bytes.readUInt32BE(16),asset.width);assert.equal(bytes.readUInt32BE(20),asset.height);
+  assert.ok(html.includes('data-question-identity="'+asset.role+'"'));assert.ok(html.includes('class="q-hero-art" src="'+asset.path+'"'));
+  for(const key of ['og:image','twitter:image'])assert.ok(html.includes(key+'" content="https://aaronalderman.com/'+asset.path+'"'));
+  assert.ok(html.includes('name="theme-color" content="'+asset.palette.paper+'"'));
+  assert.ok(html.includes('og:image:alt" content="'+asset.alt+'"'));
+  for(const [name,value] of Object.entries(asset.palette))assert.equal(source.find(f=>f.s==='questions.palette.'+asset.role+'.'+name&&f.p==='value')?.o,value);
+  for(const token of ['ink','muted','accent'])assert.ok(contrast(asset.palette[token],asset.palette.paper)>=4.5,asset.role+' '+token+' contrast');
+  assert.ok(contrast('#ffffff',asset.palette.action)>=4.5,asset.role+' button contrast');
+  assert.ok(contrast(asset.palette.focus,asset.palette.paper)>=3,asset.role+' focus contrast');
+ }
+ const css=fs.readFileSync('dist/expedition.css','utf8');for(const asset of art.assets){assert.ok(css.includes('body[data-question-identity="'+asset.role+'"]'));assert.ok(css.includes('--q-paper:'+asset.palette.paper));}
+ assert.ok(css.includes('prefers-reduced-motion: reduce'));assert.ok(css.includes('var(--q-focus)'));
+ const field=fs.readFileSync('dist/the-field/index.html','utf8');assert.ok(field.includes('assets/questions/open-workshop-daylight-v2.png'));assert.ok(!field.includes('data-question-identity='));
+ const programmes=read('algebra/publication.process.json');assert.ok(JSON.stringify(programmes.queries['publication.styles']).includes('questionColour'));assert.equal(read('bootstrap/site.json').executionBudget,20000000);
 });

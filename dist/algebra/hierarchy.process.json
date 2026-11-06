@@ -3912,7 +3912,16 @@
                   "tag": "meta",
                   "attrs": {
                     "name": "theme-color",
-                    "content": "#faf7ef"
+                    "content": [
+                      "one",
+                      [
+                        "concat",
+                        "questions.palette.",
+                        "christian",
+                        ".paper"
+                      ],
+                      "value"
+                    ]
                   },
                   "children": [
                     "list"
@@ -3962,7 +3971,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "expedition.css?v=questions-light-1"
+                    "href": "expedition.css?v=question-worlds-1"
                   },
                   "children": [
                     "list"
@@ -4020,7 +4029,19 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:image",
-                    "content": "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+                    "content": [
+                      "concat",
+                      "https://aaronalderman.com/",
+                      [
+                        "one",
+                        [
+                          "concat",
+                          "identity.",
+                          "christian"
+                        ],
+                        "questionHero"
+                      ]
+                    ]
                   },
                   "children": [
                     "list"
@@ -4030,7 +4051,15 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:image:width",
-                    "content": "1672"
+                    "content": [
+                      "one",
+                      [
+                        "concat",
+                        "identity.",
+                        "christian"
+                      ],
+                      "questionHeroWidth"
+                    ]
                   },
                   "children": [
                     "list"
@@ -4040,7 +4069,15 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:image:height",
-                    "content": "941"
+                    "content": [
+                      "one",
+                      [
+                        "concat",
+                        "identity.",
+                        "christian"
+                      ],
+                      "questionHeroHeight"
+                    ]
                   },
                   "children": [
                     "list"
@@ -4050,7 +4087,15 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:image:alt",
-                    "content": "A sunlit workshop opening onto a green field, with two people sharing a repair."
+                    "content": [
+                      "one",
+                      [
+                        "concat",
+                        "identity.",
+                        "christian"
+                      ],
+                      "questionHeroAlt"
+                    ]
                   },
                   "children": [
                     "list"
@@ -4098,7 +4143,19 @@
                   "tag": "meta",
                   "attrs": {
                     "name": "twitter:image",
-                    "content": "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+                    "content": [
+                      "concat",
+                      "https://aaronalderman.com/",
+                      [
+                        "one",
+                        [
+                          "concat",
+                          "identity.",
+                          "christian"
+                        ],
+                        "questionHero"
+                      ]
+                    ]
                   },
                   "children": [
                     "list"
@@ -4108,7 +4165,15 @@
                   "tag": "meta",
                   "attrs": {
                     "name": "twitter:image:alt",
-                    "content": "A sunlit workshop opening onto a green field, with two people sharing a repair."
+                    "content": [
+                      "one",
+                      [
+                        "concat",
+                        "identity.",
+                        "christian"
+                      ],
+                      "questionHeroAlt"
+                    ]
                   },
                   "children": [
                     "list"
@@ -4118,7 +4183,9 @@
             },
             {
               "tag": "body",
-              "attrs": {},
+              "attrs": {
+                "data-question-identity": "christian"
+              },
               "children": [
                 "list",
                 {
@@ -4195,7 +4262,8 @@
                   "tag": "main",
                   "attrs": {
                     "id": "main",
-                    "class": "q-page"
+                    "class": "q-page",
+                    "data-question-identity": "christian"
                   },
                   "children": [
                     "list",
@@ -4220,13 +4288,33 @@
                                 "class": "q-hero-art",
                                 "src": [
                                   "one",
-                                  "questions",
-                                  "hero"
+                                  [
+                                    "concat",
+                                    "identity.",
+                                    "christian"
+                                  ],
+                                  "questionHero"
                                 ],
                                 "alt": "",
                                 "aria-hidden": "true",
-                                "width": 1672,
-                                "height": 941,
+                                "width": [
+                                  "one",
+                                  [
+                                    "concat",
+                                    "identity.",
+                                    "christian"
+                                  ],
+                                  "questionHeroWidth"
+                                ],
+                                "height": [
+                                  "one",
+                                  [
+                                    "concat",
+                                    "identity.",
+                                    "christian"
+                                  ],
+                                  "questionHeroHeight"
+                                ],
                                 "fetchpriority": "high"
                               },
                               "children": [
@@ -7356,7 +7444,20 @@
                       "tag": "meta",
                       "attrs": {
                         "name": "theme-color",
-                        "content": "#faf7ef"
+                        "content": [
+                          "one",
+                          [
+                            "concat",
+                            "questions.palette.",
+                            [
+                              "one",
+                              "$identityPage",
+                              "key"
+                            ],
+                            ".paper"
+                          ],
+                          "value"
+                        ]
                       },
                       "children": [
                         "list"
@@ -7420,7 +7521,7 @@
                       "tag": "link",
                       "attrs": {
                         "rel": "stylesheet",
-                        "href": "expedition.css?v=questions-light-1"
+                        "href": "expedition.css?v=question-worlds-1"
                       },
                       "children": [
                         "list"
@@ -7495,7 +7596,23 @@
                       "tag": "meta",
                       "attrs": {
                         "property": "og:image",
-                        "content": "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+                        "content": [
+                          "concat",
+                          "https://aaronalderman.com/",
+                          [
+                            "one",
+                            [
+                              "concat",
+                              "identity.",
+                              [
+                                "one",
+                                "$identityPage",
+                                "key"
+                              ]
+                            ],
+                            "questionHero"
+                          ]
+                        ]
                       },
                       "children": [
                         "list"
@@ -7505,7 +7622,19 @@
                       "tag": "meta",
                       "attrs": {
                         "property": "og:image:width",
-                        "content": "1672"
+                        "content": [
+                          "one",
+                          [
+                            "concat",
+                            "identity.",
+                            [
+                              "one",
+                              "$identityPage",
+                              "key"
+                            ]
+                          ],
+                          "questionHeroWidth"
+                        ]
                       },
                       "children": [
                         "list"
@@ -7515,7 +7644,19 @@
                       "tag": "meta",
                       "attrs": {
                         "property": "og:image:height",
-                        "content": "941"
+                        "content": [
+                          "one",
+                          [
+                            "concat",
+                            "identity.",
+                            [
+                              "one",
+                              "$identityPage",
+                              "key"
+                            ]
+                          ],
+                          "questionHeroHeight"
+                        ]
                       },
                       "children": [
                         "list"
@@ -7525,7 +7666,19 @@
                       "tag": "meta",
                       "attrs": {
                         "property": "og:image:alt",
-                        "content": "A sunlit workshop opening onto a green field, with two people sharing a repair."
+                        "content": [
+                          "one",
+                          [
+                            "concat",
+                            "identity.",
+                            [
+                              "one",
+                              "$identityPage",
+                              "key"
+                            ]
+                          ],
+                          "questionHeroAlt"
+                        ]
                       },
                       "children": [
                         "list"
@@ -7582,7 +7735,23 @@
                       "tag": "meta",
                       "attrs": {
                         "name": "twitter:image",
-                        "content": "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+                        "content": [
+                          "concat",
+                          "https://aaronalderman.com/",
+                          [
+                            "one",
+                            [
+                              "concat",
+                              "identity.",
+                              [
+                                "one",
+                                "$identityPage",
+                                "key"
+                              ]
+                            ],
+                            "questionHero"
+                          ]
+                        ]
                       },
                       "children": [
                         "list"
@@ -7592,7 +7761,19 @@
                       "tag": "meta",
                       "attrs": {
                         "name": "twitter:image:alt",
-                        "content": "A sunlit workshop opening onto a green field, with two people sharing a repair."
+                        "content": [
+                          "one",
+                          [
+                            "concat",
+                            "identity.",
+                            [
+                              "one",
+                              "$identityPage",
+                              "key"
+                            ]
+                          ],
+                          "questionHeroAlt"
+                        ]
                       },
                       "children": [
                         "list"
@@ -7602,7 +7783,13 @@
                 },
                 {
                   "tag": "body",
-                  "attrs": {},
+                  "attrs": {
+                    "data-question-identity": [
+                      "one",
+                      "$identityPage",
+                      "key"
+                    ]
+                  },
                   "children": [
                     "list",
                     {
@@ -7721,13 +7908,45 @@
                                     "class": "q-hero-art",
                                     "src": [
                                       "one",
-                                      "questions",
-                                      "hero"
+                                      [
+                                        "concat",
+                                        "identity.",
+                                        [
+                                          "one",
+                                          "$identityPage",
+                                          "key"
+                                        ]
+                                      ],
+                                      "questionHero"
                                     ],
                                     "alt": "",
                                     "aria-hidden": "true",
-                                    "width": 1672,
-                                    "height": 941,
+                                    "width": [
+                                      "one",
+                                      [
+                                        "concat",
+                                        "identity.",
+                                        [
+                                          "one",
+                                          "$identityPage",
+                                          "key"
+                                        ]
+                                      ],
+                                      "questionHeroWidth"
+                                    ],
+                                    "height": [
+                                      "one",
+                                      [
+                                        "concat",
+                                        "identity.",
+                                        [
+                                          "one",
+                                          "$identityPage",
+                                          "key"
+                                        ]
+                                      ],
+                                      "questionHeroHeight"
+                                    ],
                                     "fetchpriority": "high"
                                   },
                                   "children": [

@@ -498,60 +498,132 @@
             "list"
           ],
           "rules": [
-            "map",
+            "append",
             [
-              "filter",
+              "map",
               [
-                "subjects",
-                "isa",
-                "StyleRule"
+                "filter",
+                [
+                  "subjects",
+                  "isa",
+                  "StyleRule"
+                ],
+                "rule",
+                [
+                  "eq",
+                  [
+                    "one",
+                    "$rule",
+                    "projection"
+                  ],
+                  "$projection"
+                ]
               ],
               "rule",
-              [
-                "eq",
-                [
+              {
+                "id": "$rule",
+                "selector": [
                   "one",
                   "$rule",
-                  "projection"
+                  "selector"
                 ],
-                "$projection"
-              ]
+                "context": [
+                  "optional",
+                  "$rule",
+                  "context"
+                ],
+                "declarations": [
+                  "map",
+                  [
+                    "objects",
+                    "$rule",
+                    "declaration"
+                  ],
+                  "decl",
+                  {
+                    "property": [
+                      "one",
+                      "$decl",
+                      "property"
+                    ],
+                    "value": [
+                      "one",
+                      "$decl",
+                      "value"
+                    ]
+                  }
+                ]
+              }
             ],
-            "rule",
-            {
-              "id": "$rule",
-              "selector": [
-                "one",
-                "$rule",
-                "selector"
+            [
+              "if",
+              [
+                "eq",
+                "$projection",
+                "main"
               ],
-              "context": [
-                "optional",
-                "$rule",
-                "context"
-              ],
-              "declarations": [
+              [
                 "map",
                 [
-                  "objects",
-                  "$rule",
-                  "declaration"
+                  "subjects",
+                  "isa",
+                  "IdentityTheme"
                 ],
-                "decl",
+                "theme",
                 {
-                  "property": [
-                    "one",
-                    "$decl",
-                    "property"
+                  "id": [
+                    "concat",
+                    "questions.palette.",
+                    [
+                      "one",
+                      "$theme",
+                      "key"
+                    ]
                   ],
-                  "value": [
-                    "one",
-                    "$decl",
-                    "value"
-                  ]
+                  "selector": [
+                    "concat",
+                    "html:has(body[data-question-identity=\"",
+                    [
+                      "one",
+                      "$theme",
+                      "key"
+                    ],
+                    "\"]),body[data-question-identity=\"",
+                    [
+                      "one",
+                      "$theme",
+                      "key"
+                    ],
+                    "\"]"
+                  ],
+                  "declarations": [
+                    "map",
+                    [
+                      "objects",
+                      "$theme",
+                      "questionColour"
+                    ],
+                    "decl",
+                    {
+                      "property": [
+                        "one",
+                        "$decl",
+                        "property"
+                      ],
+                      "value": [
+                        "one",
+                        "$decl",
+                        "value"
+                      ]
+                    }
+                  ],
+                  "context": null
                 }
+              ],
+              [
+                "list"
               ]
-            }
+            ]
           ]
         }
       },
