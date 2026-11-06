@@ -1747,6 +1747,38 @@
             "children": [
               "list"
             ]
+          },
+          {
+            "tag": "div",
+            "attrs": {
+              "hidden": true,
+              "aria-hidden": "true"
+            },
+            "children": [
+              "map",
+              [
+                "subjects",
+                "isa",
+                "IdentityTheme"
+              ],
+              "theme",
+              {
+                "tag": "img",
+                "attrs": {
+                  "src": [
+                    "one",
+                    "$theme",
+                    "image"
+                  ],
+                  "alt": "",
+                  "decoding": "async",
+                  "fetchpriority": "low"
+                },
+                "children": [
+                  "list"
+                ]
+              }
+            ]
           }
         ]
       }
