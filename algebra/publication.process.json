@@ -3236,6 +3236,13 @@
     ],
     "identity.runtime.build": [
       {
+        "port": "file.copy",
+        "args": {
+          "path": "source/hierarchy.json"
+        },
+        "into": "_"
+      },
+      {
         "port": "file.read",
         "args": {
           "path": "source/hierarchy.json"
