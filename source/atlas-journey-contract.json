@@ -1,0 +1,46 @@
+{
+  "protocol": "worldwright/atlas-journey-contract/1",
+  "owners": {
+    "page": "algebra/atlas.process.json",
+    "events": "algebra/atlas-journey.process.json",
+    "presentation": "source/atlas.rel",
+    "native": "bootstrap/ports/browser-effects.cjs"
+  },
+  "storage": {
+    "kind": "localStorage",
+    "key": "worldwright.atlas.seen.v1",
+    "format": "Newline-separated known place slugs; duplicates and unknown entries are discarded.",
+    "maxReadCharacters": 4096,
+    "mark": "When a destination document loads or is restored from history; previews do not mark visits.",
+    "reset": "Remove only the named key. No storage.clear operation.",
+    "failure": "Nonfatal; page discloses that a visit could not be saved."
+  },
+  "interaction": {
+    "desktop": "Hover or focus a numbered native link to preview; click or Enter opens its page. Escape dismisses its preview.",
+    "mobile": "At up to 760 CSS pixels, tap previews in a panel below the scrollable map; a separate Explore link opens the place. Media-query changes rebind this behaviour.",
+    "fallback": "All native map and list links continue to navigate without JavaScript.",
+    "motion": "Two finite 2.5-second halo cycles, plus hover/focus transitions. Reduced-motion rules disable both."
+  },
+  "nativeSuccessor": "source/publication-contract.json#atlasStorageSuccessor",
+  "moduleSha256": "6bb32792386552e8fed084e6be5e9d7c2d25f9d755bd93f1a159f9d663ed0817",
+  "verification": {
+    "test": "atlas-journey.test.mjs",
+    "browser": [
+      "Keyboard preview and Escape dismissal",
+      "Personal destination visit, return, reload and seen label",
+      "Reset and reload restore zero seen places",
+      "Mobile map contained horizontal scroll; no document overflow; roughly 44px targets",
+      "Mobile Care preview, Explore, return and saved count",
+      "Lower-row tooltip stays within map",
+      "All forty pin hit regions have no overlap; all forty tooltip boxes fit the desktop map; no document or map vertical overflow."
+    ],
+    "limits": "Representative browser journeys, not an exhaustive test of all browser engines or every possible concurrent tab interleaving.",
+    "result": {
+      "tests": 54,
+      "failed": 0,
+      "reproducibleArtifacts": 293,
+      "admissionPasses": 17,
+      "seedSha256": "c1fdf47cb183a0c8e69d000d091ada457fdc8333b34a2a5bba4bcc51d53ac71e"
+    }
+  }
+}
