@@ -3,6 +3,9 @@
   "queries": {
     "publication.build": [
       {
+        "call": "identity.runtime.build"
+      },
+      {
         "assert": [
           "eq",
           [
@@ -1373,16 +1376,65 @@
                       },
                       {
                         "tag": "span",
-                        "attrs": {},
+                        "attrs": {
+                          "class": "identity-line"
+                        },
                         "children": [
                           "list",
                           "modern-day ",
                           {
-                            "tag": "em",
-                            "attrs": {},
+                            "tag": "span",
+                            "attrs": {
+                              "class": "identity-choice"
+                            },
                             "children": [
                               "list",
-                              "sourcerer."
+                              {
+                                "tag": "em",
+                                "attrs": {
+                                  "id": "identity-word"
+                                },
+                                "children": [
+                                  "list",
+                                  "sourcerer."
+                                ]
+                              },
+                              {
+                                "tag": "button",
+                                "attrs": {
+                                  "type": "button",
+                                  "id": "identity-switch",
+                                  "class": "identity-switch",
+                                  "disabled": true,
+                                  "aria-label": "Discover another side of Aaron: change the theme",
+                                  "aria-describedby": "identity-status",
+                                  "title": "A different side. Press to discover."
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "identity-cross",
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "identity-hint",
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Another side"
+                                    ]
+                                  }
+                                ]
+                              }
                             ]
                           }
                         ]
@@ -1392,7 +1444,8 @@
                   {
                     "tag": "p",
                     "attrs": {
-                      "class": "hero-copy"
+                      "class": "hero-copy",
+                      "id": "identity-copy"
                     },
                     "children": [
                       "list",
@@ -1655,7 +1708,30 @@
               }
             ]
           },
-          "$micrositeNav"
+          "$micrositeNav",
+          {
+            "tag": "p",
+            "attrs": {
+              "id": "identity-status",
+              "class": "sr-only",
+              "aria-live": "polite",
+              "aria-atomic": "true"
+            },
+            "children": [
+              "list",
+              "Current theme: sourcerer."
+            ]
+          },
+          {
+            "tag": "script",
+            "attrs": {
+              "src": "identity-runtime.js?v=identities-1",
+              "defer": true
+            },
+            "children": [
+              "list"
+            ]
+          }
         ]
       }
     ],
@@ -2796,6 +2872,222 @@
             }
           ]
         }
+      }
+    ],
+    "identity.boot": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "identity",
+          "value": "sourcerer"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-identity",
+          "value": "sourcerer"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#identity-switch",
+          "event": "click",
+          "query": "identity.change"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-switch",
+          "name": "disabled",
+          "value": false
+        },
+        "into": "_"
+      }
+    ],
+    "identity.change": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "identity"
+        },
+        "into": "current"
+      },
+      {
+        "let": "choices",
+        "value": [
+          "filter",
+          "$data.themes",
+          "theme",
+          [
+            "not",
+            [
+              "eq",
+              "$theme.key",
+              "$current"
+            ]
+          ]
+        ]
+      },
+      {
+        "port": "random.values",
+        "args": {
+          "count": 1
+        },
+        "into": "random"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$random",
+              0
+            ],
+            [
+              "count",
+              "$choices"
+            ]
+          ]
+        },
+        "into": "scaled"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "floor",
+          "values": [
+            "list",
+            "$scaled"
+          ]
+        },
+        "into": "index"
+      },
+      {
+        "let": "chosen",
+        "value": [
+          "at",
+          "$choices",
+          "$index"
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-identity",
+          "value": "$chosen.key"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-word",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "$chosen.label",
+            "."
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-copy",
+          "name": "textContent",
+          "value": "$chosen.copy"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-status",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Current theme: ",
+            "$chosen.label",
+            ". Press again to discover another side."
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "identity",
+          "value": "$chosen.key"
+        },
+        "into": "_"
+      }
+    ],
+    "identity.runtime.build": [
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "identity.boot",
+          "mode": "browser",
+          "grantProfile": "micrositesBrowser",
+          "queries": [
+            "list",
+            "identity.boot",
+            "identity.change"
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "data": {
+            "themes": [
+              "map",
+              [
+                "subjects",
+                "isa",
+                "IdentityTheme"
+              ],
+              "t",
+              {
+                "key": [
+                  "one",
+                  "$t",
+                  "key"
+                ],
+                "label": [
+                  "one",
+                  "$t",
+                  "label"
+                ],
+                "copy": [
+                  "one",
+                  "$t",
+                  "copy"
+                ]
+              }
+            ]
+          },
+          "budget": 2000000
+        },
+        "into": "identityRuntime"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "identity-runtime.js",
+          "text": "$identityRuntime"
+        },
+        "into": "_"
       }
     ]
   }
