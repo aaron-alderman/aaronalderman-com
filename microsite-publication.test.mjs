@@ -8,7 +8,7 @@ const receipt=json('source/microsites/presentation-correspondence.json');
 test('all four recomposed documents retain their independently compared source structure and reading',()=>{
  assert.equal(sha(read('source/microsites/editorial-successor.json')),receipt.editorialSuccessorSha256);
  assert.equal(receipt.pages.length,4);
- for(const page of receipt.pages){assert.equal(sha(read(page.source)),page.sourceSha256);assert.equal(sha(read('dist/'+page.path)),page.outputSha256);const html=read('dist/'+page.path).toString();assert.ok(html.includes('rel="canonical"'));assert.ok(html.includes('property="og:image"'));assert.ok(html.includes('name="twitter:card"'));}
+ for(const page of receipt.pages){assert.equal(sha(read(page.source)),page.sourceSha256);assert.equal(sha(read('dist/'+page.path)),page.outputSha256);const html=read('dist/'+page.path).toString();if(page.navigationAddition){const n=page.navigationAddition;assert.equal(sha(html.replace(n.headInsertion,'').replace(n.bodyInsertion,'')),n.priorOutputSha256,page.path+' retains predecessor content');assert.ok(n.bodyInsertion.includes('Back to Aaron Alderman'));assert.ok(!n.bodyInsertion.includes('<script'));}assert.ok(html.includes('rel="canonical"'));assert.ok(html.includes('property="og:image"'));assert.ok(html.includes('name="twitter:card"'));}
 });
 
 test('microsite navigation and referenced resources stay inside the ecosystem and resolve, including fragments',()=>{

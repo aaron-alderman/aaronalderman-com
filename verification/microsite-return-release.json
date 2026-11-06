@@ -1,0 +1,26 @@
+{
+  "protocol": "worldwright/microsite-return-release/1",
+  "owner": "algebra/microsite-return.process.json",
+  "ownerSha256": "4b85950b52b1d7f4721b02712c6833bf3917474eb27ab40fd0beeaee32d64afd",
+  "scope": [
+    "temple/index.html",
+    "temple/films/index.html",
+    "sourcery/index.html",
+    "sourcery/films/index.html"
+  ],
+  "behaviour": "Fixed bottom-right native link to the main website’s microsite entrances. Markup and a shared CSS plan are projected by existing algebra; no browser event programme is required.",
+  "checks": {
+    "localTests": 22,
+    "failed": 0,
+    "predecessor": "Removing each recorded head/body addition recovers the prior independently compared output hash exactly.",
+    "browser": [
+      "Temple desktop fixed link: 44px target, clear of existing corner controls",
+      "Sourcery keyboard focus and Enter reach the main website",
+      "Sourcery mobile link remains in the viewport, with zero horizontal overflow",
+      "Link remains 16px from the bottom after scrolling",
+      "Temple film page resolves ../../index.html#microsites"
+    ],
+    "styles": "Safe-area spacing, visible focus, reduced-motion and print rules."
+  },
+  "limits": "Representative browser journeys; the original demo logic and complete original stylesheet bytes remain covered by existing correspondence tests."
+}
