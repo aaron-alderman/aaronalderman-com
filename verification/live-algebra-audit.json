@@ -27,12 +27,12 @@
   ],
   "coverage": {
     "executableBundles": 11,
-    "htmlAndSvgDocuments": 100,
+    "htmlAndSvgDocuments": 102,
     "checks": [
       "Fresh algebra build and all 25 model/effect admission passes.",
       "Exact whole-script native-envelope comparison for every shipped JavaScript file.",
       "Browser DOMParser traversal of all HTML/SVG, template contents and srcdoc: no inline handlers, executable URLs, unowned scripts or object/embed surfaces.",
-      "108 tests including bundle-tampering and parameterized native mechanism cases.",
+      "109 tests including bundle-tampering and parameterized native mechanism cases.",
       "5 document-inspection tests.",
       "139 local browser checks, no runtime errors."
     ],
@@ -48,13 +48,13 @@
     "qualification": "The audit covers the generated publication and its native mechanisms. Generic JavaScript mechanisms intentionally remain. These are same-run engineering checks, not independent assurance."
   },
   "build": {
-    "receiptSha256": "c47956a5fc5fb3dfb4e07434ff7000a8694b0354be83fe351849ca08a1f042de",
-    "artifacts": 323,
+    "receiptSha256": "84b566015e50c47472062310a7c3333b2709e9f611f5648c0a18cc09480685a2",
+    "artifacts": 328,
     "admissionPasses": 25,
     "execution": {
-      "indexSteps": 3764754,
-      "applicationSteps": 7264668,
-      "totalSteps": 11029422,
+      "indexSteps": 3825130,
+      "applicationSteps": 7341841,
+      "totalSteps": 11166971,
       "limit": 20000000
     }
   },
@@ -62,5 +62,10 @@
     "tooling/audit-browser-bundle.mjs": "42480f7d5cae7497d00400821ca4cb7922b468bfc72a3c1064c74582c7e1854d",
     "tooling/verify-reader-workshop-browser.mjs": "ab18a4d245093f9b714bc848a3819d865bf84afe8304023413dee85603df209b",
     "reader-workshop-algebra.test.mjs": "305a1067ccdef3add75c097710569077e69ba03ac93546854c46e4ccc195fec5"
+  },
+  "integration": {
+    "auditParent": "b93c8a7",
+    "preservedRemoteParent": "c7d7ac7",
+    "changes": "Coloured entry cards and Creator Studio remain algebra-owned and included in the audited publication."
   }
 }

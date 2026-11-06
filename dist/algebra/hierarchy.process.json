@@ -766,7 +766,8 @@
                         "tag": "article",
                         "attrs": {
                           "class": "hierarchy-card",
-                          "data-item": "$hItem.id"
+                          "data-item": "$hItem.id",
+                          "data-type": "$hItem.type"
                         },
                         "children": [
                           "list",
@@ -794,7 +795,26 @@
                                 },
                                 "children": [
                                   "list",
-                                  "$hItem.status"
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "card-type"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$hItem.typeLabel"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "card-stage"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$hItem.status"
+                                    ]
+                                  }
                                 ]
                               },
                               {
@@ -999,7 +1019,8 @@
                         "tag": "article",
                         "attrs": {
                           "class": "hierarchy-card",
-                          "data-item": "$hItem.id"
+                          "data-item": "$hItem.id",
+                          "data-type": "$hItem.type"
                         },
                         "children": [
                           "list",
@@ -1027,7 +1048,26 @@
                                 },
                                 "children": [
                                   "list",
-                                  "$hItem.status"
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "card-type"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$hItem.typeLabel"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "card-stage"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$hItem.status"
+                                    ]
+                                  }
                                 ]
                               },
                               {
@@ -1232,7 +1272,8 @@
                         "tag": "article",
                         "attrs": {
                           "class": "hierarchy-card",
-                          "data-item": "$hItem.id"
+                          "data-item": "$hItem.id",
+                          "data-type": "$hItem.type"
                         },
                         "children": [
                           "list",
@@ -1260,7 +1301,26 @@
                                 },
                                 "children": [
                                   "list",
-                                  "$hItem.status"
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "card-type"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$hItem.typeLabel"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "card-stage"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$hItem.status"
+                                    ]
+                                  }
                                 ]
                               },
                               {
@@ -1465,7 +1525,8 @@
                         "tag": "article",
                         "attrs": {
                           "class": "hierarchy-card",
-                          "data-item": "$hItem.id"
+                          "data-item": "$hItem.id",
+                          "data-type": "$hItem.type"
                         },
                         "children": [
                           "list",
@@ -1493,7 +1554,26 @@
                                 },
                                 "children": [
                                   "list",
-                                  "$hItem.status"
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "card-type"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$hItem.typeLabel"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "card-stage"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$hItem.status"
+                                    ]
+                                  }
                                 ]
                               },
                               {
@@ -2155,7 +2235,7 @@
                     "href": [
                       "concat",
                       "../",
-                      "expedition.css?v=document-1"
+                      "expedition.css?v=card-types-1"
                     ]
                   },
                   "children": [
@@ -2909,7 +2989,7 @@
                             "href": [
                               "concat",
                               "../",
-                              "expedition.css?v=document-1"
+                              "expedition.css?v=card-types-1"
                             ]
                           },
                           "children": [
@@ -3021,11 +3101,20 @@
                           "tag": "main",
                           "attrs": {
                             "class": "hierarchy-page",
-                            "id": "main"
+                            "id": "main",
+                            "data-type": "$hItem.type"
                           },
                           "children": [
                             "list",
-                            "$hItem.icon",
+                            [
+                              "or",
+                              [
+                                "at",
+                                "$hItem",
+                                "pageIcon"
+                              ],
+                              "$hItem.icon"
+                            ],
                             {
                               "tag": "p",
                               "attrs": {
@@ -3066,18 +3155,27 @@
                                   [
                                     "eq",
                                     "$hItem.id",
-                                    "the-field"
+                                    "creator-studio"
                                   ],
-                                  "The source contains a single-encounter prototype with direct, relational and institutional consequences, including refusal and repair.",
+                                  "Bring cartoons, animation, film and interactive stories into one creative workspace. Different forms can develop the same ideas while keeping their sources and uncertainty visible. This is an introduction to the work in development; the complete studio experience is still taking shape.",
                                   [
                                     "if",
                                     [
                                       "eq",
                                       "$hItem.id",
-                                      "relationship-manager"
+                                      "the-field"
                                     ],
-                                    "The underlying source project is named Relationship Navigator. It explores boundaries, assistance, rupture and repair.",
-                                    "This microsite introduces the work and its selected source bindings. Source inspection records declarations, rather than claiming a deployed application runtime."
+                                    "The source contains a single-encounter prototype with direct, relational and institutional consequences, including refusal and repair.",
+                                    [
+                                      "if",
+                                      [
+                                        "eq",
+                                        "$hItem.id",
+                                        "relationship-manager"
+                                      ],
+                                      "The underlying source project is named Relationship Navigator. It explores boundaries, assistance, rupture and repair.",
+                                      "This microsite introduces the work and its selected source bindings. Source inspection records declarations, rather than claiming a deployed application runtime."
+                                    ]
                                   ]
                                 ]
                               ]
@@ -3478,7 +3576,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "expedition.css?v=document-1"
+                    "href": "expedition.css?v=card-types-1"
                   },
                   "children": [
                     "list"
@@ -3905,7 +4003,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "../expedition.css?v=document-1"
+                    "href": "../expedition.css?v=card-types-1"
                   },
                   "children": [
                     "list"

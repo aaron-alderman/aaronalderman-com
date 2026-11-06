@@ -1,0 +1,38 @@
+{
+  "protocol": "worldwright/entry-cards-release/1",
+  "owners": [
+    "source/hierarchy.json",
+    "source/hierarchy.rel",
+    "algebra/hierarchy.process.json"
+  ],
+  "changes": [
+    "Two original transparent PNG emblems for Claimipedia Science and Creator Studio",
+    "Six Taking shape entries in two desktop rows of three",
+    "Nine editorial purpose types, with text badges and colour families",
+    "Creator Studio introduction and exact Creative Studio test-source snapshot"
+  ],
+  "verification": {
+    "buildArtifacts": 328,
+    "localSuite": {
+      "tests": 74,
+      "passed": 73,
+      "failed": 1,
+      "note": "The only failure was an outdated cached-stylesheet version expectation, corrected to the new card edition."
+    },
+    "correctedCheck": {
+      "command": "node --test --test-name-pattern \"the homepage presents the hierarchy\" algebra-publication.test.mjs",
+      "passed": 1,
+      "failed": 0
+    },
+    "browser": [
+      "Desktop: three columns, two rows, both new PNGs loaded, no horizontal overflow",
+      "Tablet: two columns, no horizontal overflow",
+      "Mobile: one column, six cards, no horizontal overflow",
+      "Creator Studio navigation, artwork and source-inspection view",
+      "Keyboard navigation to Science and its PNG on mobile",
+      "No browser console errors observed"
+    ],
+    "artifactReceipt": "dist/build-receipt.json"
+  },
+  "scope": "Purpose categories are editorial, separate from availability and declared machine capability edges. Creator Studio is the requested public name; Creative Studio is the source name."
+}
