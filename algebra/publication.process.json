@@ -42,6 +42,9 @@
         "call": "hierarchy.build"
       },
       {
+        "call": "identity.assurance.build"
+      },
+      {
         "each": [
           "subjects",
           "isa",
@@ -1386,6 +1389,20 @@
                           "children": [
                             "list",
                             "Built with Worldwright.io ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "$prefix",
+                              "assurance/"
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            "Identity assurance"
                           ]
                         }
                       ]
@@ -3395,6 +3412,1706 @@
         "args": {
           "path": "identity-runtime.js",
           "text": "$identityRuntime"
+        },
+        "into": "_"
+      }
+    ],
+    "identity.assurance.classify": [
+      {
+        "fold": "$eventInput.policies",
+        "as": "p",
+        "accumulator": "rows",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "values",
+            "value": [
+              "map",
+              "$eventInput.worlds",
+              "w",
+              {
+                "identity": "$w.key",
+                "value": [
+                  "at",
+                  "$w.values",
+                  "$p.id"
+                ]
+              }
+            ]
+          },
+          {
+            "let": "dataBinding",
+            "value": [
+              "at",
+              "$eventInput.themeFields",
+              "$p.field"
+            ]
+          },
+          {
+            "let": "dataBound",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$p.resolver",
+                "style"
+              ],
+              true,
+              [
+                "if",
+                [
+                  "includes",
+                  [
+                    "list",
+                    "catalogue",
+                    "collection",
+                    "app"
+                  ],
+                  "$p.resolver"
+                ],
+                "$eventInput.catalogueBound",
+                [
+                  "and",
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$dataBinding",
+                      0
+                    ],
+                    "one"
+                  ],
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$dataBinding",
+                      1
+                    ],
+                    "$p.subjectRead"
+                  ],
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$dataBinding",
+                      2
+                    ],
+                    "$p.field"
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "writers",
+            "value": [
+              "filter",
+              "$eventInput.bindings",
+              "b",
+              [
+                "and",
+                [
+                  "eq",
+                  "$b.args.ref",
+                  "$p.target"
+                ],
+                [
+                  "eq",
+                  "$b.args.name",
+                  "$p.sink"
+                ]
+              ]
+            ]
+          },
+          {
+            "port": "json.stringify",
+            "args": {
+              "value": "$p.read"
+            },
+            "into": "serializedRead"
+          },
+          {
+            "fold": "$writers",
+            "as": "b",
+            "accumulator": "writerReads",
+            "initial": true,
+            "steps": [
+              {
+                "port": "json.stringify",
+                "args": {
+                  "value": "$b.args.value"
+                },
+                "into": "serialized"
+              },
+              {
+                "port": "text.indexOf",
+                "args": {
+                  "value": "$serialized",
+                  "search": "$serializedRead",
+                  "from": 0
+                },
+                "into": "offset"
+              }
+            ],
+            "yield": [
+              "and",
+              "$writerReads",
+              [
+                "not",
+                [
+                  "eq",
+                  "$offset",
+                  -1
+                ]
+              ]
+            ],
+            "into": "writerReads"
+          },
+          {
+            "let": "writerBound",
+            "value": [
+              "and",
+              [
+                "not",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$writers"
+                  ],
+                  0
+                ]
+              ],
+              "$writerReads"
+            ]
+          },
+          {
+            "let": "complete",
+            "value": [
+              "and",
+              "$dataBound",
+              "$writerBound",
+              [
+                "not",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$eventInput.identities"
+                  ],
+                  0
+                ]
+              ],
+              [
+                "every",
+                "$eventInput.identities",
+                "key",
+                [
+                  "eq",
+                  [
+                    "count",
+                    [
+                      "filter",
+                      "$eventInput.worlds",
+                      "w",
+                      [
+                        "eq",
+                        "$w.key",
+                        "$key"
+                      ]
+                    ]
+                  ],
+                  1
+                ]
+              ],
+              [
+                "every",
+                "$values",
+                "v",
+                "$v.value"
+              ]
+            ]
+          },
+          {
+            "let": "status",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$p.intent",
+                "undecided"
+              ],
+              "undecided",
+              [
+                "if",
+                [
+                  "eq",
+                  "$p.intent",
+                  "invariant"
+                ],
+                [
+                  "if",
+                  [
+                    "and",
+                    [
+                      "not",
+                      [
+                        "eq",
+                        "$p.reason",
+                        ""
+                      ]
+                    ],
+                    [
+                      "eq",
+                      [
+                        "count",
+                        "$writers"
+                      ],
+                      0
+                    ]
+                  ],
+                  "intentionally-invariant",
+                  "missing"
+                ],
+                [
+                  "if",
+                  "$complete",
+                  "identity-mapped",
+                  "missing"
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "row",
+            "value": {
+              "id": "$p.id",
+              "area": "$p.area",
+              "label": "$p.label",
+              "intent": "$p.intent",
+              "status": "$status",
+              "reason": "$p.reason",
+              "next": [
+                "if",
+                [
+                  "eq",
+                  "$status",
+                  "identity-mapped"
+                ],
+                "Review semantic fit and downstream behaviour; the declared structural connection is present.",
+                "$p.next"
+              ],
+              "source": "$p.source",
+              "target": "$p.target",
+              "sink": "$p.sink",
+              "field": "$p.field",
+              "values": "$values",
+              "dataBound": "$dataBound",
+              "writerBound": "$writerBound",
+              "boundary": [
+                "if",
+                [
+                  "eq",
+                  "$p.intent",
+                  "invariant"
+                ],
+                "Declared policy; this is not an automated proof that every descendant is invariant.",
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$p.resolver",
+                    "style"
+                  ],
+                  "Checks declared CSS values and the body identity writer; does not certify visual appearance.",
+                  "Checks authored world values, runtime field projection and matching browser writer; does not certify downstream meaning."
+                ]
+              ]
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$rows",
+          [
+            "list",
+            "$row"
+          ]
+        ],
+        "into": "rows"
+      },
+      {
+        "fold": "$eventInput.bindings",
+        "as": "b",
+        "accumulator": "scanRows",
+        "initial": "$rows",
+        "steps": [],
+        "yield": [
+          "if",
+          [
+            "not",
+            [
+              "some",
+              "$eventInput.policies",
+              "p",
+              [
+                "and",
+                [
+                  "eq",
+                  "$p.target",
+                  "$b.args.ref"
+                ],
+                [
+                  "eq",
+                  "$p.sink",
+                  "$b.args.name"
+                ]
+              ]
+            ]
+          ],
+          [
+            "append",
+            "$scanRows",
+            [
+              "list",
+              {
+                "id": [
+                  "concat",
+                  "unclassified:",
+                  "$b.args.ref",
+                  ":",
+                  "$b.args.name"
+                ],
+                "area": "Unclassified cross updates",
+                "label": [
+                  "concat",
+                  "$b.args.ref",
+                  " → ",
+                  "$b.args.name"
+                ],
+                "intent": "undecided",
+                "status": "undecided",
+                "reason": "A cross writer exists without an assurance declaration.",
+                "next": "Declare the intended identity relationship and its evidence.",
+                "source": "algebra/publication.process.json · identity.change",
+                "target": "$b.args.ref",
+                "sink": "$b.args.name",
+                "field": "",
+                "values": [
+                  "list"
+                ],
+                "dataBound": false,
+                "writerBound": true,
+                "boundary": "Automatically discovered browser writer; no invariance is inferred."
+              }
+            ]
+          ],
+          "$scanRows"
+        ],
+        "into": "rows"
+      },
+      {
+        "let": "result",
+        "value": "$rows"
+      }
+    ],
+    "identity.assurance.build": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "algebra/publication.process.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "algebra/publication.process.json"
+        },
+        "into": "assuranceSource"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$assuranceSource"
+        },
+        "into": "assuranceModule"
+      },
+      {
+        "let": "change",
+        "value": [
+          "or",
+          [
+            "at",
+            "$assuranceModule.queries",
+            "identity.change"
+          ],
+          [
+            "list"
+          ]
+        ]
+      },
+      {
+        "let": "runtimeSteps",
+        "value": [
+          "or",
+          [
+            "at",
+            "$assuranceModule.queries",
+            "identity.runtime.build"
+          ],
+          [
+            "list"
+          ]
+        ]
+      },
+      {
+        "let": "runtime",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$runtimeSteps",
+            "s",
+            [
+              "eq",
+              [
+                "at",
+                "$s",
+                "port"
+              ],
+              "runtime.bundle"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "themeFold",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$runtimeSteps",
+            "s",
+            [
+              "eq",
+              [
+                "at",
+                "$s",
+                "into"
+              ],
+              "identityThemes"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "themeFields",
+        "value": [
+          "at",
+          [
+            "at",
+            [
+              "at",
+              "$themeFold",
+              "yield"
+            ],
+            2
+          ],
+          1
+        ]
+      },
+      {
+        "let": "catalogueBound",
+        "value": [
+          "and",
+          [
+            "eq",
+            [
+              "at",
+              [
+                "at",
+                [
+                  "at",
+                  "$runtime",
+                  "args"
+                ],
+                "data"
+              ],
+              "themes"
+            ],
+            [
+              "one",
+              "identity.assurance.scope",
+              "runtimeThemes"
+            ]
+          ],
+          [
+            "eq",
+            [
+              "at",
+              "$themeFields",
+              "catalogueHTML"
+            ],
+            [
+              "one",
+              "identity.assurance.scope",
+              "catalogueResult"
+            ]
+          ],
+          [
+            "some",
+            [
+              "or",
+              [
+                "at",
+                "$themeFold",
+                "steps"
+              ],
+              [
+                "list"
+              ]
+            ],
+            "s",
+            [
+              "eq",
+              [
+                "at",
+                "$s",
+                "call"
+              ],
+              "identity.catalogue.view"
+            ]
+          ],
+          [
+            "some",
+            [
+              "or",
+              [
+                "at",
+                "$themeFold",
+                "steps"
+              ],
+              [
+                "list"
+              ]
+            ],
+            "s",
+            [
+              "eq",
+              [
+                "at",
+                "$s",
+                "call"
+              ],
+              "html.serialize"
+            ]
+          ]
+        ]
+      },
+      {
+        "let": "policies",
+        "value": [
+          "map",
+          [
+            "subjects",
+            "isa",
+            "IdentityAssuranceMapping"
+          ],
+          "m",
+          {
+            "id": [
+              "one",
+              "$m",
+              "id"
+            ],
+            "area": [
+              "one",
+              "$m",
+              "area"
+            ],
+            "label": [
+              "one",
+              "$m",
+              "label"
+            ],
+            "intent": [
+              "one",
+              "$m",
+              "intent"
+            ],
+            "resolver": [
+              "one",
+              "$m",
+              "resolver"
+            ],
+            "field": [
+              "one",
+              "$m",
+              "field"
+            ],
+            "target": [
+              "one",
+              "$m",
+              "target"
+            ],
+            "sink": [
+              "one",
+              "$m",
+              "sink"
+            ],
+            "reason": [
+              "one",
+              "$m",
+              "reason"
+            ],
+            "next": [
+              "one",
+              "$m",
+              "next"
+            ],
+            "slot": [
+              "one",
+              "$m",
+              "slot"
+            ],
+            "item": [
+              "one",
+              "$m",
+              "item"
+            ],
+            "read": [
+              "one",
+              "$m",
+              "read"
+            ],
+            "subjectRead": [
+              "one",
+              "$m",
+              "subjectRead"
+            ],
+            "source": [
+              "one",
+              "$m",
+              "source"
+            ],
+            "collectionField": [
+              "one",
+              "$m",
+              "collectionField"
+            ]
+          }
+        ]
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/hierarchy.json"
+        },
+        "into": "catalogueText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$catalogueText"
+        },
+        "into": "catalogue"
+      },
+      {
+        "let": "policies",
+        "value": [
+          "append",
+          "$policies",
+          [
+            "map",
+            "$catalogue.items",
+            "item",
+            {
+              "id": [
+                "concat",
+                "app.",
+                "$item.id"
+              ],
+              "area": "Application relevance",
+              "label": [
+                "concat",
+                "$item.name",
+                " — curated relevance and introduction"
+              ],
+              "intent": "identity",
+              "resolver": "app",
+              "field": "catalogueHTML",
+              "target": "#microsites",
+              "sink": "innerHTML",
+              "read": [
+                "one",
+                "identity.assurance.scope",
+                "catalogueRead"
+              ],
+              "subjectRead": "",
+              "slot": "",
+              "collectionField": "",
+              "item": "$item.id",
+              "reason": "Curated membership and identity notes come from IdentityCollection and identity.card facts. Unselected apps remain in the shared full directory.",
+              "next": "Restore a selected app note, collection declaration or catalogue projection.",
+              "source": [
+                "concat",
+                "source/hierarchy.json + source/hierarchy.rel · ",
+                "$item.id"
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "let": "worlds",
+        "value": [
+          "map",
+          [
+            "subjects",
+            "isa",
+            "IdentityTheme"
+          ],
+          "t",
+          {
+            "key": [
+              "one",
+              "$t",
+              "key"
+            ],
+            "label": [
+              "one",
+              "$t",
+              "label"
+            ],
+            "subject": "$t",
+            "values": {}
+          }
+        ]
+      },
+      {
+        "fold": "$worlds",
+        "as": "w",
+        "accumulator": "resolved",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "fold": "$policies",
+            "as": "p",
+            "accumulator": "worldValues",
+            "initial": {},
+            "steps": [
+              {
+                "let": "slots",
+                "value": [
+                  "list",
+                  "foundation",
+                  "application",
+                  "progress",
+                  "tool"
+                ]
+              },
+              {
+                "let": "collections",
+                "value": [
+                  "map",
+                  "$slots",
+                  "slot",
+                  [
+                    "concat",
+                    "identity.collection.",
+                    "$w.key",
+                    ".",
+                    "$slot"
+                  ]
+                ]
+              },
+              {
+                "let": "selection",
+                "value": [
+                  "fold",
+                  "$collections",
+                  "c",
+                  "ids",
+                  [
+                    "list"
+                  ],
+                  [
+                    "append",
+                    "$ids",
+                    [
+                      "objects",
+                      "$c",
+                      "item"
+                    ]
+                  ]
+                ]
+              },
+              {
+                "let": "hasCollections",
+                "value": [
+                  "every",
+                  "$collections",
+                  "c",
+                  [
+                    "has",
+                    "$c",
+                    "isa",
+                    "IdentityCollection"
+                  ]
+                ]
+              },
+              {
+                "let": "value",
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$p.resolver",
+                    "theme"
+                  ],
+                  [
+                    "optional",
+                    "$w.subject",
+                    "$p.field"
+                  ],
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$p.resolver",
+                      "style"
+                    ],
+                    [
+                      "optional",
+                      [
+                        "concat",
+                        "identity.style.",
+                        "$w.key",
+                        ".",
+                        "$p.field"
+                      ],
+                      "value"
+                    ],
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$p.resolver",
+                        "catalogue"
+                      ],
+                      [
+                        "if",
+                        "$hasCollections",
+                        [
+                          "concat",
+                          "Curated: ",
+                          "$selection"
+                        ],
+                        null
+                      ],
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$p.resolver",
+                          "collection"
+                        ],
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$p.collectionField",
+                            "item"
+                          ],
+                          [
+                            "if",
+                            [
+                              "not",
+                              [
+                                "eq",
+                                [
+                                  "count",
+                                  [
+                                    "objects",
+                                    [
+                                      "concat",
+                                      "identity.collection.",
+                                      "$w.key",
+                                      ".",
+                                      "$p.slot"
+                                    ],
+                                    "item"
+                                  ]
+                                ],
+                                0
+                              ]
+                            ],
+                            [
+                              "concat",
+                              "Selected: ",
+                              [
+                                "objects",
+                                [
+                                  "concat",
+                                  "identity.collection.",
+                                  "$w.key",
+                                  ".",
+                                  "$p.slot"
+                                ],
+                                "item"
+                              ]
+                            ],
+                            null
+                          ],
+                          [
+                            "optional",
+                            [
+                              "concat",
+                              "identity.collection.",
+                              "$w.key",
+                              ".",
+                              "$p.slot"
+                            ],
+                            "$p.collectionField"
+                          ]
+                        ],
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$p.resolver",
+                            "app"
+                          ],
+                          [
+                            "if",
+                            [
+                              "not",
+                              "$hasCollections"
+                            ],
+                            null,
+                            [
+                              "if",
+                              [
+                                "includes",
+                                "$selection",
+                                "$p.item"
+                              ],
+                              [
+                                "optional",
+                                [
+                                  "concat",
+                                  "identity.card.",
+                                  "$w.key",
+                                  ".",
+                                  "$p.item"
+                                ],
+                                "note"
+                              ],
+                              "Not curated; available in the shared full directory."
+                            ]
+                          ],
+                          null
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              },
+              {
+                "port": "record.put",
+                "args": {
+                  "record": "$worldValues",
+                  "key": "$p.id",
+                  "value": "$value"
+                },
+                "into": "worldValues"
+              }
+            ],
+            "yield": "$worldValues",
+            "into": "worldValues"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$w",
+              "key": "values",
+              "value": "$worldValues"
+            },
+            "into": "world"
+          }
+        ],
+        "yield": [
+          "append",
+          "$resolved",
+          [
+            "list",
+            "$world"
+          ]
+        ],
+        "into": "resolved"
+      },
+      {
+        "let": "eventInput",
+        "value": {
+          "policies": "$policies",
+          "worlds": "$resolved",
+          "identities": [
+            "objects",
+            "identity.assurance.scope",
+            "identity"
+          ],
+          "catalogueBound": "$catalogueBound",
+          "bindings": [
+            "map",
+            [
+              "filter",
+              "$change",
+              "s",
+              [
+                "includes",
+                [
+                  "list",
+                  "browser.attribute",
+                  "browser.write",
+                  "browser.content"
+                ],
+                [
+                  "at",
+                  "$s",
+                  "port"
+                ]
+              ]
+            ],
+            "s",
+            {
+              "port": "$s.port",
+              "args": {
+                "ref": "$s.args.ref",
+                "name": [
+                  "if",
+                  [
+                    "eq",
+                    "$s.port",
+                    "browser.content"
+                  ],
+                  "innerHTML",
+                  "$s.args.name"
+                ],
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$s.port",
+                    "browser.content"
+                  ],
+                  "$s.args.html",
+                  "$s.args.value"
+                ]
+              }
+            }
+          ],
+          "themeFields": "$themeFields"
+        }
+      },
+      {
+        "call": "identity.assurance.classify"
+      },
+      {
+        "let": "assuranceRows",
+        "value": "$result"
+      },
+      {
+        "let": "statuses",
+        "value": [
+          "list",
+          "intentionally-invariant",
+          "identity-mapped",
+          "missing",
+          "undecided"
+        ]
+      },
+      {
+        "let": "statusLabels",
+        "value": {
+          "intentionally-invariant": "Intentionally invariant",
+          "identity-mapped": "Identity mapped",
+          "missing": "Missing",
+          "undecided": "Undecided"
+        }
+      },
+      {
+        "let": "summary",
+        "value": [
+          "map",
+          "$statuses",
+          "s",
+          {
+            "status": "$s",
+            "count": [
+              "count",
+              [
+                "filter",
+                "$assuranceRows",
+                "r",
+                [
+                  "eq",
+                  "$r.status",
+                  "$s"
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "let": "report",
+        "value": {
+          "protocol": "worldwright/identity-assurance/1",
+          "scope": "Homepage: opening, navigation, Questions entrance, Threads, Map, application catalogue and collection headings, notes, images and ordering, appearance, interaction and footer. Downstream article, thread and map internals are not certified.",
+          "policy": "Equal output never implies intentional invariance. Missing and undecided relationships remain open work.",
+          "boundary": "Declared surface inventory plus automatic discovery of unclassified top-level cross browser writers. Catalogue rows check collection facts, selected-app notes, the view/serializer pipeline and cross content writer; they do not prove every inner renderer dependency. This is not exhaustive DOM, transitive dependency, visual or semantic verification.",
+          "identities": [
+            "map",
+            "$resolved",
+            "w",
+            "$w.key"
+          ],
+          "summary": "$summary",
+          "rows": "$assuranceRows"
+        }
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$report"
+        },
+        "into": "assuranceJson"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/identity-mappings.json",
+          "text": "$assuranceJson"
+        },
+        "into": "_"
+      },
+      {
+        "let": "body",
+        "value": [
+          "list",
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "assurance-intro"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "eyebrow"
+                },
+                "children": [
+                  "list",
+                  "ASSURANCE / IDENTITY MAPPINGS"
+                ]
+              },
+              {
+                "tag": "h1",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Where does each world reach?"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "The cross promises a world. This report shows what is deliberately shared, what is connected to identity, and where that promise remains unfinished."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "$report.policy"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "identity-mappings.json"
+                    },
+                    "children": [
+                      "list",
+                      "Download the machine-readable report ↗"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "nav",
+            "attrs": {
+              "class": "assurance-counts",
+              "aria-label": "Mapping status counts"
+            },
+            "children": [
+              "list",
+              [
+                "map",
+                "$summary",
+                "s",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": [
+                      "concat",
+                      "#status-",
+                      "$s.status"
+                    ]
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "strong",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "$s.count"
+                      ]
+                    },
+                    {
+                      "tag": "span",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "at",
+                          "$statusLabels",
+                          "$s.status"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "assurance-boundary"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "h2",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "What these statuses establish"
+                ]
+              },
+              {
+                "tag": "dl",
+                "attrs": {},
+                "children": [
+                  "list",
+                  {
+                    "tag": "dt",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Intentionally invariant"
+                    ]
+                  },
+                  {
+                    "tag": "dd",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "An explicit scoped policy and reason. A declaration is not a proof over all page descendants."
+                    ]
+                  },
+                  {
+                    "tag": "dt",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Identity mapped"
+                    ]
+                  },
+                  {
+                    "tag": "dd",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "All four world values, the runtime data projection and the corresponding cross writer are present."
+                    ]
+                  },
+                  {
+                    "tag": "dt",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Missing"
+                    ]
+                  },
+                  {
+                    "tag": "dd",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Identity variation is expected, but a value or connection is absent. An invariant declaration can also conflict with a cross writer."
+                    ]
+                  },
+                  {
+                    "tag": "dt",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Undecided"
+                    ]
+                  },
+                  {
+                    "tag": "dd",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "The intended relationship has not been established. Equal outputs do not resolve it."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "$report.scope"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "$report.boundary"
+                ]
+              }
+            ]
+          },
+          [
+            "map",
+            "$statuses",
+            "status",
+            {
+              "tag": "section",
+              "attrs": {
+                "id": [
+                  "concat",
+                  "status-",
+                  "$status"
+                ],
+                "class": "assurance-section"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "at",
+                      "$statusLabels",
+                      "$status"
+                    ]
+                  ]
+                },
+                [
+                  "map",
+                  [
+                    "filter",
+                    "$assuranceRows",
+                    "r",
+                    [
+                      "eq",
+                      "$r.status",
+                      "$status"
+                    ]
+                  ],
+                  "r",
+                  {
+                    "tag": "details",
+                    "attrs": {
+                      "class": "assurance-row",
+                      "data-status": "$r.status"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "summary",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "span",
+                            "attrs": {
+                              "class": "assurance-area"
+                            },
+                            "children": [
+                              "list",
+                              "$r.area"
+                            ]
+                          },
+                          {
+                            "tag": "strong",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "$r.label"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "div",
+                        "attrs": {
+                          "class": "assurance-detail"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "$r.reason"
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "assurance-next"
+                            },
+                            "children": [
+                              "list",
+                              "Next: ",
+                              "$r.next"
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "code",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$r.source"
+                                ]
+                              }
+                            ]
+                          },
+                          [
+                            "if",
+                            [
+                              "not",
+                              [
+                                "eq",
+                                "$r.target",
+                                ""
+                              ]
+                            ],
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Target: ",
+                                {
+                                  "tag": "code",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    [
+                                      "concat",
+                                      "$r.target",
+                                      " · ",
+                                      "$r.sink"
+                                    ]
+                                  ]
+                                }
+                              ]
+                            },
+                            null
+                          ],
+                          [
+                            "if",
+                            [
+                              "eq",
+                              "$r.intent",
+                              "identity"
+                            ],
+                            {
+                              "tag": "dl",
+                              "attrs": {
+                                "class": "assurance-worlds"
+                              },
+                              "children": [
+                                "list",
+                                [
+                                  "map",
+                                  "$r.values",
+                                  "v",
+                                  {
+                                    "tag": "div",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "dt",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "$v.identity"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "dd",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          [
+                                            "if",
+                                            [
+                                              "or",
+                                              [
+                                                "eq",
+                                                "$v.value",
+                                                null
+                                              ],
+                                              [
+                                                "eq",
+                                                "$v.value",
+                                                ""
+                                              ]
+                                            ],
+                                            "No declared value",
+                                            "$v.value"
+                                          ]
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              ]
+                            },
+                            null
+                          ],
+                          [
+                            "if",
+                            [
+                              "eq",
+                              "$r.intent",
+                              "identity"
+                            ],
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Runtime field: ",
+                                [
+                                  "if",
+                                  "$r.dataBound",
+                                  "present",
+                                  "missing"
+                                ],
+                                " · Cross writer: ",
+                                [
+                                  "if",
+                                  "$r.writerBound",
+                                  "present",
+                                  "missing"
+                                ]
+                              ]
+                            },
+                            null
+                          ],
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "assurance-limit"
+                            },
+                            "children": [
+                              "list",
+                              "$r.boundary"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "let": "prefix",
+        "value": "../"
+      },
+      {
+        "let": "pageTitle",
+        "value": "Identity mapping assurance — Aaron Alderman"
+      },
+      {
+        "let": "description",
+        "value": "An algebra-generated account of invariant, identity-mapped, missing and undecided homepage relationships."
+      },
+      {
+        "let": "canonical",
+        "value": "https://aaronalderman.com/assurance/"
+      },
+      {
+        "let": "light",
+        "value": "home"
+      },
+      {
+        "call": "publication.document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
         },
         "into": "_"
       }

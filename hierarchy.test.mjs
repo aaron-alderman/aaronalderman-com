@@ -11,6 +11,41 @@ const surface={entry:'hierarchy.parse',queries:{...read('algebra/source.process.
 const model=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:surface,mode:'model',ports:valuePorts(),limit:20000000});
 const run=async(entry,eventInput)=>(await invoke({model,entry,input:{eventInput},ports:valuePorts(),limit:20000000})).value;
 
+test('identity assurance distinguishes declared invariance, missing connections and equal world values',async()=>{
+ const queries=read('algebra/publication.process.json').queries;
+ const entry='identity.assurance.classify';
+ const compiled=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry,queries:{[entry]:queries[entry]}},mode:'model',ports:valuePorts(),limit:20000000});
+ const classify=async input=>(await invoke({model:compiled,entry,input:{eventInput:input},ports:valuePorts(),limit:20000000})).value;
+ const p={id:'hero',area:'Opening',label:'Image',intent:'identity',resolver:'theme',field:'image',target:'#hero',sink:'src',read:'$chosen.image',subjectRead:'$t',reason:'World imagery',next:'Restore mapping',source:'fixture'};
+ const input={identities:['sourcerer','author','dad','christian'],policies:[p],worlds:['sourcerer','author','dad','christian'].map(key=>({key,values:{hero:'same.webp'}})),bindings:[{port:'browser.attribute',args:{ref:'#hero',name:'src',value:'$chosen.image'}}],themeFields:{image:['one','$t','image']}};
+ assert.equal((await classify(input))[0].status,'identity-mapped','equal values do not imply invariance');
+ for(const mutate of [x=>x.worlds[0].values.hero=null,x=>delete x.worlds[0].values.hero,x=>x.worlds.pop(),x=>x.worlds.push(x.worlds[0]),x=>x.bindings=[],x=>x.themeFields={},x=>x.themeFields.image=['one','$wrong','image'],x=>x.bindings[0].args.value='$chosen.imageWrong',x=>x.bindings.push({port:'browser.attribute',args:{ref:'#hero',name:'src',value:'wrong.webp'}})]){
+  const changed=structuredClone(input);mutate(changed);assert.equal((await classify(changed))[0].status,'missing');
+ }
+ const undecided=structuredClone(input);undecided.policies[0].intent='undecided';assert.equal((await classify(undecided))[0].status,'undecided');
+ const invariant=structuredClone(input);invariant.policies[0].intent='invariant';invariant.bindings=[];assert.equal((await classify(invariant))[0].status,'intentionally-invariant');
+ invariant.policies[0].reason='';assert.equal((await classify(invariant))[0].status,'missing','invariance requires a reason');
+ invariant.policies[0].reason='Shared across these four identities';invariant.bindings=input.bindings;assert.equal((await classify(invariant))[0].status,'missing','an invariant policy conflicts with an identity writer');
+ const unknown=structuredClone(input);unknown.bindings.push({port:'browser.write',args:{ref:'#new-copy',name:'textContent',value:'$chosen.copy'}});assert.equal((await classify(unknown)).find(r=>r.target==='#new-copy').status,'undecided');
+});
+
+test('generated identity assurance keeps navigation gaps visible and covers every catalogue entry',()=>{
+ const report=JSON.parse(fs.readFileSync('dist/assurance/identity-mappings.json','utf8'));
+ assert.equal(report.protocol,'worldwright/identity-assurance/1');
+ assert.deepEqual(report.identities,['sourcerer','author','dad','christian']);
+ const row=id=>report.rows.find(r=>r.id===id);
+ for(const id of ['threads.context','atlas.context'])assert.equal(row(id).status,'missing',id);
+ for(const id of ['hero.image','questions.route','threads.image','atlas.image','appearance.--identity-bg','apps.filter','apps.perspective','apps.accessible','collection.application.title'])assert.equal(row(id).status,'identity-mapped',id);
+ for(const item of catalogue.items)assert.ok(['identity-mapped','missing'].includes(row('app.'+item.id).status),item.id);
+ assert.equal(row('brand').status,'intentionally-invariant');
+ assert.equal(new Set(report.rows.map(r=>r.id)).size,report.rows.length);
+ assert.equal(report.summary.reduce((sum,s)=>sum+s.count,0),report.rows.length);
+ const html=fs.readFileSync('dist/assurance/index.html','utf8');
+ assert.ok(html.includes('Where does each world reach?'));assert.ok(html.includes('identity-mappings.json'));assert.ok(!html.match(/<script/));
+ assert.ok(fs.readFileSync('dist/index.html','utf8').includes('href="assurance/"'));
+ assert.ok(fs.readFileSync('dist/sitemap.xml','utf8').includes('https://aaronalderman.com/assurance/'));
+});
+
 test('the homepage hierarchy preserves the author order and routes every tool to its own microsite',()=>{
  const groups=Object.fromEntries(['foundation','platform','application','progress','tool'].map(g=>[g,catalogue.items.filter(i=>i.group===g).map(i=>i.name)]));
  assert.deepEqual(groups,{foundation:['Temple'],platform:['Sourcery'],application:['Claimipedia','Claimipedia Science'],progress:['Worldwright','Kingdom','World Modelling','Tradie','Foundry','Creator Studio'],tool:['Encounter','Mission Control','The Field','SuperCRM','Timesheet','Workgarden','Harborboard','Relationship Manager']});

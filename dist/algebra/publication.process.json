@@ -1,0 +1,5120 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "publication.build": [
+      {
+        "call": "identity.runtime.build"
+      },
+      {
+        "assert": [
+          "eq",
+          [
+            "count",
+            [
+              "subjects",
+              "isa",
+              "Place"
+            ]
+          ],
+          40
+        ],
+        "message": "Publication must retain all forty places."
+      },
+      {
+        "call": "microsites.build"
+      },
+      {
+        "call": "frontdoors.claimipedia"
+      },
+      {
+        "call": "frontdoors.worldwright"
+      },
+      {
+        "call": "atlas.build"
+      },
+      {
+        "call": "frontdoors.capabilities"
+      },
+      {
+        "call": "encounter.build"
+      },
+      {
+        "call": "hierarchy.build"
+      },
+      {
+        "call": "identity.assurance.build"
+      },
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "PublicationAsset"
+        ],
+        "as": "asset",
+        "steps": [
+          {
+            "port": "text.matches",
+            "args": {
+              "value": [
+                "one",
+                "$asset",
+                "path"
+              ],
+              "pattern": "\\.(?:m?js)$|/regenerate\\.cjs$"
+            },
+            "into": "legacyExecutable"
+          },
+          {
+            "when": "$legacyExecutable",
+            "then": [
+              {
+                "port": "file.remove",
+                "args": {
+                  "path": [
+                    "one",
+                    "$asset",
+                    "path"
+                  ]
+                },
+                "into": "_"
+              },
+              {
+                "when": [
+                  "optional",
+                  "$asset",
+                  "legacyAlias"
+                ],
+                "then": [
+                  {
+                    "port": "file.remove",
+                    "args": {
+                      "path": [
+                        "one",
+                        "$asset",
+                        "legacyAlias"
+                      ]
+                    },
+                    "into": "_"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "not",
+              "$legacyExecutable"
+            ],
+            "then": [
+              {
+                "port": "file.copy",
+                "args": {
+                  "path": [
+                    "one",
+                    "$asset",
+                    "path"
+                  ]
+                },
+                "into": "_"
+              },
+              {
+                "when": [
+                  "optional",
+                  "$asset",
+                  "legacyAlias"
+                ],
+                "then": [
+                  {
+                    "port": "file.read",
+                    "args": {
+                      "path": [
+                        "one",
+                        "$asset",
+                        "path"
+                      ]
+                    },
+                    "into": "legacyBytes"
+                  },
+                  {
+                    "port": "file.write",
+                    "args": {
+                      "path": [
+                        "one",
+                        "$asset",
+                        "legacyAlias"
+                      ],
+                      "text": "$legacyBytes"
+                    },
+                    "into": "_"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "call": "publication.icon"
+      },
+      {
+        "let": "projection",
+        "value": "main"
+      },
+      {
+        "call": "publication.styles"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "expedition.css",
+          "text": "$css"
+        },
+        "into": "_"
+      },
+      {
+        "let": "projection",
+        "value": "activity"
+      },
+      {
+        "call": "publication.styles"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "activity.css",
+          "text": "$css"
+        },
+        "into": "_"
+      },
+      {
+        "let": "prefix",
+        "value": ""
+      },
+      {
+        "let": "pageTitle",
+        "value": [
+          "concat",
+          "Aaron Alderman — ",
+          [
+            "one",
+            "site",
+            "headline"
+          ]
+        ]
+      },
+      {
+        "let": "description",
+        "value": [
+          "one",
+          "site",
+          "description"
+        ]
+      },
+      {
+        "let": "canonical",
+        "value": [
+          "one",
+          "site",
+          "origin"
+        ]
+      },
+      {
+        "let": "light",
+        "value": "home"
+      },
+      {
+        "call": "publication.home"
+      },
+      {
+        "let": "body",
+        "value": "$result"
+      },
+      {
+        "call": "publication.document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "Place"
+        ],
+        "as": "place",
+        "steps": [
+          {
+            "let": "prefix",
+            "value": "../"
+          },
+          {
+            "let": "pageTitle",
+            "value": [
+              "concat",
+              [
+                "one",
+                "$place",
+                "title"
+              ],
+              " — Aaron Alderman"
+            ]
+          },
+          {
+            "let": "description",
+            "value": [
+              "one",
+              "$place",
+              "lead"
+            ]
+          },
+          {
+            "let": "canonical",
+            "value": [
+              "concat",
+              [
+                "one",
+                "site",
+                "origin"
+              ],
+              [
+                "one",
+                "$place",
+                "route"
+              ]
+            ]
+          },
+          {
+            "let": "light",
+            "value": [
+              "one",
+              "$place",
+              "light"
+            ]
+          },
+          {
+            "call": "publication.place"
+          },
+          {
+            "let": "body",
+            "value": "$result"
+          },
+          {
+            "call": "publication.document"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": [
+                "one",
+                "$place",
+                "route"
+              ],
+              "text": [
+                "concat",
+                "<!doctype html>\n",
+                "$result"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "call": "gateway.build"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "robots.txt",
+          "text": [
+            "concat",
+            "User-agent: *\nAllow: /\nSitemap: ",
+            [
+              "one",
+              "site",
+              "origin"
+            ],
+            "sitemap.xml\n"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "sitemap",
+        "value": [
+          "fold",
+          [
+            "subjects",
+            "isa",
+            "Place"
+          ],
+          "sitemapPlace",
+          "xml",
+          [
+            "concat",
+            [
+              "concat",
+              "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url><loc>",
+              [
+                "one",
+                "site",
+                "origin"
+              ],
+              "</loc></url>"
+            ],
+            "<url><loc>",
+            [
+              "one",
+              "site",
+              "origin"
+            ],
+            "gate.html</loc></url>"
+          ],
+          [
+            "concat",
+            "$xml",
+            "<url><loc>",
+            [
+              "one",
+              "site",
+              "origin"
+            ],
+            [
+              "one",
+              "$sitemapPlace",
+              "route"
+            ],
+            "</loc></url>"
+          ]
+        ]
+      },
+      {
+        "let": "sitemap",
+        "value": [
+          "fold",
+          [
+            "subjects",
+            "isa",
+            "MicrositeDocument"
+          ],
+          "document",
+          "xml",
+          "$sitemap",
+          [
+            "concat",
+            "$xml",
+            "<url><loc>",
+            [
+              "one",
+              "$document",
+              "canonical"
+            ],
+            "</loc></url>"
+          ]
+        ]
+      },
+      {
+        "let": "sitemap",
+        "value": [
+          "fold",
+          [
+            "subjects",
+            "isa",
+            "StandalonePage"
+          ],
+          "page",
+          "xml",
+          "$sitemap",
+          [
+            "concat",
+            "$xml",
+            "<url><loc>",
+            [
+              "one",
+              "$page",
+              "canonical"
+            ],
+            "</loc></url>"
+          ]
+        ]
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "sitemap.xml",
+          "text": [
+            "concat",
+            "$sitemap",
+            "</urlset>"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "call": "readerworkshop.build"
+      },
+      {
+        "call": "microsite.return.all"
+      },
+      {
+        "let": "assurance",
+        "value": {
+          "places": [
+            "count",
+            [
+              "subjects",
+              "isa",
+              "Place"
+            ]
+          ],
+          "sourceNotes": [
+            "count",
+            [
+              "subjects",
+              "isa",
+              "SourceNote"
+            ]
+          ],
+          "policy": "Temple process algebra",
+          "compatibility": "historical source oracles; algebra-owned reader and workshop",
+          "budget": 20000000
+        }
+      }
+    ],
+    "publication.styles": [
+      {
+        "let": "cssPlan",
+        "value": {
+          "imports": [
+            "list"
+          ],
+          "tokens": [
+            "list"
+          ],
+          "rules": [
+            "append",
+            [
+              "map",
+              [
+                "filter",
+                [
+                  "subjects",
+                  "isa",
+                  "StyleRule"
+                ],
+                "rule",
+                [
+                  "eq",
+                  [
+                    "one",
+                    "$rule",
+                    "projection"
+                  ],
+                  "$projection"
+                ]
+              ],
+              "rule",
+              {
+                "id": "$rule",
+                "selector": [
+                  "one",
+                  "$rule",
+                  "selector"
+                ],
+                "context": [
+                  "optional",
+                  "$rule",
+                  "context"
+                ],
+                "declarations": [
+                  "map",
+                  [
+                    "objects",
+                    "$rule",
+                    "declaration"
+                  ],
+                  "decl",
+                  {
+                    "property": [
+                      "one",
+                      "$decl",
+                      "property"
+                    ],
+                    "value": [
+                      "one",
+                      "$decl",
+                      "value"
+                    ]
+                  }
+                ]
+              }
+            ],
+            [
+              "if",
+              [
+                "eq",
+                "$projection",
+                "main"
+              ],
+              [
+                "map",
+                [
+                  "subjects",
+                  "isa",
+                  "IdentityTheme"
+                ],
+                "theme",
+                {
+                  "id": [
+                    "concat",
+                    "questions.palette.",
+                    [
+                      "one",
+                      "$theme",
+                      "key"
+                    ]
+                  ],
+                  "selector": [
+                    "concat",
+                    "html:has(body[data-question-identity=\"",
+                    [
+                      "one",
+                      "$theme",
+                      "key"
+                    ],
+                    "\"]),body[data-question-identity=\"",
+                    [
+                      "one",
+                      "$theme",
+                      "key"
+                    ],
+                    "\"]",
+                    ", .identity-catalogue[data-perspective=\"",
+                    [
+                      "one",
+                      "$theme",
+                      "key"
+                    ],
+                    "\"]"
+                  ],
+                  "declarations": [
+                    "map",
+                    [
+                      "objects",
+                      "$theme",
+                      "questionColour"
+                    ],
+                    "decl",
+                    {
+                      "property": [
+                        "one",
+                        "$decl",
+                        "property"
+                      ],
+                      "value": [
+                        "one",
+                        "$decl",
+                        "value"
+                      ]
+                    }
+                  ],
+                  "context": null
+                }
+              ],
+              [
+                "list"
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "call": "css.renderPlan"
+      },
+      {
+        "when": [
+          "eq",
+          "$projection",
+          "main"
+        ],
+        "then": [
+          {
+            "call": "publication.motion"
+          },
+          {
+            "let": "css",
+            "value": [
+              "concat",
+              "$css",
+              "$motionCSS"
+            ]
+          }
+        ]
+      }
+    ],
+    "publication.document": [
+      {
+        "let": "stewardshipInput",
+        "value": "$result"
+      },
+      {
+        "call": "publication.stewardship.view"
+      },
+      {
+        "let": "stewardshipLinks",
+        "value": "$result"
+      },
+      {
+        "let": "result",
+        "value": "$stewardshipInput"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "theme-color",
+                    "content": "#0c111b"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$pageTitle"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "$description"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "$canonical"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:type",
+                    "content": "website"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:site_name",
+                    "content": "Aaron Alderman"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "title"
+                      ],
+                      "$pageTitle"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "description"
+                      ],
+                      "$description"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": "$canonical"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image",
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "image"
+                      ],
+                      [
+                        "concat",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ],
+                        [
+                          "one",
+                          "site",
+                          "image"
+                        ]
+                      ]
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:alt",
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "alt"
+                      ],
+                      [
+                        "one",
+                        "site",
+                        "imageAlt"
+                      ]
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:card",
+                    "content": "summary_large_image"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:title",
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "title"
+                      ],
+                      "$pageTitle"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:description",
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "description"
+                      ],
+                      "$description"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image",
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "image"
+                      ],
+                      [
+                        "concat",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ],
+                        [
+                          "one",
+                          "site",
+                          "image"
+                        ]
+                      ]
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image:alt",
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "alt"
+                      ],
+                      [
+                        "one",
+                        "site",
+                        "imageAlt"
+                      ]
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "icon",
+                    "type": "image/svg+xml",
+                    "href": [
+                      "concat",
+                      "$prefix",
+                      "assets/personal-mark.svg"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": [
+                      "concat",
+                      "$prefix",
+                      "expedition.css?v=",
+                      [
+                        "one",
+                        "site",
+                        "stylesheetVersion"
+                      ]
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:width",
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "width"
+                      ],
+                      "1672"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:height",
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        [
+                          "one",
+                          "site",
+                          "origin"
+                        ]
+                      ],
+                      [
+                        "one",
+                        "sharing.home",
+                        "height"
+                      ],
+                      "941"
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$canonical",
+                    [
+                      "one",
+                      "site",
+                      "origin"
+                    ]
+                  ],
+                  {
+                    "tag": "meta",
+                    "attrs": {
+                      "property": "og:image:secure_url",
+                      "content": [
+                        "one",
+                        "sharing.home",
+                        "image"
+                      ]
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  },
+                  null
+                ],
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$canonical",
+                    [
+                      "one",
+                      "site",
+                      "origin"
+                    ]
+                  ],
+                  {
+                    "tag": "meta",
+                    "attrs": {
+                      "property": "og:image:type",
+                      "content": [
+                        "one",
+                        "sharing.home",
+                        "type"
+                      ]
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  },
+                  null
+                ]
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {
+                "data-light": "$light"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "#main",
+                    "class": "skip"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to the story"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {
+                    "class": "masthead"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": [
+                          "concat",
+                          "$prefix",
+                          "index.html"
+                        ],
+                        "class": "brand",
+                        "aria-label": "Aaron Alderman"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "span",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            {
+                              "tag": "span",
+                              "attrs": {
+                                "class": "monogram",
+                                "aria-hidden": "true"
+                              },
+                              "children": [
+                                "list",
+                                "A"
+                              ]
+                            },
+                            {
+                              "tag": "span",
+                              "attrs": {
+                                "class": "brand-name"
+                              },
+                              "children": [
+                                "list",
+                                "Aaron ",
+                                {
+                                  "tag": "span",
+                                  "attrs": {
+                                    "class": "brand-surname"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Alderman"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Main navigation"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "$prefix",
+                              "gate.html"
+                            ],
+                            "class": "gate-nav"
+                          },
+                          "children": [
+                            "list",
+                            "Reading paths ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "$prefix",
+                              "atlas.html"
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            "Explore the map"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "$prefix",
+                              "retained/workshop/index.html"
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            "The workshop ↗"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "id": "main"
+                  },
+                  "children": [
+                    "list",
+                    "$body"
+                  ]
+                },
+                {
+                  "tag": "footer",
+                  "attrs": {
+                    "class": "footer"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "div",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "signature"
+                          },
+                          "children": [
+                            "list",
+                            "Aaron Alderman"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "A few things I’ve built. A few things I’m still trying to understand."
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Elsewhere"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://github.com/aaron-alderman"
+                          },
+                          "children": [
+                            "list",
+                            "GitHub ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://www.linkedin.com/in/aaron-alderman/"
+                          },
+                          "children": [
+                            "list",
+                            "LinkedIn ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://worldwright.io/"
+                          },
+                          "children": [
+                            "list",
+                            "Built with Worldwright.io ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "$prefix",
+                              "assurance/"
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            "Identity assurance"
+                          ]
+                        }
+                      ]
+                    },
+                    "$stewardshipLinks"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      }
+    ],
+    "publication.home": [
+      {
+        "call": "frontdoors.home"
+      },
+      {
+        "let": "micrositeNav",
+        "value": "$result"
+      },
+      {
+        "let": "result",
+        "value": [
+          "list",
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "hero home-entrance-fold",
+              "aria-labelledby": "hero-title"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "img",
+                "attrs": {
+                  "class": "hero-image",
+                  "src": [
+                    "one",
+                    "identity.sourcerer",
+                    "image"
+                  ],
+                  "alt": "",
+                  "aria-hidden": "true",
+                  "width": "1672",
+                  "height": "941",
+                  "fetchpriority": "high",
+                  "id": "identity-background"
+                },
+                "children": [
+                  "list"
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "hero-content"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "eyebrow"
+                    },
+                    "children": [
+                      "list",
+                      "Aaron Alderman / A personal expedition"
+                    ]
+                  },
+                  {
+                    "tag": "h1",
+                    "attrs": {
+                      "id": "hero-title"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "span",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "Inside the mind of a"
+                        ]
+                      },
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "identity-line"
+                        },
+                        "children": [
+                          "list",
+                          "modern-day ",
+                          {
+                            "tag": "span",
+                            "attrs": {
+                              "class": "identity-choice"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "em",
+                                "attrs": {
+                                  "id": "identity-word"
+                                },
+                                "children": [
+                                  "list",
+                                  "sourcerer."
+                                ]
+                              },
+                              {
+                                "tag": "button",
+                                "attrs": {
+                                  "type": "button",
+                                  "id": "identity-switch",
+                                  "class": "identity-switch",
+                                  "disabled": true,
+                                  "aria-label": "Discover another side of Aaron: change the perspective and projects",
+                                  "aria-describedby": "identity-status",
+                                  "title": "A different side. Press to discover.",
+                                  "aria-controls": "microsites"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "identity-cross",
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "class": "identity-hint",
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "Another side"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "hero-copy",
+                      "id": "identity-copy"
+                    },
+                    "children": [
+                      "list",
+                      "Physics, faith, machines, and the work of remembering care."
+                    ]
+                  },
+                  {
+                    "tag": "nav",
+                    "attrs": {
+                      "class": "begin-with",
+                      "aria-labelledby": "begin-with-title"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "eyebrow",
+                          "id": "begin-with-title"
+                        },
+                        "children": [
+                          "list",
+                          "Begin with"
+                        ]
+                      },
+                      {
+                        "tag": "div",
+                        "attrs": {
+                          "class": "begin-with-grid"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "id": "first-trails",
+                              "class": "begin-door",
+                              "href": [
+                                "one",
+                                "identity.sourcerer",
+                                "questionHref"
+                              ],
+                              "aria-label": [
+                                "one",
+                                "identity.sourcerer",
+                                "questionCopy"
+                              ]
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "img",
+                                "attrs": {
+                                  "src": [
+                                    "one",
+                                    "identity.sourcerer",
+                                    "questionsImage"
+                                  ],
+                                  "alt": "",
+                                  "width": 768,
+                                  "height": 384,
+                                  "decoding": "async",
+                                  "id": "identity-card-questions"
+                                },
+                                "children": [
+                                  "list"
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "begin-door-copy"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Questions"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {
+                                      "id": "identity-question-copy"
+                                    },
+                                    "children": [
+                                      "list",
+                                      [
+                                        "one",
+                                        "identity.sourcerer",
+                                        "questionCopy"
+                                      ]
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "↗"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "id": "threads",
+                              "class": "begin-door",
+                              "href": "gate.html"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "img",
+                                "attrs": {
+                                  "src": [
+                                    "one",
+                                    "identity.sourcerer",
+                                    "threadsImage"
+                                  ],
+                                  "alt": "",
+                                  "width": 768,
+                                  "height": 384,
+                                  "decoding": "async",
+                                  "id": "identity-card-threads"
+                                },
+                                "children": [
+                                  "list"
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "begin-door-copy"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Threads"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Follow an idea across the work."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "↗"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "id": "atlas",
+                              "class": "begin-door",
+                              "href": "atlas.html"
+                            },
+                            "children": [
+                              "list",
+                              {
+                                "tag": "img",
+                                "attrs": {
+                                  "src": [
+                                    "one",
+                                    "identity.sourcerer",
+                                    "atlasImage"
+                                  ],
+                                  "alt": "",
+                                  "width": 768,
+                                  "height": 320,
+                                  "decoding": "async",
+                                  "id": "identity-card-atlas"
+                                },
+                                "children": [
+                                  "list"
+                                ]
+                              },
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "begin-door-copy"
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Atlas / Map"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "p",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      "Find a place. Choose your own path."
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {
+                                      "aria-hidden": "true"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "↗"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "class": "scroll-invitation",
+                      "href": "#microsites",
+                      "aria-label": "Scroll to explore the systems, applications and tools"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "span",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "strong",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "There’s more beneath the surface."
+                            ]
+                          },
+                          {
+                            "tag": "small",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "Explore the systems, applications and tools"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "scroll-chevron",
+                          "aria-hidden": "true"
+                        },
+                        "children": [
+                          "list",
+                          "↓"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "$micrositeNav",
+          {
+            "tag": "p",
+            "attrs": {
+              "id": "identity-status",
+              "class": "sr-only",
+              "aria-live": "polite",
+              "aria-atomic": "true"
+            },
+            "children": [
+              "list",
+              "Current theme: sourcerer."
+            ]
+          },
+          {
+            "tag": "script",
+            "attrs": {
+              "src": "identity-runtime.js?v=identity-collections-optimized-1",
+              "defer": true
+            },
+            "children": [
+              "list"
+            ]
+          }
+        ]
+      }
+    ],
+    "publication.place": [
+      {
+        "let": "result",
+        "value": [
+          "list",
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "place-opening"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "breadcrumbs"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "../atlas.html"
+                    },
+                    "children": [
+                      "list",
+                      "← Return to the map"
+                    ]
+                  },
+                  {
+                    "tag": "span",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      [
+                        "concat",
+                        "Place ",
+                        [
+                          "one",
+                          "$place",
+                          "chapter"
+                        ],
+                        " / ",
+                        [
+                          "one",
+                          "$place",
+                          "region"
+                        ]
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "eyebrow"
+                },
+                "children": [
+                  "list",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      [
+                        "one",
+                        "$place",
+                        "light"
+                      ],
+                      "unseen"
+                    ],
+                    "Finding things out",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        [
+                          "one",
+                          "$place",
+                          "light"
+                        ],
+                        "human"
+                      ],
+                      "Understanding people",
+                      "Using power responsibly"
+                    ]
+                  ]
+                ]
+              },
+              {
+                "tag": "h1",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "one",
+                    "$place",
+                    "title"
+                  ]
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "place-lead"
+                },
+                "children": [
+                  "list",
+                  [
+                    "one",
+                    "$place",
+                    "lead"
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "encounter-layout",
+              "aria-label": "Explore this question"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "activity-wrap"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "class": "activity-heading"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "eyebrow"
+                        },
+                        "children": [
+                          "list",
+                          "A closer look"
+                        ]
+                      },
+                      {
+                        "tag": "a",
+                        "attrs": {
+                          "href": [
+                            "concat",
+                            "../reader.html#",
+                            [
+                              "one",
+                              "$place",
+                              "slug"
+                            ]
+                          ]
+                        },
+                        "children": [
+                          "list",
+                          "Open in a larger view ↗"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "iframe",
+                    "attrs": {
+                      "src": [
+                        "concat",
+                        "../retained/activity.html?v=algebra-1#",
+                        [
+                          "one",
+                          "$place",
+                          "slug"
+                        ]
+                      ],
+                      "title": [
+                        "concat",
+                        [
+                          "one",
+                          "$place",
+                          "region"
+                        ],
+                        " — interactive example"
+                      ],
+                      "loading": "lazy",
+                      "class": "activity-frame"
+                    },
+                    "children": [
+                      "list"
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "frame-note"
+                    },
+                    "children": [
+                      "list",
+                      "The interactive example has its own motion control. Scroll inside it if you need more room."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "reading"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "scope"
+                    },
+                    "children": [
+                      "list",
+                      [
+                        "at",
+                        [
+                          "objects",
+                          [
+                            "one",
+                            "$place",
+                            "source"
+                          ],
+                          "paragraph"
+                        ],
+                        0
+                      ]
+                    ]
+                  },
+                  [
+                    "if",
+                    [
+                      "optional",
+                      "$place",
+                      "personal"
+                    ],
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "draft-label"
+                      },
+                      "children": [
+                        "list",
+                        "Personal account · working draft"
+                      ]
+                    },
+                    null
+                  ],
+                  {
+                    "tag": "div",
+                    "attrs": {},
+                    "children": [
+                      "map",
+                      [
+                        "objects",
+                        "$place",
+                        "paragraph"
+                      ],
+                      "paragraph",
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "$paragraph"
+                        ]
+                      }
+                    ]
+                  },
+                  [
+                    "if",
+                    [
+                      "optional",
+                      "$place",
+                      "instruction"
+                    ],
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "instruction"
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "one",
+                          "$place",
+                          "instruction"
+                        ]
+                      ]
+                    },
+                    null
+                  ],
+                  [
+                    "if",
+                    [
+                      "count",
+                      [
+                        "objects",
+                        "$place",
+                        "word"
+                      ]
+                    ],
+                    {
+                      "tag": "details",
+                      "attrs": {
+                        "class": "word-help"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "summary",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Words used here"
+                          ]
+                        },
+                        {
+                          "tag": "dl",
+                          "attrs": {},
+                          "children": [
+                            "map",
+                            [
+                              "objects",
+                              "$place",
+                              "word"
+                            ],
+                            "word",
+                            [
+                              "list",
+                              {
+                                "tag": "dt",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$word",
+                                    "label"
+                                  ]
+                                ]
+                              },
+                              {
+                                "tag": "dd",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$word",
+                                    "meaning"
+                                  ]
+                                ]
+                              }
+                            ]
+                          ]
+                        }
+                      ]
+                    },
+                    null
+                  ],
+                  {
+                    "tag": "details",
+                    "attrs": {
+                      "class": "full-reading"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "summary",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "Read the fuller explanation"
+                        ]
+                      },
+                      {
+                        "tag": "div",
+                        "attrs": {},
+                        "children": [
+                          "map",
+                          [
+                            "objects",
+                            "$place",
+                            "fullParagraph"
+                          ],
+                          "paragraph",
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "$paragraph"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "details",
+                    "attrs": {
+                      "class": "source-note"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "summary",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "concat",
+                            "Where this comes from: ",
+                            [
+                              "one",
+                              [
+                                "one",
+                                "$place",
+                                "source"
+                              ],
+                              "title"
+                            ]
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "scope"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            [
+                              "one",
+                              "$place",
+                              "source"
+                            ],
+                            "kind"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "div",
+                        "attrs": {},
+                        "children": [
+                          "map",
+                          [
+                            "objects",
+                            [
+                              "one",
+                              "$place",
+                              "source"
+                            ],
+                            "paragraph"
+                          ],
+                          "paragraph",
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "$paragraph"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "details",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "summary",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "Read the full source note"
+                            ]
+                          },
+                          {
+                            "tag": "h3",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              [
+                                "one",
+                                [
+                                  "one",
+                                  "$place",
+                                  "source"
+                                ],
+                                "originalTitle"
+                              ]
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              [
+                                "one",
+                                [
+                                  "one",
+                                  "$place",
+                                  "source"
+                                ],
+                                "note"
+                              ]
+                            ]
+                          }
+                        ]
+                      },
+                      [
+                        "if",
+                        [
+                          "optional",
+                          [
+                            "one",
+                            "$place",
+                            "source"
+                          ],
+                          "href"
+                        ],
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "$prefix",
+                              [
+                                "one",
+                                [
+                                  "one",
+                                  "$place",
+                                  "source"
+                                ],
+                                "href"
+                              ]
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            "Read the original source ↗"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "This account is drawn from Aaron’s own words; it is not an independent account of anyone else’s experience."
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "div",
+                    "attrs": {},
+                    "children": [
+                      "map",
+                      [
+                        "objects",
+                        "$place",
+                        "supplement"
+                      ],
+                      "supplement",
+                      {
+                        "tag": "details",
+                        "attrs": {
+                          "class": "source-note"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "summary",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              [
+                                "concat",
+                                "Where this comes from: ",
+                                [
+                                  "one",
+                                  "$supplement",
+                                  "title"
+                                ]
+                              ]
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "scope"
+                            },
+                            "children": [
+                              "list",
+                              [
+                                "one",
+                                "$supplement",
+                                "kind"
+                              ]
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {},
+                            "children": [
+                              "map",
+                              [
+                                "objects",
+                                "$supplement",
+                                "paragraph"
+                              ],
+                              "paragraph",
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$paragraph"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "details",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "summary",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "Read the full source note"
+                                ]
+                              },
+                              {
+                                "tag": "h3",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$supplement",
+                                    "originalTitle"
+                                  ]
+                                ]
+                              },
+                              {
+                                "tag": "p",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  [
+                                    "one",
+                                    "$supplement",
+                                    "note"
+                                  ]
+                                ]
+                              }
+                            ]
+                          },
+                          [
+                            "if",
+                            [
+                              "optional",
+                              "$supplement",
+                              "href"
+                            ],
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": [
+                                  "concat",
+                                  "$prefix",
+                                  [
+                                    "one",
+                                    "$supplement",
+                                    "href"
+                                  ]
+                                ]
+                              },
+                              "children": [
+                                "list",
+                                "Read the original source ↗"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "This account is drawn from Aaron’s own words; it is not an independent account of anyone else’s experience."
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  },
+                  [
+                    "if",
+                    [
+                      "optional",
+                      "$place",
+                      "pause"
+                    ],
+                    {
+                      "tag": "aside",
+                      "attrs": {
+                        "class": "pause"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {
+                            "class": "eyebrow"
+                          },
+                          "children": [
+                            "list",
+                            "Stay with the question"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            [
+                              "one",
+                              "$place",
+                              "pause"
+                            ]
+                          ]
+                        }
+                      ]
+                    },
+                    null
+                  ],
+                  [
+                    "if",
+                    [
+                      "optional",
+                      "$place",
+                      "experience"
+                    ],
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../retained/workshop/index.html",
+                            "class": "button"
+                          },
+                          "children": [
+                            "list",
+                            "Enter the interactive workshop ↗"
+                          ]
+                        }
+                      ]
+                    },
+                    null
+                  ],
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "share-note"
+                    },
+                    "children": [
+                      "list",
+                      "To share this question, copy this page’s address. Its title, introduction and landscape travel with the link."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "section onward"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "section-heading"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "class": "eyebrow"
+                    },
+                    "children": [
+                      "list",
+                      "Where does your curiosity go?"
+                    ]
+                  },
+                  {
+                    "tag": "h2",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Another doorway."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "class": "trail-grid"
+                },
+                "children": [
+                  "map",
+                  [
+                    "objects",
+                    "$place",
+                    "choice"
+                  ],
+                  "choice",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "class": "trail",
+                      "href": [
+                        "concat",
+                        [
+                          "one",
+                          [
+                            "one",
+                            "$choice",
+                            "destination"
+                          ],
+                          "slug"
+                        ],
+                        ".html"
+                      ],
+                      "data-light": [
+                        "one",
+                        [
+                          "one",
+                          "$choice",
+                          "destination"
+                        ],
+                        "light"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "eyebrow"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$choice",
+                            "kind"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "h3",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$choice",
+                            "label"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            [
+                              "one",
+                              "$choice",
+                              "destination"
+                            ],
+                            "lead"
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "span",
+                        "attrs": {
+                          "class": "arrow",
+                          "aria-hidden": "true"
+                        },
+                        "children": [
+                          "list",
+                          "↗"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "p",
+            "attrs": {
+              "class": "atlas-visit-note",
+              "data-atlas-current": [
+                "one",
+                "$place",
+                "slug"
+              ],
+              "id": "atlas-visit-note",
+              "hidden": true
+            },
+            "children": [
+              "list",
+              "Seen on your map."
+            ]
+          },
+          {
+            "tag": "script",
+            "attrs": {
+              "src": "../atlas-runtime.js?v=journey-1",
+              "defer": true
+            },
+            "children": [
+              "list"
+            ]
+          }
+        ]
+      }
+    ],
+    "publication.motion": [
+      {
+        "let": "motionCSS",
+        "value": [
+          "fold",
+          [
+            "subjects",
+            "isa",
+            "Motion"
+          ],
+          "motion",
+          "allMotion",
+          "",
+          [
+            "concat",
+            "$allMotion",
+            "@keyframes ",
+            [
+              "one",
+              "$motion",
+              "name"
+            ],
+            "{",
+            [
+              "fold",
+              [
+                "objects",
+                "$motion",
+                "frame"
+              ],
+              "frame",
+              "allFrames",
+              "",
+              [
+                "concat",
+                "$allFrames",
+                [
+                  "one",
+                  "$frame",
+                  "selector"
+                ],
+                "{",
+                [
+                  "fold",
+                  [
+                    "objects",
+                    "$frame",
+                    "declaration"
+                  ],
+                  "decl",
+                  "allDeclarations",
+                  "",
+                  [
+                    "concat",
+                    "$allDeclarations",
+                    [
+                      "one",
+                      "$decl",
+                      "property"
+                    ],
+                    ":",
+                    [
+                      "one",
+                      "$decl",
+                      "value"
+                    ],
+                    ";"
+                  ]
+                ],
+                "}"
+              ]
+            ],
+            "}"
+          ]
+        ]
+      }
+    ],
+    "publication.icon": [
+      {
+        "let": "input",
+        "value": {
+          "tag": "svg",
+          "attrs": {
+            "xmlns": "http://www.w3.org/2000/svg",
+            "viewBox": "0 0 64 64"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "rect",
+              "attrs": {
+                "width": "64",
+                "height": "64",
+                "rx": "16",
+                "fill": "#0c111b"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "circle",
+              "attrs": {
+                "cx": "32",
+                "cy": "32",
+                "r": "27",
+                "fill": "none",
+                "stroke": "#ba975f"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "tag": "text",
+              "attrs": {
+                "x": "32",
+                "y": "44",
+                "text-anchor": "middle",
+                "font-family": "Georgia,serif",
+                "font-size": "38",
+                "fill": "#ebc991"
+              },
+              "children": [
+                "list",
+                "A"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assets/personal-mark.svg",
+          "text": "$result"
+        },
+        "into": "_"
+      }
+    ],
+    "publication.stewardship.view": [
+      {
+        "let": "result",
+        "value": {
+          "tag": "nav",
+          "attrs": {
+            "class": "footer-stewardship",
+            "aria-label": "Licensing and stewardship"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://github.com/aaron-alderman/aaronalderman-com/blob/main/LICENSE.md"
+              },
+              "children": [
+                "list",
+                "Licence ↗"
+              ]
+            },
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://github.com/aaron-alderman/aaronalderman-com/blob/main/CHRISTIAN_STEWARDSHIP_COVENANT.md"
+              },
+              "children": [
+                "list",
+                "Christian stewardship covenant ↗"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "identity.boot": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "identity",
+          "value": "sourcerer"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-identity",
+          "value": "sourcerer"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#identity-switch",
+          "event": "click",
+          "query": "identity.change"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-switch",
+          "name": "disabled",
+          "value": false
+        },
+        "into": "_"
+      }
+    ],
+    "identity.change": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "identity"
+        },
+        "into": "current"
+      },
+      {
+        "let": "choices",
+        "value": [
+          "filter",
+          "$data.themes",
+          "theme",
+          [
+            "not",
+            [
+              "eq",
+              "$theme.key",
+              "$current"
+            ]
+          ]
+        ]
+      },
+      {
+        "port": "random.values",
+        "args": {
+          "count": 1
+        },
+        "into": "random"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$random",
+              0
+            ],
+            [
+              "count",
+              "$choices"
+            ]
+          ]
+        },
+        "into": "scaled"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "floor",
+          "values": [
+            "list",
+            "$scaled"
+          ]
+        },
+        "into": "index"
+      },
+      {
+        "let": "chosen",
+        "value": [
+          "at",
+          "$choices",
+          "$index"
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-identity",
+          "value": "$chosen.key"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#identity-background",
+          "name": "src",
+          "value": "$chosen.image"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#identity-card-questions",
+          "name": "src",
+          "value": "$chosen.questionsImage"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#identity-card-threads",
+          "name": "src",
+          "value": "$chosen.threadsImage"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#identity-card-atlas",
+          "name": "src",
+          "value": "$chosen.atlasImage"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-word",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "$chosen.label",
+            "."
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-copy",
+          "name": "textContent",
+          "value": "$chosen.copy"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#microsites",
+          "html": "$chosen.catalogueHTML"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#microsites",
+          "name": "data-perspective",
+          "value": "$chosen.key"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#microsites",
+          "name": "aria-label",
+          "value": "$chosen.catalogueIntro"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-status",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Now viewing Aaron as ",
+            "$chosen.label",
+            ". Project selections and descriptions updated. Press again to discover another side."
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#first-trails",
+          "name": "href",
+          "value": "$chosen.questionHref"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#first-trails",
+          "name": "aria-label",
+          "value": "$chosen.questionCopy"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#identity-question-copy",
+          "name": "textContent",
+          "value": "$chosen.questionCopy"
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "identity",
+          "value": "$chosen.key"
+        },
+        "into": "_"
+      }
+    ],
+    "identity.runtime.build": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/hierarchy.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/hierarchy.json"
+        },
+        "into": "identityText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$identityText"
+        },
+        "into": "identityCatalogue"
+      },
+      {
+        "fold": [
+          "subjects",
+          "isa",
+          "IdentityTheme"
+        ],
+        "as": "identitySubject",
+        "accumulator": "identityViews",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "identityKey",
+            "value": [
+              "one",
+              "$identitySubject",
+              "key"
+            ]
+          },
+          {
+            "call": "identity.catalogue.view"
+          },
+          {
+            "let": "input",
+            "value": "$result"
+          },
+          {
+            "call": "html.serialize"
+          }
+        ],
+        "yield": [
+          "append",
+          "$identityViews",
+          [
+            "list",
+            {
+              "key": [
+                "one",
+                "$identitySubject",
+                "key"
+              ],
+              "label": [
+                "one",
+                "$identitySubject",
+                "label"
+              ],
+              "copy": [
+                "one",
+                "$identitySubject",
+                "copy"
+              ],
+              "questionHref": [
+                "one",
+                "$identitySubject",
+                "questionHref"
+              ],
+              "questionCopy": [
+                "one",
+                "$identitySubject",
+                "questionCopy"
+              ],
+              "image": [
+                "one",
+                "$identitySubject",
+                "image"
+              ],
+              "questionsImage": [
+                "one",
+                "$identitySubject",
+                "questionsImage"
+              ],
+              "threadsImage": [
+                "one",
+                "$identitySubject",
+                "threadsImage"
+              ],
+              "atlasImage": [
+                "one",
+                "$identitySubject",
+                "atlasImage"
+              ],
+              "catalogueHTML": "$result",
+              "catalogueIntro": [
+                "one",
+                "$identitySubject",
+                "catalogueIntro"
+              ]
+            }
+          ]
+        ],
+        "into": "identityThemes"
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "identity.boot",
+          "mode": "browser",
+          "grantProfile": "micrositesBrowser",
+          "queries": [
+            "list",
+            "identity.boot",
+            "identity.change"
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "data": {
+            "themes": "$identityThemes"
+          },
+          "budget": 2000000
+        },
+        "into": "identityRuntime"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "identity-runtime.js",
+          "text": "$identityRuntime"
+        },
+        "into": "_"
+      }
+    ],
+    "identity.assurance.classify": [
+      {
+        "fold": "$eventInput.policies",
+        "as": "p",
+        "accumulator": "rows",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "values",
+            "value": [
+              "map",
+              "$eventInput.worlds",
+              "w",
+              {
+                "identity": "$w.key",
+                "value": [
+                  "at",
+                  "$w.values",
+                  "$p.id"
+                ]
+              }
+            ]
+          },
+          {
+            "let": "dataBinding",
+            "value": [
+              "at",
+              "$eventInput.themeFields",
+              "$p.field"
+            ]
+          },
+          {
+            "let": "dataBound",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$p.resolver",
+                "style"
+              ],
+              true,
+              [
+                "if",
+                [
+                  "includes",
+                  [
+                    "list",
+                    "catalogue",
+                    "collection",
+                    "app"
+                  ],
+                  "$p.resolver"
+                ],
+                "$eventInput.catalogueBound",
+                [
+                  "and",
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$dataBinding",
+                      0
+                    ],
+                    "one"
+                  ],
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$dataBinding",
+                      1
+                    ],
+                    "$p.subjectRead"
+                  ],
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$dataBinding",
+                      2
+                    ],
+                    "$p.field"
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "writers",
+            "value": [
+              "filter",
+              "$eventInput.bindings",
+              "b",
+              [
+                "and",
+                [
+                  "eq",
+                  "$b.args.ref",
+                  "$p.target"
+                ],
+                [
+                  "eq",
+                  "$b.args.name",
+                  "$p.sink"
+                ]
+              ]
+            ]
+          },
+          {
+            "port": "json.stringify",
+            "args": {
+              "value": "$p.read"
+            },
+            "into": "serializedRead"
+          },
+          {
+            "fold": "$writers",
+            "as": "b",
+            "accumulator": "writerReads",
+            "initial": true,
+            "steps": [
+              {
+                "port": "json.stringify",
+                "args": {
+                  "value": "$b.args.value"
+                },
+                "into": "serialized"
+              },
+              {
+                "port": "text.indexOf",
+                "args": {
+                  "value": "$serialized",
+                  "search": "$serializedRead",
+                  "from": 0
+                },
+                "into": "offset"
+              }
+            ],
+            "yield": [
+              "and",
+              "$writerReads",
+              [
+                "not",
+                [
+                  "eq",
+                  "$offset",
+                  -1
+                ]
+              ]
+            ],
+            "into": "writerReads"
+          },
+          {
+            "let": "writerBound",
+            "value": [
+              "and",
+              [
+                "not",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$writers"
+                  ],
+                  0
+                ]
+              ],
+              "$writerReads"
+            ]
+          },
+          {
+            "let": "complete",
+            "value": [
+              "and",
+              "$dataBound",
+              "$writerBound",
+              [
+                "not",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$eventInput.identities"
+                  ],
+                  0
+                ]
+              ],
+              [
+                "every",
+                "$eventInput.identities",
+                "key",
+                [
+                  "eq",
+                  [
+                    "count",
+                    [
+                      "filter",
+                      "$eventInput.worlds",
+                      "w",
+                      [
+                        "eq",
+                        "$w.key",
+                        "$key"
+                      ]
+                    ]
+                  ],
+                  1
+                ]
+              ],
+              [
+                "every",
+                "$values",
+                "v",
+                "$v.value"
+              ]
+            ]
+          },
+          {
+            "let": "status",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$p.intent",
+                "undecided"
+              ],
+              "undecided",
+              [
+                "if",
+                [
+                  "eq",
+                  "$p.intent",
+                  "invariant"
+                ],
+                [
+                  "if",
+                  [
+                    "and",
+                    [
+                      "not",
+                      [
+                        "eq",
+                        "$p.reason",
+                        ""
+                      ]
+                    ],
+                    [
+                      "eq",
+                      [
+                        "count",
+                        "$writers"
+                      ],
+                      0
+                    ]
+                  ],
+                  "intentionally-invariant",
+                  "missing"
+                ],
+                [
+                  "if",
+                  "$complete",
+                  "identity-mapped",
+                  "missing"
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "row",
+            "value": {
+              "id": "$p.id",
+              "area": "$p.area",
+              "label": "$p.label",
+              "intent": "$p.intent",
+              "status": "$status",
+              "reason": "$p.reason",
+              "next": [
+                "if",
+                [
+                  "eq",
+                  "$status",
+                  "identity-mapped"
+                ],
+                "Review semantic fit and downstream behaviour; the declared structural connection is present.",
+                "$p.next"
+              ],
+              "source": "$p.source",
+              "target": "$p.target",
+              "sink": "$p.sink",
+              "field": "$p.field",
+              "values": "$values",
+              "dataBound": "$dataBound",
+              "writerBound": "$writerBound",
+              "boundary": [
+                "if",
+                [
+                  "eq",
+                  "$p.intent",
+                  "invariant"
+                ],
+                "Declared policy; this is not an automated proof that every descendant is invariant.",
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$p.resolver",
+                    "style"
+                  ],
+                  "Checks declared CSS values and the body identity writer; does not certify visual appearance.",
+                  "Checks authored world values, runtime field projection and matching browser writer; does not certify downstream meaning."
+                ]
+              ]
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$rows",
+          [
+            "list",
+            "$row"
+          ]
+        ],
+        "into": "rows"
+      },
+      {
+        "fold": "$eventInput.bindings",
+        "as": "b",
+        "accumulator": "scanRows",
+        "initial": "$rows",
+        "steps": [],
+        "yield": [
+          "if",
+          [
+            "not",
+            [
+              "some",
+              "$eventInput.policies",
+              "p",
+              [
+                "and",
+                [
+                  "eq",
+                  "$p.target",
+                  "$b.args.ref"
+                ],
+                [
+                  "eq",
+                  "$p.sink",
+                  "$b.args.name"
+                ]
+              ]
+            ]
+          ],
+          [
+            "append",
+            "$scanRows",
+            [
+              "list",
+              {
+                "id": [
+                  "concat",
+                  "unclassified:",
+                  "$b.args.ref",
+                  ":",
+                  "$b.args.name"
+                ],
+                "area": "Unclassified cross updates",
+                "label": [
+                  "concat",
+                  "$b.args.ref",
+                  " → ",
+                  "$b.args.name"
+                ],
+                "intent": "undecided",
+                "status": "undecided",
+                "reason": "A cross writer exists without an assurance declaration.",
+                "next": "Declare the intended identity relationship and its evidence.",
+                "source": "algebra/publication.process.json · identity.change",
+                "target": "$b.args.ref",
+                "sink": "$b.args.name",
+                "field": "",
+                "values": [
+                  "list"
+                ],
+                "dataBound": false,
+                "writerBound": true,
+                "boundary": "Automatically discovered browser writer; no invariance is inferred."
+              }
+            ]
+          ],
+          "$scanRows"
+        ],
+        "into": "rows"
+      },
+      {
+        "let": "result",
+        "value": "$rows"
+      }
+    ],
+    "identity.assurance.build": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "algebra/publication.process.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "algebra/publication.process.json"
+        },
+        "into": "assuranceSource"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$assuranceSource"
+        },
+        "into": "assuranceModule"
+      },
+      {
+        "let": "change",
+        "value": [
+          "or",
+          [
+            "at",
+            "$assuranceModule.queries",
+            "identity.change"
+          ],
+          [
+            "list"
+          ]
+        ]
+      },
+      {
+        "let": "runtimeSteps",
+        "value": [
+          "or",
+          [
+            "at",
+            "$assuranceModule.queries",
+            "identity.runtime.build"
+          ],
+          [
+            "list"
+          ]
+        ]
+      },
+      {
+        "let": "runtime",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$runtimeSteps",
+            "s",
+            [
+              "eq",
+              [
+                "at",
+                "$s",
+                "port"
+              ],
+              "runtime.bundle"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "themeFold",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$runtimeSteps",
+            "s",
+            [
+              "eq",
+              [
+                "at",
+                "$s",
+                "into"
+              ],
+              "identityThemes"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "themeFields",
+        "value": [
+          "at",
+          [
+            "at",
+            [
+              "at",
+              "$themeFold",
+              "yield"
+            ],
+            2
+          ],
+          1
+        ]
+      },
+      {
+        "let": "catalogueBound",
+        "value": [
+          "and",
+          [
+            "eq",
+            [
+              "at",
+              [
+                "at",
+                [
+                  "at",
+                  "$runtime",
+                  "args"
+                ],
+                "data"
+              ],
+              "themes"
+            ],
+            [
+              "one",
+              "identity.assurance.scope",
+              "runtimeThemes"
+            ]
+          ],
+          [
+            "eq",
+            [
+              "at",
+              "$themeFields",
+              "catalogueHTML"
+            ],
+            [
+              "one",
+              "identity.assurance.scope",
+              "catalogueResult"
+            ]
+          ],
+          [
+            "some",
+            [
+              "or",
+              [
+                "at",
+                "$themeFold",
+                "steps"
+              ],
+              [
+                "list"
+              ]
+            ],
+            "s",
+            [
+              "eq",
+              [
+                "at",
+                "$s",
+                "call"
+              ],
+              "identity.catalogue.view"
+            ]
+          ],
+          [
+            "some",
+            [
+              "or",
+              [
+                "at",
+                "$themeFold",
+                "steps"
+              ],
+              [
+                "list"
+              ]
+            ],
+            "s",
+            [
+              "eq",
+              [
+                "at",
+                "$s",
+                "call"
+              ],
+              "html.serialize"
+            ]
+          ]
+        ]
+      },
+      {
+        "let": "policies",
+        "value": [
+          "map",
+          [
+            "subjects",
+            "isa",
+            "IdentityAssuranceMapping"
+          ],
+          "m",
+          {
+            "id": [
+              "one",
+              "$m",
+              "id"
+            ],
+            "area": [
+              "one",
+              "$m",
+              "area"
+            ],
+            "label": [
+              "one",
+              "$m",
+              "label"
+            ],
+            "intent": [
+              "one",
+              "$m",
+              "intent"
+            ],
+            "resolver": [
+              "one",
+              "$m",
+              "resolver"
+            ],
+            "field": [
+              "one",
+              "$m",
+              "field"
+            ],
+            "target": [
+              "one",
+              "$m",
+              "target"
+            ],
+            "sink": [
+              "one",
+              "$m",
+              "sink"
+            ],
+            "reason": [
+              "one",
+              "$m",
+              "reason"
+            ],
+            "next": [
+              "one",
+              "$m",
+              "next"
+            ],
+            "slot": [
+              "one",
+              "$m",
+              "slot"
+            ],
+            "item": [
+              "one",
+              "$m",
+              "item"
+            ],
+            "read": [
+              "one",
+              "$m",
+              "read"
+            ],
+            "subjectRead": [
+              "one",
+              "$m",
+              "subjectRead"
+            ],
+            "source": [
+              "one",
+              "$m",
+              "source"
+            ],
+            "collectionField": [
+              "one",
+              "$m",
+              "collectionField"
+            ]
+          }
+        ]
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/hierarchy.json"
+        },
+        "into": "catalogueText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$catalogueText"
+        },
+        "into": "catalogue"
+      },
+      {
+        "let": "policies",
+        "value": [
+          "append",
+          "$policies",
+          [
+            "map",
+            "$catalogue.items",
+            "item",
+            {
+              "id": [
+                "concat",
+                "app.",
+                "$item.id"
+              ],
+              "area": "Application relevance",
+              "label": [
+                "concat",
+                "$item.name",
+                " — curated relevance and introduction"
+              ],
+              "intent": "identity",
+              "resolver": "app",
+              "field": "catalogueHTML",
+              "target": "#microsites",
+              "sink": "innerHTML",
+              "read": [
+                "one",
+                "identity.assurance.scope",
+                "catalogueRead"
+              ],
+              "subjectRead": "",
+              "slot": "",
+              "collectionField": "",
+              "item": "$item.id",
+              "reason": "Curated membership and identity notes come from IdentityCollection and identity.card facts. Unselected apps remain in the shared full directory.",
+              "next": "Restore a selected app note, collection declaration or catalogue projection.",
+              "source": [
+                "concat",
+                "source/hierarchy.json + source/hierarchy.rel · ",
+                "$item.id"
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "let": "worlds",
+        "value": [
+          "map",
+          [
+            "subjects",
+            "isa",
+            "IdentityTheme"
+          ],
+          "t",
+          {
+            "key": [
+              "one",
+              "$t",
+              "key"
+            ],
+            "label": [
+              "one",
+              "$t",
+              "label"
+            ],
+            "subject": "$t",
+            "values": {}
+          }
+        ]
+      },
+      {
+        "fold": "$worlds",
+        "as": "w",
+        "accumulator": "resolved",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "fold": "$policies",
+            "as": "p",
+            "accumulator": "worldValues",
+            "initial": {},
+            "steps": [
+              {
+                "let": "slots",
+                "value": [
+                  "list",
+                  "foundation",
+                  "application",
+                  "progress",
+                  "tool"
+                ]
+              },
+              {
+                "let": "collections",
+                "value": [
+                  "map",
+                  "$slots",
+                  "slot",
+                  [
+                    "concat",
+                    "identity.collection.",
+                    "$w.key",
+                    ".",
+                    "$slot"
+                  ]
+                ]
+              },
+              {
+                "let": "selection",
+                "value": [
+                  "fold",
+                  "$collections",
+                  "c",
+                  "ids",
+                  [
+                    "list"
+                  ],
+                  [
+                    "append",
+                    "$ids",
+                    [
+                      "objects",
+                      "$c",
+                      "item"
+                    ]
+                  ]
+                ]
+              },
+              {
+                "let": "hasCollections",
+                "value": [
+                  "every",
+                  "$collections",
+                  "c",
+                  [
+                    "has",
+                    "$c",
+                    "isa",
+                    "IdentityCollection"
+                  ]
+                ]
+              },
+              {
+                "let": "value",
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$p.resolver",
+                    "theme"
+                  ],
+                  [
+                    "optional",
+                    "$w.subject",
+                    "$p.field"
+                  ],
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$p.resolver",
+                      "style"
+                    ],
+                    [
+                      "optional",
+                      [
+                        "concat",
+                        "identity.style.",
+                        "$w.key",
+                        ".",
+                        "$p.field"
+                      ],
+                      "value"
+                    ],
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$p.resolver",
+                        "catalogue"
+                      ],
+                      [
+                        "if",
+                        "$hasCollections",
+                        [
+                          "concat",
+                          "Curated: ",
+                          "$selection"
+                        ],
+                        null
+                      ],
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$p.resolver",
+                          "collection"
+                        ],
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$p.collectionField",
+                            "item"
+                          ],
+                          [
+                            "if",
+                            [
+                              "not",
+                              [
+                                "eq",
+                                [
+                                  "count",
+                                  [
+                                    "objects",
+                                    [
+                                      "concat",
+                                      "identity.collection.",
+                                      "$w.key",
+                                      ".",
+                                      "$p.slot"
+                                    ],
+                                    "item"
+                                  ]
+                                ],
+                                0
+                              ]
+                            ],
+                            [
+                              "concat",
+                              "Selected: ",
+                              [
+                                "objects",
+                                [
+                                  "concat",
+                                  "identity.collection.",
+                                  "$w.key",
+                                  ".",
+                                  "$p.slot"
+                                ],
+                                "item"
+                              ]
+                            ],
+                            null
+                          ],
+                          [
+                            "optional",
+                            [
+                              "concat",
+                              "identity.collection.",
+                              "$w.key",
+                              ".",
+                              "$p.slot"
+                            ],
+                            "$p.collectionField"
+                          ]
+                        ],
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$p.resolver",
+                            "app"
+                          ],
+                          [
+                            "if",
+                            [
+                              "not",
+                              "$hasCollections"
+                            ],
+                            null,
+                            [
+                              "if",
+                              [
+                                "includes",
+                                "$selection",
+                                "$p.item"
+                              ],
+                              [
+                                "optional",
+                                [
+                                  "concat",
+                                  "identity.card.",
+                                  "$w.key",
+                                  ".",
+                                  "$p.item"
+                                ],
+                                "note"
+                              ],
+                              "Not curated; available in the shared full directory."
+                            ]
+                          ],
+                          null
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              },
+              {
+                "port": "record.put",
+                "args": {
+                  "record": "$worldValues",
+                  "key": "$p.id",
+                  "value": "$value"
+                },
+                "into": "worldValues"
+              }
+            ],
+            "yield": "$worldValues",
+            "into": "worldValues"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$w",
+              "key": "values",
+              "value": "$worldValues"
+            },
+            "into": "world"
+          }
+        ],
+        "yield": [
+          "append",
+          "$resolved",
+          [
+            "list",
+            "$world"
+          ]
+        ],
+        "into": "resolved"
+      },
+      {
+        "let": "eventInput",
+        "value": {
+          "policies": "$policies",
+          "worlds": "$resolved",
+          "identities": [
+            "objects",
+            "identity.assurance.scope",
+            "identity"
+          ],
+          "catalogueBound": "$catalogueBound",
+          "bindings": [
+            "map",
+            [
+              "filter",
+              "$change",
+              "s",
+              [
+                "includes",
+                [
+                  "list",
+                  "browser.attribute",
+                  "browser.write",
+                  "browser.content"
+                ],
+                [
+                  "at",
+                  "$s",
+                  "port"
+                ]
+              ]
+            ],
+            "s",
+            {
+              "port": "$s.port",
+              "args": {
+                "ref": "$s.args.ref",
+                "name": [
+                  "if",
+                  [
+                    "eq",
+                    "$s.port",
+                    "browser.content"
+                  ],
+                  "innerHTML",
+                  "$s.args.name"
+                ],
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$s.port",
+                    "browser.content"
+                  ],
+                  "$s.args.html",
+                  "$s.args.value"
+                ]
+              }
+            }
+          ],
+          "themeFields": "$themeFields"
+        }
+      },
+      {
+        "call": "identity.assurance.classify"
+      },
+      {
+        "let": "assuranceRows",
+        "value": "$result"
+      },
+      {
+        "let": "statuses",
+        "value": [
+          "list",
+          "intentionally-invariant",
+          "identity-mapped",
+          "missing",
+          "undecided"
+        ]
+      },
+      {
+        "let": "statusLabels",
+        "value": {
+          "intentionally-invariant": "Intentionally invariant",
+          "identity-mapped": "Identity mapped",
+          "missing": "Missing",
+          "undecided": "Undecided"
+        }
+      },
+      {
+        "let": "summary",
+        "value": [
+          "map",
+          "$statuses",
+          "s",
+          {
+            "status": "$s",
+            "count": [
+              "count",
+              [
+                "filter",
+                "$assuranceRows",
+                "r",
+                [
+                  "eq",
+                  "$r.status",
+                  "$s"
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "let": "report",
+        "value": {
+          "protocol": "worldwright/identity-assurance/1",
+          "scope": "Homepage: opening, navigation, Questions entrance, Threads, Map, application catalogue and collection headings, notes, images and ordering, appearance, interaction and footer. Downstream article, thread and map internals are not certified.",
+          "policy": "Equal output never implies intentional invariance. Missing and undecided relationships remain open work.",
+          "boundary": "Declared surface inventory plus automatic discovery of unclassified top-level cross browser writers. Catalogue rows check collection facts, selected-app notes, the view/serializer pipeline and cross content writer; they do not prove every inner renderer dependency. This is not exhaustive DOM, transitive dependency, visual or semantic verification.",
+          "identities": [
+            "map",
+            "$resolved",
+            "w",
+            "$w.key"
+          ],
+          "summary": "$summary",
+          "rows": "$assuranceRows"
+        }
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$report"
+        },
+        "into": "assuranceJson"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/identity-mappings.json",
+          "text": "$assuranceJson"
+        },
+        "into": "_"
+      },
+      {
+        "let": "body",
+        "value": [
+          "list",
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "assurance-intro"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "eyebrow"
+                },
+                "children": [
+                  "list",
+                  "ASSURANCE / IDENTITY MAPPINGS"
+                ]
+              },
+              {
+                "tag": "h1",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Where does each world reach?"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "The cross promises a world. This report shows what is deliberately shared, what is connected to identity, and where that promise remains unfinished."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "$report.policy"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "identity-mappings.json"
+                    },
+                    "children": [
+                      "list",
+                      "Download the machine-readable report ↗"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "nav",
+            "attrs": {
+              "class": "assurance-counts",
+              "aria-label": "Mapping status counts"
+            },
+            "children": [
+              "list",
+              [
+                "map",
+                "$summary",
+                "s",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": [
+                      "concat",
+                      "#status-",
+                      "$s.status"
+                    ]
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "strong",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "$s.count"
+                      ]
+                    },
+                    {
+                      "tag": "span",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "at",
+                          "$statusLabels",
+                          "$s.status"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "assurance-boundary"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "h2",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "What these statuses establish"
+                ]
+              },
+              {
+                "tag": "dl",
+                "attrs": {},
+                "children": [
+                  "list",
+                  {
+                    "tag": "dt",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Intentionally invariant"
+                    ]
+                  },
+                  {
+                    "tag": "dd",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "An explicit scoped policy and reason. A declaration is not a proof over all page descendants."
+                    ]
+                  },
+                  {
+                    "tag": "dt",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Identity mapped"
+                    ]
+                  },
+                  {
+                    "tag": "dd",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "All four world values, the runtime data projection and the corresponding cross writer are present."
+                    ]
+                  },
+                  {
+                    "tag": "dt",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Missing"
+                    ]
+                  },
+                  {
+                    "tag": "dd",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Identity variation is expected, but a value or connection is absent. An invariant declaration can also conflict with a cross writer."
+                    ]
+                  },
+                  {
+                    "tag": "dt",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Undecided"
+                    ]
+                  },
+                  {
+                    "tag": "dd",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "The intended relationship has not been established. Equal outputs do not resolve it."
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "$report.scope"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "$report.boundary"
+                ]
+              }
+            ]
+          },
+          [
+            "map",
+            "$statuses",
+            "status",
+            {
+              "tag": "section",
+              "attrs": {
+                "id": [
+                  "concat",
+                  "status-",
+                  "$status"
+                ],
+                "class": "assurance-section"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "at",
+                      "$statusLabels",
+                      "$status"
+                    ]
+                  ]
+                },
+                [
+                  "map",
+                  [
+                    "filter",
+                    "$assuranceRows",
+                    "r",
+                    [
+                      "eq",
+                      "$r.status",
+                      "$status"
+                    ]
+                  ],
+                  "r",
+                  {
+                    "tag": "details",
+                    "attrs": {
+                      "class": "assurance-row",
+                      "data-status": "$r.status"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "summary",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "span",
+                            "attrs": {
+                              "class": "assurance-area"
+                            },
+                            "children": [
+                              "list",
+                              "$r.area"
+                            ]
+                          },
+                          {
+                            "tag": "strong",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "$r.label"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "div",
+                        "attrs": {
+                          "class": "assurance-detail"
+                        },
+                        "children": [
+                          "list",
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "$r.reason"
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "assurance-next"
+                            },
+                            "children": [
+                              "list",
+                              "Next: ",
+                              "$r.next"
+                            ]
+                          },
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              {
+                                "tag": "code",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  "$r.source"
+                                ]
+                              }
+                            ]
+                          },
+                          [
+                            "if",
+                            [
+                              "not",
+                              [
+                                "eq",
+                                "$r.target",
+                                ""
+                              ]
+                            ],
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Target: ",
+                                {
+                                  "tag": "code",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    [
+                                      "concat",
+                                      "$r.target",
+                                      " · ",
+                                      "$r.sink"
+                                    ]
+                                  ]
+                                }
+                              ]
+                            },
+                            null
+                          ],
+                          [
+                            "if",
+                            [
+                              "eq",
+                              "$r.intent",
+                              "identity"
+                            ],
+                            {
+                              "tag": "dl",
+                              "attrs": {
+                                "class": "assurance-worlds"
+                              },
+                              "children": [
+                                "list",
+                                [
+                                  "map",
+                                  "$r.values",
+                                  "v",
+                                  {
+                                    "tag": "div",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "dt",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          "$v.identity"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "dd",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          [
+                                            "if",
+                                            [
+                                              "or",
+                                              [
+                                                "eq",
+                                                "$v.value",
+                                                null
+                                              ],
+                                              [
+                                                "eq",
+                                                "$v.value",
+                                                ""
+                                              ]
+                                            ],
+                                            "No declared value",
+                                            "$v.value"
+                                          ]
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              ]
+                            },
+                            null
+                          ],
+                          [
+                            "if",
+                            [
+                              "eq",
+                              "$r.intent",
+                              "identity"
+                            ],
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Runtime field: ",
+                                [
+                                  "if",
+                                  "$r.dataBound",
+                                  "present",
+                                  "missing"
+                                ],
+                                " · Cross writer: ",
+                                [
+                                  "if",
+                                  "$r.writerBound",
+                                  "present",
+                                  "missing"
+                                ]
+                              ]
+                            },
+                            null
+                          ],
+                          {
+                            "tag": "p",
+                            "attrs": {
+                              "class": "assurance-limit"
+                            },
+                            "children": [
+                              "list",
+                              "$r.boundary"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "let": "prefix",
+        "value": "../"
+      },
+      {
+        "let": "pageTitle",
+        "value": "Identity mapping assurance — Aaron Alderman"
+      },
+      {
+        "let": "description",
+        "value": "An algebra-generated account of invariant, identity-mapped, missing and undecided homepage relationships."
+      },
+      {
+        "let": "canonical",
+        "value": "https://aaronalderman.com/assurance/"
+      },
+      {
+        "let": "light",
+        "value": "home"
+      },
+      {
+        "call": "publication.document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ]
+  }
+}

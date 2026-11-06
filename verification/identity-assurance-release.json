@@ -1,0 +1,56 @@
+{
+  "protocol": "worldwright/identity-assurance-release/1",
+  "base": "bf3a638",
+  "authoring": {
+    "applied": true,
+    "contractSha256": "beab900c4e1ef83eb03aed46915fa2faa9d65a94ce1773a7d6cf58c99bea67a5",
+    "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7"
+  },
+  "summary": [
+    {
+      "status": "intentionally-invariant",
+      "count": 7
+    },
+    {
+      "status": "identity-mapped",
+      "count": 51
+    },
+    {
+      "status": "missing",
+      "count": 2
+    },
+    {
+      "status": "undecided",
+      "count": 10
+    }
+  ],
+  "scope": "Homepage: opening, navigation, Questions entrance, Threads, Map, application catalogue and collection headings, notes, images and ordering, appearance, interaction and footer. Downstream article, thread and map internals are not certified.",
+  "boundary": "Declared surface inventory plus automatic discovery of unclassified top-level cross browser writers. Catalogue rows check collection facts, selected-app notes, the view/serializer pipeline and cross content writer; they do not prove every inner renderer dependency. This is not exhaustive DOM, transitive dependency, visual or semantic verification.",
+  "sources": {
+    "algebra/publication.process.json": "a11a94828937ceedd56216f29a07bf07bac2b2a0705e7d6c5b78e9fd2977abb3",
+    "source/hierarchy.rel": "e5bf885c27a4bb331f4598dcb3777b7c14933ec94b8c0e58dafc89c84404c795",
+    "source/hierarchy.json": "0213042f6de0274f46d6d01e178123bbc2cddd517c2ae1367c3c0be0c81adfc7",
+    "hierarchy.test.mjs": "7a23e57bc52bfe00cbbcbb54f1de7a72e4d9c79c9ec63512da46b09252dbd6c0",
+    "algebra-publication.test.mjs": "e843d9f83c59872e4320886dc04bca7f0d13424ed8d25919d223ccbdc238a345",
+    "dist/assurance/index.html": "b05447229953696c241f0a58d7ea770eaf62dbf52ac1db53ce760cfd33e51eef",
+    "dist/assurance/identity-mappings.json": "0e80578cf2505cd395d62c3d437cf4e20e96dfd22867fdd32b4ddb894f10a790",
+    "dist/build-receipt.json": "c0be98088a48d95d83c6d2d1cf9dce731a149cdd5de148758f5cd0f6c61026ab"
+  },
+  "checks": {
+    "tests": 172,
+    "passed": 172,
+    "failed": 0,
+    "presentation": "passed",
+    "desktop": "inspected",
+    "mobile": {
+      "viewportWidth": 390,
+      "documentWidth": 375,
+      "scrollWidth": 375
+    }
+  },
+  "open": [
+    "threads.context",
+    "atlas.context"
+  ],
+  "corpus": "corpus/assurance/identity_mapping_assurance.md"
+}
