@@ -60,3 +60,5 @@ const doc=E('html',{lang:'en'},E('head',{},E('meta',{charset:'utf-8'}),E('meta',
 module.queries['frontdoors.worldwright']=[{let:'input',value:doc},{call:'html.serialize'},{port:'file.write',args:{path:'worldwright/index.html',text:C('<!doctype html>\n','$result')},into:'_'}];save('algebra/front-doors.process.json',module);
 const pub=read('algebra/publication.process.json');if(!pub.queries['publication.build'].some(s=>s.call==='frontdoors.worldwright'))pub.queries['publication.build'].splice(3,0,{call:'frontdoors.worldwright'});save('algebra/publication.process.json',pub);
 const rel='source/expedition.rel';fs.writeFileSync(rel,fs.readFileSync(rel,'utf8').replace(/"stylesheetVersion", "worlds-[0-9]+"/,'"stylesheetVersion", "worlds-3"'));
+
+await import('./author-capabilities.mjs');

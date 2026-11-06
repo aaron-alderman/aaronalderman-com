@@ -1,6 +1,8 @@
 # Aaron Alderman — a personal expedition
 
-Encounter has its own microsite at `/encounter/`, alongside Temple, Sourcery, Claimipedia and Worldwright. Its live title example uses the existing `ec.prepare`, `ec.run` and `ec.patch` contracts. The story and row inherit the source title; the web menu retains its local label. Changes last for the browser session only; Reset restores the original source.
+The homepage separates project cards (Temple, Sourcery, Claimipedia and Worldwright) from a smaller Capabilities list: Encounter, Kingdom, World Modelling, Creativity and The Field. `CapabilitySet` facts and `frontdoors.home` own this second list; `tooling/author-capabilities.mjs` maintains its source and presentation. Encounter links to its live example at `/encounter/`; the others enter existing reading paths and scenes.
+
+Encounter's live title example uses the existing `ec.prepare`, `ec.run` and `ec.patch` contracts. The story and row inherit the source title; the web menu retains its local label. Changes last for the browser session only; Reset restores the original source.
 
 `algebra/encounter-demo.process.json` owns the events, transitions, inspection choices and projections. `algebra/encounter.process.json` composes the page and admitted browser runtime through the main publication algebra. The three `encounter-code-*` modules are exact copies of the retained Encounter engine. No new interpreter, editor, native port implementation or execution-budget extension is introduced. `source/encounter/reuse.json` records reuse origins and hashes.
 

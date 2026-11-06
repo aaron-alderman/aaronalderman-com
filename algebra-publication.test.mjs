@@ -107,13 +107,17 @@ test('reading paths connect the guided journey to research while microsites keep
 
 test('the homepage links directly to published microsites and Claimipedia has a working standalone introduction',async()=>{
  const home=await read('dist/index.html'),menu=home.match(/<nav class="hero-microsites"[\s\S]*?<\/nav>/)?.[0];assert.ok(menu);
- assert.equal((menu.match(/<a /g)||[]).length,5);
- assert.equal((menu.match(/class="world-emblem"/g)||[]).length,5);assert.equal((menu.match(/class="world-card-description"/g)||[]).length,5);
+ assert.equal((menu.match(/<a /g)||[]).length,4);
+ assert.equal((menu.match(/class="world-emblem"/g)||[]).length,4);assert.equal((menu.match(/class="world-card-description"/g)||[]).length,4);
  assert.equal((menu.match(/<img /g)||[]).length,4);assert.ok(!menu.includes('<svg'));
+ const capabilities=home.match(/<nav class="hero-capabilities"[\s\S]*?<\/nav>/)?.[0];assert.ok(capabilities);
+ assert.deepEqual([...capabilities.matchAll(/<a [^>]*>([^<]+)</g)].map(m=>m[1]),['Encounter','Kingdom','World Modelling','Creativity','The Field']);
+ assert.ok(!menu.includes('href="encounter/"'));assert.ok(capabilities.includes('href="encounter/"'));
+ for(const href of ['gate.html#path-kingdom','places/representation.html','places/tiling.html','gate.html#path-field'])assert.ok(capabilities.includes(`href="${href}"`));
  for(const slug of ['temple','sourcery','claimipedia','worldwright'])assert.ok(menu.includes('assets/world-emblems/'+slug+'-v1.png'));
  const worldwright=await read('dist/worldwright/index.html');assert.ok(worldwright.includes('Worldwright / In preparation'));assert.ok(worldwright.includes('This is a placeholder'));assert.equal(meta(worldwright,'og:url'),'https://aaronalderman.com/worldwright/');
- for(const [name,href]of [['Temple','temple/'],['Sourcery','sourcery/'],['Claimipedia','claimipedia/'],['Worldwright','worldwright/'],['Encounter','encounter/']])assert.ok(menu.includes(`href="${href}"`)&&menu.includes(`<strong>${name}</strong>`));
- assert.ok(home.includes('expedition.css?v=worlds-3'));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));const atlas=home.slice(home.indexOf('<section class="section atlas"'));assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
+ for(const [name,href]of [['Temple','temple/'],['Sourcery','sourcery/'],['Claimipedia','claimipedia/'],['Worldwright','worldwright/']])assert.ok(menu.includes(`href="${href}"`)&&menu.includes(`<strong>${name}</strong>`));
+ assert.ok(home.includes('expedition.css?v=capabilities-1'));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));const atlas=home.slice(home.indexOf('<section class="section atlas"'));assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
  const stub=await read('dist/claimipedia/index.html');assert.ok(stub.includes('id="claimipedia-title"'));assert.ok(stub.includes('Knowledge, connected.'));assert.ok(stub.includes('Understanding, evolving.'));assert.ok(stub.includes('An interactive introduction'));assert.ok(stub.includes('href="../gate.html#path-claimipedia"'));assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(stub.includes('runtime.js?v=review-1'));
 });
 

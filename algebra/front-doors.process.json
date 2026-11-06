@@ -170,32 +170,130 @@
       {
         "let": "result",
         "value": {
-          "tag": "nav",
+          "tag": "div",
           "attrs": {
-            "class": "hero-microsites",
-            "id": "microsites",
-            "aria-label": "Microsites"
+            "class": "hero-entrances"
           },
           "children": [
             "list",
             {
-              "tag": "p",
+              "tag": "nav",
               "attrs": {
-                "class": "eyebrow"
+                "class": "hero-microsites",
+                "id": "microsites",
+                "aria-label": "Microsites"
               },
               "children": [
                 "list",
-                "Explore the worlds"
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    "Explore the worlds"
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "microsite-menu"
+                  },
+                  "children": [
+                    "list",
+                    "$cards"
+                  ]
+                }
               ]
             },
             {
-              "tag": "div",
+              "tag": "nav",
               "attrs": {
-                "class": "microsite-menu"
+                "class": "hero-capabilities",
+                "aria-label": "Capabilities"
               },
               "children": [
                 "list",
-                "$cards"
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    "Capabilities"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "capability-intro"
+                  },
+                  "children": [
+                    "list",
+                    "Ways of working that connect across the projects."
+                  ]
+                },
+                {
+                  "tag": "ul",
+                  "attrs": {
+                    "class": "capability-list"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "map",
+                      [
+                        "subjects",
+                        "isa",
+                        "CapabilitySet"
+                      ],
+                      "capability",
+                      {
+                        "tag": "li",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "href": [
+                                "one",
+                                "$capability",
+                                "href"
+                              ],
+                              "title": [
+                                "one",
+                                "$capability",
+                                "description"
+                              ]
+                            },
+                            "children": [
+                              "list",
+                              [
+                                "one",
+                                "$capability",
+                                "name"
+                              ],
+                              {
+                                "tag": "span",
+                                "attrs": {
+                                  "class": "capability-arrow",
+                                  "aria-hidden": "true"
+                                },
+                                "children": [
+                                  "list",
+                                  "↗"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
               ]
             }
           ]
