@@ -100,3 +100,5 @@ Encounter source batch 02 migrates six further modules (66 queries) after exact 
 | `source/microsites/temple-ui.encounter` | 20 | `algebra/microsite-temple-ui.process.json` |
 
 The existing process frontend now supports `each` only in explicitly selected statement profiles. Temple UI keeps its original try/catch/error JSON field order via a checked field-order profile. All six modules have separately pinned operator and direct-effect profiles; these do not grant runtime effects. The original native loader, seed, lowerer, runtime grants and 20-million-step limit are unchanged. No root JSON cache or parse-failure fallback remains for these modules. The source/oracle/profile ledger and pre-switch gate live under `source/process-authoring/batch-02/`; `verification/encounter-batch-02-release.json` records the release and source hashes.
+
+Repository care: [licensing](LICENSE.md), [Christian stewardship covenant](CHRISTIAN_STEWARDSHIP_COVENANT.md), and [source/evidence hygiene](STEWARDSHIP.md).
