@@ -23,15 +23,16 @@
   },
   "entrances": {
     "authoring": "tooling/author-world-entrances.mjs",
-    "icons": "Four inline SVG illustrations stored as REL plans and serialized by the algebra.",
+    "icons": "Four original transparent raster illustrations in assets/world-emblems, bound by REL and rendered as decorative images.",
     "presentation": "Distinct gold, rose, sage and blue light; decorative orbital backgrounds; explanatory copy and native anchor cards.",
     "worldwright": "worldwright/index.html is an explicitly labelled placeholder for the supporting platform.",
-    "stylesheet": "expedition.css?v=worlds-2",
+    "stylesheet": "expedition.css?v=worlds-3",
     "checks": [
       "Desktop two-column and mobile single-column layout",
       "No horizontal overflow at 390 CSS pixels",
       "Keyboard Enter follows the Worldwright card",
       "Reduced-motion CSS removes card animation and movement"
-    ]
+    ],
+    "motion": "Finite hover and keyboard-focus transitions: card lift, moving highlight, orbital glow and a distinct emblem tilt/lift per world. Reduced-motion preferences disable transforms and transitions."
   }
 }
