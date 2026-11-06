@@ -466,15 +466,26 @@
         "into": "hDefinition"
       },
       {
+        "let": "hDefinitionText",
+        "value": [
+          "concat",
+          "process hierarchy.shared:\n",
+          "$hDefinition.text"
+        ]
+      },
+      {
+        "port": "digest.sha256",
+        "args": {
+          "text": "$hDefinitionText"
+        },
+        "into": "hDefinitionDigest"
+      },
+      {
         "port": "kernel.invoke",
         "args": {
           "query": "sp.present",
           "input": {
-            "text": [
-              "concat",
-              "process hierarchy.shared:\n",
-              "$hDefinition.text"
-            ],
+            "text": "$hDefinitionText",
             "file": "hierarchy-shared.process",
             "language": "process",
             "theme": "dark",
@@ -483,7 +494,8 @@
             "origin": {
               "file": "algebra/hierarchy.process.json",
               "query": "hierarchy.shared"
-            }
+            },
+            "expectedHash": "$hDefinitionDigest"
           }
         },
         "into": "hDefinitionView"
