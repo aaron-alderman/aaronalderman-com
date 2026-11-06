@@ -168,6 +168,98 @@
         "into": "cards"
       },
       {
+        "fold": [
+          "subjects",
+          "isa",
+          "CapabilitySet"
+        ],
+        "as": "capability",
+        "accumulator": "capabilityCards",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "json.parse",
+            "args": {
+              "text": [
+                "one",
+                "$capability",
+                "icon"
+              ]
+            },
+            "into": "capabilityIcon"
+          }
+        ],
+        "yield": [
+          "append",
+          "$capabilityCards",
+          [
+            "list",
+            {
+              "tag": "li",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "class": "capability-card",
+                    "href": [
+                      "one",
+                      "$capability",
+                      "href"
+                    ]
+                  },
+                  "children": [
+                    "list",
+                    "$capabilityIcon",
+                    {
+                      "tag": "strong",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "one",
+                          "$capability",
+                          "name"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "capability-blurb"
+                      },
+                      "children": [
+                        "list",
+                        [
+                          "one",
+                          "$capability",
+                          "description"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "span",
+                      "attrs": {
+                        "class": "capability-arrow",
+                        "aria-hidden": "true"
+                      },
+                      "children": [
+                        "list",
+                        "↗"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        ],
+        "into": "capabilityCards"
+      },
+      {
         "let": "result",
         "value": {
           "tag": "div",
@@ -211,6 +303,7 @@
               "tag": "nav",
               "attrs": {
                 "class": "hero-capabilities",
+                "id": "capabilities",
                 "aria-label": "Capabilities"
               },
               "children": [
@@ -242,56 +335,7 @@
                   },
                   "children": [
                     "list",
-                    [
-                      "map",
-                      [
-                        "subjects",
-                        "isa",
-                        "CapabilitySet"
-                      ],
-                      "capability",
-                      {
-                        "tag": "li",
-                        "attrs": {},
-                        "children": [
-                          "list",
-                          {
-                            "tag": "a",
-                            "attrs": {
-                              "href": [
-                                "one",
-                                "$capability",
-                                "href"
-                              ],
-                              "title": [
-                                "one",
-                                "$capability",
-                                "description"
-                              ]
-                            },
-                            "children": [
-                              "list",
-                              [
-                                "one",
-                                "$capability",
-                                "name"
-                              ],
-                              {
-                                "tag": "span",
-                                "attrs": {
-                                  "class": "capability-arrow",
-                                  "aria-hidden": "true"
-                                },
-                                "children": [
-                                  "list",
-                                  "↗"
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
+                    "$capabilityCards"
                   ]
                 }
               ]
@@ -782,6 +826,418 @@
           ]
         },
         "into": "_"
+      }
+    ],
+    "frontdoors.capabilities": [
+      {
+        "each": [
+          "subjects",
+          "isa",
+          "CapabilitySet"
+        ],
+        "as": "capability",
+        "steps": [
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                [
+                  "one",
+                  "$capability",
+                  "slug"
+                ],
+                "encounter"
+              ]
+            ],
+            "then": [
+              {
+                "port": "json.parse",
+                "args": {
+                  "text": [
+                    "one",
+                    "$capability",
+                    "icon"
+                  ]
+                },
+                "into": "capabilityIcon"
+              },
+              {
+                "port": "json.parse",
+                "args": {
+                  "text": [
+                    "one",
+                    "$capability",
+                    "paragraphs"
+                  ]
+                },
+                "into": "paragraphs"
+              },
+              {
+                "port": "json.parse",
+                "args": {
+                  "text": [
+                    "one",
+                    "$capability",
+                    "links"
+                  ]
+                },
+                "into": "links"
+              },
+              {
+                "let": "input",
+                "value": {
+                  "tag": "html",
+                  "attrs": {
+                    "lang": "en"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "head",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "charset": "utf-8"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "name": "viewport",
+                            "content": "width=device-width, initial-scale=1"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "title",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            [
+                              "concat",
+                              [
+                                "one",
+                                "$capability",
+                                "name"
+                              ],
+                              " — Aaron Alderman"
+                            ]
+                          ]
+                        },
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "name": "description",
+                            "content": [
+                              "one",
+                              "$capability",
+                              "description"
+                            ]
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "link",
+                          "attrs": {
+                            "rel": "canonical",
+                            "href": [
+                              "concat",
+                              "https://aaronalderman.com/",
+                              [
+                                "one",
+                                "$capability",
+                                "href"
+                              ]
+                            ]
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "link",
+                          "attrs": {
+                            "rel": "stylesheet",
+                            "href": "../expedition.css?v=capabilities-2"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "property": "og:title",
+                            "content": [
+                              "one",
+                              "$capability",
+                              "name"
+                            ]
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "property": "og:description",
+                            "content": [
+                              "one",
+                              "$capability",
+                              "description"
+                            ]
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "meta",
+                          "attrs": {
+                            "property": "og:url",
+                            "content": [
+                              "concat",
+                              "https://aaronalderman.com/",
+                              [
+                                "one",
+                                "$capability",
+                                "href"
+                              ]
+                            ]
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "body",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "class": "skip",
+                            "href": "#main"
+                          },
+                          "children": [
+                            "list",
+                            "Skip to content"
+                          ]
+                        },
+                        {
+                          "tag": "header",
+                          "attrs": {
+                            "class": "masthead"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "class": "brand",
+                                "href": "../index.html"
+                              },
+                              "children": [
+                                "list",
+                                "Aaron Alderman"
+                              ]
+                            },
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "aria-label": "Site"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../index.html#capabilities"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Capabilities"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../index.html#microsites"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Explore the worlds"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "main",
+                          "attrs": {
+                            "id": "main",
+                            "class": "capability-page"
+                          },
+                          "children": [
+                            "list",
+                            "$capabilityIcon",
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "eyebrow"
+                              },
+                              "children": [
+                                "list",
+                                "A connected set of capabilities"
+                              ]
+                            },
+                            {
+                              "tag": "h1",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                [
+                                  "one",
+                                  "$capability",
+                                  "name"
+                                ]
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "lead"
+                              },
+                              "children": [
+                                "list",
+                                [
+                                  "one",
+                                  "$capability",
+                                  "lead"
+                                ]
+                              ]
+                            },
+                            "$paragraphs",
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "class": "capability-page-links",
+                                "aria-label": "Explore this capability"
+                              },
+                              "children": [
+                                "list",
+                                "$links"
+                              ]
+                            },
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "class": "capability-siblings",
+                                "aria-label": "Other capabilities"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../encounter/"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Encounter"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../kingdom/"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Kingdom"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../world-modelling/"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "World Modelling"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../creativity/"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Creativity"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "../the-field/"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "The Field"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "call": "html.serialize"
+              },
+              {
+                "port": "file.write",
+                "args": {
+                  "path": [
+                    "concat",
+                    [
+                      "one",
+                      "$capability",
+                      "href"
+                    ],
+                    "index.html"
+                  ],
+                  "text": [
+                    "concat",
+                    "<!doctype html>\n",
+                    "$result"
+                  ]
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
       }
     ]
   }

@@ -39,7 +39,7 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  const b=await fs.readFile(path.join(root,'dist/assets/sourcerer-threshold.png'));
  assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b.readUInt32BE(16),1672);assert.equal(b.readUInt32BE(20),941);
  assert.ok(b.length<5_000_000);
- const xml=await read('dist/sitemap.xml');assert.equal((xml.match(/<loc>/g)||[]).length,49);
+ const xml=await read('dist/sitemap.xml');assert.equal((xml.match(/<loc>/g)||[]).length,53);
  assert.ok(xml.includes('https://aaronalderman.com/claimipedia/'));
  assert.ok(xml.includes('https://aaronalderman.com/gate.html'));
  for(const id of Object.keys(scenes))assert.ok(xml.includes(`https://aaronalderman.com/places/${id}.html`));
@@ -111,13 +111,18 @@ test('the homepage links directly to published microsites and Claimipedia has a 
  assert.equal((menu.match(/class="world-emblem"/g)||[]).length,4);assert.equal((menu.match(/class="world-card-description"/g)||[]).length,4);
  assert.equal((menu.match(/<img /g)||[]).length,4);assert.ok(!menu.includes('<svg'));
  const capabilities=home.match(/<nav class="hero-capabilities"[\s\S]*?<\/nav>/)?.[0];assert.ok(capabilities);
- assert.deepEqual([...capabilities.matchAll(/<a [^>]*>([^<]+)</g)].map(m=>m[1]),['Encounter','Kingdom','World Modelling','Creativity','The Field']);
+ assert.deepEqual([...capabilities.matchAll(/<strong>([^<]+)</g)].map(m=>m[1]),['Encounter','Kingdom','World Modelling','Creativity','The Field']);
  assert.ok(!menu.includes('href="encounter/"'));assert.ok(capabilities.includes('href="encounter/"'));
- for(const href of ['gate.html#path-kingdom','places/representation.html','places/tiling.html','gate.html#path-field'])assert.ok(capabilities.includes(`href="${href}"`));
+ for(const href of ['kingdom/','world-modelling/','creativity/','the-field/'])assert.ok(capabilities.includes(`href="${href}"`));
+ assert.equal((capabilities.match(/<svg /g)||[]).length,5);
+ assert.equal((capabilities.match(/class="capability-blurb"/g)||[]).length,5);
+ for(const [slug,name]of [['kingdom','Kingdom'],['world-modelling','World Modelling'],['creativity','Creativity'],['the-field','The Field']]){
+  const page=await read('dist/'+slug+'/index.html');assert.ok(page.includes('<h1>'+name+'</h1>'));assert.ok(page.includes('class="capability-page-links"'));assert.equal(meta(page,'og:url'),'https://aaronalderman.com/'+slug+'/');assert.ok(!page.includes('>list'));assert.ok(!page.includes('<script'));
+ }
  for(const slug of ['temple','sourcery','claimipedia','worldwright'])assert.ok(menu.includes('assets/world-emblems/'+slug+'-v1.png'));
  const worldwright=await read('dist/worldwright/index.html');assert.ok(worldwright.includes('Worldwright / In preparation'));assert.ok(worldwright.includes('This is a placeholder'));assert.equal(meta(worldwright,'og:url'),'https://aaronalderman.com/worldwright/');
  for(const [name,href]of [['Temple','temple/'],['Sourcery','sourcery/'],['Claimipedia','claimipedia/'],['Worldwright','worldwright/']])assert.ok(menu.includes(`href="${href}"`)&&menu.includes(`<strong>${name}</strong>`));
- assert.ok(home.includes('expedition.css?v=capabilities-1'));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));const atlas=home.slice(home.indexOf('<section class="section atlas"'));assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
+ assert.ok(home.includes('expedition.css?v=capabilities-2'));assert.ok(!menu.includes('gate.html'));assert.ok(!menu.includes('github.io'));const atlas=home.slice(home.indexOf('<section class="section atlas"'));assert.ok(atlas.includes('Machines &amp; agency'));assert.ok(!atlas.includes('<strong>Sourcery</strong>'));
  const stub=await read('dist/claimipedia/index.html');assert.ok(stub.includes('id="claimipedia-title"'));assert.ok(stub.includes('Knowledge, connected.'));assert.ok(stub.includes('Understanding, evolving.'));assert.ok(stub.includes('An interactive introduction'));assert.ok(stub.includes('href="../gate.html#path-claimipedia"'));assert.equal(meta(stub,'og:url'),'https://aaronalderman.com/claimipedia/');assert.ok(stub.includes('runtime.js?v=review-1'));
 });
 
