@@ -24,6 +24,8 @@ test('microsite navigation and referenced resources stay inside the ecosystem an
  }
  for(const file of ['temple/index.html','temple/films/index.html']){const html=read('dist/'+file).toString();assert.ok(html.includes('<span>Temple</span>'));assert.ok(!html.includes('aria-label="Sourcery, back'));}
  const temple=read('dist/temple/index.html').toString();for(const obsolete of ['latest integrated qualification','101 of 101','486 hostile cases','Claimipedia opens soon','Enforced in Claimipedia today'])assert.ok(!temple.includes(obsolete));
+ assert.ok(temple.includes('software that checks proposed changes against explicit rules and authority'));
+ const sourcery=read('dist/sourcery/index.html').toString();assert.ok(sourcery.includes('Sourcery creates software from explicit descriptions'));assert.ok(sourcery.includes('broomsticks illustrate automation'));for(const obsolete of ['opening soon','opens soon','How Sourcery and Claimipedia work today.','Enforced in Claimipedia today'])assert.ok(!sourcery.includes(obsolete));
 });
 test('every captured microsite asset and both complete stylesheets retain their exact bytes',()=>{
  for(const sheet of receipt.sheets){assert.equal(sha(read(sheet.source)),sheet.sha256);assert.equal(sha(read('dist/'+sheet.path)),sheet.sha256);}
