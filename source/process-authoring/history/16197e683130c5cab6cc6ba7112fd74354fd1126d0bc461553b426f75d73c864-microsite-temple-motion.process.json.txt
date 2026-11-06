@@ -1,0 +1,5942 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "motion.temple.init": [
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            [
+              "or",
+              [
+                "at",
+                "$env",
+                "dpr"
+              ],
+              1
+            ],
+            2
+          ]
+        },
+        "into": "arithmetic23"
+      },
+      {
+        "let": "dpr",
+        "value": "$arithmetic23"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "skyFrame",
+          "value": 0
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "skyLast",
+          "value": 0
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "skyResize",
+          "value": 0
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.sky.seed",
+          "input": {}
+        },
+        "into": "result"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.sky.start",
+          "input": {}
+        },
+        "into": "result"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "window",
+          "event": "resize",
+          "query": "motion.sky.resize",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "document",
+          "event": "visibilitychange",
+          "query": "motion.sky.start",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": {
+            "media": "(prefers-reduced-motion: reduce)"
+          },
+          "event": "change",
+          "query": "motion.sky.start",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "window",
+          "event": "scroll",
+          "query": "motion.sky.scroll",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.stone",
+          "input": {}
+        },
+        "into": "result"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "when": [
+          "at",
+          "$env",
+          "intersection"
+        ],
+        "then": [
+          {
+            "port": "browser.intersection",
+            "args": {
+              "selector": "[data-reveal]",
+              "query": "motion.temple.reveal",
+              "input": {},
+              "rootMargin": "0px 0px -10% 0px",
+              "threshold": 0.12
+            },
+            "into": "observer"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "revealObserver",
+              "value": "$observer"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "when": [
+          "not",
+          [
+            "at",
+            "$env",
+            "intersection"
+          ]
+        ],
+        "then": [
+          {
+            "port": "browser.select",
+            "args": {
+              "selector": "[data-reveal]"
+            },
+            "into": "items"
+          },
+          {
+            "each": "$items",
+            "as": "item",
+            "steps": [
+              {
+                "port": "browser.class",
+                "args": {
+                  "ref": [
+                    "at",
+                    "$item",
+                    "ref"
+                  ],
+                  "name": "in",
+                  "value": true
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "sceneTicking",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "window",
+          "event": "scroll",
+          "query": "motion.temple.scroll",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "window",
+          "event": "resize",
+          "query": "motion.temple.mode",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": {
+            "media": "(prefers-reduced-motion: reduce)"
+          },
+          "event": "change",
+          "query": "motion.temple.mode",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": {
+            "media": "(max-width: 819px)"
+          },
+          "event": "change",
+          "query": "motion.temple.mode",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.temple.mode",
+          "input": {}
+        },
+        "into": "result"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "#constellation"
+        },
+        "into": "constellation"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$constellation"
+            ],
+            0
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.constellation.init",
+              "input": {}
+            },
+            "into": "result"
+          }
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "#follow-btn"
+        },
+        "into": "follow"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$follow"
+            ],
+            0
+          ]
+        ],
+        "then": [
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#follow-btn",
+              "event": "click",
+              "query": "motion.temple.follow",
+              "input": {}
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "motion.temple.follow": [
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#follow-note",
+          "name": "hidden",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#follow-btn",
+          "name": "aria-expanded",
+          "value": "true"
+        },
+        "into": "_"
+      }
+    ],
+    "motion.temple.reveal": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "revealObserver"
+        },
+        "into": "revealObserver"
+      },
+      {
+        "each": [
+          "at",
+          "$eventInput",
+          "entries"
+        ],
+        "as": "entry",
+        "steps": [
+          {
+            "when": [
+              "at",
+              "$entry",
+              "isIntersecting"
+            ],
+            "then": [
+              {
+                "port": "browser.class",
+                "args": {
+                  "ref": [
+                    "at",
+                    "$entry",
+                    "ref"
+                  ],
+                  "name": "in",
+                  "value": true
+                },
+                "into": "_"
+              },
+              {
+                "port": "browser.unobserve",
+                "args": {
+                  "id": "$revealObserver",
+                  "ref": [
+                    "at",
+                    "$entry",
+                    "ref"
+                  ]
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "motion.temple.scroll": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "sceneTicking"
+        },
+        "into": "sceneTicking"
+      },
+      {
+        "when": [
+          "not",
+          "$sceneTicking"
+        ],
+        "then": [
+          {
+            "port": "state.set",
+            "args": {
+              "key": "sceneTicking",
+              "value": true
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.frame",
+            "args": {
+              "query": "motion.temple.scenes",
+              "input": {}
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "motion.temple.mode": [
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-scene]"
+        },
+        "into": "scenes"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$scenes"
+            ],
+            0
+          ]
+        ],
+        "then": [
+          {
+            "port": "browser.environment",
+            "args": {},
+            "into": "env"
+          },
+          {
+            "port": "browser.mediaQuery",
+            "args": {
+              "query": "(max-width: 819px)"
+            },
+            "into": "narrow"
+          },
+          {
+            "let": "static",
+            "value": [
+              "or",
+              [
+                "at",
+                "$env",
+                "reduced"
+              ],
+              "$narrow"
+            ]
+          },
+          {
+            "port": "browser.class",
+            "args": {
+              "ref": "[data-scene]",
+              "name": "static",
+              "value": "$static"
+            },
+            "into": "_"
+          },
+          {
+            "when": "$static",
+            "then": [
+              {
+                "port": "browser.attribute",
+                "args": {
+                  "ref": "[data-scene]",
+                  "name": "data-step",
+                  "value": "all"
+                },
+                "into": "_"
+              }
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.temple.scenes",
+              "input": {}
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "motion.temple.scenes": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "sceneTicking",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-progress]"
+        },
+        "into": "progressed"
+      },
+      {
+        "each": "$progressed",
+        "as": "item",
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$env",
+                  "height"
+                ],
+                [
+                  "at",
+                  [
+                    "at",
+                    "$item",
+                    "rect"
+                  ],
+                  "top"
+                ]
+              ]
+            },
+            "into": "arithmetic24"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$item",
+                    "rect"
+                  ],
+                  "height"
+                ],
+                [
+                  "at",
+                  "$env",
+                  "height"
+                ]
+              ]
+            },
+            "into": "arithmetic25"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$arithmetic24",
+                "$arithmetic25"
+              ]
+            },
+            "into": "arithmetic26"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "min",
+              "values": [
+                "list",
+                1,
+                "$arithmetic26"
+              ]
+            },
+            "into": "arithmetic27"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "max",
+              "values": [
+                "list",
+                0,
+                "$arithmetic27"
+              ]
+            },
+            "into": "arithmetic28"
+          },
+          {
+            "let": "progress",
+            "value": "$arithmetic28"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$progress",
+                0.2
+              ]
+            },
+            "into": "arithmetic29"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$arithmetic29",
+                0.55
+              ]
+            },
+            "into": "arithmetic30"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "min",
+              "values": [
+                "list",
+                1,
+                "$arithmetic30"
+              ]
+            },
+            "into": "arithmetic31"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "max",
+              "values": [
+                "list",
+                0,
+                "$arithmetic31"
+              ]
+            },
+            "into": "arithmetic32"
+          },
+          {
+            "let": "progress",
+            "value": "$arithmetic32"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$progress",
+              "digits": 3
+            },
+            "into": "progress"
+          },
+          {
+            "port": "browser.style",
+            "args": {
+              "ref": [
+                "at",
+                "$item",
+                "ref"
+              ],
+              "name": "--p",
+              "value": "$progress"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-scene]"
+        },
+        "into": "scenes"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$scenes"
+            ],
+            0
+          ]
+        ],
+        "then": [
+          {
+            "let": "scene",
+            "value": [
+              "at",
+              "$scenes",
+              0
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "includes",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$scene",
+                    "attributes"
+                  ],
+                  "class"
+                ],
+                "static"
+              ]
+            ],
+            "then": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      [
+                        "at",
+                        "$scene",
+                        "rect"
+                      ],
+                      "height"
+                    ],
+                    [
+                      "at",
+                      "$env",
+                      "height"
+                    ]
+                  ]
+                },
+                "into": "arithmetic33"
+              },
+              {
+                "let": "total",
+                "value": "$arithmetic33"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greater",
+                  "values": [
+                    "list",
+                    "$total",
+                    0
+                  ]
+                },
+                "into": "arithmetic34"
+              },
+              {
+                "let": "positive",
+                "value": "$arithmetic34"
+              },
+              {
+                "let": "progress",
+                "value": 0
+              },
+              {
+                "when": "$positive",
+                "then": [
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "multiply",
+                      "values": [
+                        "list",
+                        [
+                          "at",
+                          [
+                            "at",
+                            "$scene",
+                            "rect"
+                          ],
+                          "top"
+                        ],
+                        -1
+                      ]
+                    },
+                    "into": "arithmetic35"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "divide",
+                      "values": [
+                        "list",
+                        "$arithmetic35",
+                        "$total"
+                      ]
+                    },
+                    "into": "arithmetic36"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "min",
+                      "values": [
+                        "list",
+                        1,
+                        "$arithmetic36"
+                      ]
+                    },
+                    "into": "arithmetic37"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "max",
+                      "values": [
+                        "list",
+                        0,
+                        "$arithmetic37"
+                      ]
+                    },
+                    "into": "arithmetic38"
+                  },
+                  {
+                    "let": "progress",
+                    "value": "$arithmetic38"
+                  }
+                ]
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    "$progress",
+                    10,
+                    0.999
+                  ]
+                },
+                "into": "arithmetic39"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "floor",
+                  "values": [
+                    "list",
+                    "$arithmetic39"
+                  ]
+                },
+                "into": "arithmetic40"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "min",
+                  "values": [
+                    "list",
+                    9,
+                    "$arithmetic40"
+                  ]
+                },
+                "into": "arithmetic41"
+              },
+              {
+                "let": "index",
+                "value": "$arithmetic41"
+              },
+              {
+                "port": "browser.attribute",
+                "args": {
+                  "ref": [
+                    "at",
+                    "$scene",
+                    "ref"
+                  ],
+                  "name": "data-step",
+                  "value": [
+                    "at",
+                    [
+                      "list",
+                      "all",
+                      "c",
+                      "turn",
+                      "ark",
+                      "i",
+                      "s0",
+                      "d",
+                      "w",
+                      "s1",
+                      "six"
+                    ],
+                    "$index"
+                  ]
+                },
+                "into": "_"
+              },
+              {
+                "port": "browser.select",
+                "args": {
+                  "selector": "[data-scene] .scene-rail span"
+                },
+                "into": "rail"
+              },
+              {
+                "each": [
+                  "range",
+                  [
+                    "count",
+                    "$rail"
+                  ]
+                ],
+                "as": "i",
+                "steps": [
+                  {
+                    "port": "browser.class",
+                    "args": {
+                      "ref": [
+                        "at",
+                        [
+                          "at",
+                          "$rail",
+                          [
+                            "add",
+                            "$i",
+                            -1
+                          ]
+                        ],
+                        "ref"
+                      ],
+                      "name": "on",
+                      "value": [
+                        "eq",
+                        [
+                          "add",
+                          "$i",
+                          -1
+                        ],
+                        "$index"
+                      ]
+                    },
+                    "into": "_"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "motion.sky.star": [
+      {
+        "port": "random.values",
+        "args": {
+          "count": 8
+        },
+        "into": "r"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              0
+            ],
+            [
+              "at",
+              "$eventInput",
+              "width"
+            ]
+          ]
+        },
+        "into": "arithmetic42"
+      },
+      {
+        "let": "x",
+        "value": "$arithmetic42"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              1
+            ],
+            [
+              "at",
+              "$eventInput",
+              "height"
+            ],
+            1.7
+          ]
+        },
+        "into": "arithmetic43"
+      },
+      {
+        "let": "y",
+        "value": "$arithmetic43"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "power",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              2
+            ],
+            2.2
+          ]
+        },
+        "into": "arithmetic44"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$arithmetic44",
+            1.5
+          ]
+        },
+        "into": "arithmetic45"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$arithmetic45",
+            0.25
+          ]
+        },
+        "into": "arithmetic46"
+      },
+      {
+        "let": "radius",
+        "value": "$arithmetic46"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              3
+            ],
+            0.55
+          ]
+        },
+        "into": "arithmetic47"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$arithmetic47",
+            0.25
+          ]
+        },
+        "into": "arithmetic48"
+      },
+      {
+        "let": "alpha",
+        "value": "$arithmetic48"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              4
+            ],
+            3.141592653589793,
+            2
+          ]
+        },
+        "into": "arithmetic49"
+      },
+      {
+        "let": "phase",
+        "value": "$arithmetic49"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              5
+            ],
+            0.9
+          ]
+        },
+        "into": "arithmetic50"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$arithmetic50",
+            0.2
+          ]
+        },
+        "into": "arithmetic51"
+      },
+      {
+        "let": "speed",
+        "value": "$arithmetic51"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              6
+            ],
+            0.6
+          ]
+        },
+        "into": "arithmetic52"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$arithmetic52",
+            0.1
+          ]
+        },
+        "into": "arithmetic53"
+      },
+      {
+        "let": "depth",
+        "value": "$arithmetic53"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "less",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              7
+            ],
+            0.14
+          ]
+        },
+        "into": "arithmetic54"
+      },
+      {
+        "let": "warm",
+        "value": "$arithmetic54"
+      },
+      {
+        "let": "result",
+        "value": {
+          "x": "$x",
+          "y": "$y",
+          "r": "$radius",
+          "a": "$alpha",
+          "phase": "$phase",
+          "speed": "$speed",
+          "depth": "$depth",
+          "warm": "$warm"
+        }
+      }
+    ],
+    "motion.sky.mote": [
+      {
+        "port": "random.values",
+        "args": {
+          "count": [
+            "if",
+            [
+              "at",
+              "$eventInput",
+              "anywhere"
+            ],
+            7,
+            5
+          ]
+        },
+        "into": "r"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              0
+            ],
+            [
+              "at",
+              "$eventInput",
+              "width"
+            ]
+          ]
+        },
+        "into": "arithmetic55"
+      },
+      {
+        "let": "x",
+        "value": "$arithmetic55"
+      },
+      {
+        "let": "offset",
+        "value": [
+          "if",
+          [
+            "at",
+            "$eventInput",
+            "anywhere"
+          ],
+          2,
+          1
+        ]
+      },
+      {
+        "let": "y",
+        "value": [
+          "add",
+          [
+            "at",
+            "$eventInput",
+            "height"
+          ],
+          6
+        ]
+      },
+      {
+        "when": [
+          "at",
+          "$eventInput",
+          "anywhere"
+        ],
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$r",
+                  1
+                ],
+                [
+                  "at",
+                  "$eventInput",
+                  "height"
+                ],
+                0.5
+              ]
+            },
+            "into": "arithmetic56"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput",
+                  "height"
+                ],
+                "$arithmetic56"
+              ]
+            },
+            "into": "arithmetic57"
+          },
+          {
+            "let": "y",
+            "value": "$arithmetic57"
+          }
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              [
+                "add",
+                "$offset",
+                0
+              ]
+            ],
+            1.3
+          ]
+        },
+        "into": "arithmetic58"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$arithmetic58",
+            0.35
+          ]
+        },
+        "into": "arithmetic59"
+      },
+      {
+        "let": "radius",
+        "value": "$arithmetic59"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              [
+                "add",
+                "$offset",
+                1
+              ]
+            ],
+            0.16
+          ]
+        },
+        "into": "arithmetic60"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$arithmetic60",
+            0.05
+          ]
+        },
+        "into": "arithmetic61"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$arithmetic61",
+            -1
+          ]
+        },
+        "into": "arithmetic62"
+      },
+      {
+        "let": "vy",
+        "value": "$arithmetic62"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              [
+                "add",
+                "$offset",
+                2
+              ]
+            ],
+            0.5
+          ]
+        },
+        "into": "arithmetic63"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$arithmetic63",
+            0.08
+          ]
+        },
+        "into": "arithmetic64"
+      },
+      {
+        "let": "vx",
+        "value": "$arithmetic64"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$r",
+              [
+                "add",
+                "$offset",
+                3
+              ]
+            ],
+            0.5
+          ]
+        },
+        "into": "arithmetic65"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$arithmetic65",
+            0.2
+          ]
+        },
+        "into": "arithmetic66"
+      },
+      {
+        "let": "alpha",
+        "value": "$arithmetic66"
+      },
+      {
+        "let": "result",
+        "value": {
+          "x": "$x",
+          "y": "$y",
+          "r": "$radius",
+          "vy": "$vy",
+          "vx": "$vx",
+          "a": "$alpha",
+          "age": [
+            "if",
+            [
+              "at",
+              "$eventInput",
+              "anywhere"
+            ],
+            [
+              "at",
+              "$r",
+              6
+            ],
+            0
+          ]
+        }
+      }
+    ],
+    "motion.sky.seed": [
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            [
+              "or",
+              [
+                "at",
+                "$env",
+                "dpr"
+              ],
+              1
+            ],
+            2
+          ]
+        },
+        "into": "arithmetic67"
+      },
+      {
+        "let": "dpr",
+        "value": "$arithmetic67"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$env",
+              "width"
+            ],
+            "$dpr"
+          ]
+        },
+        "into": "arithmetic68"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "round",
+          "values": [
+            "list",
+            "$arithmetic68"
+          ]
+        },
+        "into": "arithmetic69"
+      },
+      {
+        "let": "pixelWidth",
+        "value": "$arithmetic69"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$env",
+              "height"
+            ],
+            "$dpr"
+          ]
+        },
+        "into": "arithmetic70"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "round",
+          "values": [
+            "list",
+            "$arithmetic70"
+          ]
+        },
+        "into": "arithmetic71"
+      },
+      {
+        "let": "pixelHeight",
+        "value": "$arithmetic71"
+      },
+      {
+        "port": "canvas.draw",
+        "args": {
+          "ref": "#sky",
+          "width": "$pixelWidth",
+          "height": "$pixelHeight",
+          "dpr": "$dpr",
+          "commands": [
+            "list"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "skySize",
+          "value": {
+            "width": [
+              "at",
+              "$env",
+              "width"
+            ],
+            "height": [
+              "at",
+              "$env",
+              "height"
+            ]
+          }
+        },
+        "into": "_"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$env",
+              "width"
+            ],
+            [
+              "at",
+              "$env",
+              "height"
+            ]
+          ]
+        },
+        "into": "arithmetic72"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            "$arithmetic72",
+            3300
+          ]
+        },
+        "into": "arithmetic73"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            460,
+            "$arithmetic73"
+          ]
+        },
+        "into": "arithmetic74"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "round",
+          "values": [
+            "list",
+            "$arithmetic74"
+          ]
+        },
+        "into": "arithmetic75"
+      },
+      {
+        "let": "n",
+        "value": "$arithmetic75"
+      },
+      {
+        "fold": [
+          "range",
+          "$n"
+        ],
+        "as": "i",
+        "accumulator": "stars",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.sky.star",
+              "input": {
+                "width": [
+                  "at",
+                  "$env",
+                  "width"
+                ],
+                "height": [
+                  "at",
+                  "$env",
+                  "height"
+                ]
+              }
+            },
+            "into": "star"
+          }
+        ],
+        "yield": [
+          "append",
+          "$stars",
+          [
+            "list",
+            "$star"
+          ]
+        ],
+        "into": "stars"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "skyStars",
+          "value": "$stars"
+        },
+        "into": "_"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            "$n",
+            9
+          ]
+        },
+        "into": "arithmetic76"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "round",
+          "values": [
+            "list",
+            "$arithmetic76"
+          ]
+        },
+        "into": "arithmetic77"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "max",
+          "values": [
+            "list",
+            12,
+            "$arithmetic77"
+          ]
+        },
+        "into": "arithmetic78"
+      },
+      {
+        "let": "n",
+        "value": "$arithmetic78"
+      },
+      {
+        "fold": [
+          "range",
+          "$n"
+        ],
+        "as": "i",
+        "accumulator": "motes",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.sky.mote",
+              "input": {
+                "width": [
+                  "at",
+                  "$env",
+                  "width"
+                ],
+                "height": [
+                  "at",
+                  "$env",
+                  "height"
+                ],
+                "anywhere": true
+              }
+            },
+            "into": "mote"
+          }
+        ],
+        "yield": [
+          "append",
+          "$motes",
+          [
+            "list",
+            "$mote"
+          ]
+        ],
+        "into": "motes"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "skyMotes",
+          "value": "$motes"
+        },
+        "into": "_"
+      }
+    ],
+    "motion.sky.plan": [
+      {
+        "let": "size",
+        "value": [
+          "at",
+          "$eventInput",
+          "size"
+        ]
+      },
+      {
+        "let": "commands",
+        "value": [
+          "list",
+          {
+            "kind": "call",
+            "name": "clearRect",
+            "args": [
+              "list",
+              0,
+              0,
+              [
+                "at",
+                "$size",
+                "width"
+              ],
+              [
+                "at",
+                "$size",
+                "height"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "fold": [
+          "at",
+          "$eventInput",
+          "stars"
+        ],
+        "as": "star",
+        "accumulator": "commands",
+        "initial": "$commands",
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$size",
+                  "height"
+                ],
+                1.7
+              ]
+            },
+            "into": "arithmetic79"
+          },
+          {
+            "let": "span",
+            "value": "$arithmetic79"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput",
+                  "scroll"
+                ],
+                [
+                  "at",
+                  "$star",
+                  "depth"
+                ],
+                0.22
+              ]
+            },
+            "into": "arithmetic80"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$star",
+                  "y"
+                ],
+                "$arithmetic80"
+              ]
+            },
+            "into": "arithmetic81"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "remainder",
+              "values": [
+                "list",
+                "$arithmetic81",
+                "$span"
+              ]
+            },
+            "into": "arithmetic82"
+          },
+          {
+            "let": "y",
+            "value": "$arithmetic82"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                "$y",
+                0
+              ]
+            },
+            "into": "arithmetic83"
+          },
+          {
+            "let": "negative",
+            "value": "$arithmetic83"
+          },
+          {
+            "when": "$negative",
+            "then": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    "$y",
+                    "$span"
+                  ]
+                },
+                "into": "arithmetic84"
+              },
+              {
+                "let": "y",
+                "value": "$arithmetic84"
+              }
+            ]
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$size",
+                  "height"
+                ],
+                0.35
+              ]
+            },
+            "into": "arithmetic85"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$y",
+                "$arithmetic85"
+              ]
+            },
+            "into": "arithmetic86"
+          },
+          {
+            "let": "y",
+            "value": "$arithmetic86"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                "$y",
+                -3
+              ]
+            },
+            "into": "arithmetic87"
+          },
+          {
+            "let": "above",
+            "value": "$arithmetic87"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$y",
+                [
+                  "add",
+                  [
+                    "at",
+                    "$size",
+                    "height"
+                  ],
+                  3
+                ]
+              ]
+            },
+            "into": "arithmetic88"
+          },
+          {
+            "let": "below",
+            "value": "$arithmetic88"
+          },
+          {
+            "when": [
+              "not",
+              [
+                "or",
+                "$above",
+                "$below"
+              ]
+            ],
+            "then": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$eventInput",
+                      "time"
+                    ],
+                    0.0011,
+                    [
+                      "at",
+                      "$star",
+                      "speed"
+                    ]
+                  ]
+                },
+                "into": "arithmetic89"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    "$arithmetic89",
+                    [
+                      "at",
+                      "$star",
+                      "phase"
+                    ]
+                  ]
+                },
+                "into": "arithmetic90"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "sin",
+                  "values": [
+                    "list",
+                    "$arithmetic90"
+                  ]
+                },
+                "into": "arithmetic91"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    0.38,
+                    "$arithmetic91"
+                  ]
+                },
+                "into": "arithmetic92"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    0.62,
+                    "$arithmetic92"
+                  ]
+                },
+                "into": "arithmetic93"
+              },
+              {
+                "let": "twinkle",
+                "value": [
+                  "if",
+                  [
+                    "at",
+                    "$eventInput",
+                    "still"
+                  ],
+                  0.85,
+                  "$arithmetic93"
+                ]
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$star",
+                      "a"
+                    ],
+                    "$twinkle"
+                  ]
+                },
+                "into": "arithmetic94"
+              },
+              {
+                "let": "alpha",
+                "value": "$arithmetic94"
+              },
+              {
+                "let": "commands",
+                "value": [
+                  "append",
+                  "$commands",
+                  [
+                    "list",
+                    {
+                      "kind": "set",
+                      "name": "globalAlpha",
+                      "value": "$alpha"
+                    },
+                    {
+                      "kind": "set",
+                      "name": "fillStyle",
+                      "value": [
+                        "if",
+                        [
+                          "at",
+                          "$star",
+                          "warm"
+                        ],
+                        "#ffe2a8",
+                        "#dfe4ff"
+                      ]
+                    },
+                    {
+                      "kind": "call",
+                      "name": "beginPath",
+                      "args": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "kind": "call",
+                      "name": "arc",
+                      "args": [
+                        "list",
+                        [
+                          "at",
+                          "$star",
+                          "x"
+                        ],
+                        "$y",
+                        [
+                          "at",
+                          "$star",
+                          "r"
+                        ],
+                        0,
+                        6.283185307179586
+                      ]
+                    },
+                    {
+                      "kind": "call",
+                      "name": "fill",
+                      "args": [
+                        "list"
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": "$commands",
+        "into": "commands"
+      },
+      {
+        "fold": [
+          "at",
+          "$eventInput",
+          "motes"
+        ],
+        "as": "mote",
+        "accumulator": "drawing",
+        "initial": {
+          "motes": [
+            "list"
+          ],
+          "commands": "$commands"
+        },
+        "steps": [
+          {
+            "let": "m",
+            "value": "$mote"
+          },
+          {
+            "let": "respawn",
+            "value": false
+          },
+          {
+            "when": [
+              "not",
+              [
+                "at",
+                "$eventInput",
+                "still"
+              ]
+            ],
+            "then": [
+              {
+                "port": "record.put",
+                "args": {
+                  "record": "$m",
+                  "key": "x",
+                  "value": [
+                    "add",
+                    [
+                      "at",
+                      "$m",
+                      "x"
+                    ],
+                    [
+                      "at",
+                      "$m",
+                      "vx"
+                    ]
+                  ]
+                },
+                "into": "m"
+              },
+              {
+                "port": "record.put",
+                "args": {
+                  "record": "$m",
+                  "key": "y",
+                  "value": [
+                    "add",
+                    [
+                      "at",
+                      "$m",
+                      "y"
+                    ],
+                    [
+                      "at",
+                      "$m",
+                      "vy"
+                    ]
+                  ]
+                },
+                "into": "m"
+              },
+              {
+                "port": "record.put",
+                "args": {
+                  "record": "$m",
+                  "key": "age",
+                  "value": [
+                    "add",
+                    [
+                      "at",
+                      "$m",
+                      "age"
+                    ],
+                    0.0016
+                  ]
+                },
+                "into": "m"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greater",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$m",
+                      "age"
+                    ],
+                    1
+                  ]
+                },
+                "into": "arithmetic95"
+              },
+              {
+                "let": "old",
+                "value": "$arithmetic95"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$size",
+                      "height"
+                    ],
+                    0.4
+                  ]
+                },
+                "into": "arithmetic96"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "less",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$m",
+                      "y"
+                    ],
+                    "$arithmetic96"
+                  ]
+                },
+                "into": "arithmetic97"
+              },
+              {
+                "let": "high",
+                "value": "$arithmetic97"
+              },
+              {
+                "let": "respawn",
+                "value": [
+                  "or",
+                  "$old",
+                  "$high"
+                ]
+              },
+              {
+                "when": "$respawn",
+                "then": [
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "motion.sky.mote",
+                      "input": {
+                        "width": [
+                          "at",
+                          "$size",
+                          "width"
+                        ],
+                        "height": [
+                          "at",
+                          "$size",
+                          "height"
+                        ],
+                        "anywhere": false
+                      }
+                    },
+                    "into": "m"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "let": "commands",
+            "value": [
+              "at",
+              "$drawing",
+              "commands"
+            ]
+          },
+          {
+            "when": [
+              "not",
+              "$respawn"
+            ],
+            "then": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "min",
+                  "values": [
+                    "list",
+                    1,
+                    [
+                      "at",
+                      "$m",
+                      "age"
+                    ]
+                  ]
+                },
+                "into": "arithmetic98"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "max",
+                  "values": [
+                    "list",
+                    0,
+                    "$arithmetic98"
+                  ]
+                },
+                "into": "arithmetic99"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    3.141592653589793,
+                    "$arithmetic99"
+                  ]
+                },
+                "into": "arithmetic100"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "sin",
+                  "values": [
+                    "list",
+                    "$arithmetic100"
+                  ]
+                },
+                "into": "arithmetic101"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$m",
+                      "a"
+                    ],
+                    "$arithmetic101"
+                  ]
+                },
+                "into": "arithmetic102"
+              },
+              {
+                "let": "alpha",
+                "value": "$arithmetic102"
+              },
+              {
+                "let": "commands",
+                "value": [
+                  "append",
+                  "$commands",
+                  [
+                    "list",
+                    {
+                      "kind": "set",
+                      "name": "globalAlpha",
+                      "value": "$alpha"
+                    },
+                    {
+                      "kind": "set",
+                      "name": "fillStyle",
+                      "value": "#f2c96f"
+                    },
+                    {
+                      "kind": "call",
+                      "name": "beginPath",
+                      "args": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "kind": "call",
+                      "name": "arc",
+                      "args": [
+                        "list",
+                        [
+                          "at",
+                          "$m",
+                          "x"
+                        ],
+                        [
+                          "at",
+                          "$m",
+                          "y"
+                        ],
+                        [
+                          "at",
+                          "$m",
+                          "r"
+                        ],
+                        0,
+                        6.283185307179586
+                      ]
+                    },
+                    {
+                      "kind": "call",
+                      "name": "fill",
+                      "args": [
+                        "list"
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": {
+          "motes": [
+            "append",
+            [
+              "at",
+              "$drawing",
+              "motes"
+            ],
+            [
+              "list",
+              "$m"
+            ]
+          ],
+          "commands": "$commands"
+        },
+        "into": "drawing"
+      },
+      {
+        "let": "result",
+        "value": {
+          "motes": [
+            "at",
+            "$drawing",
+            "motes"
+          ],
+          "commands": [
+            "append",
+            [
+              "at",
+              "$drawing",
+              "commands"
+            ],
+            [
+              "list",
+              {
+                "kind": "set",
+                "name": "globalAlpha",
+                "value": 1
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "motion.sky.draw": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "skyStars"
+        },
+        "into": "skyStars"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "skyMotes"
+        },
+        "into": "skyMotes"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "skySize"
+        },
+        "into": "skySize"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.sky.plan",
+          "input": {
+            "size": "$skySize",
+            "stars": "$skyStars",
+            "motes": "$skyMotes",
+            "scroll": [
+              "at",
+              "$env",
+              "scrollY"
+            ],
+            "time": [
+              "at",
+              "$eventInput",
+              "time"
+            ],
+            "still": [
+              "at",
+              "$eventInput",
+              "still"
+            ]
+          }
+        },
+        "into": "plan"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "skyMotes",
+          "value": [
+            "at",
+            "$plan",
+            "motes"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "canvas.draw",
+        "args": {
+          "ref": "#sky",
+          "commands": [
+            "at",
+            "$plan",
+            "commands"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "motion.sky.start": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "skyFrame"
+        },
+        "into": "skyFrame"
+      },
+      {
+        "port": "browser.cancel",
+        "args": {
+          "id": "$skyFrame"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "when": [
+          "or",
+          [
+            "at",
+            "$env",
+            "reduced"
+          ],
+          [
+            "at",
+            "$env",
+            "hidden"
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.sky.draw",
+              "input": {
+                "time": 0,
+                "still": true
+              }
+            },
+            "into": "result"
+          }
+        ]
+      },
+      {
+        "when": [
+          "not",
+          [
+            "or",
+            [
+              "at",
+              "$env",
+              "reduced"
+            ],
+            [
+              "at",
+              "$env",
+              "hidden"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "browser.frame",
+            "args": {
+              "query": "motion.sky.frame",
+              "input": {}
+            },
+            "into": "frame"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "skyFrame",
+              "value": "$frame"
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "motion.sky.frame": [
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "when": [
+          "and",
+          [
+            "not",
+            [
+              "at",
+              "$env",
+              "hidden"
+            ]
+          ],
+          [
+            "not",
+            [
+              "at",
+              "$env",
+              "reduced"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "browser.frame",
+            "args": {
+              "query": "motion.sky.frame",
+              "input": {}
+            },
+            "into": "frame"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "skyFrame",
+              "value": "$frame"
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.get",
+            "args": {
+              "key": "skyLast"
+            },
+            "into": "skyLast"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput",
+                  "time"
+                ],
+                "$skyLast"
+              ]
+            },
+            "into": "arithmetic103"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greaterEqual",
+              "values": [
+                "list",
+                "$arithmetic103",
+                32
+              ]
+            },
+            "into": "arithmetic104"
+          },
+          {
+            "let": "due",
+            "value": "$arithmetic104"
+          },
+          {
+            "when": "$due",
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "skyLast",
+                  "value": [
+                    "at",
+                    "$eventInput",
+                    "time"
+                  ]
+                },
+                "into": "_"
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "motion.sky.draw",
+                  "input": {
+                    "time": [
+                      "at",
+                      "$eventInput",
+                      "time"
+                    ],
+                    "still": false
+                  }
+                },
+                "into": "result"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "motion.sky.resize": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "skyResize"
+        },
+        "into": "skyResize"
+      },
+      {
+        "port": "browser.cancel",
+        "args": {
+          "id": "$skyResize"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.timer",
+        "args": {
+          "milliseconds": 150,
+          "query": "motion.sky.reseed",
+          "input": {}
+        },
+        "into": "timer"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "skyResize",
+          "value": "$timer"
+        },
+        "into": "_"
+      }
+    ],
+    "motion.sky.reseed": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.sky.seed",
+          "input": {}
+        },
+        "into": "result"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.sky.start",
+          "input": {}
+        },
+        "into": "result"
+      }
+    ],
+    "motion.sky.scroll": [
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "when": [
+          "at",
+          "$env",
+          "reduced"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.sky.draw",
+              "input": {
+                "time": 0,
+                "still": true
+              }
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "motion.stone.row": [
+      {
+        "port": "random.values",
+        "args": {
+          "count": 320
+        },
+        "into": "random"
+      },
+      {
+        "fold": [
+          "range",
+          160
+        ],
+        "as": "i",
+        "accumulator": "pixels",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$i",
+                1
+              ]
+            },
+            "into": "arithmetic105"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$arithmetic105",
+                2
+              ]
+            },
+            "into": "arithmetic106"
+          },
+          {
+            "let": "offset",
+            "value": "$arithmetic106"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$random",
+                  "$offset"
+                ],
+                105
+              ]
+            },
+            "into": "arithmetic107"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                150,
+                "$arithmetic107"
+              ]
+            },
+            "into": "arithmetic108"
+          },
+          {
+            "let": "v",
+            "value": "$arithmetic108"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$v",
+                0.94
+              ]
+            },
+            "into": "arithmetic109"
+          },
+          {
+            "let": "g",
+            "value": "$arithmetic109"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$v",
+                0.82
+              ]
+            },
+            "into": "arithmetic110"
+          },
+          {
+            "let": "b",
+            "value": "$arithmetic110"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$random",
+                  [
+                    "add",
+                    "$offset",
+                    1
+                  ]
+                ],
+                0.5
+              ]
+            },
+            "into": "arithmetic111"
+          },
+          {
+            "let": "low",
+            "value": "$arithmetic111"
+          }
+        ],
+        "yield": [
+          "append",
+          "$pixels",
+          [
+            "list",
+            "$v",
+            "$g",
+            "$b",
+            [
+              "if",
+              "$low",
+              10,
+              4
+            ]
+          ]
+        ],
+        "into": "result"
+      }
+    ],
+    "motion.stone": [
+      {
+        "fold": [
+          "range",
+          160
+        ],
+        "as": "i",
+        "accumulator": "rows",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.stone.row",
+              "input": {}
+            },
+            "into": "row"
+          }
+        ],
+        "yield": [
+          "append",
+          "$rows",
+          [
+            "list",
+            "$row"
+          ]
+        ],
+        "into": "rows"
+      },
+      {
+        "port": "image.rasterize",
+        "args": {
+          "width": 160,
+          "height": 160,
+          "rows": "$rows"
+        },
+        "into": "image"
+      },
+      {
+        "port": "browser.style",
+        "args": {
+          "ref": "html",
+          "name": "--noise",
+          "value": [
+            "concat",
+            "url(",
+            "$image",
+            ")"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "motion.constellation.pos": [
+      {
+        "let": "point",
+        "value": [
+          "at",
+          [
+            "list",
+            [
+              "list",
+              0.1,
+              0.34
+            ],
+            [
+              "list",
+              0.27,
+              0.13
+            ],
+            [
+              "list",
+              0.47,
+              0.3
+            ],
+            [
+              "list",
+              0.7,
+              0.12
+            ],
+            [
+              "list",
+              0.9,
+              0.36
+            ],
+            [
+              "list",
+              0.66,
+              0.6
+            ],
+            [
+              "list",
+              0.4,
+              0.68
+            ],
+            [
+              "list",
+              0.16,
+              0.8
+            ],
+            [
+              "list",
+              0.86,
+              0.84
+            ]
+          ],
+          [
+            "at",
+            "$eventInput",
+            "index"
+          ]
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput",
+                "size"
+              ],
+              "width"
+            ],
+            60
+          ]
+        },
+        "into": "arithmetic112"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$point",
+              0
+            ],
+            "$arithmetic112"
+          ]
+        },
+        "into": "arithmetic113"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$arithmetic113",
+            30
+          ]
+        },
+        "into": "arithmetic114"
+      },
+      {
+        "let": "x",
+        "value": "$arithmetic114"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput",
+                "size"
+              ],
+              "height"
+            ],
+            70
+          ]
+        },
+        "into": "arithmetic115"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$point",
+              1
+            ],
+            "$arithmetic115"
+          ]
+        },
+        "into": "arithmetic116"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$arithmetic116",
+            30
+          ]
+        },
+        "into": "arithmetic117"
+      },
+      {
+        "let": "y",
+        "value": "$arithmetic117"
+      },
+      {
+        "let": "result",
+        "value": {
+          "x": "$x",
+          "y": "$y"
+        }
+      }
+    ],
+    "motion.constellation.temple": [
+      {
+        "let": "x",
+        "value": [
+          "at",
+          "$eventInput",
+          "x"
+        ]
+      },
+      {
+        "let": "y",
+        "value": [
+          "at",
+          "$eventInput",
+          "y"
+        ]
+      },
+      {
+        "let": "s",
+        "value": [
+          "at",
+          "$eventInput",
+          "size"
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$s",
+            3.2
+          ]
+        },
+        "into": "arithmetic118"
+      },
+      {
+        "let": "r",
+        "value": "$arithmetic118"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            0.28,
+            [
+              "at",
+              "$eventInput",
+              "glow"
+            ]
+          ]
+        },
+        "into": "arithmetic119"
+      },
+      {
+        "let": "a",
+        "value": "$arithmetic119"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$x",
+            "$s"
+          ]
+        },
+        "into": "arithmetic120"
+      },
+      {
+        "let": "left",
+        "value": "$arithmetic120"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$s",
+            0.35
+          ]
+        },
+        "into": "arithmetic121"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$y",
+            "$arithmetic121"
+          ]
+        },
+        "into": "arithmetic122"
+      },
+      {
+        "let": "roofBase",
+        "value": "$arithmetic122"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$s",
+            0.95
+          ]
+        },
+        "into": "arithmetic123"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$y",
+            "$arithmetic123"
+          ]
+        },
+        "into": "arithmetic124"
+      },
+      {
+        "let": "roofTop",
+        "value": "$arithmetic124"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$x",
+            "$s"
+          ]
+        },
+        "into": "arithmetic125"
+      },
+      {
+        "let": "right",
+        "value": "$arithmetic125"
+      },
+      {
+        "let": "commands",
+        "value": [
+          "list",
+          {
+            "kind": "gradient",
+            "id": "temple",
+            "args": [
+              "list",
+              "$x",
+              "$y",
+              0,
+              "$x",
+              "$y",
+              "$r"
+            ],
+            "stops": [
+              "list",
+              [
+                "list",
+                0,
+                [
+                  "concat",
+                  "rgba(255,214,140,",
+                  "$a",
+                  ")"
+                ]
+              ],
+              [
+                "list",
+                1,
+                "rgba(255,214,140,0)"
+              ]
+            ]
+          },
+          {
+            "kind": "set",
+            "name": "fillStyle",
+            "gradient": "temple"
+          },
+          {
+            "kind": "call",
+            "name": "beginPath",
+            "args": [
+              "list"
+            ]
+          },
+          {
+            "kind": "call",
+            "name": "arc",
+            "args": [
+              "list",
+              "$x",
+              "$y",
+              "$r",
+              0,
+              6.283185307179586
+            ]
+          },
+          {
+            "kind": "call",
+            "name": "fill",
+            "args": [
+              "list"
+            ]
+          },
+          {
+            "kind": "set",
+            "name": "strokeStyle",
+            "value": "#e3c07a"
+          },
+          {
+            "kind": "set",
+            "name": "lineWidth",
+            "value": 1.3
+          },
+          {
+            "kind": "call",
+            "name": "beginPath",
+            "args": [
+              "list"
+            ]
+          },
+          {
+            "kind": "call",
+            "name": "moveTo",
+            "args": [
+              "list",
+              "$left",
+              "$roofBase"
+            ]
+          },
+          {
+            "kind": "call",
+            "name": "lineTo",
+            "args": [
+              "list",
+              "$x",
+              "$roofTop"
+            ]
+          },
+          {
+            "kind": "call",
+            "name": "lineTo",
+            "args": [
+              "list",
+              "$right",
+              "$roofBase"
+            ]
+          },
+          {
+            "kind": "call",
+            "name": "closePath",
+            "args": [
+              "list"
+            ]
+          }
+        ]
+      },
+      {
+        "fold": [
+          "list",
+          -0.66,
+          -0.22,
+          0.22,
+          0.66
+        ],
+        "as": "dx",
+        "accumulator": "commands",
+        "initial": "$commands",
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$dx",
+                "$s"
+              ]
+            },
+            "into": "arithmetic126"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$x",
+                "$arithmetic126"
+              ]
+            },
+            "into": "arithmetic127"
+          },
+          {
+            "let": "columnX",
+            "value": "$arithmetic127"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$s",
+                0.2
+              ]
+            },
+            "into": "arithmetic128"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$y",
+                "$arithmetic128"
+              ]
+            },
+            "into": "arithmetic129"
+          },
+          {
+            "let": "columnTop",
+            "value": "$arithmetic129"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$s",
+                0.62
+              ]
+            },
+            "into": "arithmetic130"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$y",
+                "$arithmetic130"
+              ]
+            },
+            "into": "arithmetic131"
+          },
+          {
+            "let": "columnBottom",
+            "value": "$arithmetic131"
+          }
+        ],
+        "yield": [
+          "append",
+          "$commands",
+          [
+            "list",
+            {
+              "kind": "call",
+              "name": "moveTo",
+              "args": [
+                "list",
+                "$columnX",
+                "$columnTop"
+              ]
+            },
+            {
+              "kind": "call",
+              "name": "lineTo",
+              "args": [
+                "list",
+                "$columnX",
+                "$columnBottom"
+              ]
+            }
+          ]
+        ],
+        "into": "commands"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$s",
+            1.1
+          ]
+        },
+        "into": "arithmetic132"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$x",
+            "$arithmetic132"
+          ]
+        },
+        "into": "arithmetic133"
+      },
+      {
+        "let": "left",
+        "value": "$arithmetic133"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$s",
+            1.1
+          ]
+        },
+        "into": "arithmetic134"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$x",
+            "$arithmetic134"
+          ]
+        },
+        "into": "arithmetic135"
+      },
+      {
+        "let": "right",
+        "value": "$arithmetic135"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$s",
+            0.78
+          ]
+        },
+        "into": "arithmetic136"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$y",
+            "$arithmetic136"
+          ]
+        },
+        "into": "arithmetic137"
+      },
+      {
+        "let": "bottom",
+        "value": "$arithmetic137"
+      },
+      {
+        "let": "result",
+        "value": [
+          "append",
+          "$commands",
+          [
+            "list",
+            {
+              "kind": "call",
+              "name": "moveTo",
+              "args": [
+                "list",
+                "$left",
+                "$bottom"
+              ]
+            },
+            {
+              "kind": "call",
+              "name": "lineTo",
+              "args": [
+                "list",
+                "$right",
+                "$bottom"
+              ]
+            },
+            {
+              "kind": "call",
+              "name": "stroke",
+              "args": [
+                "list"
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "motion.constellation.plan": [
+      {
+        "let": "size",
+        "value": [
+          "at",
+          "$eventInput",
+          "size"
+        ]
+      },
+      {
+        "let": "time",
+        "value": [
+          "at",
+          "$eventInput",
+          "time"
+        ]
+      },
+      {
+        "let": "still",
+        "value": [
+          "at",
+          "$eventInput",
+          "still"
+        ]
+      },
+      {
+        "let": "commands",
+        "value": [
+          "list",
+          {
+            "kind": "call",
+            "name": "clearRect",
+            "args": [
+              "list",
+              0,
+              0,
+              [
+                "at",
+                "$size",
+                "width"
+              ],
+              [
+                "at",
+                "$size",
+                "height"
+              ]
+            ]
+          },
+          {
+            "kind": "set",
+            "name": "lineWidth",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "fold": [
+          "list",
+          [
+            "list",
+            0,
+            1
+          ],
+          [
+            "list",
+            1,
+            2
+          ],
+          [
+            "list",
+            2,
+            3
+          ],
+          [
+            "list",
+            3,
+            4
+          ],
+          [
+            "list",
+            2,
+            5
+          ],
+          [
+            "list",
+            5,
+            4
+          ],
+          [
+            "list",
+            6,
+            5
+          ],
+          [
+            "list",
+            6,
+            7
+          ],
+          [
+            "list",
+            6,
+            2
+          ],
+          [
+            "list",
+            5,
+            8
+          ],
+          [
+            "list",
+            0,
+            7
+          ]
+        ],
+        "as": "edge",
+        "accumulator": "commands",
+        "initial": "$commands",
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.constellation.pos",
+              "input": {
+                "index": [
+                  "at",
+                  "$edge",
+                  0
+                ],
+                "size": "$size"
+              }
+            },
+            "into": "a"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.constellation.pos",
+              "input": {
+                "index": [
+                  "at",
+                  "$edge",
+                  1
+                ],
+                "size": "$size"
+              }
+            },
+            "into": "b"
+          },
+          {
+            "let": "lab",
+            "value": [
+              "and",
+              [
+                "eq",
+                [
+                  "at",
+                  "$edge",
+                  0
+                ],
+                6
+              ],
+              [
+                "eq",
+                [
+                  "at",
+                  "$edge",
+                  1
+                ],
+                5
+              ]
+            ]
+          }
+        ],
+        "yield": [
+          "append",
+          "$commands",
+          [
+            "list",
+            {
+              "kind": "set",
+              "name": "strokeStyle",
+              "value": [
+                "if",
+                "$lab",
+                "rgba(255,226,168,0.55)",
+                "rgba(227,192,122,0.2)"
+              ]
+            },
+            {
+              "kind": "call",
+              "name": "setLineDash",
+              "args": [
+                "list",
+                [
+                  "if",
+                  "$lab",
+                  [
+                    "list"
+                  ],
+                  [
+                    "list",
+                    3,
+                    6
+                  ]
+                ]
+              ]
+            },
+            {
+              "kind": "call",
+              "name": "beginPath",
+              "args": [
+                "list"
+              ]
+            },
+            {
+              "kind": "call",
+              "name": "moveTo",
+              "args": [
+                "list",
+                [
+                  "at",
+                  "$a",
+                  "x"
+                ],
+                [
+                  "at",
+                  "$a",
+                  "y"
+                ]
+              ]
+            },
+            {
+              "kind": "call",
+              "name": "lineTo",
+              "args": [
+                "list",
+                [
+                  "at",
+                  "$b",
+                  "x"
+                ],
+                [
+                  "at",
+                  "$b",
+                  "y"
+                ]
+              ]
+            },
+            {
+              "kind": "call",
+              "name": "stroke",
+              "args": [
+                "list"
+              ]
+            }
+          ]
+        ],
+        "into": "commands"
+      },
+      {
+        "let": "commands",
+        "value": [
+          "append",
+          "$commands",
+          [
+            "list",
+            {
+              "kind": "call",
+              "name": "setLineDash",
+              "args": [
+                "list",
+                [
+                  "list"
+                ]
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "let": "sparks",
+        "value": [
+          "at",
+          "$eventInput",
+          "sparks"
+        ]
+      },
+      {
+        "let": "rings",
+        "value": [
+          "at",
+          "$eventInput",
+          "rings"
+        ]
+      },
+      {
+        "let": "nextSpark",
+        "value": [
+          "at",
+          "$eventInput",
+          "nextSpark"
+        ]
+      },
+      {
+        "when": [
+          "not",
+          "$still"
+        ],
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$time",
+                "$nextSpark"
+              ]
+            },
+            "into": "arithmetic138"
+          },
+          {
+            "let": "due",
+            "value": "$arithmetic138"
+          },
+          {
+            "when": "$due",
+            "then": [
+              {
+                "port": "random.values",
+                "args": {
+                  "count": 5
+                },
+                "into": "r"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$r",
+                      0
+                    ],
+                    11
+                  ]
+                },
+                "into": "arithmetic139"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "floor",
+                  "values": [
+                    "list",
+                    "$arithmetic139"
+                  ]
+                },
+                "into": "arithmetic140"
+              },
+              {
+                "let": "edgeIndex",
+                "value": "$arithmetic140"
+              },
+              {
+                "let": "edge",
+                "value": [
+                  "at",
+                  [
+                    "list",
+                    [
+                      "list",
+                      0,
+                      1
+                    ],
+                    [
+                      "list",
+                      1,
+                      2
+                    ],
+                    [
+                      "list",
+                      2,
+                      3
+                    ],
+                    [
+                      "list",
+                      3,
+                      4
+                    ],
+                    [
+                      "list",
+                      2,
+                      5
+                    ],
+                    [
+                      "list",
+                      5,
+                      4
+                    ],
+                    [
+                      "list",
+                      6,
+                      5
+                    ],
+                    [
+                      "list",
+                      6,
+                      7
+                    ],
+                    [
+                      "list",
+                      6,
+                      2
+                    ],
+                    [
+                      "list",
+                      5,
+                      8
+                    ],
+                    [
+                      "list",
+                      0,
+                      7
+                    ]
+                  ],
+                  "$edgeIndex"
+                ]
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "less",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$r",
+                      1
+                    ],
+                    0.5
+                  ]
+                },
+                "into": "arithmetic141"
+              },
+              {
+                "let": "flip",
+                "value": "$arithmetic141"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$r",
+                      2
+                    ],
+                    700
+                  ]
+                },
+                "into": "arithmetic142"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    1700,
+                    "$arithmetic142"
+                  ]
+                },
+                "into": "arithmetic143"
+              },
+              {
+                "let": "duration",
+                "value": "$arithmetic143"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "less",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$r",
+                      3
+                    ],
+                    0.72
+                  ]
+                },
+                "into": "arithmetic144"
+              },
+              {
+                "let": "ok",
+                "value": "$arithmetic144"
+              },
+              {
+                "let": "sparks",
+                "value": [
+                  "append",
+                  "$sparks",
+                  [
+                    "list",
+                    {
+                      "from": [
+                        "if",
+                        "$flip",
+                        [
+                          "at",
+                          "$edge",
+                          1
+                        ],
+                        [
+                          "at",
+                          "$edge",
+                          0
+                        ]
+                      ],
+                      "to": [
+                        "if",
+                        "$flip",
+                        [
+                          "at",
+                          "$edge",
+                          0
+                        ],
+                        [
+                          "at",
+                          "$edge",
+                          1
+                        ]
+                      ],
+                      "t0": "$time",
+                      "dur": "$duration",
+                      "ok": "$ok"
+                    }
+                  ]
+                ]
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$r",
+                      4
+                    ],
+                    900
+                  ]
+                },
+                "into": "arithmetic145"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    "$time",
+                    900,
+                    "$arithmetic145"
+                  ]
+                },
+                "into": "arithmetic146"
+              },
+              {
+                "let": "nextSpark",
+                "value": "$arithmetic146"
+              }
+            ]
+          },
+          {
+            "fold": "$sparks",
+            "as": "spark",
+            "accumulator": "animation",
+            "initial": {
+              "sparks": [
+                "list"
+              ],
+              "rings": "$rings",
+              "commands": "$commands"
+            },
+            "steps": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    "$time",
+                    [
+                      "at",
+                      "$spark",
+                      "t0"
+                    ]
+                  ]
+                },
+                "into": "arithmetic147"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "divide",
+                  "values": [
+                    "list",
+                    "$arithmetic147",
+                    [
+                      "at",
+                      "$spark",
+                      "dur"
+                    ]
+                  ]
+                },
+                "into": "arithmetic148"
+              },
+              {
+                "let": "progress",
+                "value": "$arithmetic148"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greaterEqual",
+                  "values": [
+                    "list",
+                    "$progress",
+                    1
+                  ]
+                },
+                "into": "arithmetic149"
+              },
+              {
+                "let": "arrived",
+                "value": "$arithmetic149"
+              },
+              {
+                "let": "commands",
+                "value": [
+                  "at",
+                  "$animation",
+                  "commands"
+                ]
+              },
+              {
+                "let": "rings",
+                "value": [
+                  "at",
+                  "$animation",
+                  "rings"
+                ]
+              },
+              {
+                "let": "sparks",
+                "value": [
+                  "at",
+                  "$animation",
+                  "sparks"
+                ]
+              },
+              {
+                "when": "$arrived",
+                "then": [
+                  {
+                    "let": "rings",
+                    "value": [
+                      "append",
+                      "$rings",
+                      [
+                        "list",
+                        {
+                          "at": [
+                            "at",
+                            "$spark",
+                            "to"
+                          ],
+                          "t0": "$time",
+                          "ok": [
+                            "at",
+                            "$spark",
+                            "ok"
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "not",
+                  "$arrived"
+                ],
+                "then": [
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "motion.constellation.pos",
+                      "input": {
+                        "index": [
+                          "at",
+                          "$spark",
+                          "from"
+                        ],
+                        "size": "$size"
+                      }
+                    },
+                    "into": "a"
+                  },
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "motion.constellation.pos",
+                      "input": {
+                        "index": [
+                          "at",
+                          "$spark",
+                          "to"
+                        ],
+                        "size": "$size"
+                      }
+                    },
+                    "into": "b"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "multiply",
+                      "values": [
+                        "list",
+                        2,
+                        "$progress"
+                      ]
+                    },
+                    "into": "arithmetic150"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "subtract",
+                      "values": [
+                        "list",
+                        3,
+                        "$arithmetic150"
+                      ]
+                    },
+                    "into": "arithmetic151"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "multiply",
+                      "values": [
+                        "list",
+                        "$progress",
+                        "$progress",
+                        "$arithmetic151"
+                      ]
+                    },
+                    "into": "arithmetic152"
+                  },
+                  {
+                    "let": "ease",
+                    "value": "$arithmetic152"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "subtract",
+                      "values": [
+                        "list",
+                        [
+                          "at",
+                          "$b",
+                          "x"
+                        ],
+                        [
+                          "at",
+                          "$a",
+                          "x"
+                        ]
+                      ]
+                    },
+                    "into": "arithmetic153"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "multiply",
+                      "values": [
+                        "list",
+                        "$arithmetic153",
+                        "$ease"
+                      ]
+                    },
+                    "into": "arithmetic154"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "add",
+                      "values": [
+                        "list",
+                        [
+                          "at",
+                          "$a",
+                          "x"
+                        ],
+                        "$arithmetic154"
+                      ]
+                    },
+                    "into": "arithmetic155"
+                  },
+                  {
+                    "let": "x",
+                    "value": "$arithmetic155"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "subtract",
+                      "values": [
+                        "list",
+                        [
+                          "at",
+                          "$b",
+                          "y"
+                        ],
+                        [
+                          "at",
+                          "$a",
+                          "y"
+                        ]
+                      ]
+                    },
+                    "into": "arithmetic156"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "multiply",
+                      "values": [
+                        "list",
+                        "$arithmetic156",
+                        "$ease"
+                      ]
+                    },
+                    "into": "arithmetic157"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "add",
+                      "values": [
+                        "list",
+                        [
+                          "at",
+                          "$a",
+                          "y"
+                        ],
+                        "$arithmetic157"
+                      ]
+                    },
+                    "into": "arithmetic158"
+                  },
+                  {
+                    "let": "y",
+                    "value": "$arithmetic158"
+                  },
+                  {
+                    "let": "commands",
+                    "value": [
+                      "append",
+                      "$commands",
+                      [
+                        "list",
+                        {
+                          "kind": "gradient",
+                          "id": "spark",
+                          "args": [
+                            "list",
+                            "$x",
+                            "$y",
+                            0,
+                            "$x",
+                            "$y",
+                            9
+                          ],
+                          "stops": [
+                            "list",
+                            [
+                              "list",
+                              0,
+                              "rgba(255,241,201,0.95)"
+                            ],
+                            [
+                              "list",
+                              1,
+                              "rgba(255,214,140,0)"
+                            ]
+                          ]
+                        },
+                        {
+                          "kind": "set",
+                          "name": "fillStyle",
+                          "gradient": "spark"
+                        },
+                        {
+                          "kind": "call",
+                          "name": "beginPath",
+                          "args": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "kind": "call",
+                          "name": "arc",
+                          "args": [
+                            "list",
+                            "$x",
+                            "$y",
+                            9,
+                            0,
+                            6.283185307179586
+                          ]
+                        },
+                        {
+                          "kind": "call",
+                          "name": "fill",
+                          "args": [
+                            "list"
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "let": "sparks",
+                    "value": [
+                      "append",
+                      "$sparks",
+                      [
+                        "list",
+                        "$spark"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": {
+              "commands": "$commands",
+              "sparks": "$sparks",
+              "rings": "$rings"
+            },
+            "into": "animation"
+          },
+          {
+            "let": "commands",
+            "value": [
+              "at",
+              "$animation",
+              "commands"
+            ]
+          },
+          {
+            "let": "sparks",
+            "value": [
+              "at",
+              "$animation",
+              "sparks"
+            ]
+          },
+          {
+            "let": "rings",
+            "value": [
+              "at",
+              "$animation",
+              "rings"
+            ]
+          },
+          {
+            "fold": "$rings",
+            "as": "ring",
+            "accumulator": "animation",
+            "initial": {
+              "commands": "$commands",
+              "rings": [
+                "list"
+              ]
+            },
+            "steps": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    "$time",
+                    [
+                      "at",
+                      "$ring",
+                      "t0"
+                    ]
+                  ]
+                },
+                "into": "arithmetic159"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "divide",
+                  "values": [
+                    "list",
+                    "$arithmetic159",
+                    1300
+                  ]
+                },
+                "into": "arithmetic160"
+              },
+              {
+                "let": "progress",
+                "value": "$arithmetic160"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "less",
+                  "values": [
+                    "list",
+                    "$progress",
+                    1
+                  ]
+                },
+                "into": "arithmetic161"
+              },
+              {
+                "let": "alive",
+                "value": "$arithmetic161"
+              },
+              {
+                "let": "commands",
+                "value": [
+                  "at",
+                  "$animation",
+                  "commands"
+                ]
+              },
+              {
+                "let": "rings",
+                "value": [
+                  "at",
+                  "$animation",
+                  "rings"
+                ]
+              },
+              {
+                "when": "$alive",
+                "then": [
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "motion.constellation.pos",
+                      "input": {
+                        "index": [
+                          "at",
+                          "$ring",
+                          "at"
+                        ],
+                        "size": "$size"
+                      }
+                    },
+                    "into": "point"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "subtract",
+                      "values": [
+                        "list",
+                        1,
+                        "$progress"
+                      ]
+                    },
+                    "into": "arithmetic162"
+                  },
+                  {
+                    "let": "alpha",
+                    "value": "$arithmetic162"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "multiply",
+                      "values": [
+                        "list",
+                        "$progress",
+                        22
+                      ]
+                    },
+                    "into": "arithmetic163"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "add",
+                      "values": [
+                        "list",
+                        12,
+                        "$arithmetic163"
+                      ]
+                    },
+                    "into": "arithmetic164"
+                  },
+                  {
+                    "let": "radius",
+                    "value": "$arithmetic164"
+                  },
+                  {
+                    "let": "commands",
+                    "value": [
+                      "append",
+                      "$commands",
+                      [
+                        "list",
+                        {
+                          "kind": "set",
+                          "name": "strokeStyle",
+                          "value": [
+                            "concat",
+                            [
+                              "if",
+                              [
+                                "at",
+                                "$ring",
+                                "ok"
+                              ],
+                              "rgba(227,192,122,",
+                              "rgba(232,145,127,"
+                            ],
+                            "$alpha",
+                            ")"
+                          ]
+                        },
+                        {
+                          "kind": "set",
+                          "name": "lineWidth",
+                          "value": 1.4
+                        },
+                        {
+                          "kind": "call",
+                          "name": "beginPath",
+                          "args": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "kind": "call",
+                          "name": "arc",
+                          "args": [
+                            "list",
+                            [
+                              "at",
+                              "$point",
+                              "x"
+                            ],
+                            [
+                              "at",
+                              "$point",
+                              "y"
+                            ],
+                            "$radius",
+                            0,
+                            6.283185307179586
+                          ]
+                        },
+                        {
+                          "kind": "call",
+                          "name": "stroke",
+                          "args": [
+                            "list"
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "let": "rings",
+                    "value": [
+                      "append",
+                      "$rings",
+                      [
+                        "list",
+                        "$ring"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ],
+            "yield": {
+              "commands": "$commands",
+              "rings": "$rings"
+            },
+            "into": "animation"
+          },
+          {
+            "let": "commands",
+            "value": [
+              "at",
+              "$animation",
+              "commands"
+            ]
+          },
+          {
+            "let": "rings",
+            "value": [
+              "at",
+              "$animation",
+              "rings"
+            ]
+          }
+        ]
+      },
+      {
+        "fold": [
+          "range",
+          9
+        ],
+        "as": "i",
+        "accumulator": "commands",
+        "initial": "$commands",
+        "steps": [
+          {
+            "let": "index",
+            "value": [
+              "add",
+              "$i",
+              -1
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.constellation.pos",
+              "input": {
+                "index": "$index",
+                "size": "$size"
+              }
+            },
+            "into": "point"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$time",
+                0.0013
+              ]
+            },
+            "into": "arithmetic165"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$arithmetic165",
+                "$index"
+              ]
+            },
+            "into": "arithmetic166"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "sin",
+              "values": [
+                "list",
+                "$arithmetic166"
+              ]
+            },
+            "into": "arithmetic167"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                0.3,
+                "$arithmetic167"
+              ]
+            },
+            "into": "arithmetic168"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                0.7,
+                "$arithmetic168"
+              ]
+            },
+            "into": "arithmetic169"
+          },
+          {
+            "let": "glow",
+            "value": [
+              "if",
+              "$still",
+              0.8,
+              "$arithmetic169"
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.constellation.temple",
+              "input": {
+                "x": [
+                  "at",
+                  "$point",
+                  "x"
+                ],
+                "y": [
+                  "at",
+                  "$point",
+                  "y"
+                ],
+                "size": [
+                  "if",
+                  [
+                    "or",
+                    [
+                      "eq",
+                      "$index",
+                      6
+                    ],
+                    [
+                      "eq",
+                      "$index",
+                      5
+                    ]
+                  ],
+                  12,
+                  9
+                ],
+                "glow": "$glow"
+              }
+            },
+            "into": "glyph"
+          }
+        ],
+        "yield": [
+          "append",
+          "$commands",
+          "$glyph"
+        ],
+        "into": "commands"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.constellation.pos",
+          "input": {
+            "index": 6,
+            "size": "$size"
+          }
+        },
+        "into": "west"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.constellation.pos",
+          "input": {
+            "index": 5,
+            "size": "$size"
+          }
+        },
+        "into": "east"
+      },
+      {
+        "let": "result",
+        "value": {
+          "commands": [
+            "append",
+            "$commands",
+            [
+              "list",
+              {
+                "kind": "set",
+                "name": "font",
+                "value": "italic 500 15px \"Cormorant Garamond\", Georgia, serif"
+              },
+              {
+                "kind": "set",
+                "name": "fillStyle",
+                "value": "#ffe2a8"
+              },
+              {
+                "kind": "set",
+                "name": "textAlign",
+                "value": "center"
+              },
+              {
+                "kind": "call",
+                "name": "fillText",
+                "args": [
+                  "list",
+                  "west",
+                  [
+                    "at",
+                    "$west",
+                    "x"
+                  ],
+                  [
+                    "add",
+                    [
+                      "at",
+                      "$west",
+                      "y"
+                    ],
+                    30
+                  ]
+                ]
+              },
+              {
+                "kind": "call",
+                "name": "fillText",
+                "args": [
+                  "list",
+                  "east",
+                  [
+                    "at",
+                    "$east",
+                    "x"
+                  ],
+                  [
+                    "add",
+                    [
+                      "at",
+                      "$east",
+                      "y"
+                    ],
+                    30
+                  ]
+                ]
+              }
+            ]
+          ],
+          "sparks": "$sparks",
+          "rings": "$rings",
+          "nextSpark": "$nextSpark"
+        }
+      }
+    ],
+    "motion.constellation.init": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "constellationFrame",
+          "value": 0
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "constellationVisible",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "constellationSparks",
+          "value": [
+            "list"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "constellationRings",
+          "value": [
+            "list"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "constellationNext",
+          "value": 0
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.constellation.size",
+          "input": {}
+        },
+        "into": "result"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.constellation.draw",
+          "input": {
+            "time": 0,
+            "still": true
+          }
+        },
+        "into": "result"
+      },
+      {
+        "port": "browser.intersection",
+        "args": {
+          "selector": "#constellation",
+          "query": "motion.constellation.intersection",
+          "input": {},
+          "threshold": 0.05
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "window",
+          "event": "resize",
+          "query": "motion.constellation.resize",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "document",
+          "event": "visibilitychange",
+          "query": "motion.constellation.start",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": {
+            "media": "(prefers-reduced-motion: reduce)"
+          },
+          "event": "change",
+          "query": "motion.constellation.start",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.fontsReady",
+        "args": {},
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.constellation.draw",
+          "input": {
+            "time": 0,
+            "still": true
+          }
+        },
+        "into": "result"
+      }
+    ],
+    "motion.constellation.size": [
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            [
+              "or",
+              [
+                "at",
+                "$env",
+                "dpr"
+              ],
+              1
+            ],
+            2
+          ]
+        },
+        "into": "arithmetic170"
+      },
+      {
+        "let": "dpr",
+        "value": "$arithmetic170"
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#constellation"
+        },
+        "into": "canvas"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "constellationSize",
+          "value": {
+            "width": [
+              "at",
+              [
+                "at",
+                "$canvas",
+                "rect"
+              ],
+              "width"
+            ],
+            "height": [
+              "at",
+              [
+                "at",
+                "$canvas",
+                "rect"
+              ],
+              "height"
+            ]
+          }
+        },
+        "into": "_"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$canvas",
+                "rect"
+              ],
+              "width"
+            ],
+            "$dpr"
+          ]
+        },
+        "into": "arithmetic171"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "round",
+          "values": [
+            "list",
+            "$arithmetic171"
+          ]
+        },
+        "into": "arithmetic172"
+      },
+      {
+        "let": "width",
+        "value": "$arithmetic172"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$canvas",
+                "rect"
+              ],
+              "height"
+            ],
+            "$dpr"
+          ]
+        },
+        "into": "arithmetic173"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "round",
+          "values": [
+            "list",
+            "$arithmetic173"
+          ]
+        },
+        "into": "arithmetic174"
+      },
+      {
+        "let": "height",
+        "value": "$arithmetic174"
+      },
+      {
+        "port": "canvas.draw",
+        "args": {
+          "ref": "#constellation",
+          "width": "$width",
+          "height": "$height",
+          "dpr": "$dpr",
+          "commands": [
+            "list"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "motion.constellation.draw": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "constellationSize"
+        },
+        "into": "constellationSize"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "constellationSparks"
+        },
+        "into": "constellationSparks"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "constellationRings"
+        },
+        "into": "constellationRings"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "constellationNext"
+        },
+        "into": "constellationNext"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.constellation.plan",
+          "input": {
+            "size": "$constellationSize",
+            "sparks": "$constellationSparks",
+            "rings": "$constellationRings",
+            "nextSpark": "$constellationNext",
+            "time": [
+              "at",
+              "$eventInput",
+              "time"
+            ],
+            "still": [
+              "at",
+              "$eventInput",
+              "still"
+            ]
+          }
+        },
+        "into": "plan"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "constellationSparks",
+          "value": [
+            "at",
+            "$plan",
+            "sparks"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "constellationRings",
+          "value": [
+            "at",
+            "$plan",
+            "rings"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "constellationNext",
+          "value": [
+            "at",
+            "$plan",
+            "nextSpark"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "canvas.draw",
+        "args": {
+          "ref": "#constellation",
+          "commands": [
+            "at",
+            "$plan",
+            "commands"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "motion.constellation.start": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "constellationFrame"
+        },
+        "into": "constellationFrame"
+      },
+      {
+        "port": "browser.cancel",
+        "args": {
+          "id": "$constellationFrame"
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "constellationVisible"
+        },
+        "into": "constellationVisible"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "when": [
+          "or",
+          [
+            "not",
+            "$constellationVisible"
+          ],
+          [
+            "at",
+            "$env",
+            "reduced"
+          ],
+          [
+            "at",
+            "$env",
+            "hidden"
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.constellation.draw",
+              "input": {
+                "time": 0,
+                "still": true
+              }
+            },
+            "into": "result"
+          }
+        ]
+      },
+      {
+        "when": [
+          "and",
+          "$constellationVisible",
+          [
+            "not",
+            [
+              "at",
+              "$env",
+              "reduced"
+            ]
+          ],
+          [
+            "not",
+            [
+              "at",
+              "$env",
+              "hidden"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "browser.frame",
+            "args": {
+              "query": "motion.constellation.frame",
+              "input": {}
+            },
+            "into": "frame"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "constellationFrame",
+              "value": "$frame"
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "motion.constellation.frame": [
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "env"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "constellationVisible"
+        },
+        "into": "constellationVisible"
+      },
+      {
+        "when": [
+          "and",
+          "$constellationVisible",
+          [
+            "not",
+            [
+              "at",
+              "$env",
+              "hidden"
+            ]
+          ],
+          [
+            "not",
+            [
+              "at",
+              "$env",
+              "reduced"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "browser.frame",
+            "args": {
+              "query": "motion.constellation.frame",
+              "input": {}
+            },
+            "into": "frame"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "constellationFrame",
+              "value": "$frame"
+            },
+            "into": "_"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "motion.constellation.draw",
+              "input": {
+                "time": [
+                  "at",
+                  "$eventInput",
+                  "time"
+                ],
+                "still": false
+              }
+            },
+            "into": "result"
+          }
+        ]
+      }
+    ],
+    "motion.constellation.intersection": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "constellationVisible",
+          "value": [
+            "at",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput",
+                "entries"
+              ],
+              0
+            ],
+            "isIntersecting"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.constellation.start",
+          "input": {}
+        },
+        "into": "result"
+      }
+    ],
+    "motion.constellation.resize": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.constellation.size",
+          "input": {}
+        },
+        "into": "result"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "motion.constellation.start",
+          "input": {}
+        },
+        "into": "result"
+      }
+    ]
+  }
+}

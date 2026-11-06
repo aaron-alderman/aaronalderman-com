@@ -1,0 +1,115 @@
+{
+  "protocol": "temple/bootstrap-site/1",
+  "entry": "publication.build",
+  "operatorDefinitions": "algebra/operators.expression.json",
+  "operatorCompiler": "algebra/lowering.process.json",
+  "factIndexer": "algebra/fact-index.process.json",
+  "nativeSource": "bootstrap/native.json",
+  "hostPorts": "bootstrap/ports.json",
+  "executionBudget": 20000000,
+  "modules": [
+    "algebra/html.process.json",
+    "algebra/css.process.json",
+    "algebra/publication.process.json",
+    "algebra/gateway.process.json",
+    "algebra/language.process.json",
+    "algebra/fact-index.process.json",
+    "algebra/admission.process.json",
+    "algebra/lowering.process.json",
+    "algebra/microsite-projection.process.json",
+    "algebra/microsites.process.json",
+    "algebra/front-doors.process.json",
+    "algebra/claimipedia.process.json",
+    "algebra/claimipedia-review.process.json",
+    "algebra/encounter-demo.process.json",
+    "algebra/encounter-code-types.process.json",
+    "algebra/encounter-code-compiler.process.json",
+    "algebra/encounter-code-runtime.process.json",
+    "algebra/atlas.process.json",
+    "algebra/atlas-journey.process.json",
+    "algebra/reader-models.process.json",
+    "algebra/reader-activities.process.json",
+    "algebra/reader-navigation.process.json",
+    "algebra/workshop-lab.process.json",
+    "algebra/workshop-session.process.json",
+    "algebra/reader-workshop-publication.process.json",
+    "algebra/hierarchy.process.json",
+    "algebra/microsite-return.process.json"
+  ],
+  "sources": [
+    "source/expedition.rel",
+    "source/presentation.rel",
+    "source/gateway.rel",
+    "source/gateway-presentation.rel",
+    "source/microsites/presentation.rel",
+    "source/microsites/release.rel",
+    "source/front-doors.rel",
+    "source/claimipedia.rel",
+    "source/claimipedia-example.rel",
+    "source/social-sharing.rel",
+    "source/encounter.rel",
+    "source/atlas.rel",
+    "source/hierarchy.rel"
+  ],
+  "kernelProfile": "bootstrap/kernel-profile.json",
+  "admission": "algebra/admission.process.json",
+  "languageCompiler": "algebra/language.process.json",
+  "languageSources": [],
+  "processModules": [
+    {
+      "file": "source/encounter/source-algebra.encounter",
+      "output": "algebra/encounter-source.process.json",
+      "frontend": "bootstrap/process-frontend.json"
+    },
+    {
+      "file": "source/encounter/encounter.encounter",
+      "output": "algebra/encounter.process.json",
+      "frontend": "bootstrap/frontends/encounter.json"
+    },
+    {
+      "file": "source/algebra/source.encounter",
+      "output": "algebra/source.process.json",
+      "frontend": "bootstrap/frontends/source.json"
+    },
+    {
+      "file": "source/microsites/ui.encounter",
+      "output": "algebra/microsite-ui.process.json",
+      "frontend": "bootstrap/frontends/microsite-ui.json"
+    },
+    {
+      "file": "source/microsites/values.encounter",
+      "output": "algebra/microsite-values.process.json",
+      "frontend": "bootstrap/frontends/microsite-values.json"
+    },
+    {
+      "file": "source/microsites/sourcery.encounter",
+      "output": "algebra/microsite-sourcery.process.json",
+      "frontend": "bootstrap/frontends/microsite-sourcery.json"
+    },
+    {
+      "file": "source/microsites/temple-ui.encounter",
+      "output": "algebra/microsite-temple-ui.process.json",
+      "frontend": "bootstrap/frontends/microsite-temple-ui.json"
+    },
+    {
+      "file": "source/microsites/lamp.encounter",
+      "output": "algebra/microsite-lamp.process.json",
+      "frontend": "bootstrap/frontends/microsite-lamp.json"
+    },
+    {
+      "file": "source/microsites/motion.encounter",
+      "output": "algebra/microsite-motion.process.json",
+      "frontend": "bootstrap/frontends/microsite-motion.json"
+    },
+    {
+      "file": "source/microsites/temple-motion.encounter",
+      "output": "algebra/microsite-temple-motion.process.json",
+      "frontend": "bootstrap/frontends/microsite-temple-motion.json"
+    },
+    {
+      "file": "source/microsites/media.encounter",
+      "output": "algebra/microsite-media.process.json",
+      "frontend": "bootstrap/frontends/microsite-media.json"
+    }
+  ]
+}

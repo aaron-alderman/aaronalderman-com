@@ -667,6 +667,200 @@
         "into": "hAuthorText"
       },
       {
+        "port": "file.copy",
+        "args": {
+          "path": "bootstrap/site.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "bootstrap/site.json"
+        },
+        "into": "hManifestText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$hManifestText"
+        },
+        "into": "hManifest"
+      },
+      {
+        "fold": "$hManifest.processModules",
+        "as": "hSelection",
+        "accumulator": "hModules",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "file.read",
+            "args": {
+              "path": "$hSelection.output"
+            },
+            "into": "hModuleText"
+          },
+          {
+            "port": "json.parse",
+            "args": {
+              "text": "$hModuleText"
+            },
+            "into": "hModuleValue"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": [
+                "concat",
+                "$hSelection.output",
+                ".map.json"
+              ]
+            },
+            "into": "hModuleMapText"
+          },
+          {
+            "port": "json.parse",
+            "args": {
+              "text": "$hModuleMapText"
+            },
+            "into": "hModuleMap"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": "$hSelection.file"
+            },
+            "into": "hModuleAuthorText"
+          },
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$hSelection.output",
+              "search": "algebra/",
+              "replacement": ""
+            },
+            "into": "hModuleSlug"
+          },
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$hModuleSlug",
+              "search": ".process.json",
+              "replacement": ""
+            },
+            "into": "hModuleSlug"
+          },
+          {
+            "let": "hShared",
+            "value": [
+              "eq",
+              "$hSelection.output",
+              "algebra/encounter-source.process.json"
+            ]
+          },
+          {
+            "let": "hSpec",
+            "value": {
+              "moduleFile": "$hSelection.output",
+              "sourceFile": "$hSelection.file",
+              "sourceHash": "$hModuleMap.sourceHash",
+              "page": [
+                "if",
+                "$hShared",
+                "source-algebra.html",
+                [
+                  "concat",
+                  "module-",
+                  "$hModuleSlug",
+                  ".html"
+                ]
+              ],
+              "title": [
+                "if",
+                "$hShared",
+                "Shared Markdown, lexer and formatting algebra",
+                [
+                  "concat",
+                  "Process / ",
+                  "$hModuleSlug"
+                ]
+              ],
+              "heading": [
+                "if",
+                "$hShared",
+                "Markdown, lexer & formatting",
+                [
+                  "concat",
+                  "Process / ",
+                  "$hModuleSlug"
+                ]
+              ],
+              "description": "Read the actual authored Encounter definitions selected by this publication.",
+              "query": "",
+              "sourceModule": "$hModuleValue",
+              "sourceText": "$hModuleText",
+              "authorText": "$hModuleAuthorText",
+              "sourceOrigins": "$hModuleMap.origins"
+            }
+          },
+          {
+            "port": "record.entries",
+            "args": {
+              "value": "$hModuleValue.queries"
+            },
+            "into": "hSpecEntries"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$hSpec",
+              "key": "query",
+              "value": [
+                "if",
+                "$hShared",
+                "md.preview",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$hSpecEntries",
+                    0
+                  ],
+                  0
+                ]
+              ]
+            },
+            "into": "hSpec"
+          }
+        ],
+        "yield": [
+          "append",
+          "$hModules",
+          [
+            "list",
+            "$hSpec"
+          ]
+        ],
+        "into": "hModuleCatalogue"
+      },
+      {
+        "let": "hModuleMetadata",
+        "value": [
+          "map",
+          "$hModuleCatalogue",
+          "published",
+          {
+            "moduleFile": "$published.moduleFile",
+            "sourceFile": "$published.sourceFile",
+            "sourceHash": "$published.sourceHash",
+            "page": "$published.page",
+            "title": "$published.title"
+          }
+        ]
+      },
+      {
         "port": "runtime.bundle",
         "args": {
           "entry": "hierarchy.viewer.boot",
@@ -738,7 +932,8 @@
               "sp.structure",
               "sp.moduleView",
               "hierarchy.module.boot",
-              "hierarchy.module.select"
+              "hierarchy.module.select",
+              "hierarchy.module.context"
             ]
           ],
           "factSubjects": [
@@ -756,7 +951,8 @@
             "sourceModule": "$hSourceModule",
             "sourceText": "$hSourceModuleText",
             "authorText": "$hAuthorText",
-            "sourceOrigins": "$hAuthorMap.origins"
+            "sourceOrigins": "$hAuthorMap.origins",
+            "moduleCatalogue": "$hModuleMetadata"
           },
           "budget": 20000000
         },
@@ -2943,6 +3139,71 @@
                           ]
                         }
                       ]
+                    },
+                    {
+                      "tag": "details",
+                      "attrs": {
+                        "class": "module-disclosure"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "summary",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Published Encounter definitions"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "These are the readable source owners selected by this publication’s build manifest."
+                          ]
+                        },
+                        {
+                          "tag": "ul",
+                          "attrs": {
+                            "class": "published-modules"
+                          },
+                          "children": [
+                            "map",
+                            "$hModuleMetadata",
+                            "publishedModule",
+                            {
+                              "tag": "li",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "$publishedModule.page"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "$publishedModule.title"
+                                  ]
+                                },
+                                {
+                                  "tag": "small",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    [
+                                      "concat",
+                                      " · ",
+                                      "$publishedModule.sourceFile"
+                                    ]
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -4208,6 +4469,9 @@
     ],
     "hierarchy.module.boot": [
       {
+        "call": "hierarchy.module.context"
+      },
+      {
         "port": "browser.on",
         "args": {
           "ref": "#module-query",
@@ -4220,7 +4484,7 @@
       {
         "port": "digest.sha256",
         "args": {
-          "text": "$data.sourceText"
+          "text": "$selectedModule.sourceText"
         },
         "into": "moduleHash"
       },
@@ -4240,7 +4504,7 @@
       {
         "port": "digest.sha256",
         "args": {
-          "text": "$data.authorText"
+          "text": "$selectedModule.authorText"
         },
         "into": "authorHash"
       },
@@ -4262,6 +4526,9 @@
       }
     ],
     "hierarchy.module.select": [
+      {
+        "call": "hierarchy.module.context"
+      },
       {
         "let": "spPolicy",
         "value": "$data.presentation.spPolicy"
@@ -4291,7 +4558,7 @@
         "args": {
           "query": "sp.moduleView",
           "input": {
-            "module": "$data.sourceModule",
+            "module": "$selectedModule.sourceModule",
             "name": "$selectedQuery"
           }
         },
@@ -4303,12 +4570,12 @@
       },
       {
         "let": "selectedFile",
-        "value": "algebra/encounter-source.process.json"
+        "value": "$selectedModule.moduleFile"
       },
       {
         "when": [
           "at",
-          "$data",
+          "$selectedModule",
           "authorText"
         ],
         "then": [
@@ -4316,7 +4583,7 @@
             "let": "sourceRanges",
             "value": [
               "filter",
-              "$data.sourceOrigins",
+              "$selectedModule.sourceOrigins",
               "sourceRange",
               [
                 "and",
@@ -4355,7 +4622,7 @@
           {
             "port": "text.slice",
             "args": {
-              "value": "$data.authorText",
+              "value": "$selectedModule.authorText",
               "start": "$sourceRange.start",
               "end": "$sourceRange.end"
             },
@@ -4363,7 +4630,7 @@
           },
           {
             "let": "selectedFile",
-            "value": "source/encounter/source-algebra.encounter"
+            "value": "$selectedModule.sourceFile"
           }
         ]
       },
@@ -4536,9 +4803,145 @@
     ],
     "hierarchy.module.build": [
       {
+        "each": "$hModuleCatalogue",
+        "as": "hModuleSpec",
+        "steps": [
+          {
+            "port": "json.stringify",
+            "args": {
+              "value": "$hModuleSpec"
+            },
+            "into": "hModulePayload"
+          },
+          {
+            "call": "hierarchy.module.page"
+          }
+        ]
+      }
+    ],
+    "hierarchy.module.context": [
+      {
+        "let": "selectedModule",
+        "value": {
+          "sourceModule": "$data.sourceModule",
+          "sourceText": [
+            "or",
+            [
+              "at",
+              "$data",
+              "sourceText"
+            ],
+            ""
+          ],
+          "authorText": [
+            "or",
+            [
+              "at",
+              "$data",
+              "authorText"
+            ],
+            ""
+          ],
+          "sourceOrigins": [
+            "or",
+            [
+              "at",
+              "$data",
+              "sourceOrigins"
+            ],
+            [
+              "list"
+            ]
+          ],
+          "sourceFile": "source/encounter/source-algebra.encounter",
+          "moduleFile": "algebra/encounter-source.process.json"
+        }
+      },
+      {
+        "when": [
+          "at",
+          "$data",
+          "moduleCatalogue"
+        ],
+        "then": [
+          {
+            "port": "browser.property",
+            "args": {
+              "ref": "#module-data",
+              "name": "value"
+            },
+            "into": "modulePayload"
+          },
+          {
+            "port": "json.parse",
+            "args": {
+              "text": "$modulePayload"
+            },
+            "into": "selectedModule"
+          },
+          {
+            "let": "declaredModules",
+            "value": [
+              "filter",
+              "$data.moduleCatalogue",
+              "declaration",
+              [
+                "and",
+                [
+                  "eq",
+                  "$declaration.moduleFile",
+                  "$selectedModule.moduleFile"
+                ],
+                [
+                  "eq",
+                  "$declaration.sourceFile",
+                  "$selectedModule.sourceFile"
+                ]
+              ]
+            ]
+          },
+          {
+            "assert": [
+              "eq",
+              [
+                "count",
+                "$declaredModules"
+              ],
+              1
+            ],
+            "message": "INSPECT-OWNER: Exactly one declared Encounter owner is required."
+          },
+          {
+            "port": "digest.sha256",
+            "args": {
+              "text": "$selectedModule.authorText"
+            },
+            "into": "observedAuthorHash"
+          },
+          {
+            "assert": [
+              "eq",
+              "$observedAuthorHash",
+              [
+                "at",
+                [
+                  "at",
+                  "$declaredModules",
+                  0
+                ],
+                "sourceHash"
+              ]
+            ],
+            "message": "INSPECT-SOURCE: Authored source hash differs from the selected build owner."
+          }
+        ]
+      }
+    ],
+    "hierarchy.module.page": [
+      {
         "port": "record.entries",
         "args": {
-          "value": "$hSourceModule.queries"
+          "value": "$hModuleSpec.sourceModule.queries"
         },
         "into": "hModuleEntries"
       },
@@ -4580,14 +4983,14 @@
                   "attrs": {},
                   "children": [
                     "list",
-                    "Shared Markdown, lexer and formatting algebra"
+                    "$hModuleSpec.title"
                   ]
                 },
                 {
                   "tag": "meta",
                   "attrs": {
                     "name": "description",
-                    "content": "Read the actual process queries behind Markdown preview, syntax highlighting and readable definitions."
+                    "content": "$hModuleSpec.description"
                   },
                   "children": [
                     "list"
@@ -4597,7 +5000,11 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "canonical",
-                    "href": "https://aaronalderman.com/inspection/source-algebra.html"
+                    "href": [
+                      "concat",
+                      "https://aaronalderman.com/inspection/",
+                      "$hModuleSpec.page"
+                    ]
                   },
                   "children": [
                     "list"
@@ -4617,7 +5024,7 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:title",
-                    "content": "Shared Markdown, lexer and formatting algebra"
+                    "content": "$hModuleSpec.title"
                   },
                   "children": [
                     "list"
@@ -4627,7 +5034,7 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:description",
-                    "content": "Read the actual processes behind Markdown preview, syntax highlighting and readable definitions."
+                    "content": "$hModuleSpec.description"
                   },
                   "children": [
                     "list"
@@ -4637,7 +5044,11 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:url",
-                    "content": "https://aaronalderman.com/inspection/source-algebra.html"
+                    "content": [
+                      "concat",
+                      "https://aaronalderman.com/inspection/",
+                      "$hModuleSpec.page"
+                    ]
                   },
                   "children": [
                     "list"
@@ -4719,6 +5130,19 @@
                   "children": [
                     "list",
                     {
+                      "tag": "textarea",
+                      "attrs": {
+                        "id": "module-data",
+                        "hidden": true,
+                        "aria-hidden": "true",
+                        "readonly": true
+                      },
+                      "children": [
+                        "list",
+                        "$hModulePayload"
+                      ]
+                    },
+                    {
                       "tag": "p",
                       "attrs": {
                         "class": "eyebrow"
@@ -4733,7 +5157,7 @@
                       "attrs": {},
                       "children": [
                         "list",
-                        "Markdown, lexer & formatting"
+                        "$hModuleSpec.heading"
                       ]
                     },
                     {
@@ -4743,7 +5167,7 @@
                       },
                       "children": [
                         "list",
-                        "Read the processes that turn source into a document, coloured tokens and readable definitions."
+                        "$hModuleSpec.description"
                       ]
                     },
                     {
@@ -4824,7 +5248,7 @@
                                           "$hModuleEntry",
                                           0
                                         ],
-                                        "md.preview"
+                                        "$hModuleSpec.query"
                                       ],
                                       true,
                                       null
@@ -4850,7 +5274,7 @@
                           },
                           "children": [
                             "list",
-                            "md.preview"
+                            "$hModuleSpec.query"
                           ]
                         },
                         {
@@ -4863,8 +5287,9 @@
                             "list",
                             [
                               "concat",
-                              "algebra/encounter-source.process.json",
-                              " · /queries/md.preview"
+                              "$hModuleSpec.sourceFile",
+                              " · /queries/",
+                              "$hModuleSpec.query"
                             ]
                           ]
                         },
@@ -4965,7 +5390,7 @@
                           "attrs": {},
                           "children": [
                             "list",
-                            "Readable Encounter source is authoritative. The existing algebra-owned process frontend compiles all 23 queries into the JSON module used by the normal lowerer and kernel."
+                            "Readable Encounter source is authoritative. The existing process frontend compiles these definitions into generated JSON for the normal lowerer and kernel."
                           ]
                         },
                         {
@@ -4981,7 +5406,7 @@
                           "attrs": {},
                           "children": [
                             "list",
-                            "The authority switch followed exact ordered JSON correspondence, whole-module lowering equality, source-coordinate coverage, behaviour/effect/fault comparisons and refusal checks. A pinned predecessor supplies compiler bootstrap only; application definitions come from this readable source."
+                            "Ownership is selected by the build manifest after correspondence passes. The authored source, generated module and compiler coordinates remain available for inspection."
                           ]
                         },
                         {
@@ -5031,7 +5456,11 @@
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "../algebra/encounter-source.process.json"
+                            "href": [
+                              "concat",
+                              "../",
+                              "$hModuleSpec.moduleFile"
+                            ]
                           },
                           "children": [
                             "list",
@@ -5074,7 +5503,11 @@
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "../source/encounter/source-algebra.encounter"
+                            "href": [
+                              "concat",
+                              "../",
+                              "$hModuleSpec.sourceFile"
+                            ]
                           },
                           "children": [
                             "list",
@@ -5095,7 +5528,12 @@
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": "../algebra/encounter-source.process.json.map.json"
+                            "href": [
+                              "concat",
+                              "../",
+                              "$hModuleSpec.moduleFile",
+                              ".map.json"
+                            ]
                           },
                           "children": [
                             "list",
@@ -5127,7 +5565,11 @@
       {
         "port": "file.write",
         "args": {
-          "path": "inspection/source-algebra.html",
+          "path": [
+            "concat",
+            "inspection/",
+            "$hModuleSpec.page"
+          ],
           "text": [
             "concat",
             "<!doctype html>\n",

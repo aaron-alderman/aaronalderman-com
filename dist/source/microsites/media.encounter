@@ -1,0 +1,311 @@
+# Readable process source; authority is selected explicitly by the build manifest.
+# The migration is gated by author.run correspondence and publication validation.
+process-module "temple/surface-process-module/1"
+profile "encounter/module-batch/microsite-media/1"
+
+process media.screens.init:
+  port browser.select { selector = "[data-screen]" } → screens
+  each $screens as screen:
+    port browser.relative { ref = at($screen, "ref"); relation = "query"; selector = "video" } → video
+    when $video:
+      port browser.relative { ref = at($screen, "ref"); relation = "query"; selector = "[data-sound]" } → sound
+      when $sound:
+        port browser.on {
+          ref = at($sound, "ref");
+          event = "click";
+          query = "media.sound.toggle";
+          input = { video = at($video, "ref"); sound = at($sound, "ref") }
+        } → _
+        port browser.on {
+          ref = at($video, "ref");
+          event = "volumechange";
+          query = "media.sound.sync";
+          input = { video = at($video, "ref"); sound = at($sound, "ref") }
+        } → _
+        port kernel.invoke {
+          query = "media.sound.sync";
+          input = { video = at($video, "ref"); sound = at($sound, "ref") }
+        } → result
+      port browser.relative { ref = at($screen, "ref"); relation = "parent" } → parent
+      port browser.relative { ref = at($parent, "ref"); relation = "query"; selector = ".chapters" } → chapters
+      when $chapters:
+        port state.set { key = concat("seek.", at(at($video, "ref"), "handle")); value = null } → _
+        port browser.on {
+          ref = at($chapters, "ref");
+          event = "click";
+          query = "media.seek.click";
+          input = { video = at($video, "ref") };
+          delegate = "[data-seek]"
+        } → _
+        port browser.on {
+          ref = at($video, "ref");
+          event = "loadedmetadata";
+          query = "media.seek.loaded";
+          input = { video = at($video, "ref") }
+        } → _
+  port browser.environment {  } → env
+  when at($env, "intersection"):
+    port browser.intersection {
+      selector = "[data-screen] video";
+      query = "media.screens.intersection";
+      input = {  };
+      threshold = 0.2
+    } → _
+  port browser.select { selector = "#provenance" } → boxes
+  when not(eq(count($boxes), 0)):
+    port kernel.invoke { query = "media.provenance"; input = {  } } → result
+
+process media.sound.sync:
+  port media.read { ref = at($eventInput, "video") } → video
+  port browser.write {
+    ref = at($eventInput, "sound");
+    name = "textContent";
+    value = if(at($video, "muted"), "Sound off", "Sound on")
+  } → _
+  port browser.attribute {
+    ref = at($eventInput, "sound");
+    name = "aria-pressed";
+    value = if(at($video, "muted"), "false", "true")
+  } → _
+
+process media.sound.toggle:
+  port media.read { ref = at($eventInput, "video") } → video
+  port media.write { ref = at($eventInput, "video"); name = "muted"; value = not(at($video, "muted")) } → _
+  when and(at($video, "muted"), eq(at($video, "volume"), 0)):
+    port media.write { ref = at($eventInput, "video"); name = "volume"; value = 0.8 } → _
+  port kernel.invoke {
+    query = "media.sound.sync";
+    input = { video = at($eventInput, "video"); sound = at($eventInput, "sound") }
+  } → result
+
+process media.screens.intersection:
+  each at($eventInput, "entries") as entry:
+    when not(at($entry, "isIntersecting")):
+      port media.read { ref = at($entry, "ref") } → video
+      when not(at($video, "paused")):
+        port media.pause { ref = at($entry, "ref") } → _
+
+process media.seek.click:
+  port number.parse { value = at(at(at($eventInput, "matched"), "attributes"), "data-seek") } → time
+  port state.set {
+    key = concat("seek.", at(at($eventInput, "video"), "handle"));
+    value = { time = $time; phase = "metadata" }
+  } → _
+  port media.read { ref = at($eventInput, "video") } → video
+  port number.calculate { operation = "less"; values = list(at($video, "readyState"), 1) } → unloaded
+  when $unloaded:
+    port media.write { ref = at($eventInput, "video"); name = "preload"; value = "auto" } → _
+    port media.load { ref = at($eventInput, "video") } → _
+  when not($unloaded):
+    port kernel.invoke {
+      query = "media.seek.prepare";
+      input = { video = at($eventInput, "video"); time = $time }
+    } → result
+  port browser.focus { ref = at($eventInput, "video"); preventScroll = true } → _
+
+process media.seek.loaded:
+  port state.get { key = concat("seek.", at(at($eventInput, "video"), "handle")) } → pending
+  when $pending:
+    when eq(at($pending, "phase"), "metadata"):
+      port kernel.invoke {
+        query = "media.seek.prepare";
+        input = { video = at($eventInput, "video"); time = at($pending, "time") }
+      } → result
+    when eq(at($pending, "phase"), "blob"):
+      port kernel.invoke {
+        query = "media.seek.finish";
+        input = { video = at($eventInput, "video"); time = at($pending, "time") }
+      } → result
+
+process media.seek.contains:
+  fold at($eventInput, "ranges") as range; found starts false:
+    port number.calculate { operation = "lessEqual"; values = list(at($range, 0), at($eventInput, "time")) } → after
+    port number.calculate { operation = "lessEqual"; values = list(at($eventInput, "time"), at($range, 1)) } → before
+    yield or($found, and($after, $before)) → result
+  let result = not(not($result))
+
+process media.seek.prepare:
+  port media.read { ref = at($eventInput, "video") } → video
+  port kernel.invoke {
+    query = "media.seek.contains";
+    input = { ranges = at($video, "seekable"); time = at($eventInput, "time") }
+  } → seekable
+  port text.matches { value = at($video, "currentSrc"); pattern = "^blob:" } → blob
+  let finish = true
+  when and(not($seekable), at($video, "currentSrc"), not($blob)):
+    try:
+      port asset.blobURL { url = at($video, "currentSrc") } → url
+      port state.set {
+        key = concat("seek.", at(at($eventInput, "video"), "handle"));
+        value = { time = at($eventInput, "time"); phase = "blob" }
+      } → _
+      port media.write { ref = at($eventInput, "video"); name = "src"; value = $url } → _
+      port media.write { ref = at($eventInput, "video"); name = "muted"; value = at($video, "muted") } → _
+      let finish = false
+    catch error:
+
+  when $finish:
+    port kernel.invoke {
+      query = "media.seek.finish";
+      input = { video = at($eventInput, "video"); time = at($eventInput, "time") }
+    } → result
+
+process media.seek.finish:
+  port state.set { key = concat("seek.", at(at($eventInput, "video"), "handle")); value = null } → _
+  port media.write {
+    ref = at($eventInput, "video");
+    name = "currentTime";
+    value = at($eventInput, "time")
+  } → _
+  port media.play { ref = at($eventInput, "video") } → _
+
+process media.provenance:
+  try:
+    port asset.json { url = "manifest.json"; cache = "no-cache" } → manifest
+    port kernel.invoke { query = "media.provenance.view"; input = { manifest = $manifest } } → node
+    port kernel.invoke { query = "ui.html"; input = { node = $node } } → html
+    port browser.content { ref = "#provenance"; html = $html } → _
+  catch error:
+    port kernel.invoke {
+      query = "ui.html";
+      input = {
+        node = {
+          tag = "p";
+          attrs = { class = "fine" };
+          children = list(
+            "The manifest could not be read here. It sits beside the film as ",
+            { tag = "a"; attrs = { href = "manifest.json" }; children = list("manifest.json") },
+            "."
+          )
+        }
+      }
+    } → html
+    port browser.content { ref = "#provenance"; html = $html } → _
+
+process media.provenance.view:
+  let m = at($eventInput, "manifest")
+  fold at($m, "files") as file; rows starts list():
+    port text.replace { value = at($file, "path"); pattern = "^films/"; flags = ""; replacement = "" } → path
+    port number.calculate { operation = "divide"; values = list(at($file, "bytes"), 1000000) } → arithmetic23
+    let mb = $arithmetic23
+    port number.format { value = $mb; digits = 2 } → mb
+    port text.slice { value = at($file, "sha256"); start = 0; end = 16 } → hash
+    yield append(
+    $rows,
+    list(
+      {
+        tag = "tr";
+        attrs = {  };
+        children = list(
+          {
+            tag = "th";
+            attrs = { scope = "row" };
+            children = list({ tag = "a"; attrs = { href = $path }; children = list($path) })
+          },
+          {
+            tag = "td";
+            attrs = {  };
+            children = list(
+              concat(
+                at($file, "kind"),
+                if(at($file, "duration"), concat(" · ", at($file, "duration"), " s"), ""),
+                if(
+                  at($file, "codecs"),
+                  concat(" · ", at(at($file, "codecs"), "video"), "/", at(at($file, "codecs"), "audio")),
+                  ""
+                )
+              )
+            )
+          },
+          { tag = "td"; attrs = {  }; children = list(concat($mb, " MB")) },
+          {
+            tag = "td";
+            attrs = {  };
+            children = list(
+              {
+                tag = "code";
+                attrs = { title = at($file, "sha256") };
+                children = list(concat($hash, "…"))
+              }
+            )
+          }
+        )
+      }
+    )
+  ) → rows
+  let result = list(
+    {
+      tag = "dl";
+      attrs = { class = "prov-facts" };
+      children = list(
+        {
+          tag = "div";
+          attrs = {  };
+          children = list(
+            { tag = "dt"; attrs = {  }; children = list("Source hash") },
+            {
+              tag = "dd";
+              attrs = {  };
+              children = list({ tag = "code"; attrs = {  }; children = list(at($m, "sourceHash")) })
+            }
+          )
+        },
+        {
+          tag = "div";
+          attrs = {  };
+          children = list(
+            { tag = "dt"; attrs = {  }; children = list("Defined as") },
+            { tag = "dd"; attrs = {  }; children = list(at($m, "sourceHashDefinition")) }
+          )
+        },
+        {
+          tag = "div";
+          attrs = {  };
+          children = list(
+            { tag = "dt"; attrs = {  }; children = list("Rendered with") },
+            {
+              tag = "dd";
+              attrs = {  };
+              children = list({ tag = "code"; attrs = {  }; children = list(at($m, "ffmpeg")) })
+            }
+          )
+        },
+        {
+          tag = "div";
+          attrs = {  };
+          children = list(
+            { tag = "dt"; attrs = {  }; children = list("Duration") },
+            {
+              tag = "dd";
+              attrs = {  };
+              children = list(concat(at($m, "duration"), " s in ", count(at($m, "scenes")), " scenes"))
+            }
+          )
+        }
+      )
+    },
+    {
+      tag = "table";
+      attrs = { class = "prov-table" };
+      children = list(
+        {
+          tag = "thead";
+          attrs = {  };
+          children = list(
+            {
+              tag = "tr";
+              attrs = {  };
+              children = list(
+                { tag = "th"; attrs = { scope = "col" }; children = list("File") },
+                { tag = "th"; attrs = { scope = "col" }; children = list("What") },
+                { tag = "th"; attrs = { scope = "col" }; children = list("Size") },
+                { tag = "th"; attrs = { scope = "col" }; children = list("SHA-256") }
+              )
+            }
+          )
+        },
+        { tag = "tbody"; attrs = {  }; children = list($rows) }
+      )
+    }
+  )
+

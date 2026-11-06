@@ -7002,12 +7002,27 @@
           },
           {
             "when": [
-              "eq",
+              "and",
               [
-                "count",
-                "$catchBody"
+                "eq",
+                [
+                  "count",
+                  "$catchBody"
+                ],
+                0
               ],
-              0
+              [
+                "not",
+                [
+                  "eq",
+                  [
+                    "at",
+                    "$lpPolicy",
+                    "allowEmptyCatch"
+                  ],
+                  true
+                ]
+              ]
             ],
             "then": [
               {

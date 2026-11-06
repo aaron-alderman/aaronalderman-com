@@ -1,0 +1,555 @@
+# Readable process source; authority is selected explicitly by the build manifest.
+# The migration is gated by author.run correspondence and publication validation.
+process-module "temple/surface-process-module/1"
+profile "encounter/module-batch/microsite-motion/1"
+
+process motion.sourcery.init:
+  port browser.class { ref = "html"; name = "no-js"; value = false } → _
+  port browser.environment {  } → env
+  port state.set { key = "reduced"; value = at($env, "reduced") } → _
+  when at($env, "intersection"):
+    port browser.intersection {
+      selector = ".scene, .reveal";
+      query = "motion.sourcery.scenes";
+      input = {  };
+      rootMargin = "0px 0px -8% 0px";
+      threshold = 0.05
+    } → _
+  when not(at($env, "intersection")):
+    port browser.select { selector = ".scene, .reveal" } → scenes
+    each $scenes as scene:
+      port browser.class { ref = at($scene, "ref"); name = "is-in"; value = true } → _
+      port browser.class { ref = at($scene, "ref"); name = "is-playing"; value = not(at($env, "reduced")) } → _
+  port browser.select { selector = ".contents-toggle" } → toggles
+  when not(eq(count($toggles), 0)):
+    port browser.on {
+      ref = ".contents-toggle";
+      event = "click";
+      query = "motion.sourcery.tocToggle";
+      input = {  }
+    } → _
+    port browser.on {
+      ref = "#toc";
+      event = "click";
+      query = "motion.sourcery.tocClose";
+      input = {  };
+      delegate = "a"
+    } → _
+    port browser.on { ref = "document"; event = "keydown"; query = "motion.sourcery.escape"; input = {  } } → _
+  port browser.select { selector = ".toc a[href^=\"#\"]" } → links
+  port state.set { key = "tocLinks"; value = $links } → _
+  port state.set { key = "chapter"; value = null } → _
+  when and(at($env, "intersection"), not(eq(count($links), 0))):
+    port text.join { values = map($links, "link", at(at($link, "attributes"), "href")); separator = "," } → selector
+    port browser.intersection {
+      selector = $selector;
+      query = "motion.sourcery.chapters";
+      input = {  };
+      rootMargin = "-45% 0px -50% 0px"
+    } → _
+  port browser.select { selector = ".stone" } → stones
+  each range(count($stones)) as i:
+    let stone = at($stones, add($i, -1))
+    port browser.on {
+      ref = at($stone, "ref");
+      event = "click";
+      query = "motion.sourcery.stone";
+      input = { index = $i; stone = $stone }
+    } → _
+  port browser.select { selector = "#cta-button" } → cta
+  when not(eq(count($cta), 0)):
+    port browser.on { ref = "#cta-button"; event = "click"; query = "motion.sourcery.cta"; input = {  } } → _
+  port browser.select { selector = "#flood" } → flood
+  when not(eq(count($flood), 0)):
+    port kernel.invoke { query = "motion.flood.init"; input = {  } } → result
+  port kernel.invoke { query = "motion.autoplay.init"; input = {  } } → result
+  port browser.on {
+    ref = { media = "(prefers-reduced-motion: reduce)" };
+    event = "change";
+    query = "motion.sourcery.reduced";
+    input = {  }
+  } → _
+
+process motion.sourcery.scenes:
+  port state.get { key = "reduced" } → reduced
+  each at($eventInput, "entries") as entry:
+    port browser.class {
+      ref = at($entry, "ref");
+      name = "is-playing";
+      value = and(at($entry, "isIntersecting"), not($reduced))
+    } → _
+    when at($entry, "isIntersecting"):
+      port browser.class { ref = at($entry, "ref"); name = "is-in"; value = true } → _
+
+process motion.sourcery.reduced:
+  port state.set { key = "reduced"; value = at(at($eventInput, "event"), "matches") } → _
+  port browser.select { selector = "#flood" } → flood
+  when not(eq(count($flood), 0)):
+    when at(at($eventInput, "event"), "matches"):
+      port state.set { key = "floodProgress"; value = 0.72 } → _
+      port kernel.invoke { query = "motion.flood.render"; input = { time = 0 } } → result
+    port kernel.invoke { query = "motion.flood.running"; input = {  } } → result
+
+process motion.sourcery.tocToggle:
+  port browser.read { ref = ".contents-toggle" } → toggle
+  let open = not(eq(at(at($toggle, "attributes"), "aria-expanded"), "true"))
+  port browser.attribute { ref = ".contents-toggle"; name = "aria-expanded"; value = if($open, "true", "false") } → _
+  port browser.class { ref = "#toc"; name = "is-open"; value = $open } → _
+
+process motion.sourcery.tocClose:
+  port browser.attribute { ref = ".contents-toggle"; name = "aria-expanded"; value = "false" } → _
+  port browser.class { ref = "#toc"; name = "is-open"; value = false } → _
+
+process motion.sourcery.escape:
+  when eq(at(at($eventInput, "event"), "key"), "Escape"):
+    port browser.read { ref = "#toc" } → toc
+    when includes(at(at($toc, "attributes"), "class"), "is-open"):
+      port kernel.invoke { query = "motion.sourcery.tocClose"; input = {  } } → result
+      port browser.focus { ref = ".contents-toggle" } → _
+
+process motion.sourcery.chapters:
+  port state.get { key = "chapter" } → chapter
+  fold at($eventInput, "entries") as entry; chapter starts $chapter:
+    when at($entry, "isIntersecting"):
+      port browser.read { ref = at($entry, "ref") } → node
+      let chapter = at(at($node, "attributes"), "id")
+    yield $chapter → chapter
+  port state.set { key = "chapter"; value = $chapter } → _
+  port state.get { key = "tocLinks" } → tocLinks
+  each $tocLinks as link:
+    let on = eq(at(at($link, "attributes"), "href"), concat("#", $chapter))
+    port browser.class { ref = at($link, "ref"); name = "is-current"; value = $on } → _
+    port browser.attribute { ref = at($link, "ref"); name = "aria-current"; value = if($on, "location", null) } → _
+
+process motion.sourcery.stone:
+  port browser.select { selector = ".stone" } → stones
+  each $stones as stone:
+    port browser.attribute { ref = at($stone, "ref"); name = "aria-pressed"; value = "false" } → _
+  port browser.attribute { ref = at(at($eventInput, "stone"), "ref"); name = "aria-pressed"; value = "true" } → _
+  port text.trim { value = at(at($eventInput, "stone"), "text") } → title
+  port kernel.invoke {
+    query = "ui.html";
+    input = {
+      node = list(
+        {
+          tag = "b";
+          attrs = {  };
+          children = list(concat(at($eventInput, "index"), ". ", $title, "."))
+        },
+        at(at(at($eventInput, "stone"), "attributes"), "data-full")
+      )
+    }
+  } → html
+  port browser.content { ref = "#stone-caption"; html = $html } → _
+
+process motion.sourcery.cta:
+  port browser.read { ref = "#cta-note" } → note
+  port browser.write { ref = "#cta-note"; name = "hidden"; value = not(at($note, "hidden")) } → _
+  port browser.attribute {
+    ref = "#cta-button";
+    name = "aria-expanded";
+    value = if(at($note, "hidden"), "true", "false")
+  } → _
+
+process motion.flood.rand:
+  port number.calculate { operation = "multiply"; values = list(at($eventInput, "seed"), 1664525) } → arithmetic22
+  port number.calculate { operation = "add"; values = list($arithmetic22, 1013904223) } → arithmetic23
+  port number.calculate { operation = "uint32"; values = list($arithmetic23) } → arithmetic24
+  let seed = $arithmetic24
+  port number.calculate { operation = "divide"; values = list($seed, 4294967296) } → arithmetic25
+  let value = $arithmetic25
+  let result = { seed = $seed; value = $value }
+
+process motion.flood.scatter:
+  let seed = 20260928
+  let xs = list(
+    560,
+    470,
+    650,
+    380,
+    520,
+    290,
+    720,
+    430,
+    150,
+    610,
+    340,
+    90,
+    250,
+    760,
+    500,
+    190,
+    580,
+    60,
+    680,
+    400
+  )
+  fold range(40) as i; scatter starts { seed = 20260928; brooms = list() }:
+    let seed = at($scatter, "seed")
+    port kernel.invoke { query = "motion.flood.rand"; input = { seed = $seed } } → random
+    let r0 = at($random, "value")
+    let seed = at($random, "seed")
+    port kernel.invoke { query = "motion.flood.rand"; input = { seed = $seed } } → random
+    let r1 = at($random, "value")
+    let seed = at($random, "seed")
+    port kernel.invoke { query = "motion.flood.rand"; input = { seed = $seed } } → random
+    let r2 = at($random, "value")
+    let seed = at($random, "seed")
+    port kernel.invoke { query = "motion.flood.rand"; input = { seed = $seed } } → random
+    let r3 = at($random, "value")
+    let seed = at($random, "seed")
+    port kernel.invoke { query = "motion.flood.rand"; input = { seed = $seed } } → random
+    let r4 = at($random, "value")
+    let seed = at($random, "seed")
+    port kernel.invoke { query = "motion.flood.rand"; input = { seed = $seed } } → random
+    let r5 = at($random, "value")
+    let seed = at($random, "seed")
+    port number.calculate { operation = "lessEqual"; values = list($i, 20) } → fixed
+    port number.calculate { operation = "subtract"; values = list($r0, 0.5) } → arithmetic26
+    port number.calculate { operation = "multiply"; values = list($arithmetic26, 24) } → arithmetic27
+    port number.calculate { operation = "multiply"; values = list($r0, 730) } → arithmetic28
+    port number.calculate {
+      operation = "add";
+      values = list(if($fixed, at($xs, add($i, -1)), 40), if($fixed, $arithmetic27, $arithmetic28))
+    } → arithmetic29
+    let x = $arithmetic29
+    port number.calculate { operation = "multiply"; values = list($r1, 0.16) } → arithmetic30
+    port number.calculate { operation = "add"; values = list(0.26, $arithmetic30) } → arithmetic31
+    let s = $arithmetic31
+    port number.calculate { operation = "less"; values = list($r2, 0.4) } → arithmetic32
+    let flipped = $arithmetic32
+    port number.calculate { operation = "multiply"; values = list($r3, 3.141592653589793, 2) } → arithmetic33
+    let phase = $arithmetic33
+    port number.calculate { operation = "subtract"; values = list($r4, 0.5) } → arithmetic34
+    port number.calculate { operation = "multiply"; values = list($arithmetic34, 10) } → arithmetic35
+    let tilt = $arithmetic35
+    port number.calculate { operation = "multiply"; values = list($r5, 16) } → arithmetic36
+    port number.calculate { operation = "add"; values = list(6, $arithmetic36) } → arithmetic37
+    let sink = $arithmetic37
+    yield {
+    seed = $seed;
+    brooms = append(
+      at($scatter, "brooms"),
+      list(
+        {
+          x = $x;
+          s = $s;
+          flip = if($flipped, -1, 1);
+          phase = $phase;
+          tilt = $tilt;
+          sink = $sink
+        }
+      )
+    )
+  } → scatter
+  let result = at($scatter, "brooms")
+
+process motion.flood.init:
+  port kernel.invoke { query = "motion.flood.scatter"; input = {  } } → brooms
+  port state.set { key = "floodBrooms"; value = $brooms } → _
+  port kernel.invoke {
+    query = "ui.html";
+    input = {
+      node = map(
+        $brooms,
+        "broom",
+        {
+          tag = "g";
+          attrs = { style = "display: none;" };
+          children = list(
+            {
+              tag = "g";
+              attrs = {  };
+              children = list(
+                {
+                  tag = "use";
+                  attrs = { href = "#broom"; x = -60; y = -240; width = 120; height = 250 };
+                  children = list()
+                }
+              )
+            }
+          )
+        }
+      )
+    }
+  } → html
+  port browser.content { ref = "#flood-brooms"; html = $html } → _
+  port state.get { key = "reduced" } → reduced
+  port state.set { key = "floodProgress"; value = if($reduced, 0.72, 0) } → _
+  port state.set { key = "floodLevel"; value = 592 } → _
+  port state.set { key = "floodShown"; value = 0 } → _
+  port state.set { key = "floodRunning"; value = false } → _
+  port state.set { key = "floodVisible"; value = false } → _
+  port browser.environment {  } → env
+  when not($reduced):
+    when at($env, "intersection"):
+      port browser.intersection { selector = "#flood"; query = "motion.flood.intersection"; input = {  } } → _
+    when not(at($env, "intersection")):
+      port state.set { key = "floodVisible"; value = true } → _
+      port kernel.invoke { query = "motion.flood.running"; input = {  } } → result
+    port browser.on { ref = "window"; event = "scroll"; query = "motion.flood.scroll"; input = {  } } → _
+    port browser.on { ref = "window"; event = "resize"; query = "motion.flood.scroll"; input = {  } } → _
+    port browser.on {
+      ref = "document";
+      event = "visibilitychange";
+      query = "motion.flood.running";
+      input = {  }
+    } → _
+  port kernel.invoke { query = "motion.flood.render"; input = { time = 0 } } → result
+
+process motion.flood.intersection:
+  let visible = at(at(at($eventInput, "entries"), 0), "isIntersecting")
+  port state.set { key = "floodVisible"; value = $visible } → _
+  when $visible:
+    port kernel.invoke { query = "motion.flood.scroll"; input = {  } } → result
+  port kernel.invoke { query = "motion.flood.running"; input = {  } } → result
+
+process motion.flood.scroll:
+  port state.get { key = "reduced" } → reduced
+  when not($reduced):
+    port browser.read { ref = "#flood" } → flood
+    port browser.environment {  } → env
+    port number.calculate { operation = "multiply"; values = list(or(at($env, "height"), 800), 0.6) } → arithmetic38
+    port number.calculate {
+      operation = "subtract";
+      values = list(at(at($flood, "rect"), "height"), $arithmetic38)
+    } → arithmetic39
+    port number.calculate { operation = "max"; values = list(1, $arithmetic39) } → arithmetic40
+    let travel = $arithmetic40
+    port number.calculate { operation = "multiply"; values = list(or(at($env, "height"), 800), 0.35) } → arithmetic41
+    port number.calculate { operation = "subtract"; values = list($arithmetic41, at(at($flood, "rect"), "top")) } → arithmetic42
+    port number.calculate { operation = "divide"; values = list($arithmetic42, $travel) } → arithmetic43
+    port number.calculate { operation = "min"; values = list(1, $arithmetic43) } → arithmetic44
+    port number.calculate { operation = "max"; values = list(0, $arithmetic44) } → arithmetic45
+    let progress = $arithmetic45
+    port state.set { key = "floodProgress"; value = $progress } → _
+
+process motion.flood.running:
+  port state.get { key = "reduced" } → reduced
+  port state.get { key = "floodVisible" } → floodVisible
+  port state.get { key = "floodRunning" } → floodRunning
+  port browser.environment {  } → env
+  let should = and($floodVisible, not($reduced), eq(at($env, "visibility"), "visible"))
+  when and($should, not($floodRunning)):
+    port state.set { key = "floodRunning"; value = true } → _
+    port browser.frame { query = "motion.flood.frame"; input = {  } } → _
+  when not($should):
+    port state.set { key = "floodRunning"; value = false } → _
+
+process motion.flood.frame:
+  port state.get { key = "floodRunning" } → floodRunning
+  when $floodRunning:
+    port number.calculate { operation = "divide"; values = list(at($eventInput, "time"), 1000) } → arithmetic46
+    let t = $arithmetic46
+    port kernel.invoke { query = "motion.flood.render"; input = { time = $t } } → result
+    port browser.frame { query = "motion.flood.frame"; input = {  } } → _
+
+process motion.flood.wave:
+  port number.format { value = at($eventInput, "baseY"); digits = 1 } → y
+  fold range(43) as position; path starts concat("M-20 ", $y):
+    port number.calculate { operation = "subtract"; values = list($position, 1) } → arithmetic47
+    port number.calculate { operation = "multiply"; values = list($arithmetic47, 20) } → arithmetic48
+    port number.calculate { operation = "add"; values = list(-20, $arithmetic48) } → arithmetic49
+    let x = $arithmetic49
+    port number.calculate { operation = "divide"; values = list($x, at($eventInput, "len")) } → arithmetic50
+    port number.calculate { operation = "multiply"; values = list($arithmetic50, 3.141592653589793, 2) } → arithmetic51
+    port number.calculate {
+      operation = "add";
+      values = list($arithmetic51, at($eventInput, "phase"), at($eventInput, "time"))
+    } → arithmetic52
+    port number.calculate { operation = "sin"; values = list($arithmetic52) } → arithmetic53
+    port number.calculate { operation = "multiply"; values = list($arithmetic53, at($eventInput, "amp")) } → arithmetic54
+    port number.calculate { operation = "multiply"; values = list(at($eventInput, "len"), 0.43) } → arithmetic55
+    port number.calculate { operation = "divide"; values = list($x, $arithmetic55) } → arithmetic56
+    port number.calculate { operation = "multiply"; values = list($arithmetic56, 3.141592653589793, 2) } → arithmetic57
+    port number.calculate { operation = "multiply"; values = list(at($eventInput, "time"), 1.3) } → arithmetic58
+    port number.calculate { operation = "subtract"; values = list($arithmetic57, $arithmetic58) } → arithmetic59
+    port number.calculate { operation = "sin"; values = list($arithmetic59) } → arithmetic60
+    port number.calculate { operation = "multiply"; values = list($arithmetic60, at($eventInput, "amp"), 0.35) } → arithmetic61
+    port number.calculate {
+      operation = "add";
+      values = list(at($eventInput, "baseY"), $arithmetic54, $arithmetic61)
+    } → arithmetic62
+    let y = $arithmetic62
+    port number.format { value = $y; digits = 1 } → y
+    yield concat($path, " L", $x, " ", $y) → result
+
+process motion.flood.pose:
+  let b = at($eventInput, "broom")
+  port number.calculate { operation = "less"; values = list(at($eventInput, "level"), 558) } → arithmetic63
+  let floating = $arithmetic63
+  port number.calculate { operation = "multiply"; values = list(at($eventInput, "time"), 2) } → arithmetic64
+  port number.calculate { operation = "add"; values = list($arithmetic64, at($b, "phase")) } → arithmetic65
+  port number.calculate { operation = "sin"; values = list($arithmetic65) } → arithmetic66
+  port number.calculate { operation = "multiply"; values = list($arithmetic66, 3) } → arithmetic67
+  port number.calculate {
+    operation = "add";
+    values = list(at($eventInput, "level"), at($b, "sink"), $arithmetic67)
+  } → arithmetic68
+  let y = if($floating, $arithmetic68, 562)
+  port number.calculate { operation = "multiply"; values = list(at($eventInput, "time"), 1.6) } → arithmetic69
+  port number.calculate { operation = "add"; values = list($arithmetic69, at($b, "phase")) } → arithmetic70
+  port number.calculate { operation = "sin"; values = list($arithmetic70) } → arithmetic71
+  port number.calculate { operation = "multiply"; values = list($arithmetic71, 5) } → arithmetic72
+  port number.calculate { operation = "add"; values = list(at($b, "tilt"), $arithmetic72) } → arithmetic73
+  port number.calculate { operation = "multiply"; values = list(at($eventInput, "time"), 5) } → arithmetic74
+  port number.calculate { operation = "add"; values = list($arithmetic74, at($b, "phase")) } → arithmetic75
+  port number.calculate { operation = "sin"; values = list($arithmetic75) } → arithmetic76
+  port number.calculate { operation = "multiply"; values = list($arithmetic76, 3) } → arithmetic77
+  let rotation = if($floating, $arithmetic73, $arithmetic77)
+  port number.calculate { operation = "multiply"; values = list(at($eventInput, "time"), 5) } → arithmetic78
+  port number.calculate { operation = "add"; values = list($arithmetic78, at($b, "phase")) } → arithmetic79
+  port number.calculate { operation = "sin"; values = list($arithmetic79) } → arithmetic80
+  port number.calculate { operation = "abs"; values = list($arithmetic80) } → arithmetic81
+  port number.calculate { operation = "multiply"; values = list($arithmetic81, -8) } → arithmetic82
+  let hop = if($floating, 0, $arithmetic82)
+  port number.calculate { operation = "add"; values = list($y, $hop) } → arithmetic83
+  let y = $arithmetic83
+  port number.calculate { operation = "multiply"; values = list(at($b, "s"), at($b, "flip")) } → arithmetic84
+  let sx = $arithmetic84
+  port number.format { value = at($b, "x"); digits = 1 } → x
+  port number.format { value = $y; digits = 1 } → y
+  port number.format { value = $rotation; digits = 1 } → rotation
+  port number.format { value = $sx; digits = 3 } → sx
+  port number.format { value = at($b, "s"); digits = 3 } → s
+  let result = concat("translate(", $x, " ", $y, ") rotate(", $rotation, ") scale(", $sx, " ", $s, ")")
+
+process motion.flood.render:
+  port state.get { key = "floodProgress" } → progress
+  port state.get { key = "floodLevel" } → level
+  port state.get { key = "floodBrooms" } → brooms
+  port state.get { key = "floodShown" } → shown
+  port state.get { key = "reduced" } → reduced
+  port number.calculate { operation = "multiply"; values = list($progress, 300) } → arithmetic85
+  port number.calculate { operation = "subtract"; values = list(592, $arithmetic85) } → arithmetic86
+  let target = $arithmetic86
+  port number.calculate { operation = "subtract"; values = list($target, $level) } → arithmetic87
+  port number.calculate { operation = "multiply"; values = list($arithmetic87, if($reduced, 1, 0.12)) } → arithmetic88
+  port number.calculate { operation = "add"; values = list($level, $arithmetic88) } → arithmetic89
+  let level = $arithmetic89
+  port state.set { key = "floodLevel"; value = $level } → _
+  port number.calculate { operation = "multiply"; values = list($progress, 7) } → arithmetic90
+  port number.calculate { operation = "add"; values = list(4, $arithmetic90) } → arithmetic91
+  let amp = $arithmetic91
+  port kernel.invoke {
+    query = "motion.flood.wave";
+    input = { baseY = $level; amp = $amp; len = 260; phase = 0; time = at($eventInput, "time") }
+  } → front
+  port browser.attribute { ref = "#wave-front"; name = "d"; value = concat($front, " L820 640 L-20 640 Z") } → _
+  port browser.attribute { ref = "#wave-foam"; name = "d"; value = $front } → _
+  port number.calculate { operation = "subtract"; values = list($level, 9) } → arithmetic92
+  let backLevel = $arithmetic92
+  port number.calculate { operation = "multiply"; values = list($amp, 0.8) } → arithmetic93
+  let backAmp = $arithmetic93
+  port number.calculate { operation = "multiply"; values = list(at($eventInput, "time"), 0.8) } → arithmetic94
+  let backTime = $arithmetic94
+  port kernel.invoke {
+    query = "motion.flood.wave";
+    input = { baseY = $backLevel; amp = $backAmp; len = 340; phase = 1.7; time = $backTime }
+  } → back
+  port browser.attribute { ref = "#wave-back"; name = "d"; value = concat($back, " L820 640 L-20 640 Z") } → _
+  port number.calculate { operation = "multiply"; values = list($progress, 5.35) } → arithmetic95
+  port number.calculate { operation = "power"; values = list(2, $arithmetic95) } → arithmetic96
+  port number.calculate { operation = "round"; values = list($arithmetic96) } → arithmetic97
+  port number.calculate { operation = "min"; values = list(40, $arithmetic97) } → arithmetic98
+  port number.calculate { operation = "max"; values = list(1, $arithmetic98) } → arithmetic99
+  let n = $arithmetic99
+  port browser.select { selector = "#flood-brooms > g" } → elements
+  when not(eq($shown, $n)):
+    each range(40) as position:
+      port number.calculate { operation = "lessEqual"; values = list($position, $n) } → visible
+      port browser.style {
+        ref = at(at($elements, add($position, -1)), "ref");
+        name = "display";
+        value = if($visible, "", "none")
+      } → _
+    port state.set { key = "floodShown"; value = $n } → _
+    port browser.write { ref = "[data-count=\"brooms\"]"; name = "textContent"; value = $n } → _
+    port number.calculate { operation = "multiply"; values = list($n, 2) } → arithmetic100
+    let buckets = $arithmetic100
+    port browser.write { ref = "[data-count=\"buckets\"]"; name = "textContent"; value = $buckets } → _
+  each range($n) as position:
+    port kernel.invoke {
+      query = "motion.flood.pose";
+      input = {
+        broom = at($brooms, add($position, -1));
+        level = $level;
+        time = at($eventInput, "time")
+      }
+    } → pose
+    port browser.attribute {
+      ref = at(at($elements, add($position, -1)), "ref");
+      name = "transform";
+      value = $pose
+    } → _
+  port browser.select { selector = "#flood-scene .float-tag" } → tags
+  each $tags as tag:
+    port number.parse { value = at(at($tag, "attributes"), "data-at") } → at
+    port number.calculate { operation = "greaterEqual"; values = list($progress, $at) } → on
+    port browser.class { ref = at($tag, "ref"); name = "is-on"; value = $on } → _
+
+process motion.autoplay.init:
+  port browser.environment {  } → env
+  port browser.select { selector = "video[data-autoplay]" } → videos
+  each $videos as video:
+    port media.write { ref = at($video, "ref"); name = "muted"; value = true } → _
+    when at($env, "reduced"):
+      port media.write { ref = at($video, "ref"); name = "controls"; value = true } → _
+    when not(at($env, "reduced")):
+      port browser.relative { ref = at($video, "ref"); relation = "parent" } → parent
+      port browser.relative { ref = at($parent, "ref"); relation = "query"; selector = ".video-toggle" } → toggle
+      port state.set { key = concat("paused.", at(at($video, "ref"), "handle")); value = false } → _
+      when $toggle:
+        port browser.write { ref = at($toggle, "ref"); name = "hidden"; value = false } → _
+        port browser.on {
+          ref = at($toggle, "ref");
+          event = "click";
+          query = "motion.autoplay.toggle";
+          input = { video = at($video, "ref") }
+        } → _
+        port browser.on {
+          ref = at($video, "ref");
+          event = "play";
+          query = "motion.autoplay.label";
+          input = { toggle = at($toggle, "ref"); text = "Pause" }
+        } → _
+        port browser.on {
+          ref = at($video, "ref");
+          event = "pause";
+          query = "motion.autoplay.label";
+          input = { toggle = at($toggle, "ref"); text = "Play" }
+        } → _
+  when and(at($env, "intersection"), not(at($env, "reduced"))):
+    port browser.intersection {
+      selector = "video[data-autoplay]";
+      query = "motion.autoplay.intersection";
+      input = {  };
+      threshold = 0.4
+    } → _
+
+process motion.autoplay.toggle:
+  port media.read { ref = at($eventInput, "video") } → video
+  port state.set {
+    key = concat("paused.", at(at($eventInput, "video"), "handle"));
+    value = not(at($video, "paused"))
+  } → _
+  when at($video, "paused"):
+    port media.play { ref = at($eventInput, "video") } → _
+  when not(at($video, "paused")):
+    port media.pause { ref = at($eventInput, "video") } → _
+
+process motion.autoplay.label:
+  port browser.write {
+    ref = at($eventInput, "toggle");
+    name = "textContent";
+    value = at($eventInput, "text")
+  } → _
+
+process motion.autoplay.intersection:
+  each at($eventInput, "entries") as entry:
+    port state.get { key = concat("paused.", at(at($entry, "ref"), "handle")) } → userPaused
+    when and(at($entry, "isIntersecting"), not($userPaused)):
+      port media.play { ref = at($entry, "ref") } → _
+    when not(at($entry, "isIntersecting")):
+      port media.pause { ref = at($entry, "ref") } → _
+

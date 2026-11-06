@@ -1,0 +1,897 @@
+# Readable process source; authority is selected explicitly by the build manifest.
+# The migration is gated by author.run correspondence and publication validation.
+process-module "temple/surface-process-module/1"
+profile "encounter/module-batch/microsite-temple-motion/1"
+
+process motion.temple.init:
+  port browser.environment {  } → env
+  port number.calculate { operation = "min"; values = list(or(at($env, "dpr"), 1), 2) } → arithmetic23
+  let dpr = $arithmetic23
+  port state.set { key = "skyFrame"; value = 0 } → _
+  port state.set { key = "skyLast"; value = 0 } → _
+  port state.set { key = "skyResize"; value = 0 } → _
+  port kernel.invoke { query = "motion.sky.seed"; input = {  } } → result
+  port kernel.invoke { query = "motion.sky.start"; input = {  } } → result
+  port browser.on { ref = "window"; event = "resize"; query = "motion.sky.resize"; input = {  } } → _
+  port browser.on {
+    ref = "document";
+    event = "visibilitychange";
+    query = "motion.sky.start";
+    input = {  }
+  } → _
+  port browser.on {
+    ref = { media = "(prefers-reduced-motion: reduce)" };
+    event = "change";
+    query = "motion.sky.start";
+    input = {  }
+  } → _
+  port browser.on { ref = "window"; event = "scroll"; query = "motion.sky.scroll"; input = {  } } → _
+  port kernel.invoke { query = "motion.stone"; input = {  } } → result
+  port browser.environment {  } → env
+  when at($env, "intersection"):
+    port browser.intersection {
+      selector = "[data-reveal]";
+      query = "motion.temple.reveal";
+      input = {  };
+      rootMargin = "0px 0px -10% 0px";
+      threshold = 0.12
+    } → observer
+    port state.set { key = "revealObserver"; value = $observer } → _
+  when not(at($env, "intersection")):
+    port browser.select { selector = "[data-reveal]" } → items
+    each $items as item:
+      port browser.class { ref = at($item, "ref"); name = "in"; value = true } → _
+  port state.set { key = "sceneTicking"; value = false } → _
+  port browser.on { ref = "window"; event = "scroll"; query = "motion.temple.scroll"; input = {  } } → _
+  port browser.on { ref = "window"; event = "resize"; query = "motion.temple.mode"; input = {  } } → _
+  port browser.on {
+    ref = { media = "(prefers-reduced-motion: reduce)" };
+    event = "change";
+    query = "motion.temple.mode";
+    input = {  }
+  } → _
+  port browser.on {
+    ref = { media = "(max-width: 819px)" };
+    event = "change";
+    query = "motion.temple.mode";
+    input = {  }
+  } → _
+  port kernel.invoke { query = "motion.temple.mode"; input = {  } } → result
+  port browser.select { selector = "#constellation" } → constellation
+  when not(eq(count($constellation), 0)):
+    port kernel.invoke { query = "motion.constellation.init"; input = {  } } → result
+  port browser.select { selector = "#follow-btn" } → follow
+  when not(eq(count($follow), 0)):
+    port browser.on { ref = "#follow-btn"; event = "click"; query = "motion.temple.follow"; input = {  } } → _
+
+process motion.temple.follow:
+  port browser.write { ref = "#follow-note"; name = "hidden"; value = false } → _
+  port browser.attribute { ref = "#follow-btn"; name = "aria-expanded"; value = "true" } → _
+
+process motion.temple.reveal:
+  port state.get { key = "revealObserver" } → revealObserver
+  each at($eventInput, "entries") as entry:
+    when at($entry, "isIntersecting"):
+      port browser.class { ref = at($entry, "ref"); name = "in"; value = true } → _
+      port browser.unobserve { id = $revealObserver; ref = at($entry, "ref") } → _
+
+process motion.temple.scroll:
+  port state.get { key = "sceneTicking" } → sceneTicking
+  when not($sceneTicking):
+    port state.set { key = "sceneTicking"; value = true } → _
+    port browser.frame { query = "motion.temple.scenes"; input = {  } } → _
+
+process motion.temple.mode:
+  port browser.select { selector = "[data-scene]" } → scenes
+  when not(eq(count($scenes), 0)):
+    port browser.environment {  } → env
+    port browser.mediaQuery { query = "(max-width: 819px)" } → narrow
+    let static = or(at($env, "reduced"), $narrow)
+    port browser.class { ref = "[data-scene]"; name = "static"; value = $static } → _
+    when $static:
+      port browser.attribute { ref = "[data-scene]"; name = "data-step"; value = "all" } → _
+    port kernel.invoke { query = "motion.temple.scenes"; input = {  } } → result
+
+process motion.temple.scenes:
+  port state.set { key = "sceneTicking"; value = false } → _
+  port browser.environment {  } → env
+  port browser.select { selector = "[data-progress]" } → progressed
+  each $progressed as item:
+    port number.calculate {
+      operation = "subtract";
+      values = list(at($env, "height"), at(at($item, "rect"), "top"))
+    } → arithmetic24
+    port number.calculate {
+      operation = "add";
+      values = list(at(at($item, "rect"), "height"), at($env, "height"))
+    } → arithmetic25
+    port number.calculate { operation = "divide"; values = list($arithmetic24, $arithmetic25) } → arithmetic26
+    port number.calculate { operation = "min"; values = list(1, $arithmetic26) } → arithmetic27
+    port number.calculate { operation = "max"; values = list(0, $arithmetic27) } → arithmetic28
+    let progress = $arithmetic28
+    port number.calculate { operation = "subtract"; values = list($progress, 0.2) } → arithmetic29
+    port number.calculate { operation = "divide"; values = list($arithmetic29, 0.55) } → arithmetic30
+    port number.calculate { operation = "min"; values = list(1, $arithmetic30) } → arithmetic31
+    port number.calculate { operation = "max"; values = list(0, $arithmetic31) } → arithmetic32
+    let progress = $arithmetic32
+    port number.format { value = $progress; digits = 3 } → progress
+    port browser.style { ref = at($item, "ref"); name = "--p"; value = $progress } → _
+  port browser.select { selector = "[data-scene]" } → scenes
+  when not(eq(count($scenes), 0)):
+    let scene = at($scenes, 0)
+    when not(includes(at(at($scene, "attributes"), "class"), "static")):
+      port number.calculate {
+        operation = "subtract";
+        values = list(at(at($scene, "rect"), "height"), at($env, "height"))
+      } → arithmetic33
+      let total = $arithmetic33
+      port number.calculate { operation = "greater"; values = list($total, 0) } → arithmetic34
+      let positive = $arithmetic34
+      let progress = 0
+      when $positive:
+        port number.calculate { operation = "multiply"; values = list(at(at($scene, "rect"), "top"), -1) } → arithmetic35
+        port number.calculate { operation = "divide"; values = list($arithmetic35, $total) } → arithmetic36
+        port number.calculate { operation = "min"; values = list(1, $arithmetic36) } → arithmetic37
+        port number.calculate { operation = "max"; values = list(0, $arithmetic37) } → arithmetic38
+        let progress = $arithmetic38
+      port number.calculate { operation = "multiply"; values = list($progress, 10, 0.999) } → arithmetic39
+      port number.calculate { operation = "floor"; values = list($arithmetic39) } → arithmetic40
+      port number.calculate { operation = "min"; values = list(9, $arithmetic40) } → arithmetic41
+      let index = $arithmetic41
+      port browser.attribute {
+        ref = at($scene, "ref");
+        name = "data-step";
+        value = at(list("all", "c", "turn", "ark", "i", "s0", "d", "w", "s1", "six"), $index)
+      } → _
+      port browser.select { selector = "[data-scene] .scene-rail span" } → rail
+      each range(count($rail)) as i:
+        port browser.class {
+          ref = at(at($rail, add($i, -1)), "ref");
+          name = "on";
+          value = eq(add($i, -1), $index)
+        } → _
+
+process motion.sky.star:
+  port random.values { count = 8 } → r
+  port number.calculate { operation = "multiply"; values = list(at($r, 0), at($eventInput, "width")) } → arithmetic42
+  let x = $arithmetic42
+  port number.calculate { operation = "multiply"; values = list(at($r, 1), at($eventInput, "height"), 1.7) } → arithmetic43
+  let y = $arithmetic43
+  port number.calculate { operation = "power"; values = list(at($r, 2), 2.2) } → arithmetic44
+  port number.calculate { operation = "multiply"; values = list($arithmetic44, 1.5) } → arithmetic45
+  port number.calculate { operation = "add"; values = list($arithmetic45, 0.25) } → arithmetic46
+  let radius = $arithmetic46
+  port number.calculate { operation = "multiply"; values = list(at($r, 3), 0.55) } → arithmetic47
+  port number.calculate { operation = "add"; values = list($arithmetic47, 0.25) } → arithmetic48
+  let alpha = $arithmetic48
+  port number.calculate { operation = "multiply"; values = list(at($r, 4), 3.141592653589793, 2) } → arithmetic49
+  let phase = $arithmetic49
+  port number.calculate { operation = "multiply"; values = list(at($r, 5), 0.9) } → arithmetic50
+  port number.calculate { operation = "add"; values = list($arithmetic50, 0.2) } → arithmetic51
+  let speed = $arithmetic51
+  port number.calculate { operation = "multiply"; values = list(at($r, 6), 0.6) } → arithmetic52
+  port number.calculate { operation = "add"; values = list($arithmetic52, 0.1) } → arithmetic53
+  let depth = $arithmetic53
+  port number.calculate { operation = "less"; values = list(at($r, 7), 0.14) } → arithmetic54
+  let warm = $arithmetic54
+  let result = {
+    x = $x;
+    y = $y;
+    r = $radius;
+    a = $alpha;
+    phase = $phase;
+    speed = $speed;
+    depth = $depth;
+    warm = $warm
+  }
+
+process motion.sky.mote:
+  port random.values { count = if(at($eventInput, "anywhere"), 7, 5) } → r
+  port number.calculate { operation = "multiply"; values = list(at($r, 0), at($eventInput, "width")) } → arithmetic55
+  let x = $arithmetic55
+  let offset = if(at($eventInput, "anywhere"), 2, 1)
+  let y = add(at($eventInput, "height"), 6)
+  when at($eventInput, "anywhere"):
+    port number.calculate { operation = "multiply"; values = list(at($r, 1), at($eventInput, "height"), 0.5) } → arithmetic56
+    port number.calculate { operation = "subtract"; values = list(at($eventInput, "height"), $arithmetic56) } → arithmetic57
+    let y = $arithmetic57
+  port number.calculate { operation = "multiply"; values = list(at($r, add($offset, 0)), 1.3) } → arithmetic58
+  port number.calculate { operation = "add"; values = list($arithmetic58, 0.35) } → arithmetic59
+  let radius = $arithmetic59
+  port number.calculate { operation = "multiply"; values = list(at($r, add($offset, 1)), 0.16) } → arithmetic60
+  port number.calculate { operation = "add"; values = list($arithmetic60, 0.05) } → arithmetic61
+  port number.calculate { operation = "multiply"; values = list($arithmetic61, -1) } → arithmetic62
+  let vy = $arithmetic62
+  port number.calculate { operation = "subtract"; values = list(at($r, add($offset, 2)), 0.5) } → arithmetic63
+  port number.calculate { operation = "multiply"; values = list($arithmetic63, 0.08) } → arithmetic64
+  let vx = $arithmetic64
+  port number.calculate { operation = "multiply"; values = list(at($r, add($offset, 3)), 0.5) } → arithmetic65
+  port number.calculate { operation = "add"; values = list($arithmetic65, 0.2) } → arithmetic66
+  let alpha = $arithmetic66
+  let result = {
+    x = $x;
+    y = $y;
+    r = $radius;
+    vy = $vy;
+    vx = $vx;
+    a = $alpha;
+    age = if(at($eventInput, "anywhere"), at($r, 6), 0)
+  }
+
+process motion.sky.seed:
+  port browser.environment {  } → env
+  port number.calculate { operation = "min"; values = list(or(at($env, "dpr"), 1), 2) } → arithmetic67
+  let dpr = $arithmetic67
+  port number.calculate { operation = "multiply"; values = list(at($env, "width"), $dpr) } → arithmetic68
+  port number.calculate { operation = "round"; values = list($arithmetic68) } → arithmetic69
+  let pixelWidth = $arithmetic69
+  port number.calculate { operation = "multiply"; values = list(at($env, "height"), $dpr) } → arithmetic70
+  port number.calculate { operation = "round"; values = list($arithmetic70) } → arithmetic71
+  let pixelHeight = $arithmetic71
+  port canvas.draw {
+    ref = "#sky";
+    width = $pixelWidth;
+    height = $pixelHeight;
+    dpr = $dpr;
+    commands = list()
+  } → _
+  port state.set { key = "skySize"; value = { width = at($env, "width"); height = at($env, "height") } } → _
+  port number.calculate { operation = "multiply"; values = list(at($env, "width"), at($env, "height")) } → arithmetic72
+  port number.calculate { operation = "divide"; values = list($arithmetic72, 3300) } → arithmetic73
+  port number.calculate { operation = "min"; values = list(460, $arithmetic73) } → arithmetic74
+  port number.calculate { operation = "round"; values = list($arithmetic74) } → arithmetic75
+  let n = $arithmetic75
+  fold range($n) as i; stars starts list():
+    port kernel.invoke {
+      query = "motion.sky.star";
+      input = { width = at($env, "width"); height = at($env, "height") }
+    } → star
+    yield append($stars, list($star)) → stars
+  port state.set { key = "skyStars"; value = $stars } → _
+  port number.calculate { operation = "divide"; values = list($n, 9) } → arithmetic76
+  port number.calculate { operation = "round"; values = list($arithmetic76) } → arithmetic77
+  port number.calculate { operation = "max"; values = list(12, $arithmetic77) } → arithmetic78
+  let n = $arithmetic78
+  fold range($n) as i; motes starts list():
+    port kernel.invoke {
+      query = "motion.sky.mote";
+      input = { width = at($env, "width"); height = at($env, "height"); anywhere = true }
+    } → mote
+    yield append($motes, list($mote)) → motes
+  port state.set { key = "skyMotes"; value = $motes } → _
+
+process motion.sky.plan:
+  let size = at($eventInput, "size")
+  let commands = list(
+    {
+      kind = "call";
+      name = "clearRect";
+      args = list(0, 0, at($size, "width"), at($size, "height"))
+    }
+  )
+  fold at($eventInput, "stars") as star; commands starts $commands:
+    port number.calculate { operation = "multiply"; values = list(at($size, "height"), 1.7) } → arithmetic79
+    let span = $arithmetic79
+    port number.calculate {
+      operation = "multiply";
+      values = list(at($eventInput, "scroll"), at($star, "depth"), 0.22)
+    } → arithmetic80
+    port number.calculate { operation = "subtract"; values = list(at($star, "y"), $arithmetic80) } → arithmetic81
+    port number.calculate { operation = "remainder"; values = list($arithmetic81, $span) } → arithmetic82
+    let y = $arithmetic82
+    port number.calculate { operation = "less"; values = list($y, 0) } → arithmetic83
+    let negative = $arithmetic83
+    when $negative:
+      port number.calculate { operation = "add"; values = list($y, $span) } → arithmetic84
+      let y = $arithmetic84
+    port number.calculate { operation = "multiply"; values = list(at($size, "height"), 0.35) } → arithmetic85
+    port number.calculate { operation = "subtract"; values = list($y, $arithmetic85) } → arithmetic86
+    let y = $arithmetic86
+    port number.calculate { operation = "less"; values = list($y, -3) } → arithmetic87
+    let above = $arithmetic87
+    port number.calculate { operation = "greater"; values = list($y, add(at($size, "height"), 3)) } → arithmetic88
+    let below = $arithmetic88
+    when not(or($above, $below)):
+      port number.calculate {
+        operation = "multiply";
+        values = list(at($eventInput, "time"), 0.0011, at($star, "speed"))
+      } → arithmetic89
+      port number.calculate { operation = "add"; values = list($arithmetic89, at($star, "phase")) } → arithmetic90
+      port number.calculate { operation = "sin"; values = list($arithmetic90) } → arithmetic91
+      port number.calculate { operation = "multiply"; values = list(0.38, $arithmetic91) } → arithmetic92
+      port number.calculate { operation = "add"; values = list(0.62, $arithmetic92) } → arithmetic93
+      let twinkle = if(at($eventInput, "still"), 0.85, $arithmetic93)
+      port number.calculate { operation = "multiply"; values = list(at($star, "a"), $twinkle) } → arithmetic94
+      let alpha = $arithmetic94
+      let commands = append(
+        $commands,
+        list(
+          { kind = "set"; name = "globalAlpha"; value = $alpha },
+          {
+            kind = "set";
+            name = "fillStyle";
+            value = if(at($star, "warm"), "#ffe2a8", "#dfe4ff")
+          },
+          { kind = "call"; name = "beginPath"; args = list() },
+          {
+            kind = "call";
+            name = "arc";
+            args = list(at($star, "x"), $y, at($star, "r"), 0, 6.283185307179586)
+          },
+          { kind = "call"; name = "fill"; args = list() }
+        )
+      )
+    yield $commands → commands
+  fold at($eventInput, "motes") as mote; drawing starts { motes = list(); commands = $commands }:
+    let m = $mote
+    let respawn = false
+    when not(at($eventInput, "still")):
+      port record.put { record = $m; key = "x"; value = add(at($m, "x"), at($m, "vx")) } → m
+      port record.put { record = $m; key = "y"; value = add(at($m, "y"), at($m, "vy")) } → m
+      port record.put { record = $m; key = "age"; value = add(at($m, "age"), 0.0016) } → m
+      port number.calculate { operation = "greater"; values = list(at($m, "age"), 1) } → arithmetic95
+      let old = $arithmetic95
+      port number.calculate { operation = "multiply"; values = list(at($size, "height"), 0.4) } → arithmetic96
+      port number.calculate { operation = "less"; values = list(at($m, "y"), $arithmetic96) } → arithmetic97
+      let high = $arithmetic97
+      let respawn = or($old, $high)
+      when $respawn:
+        port kernel.invoke {
+          query = "motion.sky.mote";
+          input = { width = at($size, "width"); height = at($size, "height"); anywhere = false }
+        } → m
+    let commands = at($drawing, "commands")
+    when not($respawn):
+      port number.calculate { operation = "min"; values = list(1, at($m, "age")) } → arithmetic98
+      port number.calculate { operation = "max"; values = list(0, $arithmetic98) } → arithmetic99
+      port number.calculate { operation = "multiply"; values = list(3.141592653589793, $arithmetic99) } → arithmetic100
+      port number.calculate { operation = "sin"; values = list($arithmetic100) } → arithmetic101
+      port number.calculate { operation = "multiply"; values = list(at($m, "a"), $arithmetic101) } → arithmetic102
+      let alpha = $arithmetic102
+      let commands = append(
+        $commands,
+        list(
+          { kind = "set"; name = "globalAlpha"; value = $alpha },
+          { kind = "set"; name = "fillStyle"; value = "#f2c96f" },
+          { kind = "call"; name = "beginPath"; args = list() },
+          {
+            kind = "call";
+            name = "arc";
+            args = list(at($m, "x"), at($m, "y"), at($m, "r"), 0, 6.283185307179586)
+          },
+          { kind = "call"; name = "fill"; args = list() }
+        )
+      )
+    yield { motes = append(at($drawing, "motes"), list($m)); commands = $commands } → drawing
+  let result = {
+    motes = at($drawing, "motes");
+    commands = append(
+      at($drawing, "commands"),
+      list({ kind = "set"; name = "globalAlpha"; value = 1 })
+    )
+  }
+
+process motion.sky.draw:
+  port state.get { key = "skyStars" } → skyStars
+  port state.get { key = "skyMotes" } → skyMotes
+  port state.get { key = "skySize" } → skySize
+  port browser.environment {  } → env
+  port kernel.invoke {
+    query = "motion.sky.plan";
+    input = {
+      size = $skySize;
+      stars = $skyStars;
+      motes = $skyMotes;
+      scroll = at($env, "scrollY");
+      time = at($eventInput, "time");
+      still = at($eventInput, "still")
+    }
+  } → plan
+  port state.set { key = "skyMotes"; value = at($plan, "motes") } → _
+  port canvas.draw { ref = "#sky"; commands = at($plan, "commands") } → _
+
+process motion.sky.start:
+  port state.get { key = "skyFrame" } → skyFrame
+  port browser.cancel { id = $skyFrame } → _
+  port browser.environment {  } → env
+  when or(at($env, "reduced"), at($env, "hidden")):
+    port kernel.invoke { query = "motion.sky.draw"; input = { time = 0; still = true } } → result
+  when not(or(at($env, "reduced"), at($env, "hidden"))):
+    port browser.frame { query = "motion.sky.frame"; input = {  } } → frame
+    port state.set { key = "skyFrame"; value = $frame } → _
+
+process motion.sky.frame:
+  port browser.environment {  } → env
+  when and(not(at($env, "hidden")), not(at($env, "reduced"))):
+    port browser.frame { query = "motion.sky.frame"; input = {  } } → frame
+    port state.set { key = "skyFrame"; value = $frame } → _
+    port state.get { key = "skyLast" } → skyLast
+    port number.calculate { operation = "subtract"; values = list(at($eventInput, "time"), $skyLast) } → arithmetic103
+    port number.calculate { operation = "greaterEqual"; values = list($arithmetic103, 32) } → arithmetic104
+    let due = $arithmetic104
+    when $due:
+      port state.set { key = "skyLast"; value = at($eventInput, "time") } → _
+      port kernel.invoke { query = "motion.sky.draw"; input = { time = at($eventInput, "time"); still = false } } → result
+
+process motion.sky.resize:
+  port state.get { key = "skyResize" } → skyResize
+  port browser.cancel { id = $skyResize } → _
+  port browser.timer { milliseconds = 150; query = "motion.sky.reseed"; input = {  } } → timer
+  port state.set { key = "skyResize"; value = $timer } → _
+
+process motion.sky.reseed:
+  port kernel.invoke { query = "motion.sky.seed"; input = {  } } → result
+  port kernel.invoke { query = "motion.sky.start"; input = {  } } → result
+
+process motion.sky.scroll:
+  port browser.environment {  } → env
+  when at($env, "reduced"):
+    port kernel.invoke { query = "motion.sky.draw"; input = { time = 0; still = true } } → result
+
+process motion.stone.row:
+  port random.values { count = 320 } → random
+  fold range(160) as i; pixels starts list():
+    port number.calculate { operation = "subtract"; values = list($i, 1) } → arithmetic105
+    port number.calculate { operation = "multiply"; values = list($arithmetic105, 2) } → arithmetic106
+    let offset = $arithmetic106
+    port number.calculate { operation = "multiply"; values = list(at($random, $offset), 105) } → arithmetic107
+    port number.calculate { operation = "add"; values = list(150, $arithmetic107) } → arithmetic108
+    let v = $arithmetic108
+    port number.calculate { operation = "multiply"; values = list($v, 0.94) } → arithmetic109
+    let g = $arithmetic109
+    port number.calculate { operation = "multiply"; values = list($v, 0.82) } → arithmetic110
+    let b = $arithmetic110
+    port number.calculate { operation = "less"; values = list(at($random, add($offset, 1)), 0.5) } → arithmetic111
+    let low = $arithmetic111
+    yield append($pixels, list($v, $g, $b, if($low, 10, 4))) → result
+
+process motion.stone:
+  fold range(160) as i; rows starts list():
+    port kernel.invoke { query = "motion.stone.row"; input = {  } } → row
+    yield append($rows, list($row)) → rows
+  port image.rasterize { width = 160; height = 160; rows = $rows } → image
+  port browser.style { ref = "html"; name = "--noise"; value = concat("url(", $image, ")") } → _
+
+process motion.constellation.pos:
+  let point = at(
+    list(
+      list(0.1, 0.34),
+      list(0.27, 0.13),
+      list(0.47, 0.3),
+      list(0.7, 0.12),
+      list(0.9, 0.36),
+      list(0.66, 0.6),
+      list(0.4, 0.68),
+      list(0.16, 0.8),
+      list(0.86, 0.84)
+    ),
+    at($eventInput, "index")
+  )
+  port number.calculate { operation = "subtract"; values = list(at(at($eventInput, "size"), "width"), 60) } → arithmetic112
+  port number.calculate { operation = "multiply"; values = list(at($point, 0), $arithmetic112) } → arithmetic113
+  port number.calculate { operation = "add"; values = list($arithmetic113, 30) } → arithmetic114
+  let x = $arithmetic114
+  port number.calculate { operation = "subtract"; values = list(at(at($eventInput, "size"), "height"), 70) } → arithmetic115
+  port number.calculate { operation = "multiply"; values = list(at($point, 1), $arithmetic115) } → arithmetic116
+  port number.calculate { operation = "add"; values = list($arithmetic116, 30) } → arithmetic117
+  let y = $arithmetic117
+  let result = { x = $x; y = $y }
+
+process motion.constellation.temple:
+  let x = at($eventInput, "x")
+  let y = at($eventInput, "y")
+  let s = at($eventInput, "size")
+  port number.calculate { operation = "multiply"; values = list($s, 3.2) } → arithmetic118
+  let r = $arithmetic118
+  port number.calculate { operation = "multiply"; values = list(0.28, at($eventInput, "glow")) } → arithmetic119
+  let a = $arithmetic119
+  port number.calculate { operation = "subtract"; values = list($x, $s) } → arithmetic120
+  let left = $arithmetic120
+  port number.calculate { operation = "multiply"; values = list($s, 0.35) } → arithmetic121
+  port number.calculate { operation = "subtract"; values = list($y, $arithmetic121) } → arithmetic122
+  let roofBase = $arithmetic122
+  port number.calculate { operation = "multiply"; values = list($s, 0.95) } → arithmetic123
+  port number.calculate { operation = "subtract"; values = list($y, $arithmetic123) } → arithmetic124
+  let roofTop = $arithmetic124
+  port number.calculate { operation = "add"; values = list($x, $s) } → arithmetic125
+  let right = $arithmetic125
+  let commands = list(
+    {
+      kind = "gradient";
+      id = "temple";
+      args = list($x, $y, 0, $x, $y, $r);
+      stops = list(list(0, concat("rgba(255,214,140,", $a, ")")), list(1, "rgba(255,214,140,0)"))
+    },
+    { kind = "set"; name = "fillStyle"; gradient = "temple" },
+    { kind = "call"; name = "beginPath"; args = list() },
+    { kind = "call"; name = "arc"; args = list($x, $y, $r, 0, 6.283185307179586) },
+    { kind = "call"; name = "fill"; args = list() },
+    { kind = "set"; name = "strokeStyle"; value = "#e3c07a" },
+    { kind = "set"; name = "lineWidth"; value = 1.3 },
+    { kind = "call"; name = "beginPath"; args = list() },
+    { kind = "call"; name = "moveTo"; args = list($left, $roofBase) },
+    { kind = "call"; name = "lineTo"; args = list($x, $roofTop) },
+    { kind = "call"; name = "lineTo"; args = list($right, $roofBase) },
+    { kind = "call"; name = "closePath"; args = list() }
+  )
+  fold list(-0.66, -0.22, 0.22, 0.66) as dx; commands starts $commands:
+    port number.calculate { operation = "multiply"; values = list($dx, $s) } → arithmetic126
+    port number.calculate { operation = "add"; values = list($x, $arithmetic126) } → arithmetic127
+    let columnX = $arithmetic127
+    port number.calculate { operation = "multiply"; values = list($s, 0.2) } → arithmetic128
+    port number.calculate { operation = "subtract"; values = list($y, $arithmetic128) } → arithmetic129
+    let columnTop = $arithmetic129
+    port number.calculate { operation = "multiply"; values = list($s, 0.62) } → arithmetic130
+    port number.calculate { operation = "add"; values = list($y, $arithmetic130) } → arithmetic131
+    let columnBottom = $arithmetic131
+    yield append(
+    $commands,
+    list(
+      { kind = "call"; name = "moveTo"; args = list($columnX, $columnTop) },
+      { kind = "call"; name = "lineTo"; args = list($columnX, $columnBottom) }
+    )
+  ) → commands
+  port number.calculate { operation = "multiply"; values = list($s, 1.1) } → arithmetic132
+  port number.calculate { operation = "subtract"; values = list($x, $arithmetic132) } → arithmetic133
+  let left = $arithmetic133
+  port number.calculate { operation = "multiply"; values = list($s, 1.1) } → arithmetic134
+  port number.calculate { operation = "add"; values = list($x, $arithmetic134) } → arithmetic135
+  let right = $arithmetic135
+  port number.calculate { operation = "multiply"; values = list($s, 0.78) } → arithmetic136
+  port number.calculate { operation = "add"; values = list($y, $arithmetic136) } → arithmetic137
+  let bottom = $arithmetic137
+  let result = append(
+    $commands,
+    list(
+      { kind = "call"; name = "moveTo"; args = list($left, $bottom) },
+      { kind = "call"; name = "lineTo"; args = list($right, $bottom) },
+      { kind = "call"; name = "stroke"; args = list() }
+    )
+  )
+
+process motion.constellation.plan:
+  let size = at($eventInput, "size")
+  let time = at($eventInput, "time")
+  let still = at($eventInput, "still")
+  let commands = list(
+    {
+      kind = "call";
+      name = "clearRect";
+      args = list(0, 0, at($size, "width"), at($size, "height"))
+    },
+    { kind = "set"; name = "lineWidth"; value = 1 }
+  )
+  fold list(
+    list(0, 1),
+    list(1, 2),
+    list(2, 3),
+    list(3, 4),
+    list(2, 5),
+    list(5, 4),
+    list(6, 5),
+    list(6, 7),
+    list(6, 2),
+    list(5, 8),
+    list(0, 7)
+  ) as edge; commands starts $commands:
+    port kernel.invoke { query = "motion.constellation.pos"; input = { index = at($edge, 0); size = $size } } → a
+    port kernel.invoke { query = "motion.constellation.pos"; input = { index = at($edge, 1); size = $size } } → b
+    let lab = and(eq(at($edge, 0), 6), eq(at($edge, 1), 5))
+    yield append(
+    $commands,
+    list(
+      {
+        kind = "set";
+        name = "strokeStyle";
+        value = if($lab, "rgba(255,226,168,0.55)", "rgba(227,192,122,0.2)")
+      },
+      { kind = "call"; name = "setLineDash"; args = list(if($lab, list(), list(3, 6))) },
+      { kind = "call"; name = "beginPath"; args = list() },
+      { kind = "call"; name = "moveTo"; args = list(at($a, "x"), at($a, "y")) },
+      { kind = "call"; name = "lineTo"; args = list(at($b, "x"), at($b, "y")) },
+      { kind = "call"; name = "stroke"; args = list() }
+    )
+  ) → commands
+  let commands = append($commands, list({ kind = "call"; name = "setLineDash"; args = list(list()) }))
+  let sparks = at($eventInput, "sparks")
+  let rings = at($eventInput, "rings")
+  let nextSpark = at($eventInput, "nextSpark")
+  when not($still):
+    port number.calculate { operation = "greater"; values = list($time, $nextSpark) } → arithmetic138
+    let due = $arithmetic138
+    when $due:
+      port random.values { count = 5 } → r
+      port number.calculate { operation = "multiply"; values = list(at($r, 0), 11) } → arithmetic139
+      port number.calculate { operation = "floor"; values = list($arithmetic139) } → arithmetic140
+      let edgeIndex = $arithmetic140
+      let edge = at(
+        list(
+          list(0, 1),
+          list(1, 2),
+          list(2, 3),
+          list(3, 4),
+          list(2, 5),
+          list(5, 4),
+          list(6, 5),
+          list(6, 7),
+          list(6, 2),
+          list(5, 8),
+          list(0, 7)
+        ),
+        $edgeIndex
+      )
+      port number.calculate { operation = "less"; values = list(at($r, 1), 0.5) } → arithmetic141
+      let flip = $arithmetic141
+      port number.calculate { operation = "multiply"; values = list(at($r, 2), 700) } → arithmetic142
+      port number.calculate { operation = "add"; values = list(1700, $arithmetic142) } → arithmetic143
+      let duration = $arithmetic143
+      port number.calculate { operation = "less"; values = list(at($r, 3), 0.72) } → arithmetic144
+      let ok = $arithmetic144
+      let sparks = append(
+        $sparks,
+        list(
+          {
+            from = if($flip, at($edge, 1), at($edge, 0));
+            to = if($flip, at($edge, 0), at($edge, 1));
+            t0 = $time;
+            dur = $duration;
+            ok = $ok
+          }
+        )
+      )
+      port number.calculate { operation = "multiply"; values = list(at($r, 4), 900) } → arithmetic145
+      port number.calculate { operation = "add"; values = list($time, 900, $arithmetic145) } → arithmetic146
+      let nextSpark = $arithmetic146
+    fold $sparks as spark; animation starts { sparks = list(); rings = $rings; commands = $commands }:
+      port number.calculate { operation = "subtract"; values = list($time, at($spark, "t0")) } → arithmetic147
+      port number.calculate { operation = "divide"; values = list($arithmetic147, at($spark, "dur")) } → arithmetic148
+      let progress = $arithmetic148
+      port number.calculate { operation = "greaterEqual"; values = list($progress, 1) } → arithmetic149
+      let arrived = $arithmetic149
+      let commands = at($animation, "commands")
+      let rings = at($animation, "rings")
+      let sparks = at($animation, "sparks")
+      when $arrived:
+        let rings = append($rings, list({ at = at($spark, "to"); t0 = $time; ok = at($spark, "ok") }))
+      when not($arrived):
+        port kernel.invoke {
+          query = "motion.constellation.pos";
+          input = { index = at($spark, "from"); size = $size }
+        } → a
+        port kernel.invoke {
+          query = "motion.constellation.pos";
+          input = { index = at($spark, "to"); size = $size }
+        } → b
+        port number.calculate { operation = "multiply"; values = list(2, $progress) } → arithmetic150
+        port number.calculate { operation = "subtract"; values = list(3, $arithmetic150) } → arithmetic151
+        port number.calculate { operation = "multiply"; values = list($progress, $progress, $arithmetic151) } → arithmetic152
+        let ease = $arithmetic152
+        port number.calculate { operation = "subtract"; values = list(at($b, "x"), at($a, "x")) } → arithmetic153
+        port number.calculate { operation = "multiply"; values = list($arithmetic153, $ease) } → arithmetic154
+        port number.calculate { operation = "add"; values = list(at($a, "x"), $arithmetic154) } → arithmetic155
+        let x = $arithmetic155
+        port number.calculate { operation = "subtract"; values = list(at($b, "y"), at($a, "y")) } → arithmetic156
+        port number.calculate { operation = "multiply"; values = list($arithmetic156, $ease) } → arithmetic157
+        port number.calculate { operation = "add"; values = list(at($a, "y"), $arithmetic157) } → arithmetic158
+        let y = $arithmetic158
+        let commands = append(
+          $commands,
+          list(
+            {
+              kind = "gradient";
+              id = "spark";
+              args = list($x, $y, 0, $x, $y, 9);
+              stops = list(list(0, "rgba(255,241,201,0.95)"), list(1, "rgba(255,214,140,0)"))
+            },
+            { kind = "set"; name = "fillStyle"; gradient = "spark" },
+            { kind = "call"; name = "beginPath"; args = list() },
+            { kind = "call"; name = "arc"; args = list($x, $y, 9, 0, 6.283185307179586) },
+            { kind = "call"; name = "fill"; args = list() }
+          )
+        )
+        let sparks = append($sparks, list($spark))
+      yield { commands = $commands; sparks = $sparks; rings = $rings } → animation
+    let commands = at($animation, "commands")
+    let sparks = at($animation, "sparks")
+    let rings = at($animation, "rings")
+    fold $rings as ring; animation starts { commands = $commands; rings = list() }:
+      port number.calculate { operation = "subtract"; values = list($time, at($ring, "t0")) } → arithmetic159
+      port number.calculate { operation = "divide"; values = list($arithmetic159, 1300) } → arithmetic160
+      let progress = $arithmetic160
+      port number.calculate { operation = "less"; values = list($progress, 1) } → arithmetic161
+      let alive = $arithmetic161
+      let commands = at($animation, "commands")
+      let rings = at($animation, "rings")
+      when $alive:
+        port kernel.invoke {
+          query = "motion.constellation.pos";
+          input = { index = at($ring, "at"); size = $size }
+        } → point
+        port number.calculate { operation = "subtract"; values = list(1, $progress) } → arithmetic162
+        let alpha = $arithmetic162
+        port number.calculate { operation = "multiply"; values = list($progress, 22) } → arithmetic163
+        port number.calculate { operation = "add"; values = list(12, $arithmetic163) } → arithmetic164
+        let radius = $arithmetic164
+        let commands = append(
+          $commands,
+          list(
+            {
+              kind = "set";
+              name = "strokeStyle";
+              value = concat(if(at($ring, "ok"), "rgba(227,192,122,", "rgba(232,145,127,"), $alpha, ")")
+            },
+            { kind = "set"; name = "lineWidth"; value = 1.4 },
+            { kind = "call"; name = "beginPath"; args = list() },
+            {
+              kind = "call";
+              name = "arc";
+              args = list(at($point, "x"), at($point, "y"), $radius, 0, 6.283185307179586)
+            },
+            { kind = "call"; name = "stroke"; args = list() }
+          )
+        )
+        let rings = append($rings, list($ring))
+      yield { commands = $commands; rings = $rings } → animation
+    let commands = at($animation, "commands")
+    let rings = at($animation, "rings")
+  fold range(9) as i; commands starts $commands:
+    let index = add($i, -1)
+    port kernel.invoke { query = "motion.constellation.pos"; input = { index = $index; size = $size } } → point
+    port number.calculate { operation = "multiply"; values = list($time, 0.0013) } → arithmetic165
+    port number.calculate { operation = "add"; values = list($arithmetic165, $index) } → arithmetic166
+    port number.calculate { operation = "sin"; values = list($arithmetic166) } → arithmetic167
+    port number.calculate { operation = "multiply"; values = list(0.3, $arithmetic167) } → arithmetic168
+    port number.calculate { operation = "add"; values = list(0.7, $arithmetic168) } → arithmetic169
+    let glow = if($still, 0.8, $arithmetic169)
+    port kernel.invoke {
+      query = "motion.constellation.temple";
+      input = {
+        x = at($point, "x");
+        y = at($point, "y");
+        size = if(or(eq($index, 6), eq($index, 5)), 12, 9);
+        glow = $glow
+      }
+    } → glyph
+    yield append($commands, $glyph) → commands
+  port kernel.invoke { query = "motion.constellation.pos"; input = { index = 6; size = $size } } → west
+  port kernel.invoke { query = "motion.constellation.pos"; input = { index = 5; size = $size } } → east
+  let result = {
+    commands = append(
+      $commands,
+      list(
+        {
+          kind = "set";
+          name = "font";
+          value = "italic 500 15px \"Cormorant Garamond\", Georgia, serif"
+        },
+        { kind = "set"; name = "fillStyle"; value = "#ffe2a8" },
+        { kind = "set"; name = "textAlign"; value = "center" },
+        {
+          kind = "call";
+          name = "fillText";
+          args = list("west", at($west, "x"), add(at($west, "y"), 30))
+        },
+        {
+          kind = "call";
+          name = "fillText";
+          args = list("east", at($east, "x"), add(at($east, "y"), 30))
+        }
+      )
+    );
+    sparks = $sparks;
+    rings = $rings;
+    nextSpark = $nextSpark
+  }
+
+process motion.constellation.init:
+  port state.set { key = "constellationFrame"; value = 0 } → _
+  port state.set { key = "constellationVisible"; value = false } → _
+  port state.set { key = "constellationSparks"; value = list() } → _
+  port state.set { key = "constellationRings"; value = list() } → _
+  port state.set { key = "constellationNext"; value = 0 } → _
+  port kernel.invoke { query = "motion.constellation.size"; input = {  } } → result
+  port kernel.invoke { query = "motion.constellation.draw"; input = { time = 0; still = true } } → result
+  port browser.intersection {
+    selector = "#constellation";
+    query = "motion.constellation.intersection";
+    input = {  };
+    threshold = 0.05
+  } → _
+  port browser.on {
+    ref = "window";
+    event = "resize";
+    query = "motion.constellation.resize";
+    input = {  }
+  } → _
+  port browser.on {
+    ref = "document";
+    event = "visibilitychange";
+    query = "motion.constellation.start";
+    input = {  }
+  } → _
+  port browser.on {
+    ref = { media = "(prefers-reduced-motion: reduce)" };
+    event = "change";
+    query = "motion.constellation.start";
+    input = {  }
+  } → _
+  port browser.fontsReady {  } → _
+  port kernel.invoke { query = "motion.constellation.draw"; input = { time = 0; still = true } } → result
+
+process motion.constellation.size:
+  port browser.environment {  } → env
+  port number.calculate { operation = "min"; values = list(or(at($env, "dpr"), 1), 2) } → arithmetic170
+  let dpr = $arithmetic170
+  port browser.read { ref = "#constellation" } → canvas
+  port state.set {
+    key = "constellationSize";
+    value = { width = at(at($canvas, "rect"), "width"); height = at(at($canvas, "rect"), "height") }
+  } → _
+  port number.calculate { operation = "multiply"; values = list(at(at($canvas, "rect"), "width"), $dpr) } → arithmetic171
+  port number.calculate { operation = "round"; values = list($arithmetic171) } → arithmetic172
+  let width = $arithmetic172
+  port number.calculate { operation = "multiply"; values = list(at(at($canvas, "rect"), "height"), $dpr) } → arithmetic173
+  port number.calculate { operation = "round"; values = list($arithmetic173) } → arithmetic174
+  let height = $arithmetic174
+  port canvas.draw {
+    ref = "#constellation";
+    width = $width;
+    height = $height;
+    dpr = $dpr;
+    commands = list()
+  } → _
+
+process motion.constellation.draw:
+  port state.get { key = "constellationSize" } → constellationSize
+  port state.get { key = "constellationSparks" } → constellationSparks
+  port state.get { key = "constellationRings" } → constellationRings
+  port state.get { key = "constellationNext" } → constellationNext
+  port kernel.invoke {
+    query = "motion.constellation.plan";
+    input = {
+      size = $constellationSize;
+      sparks = $constellationSparks;
+      rings = $constellationRings;
+      nextSpark = $constellationNext;
+      time = at($eventInput, "time");
+      still = at($eventInput, "still")
+    }
+  } → plan
+  port state.set { key = "constellationSparks"; value = at($plan, "sparks") } → _
+  port state.set { key = "constellationRings"; value = at($plan, "rings") } → _
+  port state.set { key = "constellationNext"; value = at($plan, "nextSpark") } → _
+  port canvas.draw { ref = "#constellation"; commands = at($plan, "commands") } → _
+
+process motion.constellation.start:
+  port state.get { key = "constellationFrame" } → constellationFrame
+  port browser.cancel { id = $constellationFrame } → _
+  port state.get { key = "constellationVisible" } → constellationVisible
+  port browser.environment {  } → env
+  when or(not($constellationVisible), at($env, "reduced"), at($env, "hidden")):
+    port kernel.invoke { query = "motion.constellation.draw"; input = { time = 0; still = true } } → result
+  when and($constellationVisible, not(at($env, "reduced")), not(at($env, "hidden"))):
+    port browser.frame { query = "motion.constellation.frame"; input = {  } } → frame
+    port state.set { key = "constellationFrame"; value = $frame } → _
+
+process motion.constellation.frame:
+  port browser.environment {  } → env
+  port state.get { key = "constellationVisible" } → constellationVisible
+  when and($constellationVisible, not(at($env, "hidden")), not(at($env, "reduced"))):
+    port browser.frame { query = "motion.constellation.frame"; input = {  } } → frame
+    port state.set { key = "constellationFrame"; value = $frame } → _
+    port kernel.invoke {
+      query = "motion.constellation.draw";
+      input = { time = at($eventInput, "time"); still = false }
+    } → result
+
+process motion.constellation.intersection:
+  port state.set {
+    key = "constellationVisible";
+    value = at(at(at($eventInput, "entries"), 0), "isIntersecting")
+  } → _
+  port kernel.invoke { query = "motion.constellation.start"; input = {  } } → result
+
+process motion.constellation.resize:
+  port kernel.invoke { query = "motion.constellation.size"; input = {  } } → result
+  port kernel.invoke { query = "motion.constellation.start"; input = {  } } → result
+

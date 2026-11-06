@@ -19,10 +19,6 @@
     "algebra/gateway.process.json",
     "algebra/microsite-projection.process.json",
     "algebra/microsites.process.json",
-    "algebra/microsite-lamp.process.json",
-    "algebra/microsite-motion.process.json",
-    "algebra/microsite-temple-motion.process.json",
-    "algebra/microsite-media.process.json",
     "algebra/front-doors.process.json",
     "algebra/claimipedia.process.json",
     "algebra/claimipedia-review.process.json",
@@ -54,7 +50,11 @@
     "source/microsites/ui.encounter",
     "source/microsites/values.encounter",
     "source/microsites/sourcery.encounter",
-    "source/microsites/temple-ui.encounter"
+    "source/microsites/temple-ui.encounter",
+    "source/microsites/lamp.encounter",
+    "source/microsites/motion.encounter",
+    "source/microsites/temple-motion.encounter",
+    "source/microsites/media.encounter"
   ],
   "grants": [
     "value.describe",
@@ -111,7 +111,8 @@
     "document-inspection.test.mjs",
     "expansion.test.mjs",
     "expedition.test.mjs",
-    "workshop.test.mjs"
+    "workshop.test.mjs",
+    "microsite-process-authoring.test.mjs"
   ],
   "owners": {
     "facts": [
@@ -134,10 +135,6 @@
       "algebra/gateway.process.json",
       "algebra/microsite-projection.process.json",
       "algebra/microsites.process.json",
-      "algebra/microsite-lamp.process.json",
-      "algebra/microsite-motion.process.json",
-      "algebra/microsite-temple-motion.process.json",
-      "algebra/microsite-media.process.json",
       "algebra/front-doors.process.json",
       "algebra/claimipedia.process.json",
       "algebra/claimipedia-review.process.json",
@@ -158,7 +155,11 @@
       "source/microsites/ui.encounter",
       "source/microsites/values.encounter",
       "source/microsites/sourcery.encounter",
-      "source/microsites/temple-ui.encounter"
+      "source/microsites/temple-ui.encounter",
+      "source/microsites/lamp.encounter",
+      "source/microsites/motion.encounter",
+      "source/microsites/temple-motion.encounter",
+      "source/microsites/media.encounter"
     ],
     "authoringPolicy": [
       "algebra/authoring.process.json",
@@ -195,6 +196,22 @@
     "algebra/microsite-temple-ui.process.json": {
       "source": "source/microsites/temple-ui.encounter",
       "frontend": "bootstrap/frontends/microsite-temple-ui.json"
+    },
+    "algebra/microsite-lamp.process.json": {
+      "source": "source/microsites/lamp.encounter",
+      "frontend": "bootstrap/frontends/microsite-lamp.json"
+    },
+    "algebra/microsite-motion.process.json": {
+      "source": "source/microsites/motion.encounter",
+      "frontend": "bootstrap/frontends/microsite-motion.json"
+    },
+    "algebra/microsite-temple-motion.process.json": {
+      "source": "source/microsites/temple-motion.encounter",
+      "frontend": "bootstrap/frontends/microsite-temple-motion.json"
+    },
+    "algebra/microsite-media.process.json": {
+      "source": "source/microsites/media.encounter",
+      "frontend": "bootstrap/frontends/microsite-media.json"
     }
   },
   "processSources": [
@@ -215,7 +232,11 @@
       "bootstrap/frontends/microsite-ui.json",
       "bootstrap/frontends/microsite-values.json",
       "bootstrap/frontends/microsite-sourcery.json",
-      "bootstrap/frontends/microsite-temple-ui.json"
+      "bootstrap/frontends/microsite-temple-ui.json",
+      "bootstrap/frontends/microsite-lamp.json",
+      "bootstrap/frontends/microsite-motion.json",
+      "bootstrap/frontends/microsite-temple-motion.json",
+      "bootstrap/frontends/microsite-media.json"
     ],
     "archiveRoot": "source/process-authoring/history"
   },
