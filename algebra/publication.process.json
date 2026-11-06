@@ -578,6 +578,21 @@
     ],
     "publication.document": [
       {
+        "let": "stewardshipInput",
+        "value": "$result"
+      },
+      {
+        "call": "publication.stewardship.view"
+      },
+      {
+        "let": "stewardshipLinks",
+        "value": "$result"
+      },
+      {
+        "let": "result",
+        "value": "$stewardshipInput"
+      },
+      {
         "let": "input",
         "value": {
           "tag": "html",
@@ -1272,7 +1287,8 @@
                           ]
                         }
                       ]
-                    }
+                    },
+                    "$stewardshipLinks"
                   ]
                 }
               ]
@@ -2745,6 +2761,41 @@
           "text": "$result"
         },
         "into": "_"
+      }
+    ],
+    "publication.stewardship.view": [
+      {
+        "let": "result",
+        "value": {
+          "tag": "nav",
+          "attrs": {
+            "class": "footer-stewardship",
+            "aria-label": "Licensing and stewardship"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://github.com/aaron-alderman/aaronalderman-com/blob/main/LICENSE.md"
+              },
+              "children": [
+                "list",
+                "Licence ↗"
+              ]
+            },
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://github.com/aaron-alderman/aaronalderman-com/blob/main/CHRISTIAN_STEWARDSHIP_COVENANT.md"
+              },
+              "children": [
+                "list",
+                "Christian stewardship covenant ↗"
+              ]
+            }
+          ]
+        }
       }
     ]
   }
