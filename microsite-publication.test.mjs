@@ -51,6 +51,7 @@ test('every project microsite has exactly one algebra-owned return to the main c
   assert.equal((html.match(/id="microsite-return"/g)||[]).length,1,route);
   const anchor=html.match(/<a\b[^>]*id="microsite-return"[^>]*>[\s\S]*?<\/a>/)?.[0];
   assert.ok(anchor,route);
+  assert.ok(anchor.includes('data-site="'+route.split('/')[0]+'"'),route+' keeps film and root themes together');
   const base=new URL(route,'https://aaronalderman.com/');
   assert.equal(new URL(anchor.match(/href="([^"]+)"/)[1],base).href,'https://aaronalderman.com/index.html#microsites',route);
   assert.ok(anchor.includes('Back to Aaron Alderman’s main website'),route);
