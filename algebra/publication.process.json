@@ -572,7 +572,7 @@
         "call": "readerworkshop.build"
       },
       {
-        "call": "assurance.roadmap.publish"
+        "call": "roadmap.publish"
       },
       {
         "call": "assurance.rendered.publish"
@@ -14278,7 +14278,7 @@
                   "attrs": {},
                   "children": [
                     "list",
-                    "Assurance roadmap"
+                    "General roadmap"
                   ]
                 },
                 {
@@ -14286,17 +14286,17 @@
                   "attrs": {},
                   "children": [
                     "list",
-                    "A scoped work queue from findings and missing evidence: priorities, ownership, workflow, dependencies and verification."
+                    "Assurance findings feed the general roadmap alongside declared product plans and other work."
                   ]
                 },
                 {
                   "tag": "a",
                   "attrs": {
-                    "href": "roadmap/"
+                    "href": "../roadmap/"
                   },
                   "children": [
                     "list",
-                    "Open the assurance roadmap →"
+                    "Open the general roadmap →"
                   ]
                 }
               ]
@@ -21057,7 +21057,7 @@
         "call": "assurance.portfolio.document"
       }
     ],
-    "assurance.roadmap.collect": [
+    "roadmap.collect": [
       {
         "let": "inputReports",
         "value": "$eventInput"
@@ -21704,17 +21704,328 @@
         "into": "observedItems"
       },
       {
+        "fold": [
+          "if",
+          [
+            "at",
+            "$inputReports.workflow",
+            "work"
+          ],
+          [
+            "at",
+            "$inputReports.workflow",
+            "work"
+          ],
+          [
+            "list"
+          ]
+        ],
+        "as": "w",
+        "accumulator": "items",
+        "initial": "$observedItems",
+        "steps": [
+          {
+            "assert": [
+              "and",
+              [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "id"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "id"
+                ],
+                ""
+              ],
+              [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "title"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "title"
+                ],
+                ""
+              ],
+              [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "product"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "product"
+                ],
+                ""
+              ],
+              [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "revision"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "revision"
+                ],
+                ""
+              ],
+              [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "nextAction"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "nextAction"
+                ],
+                ""
+              ],
+              [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "doneWhen"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "doneWhen"
+                ],
+                ""
+              ]
+            ],
+            "message": "ROADMAP-PLAN: A declared plan needs id, title, product, revision, nextAction and doneWhen."
+          },
+          {
+            "assert": [
+              "and",
+              [
+                "includes",
+                [
+                  "list",
+                  "P1",
+                  "P2",
+                  "P3"
+                ],
+                [
+                  "if",
+                  [
+                    "at",
+                    "$w",
+                    "priority"
+                  ],
+                  [
+                    "at",
+                    "$w",
+                    "priority"
+                  ],
+                  "P2"
+                ]
+              ],
+              [
+                "includes",
+                [
+                  "list",
+                  "now",
+                  "next",
+                  "later"
+                ],
+                [
+                  "if",
+                  [
+                    "at",
+                    "$w",
+                    "horizon"
+                  ],
+                  [
+                    "at",
+                    "$w",
+                    "horizon"
+                  ],
+                  "next"
+                ]
+              ]
+            ],
+            "message": "ROADMAP-PLAN: Priority and horizon must use declared roadmap values."
+          },
+          {
+            "let": "plannedId",
+            "value": [
+              "concat",
+              "planned:",
+              "$w.id"
+            ]
+          },
+          {
+            "assert": [
+              "not",
+              [
+                "includes",
+                [
+                  "map",
+                  "$items",
+                  "i",
+                  "$i.id"
+                ],
+                "$plannedId"
+              ]
+            ],
+            "message": "ROADMAP-PLAN: Declared work IDs must be unique."
+          },
+          {
+            "let": "item",
+            "value": {
+              "id": "$plannedId",
+              "title": "$w.title",
+              "origin": "planning",
+              "kind": "plan",
+              "product": "$w.product",
+              "topic": [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "topic"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "topic"
+                ],
+                "product-development"
+              ],
+              "scope": [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "scope"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "scope"
+                ],
+                "declared product plan"
+              ],
+              "priority": [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "priority"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "priority"
+                ],
+                "P2"
+              ],
+              "horizon": [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "horizon"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "horizon"
+                ],
+                "next"
+              ],
+              "defaultStage": "todo",
+              "targetLevel": 0,
+              "nextAction": "$w.nextAction",
+              "doneWhen": "$w.doneWhen",
+              "evidence": [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "evidence"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "evidence"
+                ],
+                [
+                  "list",
+                  {
+                    "href": "/roadmap/workflow.json",
+                    "label": "Declared product plan"
+                  }
+                ]
+              ],
+              "routes": [
+                "if",
+                [
+                  "at",
+                  "$w",
+                  "routes"
+                ],
+                [
+                  "at",
+                  "$w",
+                  "routes"
+                ],
+                [
+                  "list"
+                ]
+              ],
+              "profiles": [
+                "list"
+              ],
+              "occurrences": 1,
+              "sourceState": "declared",
+              "sourceVersion": "$w.revision",
+              "example": "A declared plan is authored intent. Its completion requires scoped verification; it is not an assurance finding."
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$items",
+          [
+            "list",
+            "$item"
+          ]
+        ],
+        "into": "observedItems"
+      },
+      {
         "let": "result",
         "value": "$observedItems"
       }
     ],
-    "assurance.roadmap.derive": [
+    "roadmap.derive": [
       {
         "let": "todoInput",
         "value": "$eventInput"
       },
       {
-        "call": "assurance.roadmap.collect"
+        "call": "roadmap.collect"
       },
       {
         "let": "currentItems",
@@ -22108,7 +22419,18 @@
                   ],
                   [
                     "or",
-                    "$active",
+                    [
+                      "and",
+                      "$active",
+                      [
+                        "not",
+                        [
+                          "eq",
+                          "$base.origin",
+                          "planning"
+                        ]
+                      ]
+                    ],
                     [
                       "not",
                       "$verified"
@@ -22122,7 +22444,7 @@
                   },
                   {
                     "let": "issue",
-                    "value": "Completion requires absence from current assurance plus a matching scoped verification receipt."
+                    "value": "Completion requires a matching scoped verification receipt. Assurance findings must also be absent from current observations."
                   }
                 ]
               },
@@ -22492,7 +22814,7 @@
       {
         "let": "result",
         "value": {
-          "protocol": "worldwright/assurance-roadmap/1",
+          "protocol": "worldwright/roadmap/1",
           "products": [
             "map",
             "$todoInput.topics.products",
@@ -22507,7 +22829,8 @@
             "accessibility": "Accessibility",
             "internationalisation": "Internationalisation",
             "rendered-layout": "Rendered layout",
-            "navigation-layout": "Navigation source checks"
+            "navigation-layout": "Navigation source checks",
+            "product-development": "Product development"
           },
           "workflowIssues": [
             "map",
@@ -22591,15 +22914,15 @@
               ]
             }
           ],
-          "boundary": "This is a scoped work queue, not a release commitment or a composite maturity score. Repeated pages and viewport observations are grouped by rule and selector, without asserting a shared root cause. Workflow and receipts are authored corpus records; their presence does not authenticate an external reviewer. Disappearance never closes a task automatically."
+          "boundary": "This general roadmap combines declared product plans with assurance-derived work. Assurance is one source of work, not the scope of the roadmap. Priorities are review and planning order, not release promises or certified defect severity. Repeated observations are grouped without asserting a shared cause. Ownership and receipts are authored records; their presence does not authenticate an external reviewer. Disappearance alone never completes work."
         }
       }
     ],
-    "assurance.roadmap.boot": [
+    "roadmap.boot": [
       {
         "port": "asset.text",
         "args": {
-          "url": "../topics.json",
+          "url": "../assurance/topics.json",
           "cache": "no-store"
         },
         "into": "todoJSON"
@@ -22614,7 +22937,7 @@
       {
         "port": "asset.text",
         "args": {
-          "url": "../identity-mappings.json",
+          "url": "../assurance/identity-mappings.json",
           "cache": "no-store"
         },
         "into": "todoJSON"
@@ -22629,7 +22952,7 @@
       {
         "port": "asset.text",
         "args": {
-          "url": "../navigation-layout.json",
+          "url": "../assurance/navigation-layout.json",
           "cache": "no-store"
         },
         "into": "todoJSON"
@@ -22644,7 +22967,7 @@
       {
         "port": "asset.text",
         "args": {
-          "url": "../rendered-layout.json",
+          "url": "../assurance/rendered-layout.json",
           "cache": "no-store"
         },
         "into": "todoJSON"
@@ -22667,12 +22990,12 @@
         }
       },
       {
-        "call": "assurance.roadmap.derive"
+        "call": "roadmap.derive"
       },
       {
         "port": "state.set",
         "args": {
-          "key": "assurance-roadmap",
+          "key": "roadmap",
           "value": "$result"
         },
         "into": "_"
@@ -22698,7 +23021,7 @@
         "args": {
           "ref": "#todo-controls",
           "event": "change",
-          "query": "assurance.roadmap.refresh",
+          "query": "roadmap.refresh",
           "input": {}
         },
         "into": "_"
@@ -22706,7 +23029,7 @@
       {
         "port": "state.get",
         "args": {
-          "key": "assurance-roadmap"
+          "key": "roadmap"
         },
         "into": "todoReport"
       },
@@ -22765,14 +23088,14 @@
         "into": "_"
       },
       {
-        "call": "assurance.roadmap.refresh"
+        "call": "roadmap.refresh"
       }
     ],
-    "assurance.roadmap.refresh": [
+    "roadmap.refresh": [
       {
         "port": "state.get",
         "args": {
-          "key": "assurance-roadmap"
+          "key": "roadmap"
         },
         "into": "todoReport"
       },
@@ -22869,7 +23192,7 @@
                   "$todoReport.total",
                   " work items · ",
                   "$todoReport.active",
-                  " observed in current assurance · ",
+                  " currently sourced · ",
                   [
                     "count",
                     "$todoReport.workflowIssues"
@@ -23186,13 +23509,13 @@
         "into": "_"
       }
     ],
-    "assurance.roadmap.publish": [
+    "roadmap.publish": [
       {
         "port": "json.parse",
         "args": {
           "text": [
             "one",
-            "assurance.roadmap",
+            "roadmap",
             "workflow"
           ]
         },
@@ -23208,7 +23531,7 @@
       {
         "port": "file.write",
         "args": {
-          "path": "assurance/roadmap-workflow.json",
+          "path": "roadmap/workflow.json",
           "text": "$todoWorkflowJSON"
         },
         "into": "_"
@@ -23216,15 +23539,15 @@
       {
         "port": "runtime.bundle",
         "args": {
-          "entry": "assurance.roadmap.boot",
+          "entry": "roadmap.boot",
           "mode": "browser",
           "grantProfile": "readerBrowser",
           "queries": [
             "list",
-            "assurance.roadmap.boot",
-            "assurance.roadmap.refresh",
-            "assurance.roadmap.collect",
-            "assurance.roadmap.derive",
+            "roadmap.boot",
+            "roadmap.refresh",
+            "roadmap.collect",
+            "roadmap.derive",
             "html.serialize",
             "html.escape",
             "html.cssText"
@@ -23242,7 +23565,7 @@
       {
         "port": "file.write",
         "args": {
-          "path": "assurance/roadmap-runtime.js",
+          "path": "roadmap/runtime.js",
           "text": "$todoRuntime"
         },
         "into": "_"
@@ -23250,11 +23573,11 @@
       {
         "let": "portfolioPage",
         "value": {
-          "route": "assurance/roadmap/index.html",
-          "prefix": "../../",
-          "canonical": "https://aaronalderman.com/assurance/roadmap/",
-          "title": "Assurance roadmap — Aaron Alderman",
-          "description": "A corpus-owned work queue derived from assurance findings, missing evidence and scoped maturity gates.",
+          "route": "roadmap/index.html",
+          "prefix": "../",
+          "canonical": "https://aaronalderman.com/roadmap/",
+          "title": "Roadmap — Aaron Alderman",
+          "description": "The general roadmap for product plans, development and assurance-derived work, governed through the corpus algebra.",
           "body": [
             "list",
             {
@@ -23271,7 +23594,7 @@
                   },
                   "children": [
                     "list",
-                    "ASSURANCE / ROADMAP"
+                    "ROADMAP"
                   ]
                 },
                 {
@@ -23279,7 +23602,7 @@
                   "attrs": {},
                   "children": [
                     "list",
-                    "From evidence to work."
+                    "Where we go next."
                   ]
                 },
                 {
@@ -23287,7 +23610,7 @@
                   "attrs": {},
                   "children": [
                     "list",
-                    "A governed queue for what assurance reveals: discernment, corrections and missing evidence. Repeated observations become scoped work items, with ownership, dependencies and completion criteria."
+                    "Plans, product development and assurance work share one roadmap. Each item keeps its source, intended outcome, ownership and evidence for completion."
                   ]
                 },
                 {
@@ -23298,18 +23621,18 @@
                     {
                       "tag": "a",
                       "attrs": {
-                        "href": "../"
+                        "href": "../assurance/"
                       },
                       "children": [
                         "list",
-                        "Assurance topics"
+                        "Assurance inputs"
                       ]
                     },
                     " · ",
                     {
                       "tag": "a",
                       "attrs": {
-                        "href": "../maturity/"
+                        "href": "../assurance/maturity/"
                       },
                       "children": [
                         "list",
@@ -23320,11 +23643,11 @@
                     {
                       "tag": "a",
                       "attrs": {
-                        "href": "../roadmap-workflow.json"
+                        "href": "workflow.json"
                       },
                       "children": [
                         "list",
-                        "Workflow declarations (JSON)"
+                        "Roadmap declarations (JSON)"
                       ]
                     }
                   ]
@@ -23360,6 +23683,14 @@
                   "children": [
                     "list",
                     "Closure needs a matching verification key, evidence, method, reviewer and date. Acceptance also needs a rationale. Source observations remain visible and do not change maturity levels when a workflow status changes."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Product plans and other work are declared in the corpus alongside the assurance adapter. Assurance findings seed the current queue; they do not define its scope. New plans need an ID, product, revision, next action and completion criteria."
                   ]
                 }
               ]
@@ -23651,11 +23982,72 @@
             {
               "tag": "script",
               "attrs": {
-                "src": "../roadmap-runtime.js",
+                "src": "runtime.js",
                 "defer": true
               },
               "children": [
                 "list"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "assurance.portfolio.document"
+      },
+      {
+        "let": "portfolioPage",
+        "value": {
+          "route": "assurance/roadmap/index.html",
+          "prefix": "../../",
+          "canonical": "https://aaronalderman.com/roadmap/",
+          "title": "Roadmap — Aaron Alderman",
+          "description": "The general roadmap has moved to its own place.",
+          "body": [
+            "list",
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-intro"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    "ROADMAP"
+                  ]
+                },
+                {
+                  "tag": "h1",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "The general roadmap"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Assurance is one input to the general roadmap."
+                  ]
+                },
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "../../roadmap/"
+                  },
+                  "children": [
+                    "list",
+                    "Open the general roadmap →"
+                  ]
+                }
               ]
             }
           ]

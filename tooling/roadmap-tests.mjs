@@ -1,16 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createRoadmapAssessor} from './assess-assurance-roadmap.mjs';
+import {createRoadmapAssessor} from './assess-roadmap.mjs';
 const read=f=>JSON.parse(fs.readFileSync(f,'utf8'));
-const input={topics:read('dist/assurance/topics.json'),identity:read('dist/assurance/identity-mappings.json'),source:read('dist/assurance/navigation-layout.json'),rendered:read('dist/assurance/rendered-layout.json'),workflow:read('dist/assurance/roadmap-workflow.json')};
+const input={topics:read('dist/assurance/topics.json'),identity:read('dist/assurance/identity-mappings.json'),source:read('dist/assurance/navigation-layout.json'),rendered:read('dist/assurance/rendered-layout.json'),workflow:read('dist/roadmap/workflow.json')};
 const assessor=await createRoadmapAssessor(),derive=async value=>(await assessor.derive(value)).value;
 const initial=await derive(input),target=initial.items.find(i=>i.origin==='rendered'),item=r=>r.items.find(i=>i.id===target.id);
 function withoutTarget(){const value=structuredClone(input);value.rendered.report.findings=value.rendered.report.findings.filter(f=>'observation:'+JSON.stringify(['rendered',f.finding.rule,f.finding.node])!==target.id);return value;}
 function receipt(record,extra={}){return {itemId:record.id,verificationKey:record.verificationKey,source:'/assurance/rendered-layout.json',issuer:'Test reviewer',observedAt:'2026-11-07',method:'Scoped verification fixture',verdict:'verified',...extra};}
 
 test('roadmap is algebra-derived, scoped and groups observations without losing evidence',async()=>{
- assert.equal(initial.protocol,'worldwright/assurance-roadmap/1');
+ assert.equal(initial.protocol,'worldwright/roadmap/1');
  assert.equal(initial.items.filter(i=>i.origin==='maturity').length,input.topics.roadmap.length);
  assert.equal(initial.items.filter(i=>i.origin==='identity').length,input.identity.rows.filter(r=>!['identity-mapped','intentionally-invariant'].includes(r.status)).length);
  const groups=new Set(input.rendered.report.findings.map(f=>JSON.stringify(['rendered',f.finding.rule,f.finding.node])));
@@ -45,8 +45,18 @@ test('authored ownership, blocking, acceptance and priority declarations are che
 });
 
 test('roadmap is indexed, uses an admitted runtime and exposes a portable work record',()=>{
- const page=fs.readFileSync('dist/assurance/roadmap/index.html','utf8'),index=fs.readFileSync('dist/assurance/index.html','utf8');
- assert.ok(index.includes('href="roadmap/"'));assert.ok(page.includes('Inspect roadmap and todo'));assert.ok(page.includes('todo-json'));assert.ok(page.includes('roadmap-runtime.js'));
- assert.ok(!page.includes('Back to Aaron Alderman'));assert.ok(fs.readFileSync('dist/assurance/roadmap-runtime.js','utf8').includes('const model=hydrateSnapshot('));
- assert.equal(input.workflow.protocol,'worldwright/assurance-roadmap-workflow/1');assert.ok(input.workflow.ledger.length>0);assert.deepEqual(input.workflow.decisions,[]);assert.deepEqual(input.workflow.receipts,[]);
+ const page=fs.readFileSync('dist/roadmap/index.html','utf8'),index=fs.readFileSync('dist/assurance/index.html','utf8');
+ assert.ok(index.includes('href="../roadmap/"'));assert.ok(page.includes('Inspect roadmap and todo'));assert.ok(page.includes('todo-json'));assert.ok(page.includes('runtime.js'));
+ assert.ok(!page.includes('Back to Aaron Alderman'));assert.ok(fs.readFileSync('dist/roadmap/runtime.js','utf8').includes('const model=hydrateSnapshot('));
+ assert.equal(input.workflow.protocol,'worldwright/roadmap-workflow/1');assert.ok(input.workflow.ledger.length>0);assert.deepEqual(input.workflow.decisions,[]);assert.deepEqual(input.workflow.receipts,[]);
+});
+
+test('the general roadmap accepts product plans independently of assurance and verifies revisions',async()=>{
+ const value=structuredClone(input);value.workflow.work=[{id:'product-plan-fixture',product:'temple',title:'Declared product work',revision:'1',nextAction:'Implement the declared change.',doneWhen:'The intended outcome has scoped verification.',horizon:'next'}];
+ const report=await derive(value),plan=report.items.find(i=>i.id==='planned:product-plan-fixture');assert.equal(report.total,initial.total+1);assert.equal(plan.origin,'planning');assert.equal(plan.kind,'plan');assert.equal(plan.stage,'todo');
+ value.workflow.decisions=[{itemId:plan.id,stage:'done'}];assert.equal((await derive(value)).items.find(i=>i.id===plan.id).stage,'verification-required');
+ value.workflow.receipts=[receipt(plan)];assert.equal((await derive(value)).items.find(i=>i.id===plan.id).stage,'done');
+ value.workflow.work[0].revision='2';assert.equal((await derive(value)).items.find(i=>i.id===plan.id).stage,'verification-required');
+ value.workflow.work.push({...value.workflow.work[0]});await assert.rejects(derive(value),/ROADMAP-PLAN/);
+ assert.equal(input.workflow.intakes.length,2);assert.equal(input.workflow.work.length,0);
 });
