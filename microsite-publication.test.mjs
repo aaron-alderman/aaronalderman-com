@@ -47,7 +47,7 @@ test('original application JavaScript is an oracle only; shipping behaviour is a
 test('project pages use their header home link or one algebra-owned return widget',()=>{
  const routes=new Set(json('source/hierarchy.json').items.map(item=>item.href).filter(href=>href.endsWith('/')));
  for(const route of ['creativity/','relational-geometry/','temple/films/','sourcery/films/']) routes.add(route);
- assert.equal(routes.size,22);
+ assert.equal(routes.size,24);
  for(const route of routes){
   const html=read('dist/'+route+'index.html').toString();
   const nodes=n=>[n,...(n.childNodes??[]).flatMap(nodes)],all=nodes(parse(html)),header=all.find(n=>n.tagName==='header'),brand=header&&nodes(header).find(n=>n.tagName==='a'),attrs=Object.fromEntries((brand?.attrs??[]).map(a=>[a.name,a.value]));
