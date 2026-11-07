@@ -1,0 +1,564 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "stylesheet.render": [
+      {
+        "let": "cssNode",
+        "value": "$input"
+      },
+      {
+        "assert": [
+          "includes",
+          [
+            "list",
+            "root",
+            "comment",
+            "decl",
+            "rule",
+            "atrule"
+          ],
+          [
+            "at",
+            "$cssNode",
+            "kind"
+          ]
+        ],
+        "message": "CSS-001: Unknown structured stylesheet node."
+      },
+      {
+        "when": [
+          "or",
+          [
+            "at",
+            "$cssNode",
+            "before"
+          ],
+          [
+            "at",
+            "$cssNode",
+            "after"
+          ]
+        ],
+        "then": [
+          {
+            "port": "text.matches",
+            "args": {
+              "value": [
+                "concat",
+                [
+                  "or",
+                  [
+                    "at",
+                    "$cssNode",
+                    "before"
+                  ],
+                  ""
+                ],
+                [
+                  "or",
+                  [
+                    "at",
+                    "$cssNode",
+                    "after"
+                  ],
+                  ""
+                ]
+              ],
+              "pattern": "^\\s*$"
+            },
+            "into": "cssTrivia"
+          },
+          {
+            "assert": "$cssTrivia",
+            "message": "CSS-003: Stylesheet formatting fields may contain whitespace only."
+          }
+        ]
+      },
+      {
+        "fold": [
+          "or",
+          [
+            "at",
+            "$cssNode",
+            "children"
+          ],
+          [
+            "list"
+          ]
+        ],
+        "as": "cssChild",
+        "accumulator": "cssAccumulated",
+        "initial": "",
+        "steps": [
+          {
+            "let": "input",
+            "value": "$cssChild"
+          },
+          {
+            "call": "stylesheet.render"
+          }
+        ],
+        "yield": [
+          "concat",
+          "$cssAccumulated",
+          "$result"
+        ],
+        "into": "cssChildren"
+      },
+      {
+        "let": "result",
+        "value": [
+          "concat",
+          [
+            "or",
+            [
+              "at",
+              "$cssNode",
+              "before"
+            ],
+            ""
+          ],
+          [
+            "if",
+            [
+              "eq",
+              [
+                "at",
+                "$cssNode",
+                "kind"
+              ],
+              "root"
+            ],
+            [
+              "concat",
+              "$cssChildren",
+              [
+                "or",
+                [
+                  "at",
+                  "$cssNode",
+                  "after"
+                ],
+                ""
+              ]
+            ],
+            [
+              "if",
+              [
+                "eq",
+                [
+                  "at",
+                  "$cssNode",
+                  "kind"
+                ],
+                "comment"
+              ],
+              [
+                "concat",
+                "/*",
+                [
+                  "at",
+                  "$cssNode",
+                  "left"
+                ],
+                [
+                  "at",
+                  "$cssNode",
+                  "text"
+                ],
+                [
+                  "at",
+                  "$cssNode",
+                  "right"
+                ],
+                "*/"
+              ],
+              [
+                "if",
+                [
+                  "eq",
+                  [
+                    "at",
+                    "$cssNode",
+                    "kind"
+                  ],
+                  "decl"
+                ],
+                [
+                  "concat",
+                  [
+                    "at",
+                    "$cssNode",
+                    "property"
+                  ],
+                  [
+                    "at",
+                    "$cssNode",
+                    "between"
+                  ],
+                  [
+                    "at",
+                    "$cssNode",
+                    "value"
+                  ],
+                  [
+                    "at",
+                    "$cssNode",
+                    "important"
+                  ],
+                  [
+                    "at",
+                    "$cssNode",
+                    "semicolon"
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$cssNode",
+                      "kind"
+                    ],
+                    "rule"
+                  ],
+                  [
+                    "concat",
+                    [
+                      "at",
+                      "$cssNode",
+                      "selector"
+                    ],
+                    [
+                      "at",
+                      "$cssNode",
+                      "between"
+                    ],
+                    "{",
+                    "$cssChildren",
+                    [
+                      "at",
+                      "$cssNode",
+                      "after"
+                    ],
+                    "}",
+                    [
+                      "at",
+                      "$cssNode",
+                      "ownSemicolon"
+                    ]
+                  ],
+                  [
+                    "concat",
+                    "@",
+                    [
+                      "at",
+                      "$cssNode",
+                      "name"
+                    ],
+                    [
+                      "at",
+                      "$cssNode",
+                      "afterName"
+                    ],
+                    [
+                      "at",
+                      "$cssNode",
+                      "params"
+                    ],
+                    [
+                      "at",
+                      "$cssNode",
+                      "between"
+                    ],
+                    [
+                      "if",
+                      [
+                        "at",
+                        "$cssNode",
+                        "children"
+                      ],
+                      [
+                        "concat",
+                        "{",
+                        "$cssChildren",
+                        [
+                          "at",
+                          "$cssNode",
+                          "after"
+                        ],
+                        "}"
+                      ],
+                      [
+                        "at",
+                        "$cssNode",
+                        "semicolon"
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      }
+    ],
+    "stylesheet.build": [
+      {
+        "call": "stylesheet.catalog"
+      },
+      {
+        "let": "cssOwnership",
+        "value": "$result"
+      },
+      {
+        "each": "$cssOwnership.stylesheets",
+        "as": "sheet",
+        "steps": [
+          {
+            "port": "file.copy",
+            "args": {
+              "path": "$sheet.source"
+            },
+            "into": "_"
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": "$sheet.source"
+            },
+            "into": "cssSource"
+          },
+          {
+            "port": "json.parse",
+            "args": {
+              "text": "$cssSource"
+            },
+            "into": "cssSource"
+          },
+          {
+            "assert": [
+              "eq",
+              "$cssSource.protocol",
+              "worldwright/stylesheet-tree/1"
+            ],
+            "message": "CSS-002: Unsupported stylesheet source."
+          },
+          {
+            "let": "input",
+            "value": "$cssSource.root"
+          },
+          {
+            "call": "stylesheet.render"
+          },
+          {
+            "let": "stylesheetText",
+            "value": "$result"
+          },
+          {
+            "each": "$sheet.outputs",
+            "as": "cssOutput",
+            "steps": [
+              {
+                "port": "file.write",
+                "args": {
+                  "path": "$cssOutput",
+                  "text": "$stylesheetText"
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "stylesheet.activities": [
+      {
+        "let": "cssActivitiesInput",
+        "value": "$input"
+      },
+      {
+        "call": "stylesheet.catalog"
+      },
+      {
+        "let": "cssInlineSource",
+        "value": "$result.inline.source"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "$cssInlineSource"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "$cssInlineSource"
+        },
+        "into": "cssBindingsText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$cssBindingsText"
+        },
+        "into": "cssBindings"
+      },
+      {
+        "assert": [
+          "eq",
+          "$cssBindings.protocol",
+          "worldwright/inline-styles/1"
+        ],
+        "message": "CSS-004: Unsupported inline stylesheet source."
+      },
+      {
+        "port": "record.entries",
+        "args": {
+          "value": "$cssActivitiesInput.activities"
+        },
+        "into": "cssEntries"
+      },
+      {
+        "fold": "$cssEntries",
+        "as": "cssEntry",
+        "accumulator": "cssActivityResults",
+        "initial": {},
+        "steps": [
+          {
+            "let": "cssActivity",
+            "value": [
+              "at",
+              "$cssEntry",
+              1
+            ]
+          },
+          {
+            "fold": [
+              "or",
+              [
+                "at",
+                "$cssBindings.bindings",
+                [
+                  "at",
+                  "$cssEntry",
+                  0
+                ]
+              ],
+              [
+                "list"
+              ]
+            ],
+            "as": "cssBinding",
+            "accumulator": "cssHTML",
+            "initial": "$cssActivity.html",
+            "steps": [
+              {
+                "let": "input",
+                "value": {
+                  "kind": "root",
+                  "children": "$cssBinding.declarations"
+                }
+              },
+              {
+                "call": "stylesheet.render"
+              },
+              {
+                "let": "input",
+                "value": "$result"
+              },
+              {
+                "call": "html.escape"
+              },
+              {
+                "port": "text.replaceAll",
+                "args": {
+                  "value": "$cssHTML",
+                  "search": "$cssBinding.placeholder",
+                  "replacement": "$result"
+                },
+                "into": "cssHTML"
+              }
+            ],
+            "yield": "$cssHTML",
+            "into": "cssActivityHTML"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$cssActivity",
+              "key": "html",
+              "value": "$cssActivityHTML"
+            },
+            "into": "cssActivity"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$cssActivityResults",
+              "key": [
+                "at",
+                "$cssEntry",
+                0
+              ],
+              "value": "$cssActivity"
+            },
+            "into": "cssActivityResults"
+          }
+        ],
+        "yield": "$cssActivityResults",
+        "into": "cssActivityResults"
+      },
+      {
+        "port": "record.put",
+        "args": {
+          "record": "$cssActivitiesInput",
+          "key": "activities",
+          "value": "$cssActivityResults"
+        },
+        "into": "result"
+      }
+    ],
+    "stylesheet.catalog": [
+      {
+        "let": "cssCataloguePath",
+        "value": "source/stylesheets/contract.json"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "$cssCataloguePath"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "$cssCataloguePath"
+        },
+        "into": "cssCatalogueText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$cssCatalogueText"
+        },
+        "into": "cssCatalogue"
+      },
+      {
+        "assert": [
+          "eq",
+          "$cssCatalogue.protocol",
+          "worldwright/css-ownership/1"
+        ],
+        "message": "CSS-005: Unsupported stylesheet catalogue."
+      },
+      {
+        "let": "result",
+        "value": "$cssCatalogue"
+      }
+    ]
+  }
+}

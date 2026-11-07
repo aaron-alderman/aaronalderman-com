@@ -71,6 +71,7 @@ test('historical oracle bytes, passive resources and declared mechanism successo
  for(const [file,hash]of Object.entries(contract.compatibilityOrigin.sha256)){
   assert.equal(sha(await fs.readFile(path.join(root,file))),hash,file+' source');
   if(/\.(?:m?js)$|\/regenerate\.cjs$/.test(file)){await assert.rejects(fs.stat(path.join(root,'dist',file)),{code:'ENOENT'});continue;}
+  if(contract.stylesheetSuccessor&&JSON.parse(await read(contract.stylesheetSuccessor.contract)).stylesheets.some(sheet=>sheet.outputs.includes(file)))continue;
   if(contract.readerWorkshopSuccessor.replacedDocuments.includes(file))continue;
   assert.equal(sha(await fs.readFile(path.join(root,'dist',file))),hash,file+' output');
   const original=file.slice('retained/'.length);

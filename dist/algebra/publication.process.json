@@ -61,12 +61,12 @@
                 "$asset",
                 "path"
               ],
-              "pattern": "\\.(?:m?js)$|/regenerate\\.cjs$"
+              "pattern": "\\.(?:m?js|css)$|/regenerate\\.cjs$"
             },
-            "into": "legacyExecutable"
+            "into": "excludedCapturedAsset"
           },
           {
-            "when": "$legacyExecutable",
+            "when": "$excludedCapturedAsset",
             "then": [
               {
                 "port": "file.remove",
@@ -104,7 +104,7 @@
           {
             "when": [
               "not",
-              "$legacyExecutable"
+              "$excludedCapturedAsset"
             ],
             "then": [
               {

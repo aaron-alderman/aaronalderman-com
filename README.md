@@ -1,106 +1,74 @@
-# Aaron Alderman — a personal expedition
+# Aaron Alderman
 
-REL facts, process JSON and the Encounter example/presentation JSON listed in `source/authoring-contract.json` are the sole current authoring sources. The previous JavaScript generators are retired; exact bytes and hashes remain under `source/authoring-predecessors/` as inert text. There is no regeneration order or second executable owner.
+[aaronalderman.com](https://aaronalderman.com/) contains illustrated encounters, four identity perspectives, Questions, reading paths, an atlas, project introductions and source inspection. Interactive pages run admitted Temple process algebra. Canonical reading pages work without JavaScript.
 
-Use `npm run author -- proposal.json` to propose an edit. `algebra/authoring.process.json` owns authority checks, stale-source and duplicate-target refusal, preview/apply sequencing, validation and receipt policy. `tooling/author.mjs` supplies generic file observation, isolated staging, process execution and compare-before-write mechanisms. It does not supply page composition or editorial changes. This authoring workflow grants no authority over native mechanisms or execution budgets.
+## Build and verify
 
-A proposal is a JSON record with `protocol: "worldwright/authoring-proposal/1"`, an explicit boolean `apply`, and a nonempty `changes` array. Each change supplies `file` (an allowed canonical path), `beforeSha256` (the SHA-256 of its current bytes), and `text` (the complete replacement UTF-8 document). This supports coordinated changes to facts, presentation and process definitions without interpreting replacement text as host code. Native mechanisms, admission/lowering definitions, preserved engines, provenance contracts and legacy components are outside ordinary authoring authority.
+CI uses Node.js 22 and the dependencies declared in `package-lock.json`.
 
-For example, create a preview from an edited copy of a canonical source:
-
-```js
-// Save as .build/propose.mjs; run from the site directory with node .build/propose.mjs.
-import fs from 'node:fs';
-import crypto from 'node:crypto';
-const file='source/front-doors.rel';
-fs.writeFileSync('.build/proposal.json', JSON.stringify({
-  protocol:'worldwright/authoring-proposal/1', apply:false,
-  changes:[{file, beforeSha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'),
-    text:fs.readFileSync('.build/edited-front-doors.rel','utf8')}]
-}, null, 2));
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+npm run build
+npm test
+npm run verify:presentation
+npm run dev
 ```
 
-Then run `npm run author -- .build/proposal.json`. A preview performs the real algebra build and portable publication checks in `.build/authoring/candidate-*`, leaves sources untouched, and returns the candidate and receipt paths. A failed candidate keeps its `validation.json` log and cannot reach the commit effect. To apply, set `apply` to `true` and rerun the same proposal; it is staged and validated again. The host checks the full validated input snapshot before writing, refuses concurrent authoring sessions, and restores already-written files if a write fails. Receipts identify the authoring policy, contract, predecessor/successor hashes and the validated build. This is a local transaction with rollback, not a crash-atomic multi-file filesystem transaction. After applying, run `npm run build` to refresh the local `dist/`; GitHub Pages builds committed sources itself. No deploy or commit is implicit.
+`npm test` delegates to `test:portable`, the suite also used by CI. The development server serves `dist/` at `http://127.0.0.1:4186`; `WORLDWRIGHT_ROOT` and `WORLDWRIGHT_PORT` override its directory and port. Edit source owners and rebuild. `dist/` is generated output.
 
-The homepage separates project cards (Temple, Sourcery, Claimipedia and Worldwright) from a smaller Capabilities card grid: Encounter, Kingdom, World Modelling, Creativity and The Field. `CapabilitySet` facts and `frontdoors.home` own this second list; these REL and process definitions are the authoritative authoring sources. Encounter links to its live example at `/encounter/`; each other capability has its own microsite introduction, linking onward to existing reading paths and scenes.
+For browser checks, start the server with `WORLDWRIGHT_PORT=4194` and an isolated Chromium profile with remote debugging on `127.0.0.1:9229`, then run `npm run test:browser`. `READER_TEST_BASE_URL` and `READER_BROWSER_DEBUG_URL` override those endpoints. The driver closes its tab and writes `.build/reader-workshop-browser-qa.json`.
 
-Encounter's live title example uses the existing `ec.prepare`, `ec.run` and `ec.patch` contracts. The story and row inherit the source title; the web menu retains its local label. Changes last for the browser session only; Reset restores the original source.
+`npm run verify:clean` verifies a clean committed revision in an isolated checkout, installing its declared dependencies and rebuilding without inherited output. [The Pages workflow](.github/workflows/pages.yml) installs, builds and checks pushes to `main` before publishing. `dist/build-receipt.json` records source/artifact hashes, grants, admission results and execution steps. Test counts belong to run receipts.
 
-`algebra/encounter-demo.process.json` owns the events, transitions, inspection choices and projections. `algebra/encounter.process.json` composes the page and admitted browser runtime through the main publication algebra. The three `encounter-code-*` modules are exact copies of the retained Encounter engine. The existing Encounter interpreter, type contracts and kernel budget are reused. Generic browser mechanism successors are documented in source/publication-contract.json. `source/encounter/reuse.json` records reuse origins and hashes.
+## Source ownership
 
-Inspect exposes the Encounter definition, current session facts, closed type contracts, change process and inspector's own process. Shared `source.lex`, `sp.present`, `sp.listing`, HTML and CSS algebras provide highlighting and readable process listings. The digest identifies the displayed text; definitions are not execution traces. Raw authoritative sources are linked below the inspector.
+| Area | Owners |
+| --- | --- |
+| Identity, encounter narratives, source notes, routes and metadata | `source/expedition.rel`, `source/presentation.rel`, `source/social-sharing.rel`, `algebra/publication.process.json` |
+| Homepage catalogue, purpose types, entrances and source inspection | `source/hierarchy.json`, `source/hierarchy.rel`, `source/hierarchy-evidence.json`, `algebra/hierarchy.process.json` |
+| Identity Questions, Threads, Maps and destination relationships | `source/questions.rel`, `source/hierarchy.json`, `algebra/hierarchy.process.json`, `algebra/publication.process.json` |
+| Corpus reading paths | `source/gateway.rel`, `source/gateway-presentation.rel`, `algebra/gateway.process.json` |
+| Illustrated atlas and visit storage | `source/atlas.rel`, `algebra/atlas.process.json`, `algebra/atlas-journey.process.json` |
+| Reader, activities and household examples | `source/reader/`, `algebra/reader-navigation.process.json`, `algebra/reader-models.process.json`, `algebra/reader-activities.process.json` |
+| Workshop | `source/workshop/`, `source/encounter/example.json`, `algebra/workshop-session.process.json`, `algebra/workshop-lab.process.json` |
+| Reader/workshop publication | `algebra/reader-workshop-publication.process.json` |
+| Project-specific demos, readable processes and presentation | The REL/JSON and Encounter sources explicitly selected by `bootstrap/site.json` |
+| CSS catalogue, compatibility styles and inline artwork bindings | `source/stylesheets/contract.json`, its selected JSON trees, `algebra/stylesheet.process.json` |
 
-Encounter’s page, demo, source facts and presentation JSON are authored directly through the algebra-governed proposal path below. No JavaScript generator owns or regenerates them. `node --test encounter-microsite.test.mjs` checks admission, contract-routed edits, refusals, source fidelity, highlighting, self-inspection and reset, and pins the reused engine and unchanged kernel budget.
+The CSS catalogue is the single owner of reader/compatibility stylesheet routing and inline binding selection. Main and project styles use their REL/process projections. Reader and compatibility styles use structured CSS trees; empty formatting is omitted. The algebra renders inline bindings and HTML-escapes their attributes before creating the runtime snapshot. Captured CSS is comparison evidence, excluded from active build inputs. Shared stylesheet changes also require updating `site.stylesheetVersion` in `source/expedition.rel`.
 
-“Inside the mind of a modern-day sourcerer.” A static personal site at https://aaronalderman.com/, with Worldwright credited as its supporting platform.
+The homepage separates editorial purpose from availability. `frontdoors.home` delegates to `hierarchy.home`; `frontdoors.capabilities` composes standalone introductions. Inspect pages show exact selected snapshots, hashes and original line bindings. Shared edges come only from explicit `dependsOn` and `pack` declarations. Upstream synchronization is manual.
 
-The current publication is owned by source/expedition.rel (identity, readings, sources, routes and compatibility aliases), source/presentation.rel (colour, layout, responsive rules and finite motion), and algebra/publication.process.json (page compilation, metadata, navigation and output policy). Edit these owners; dist/ is disposable output.
+Source highlighting, listings and bounded Markdown preview are authored in `source/encounter/source-algebra.encounter`. The manifest selects its frontend and generated output. Generated process JSON is not an additional editable owner. Compiler profiles, pinned bootstrap inputs and correspondence fixtures live under `source/process-authoring/`.
 
-The corpus gate at /gate.html connects the personal expedition to the separately published research library. Its seven doors, descriptions and destinations belong to source/gateway.rel; its presentation belongs to source/gateway-presentation.rel; algebra/gateway.process.json compiles it through the shared document projection. source/gateway-provenance.json preserves Aaron’s exact supplied names, the evidence used and the distinction between established project framing and provisional reading paths for Kingdom, The Field and World. The gate links the existing public corpus; it does not claim to synchronize that publication with this checkout.
+The reader projects canonical encounter pages. Algebra owns navigation, visits, filters, dialogs, motion choices and activity calculations. The workshop uses `ec.prepare`, `ec.run` and `ec.patch` for checked edits, with tab-local revisions, inspection, receipts and script-free previews. Its changes reset on reload. The atlas stores a bounded place-ID list under `worldwright.atlas.seen.v1`; blocked storage is disclosed and does not stop navigation.
 
-npm run build compiles forty encounter pages and the homepage through the existing Temple lowering, admission, fact-index and HTML/CSS algebras. bootstrap/ retains the Temple seed and execution budget. Explicit native successors and their predecessors are recorded in source/publication-contract.json; the atlas adds three generic localStorage text operations. The reader/workshop successor adds only generic browser and file effects; all application rules remain algebra. The build receipt records source/artifact hashes, admission passes and actual step use against the unchanged 20,000,000-step limit. It is a build receipt, not scientific validation.
+## Author a change
 
-The reader, all forty activities and both workshop URLs now execute admitted process algebra. Original JavaScript in retained/ is a local comparison oracle and is excluded from build execution and the published JavaScript graph. Library files, passive styles and source documents remain byte-pinned; changed entry documents and native mechanisms have explicit successors in source/publication-contract.json. Canonical reading pages continue to work without JavaScript. The reader reuses their projections rather than maintaining another narrative copy.
+[source/authoring-contract.json](source/authoring-contract.json) declares editable paths, selected process frontends and validation checks. Submit complete UTF-8 replacements with current SHA-256 hashes:
 
+```json
+{
+  "protocol": "worldwright/authoring-proposal/1",
+  "apply": false,
+  "changes": [{
+    "file": "source/front-doors.rel",
+    "beforeSha256": "<SHA-256 of the file's current bytes>",
+    "text": "<complete replacement document>"
+  }]
+}
+```
 
-Reader/workshop ownership: source/reader/activities.json owns passive activity artwork and instructions; source/reader/navigation.json owns the migrated three entrances, ten regions and theme membership; source/reader/source-receipts.json retains the pinned source fingerprints. Narrative text, scope and source notes remain in source/expedition.rel. reader-navigation.process.json owns routing, visits, filtering, dialogs and motion preferences; reader-models.process.json owns the finite calculations; reader-activities.process.json owns their controls, presentation changes and animation policy. reader-workshop-publication.process.json composes and admits their bundles.
+Run `npm run author -- proposal.json`. A preview stages sources, installs dependencies, builds, runs checks and returns a receipt. Set `apply` to `true` to stage and validate again before writing. The policy refuses stale hashes, duplicate targets, no-ops and edits outside its authority. The host compares validated inputs before writing and rolls back completed writes if a write fails. Rebuild after applying. Authoring does not commit or deploy.
 
-source/workshop/document.html and workshop-session.process.json own the workshop interface, tabs, source inspection, revision basis, receipts, sandboxed preview navigation and commit-after-verification policy. workshop-lab.process.json reuses the original checked edit/snapshot programmes, and source/encounter/example.json remains the canonical input. State is volatile and event dispatch remains serialized. The old worker, browser-host, engine, listing and app modules are not published. No second application interpreter or kernel-budget extension is introduced.
+`source/authoring/workflow.encounter` and `algebra/authoring.process.json` own policy; `tooling/author.mjs` supplies generic file and process mechanisms. Native mechanisms, admission/lowering definitions, evidence contracts and comparison fixtures require explicit maintenance outside ordinary authoring grants.
 
-reader-workshop-algebra.test.mjs compares the migrated slider models, both memory trajectories, source and overlay edits, HTML, diffs and refusals against one predecessor family. Browser checks exercise the real controls and inspector; these are bounded same-run engineering checks, not independent verification or scientific evidence. source/reader/migration.json identifies the predecessor bytes and source boundaries.
+## Execution and evidence
 
-`npm run test:browser` runs the checked-in browser driver against a local publication at `http://127.0.0.1:4194` and a separate disposable Chromium profile with remote debugging on `127.0.0.1:9229`. Set `WORLDWRIGHT_PORT=4194` when starting `serve.mjs`; `READER_TEST_BASE_URL` and `READER_BROWSER_DEBUG_URL` override the driver's endpoints. Use an isolated test profile. The driver creates and closes its own tab, writes `.build/reader-workshop-browser-qa.json`, and never authors application files. `source/reader/qualification.json` records the exact source hashes, reproducible build, 91 automated tests and 138 browser cases for this migration.
+`bootstrap/site.json` selects modules, frontends and admission policy. Generic JavaScript in `bootstrap/` supplies the kernel and browser/file mechanisms. Algebra supplies application rules, transformations and rendering plans. [source/publication-contract.json](source/publication-contract.json) pins native mechanisms and their receipts. The build limit is 20,000,000 steps.
 
+`retained/` contains comparison fixtures and passive resources; its application JavaScript is excluded from build execution and publication. `source/authoring-predecessors/` contains inert generator captures indexed by hash. These bytes are evidence, not authoring paths.
 
-The independent /atlas.html has forty native place links over the illustrated map. algebra/atlas.process.json owns the document; source/atlas.rel owns positions, presentation and finite motion; algebra/atlas-journey.process.json owns preview events, visit validation, storage, seen labels and reset. Destination pages mark themselves on load, including direct links. Only worldwright.atlas.seen.v1 is written or removed; the newline-separated list is bounded and filtered against known place IDs. No analytics or network service is involved. Blocked storage is nonfatal and disclosed in the interface. The browser runtime uses a separate 2,000,000-step event budget, within the existing build limit. atlas-journey.test.mjs checks the compiled algebra, including repeat visits, invalid saved text, failure handling, mobile preview and reset isolation.
-
-
-The homepage hierarchy is owned by `source/hierarchy.json`, `source/hierarchy.rel` and `algebra/hierarchy.process.json`. It separates foundation/platform, substantial applications and programmes, applications in progress, and compact tooling. Every entrance has a microsite and source-bound Inspect page.
-
-`source/hierarchy-evidence.json` records exact snapshots, upstream/snapshot hashes and original source lines. The existing `source.rel` parser extracts `dependsOn` and `pack` edges. Sharing matches exact relation and target identity, counts each consumer once, and produces no inferred edge when no declaration is present. The existing Encounter lexer and presenter highlight source through the admitted read-only kernel. Snapshots record selected source versions; they do not claim live synchronization or deployed use. The only additional build grant is the existing pure `text.indexOf` operation required by `source.rel`. Native implementations and the 20,000,000-step budget are unchanged.
-
-`hierarchy.test.mjs` verifies all sixteen routes, source hashes and lines, extracted declarations, exact-identity sharing, duplicate handling, refusals and shared source presentation. `source/hierarchy-contract.json` records ownership and scope.
-
-
-The opening homepage fold offers three illustrated entrances: Questions (`questions.html`), Threads (`gate.html`) and Atlas / Map (`atlas.html`). The original three question journeys now live on the Questions page. Below the opening fold, the foundation, applications, in-progress work and tooling each have their own section treatment. Claimipedia Science uses `claimipedia-science/`; its first use case is the Relational Geometry Programme. The original `relational-geometry/` introduction and source-bound inspection identity remain available. These compositions and styles remain owned by the existing publication/hierarchy algebras and were applied through the algebra-owned authoring transaction.
-
-
-Mission Control is a first-class tool at `/mission-control/`, described as Sourcery’s agent harness and automatic workflow mechanism using the internal job system. Claimipedia Science links to it as a consumer. Its Inspect page exposes two exact snapshots of the research adapter rather than inventing shared capability edges. The homepage uses content-driven section heights, aligned major-card titles/actions, native stretched card links with separate Inspect targets, a keyboard-accessible scroll invitation, native workflow disclosure and reduced-motion interaction styles. Desktop, tablet and mobile visual QA is recorded in `verification/mission-control-polish-release.json`.
-
-
-Markdown Inspect pages now pair a rendered document with the exact, syntax-highlighted snapshot. `md.preview`, `md.block` and `md.inline` compose a bounded reader projection through the existing process algebra, kernel and HTML serializer. The shared lexer/presenter supports `.md` and `.markdown`; code fences reuse it. The supported Markdown subset covers headings, paragraphs/hard breaks, emphasis, links, code, lists, blockquotes and pipe tables. Raw HTML is literal; unbundled source-relative links expose their target rather than inventing a destination. This is not a full CommonMark implementation.
-
-The shared `sp.expression` and `sp.statement` presenters group long expressions and records across indented lines and omit empty fold-body gaps. Formatting and visual wrapping never change authoritative source bytes or their hashes. Both panes support keyboard scrolling, align on desktop and stack on mobile. The existing algebra-owned authoring transaction admitted both changes after 68 checks, including real-document projection, exact token reconstruction, unsafe-link/HTML handling, formatting, bounds/refusals and publication reproducibility. `verification/markdown-inspection-release.json` records ownership and QA.
-
-Entry cards carry editorial purpose types in source/hierarchy.json, rendered by hierarchy.home with a text badge and a colour family from source/hierarchy.rel. Availability remains a separate label. Taking shape contains six entries in a three-column desktop grid, including Creator Studio (the public display name for the Creative Studio source). Its introduction and exact upstream test-source snapshot distinguish the developing studio direction from a deployed editor. Two original transparent PNG emblems and their prompts/hashes are recorded in source/entry-card-art.json.
-
-
-The shared Markdown/lexer/formatter link opens `/inspection/source-algebra.html`. All 23 queries are now authored in `source/encounter/source-algebra.encounter`. `algebra/encounter-source.process.json` no longer exists as a root source or editable owner: the explicitly selected Encounter process frontend generates it into `dist/`, and the ordinary lowerer, model/effect admission and existing kernel execute the resulting module. The view/representation dialect remains separate. The page selects exact authored characters through compiler process-definition ranges; JSON pointers, generated JSON, full source maps and separate source/generated hashes remain inspectable.
-
-`algebra/language-process.process.json` is an explicit successor of the existing Encounter frontend, with its upstream source/hash in `source/process-authoring/provenance.json`. It adds fold/yield, assert/otherwise, direct calls, try/catch, the required existing operators, dotted references and complete nested linking. The selected lexical profile retains the 160,000-code-unit limit and allows 36,000 lexical parts for this whole module (the measured candidate has about 27,000 parts). The 20,000,000-step kernel limit is unchanged. Native `bootstrap/ports/process-source.cjs` and the generic build handoff only load/hash/lower/admit/invoke/serialize; grammar, source mapping and AST construction stay in algebra. No source interpreter, editor or mutation path was added.
-
-The compiler bootstrap has an explicit circularity boundary: a pinned predecessor supplies only `source.split`, `source.lex` and `s01.portable`; application definitions come exclusively from the compiled Encounter file. `oracle.json` records the old JSON module, `bootstrap.json` pins the qualified successor (semicolon tokenization and safe record-key quoting), and `candidate.encounter` is an immutable correspondence fixture rather than a second editable owner. A future compiler/bootstrap upgrade must be repinned explicitly.
-
-Before the source-owner switch, correspondence passed for ordered whole-module JSON, every statement coordinate, whole-module lowering, real documents, formatting, effects and faults. The full publication gate passed 92 checks after the switch, including readable-source-driven execution, nested-link refusals, absence of a root JSON owner, exact whitespace in Inspect, authoring transaction/refusals and reproducibility. These are bounded engineering checks, not a proof over all inputs. The generic loader has an archived predecessor and updated native hashes; the Temple native snapshot has an explicit predecessor/successor receipt. `verification/encounter-source-authority-release.json` records identities, usage, gate and visual QA.
-
-Every declared project microsite receives the same fixed main-site return link. algebra/microsite-return.process.json owns its markup, CSS, relative destination and idempotent projection. The publication’s final pass applies it to local directory-style StandalonePage declarations; MicrositeDocument pages receive it during their source projection. No browser JavaScript is added. New declared microsites inherit the control automatically.
-
-The return control adopts each host’s theme through algebra-owned CSS variables: Temple’s engraved gold, Sourcery’s rose parchment, Claimipedia’s cream/teal and Encounter’s terracotta. Project pages reuse the existing card-type palette from source/hierarchy.rel. The data-site attribute keeps nested film pages in the same visual family. Shared positioning, native navigation, focus, reduced motion and 44px minimum targets remain centralized.
-
-
-Encounter source batch 02 migrates six further modules (66 queries) after exact ordered JSON, complete lowering, every-statement origins, scoped linking, `each` scope/effects/refusals, UI DOM/state traces and the 19 existing Encounter/microsite behaviour checks passed while JSON remained authoritative. The full post-switch publication gate passed 104 checks.
-
-| Readable source owner | Queries | Generated output |
-| --- | ---: | --- |
-| `source/encounter/encounter.encounter` | 1 | `algebra/encounter.process.json` |
-| `source/algebra/source.encounter` | 5 | `algebra/source.process.json` |
-| `source/microsites/ui.encounter` | 14 | `algebra/microsite-ui.process.json` |
-| `source/microsites/values.encounter` | 19 | `algebra/microsite-values.process.json` |
-| `source/microsites/sourcery.encounter` | 7 | `algebra/microsite-sourcery.process.json` |
-| `source/microsites/temple-ui.encounter` | 20 | `algebra/microsite-temple-ui.process.json` |
-
-The existing process frontend now supports `each` only in explicitly selected statement profiles. Temple UI keeps its original try/catch/error JSON field order via a checked field-order profile. All six modules have separately pinned operator and direct-effect profiles; these do not grant runtime effects. The original native loader, seed, lowerer, runtime grants and 20-million-step limit are unchanged. No root JSON cache or parse-failure fallback remains for these modules. The source/oracle/profile ledger and pre-switch gate live under `source/process-authoring/batch-02/`; `verification/encounter-batch-02-release.json` records the release and source hashes.
+Tests verify models, checked edits, source fidelity, reproducible output, CSS ownership and complete browser-bundle envelopes. The browser audit checks HTML/SVG execution surfaces and reader/workshop interactions. Receipts in `verification/` identify their exact source version and scope. They are engineering evidence, not independent or scientific validation.
 
 Repository care: [licensing](LICENSE.md), [Christian stewardship covenant](CHRISTIAN_STEWARDSHIP_COVENANT.md), and [source/evidence hygiene](STEWARDSHIP.md).
-
-The Questions page and The Field’s first encounter are projected by hierarchy.questions.build and hierarchy.field.build from source/questions.rel. The new illustration and its full generation prompt have a provenance record in source/questions-correspondence.json. Five native disclosure choices retain the original encounter’s direct, relational, institutional and uncertainty boundaries, plus an explicit exit; no moral score, browser script or assessment is added. The retained source grammar remains unchanged.

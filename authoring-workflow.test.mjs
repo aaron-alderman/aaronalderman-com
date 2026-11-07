@@ -100,7 +100,7 @@ test('clean verification requires a clean revision and absent build, installed d
 });
 test('normal verification has no .build input and does not rewrite presentation evidence',()=>{
  assert.deepEqual([...contract.checks].sort(),fs.readdirSync('.').filter(f=>f.endsWith('.test.mjs')).sort(),'Every repository test belongs to the declared verification set');
- for(const script of ['test','test:portable'])assert.equal(read('package.json').scripts[script],'node --test '+contract.checks.join(' '));
+ assert.equal(read('package.json').scripts.test,'npm run test:portable');assert.equal(read('package.json').scripts['test:portable'],'node --test '+contract.checks.join(' '));
  const helper=fs.readFileSync('tooling/read-process-fixture.cjs','utf8');assert.ok(!helper.includes('.build'));assert.ok(!helper.includes('BATCH_PROCESS_LEG'));
  const file='source/microsites/presentation-correspondence.json',before=fs.readFileSync(file);
  const result=spawnSync(process.execPath,['tooling/verify-microsite-presentation.mjs','dist'],{encoding:'utf8'});assert.equal(result.status,0,result.stderr);assert.equal(JSON.parse(result.stdout).pages.length,4);assert.deepEqual(fs.readFileSync(file),before);assert.equal(read('package.json').devDependencies.parse5,'7.3.0');

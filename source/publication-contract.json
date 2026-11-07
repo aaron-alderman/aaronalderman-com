@@ -221,5 +221,12 @@
     "generated": "algebra/encounter-source.process.json",
     "frontend": "bootstrap/process-frontend.json",
     "boundary": "The native host loads, hashes, lowers, admits, invokes and serializes; it contains no source grammar, AST construction or expression evaluator."
+  },
+  "stylesheetSuccessor": {
+    "contract": "source/stylesheets/contract.json",
+    "renderer": "algebra/stylesheet.process.json",
+    "reason": "Editable stylesheet trees and inline artwork bindings are projected by admitted algebra. Captured CSS and artwork are comparison evidence, excluded from active build inputs.",
+    "nativeUnchanged": true,
+    "executionBudget": 20000000
   }
 }

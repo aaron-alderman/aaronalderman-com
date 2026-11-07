@@ -3976,6 +3976,17 @@
                                     "list",
                                     "One fictional encounter. Five choices. Room to disagree."
                                   ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "the-field/households/",
+                                    "class": "button q-secondary"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Explore a household over time →"
+                                  ]
                                 }
                               ]
                             }
@@ -5645,7 +5656,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "../expedition.css?v=questions-light-1"
+                    "href": "../expedition.css?v=field-households-sections-3"
                   },
                   "children": [
                     "list"
@@ -6449,6 +6460,91 @@
                                   "children": [
                                     "list",
                                     "Explore rupture and repair →"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "q-section hh-field-card"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "field-knowledge"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "div",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "eyebrow"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "The Field / A second encounter"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "h2",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "What changes when one of us changes?"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Follow a fictional household through changing values, capacity and agreements. See how being heard and keeping commitments shape willingness to ask again."
+                                      ]
+                                    },
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "households/",
+                                        "class": "q-text-link"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Explore the household through time →"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "q-caption"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Synthetic example · inspectable assumptions · leave freely"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "img",
+                                  "attrs": {
+                                    "src": "../assets/questions/open-workshop-daylight-v2.png",
+                                    "alt": "A daylight workshop beside a green field.",
+                                    "loading": "lazy",
+                                    "width": 1672,
+                                    "height": 941
+                                  },
+                                  "children": [
+                                    "list"
                                   ]
                                 }
                               ]
@@ -8135,7 +8231,27 @@
                                       "list",
                                       "Inspect"
                                     ]
-                                  }
+                                  },
+                                  [
+                                    "if",
+                                    [
+                                      "eq",
+                                      "$hItem.id",
+                                      "the-field"
+                                    ],
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "the-field/households/",
+                                        "class": "hierarchy-household"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Households over time →"
+                                      ]
+                                    },
+                                    null
+                                  ]
                                 ]
                               }
                             ]
@@ -8515,7 +8631,27 @@
                                       "list",
                                       "Inspect"
                                     ]
-                                  }
+                                  },
+                                  [
+                                    "if",
+                                    [
+                                      "eq",
+                                      "$hItem.id",
+                                      "the-field"
+                                    ],
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "the-field/households/",
+                                        "class": "hierarchy-household"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Households over time →"
+                                      ]
+                                    },
+                                    null
+                                  ]
                                 ]
                               }
                             ]
@@ -8881,7 +9017,27 @@
                                       "list",
                                       "Inspect"
                                     ]
-                                  }
+                                  },
+                                  [
+                                    "if",
+                                    [
+                                      "eq",
+                                      "$hItem.id",
+                                      "the-field"
+                                    ],
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "the-field/households/",
+                                        "class": "hierarchy-household"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Households over time →"
+                                      ]
+                                    },
+                                    null
+                                  ]
                                 ]
                               }
                             ]
@@ -9238,7 +9394,27 @@
                                       "list",
                                       "Inspect"
                                     ]
-                                  }
+                                  },
+                                  [
+                                    "if",
+                                    [
+                                      "eq",
+                                      "$hItem.id",
+                                      "the-field"
+                                    ],
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "the-field/households/",
+                                        "class": "hierarchy-household"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Households over time →"
+                                      ]
+                                    },
+                                    null
+                                  ]
                                 ]
                               }
                             ]
