@@ -2,22 +2,22 @@
   "protocol": "aaronalderman/local-publication-qualification/1",
   "date": "2026-11-07",
   "timezone": "Australia/Perth",
-  "sourceBaseline": "f769ef913dee886c5bc8078041b3fd489ea285b6",
-  "scope": "Requested Jesus-centred editorial revision, restrained emphasis and responsive margin notes; mobile invitation return-link overlap repair.",
+  "sourceBaseline": "e00c313e1d1662e7d4daf0cae703a46413327f68",
+  "scope": "Handwritten corpus annotations, taped paper and stickers, three inline pen sketches, and existing-destination links; equivalent child-array rendering avoids redundant process dispatch.",
   "entry": "publication.build",
   "execution": {
-    "indexSteps": 5171795,
-    "applicationSteps": 14793465,
-    "totalSteps": 19965260,
+    "indexSteps": 5178665,
+    "applicationSteps": 14495767,
+    "totalSteps": 19674432,
     "limit": 20000000
   },
   "artifactCount": 646,
-  "buildReceiptSha256": "54e3e3268ab92d1d38953dceb75f07d23600443919c381ed74ba7872ec582b90",
+  "buildReceiptSha256": "c7b9fc8f548a66093795d45d3f9ddfb84bf4cfbb3c901ceb136f80ee78b14b71",
   "sourceSha256": {
-    "source/front-doors.rel": "0be275b8ccbc388f5c9891e055e8cfd7e8c9283fbdff0b5d7891fcb736d483c3",
-    "source/expedition.rel": "057e2c8aad61ca4c665dd54e63251efb66cfbb5d3849405e3d89e898ccb65744",
-    "source/hierarchy.rel": "28acc6faf3850145028742626f45d019cc240b78904a27db3bb2026b77b02fc7",
-    "algebra/publication.process.json": "d24c794cf2ae47838cfbbaa0b14edd62f3d4cd4c268ddf0b8b59567fe974dc32"
+    "source/front-doors.rel": "9fda2ee28ad38b3edc7417ffa384bcd41d4d7058471f017640fcbc989532e2a3",
+    "source/expedition.rel": "eef0926c4afe4ada40114e282ff9242a662a5c338910f07b11db36e41542ce43",
+    "source/hierarchy.rel": "ad1aed5cff59fae8847a84b95a04ba58badf292b5fa2e3124857712efa2e1382",
+    "algebra/publication.process.json": "f05737807418a4571c7204075f55cc56da48c1d3f0015b75169f9d322304f550"
   },
   "artworkSha256": "89cd80f02e60dc3e0d131f22dbcaaeeeed73e7ef07974b9d0f86e2c587c250ae",
   "nativeFilesCompared": 15,
@@ -26,9 +26,9 @@
   "authoring": {
     "applied": true,
     "protocol": "worldwright/authoring-receipt/2",
-    "receiptSha256": "5b360f79bbe954173093aabdc0d9eddd918471bd9363255bd5e9479a4268da52",
+    "receiptSha256": "d510cd71cec85d071a4fd8eafafeea9658b64265d68d61e594e6a8d1e6a947f8",
     "mechanismSha256": "7ba3d118ed6d77703c6c8a90c3d56659bb1d457ebf72d54a9fc31330c2414ace",
-    "scope": "Requested Jesus-centred editorial revision, restrained emphasis and responsive margin notes; mobile invitation return-link overlap repair."
+    "scope": "Handwritten corpus annotations, taped paper and stickers, three inline pen sketches, and existing-destination links; equivalent child-array rendering avoids redundant process dispatch."
   },
   "checks": [
     {
@@ -96,25 +96,22 @@
     }
   ],
   "portableTests": {
-    "passed": 211,
+    "passed": 215,
     "failed": 0,
     "skipped": 0,
-    "includesFreshArtifactReproduction": true,
-    "scope": "Accepted editorial candidate before upstream integration; final integrated suite is recorded in GitHub Actions."
+    "includesFreshArtifactReproduction": true
   },
   "browserChecks": [
-    "Live mission invitation and full scroll destinations checked",
-    "390px and 320px scroll fit, artwork, contents links and all five tables",
-    "1500px margin notes and 390px inline note layout",
-    "390px mission return link static, no overlay",
-    "Jesus-centred section and alignment wording verified"
+    "1280px and 1500px desktop corpus annotations and sketches",
+    "390px and 320px phone widths, zero note overflow",
+    "Phone corpus links have 44px minimum tap height",
+    "Power & agency link reaches the existing corpus page"
   ],
   "boundary": "Engineering evidence for this source state; same local validation run, not independent scientific validation.",
   "comicSha256": "37b078a6dfd5fc4e6b85c61bd5374eec4469393db24d52ac2110b5b805b98256",
   "integration": {
-    "upstream": "f769ef913dee886c5bc8078041b3fd489ea285b6",
-    "validationSha256": "dabb8a606392adda03b9834f8832e3cd5273c24aa5aa41c1fa21380c0cccdc05",
-    "scope": "Accepted authoring transaction passed all 211 tests before upstream integration. The integrated publication build, mission tests and presentation comparison passed locally. The existing Pages workflow rechecks the full final revision before deployment.",
-    "presentationSha256": "4265cf34e739107d1c00392150f82b5410af4ec1ffb9a761c286d0e5147e579b"
+    "upstream": "e00c313e1d1662e7d4daf0cae703a46413327f68",
+    "validationSha256": "f33bc94aa4999e41b47d88312b2fc43dee30ce929a61d4bfa96140a4c77fdaab",
+    "renderingCorrespondenceSha256": "67710ca7d70626595c244d133a9b9d935654091c8198c04e86d23febdcbbdece"
   }
 }

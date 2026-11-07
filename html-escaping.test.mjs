@@ -21,3 +21,28 @@ test('complete element serialization keeps attributes and text escaped with less
 test('serialization still refuses event handlers and executable URL schemes',async()=>{
  for(const attrs of [{onclick:'bad()'},{href:'javascript:alert(1)'},{src:'data:text/html,bad'}])await assert.rejects(run(now,'html.serialize',{tag:'a',attrs,children:['example']}),/Invalid HTML attribute|Unsafe URL/);
 });
+
+test('publication child rendering preserves scalar, nested, CSS and unsafe-input behaviour',async()=>{
+ const publication=read('algebra/publication.process.json');
+ const queries={...current.queries,'publication.escape':publication.queries['publication.escape'],'publication.serialize':publication.queries['publication.serialize']};
+ const previous=structuredClone({queries});
+ const objectSteps=previous.queries['publication.serialize'][2].then[2].then;
+ const children=objectSteps.find(s=>s.when&&s.then?.[0]?.fold).then[0];
+ children.steps[2].then=[{call:'publication.serialize'}];
+ const [optimized,baseline]=await Promise.all([compile({queries}),compile(previous)]);
+ const examples=[
+  {tag:'div',attrs:{title:'A & B "quoted"'},children:['a & b',null,false,{tag:'em',children:['inside < >']},['nested',{tag:'br'}],0]},
+  {tag:'p',children:'scalar <b>'},
+  {tag:'p',children:{tag:'b',children:['one child']}},
+  {tag:'style',children:['x::before{content:"</sty','le><script>"}']},
+  {tag:'img',attrs:{src:'/safe.png'},children:[{tag:'script',children:['ignored']}]}
+ ];
+ let saved=0;
+ for(const input of examples){const a=await run(optimized,'publication.serialize',input),b=await run(baseline,'publication.serialize',input);assert.equal(a.value,b.value);saved+=b.usage.steps-a.usage.steps;}
+ assert.ok(saved>0,'ordinary child arrays avoid the redundant generic dispatch');
+ for(const input of [
+  {tag:'a',attrs:{onclick:'bad()'},children:['example']},
+  {tag:'a',attrs:{href:'javascript:bad()'},children:['example']},
+  {tag:'style',children:[{tag:'b',children:['bad']}]}
+ ])for(const model of [optimized,baseline])await assert.rejects(run(model,'publication.serialize',input),/Invalid HTML attribute|Unsafe URL|Style content/);
+});

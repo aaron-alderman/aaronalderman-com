@@ -11881,7 +11881,48 @@
                         ],
                         "then": [
                           {
-                            "call": "publication.serialize"
+                            "port": "value.describe",
+                            "args": {
+                              "value": "$input"
+                            },
+                            "into": "publicationChildKind"
+                          },
+                          {
+                            "when": "$publicationChildKind.array",
+                            "then": [
+                              {
+                                "fold": "$input",
+                                "as": "publicationChild",
+                                "accumulator": "publicationChildren",
+                                "initial": "",
+                                "steps": [
+                                  {
+                                    "let": "input",
+                                    "value": "$publicationChild"
+                                  },
+                                  {
+                                    "call": "publication.serialize"
+                                  }
+                                ],
+                                "yield": [
+                                  "concat",
+                                  "$publicationChildren",
+                                  "$result"
+                                ],
+                                "into": "result"
+                              }
+                            ]
+                          },
+                          {
+                            "when": [
+                              "not",
+                              "$publicationChildKind.array"
+                            ],
+                            "then": [
+                              {
+                                "call": "publication.serialize"
+                              }
+                            ]
                           }
                         ]
                       }
