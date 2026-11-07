@@ -5553,6 +5553,17 @@
         "value": "$result"
       },
       {
+        "call": "identity.discovery.build"
+      },
+      {
+        "let": "assuranceRows",
+        "value": [
+          "append",
+          "$assuranceRows",
+          "$discoveryRows"
+        ]
+      },
+      {
         "let": "statuses",
         "value": [
           "list",
@@ -5601,7 +5612,7 @@
           "protocol": "worldwright/identity-assurance/1",
           "scope": "Homepage, identity Threads and Maps, forty readings per identity, identity Questions return links, curated application collections, appearance, interaction and footer.",
           "policy": "Equal output never implies intentional invariance. Missing and undecided relationships remain open work.",
-          "boundary": "Declared surface inventory plus automatic discovery of unclassified top-level cross browser writers. Catalogue rows check collection facts, selected-app notes, the view/serializer pipeline and cross content writer; they do not prove every inner renderer dependency. This is not exhaustive DOM, transitive dependency, visual or semantic verification. Threads and Map route rows additionally require generated destination headings, copy, artwork, reading links and identity return navigation across all forty readings in each world. These checks do not certify semantic or visual correctness. The eight reviewed relationships have explicit scopes and generated-output evidence. Semantic fit remains a human review obligation even when its assignments are identity-mapped.",
+          "boundary": "Declared inventory plus automatic generated-output discovery across the entire root homepage and all four identity homepages. Undeclared text and attributes become undecided groups with located evidence; exact declarations do not cover descendants. Nested catalogue output is scanned. External dependencies and inline code bodies stay opaque. This is not exhaustive corpus, DOM, transitive dependency, runtime-state, visual or semantic verification. Existing Threads, Map, reading and eight-decision evidence retain their stated scopes.",
           "identities": [
             "map",
             "$resolved",
@@ -5611,7 +5622,26 @@
           "summary": "$summary",
           "rows": "$assuranceRows",
           "journeys": "$journeyEvidence",
-          "decisions": "$reviewEvidence"
+          "decisions": "$reviewEvidence",
+          "discovery": {
+            "protocol": "worldwright/identity-discovery/1",
+            "artifact": "identity-discovery.json",
+            "pages": [
+              "map",
+              "$discoveryPages",
+              "p",
+              {
+                "identity": "$p.identity",
+                "file": "$p.file",
+                "relationships": "$p.relationships",
+                "undecided": "$p.undecided"
+              }
+            ],
+            "observed": "$discoveryReport.observed",
+            "undecided": "$discoveryReport.undecided",
+            "groups": "$discoveryReport.groups",
+            "boundary": "$discoveryReport.boundary"
+          }
         }
       },
       {
@@ -5739,6 +5769,104 @@
                   ]
                 }
               ]
+            ]
+          },
+          {
+            "tag": "section",
+            "attrs": {
+              "class": "assurance-boundary"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "h2",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Discovered beyond the inventory"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "The algebra scans the entire generated homepage and each identity homepage. New text, links, images, metadata, appearance and behaviour attributes can reopen undecided work without adding an inventory row first."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "$discoveryReport.observed",
+                  " observed relationships · ",
+                  "$discoveryReport.undecided",
+                  " undeclared observations in ",
+                  "$discoveryReport.groups",
+                  " review groups."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Equal output never supplies intent. An exact declaration for a container does not classify its children. The complete evidence retains file, token ordinal, element, property and value for every observation."
+                ]
+              },
+              {
+                "tag": "ul",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "map",
+                    "$discoveryPages",
+                    "p",
+                    {
+                      "tag": "li",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "$p.file",
+                        " · ",
+                        "$p.relationships",
+                        " observations · ",
+                        "$p.undecided",
+                        " undeclared"
+                      ]
+                    }
+                  ]
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "assurance-limit"
+                },
+                "children": [
+                  "list",
+                  "$discoveryReport.boundary"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "identity-discovery.json"
+                    },
+                    "children": [
+                      "list",
+                      "Download all discovered relationships ↗"
+                    ]
+                  }
+                ]
+              }
             ]
           },
           {
@@ -6082,24 +6210,12 @@
                         "attrs": {},
                         "children": [
                           "list",
-                          {
-                            "tag": "span",
-                            "attrs": {
-                              "class": "assurance-area"
-                            },
-                            "children": [
-                              "list",
-                              "$r.area"
-                            ]
-                          },
-                          {
-                            "tag": "strong",
-                            "attrs": {},
-                            "children": [
-                              "list",
-                              "$r.label"
-                            ]
-                          }
+                          [
+                            "concat",
+                            "$r.area",
+                            " · ",
+                            "$r.label"
+                          ]
                         ]
                       },
                       {
@@ -6184,56 +6300,43 @@
                               "identity"
                             ],
                             {
-                              "tag": "dl",
+                              "tag": "p",
                               "attrs": {
                                 "class": "assurance-worlds"
                               },
                               "children": [
                                 "list",
                                 [
-                                  "map",
+                                  "fold",
                                   "$r.values",
-                                  "v",
-                                  {
-                                    "tag": "div",
-                                    "attrs": {},
-                                    "children": [
-                                      "list",
-                                      {
-                                        "tag": "dt",
-                                        "attrs": {},
-                                        "children": [
-                                          "list",
-                                          "$v.identity"
+                                  "worldValue",
+                                  "worldText",
+                                  "",
+                                  [
+                                    "concat",
+                                    "$worldText",
+                                    "$worldValue.identity",
+                                    ": ",
+                                    [
+                                      "if",
+                                      [
+                                        "or",
+                                        [
+                                          "eq",
+                                          "$worldValue.value",
+                                          null
+                                        ],
+                                        [
+                                          "eq",
+                                          "$worldValue.value",
+                                          ""
                                         ]
-                                      },
-                                      {
-                                        "tag": "dd",
-                                        "attrs": {},
-                                        "children": [
-                                          "list",
-                                          [
-                                            "if",
-                                            [
-                                              "or",
-                                              [
-                                                "eq",
-                                                "$v.value",
-                                                null
-                                              ],
-                                              [
-                                                "eq",
-                                                "$v.value",
-                                                ""
-                                              ]
-                                            ],
-                                            "No declared value",
-                                            "$v.value"
-                                          ]
-                                        ]
-                                      }
-                                    ]
-                                  }
+                                      ],
+                                      "No declared value",
+                                      "$worldValue.value"
+                                    ],
+                                    "; "
+                                  ]
                                 ]
                               ]
                             },
@@ -6357,6 +6460,103 @@
                               ]
                             },
                             null
+                          ],
+                          [
+                            "if",
+                            [
+                              "at",
+                              "$r",
+                              "discovery"
+                            ],
+                            {
+                              "tag": "div",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                [
+                                  "map",
+                                  "$r.discovery",
+                                  "e",
+                                  {
+                                    "tag": "div",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      {
+                                        "tag": "p",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "strong",
+                                            "attrs": {},
+                                            "children": [
+                                              "list",
+                                              "$e.file"
+                                            ]
+                                          },
+                                          " · ",
+                                          "$e.count",
+                                          " undeclared observations"
+                                        ]
+                                      },
+                                      {
+                                        "tag": "ul",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          [
+                                            "map",
+                                            "$e.examples",
+                                            "o",
+                                            {
+                                              "tag": "li",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "Token ",
+                                                "$o.ordinal",
+                                                " · ",
+                                                "$o.tag",
+                                                " · ",
+                                                "$o.sink",
+                                                " = ",
+                                                {
+                                                  "tag": "code",
+                                                  "attrs": {},
+                                                  "children": [
+                                                    "list",
+                                                    "$o.value"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ],
+                                {
+                                  "tag": "p",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "identity-discovery.json"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Inspect every located observation ↗"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            null
                           ]
                         ]
                       }
@@ -6405,6 +6605,22 @@
       }
     ],
     "identity.journey.rebase": [
+      {
+        "let": "rebaseWorldKey",
+        "value": [
+          "one",
+          "$eventInput.identity",
+          "key"
+        ]
+      },
+      {
+        "let": "rebaseQuestionAlias",
+        "value": [
+          "one",
+          "$eventInput.identity",
+          "questionHref"
+        ]
+      },
       {
         "port": "text.split",
         "args": {
@@ -6531,11 +6747,7 @@
                             [
                               "eq",
                               "$resolved.route",
-                              [
-                                "one",
-                                "$eventInput.identity",
-                                "questionHref"
-                              ]
+                              "$rebaseQuestionAlias"
                             ],
                             [
                               "one",
@@ -6548,11 +6760,7 @@
                               [
                                 "concat",
                                 "worlds/",
-                                [
-                                  "one",
-                                  "$eventInput.identity",
-                                  "key"
-                                ],
+                                "$rebaseWorldKey",
                                 "/",
                                 "$resolved.route"
                               ],
@@ -10034,6 +10242,1252 @@
         "args": {
           "path": "assurance/identity-decisions.json",
           "text": "$reviewJson"
+        },
+        "into": "_"
+      }
+    ],
+    "identity.discovery.scan": [
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$eventInput.html",
+          "pattern": "(<script\\b[^>]*>[\\s\\S]*?</script\\s*>|<style\\b[^>]*>[\\s\\S]*?</style\\s*>|<!--[\\s\\S]*?-->|<(?:[^>\"']|\"[^\"]*\"|'[^']*')*>)"
+        },
+        "into": "pieces"
+      },
+      {
+        "let": "current",
+        "value": {}
+      },
+      {
+        "let": "ordinal",
+        "value": 0
+      },
+      {
+        "fold": "$pieces",
+        "as": "piece",
+        "accumulator": "scanState",
+        "initial": {
+          "ordinal": 0,
+          "current": {},
+          "inHead": false,
+          "observed": [
+            "list"
+          ]
+        },
+        "steps": [
+          {
+            "let": "current",
+            "value": "$scanState.current"
+          },
+          {
+            "let": "inHead",
+            "value": "$scanState.inHead"
+          },
+          {
+            "let": "ordinal",
+            "value": [
+              "add",
+              "$scanState.ordinal",
+              1
+            ]
+          },
+          {
+            "port": "text.trim",
+            "args": {
+              "value": "$piece"
+            },
+            "into": "piece"
+          },
+          {
+            "let": "found",
+            "value": [
+              "list"
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$piece",
+                ""
+              ]
+            ],
+            "then": [
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$piece",
+                  "pattern": "^<[A-Za-z]"
+                },
+                "into": "opening"
+              },
+              {
+                "when": "$opening",
+                "then": [
+                  {
+                    "port": "text.split",
+                    "args": {
+                      "value": "$piece",
+                      "pattern": "^<([A-Za-z][A-Za-z0-9:-]*)"
+                    },
+                    "into": "head"
+                  },
+                  {
+                    "let": "tag",
+                    "value": [
+                      "at",
+                      "$head",
+                      1
+                    ]
+                  },
+                  {
+                    "port": "text.lowerCase",
+                    "args": {
+                      "value": "$tag"
+                    },
+                    "into": "tag"
+                  },
+                  {
+                    "when": [
+                      "eq",
+                      "$tag",
+                      "head"
+                    ],
+                    "then": [
+                      {
+                        "let": "inHead",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "port": "text.split",
+                    "args": {
+                      "value": [
+                        "at",
+                        "$head",
+                        2
+                      ],
+                      "pattern": "^((?:[^>\"']|\"[^\"]*\"|'[^']*')*)>"
+                    },
+                    "into": "tail"
+                  },
+                  {
+                    "port": "text.slice",
+                    "args": {
+                      "value": [
+                        "at",
+                        "$tail",
+                        1
+                      ],
+                      "start": 0
+                    },
+                    "into": "rawAttrs"
+                  },
+                  {
+                    "port": "text.split",
+                    "args": {
+                      "value": "$rawAttrs",
+                      "pattern": "(?:\\s+([^\\s=<>/]+(?:\\s*=\\s*(?:\"[^\"]*\"|'[^']*'|[^\\s>]+))?))|(?:\\s*/?\\s*$)"
+                    },
+                    "into": "attributePieces"
+                  },
+                  {
+                    "fold": "$attributePieces",
+                    "as": "ap",
+                    "accumulator": "attributeState",
+                    "initial": {
+                      "values": {},
+                      "entries": [
+                        "list"
+                      ]
+                    },
+                    "steps": [
+                      {
+                        "let": "attributes",
+                        "value": "$attributeState.values"
+                      },
+                      {
+                        "let": "attributeEntries",
+                        "value": "$attributeState.entries"
+                      },
+                      {
+                        "when": "$ap",
+                        "then": [
+                          {
+                            "port": "text.split",
+                            "args": {
+                              "value": "$ap",
+                              "pattern": "^([^=\\s]+)(?:\\s*=\\s*(?:\"([\\s\\S]*)\"|'([\\s\\S]*)'|([^\\s>]+)))?$"
+                            },
+                            "into": "attributeParts"
+                          },
+                          {
+                            "let": "attributeName",
+                            "value": [
+                              "at",
+                              "$attributeParts",
+                              1
+                            ]
+                          },
+                          {
+                            "let": "attributeValue",
+                            "value": [
+                              "if",
+                              [
+                                "not",
+                                [
+                                  "eq",
+                                  [
+                                    "at",
+                                    "$attributeParts",
+                                    2
+                                  ],
+                                  [
+                                    "at",
+                                    {},
+                                    "undefined"
+                                  ]
+                                ]
+                              ],
+                              [
+                                "at",
+                                "$attributeParts",
+                                2
+                              ],
+                              [
+                                "if",
+                                [
+                                  "not",
+                                  [
+                                    "eq",
+                                    [
+                                      "at",
+                                      "$attributeParts",
+                                      3
+                                    ],
+                                    [
+                                      "at",
+                                      {},
+                                      "undefined"
+                                    ]
+                                  ]
+                                ],
+                                [
+                                  "at",
+                                  "$attributeParts",
+                                  3
+                                ],
+                                [
+                                  "if",
+                                  [
+                                    "not",
+                                    [
+                                      "eq",
+                                      [
+                                        "at",
+                                        "$attributeParts",
+                                        4
+                                      ],
+                                      [
+                                        "at",
+                                        {},
+                                        "undefined"
+                                      ]
+                                    ]
+                                  ],
+                                  [
+                                    "at",
+                                    "$attributeParts",
+                                    4
+                                  ],
+                                  true
+                                ]
+                              ]
+                            ]
+                          },
+                          {
+                            "port": "record.put",
+                            "args": {
+                              "record": "$attributes",
+                              "key": "$attributeName",
+                              "value": "$attributeValue"
+                            },
+                            "into": "attributes"
+                          },
+                          {
+                            "let": "attributeEntries",
+                            "value": [
+                              "append",
+                              "$attributeEntries",
+                              [
+                                "list",
+                                [
+                                  "list",
+                                  "$attributeName",
+                                  "$attributeValue"
+                                ]
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "yield": {
+                      "values": "$attributes",
+                      "entries": "$attributeEntries"
+                    },
+                    "into": "attributeState"
+                  },
+                  {
+                    "let": "attributes",
+                    "value": "$attributeState.values"
+                  },
+                  {
+                    "let": "attributeEntries",
+                    "value": "$attributeState.entries"
+                  },
+                  {
+                    "let": "selector",
+                    "value": [
+                      "if",
+                      [
+                        "at",
+                        "$attributes",
+                        "id"
+                      ],
+                      [
+                        "concat",
+                        "#",
+                        [
+                          "at",
+                          "$attributes",
+                          "id"
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "if",
+                          [
+                            "if",
+                            true,
+                            "$inHead",
+                            false
+                          ],
+                          [
+                            "eq",
+                            "$tag",
+                            "title"
+                          ],
+                          false
+                        ],
+                        "head title",
+                        [
+                          "if",
+                          [
+                            "if",
+                            [
+                              "if",
+                              [
+                                "if",
+                                true,
+                                "$inHead",
+                                false
+                              ],
+                              [
+                                "eq",
+                                "$tag",
+                                "link"
+                              ],
+                              false
+                            ],
+                            [
+                              "eq",
+                              [
+                                "at",
+                                "$attributes",
+                                "rel"
+                              ],
+                              "canonical"
+                            ],
+                            false
+                          ],
+                          "head link[rel=\"canonical\"]",
+                          [
+                            "if",
+                            [
+                              "if",
+                              [
+                                "if",
+                                true,
+                                "$inHead",
+                                false
+                              ],
+                              [
+                                "eq",
+                                "$tag",
+                                "meta"
+                              ],
+                              false
+                            ],
+                            [
+                              "if",
+                              [
+                                "at",
+                                "$attributes",
+                                "property"
+                              ],
+                              [
+                                "concat",
+                                "head meta[property=\"",
+                                [
+                                  "at",
+                                  "$attributes",
+                                  "property"
+                                ],
+                                " \"]"
+                              ],
+                              [
+                                "concat",
+                                "head meta[name=\"",
+                                [
+                                  "or",
+                                  [
+                                    "at",
+                                    "$attributes",
+                                    "name"
+                                  ],
+                                  ""
+                                ],
+                                " \"]"
+                              ]
+                            ],
+                            [
+                              "if",
+                              [
+                                "includes",
+                                [
+                                  "list",
+                                  "body",
+                                  "html"
+                                ],
+                                "$tag"
+                              ],
+                              "$tag",
+                              ""
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  },
+                  {
+                    "port": "text.replaceAll",
+                    "args": {
+                      "value": "$selector",
+                      "search": " \"]",
+                      "replacement": "\"]"
+                    },
+                    "into": "selector"
+                  },
+                  {
+                    "let": "current",
+                    "value": {
+                      "selector": "$selector",
+                      "tag": "$tag",
+                      "ordinal": "$ordinal"
+                    }
+                  },
+                  {
+                    "let": "found",
+                    "value": [
+                      "map",
+                      [
+                        "filter",
+                        "$attributeEntries",
+                        "a",
+                        [
+                          "not",
+                          [
+                            "eq",
+                            [
+                              "at",
+                              "$a",
+                              0
+                            ],
+                            "id"
+                          ]
+                        ]
+                      ],
+                      "a",
+                      {
+                        "ordinal": "$ordinal",
+                        "tag": "$tag",
+                        "selector": "$selector",
+                        "sink": [
+                          "at",
+                          "$a",
+                          0
+                        ],
+                        "value": [
+                          "at",
+                          "$a",
+                          1
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "when": [
+                      "includes",
+                      [
+                        "list",
+                        "script",
+                        "style"
+                      ],
+                      "$tag"
+                    ],
+                    "then": [
+                      {
+                        "let": "found",
+                        "value": [
+                          "append",
+                          "$found",
+                          [
+                            "list",
+                            {
+                              "ordinal": "$ordinal",
+                              "tag": "$tag",
+                              "selector": "$selector",
+                              "sink": "opaque-content",
+                              "value": "Inline executable/style body is an opaque dependency; its internal relationships are not certified."
+                            }
+                          ]
+                        ]
+                      },
+                      {
+                        "let": "current",
+                        "value": {}
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "not",
+                  "$opening"
+                ],
+                "then": [
+                  {
+                    "port": "text.matches",
+                    "args": {
+                      "value": "$piece",
+                      "pattern": "^<"
+                    },
+                    "into": "markup"
+                  },
+                  {
+                    "when": [
+                      "not",
+                      "$markup"
+                    ],
+                    "then": [
+                      {
+                        "let": "found",
+                        "value": [
+                          "list",
+                          {
+                            "ordinal": "$ordinal",
+                            "tag": [
+                              "or",
+                              [
+                                "at",
+                                "$current",
+                                "tag"
+                              ],
+                              "unknown"
+                            ],
+                            "selector": [
+                              "if",
+                              [
+                                "at",
+                                "$current",
+                                "selector"
+                              ],
+                              "$current.selector",
+                              ""
+                            ],
+                            "sink": "textContent",
+                            "value": "$piece"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "when": "$markup",
+                    "then": [
+                      {
+                        "let": "current",
+                        "value": {}
+                      },
+                      {
+                        "port": "text.matches",
+                        "args": {
+                          "value": "$piece",
+                          "pattern": "^</head\\s*>"
+                        },
+                        "into": "headClosed"
+                      },
+                      {
+                        "when": "$headClosed",
+                        "then": [
+                          {
+                            "let": "inHead",
+                            "value": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": {
+          "ordinal": "$ordinal",
+          "current": "$current",
+          "inHead": "$inHead",
+          "observed": [
+            "append",
+            "$scanState.observed",
+            "$found"
+          ]
+        },
+        "into": "scanState"
+      },
+      {
+        "let": "result",
+        "value": "$scanState.observed"
+      }
+    ],
+    "identity.discovery.reconcile": [
+      {
+        "let": "kindIndex",
+        "value": {
+          "textContent": "text",
+          "href": "navigation",
+          "action": "navigation",
+          "formaction": "navigation",
+          "src": "media",
+          "srcset": "media",
+          "alt": "media",
+          "width": "media",
+          "height": "media",
+          "loading": "media",
+          "fetchpriority": "media",
+          "decoding": "media",
+          "class": "appearance",
+          "style": "appearance",
+          "fill": "appearance",
+          "stroke": "appearance",
+          "stroke-width": "appearance",
+          "viewBox": "appearance",
+          "cx": "appearance",
+          "cy": "appearance",
+          "r": "appearance",
+          "d": "appearance",
+          "stroke-linecap": "appearance",
+          "stroke-linejoin": "appearance",
+          "opaque-content": "opaque"
+        }
+      },
+      {
+        "fold": "$eventInput.references",
+        "as": "reference",
+        "accumulator": "registry",
+        "initial": {},
+        "steps": [
+          {
+            "let": "selectorRegistry",
+            "value": [
+              "or",
+              [
+                "at",
+                "$registry",
+                "$reference.target"
+              ],
+              {}
+            ]
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$selectorRegistry",
+              "key": "$reference.sink",
+              "value": [
+                "append",
+                [
+                  "or",
+                  [
+                    "at",
+                    "$selectorRegistry",
+                    "$reference.sink"
+                  ],
+                  [
+                    "list"
+                  ]
+                ],
+                [
+                  "list",
+                  "$reference.id"
+                ]
+              ]
+            },
+            "into": "selectorRegistry"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$registry",
+              "key": "$reference.target",
+              "value": "$selectorRegistry"
+            },
+            "into": "registry"
+          }
+        ],
+        "yield": "$registry",
+        "into": "registry"
+      },
+      {
+        "fold": "$eventInput.observed",
+        "as": "o",
+        "accumulator": "reconciled",
+        "initial": {
+          "observations": [
+            "list"
+          ],
+          "groups": {},
+          "unknown": 0
+        },
+        "steps": [
+          {
+            "let": "declared",
+            "value": [
+              "or",
+              [
+                "at",
+                [
+                  "at",
+                  "$registry",
+                  "$o.selector"
+                ],
+                "$o.sink"
+              ],
+              [
+                "list"
+              ]
+            ]
+          },
+          {
+            "let": "known",
+            "value": [
+              "if",
+              [
+                "if",
+                true,
+                [
+                  "not",
+                  [
+                    "eq",
+                    "$o.selector",
+                    ""
+                  ]
+                ],
+                false
+              ],
+              [
+                "not",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$declared"
+                  ],
+                  0
+                ]
+              ],
+              false
+            ]
+          },
+          {
+            "let": "kind",
+            "value": [
+              "or",
+              [
+                "at",
+                "$kindIndex",
+                "$o.sink"
+              ],
+              "attributes"
+            ]
+          },
+          {
+            "let": "observation",
+            "value": {
+              "ordinal": "$o.ordinal",
+              "tag": "$o.tag",
+              "selector": "$o.selector",
+              "sink": "$o.sink",
+              "value": "$o.value",
+              "declarations": "$declared",
+              "status": [
+                "if",
+                "$known",
+                "declared-reference",
+                "undecided"
+              ],
+              "kind": "$kind"
+            }
+          },
+          {
+            "let": "groups",
+            "value": "$reconciled.groups"
+          },
+          {
+            "when": [
+              "not",
+              "$known"
+            ],
+            "then": [
+              {
+                "port": "record.put",
+                "args": {
+                  "record": "$groups",
+                  "key": "$kind",
+                  "value": [
+                    "append",
+                    [
+                      "or",
+                      [
+                        "at",
+                        "$groups",
+                        "$kind"
+                      ],
+                      [
+                        "list"
+                      ]
+                    ],
+                    [
+                      "list",
+                      "$observation"
+                    ]
+                  ]
+                },
+                "into": "groups"
+              }
+            ]
+          }
+        ],
+        "yield": {
+          "observations": [
+            "append",
+            "$reconciled.observations",
+            [
+              "list",
+              "$observation"
+            ]
+          ],
+          "groups": "$groups",
+          "unknown": [
+            "add",
+            "$reconciled.unknown",
+            [
+              "if",
+              "$known",
+              0,
+              1
+            ]
+          ]
+        },
+        "into": "reconciled"
+      },
+      {
+        "let": "result",
+        "value": "$reconciled"
+      }
+    ],
+    "identity.discovery.build": [
+      {
+        "let": "discoveryReferences",
+        "value": [
+          "append",
+          [
+            "filter",
+            [
+              "map",
+              "$policies",
+              "p",
+              {
+                "id": "$p.id",
+                "target": "$p.target",
+                "sink": "$p.sink"
+              }
+            ],
+            "r",
+            [
+              "if",
+              [
+                "if",
+                true,
+                [
+                  "not",
+                  [
+                    "eq",
+                    "$r.target",
+                    ""
+                  ]
+                ],
+                false
+              ],
+              [
+                "not",
+                [
+                  "eq",
+                  "$r.sink",
+                  ""
+                ]
+              ],
+              false
+            ]
+          ],
+          [
+            "map",
+            "$reviewWriters",
+            "w",
+            {
+              "id": "metadata",
+              "target": "$w.ref",
+              "sink": "$w.name"
+            }
+          ]
+        ]
+      },
+      {
+        "let": "discoveryDocuments",
+        "value": [
+          "append",
+          [
+            "list",
+            {
+              "identity": "root",
+              "file": "index.html"
+            }
+          ],
+          [
+            "map",
+            [
+              "subjects",
+              "isa",
+              "IdentityTheme"
+            ],
+            "s",
+            {
+              "identity": [
+                "one",
+                "$s",
+                "key"
+              ],
+              "file": [
+                "one",
+                "$s",
+                "homeRoute"
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "fold": "$discoveryDocuments",
+        "as": "document",
+        "accumulator": "discoveryPages",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "file.read",
+            "args": {
+              "path": "$document.file"
+            },
+            "into": "discoveryHTML"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$discoveryHTML"
+            }
+          },
+          {
+            "call": "identity.discovery.scan"
+          },
+          {
+            "let": "discoveryObserved",
+            "value": "$result"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "observed": "$discoveryObserved",
+              "references": "$discoveryReferences"
+            }
+          },
+          {
+            "call": "identity.discovery.reconcile"
+          },
+          {
+            "let": "pageResult",
+            "value": "$result"
+          },
+          {
+            "let": "page",
+            "value": {
+              "identity": "$document.identity",
+              "file": "$document.file",
+              "relationships": [
+                "count",
+                "$pageResult.observations"
+              ],
+              "undecided": "$pageResult.unknown",
+              "observations": "$pageResult.observations",
+              "groups": "$pageResult.groups"
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$discoveryPages",
+          [
+            "list",
+            "$page"
+          ]
+        ],
+        "into": "discoveryPages"
+      },
+      {
+        "let": "discoveredSinks",
+        "value": [
+          "list",
+          "text",
+          "navigation",
+          "media",
+          "appearance",
+          "attributes",
+          "opaque"
+        ]
+      },
+      {
+        "fold": "$discoveredSinks",
+        "as": "sink",
+        "accumulator": "discoveryRows",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "evidence",
+            "value": [
+              "map",
+              "$discoveryPages",
+              "page",
+              {
+                "identity": "$page.identity",
+                "file": "$page.file",
+                "observations": [
+                  "or",
+                  [
+                    "at",
+                    "$page.groups",
+                    "$sink"
+                  ],
+                  [
+                    "list"
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "let": "evidence",
+            "value": [
+              "filter",
+              "$evidence",
+              "e",
+              [
+                "not",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$e.observations"
+                  ],
+                  0
+                ]
+              ]
+            ]
+          },
+          {
+            "fold": "$evidence",
+            "as": "e",
+            "accumulator": "samples",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "let": "examples",
+                "value": [
+                  "filter",
+                  [
+                    "list",
+                    [
+                      "at",
+                      "$e.observations",
+                      0
+                    ]
+                  ],
+                  "o",
+                  "$o"
+                ]
+              }
+            ],
+            "yield": [
+              "append",
+              "$samples",
+              [
+                "list",
+                {
+                  "identity": "$e.identity",
+                  "file": "$e.file",
+                  "count": [
+                    "count",
+                    "$e.observations"
+                  ],
+                  "examples": "$examples"
+                }
+              ]
+            ],
+            "into": "samples"
+          },
+          {
+            "let": "discoveredRow",
+            "value": {
+              "id": [
+                "concat",
+                "discovered:",
+                "$sink"
+              ],
+              "area": "Discovered page relationships",
+              "label": [
+                "concat",
+                "Undeclared ",
+                "$sink",
+                " relationships"
+              ],
+              "intent": "undecided",
+              "status": "undecided",
+              "reason": "Generated page output contains relationships without an exact element-and-property assurance declaration. Equal values and declared ancestor containers do not establish their intended identity relationship.",
+              "next": "Inspect the located observations, discern their scope and intent, and add a precise declaration with evidence. Do not suppress a whole subtree.",
+              "source": "assurance/identity-discovery.json · generated homepage scan",
+              "target": "",
+              "sink": "$sink",
+              "field": "",
+              "values": [
+                "list"
+              ],
+              "dataBound": false,
+              "writerBound": false,
+              "boundary": "Discovery observes generated HTML bytes. Declared-reference means an exact selector/property has an inventory reference, not proof of correctness or descendant coverage. External CSS/scripts and inline bodies are opaque dependencies; link destinations are not crawled.",
+              "discovery": "$samples"
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$discoveryRows",
+          [
+            "list",
+            "$discoveredRow"
+          ]
+        ],
+        "into": "discoveryRows"
+      },
+      {
+        "let": "discoveryReport",
+        "value": {
+          "protocol": "worldwright/identity-discovery/1",
+          "scope": "Entire generated index.html and every IdentityTheme homeRoute, including head metadata, navigation, text, images, attributes, catalogue output and footer.",
+          "method": "Algebra-owned lexical HTML scan with quote-aware tags and attributes; nonempty text and every non-id attribute are observed. Only exact element selector and property references are reconciled. No equality-based intent inference or ancestor/subtree coverage.",
+          "boundary": "This scans the five generated homepage documents, not every corpus destination or live DOM state. Comments, doctype, formatting whitespace and id locator attributes are excluded. Inline script/style bodies and external script/stylesheet dependencies are opaque and remain undecided unless precisely declared. CSS internals, runtime-only states, shadow DOM, frames and semantic/visual fitness are not certified. Token ordinals are byte-rendering evidence addresses, not stable DOM paths.",
+          "pages": [
+            "map",
+            "$discoveryPages",
+            "p",
+            {
+              "identity": "$p.identity",
+              "file": "$p.file",
+              "relationships": "$p.relationships",
+              "undecided": "$p.undecided",
+              "observations": "$p.observations"
+            }
+          ],
+          "groups": [
+            "count",
+            "$discoveryRows"
+          ],
+          "observed": [
+            "fold",
+            "$discoveryPages",
+            "p",
+            "n",
+            0,
+            [
+              "add",
+              "$n",
+              "$p.relationships"
+            ]
+          ],
+          "undecided": [
+            "fold",
+            "$discoveryPages",
+            "p",
+            "n",
+            0,
+            [
+              "add",
+              "$n",
+              "$p.undecided"
+            ]
+          ]
+        }
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$discoveryReport"
+        },
+        "into": "discoveryJson"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/identity-discovery.json",
+          "text": "$discoveryJson"
         },
         "into": "_"
       }

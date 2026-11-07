@@ -1,0 +1,126 @@
+{
+  "protocol": "worldwright/identity-discovery-release/1",
+  "base": "bfa113c34b6f9e68566951451d2557e22c1def47",
+  "authoring": {
+    "applied": true,
+    "contractSha256": "beab900c4e1ef83eb03aed46915fa2faa9d65a94ce1773a7d6cf58c99bea67a5",
+    "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7"
+  },
+  "summary": [
+    {
+      "status": "intentionally-invariant",
+      "count": 13
+    },
+    {
+      "status": "identity-mapped",
+      "count": 62
+    },
+    {
+      "status": "missing",
+      "count": 0
+    },
+    {
+      "status": "undecided",
+      "count": 6
+    }
+  ],
+  "discovery": {
+    "protocol": "worldwright/identity-discovery/1",
+    "observed": 4111,
+    "declaredReferences": 179,
+    "undecided": 3932,
+    "reviewGroups": 6,
+    "pages": [
+      {
+        "identity": "root",
+        "file": "index.html",
+        "observed": 997,
+        "undecided": 962
+      },
+      {
+        "identity": "sourcerer",
+        "file": "worlds/sourcerer/index.html",
+        "observed": 999,
+        "undecided": 963
+      },
+      {
+        "identity": "author",
+        "file": "worlds/author/index.html",
+        "observed": 692,
+        "undecided": 656
+      },
+      {
+        "identity": "dad",
+        "file": "worlds/dad/index.html",
+        "observed": 692,
+        "undecided": 656
+      },
+      {
+        "identity": "christian",
+        "file": "worlds/christian/index.html",
+        "observed": 731,
+        "undecided": 695
+      }
+    ],
+    "groups": [
+      {
+        "id": "discovered:text",
+        "observations": 961
+      },
+      {
+        "id": "discovered:navigation",
+        "observations": 288
+      },
+      {
+        "id": "discovered:media",
+        "observations": 373
+      },
+      {
+        "id": "discovered:appearance",
+        "observations": 1482
+      },
+      {
+        "id": "discovered:attributes",
+        "observations": 823
+      },
+      {
+        "id": "discovered:opaque",
+        "observations": 5
+      }
+    ],
+    "bytes": 615869,
+    "method": "Algebra-owned lexical HTML scan with quote-aware tags and attributes; nonempty text and every non-id attribute are observed. Only exact element selector and property references are reconciled. No equality-based intent inference or ancestor/subtree coverage.",
+    "boundary": "This scans the five generated homepage documents, not every corpus destination or live DOM state. Comments, doctype, formatting whitespace and id locator attributes are excluded. Inline script/style bodies and external script/stylesheet dependencies are opaque and remain undecided unless precisely declared. CSS internals, runtime-only states, shadow DOM, frames and semantic/visual fitness are not certified. Token ordinals are byte-rendering evidence addresses, not stable DOM paths."
+  },
+  "execution": {
+    "indexSteps": 4957428,
+    "applicationSteps": 15002697,
+    "totalSteps": 19960125,
+    "limit": 20000000
+  },
+  "mechanisms": "Existing generic text, record and file ports; native closure, grants and budgets unchanged. Rebase fact reads are cached per invocation; report HTML is compacted while retaining complete JSON evidence.",
+  "checks": {
+    "tests": 181,
+    "passed": 181,
+    "failed": 0,
+    "presentation": "passed",
+    "negative": "Undeclared nested copy, links, media, attributes and styles remain undecided; equal values and ancestor declarations cannot classify them; exact property references do not cover other properties. Quoted >, single quotes, empty/boolean and duplicate attributes are retained.",
+    "browser": {
+      "preview": "Discovery overview and expanded navigation evidence verified",
+      "mobile": {
+        "width": 375,
+        "scrollWidth": 375,
+        "expanded": "Background-image world evidence and discovered navigation"
+      }
+    }
+  },
+  "sources": {
+    "algebra/publication.process.json": "a2a98cc1ced1c666d6e5799e728ffabe87711abfba950e1ec90fd66f96c7ffe5",
+    "hierarchy.test.mjs": "c02032efe501ffcbd21499d630388911d483c6d2cc47f9515fec809699f06649",
+    "dist/assurance/index.html": "59ebf83afb7ee482b78ddb3fa78ed37a0433478485108a35396a83db1b4af66c",
+    "dist/assurance/identity-mappings.json": "2df98809d3329e0e582eadb2d1250d36bc74e2fe7d8aad01d1ca750c28ed9cf1",
+    "dist/assurance/identity-discovery.json": "2364eb8a77fbca9062cd32c9b8ce4314c489d1e1030ef312005d817c2e7c2777",
+    "dist/build-receipt.json": "c47173cb37900b9d11e16e19b38fa8178de7f709f3359e900586ff723aeb9e43"
+  },
+  "corpus": "corpus/assurance/identity_mapping_assurance.md"
+}
