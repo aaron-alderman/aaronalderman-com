@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createContrastAssessor,artifactEvidence} from './tooling/assess-reading-contrast.mjs';
+import {createContrastAssessor,artifactEvidence,assertContrastReplay} from './tooling/assess-reading-contrast.mjs';
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 const assessor=await createContrastAssessor();
 test('admitted contrast arithmetic handles extremes and the unrounded threshold',async()=>{
@@ -16,7 +16,7 @@ test('the original regression fails across three essays and current source evide
  assert.deepEqual(proof.policy,assessor.queries);assert.equal(proof.policySha256,assessor.policySha256);
  assert.deepEqual(proof.current.inputs,JSON.parse(JSON.stringify(inputs)));
  const current=(await assessor.evaluate(inputs)).value,before=(await assessor.evaluate(proof.baseline.inputs)).value;
- assert.deepEqual(JSON.parse(JSON.stringify(current)),proof.current.report);assert.deepEqual(JSON.parse(JSON.stringify(before)),proof.baseline.report);
+ assertContrastReplay(current,proof.current.report);assertContrastReplay(before,proof.baseline.report);
  assert.equal(before.failed,6);assert.equal(current.failed,0);assert.equal(current.review,0);assert.equal(current.cases.length,20);
  assert.deepEqual([...new Set(before.cases.filter(c=>c.status==='failed-source-contrast').map(c=>c.identity))].sort(),['author','dad','sourcerer']);
  assert.equal(current.browserColourEvidence,'not-collected');
@@ -28,6 +28,11 @@ test('the original regression fails across three essays and current source evide
  assert.deepEqual(proof.currencyInput,artifactEvidence());
  assert.deepEqual(proof.currentness,JSON.parse(JSON.stringify((await assessor.currentness(proof.currencyInput)).value)));
  assert.deepEqual(read('dist/assurance/contrast.json'),proof);
+});
+test('floating-point transport tolerance cannot change a verdict or hide a changed colour',()=>{
+ const original=read('tooling/assurance/contrast-evidence.json').current.report;
+ const ulp=structuredClone(original);ulp.cases[0].ratio+=1e-14;assert.doesNotThrow(()=>assertContrastReplay(ulp,original));
+ for(const change of [r=>r.cases[0].ratio+=1e-8,r=>r.cases[0].status='failed-source-contrast',r=>r.cases[0].foreground='#000000',r=>r.cases[0].minimum=3]){const altered=structuredClone(original);change(altered);assert.throws(()=>assertContrastReplay(altered,original));}
 });
 test('changed dependencies and new routes never inherit a current browser claim',async()=>{
  const input={capturedBindings:{'old.html':'same','site.css':'old'},currentBindings:{'old.html':'same','new.html':'new','site.css':'changed'},routes:['old.html','new.html']};

@@ -33,6 +33,9 @@ match the room metadata. It is not a general cascade interpreter: media rules,
 gradients, interaction states, other templates and computed browser colours
 require additional observation. The 4.5:1 threshold protects the small supporting
 text within these components; pass decisions use the unrounded ratio.
+Replay comparisons allow at most 1e-12 difference in the reported ratio for
+cross-engine floating-point arithmetic. Thresholds, verdicts, source colour
+pairs and every other evidence field must agree exactly.
 
 The previous browser observer measured geometry, not colours. Its snapshots,
 original artifact bindings and geometry-policy replay remain unchanged.

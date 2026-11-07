@@ -2,11 +2,25 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url),{createKernel}=require('../bootstrap/temple-seed.cjs'),{valuePorts}=require('../bootstrap/ports/value.cjs'),{computationalPorts}=require('../bootstrap/ports/browser-effects.cjs'),{lower}=require('../bootstrap/ports/algebra-lower.cjs'),{invoke}=require('../bootstrap/ports/programme.cjs'),{parseRel}=require('../bootstrap/ports/rel-codec.cjs'),{indexFacts}=require('../bootstrap/ports/fact-index.cjs');
 export const policyNames=['assurance.contrast.input','assurance.contrast.luminance','assurance.contrast.ratio','assurance.contrast.evaluate','assurance.contrast.currentness'];
 const defaultRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+// Transcendental floating-point results can differ by one ULP between engines.
+// Only the reported ratio has a transport tolerance; verdicts, thresholds,
+// colour bindings and all other evidence fields must still agree exactly.
+export function assertContrastReplay(actual,expected){
+ const replay=JSON.parse(JSON.stringify(actual));
+ assert.equal(replay.cases.length,expected.cases.length);
+ for(let i=0;i<replay.cases.length;i++){
+  const a=replay.cases[i].ratio,b=expected.cases[i].ratio;
+  assert.ok(Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=1e-12,'Contrast ratio replay exceeds floating-point transport tolerance');
+  replay.cases[i].ratio=b;
+ }
+ assert.deepEqual(replay,expected);
+}
 export async function createContrastAssessor({root=defaultRoot,publication}={}){
  const read=f=>JSON.parse(fs.readFileSync(path.join(root,f),'utf8')),source=publication??read('algebra/publication.process.json'),queries=Object.fromEntries(policyNames.map(n=>[n,source.queries[n]])),site=read('bootstrap/site.json'),limit=site.executionBudget;
  const compile=input=>lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input,mode:'model',ports:valuePorts(),limit});
@@ -32,7 +46,7 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
   const baseline=JSON.parse(fs.readFileSync(baselinePath,'utf8')),current=(await assessor.evaluate(inputs)).value,before=(await assessor.evaluate(baseline.inputs)).value,currencyInput=artifactEvidence(),currentness=(await assessor.currentness(currencyInput)).value;
   const report={protocol:'worldwright/contrast-evidence/1',policySha256:assessor.policySha256,policy:assessor.queries,current:{inputs,report:current},baseline:{...baseline,report:before},currencyInput,currentness};
   const output=path.join(defaultRoot,'tooling/assurance/contrast-evidence.json');
-  if(process.argv.includes('--check')){const stored=JSON.parse(fs.readFileSync(output,'utf8'));if(JSON.stringify(stored)!==JSON.stringify(report))throw Error('Contrast evidence is stale; replay the algebra before publishing');}
+  if(process.argv.includes('--check')){const stored=JSON.parse(fs.readFileSync(output,'utf8'));assertContrastReplay(report.current.report,stored.current.report);assertContrastReplay(report.baseline.report,stored.baseline.report);report.current.report=stored.current.report;report.baseline.report=stored.baseline.report;assert.deepEqual(report,stored,'Contrast evidence is stale; replay the algebra before publishing');}
   else fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify({before:before.failed,after:current.failed,review:current.review,browserColours:current.browserColourEvidence}));
  }
