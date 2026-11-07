@@ -572,6 +572,9 @@
         "call": "readerworkshop.build"
       },
       {
+        "call": "assurance.rendered.publish"
+      },
+      {
         "call": "microsite.return.all"
       },
       {
@@ -14224,6 +14227,41 @@
                   ]
                 }
               ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Rendered layout"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Desktop and mobile geometry, heading containment, overflow and spacing candidates."
+                  ]
+                },
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "rendered-layout/"
+                  },
+                  "children": [
+                    "list",
+                    "Inspect measured browser findings →"
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -17714,9 +17752,7 @@
                       "$surfaceReport.pageCount",
                       " pages inspected · ",
                       "$surfaceReport.findings",
-                      " source findings · ",
-                      "$surfaceReport.geometryUnmeasured",
-                      " pages awaiting browser geometry evidence."
+                      " targeted source findings. Desktop and mobile measurements are reported separately."
                     ]
                   ]
                 },
@@ -17744,6 +17780,17 @@
                       "children": [
                         "list",
                         "Download the evidence"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../rendered-layout/"
+                      },
+                      "children": [
+                        "list",
+                        "Rendered browser findings"
                       ]
                     }
                   ]
@@ -18153,12 +18200,90 @@
         "into": "surfacePages"
       },
       {
+        "let": "surfacePages",
+        "value": [
+          "map",
+          "$surfacePages",
+          "page",
+          [
+            "let",
+            "readings",
+            [
+              "or",
+              [
+                "at",
+                "$renderedReceipt.report.byRoute",
+                "$page.route"
+              ],
+              [
+                "list"
+              ]
+            ],
+            {
+              "route": "$page.route",
+              "headerHome": "$page.headerHome",
+              "returnWidget": "$page.returnWidget",
+              "returnStylesheet": "$page.returnStylesheet",
+              "findings": "$page.findings",
+              "geometry": {
+                "status": [
+                  "if",
+                  [
+                    "and",
+                    [
+                      "some",
+                      "$readings",
+                      "a",
+                      [
+                        "and",
+                        [
+                          "eq",
+                          "$a.profile",
+                          "desktop"
+                        ],
+                        [
+                          "eq",
+                          "$a.status",
+                          "measured"
+                        ]
+                      ]
+                    ],
+                    [
+                      "some",
+                      "$readings",
+                      "a",
+                      [
+                        "and",
+                        [
+                          "eq",
+                          "$a.profile",
+                          "mobile"
+                        ],
+                        [
+                          "eq",
+                          "$a.status",
+                          "measured"
+                        ]
+                      ]
+                    ]
+                  ],
+                  "measured",
+                  "needs-browser-evidence"
+                ],
+                "evidence": "assurance/rendered-layout.json",
+                "readings": "$readings"
+              }
+            }
+          ]
+        ]
+      },
+      {
         "let": "surfaceReport",
         "value": {
           "protocol": "worldwright/navigation-layout-assurance/1",
           "scope": "Every HTML route recorded by the algebra publication effects; independently compared with the generated artifact set by the release checks.",
           "method": "Publication-effect registration, then a static audit of the finished HTML. No manually maintained route inventory.",
-          "boundary": "Lexical source checks target redundant personal home-return controls, orphan return stylesheets and explicit inline body bottom reservations. They do not certify arbitrary CSS, computed geometry, duplicate navigation intent, runtime states or visual fitness. Every page retains an open browser-evidence requirement. Registered CSS is checked for unconditional body padding-bottom/margin-bottom in positive supported units. Shorthands, variables, fractional values below one unit, selector groups, cascade and other stylesheet patterns remain outside this check.",
+          "boundary": "Lexical source checks target redundant personal home-return controls, orphan return stylesheets and explicit inline body bottom reservations. They do not certify arbitrary CSS, computed geometry, duplicate navigation intent, runtime states or visual fitness. Per-route browser readings and their initial-state limits are recorded separately in assurance/rendered-layout.json. Registered CSS is checked for unconditional body padding-bottom/margin-bottom in positive supported units. Shorthands, variables, fractional values below one unit, selector groups, cascade and other stylesheet patterns remain outside this check.",
           "pages": "$surfacePages",
           "pageCount": [
             "count",
@@ -18188,7 +18313,19 @@
           ],
           "geometryUnmeasured": [
             "count",
-            "$surfacePages"
+            [
+              "filter",
+              "$surfacePages",
+              "p",
+              [
+                "not",
+                [
+                  "eq",
+                  "$p.geometry.status",
+                  "measured"
+                ]
+              ]
+            ]
           ],
           "stylesheetFindings": "$surfaceCSSFindings",
           "stylesheetCount": [
@@ -18284,9 +18421,7 @@
                       "$surfaceReport.pageCount",
                       " pages inspected · ",
                       "$surfaceReport.findings",
-                      " source findings · ",
-                      "$surfaceReport.geometryUnmeasured",
-                      " pages awaiting browser geometry evidence."
+                      " targeted source findings. Desktop and mobile measurements are reported separately."
                     ]
                   ]
                 },
@@ -18314,6 +18449,17 @@
                       "children": [
                         "list",
                         "Download the evidence"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../rendered-layout/"
+                      },
+                      "children": [
+                        "list",
+                        "Rendered browser findings"
                       ]
                     }
                   ]
@@ -18705,6 +18851,2172 @@
           ],
           "$readingData.rooms"
         ]
+      }
+    ],
+    "assurance.rendered.plan": [
+      {
+        "let": "result",
+        "value": {
+          "protocol": "worldwright/browser-observation-plan/1",
+          "profiles": [
+            "list",
+            {
+              "id": "desktop",
+              "width": 1280,
+              "height": 800
+            },
+            {
+              "id": "mobile",
+              "width": 390,
+              "height": 844
+            }
+          ],
+          "batchSize": 6,
+          "textLimit": 140,
+          "groups": {
+            "headings": "h1,h2,h3,h4,h5,h6,[role=\"heading\"]",
+            "regions": "main,section,article,[role=\"main\"],[role=\"region\"]",
+            "blocks": "main > *,main p,main li,main pre,main img,main video,main canvas,main iframe,main table,main button,main input"
+          },
+          "content": "h1,h2,h3,h4,h5,h6,p,li,pre,img,video,canvas,iframe,table,button,input,summary,svg,*:not(:has(*)):not(:empty)",
+          "scope": "main,[role=\"main\"]",
+          "thresholds": {
+            "edge": 8,
+            "inset": 12,
+            "minimumPeers": 2,
+            "tailSpace": 160,
+            "trailingSpace": 48,
+            "overflow": 2,
+            "overlap": 4
+          }
+        }
+      }
+    ],
+    "assurance.rendered.acceptPlan": [
+      {
+        "call": "assurance.rendered.plan"
+      },
+      {
+        "let": "expectedPlan",
+        "value": "$result"
+      },
+      {
+        "let": "observedPlan",
+        "value": "$eventInput.plan"
+      },
+      {
+        "let": "result",
+        "value": {
+          "ok": [
+            "and",
+            [
+              "eq",
+              [
+                "at",
+                "$observedPlan",
+                "protocol"
+              ],
+              [
+                "at",
+                "$expectedPlan",
+                "protocol"
+              ]
+            ],
+            [
+              "eq",
+              [
+                "at",
+                "$observedPlan",
+                "profiles"
+              ],
+              [
+                "at",
+                "$expectedPlan",
+                "profiles"
+              ]
+            ],
+            [
+              "eq",
+              [
+                "at",
+                "$observedPlan",
+                "batchSize"
+              ],
+              [
+                "at",
+                "$expectedPlan",
+                "batchSize"
+              ]
+            ],
+            [
+              "eq",
+              [
+                "at",
+                "$observedPlan",
+                "textLimit"
+              ],
+              [
+                "at",
+                "$expectedPlan",
+                "textLimit"
+              ]
+            ],
+            [
+              "eq",
+              [
+                "at",
+                "$observedPlan",
+                "groups"
+              ],
+              [
+                "at",
+                "$expectedPlan",
+                "groups"
+              ]
+            ],
+            [
+              "eq",
+              [
+                "at",
+                "$observedPlan",
+                "content"
+              ],
+              [
+                "at",
+                "$expectedPlan",
+                "content"
+              ]
+            ],
+            [
+              "eq",
+              [
+                "at",
+                "$observedPlan",
+                "scope"
+              ],
+              [
+                "at",
+                "$expectedPlan",
+                "scope"
+              ]
+            ]
+          ],
+          "invariant": [
+            "list",
+            "protocol",
+            "profiles",
+            "batchSize",
+            "textLimit",
+            "groups",
+            "content",
+            "scope"
+          ],
+          "replayable": [
+            "list",
+            "thresholds"
+          ],
+          "reason": "Observation selectors, bounds and viewports must match. Interpretation thresholds can change through an admitted replay without changing the captured geometry."
+        }
+      }
+    ],
+    "assurance.rendered.classify": [
+      {
+        "call": "assurance.rendered.plan"
+      },
+      {
+        "let": "renderedPlan",
+        "value": "$result"
+      },
+      {
+        "let": "s",
+        "value": "$eventInput"
+      },
+      {
+        "let": "limits",
+        "value": "$renderedPlan.thresholds"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$s.document.clientWidth",
+            0.55
+          ]
+        },
+        "into": "wideMinimum"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$s.document.clientWidth",
+            "$limits.inset"
+          ]
+        },
+        "into": "rightInsetMaximum"
+      },
+      {
+        "fold": "$s.headings",
+        "as": "h",
+        "accumulator": "headings",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$h.rect.width",
+                0
+              ]
+            },
+            "into": "hasWidth"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$h.rect.height",
+                0
+              ]
+            },
+            "into": "hasHeight"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                "$h.rect.left",
+                "$limits.edge"
+              ]
+            },
+            "into": "atEdge"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greaterEqual",
+              "values": [
+                "list",
+                "$h.rect.right",
+                [
+                  "add",
+                  "$s.document.clientWidth",
+                  -8
+                ]
+              ]
+            },
+            "into": "atRightEdge"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greaterEqual",
+              "values": [
+                "list",
+                "$h.rect.left",
+                "$limits.inset"
+              ]
+            },
+            "into": "leftInset"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                "$h.rect.right",
+                "$rightInsetMaximum"
+              ]
+            },
+            "into": "rightInset"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greaterEqual",
+              "values": [
+                "list",
+                "$h.rect.width",
+                "$wideMinimum"
+              ]
+            },
+            "into": "wide"
+          }
+        ],
+        "yield": [
+          "append",
+          "$headings",
+          [
+            "list",
+            {
+              "node": "$h",
+              "visible": [
+                "and",
+                "$hasWidth",
+                "$hasHeight",
+                [
+                  "not",
+                  [
+                    "eq",
+                    "$h.visibility",
+                    "hidden"
+                  ]
+                ]
+              ],
+              "edge": [
+                "and",
+                "$atEdge",
+                "$atRightEdge"
+              ],
+              "inset": [
+                "and",
+                "$leftInset",
+                "$rightInset",
+                "$wide"
+              ]
+            }
+          ]
+        ],
+        "into": "headings"
+      },
+      {
+        "let": "headings",
+        "value": [
+          "filter",
+          "$headings",
+          "h",
+          "$h.visible"
+        ]
+      },
+      {
+        "fold": "$headings",
+        "as": "entry",
+        "accumulator": "scan",
+        "initial": {
+          "findings": [
+            "list"
+          ],
+          "previousRank": 0,
+          "seenRegions": [
+            "list"
+          ]
+        },
+        "steps": [
+          {
+            "let": "h",
+            "value": "$entry.node"
+          },
+          {
+            "let": "nextFindings",
+            "value": "$scan.findings"
+          },
+          {
+            "let": "peers",
+            "value": [
+              "filter",
+              "$headings",
+              "peer",
+              [
+                "and",
+                "$peer.inset",
+                [
+                  "eq",
+                  "$peer.node.rank",
+                  "$h.rank"
+                ],
+                [
+                  "eq",
+                  "$peer.node.scope",
+                  "$h.scope"
+                ]
+              ]
+            ]
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greaterEqual",
+              "values": [
+                "list",
+                [
+                  "count",
+                  "$peers"
+                ],
+                "$limits.minimumPeers"
+              ]
+            },
+            "into": "enoughPeers"
+          },
+          {
+            "when": [
+              "and",
+              "$entry.edge",
+              "$enoughPeers"
+            ],
+            "then": [
+              {
+                "let": "railReference",
+                "value": [
+                  "at",
+                  "$peers",
+                  0
+                ]
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "round",
+                  "values": [
+                    "list",
+                    "$h.rect.left"
+                  ]
+                },
+                "into": "headingX"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "round",
+                  "values": [
+                    "list",
+                    "$railReference.node.rect.left"
+                  ]
+                },
+                "into": "peerX"
+              },
+              {
+                "let": "nextFindings",
+                "value": [
+                  "append",
+                  "$nextFindings",
+                  [
+                    "list",
+                    {
+                      "rule": "structure.heading-content-rail",
+                      "status": "review",
+                      "node": "$h.path",
+                      "text": "$h.text",
+                      "evidence": [
+                        "concat",
+                        "A viewport-wide heading sits outside the inset rail shared by peer headings: left ",
+                        "$headingX",
+                        "px versus ",
+                        "$peerX",
+                        "px. Inspect section containment; geometry does not establish layout intent."
+                      ],
+                      "metrics": {
+                        "heading": "$h.rect",
+                        "parent": "$h.parent",
+                        "reference": [
+                          "at",
+                          "$peers",
+                          0
+                        ]
+                      }
+                    }
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "let": "headingOnly",
+            "value": [
+              "and",
+              [
+                "not",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$h.parent.childTags"
+                  ],
+                  0
+                ]
+              ],
+              [
+                "every",
+                "$h.parent.childTags",
+                "tag",
+                [
+                  "includes",
+                  [
+                    "list",
+                    "H1",
+                    "H2",
+                    "H3",
+                    "H4",
+                    "H5",
+                    "H6"
+                  ],
+                  "$tag"
+                ]
+              ]
+            ]
+          },
+          {
+            "when": [
+              "and",
+              "$headingOnly",
+              [
+                "not",
+                [
+                  "includes",
+                  "$scan.seenRegions",
+                  "$h.parent.path"
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "let": "nextFindings",
+                "value": [
+                  "append",
+                  "$nextFindings",
+                  [
+                    "list",
+                    {
+                      "rule": "structure.heading-only-region",
+                      "status": "review",
+                      "node": "$h.parent.path",
+                      "text": "$h.text",
+                      "evidence": "The region contains heading elements but no result content or explicit empty-state message. Its purpose and nesting need review.",
+                      "metrics": {
+                        "region": "$h.parent",
+                        "heading": "$h.rect"
+                      }
+                    }
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$h.rank",
+                [
+                  "add",
+                  "$scan.previousRank",
+                  1
+                ]
+              ]
+            },
+            "into": "skipsRank"
+          },
+          {
+            "when": [
+              "and",
+              [
+                "not",
+                [
+                  "eq",
+                  "$scan.previousRank",
+                  0
+                ]
+              ],
+              "$skipsRank"
+            ],
+            "then": [
+              {
+                "let": "nextFindings",
+                "value": [
+                  "append",
+                  "$nextFindings",
+                  [
+                    "list",
+                    {
+                      "rule": "structure.heading-rank-gap",
+                      "status": "review",
+                      "node": "$h.path",
+                      "text": "$h.text",
+                      "evidence": "The visible heading outline skips a level. Check the intended section hierarchy.",
+                      "metrics": {
+                        "previousRank": "$scan.previousRank",
+                        "rank": "$h.rank"
+                      }
+                    }
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "and",
+              "$h.next",
+              [
+                "eq",
+                "$h.parent.display",
+                "block"
+              ],
+              [
+                "includes",
+                [
+                  "list",
+                  "static",
+                  "relative"
+                ],
+                "$h.position"
+              ]
+            ],
+            "then": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greater",
+                  "values": [
+                    "list",
+                    "$h.rect.bottom",
+                    [
+                      "add",
+                      "$h.next.rect.top",
+                      4
+                    ]
+                  ]
+                },
+                "into": "overlapY"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greater",
+                  "values": [
+                    "list",
+                    "$h.next.rect.height",
+                    0
+                  ]
+                },
+                "into": "nextVisible"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greater",
+                  "values": [
+                    "list",
+                    "$h.rect.right",
+                    "$h.next.rect.left"
+                  ]
+                },
+                "into": "overlapX1"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greater",
+                  "values": [
+                    "list",
+                    "$h.next.rect.right",
+                    "$h.rect.left"
+                  ]
+                },
+                "into": "overlapX2"
+              },
+              {
+                "when": [
+                  "and",
+                  "$overlapY",
+                  "$nextVisible",
+                  "$overlapX1",
+                  "$overlapX2",
+                  [
+                    "includes",
+                    [
+                      "list",
+                      "static",
+                      "relative"
+                    ],
+                    "$h.next.position"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "nextFindings",
+                    "value": [
+                      "append",
+                      "$nextFindings",
+                      [
+                        "list",
+                        {
+                          "rule": "layout.heading-overlap",
+                          "status": "review",
+                          "node": "$h.path",
+                          "text": "$h.text",
+                          "evidence": "The heading rectangle overlaps its following block sibling. Inspect text wrapping, negative margins and containment.",
+                          "metrics": {
+                            "heading": "$h.rect",
+                            "next": "$h.next"
+                          }
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": {
+          "findings": "$nextFindings",
+          "previousRank": "$h.rank",
+          "seenRegions": [
+            "append",
+            "$scan.seenRegions",
+            [
+              "list",
+              "$h.parent.path"
+            ]
+          ]
+        },
+        "into": "headingScan"
+      },
+      {
+        "fold": "$s.regions",
+        "as": "region",
+        "accumulator": "regionFindings",
+        "initial": "$headingScan.findings",
+        "steps": [
+          {
+            "let": "nextFindings",
+            "value": "$regionFindings"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "max",
+              "values": [
+                "append",
+                [
+                  "list",
+                  "$region.rect.top"
+                ],
+                [
+                  "map",
+                  "$region.contentRects",
+                  "rect",
+                  "$rect.bottom"
+                ]
+              ]
+            },
+            "into": "contentEnd"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$region.rect.bottom",
+                "$contentEnd"
+              ]
+            },
+            "into": "tailSpace"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$tailSpace",
+                "$limits.tailSpace"
+              ]
+            },
+            "into": "largeTail"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "round",
+              "values": [
+                "list",
+                "$tailSpace"
+              ]
+            },
+            "into": "tailLabel"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$region.rect.width",
+                0
+              ]
+            },
+            "into": "regionVisible"
+          },
+          {
+            "when": [
+              "and",
+              "$largeTail",
+              "$regionVisible",
+              [
+                "not",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$region.contentRects"
+                  ],
+                  0
+                ]
+              ],
+              [
+                "not",
+                [
+                  "includes",
+                  [
+                    "list",
+                    "auto",
+                    "scroll"
+                  ],
+                  "$region.overflowY"
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "let": "nextFindings",
+                "value": [
+                  "append",
+                  "$nextFindings",
+                  [
+                    "list",
+                    {
+                      "rule": "layout.region-tail-space",
+                      "status": "review",
+                      "node": "$region.path",
+                      "text": "$region.text",
+                      "evidence": [
+                        "concat",
+                        "The region continues ",
+                        "$tailLabel",
+                        "px below its last measured content edge. Whether this space is unnecessary still needs intent or human evidence."
+                      ],
+                      "metrics": {
+                        "region": "$region.rect",
+                        "contentEnd": "$contentEnd",
+                        "pixels": "$tailSpace"
+                      }
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": "$nextFindings",
+        "into": "findings"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$s.document.scrollWidth",
+            "$s.document.clientWidth"
+          ]
+        },
+        "into": "overflowPixels"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greater",
+          "values": [
+            "list",
+            "$overflowPixels",
+            "$limits.overflow"
+          ]
+        },
+        "into": "hasOverflow"
+      },
+      {
+        "when": "$hasOverflow",
+        "then": [
+          {
+            "let": "findings",
+            "value": [
+              "append",
+              "$findings",
+              [
+                "list",
+                {
+                  "rule": "layout.document-horizontal-overflow",
+                  "status": "observed",
+                  "node": "html",
+                  "text": "Horizontal document overflow",
+                  "evidence": [
+                    "concat",
+                    "The document exceeds the viewport by ",
+                    "$overflowPixels",
+                    "px. Inspect the measured blocks and intentional horizontal surfaces."
+                  ],
+                  "metrics": {
+                    "pixels": "$overflowPixels",
+                    "documentWidth": "$s.document.scrollWidth",
+                    "viewportWidth": "$s.document.clientWidth",
+                    "outerViewportWidth": "$s.viewport.width"
+                  }
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "when": "$s.footer",
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$s.document.scrollHeight",
+                "$s.footer.rect.bottom"
+              ]
+            },
+            "into": "trailingPixels"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$trailingPixels",
+                "$limits.trailingSpace"
+              ]
+            },
+            "into": "hasTrailing"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "round",
+              "values": [
+                "list",
+                "$trailingPixels"
+              ]
+            },
+            "into": "trailingLabel"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                "$trailingPixels",
+                96
+              ]
+            },
+            "into": "withinReturnReserve"
+          },
+          {
+            "when": [
+              "and",
+              "$hasTrailing",
+              [
+                "not",
+                [
+                  "and",
+                  "$s.returnWidget",
+                  "$withinReturnReserve"
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "let": "findings",
+                "value": [
+                  "append",
+                  "$findings",
+                  [
+                    "list",
+                    {
+                      "rule": "layout.document-trailing-space",
+                      "status": "review",
+                      "node": "$s.footer.path",
+                      "text": "Space after the footer",
+                      "evidence": [
+                        "concat",
+                        "The document extends ",
+                        "$trailingLabel",
+                        "px beyond its final footer. Check reservations, min-height and runtime state before deciding the space is unnecessary."
+                      ],
+                      "metrics": {
+                        "pixels": "$trailingPixels",
+                        "footer": "$s.footer.rect",
+                        "documentHeight": "$s.document.scrollHeight"
+                      }
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "let": "result",
+        "value": {
+          "route": "$s.route",
+          "profile": "$s.profile",
+          "viewport": "$s.viewport",
+          "status": [
+            "if",
+            [
+              "and",
+              [
+                "eq",
+                "$s.readyState",
+                "complete"
+              ],
+              [
+                "eq",
+                "$s.fontStatus",
+                "loaded"
+              ],
+              [
+                "eq",
+                "$s.location.path",
+                [
+                  "concat",
+                  "/",
+                  "$s.route"
+                ]
+              ]
+            ],
+            "measured",
+            "incomplete"
+          ],
+          "readyState": "$s.readyState",
+          "fontStatus": "$s.fontStatus",
+          "capturedAt": "$s.capturedAt",
+          "findings": "$findings",
+          "document": "$s.document"
+        }
+      }
+    ],
+    "assurance.rendered.project": [
+      {
+        "fold": "$eventInput.snapshots",
+        "as": "snapshot",
+        "accumulator": "projected",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "fold": "$snapshot.regions",
+            "as": "region",
+            "accumulator": "regions",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "let": "bottoms",
+                "value": [
+                  "distinct",
+                  [
+                    "map",
+                    "$region.contentRects",
+                    "rect",
+                    "$rect.bottom"
+                  ]
+                ]
+              },
+              {
+                "port": "record.put",
+                "args": {
+                  "record": "$region",
+                  "key": "contentRects",
+                  "value": [
+                    "map",
+                    "$bottoms",
+                    "bottom",
+                    {
+                      "bottom": "$bottom"
+                    }
+                  ]
+                },
+                "into": "projectedRegion"
+              }
+            ],
+            "yield": [
+              "append",
+              "$regions",
+              [
+                "list",
+                "$projectedRegion"
+              ]
+            ],
+            "into": "projectedRegions"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$snapshot",
+              "key": "regions",
+              "value": "$projectedRegions"
+            },
+            "into": "projectedSnapshot"
+          }
+        ],
+        "yield": [
+          "append",
+          "$projected",
+          [
+            "list",
+            "$projectedSnapshot"
+          ]
+        ],
+        "into": "projected"
+      },
+      {
+        "let": "result",
+        "value": "$projected"
+      }
+    ],
+    "assurance.rendered.report": [
+      {
+        "let": "reportInput",
+        "value": "$eventInput"
+      },
+      {
+        "let": "eventInput",
+        "value": {
+          "plan": "$reportInput.capturedPlan"
+        }
+      },
+      {
+        "call": "assurance.rendered.acceptPlan"
+      },
+      {
+        "assert": "$result.ok",
+        "message": "RENDERED-PLAN: Captured selectors and viewport contract do not match."
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$reportInput.capturedPlan"
+        },
+        "into": "capturedPlanJSON"
+      },
+      {
+        "port": "digest.sha256",
+        "args": {
+          "text": "$capturedPlanJSON",
+          "fallback": true
+        },
+        "into": "capturedPlanSHA"
+      },
+      {
+        "assert": [
+          "every",
+          "$reportInput.snapshots",
+          "snapshot",
+          [
+            "eq",
+            "$snapshot.planSha256",
+            "$capturedPlanSHA"
+          ]
+        ],
+        "message": "RENDERED-PLAN: Observation fingerprint mismatch."
+      },
+      {
+        "call": "assurance.rendered.plan"
+      },
+      {
+        "let": "interpretationPlan",
+        "value": "$result"
+      },
+      {
+        "let": "eventInput",
+        "value": "$reportInput"
+      },
+      {
+        "call": "assurance.rendered.project"
+      },
+      {
+        "let": "reportSnapshots",
+        "value": "$result"
+      },
+      {
+        "fold": "$reportSnapshots",
+        "as": "snapshot",
+        "accumulator": "assessments",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "eventInput",
+            "value": "$snapshot"
+          },
+          {
+            "call": "assurance.rendered.classify"
+          }
+        ],
+        "yield": [
+          "append",
+          "$assessments",
+          [
+            "list",
+            "$result"
+          ]
+        ],
+        "into": "assessments"
+      },
+      {
+        "fold": "$assessments",
+        "as": "a",
+        "accumulator": "byRoute",
+        "initial": {},
+        "steps": [
+          {
+            "let": "prior",
+            "value": [
+              "at",
+              "$byRoute",
+              "$a.route"
+            ]
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$byRoute",
+              "key": "$a.route",
+              "value": [
+                "append",
+                [
+                  "or",
+                  "$prior",
+                  [
+                    "list"
+                  ]
+                ],
+                [
+                  "list",
+                  {
+                    "route": "$a.route",
+                    "profile": "$a.profile",
+                    "viewport": "$a.viewport",
+                    "status": "$a.status",
+                    "readyState": "$a.readyState",
+                    "fontStatus": "$a.fontStatus",
+                    "capturedAt": "$a.capturedAt",
+                    "document": "$a.document",
+                    "findingsCount": [
+                      "count",
+                      "$a.findings"
+                    ]
+                  }
+                ]
+              ]
+            },
+            "into": "updated"
+          }
+        ],
+        "yield": "$updated",
+        "into": "byRoute"
+      },
+      {
+        "let": "allFindings",
+        "value": [
+          "fold",
+          "$assessments",
+          "a",
+          "out",
+          [
+            "list"
+          ],
+          [
+            "append",
+            "$out",
+            [
+              "map",
+              "$a.findings",
+              "f",
+              {
+                "route": "$a.route",
+                "profile": "$a.profile",
+                "finding": "$f"
+              }
+            ]
+          ]
+        ]
+      },
+      {
+        "let": "result",
+        "value": {
+          "protocol": "worldwright/rendered-layout-report/1",
+          "criteria": "$interpretationPlan.thresholds",
+          "profiles": [
+            "list",
+            {
+              "id": "desktop",
+              "width": 1280,
+              "height": 800
+            },
+            {
+              "id": "mobile",
+              "width": 390,
+              "height": 844
+            }
+          ],
+          "scope": "Every registered HTML route at desktop 1280×800 and mobile width 390×844; initial loaded state in same-origin browser frames.",
+          "boundary": "These are responsive-width browser observations, not physical device certification. Interactive states, expanded evidence details, scrolling-dependent lazy content, other engines, subjective beauty and the purpose of whitespace remain outside this receipt. Review findings are candidates, not automatic repair instructions.",
+          "assessments": [
+            "map",
+            "$assessments",
+            "a",
+            {
+              "route": "$a.route",
+              "profile": "$a.profile",
+              "viewport": "$a.viewport",
+              "status": "$a.status",
+              "readyState": "$a.readyState",
+              "fontStatus": "$a.fontStatus",
+              "capturedAt": "$a.capturedAt",
+              "document": "$a.document",
+              "findingsCount": [
+                "count",
+                "$a.findings"
+              ]
+            }
+          ],
+          "byRoute": "$byRoute",
+          "findings": "$allFindings",
+          "observationCount": [
+            "count",
+            "$assessments"
+          ],
+          "findingCount": [
+            "count",
+            "$allFindings"
+          ]
+        }
+      }
+    ],
+    "assurance.rendered.lab.write": [
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Algebra browser evidence workbench"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "h1",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Rendered observation workbench"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Each frame is an actual published route at the declared CSS viewport. No page content is rewritten."
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "attrs": {},
+                  "children": "$labFrames"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": [
+            "concat",
+            "__assurance_probe__/batch-",
+            "$labBatch",
+            ".html"
+          ],
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "assurance.rendered.lab": [
+      {
+        "call": "assurance.rendered.plan"
+      },
+      {
+        "let": "labPlan",
+        "value": "$result"
+      },
+      {
+        "let": "labFrames",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "let": "labIndex",
+        "value": 0
+      },
+      {
+        "let": "labBatch",
+        "value": 0
+      },
+      {
+        "fold": "$eventInput.routes",
+        "as": "route",
+        "accumulator": "lab",
+        "initial": {
+          "index": 0,
+          "batch": 0,
+          "frames": [
+            "list"
+          ],
+          "paths": [
+            "list"
+          ]
+        },
+        "steps": [
+          {
+            "let": "labFrames",
+            "value": [
+              "append",
+              "$lab.frames",
+              [
+                "map",
+                "$labPlan.profiles",
+                "profile",
+                {
+                  "tag": "section",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "$route",
+                          " · ",
+                          "$profile.id"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "iframe",
+                      "attrs": {
+                        "src": [
+                          "concat",
+                          "/",
+                          "$route"
+                        ],
+                        "width": "$profile.width",
+                        "height": "$profile.height",
+                        "data-route": "$route",
+                        "data-profile": "$profile.id",
+                        "title": [
+                          "concat",
+                          "$route",
+                          " · ",
+                          "$profile.id"
+                        ],
+                        "style": "display:block;border:1px solid #888;"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          },
+          {
+            "let": "labIndex",
+            "value": [
+              "add",
+              "$lab.index",
+              1
+            ]
+          },
+          {
+            "let": "labBatch",
+            "value": "$lab.batch"
+          },
+          {
+            "let": "labPaths",
+            "value": "$lab.paths"
+          },
+          {
+            "when": [
+              "eq",
+              "$labIndex",
+              "$labPlan.batchSize"
+            ],
+            "then": [
+              {
+                "call": "assurance.rendered.lab.write"
+              },
+              {
+                "let": "labPaths",
+                "value": [
+                  "append",
+                  "$labPaths",
+                  [
+                    "list",
+                    [
+                      "concat",
+                      "__assurance_probe__/batch-",
+                      "$labBatch",
+                      ".html"
+                    ]
+                  ]
+                ]
+              },
+              {
+                "let": "labBatch",
+                "value": [
+                  "add",
+                  "$labBatch",
+                  1
+                ]
+              },
+              {
+                "let": "labIndex",
+                "value": 0
+              },
+              {
+                "let": "labFrames",
+                "value": [
+                  "list"
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": {
+          "index": "$labIndex",
+          "batch": "$labBatch",
+          "frames": "$labFrames",
+          "paths": "$labPaths"
+        },
+        "into": "lab"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            "$lab.index",
+            0
+          ]
+        ],
+        "then": [
+          {
+            "let": "labFrames",
+            "value": "$lab.frames"
+          },
+          {
+            "let": "labBatch",
+            "value": "$lab.batch"
+          },
+          {
+            "call": "assurance.rendered.lab.write"
+          }
+        ]
+      },
+      {
+        "let": "result",
+        "value": {
+          "plan": "$labPlan",
+          "paths": [
+            "append",
+            "$lab.paths",
+            [
+              "if",
+              [
+                "not",
+                [
+                  "eq",
+                  "$lab.index",
+                  0
+                ]
+              ],
+              [
+                "list",
+                [
+                  "concat",
+                  "__assurance_probe__/batch-",
+                  "$lab.batch",
+                  ".html"
+                ]
+              ],
+              [
+                "list"
+              ]
+            ]
+          ]
+        }
+      }
+    ],
+    "assurance.rendered.boot": [
+      {
+        "port": "asset.text",
+        "args": {
+          "url": "../rendered-layout.json",
+          "cache": "no-store"
+        },
+        "into": "renderedJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$renderedJSON"
+        },
+        "into": "renderedData"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "div",
+          "attrs": {},
+          "children": [
+            "list",
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                [
+                  "concat",
+                  "$renderedData.report.observationCount",
+                  " desktop/mobile observations · ",
+                  "$renderedData.report.findingCount",
+                  " measured findings and review candidates."
+                ]
+              ]
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                "Review findings preserve the observed layout. Purpose and visual intent remain open."
+              ]
+            },
+            {
+              "tag": "div",
+              "attrs": {},
+              "children": [
+                "map",
+                [
+                  "distinct",
+                  [
+                    "map",
+                    "$renderedData.report.findings",
+                    "f",
+                    "$f.finding.rule"
+                  ]
+                ],
+                "rule",
+                {
+                  "tag": "details",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "summary",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "$rule"
+                      ]
+                    },
+                    {
+                      "tag": "ul",
+                      "attrs": {},
+                      "children": [
+                        "map",
+                        [
+                          "filter",
+                          "$renderedData.report.findings",
+                          "f",
+                          [
+                            "eq",
+                            "$f.finding.rule",
+                            "$rule"
+                          ]
+                        ],
+                        "f",
+                        {
+                          "tag": "li",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            {
+                              "tag": "a",
+                              "attrs": {
+                                "href": [
+                                  "concat",
+                                  "/",
+                                  "$f.route"
+                                ]
+                              },
+                              "children": [
+                                "list",
+                                "$f.route"
+                              ]
+                            },
+                            " · ",
+                            "$f.profile",
+                            " · ",
+                            {
+                              "tag": "strong",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "$f.finding.status"
+                              ]
+                            },
+                            " · “",
+                            "$f.finding.text",
+                            "” — ",
+                            "$f.finding.evidence",
+                            " ",
+                            {
+                              "tag": "code",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "$f.finding.node"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#rendered-results",
+          "html": "$result"
+        },
+        "into": "_"
+      }
+    ],
+    "assurance.rendered.record": [
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$eventInput"
+        },
+        "into": "recordJSON"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "browser-evidence.json",
+          "text": "$recordJSON"
+        },
+        "into": "_"
+      },
+      {
+        "let": "result",
+        "value": true
+      }
+    ],
+    "assurance.rendered.publish": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": [
+            "one",
+            "assurance.rendered.capture",
+            "path"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": [
+            "one",
+            "assurance.rendered.capture",
+            "path"
+          ]
+        },
+        "into": "renderedSourceJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$renderedSourceJSON"
+        },
+        "into": "renderedReceipt"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": {
+            "protocol": "$renderedReceipt.protocol",
+            "capturedAt": "$renderedReceipt.capturedAt",
+            "bindings": "$renderedReceipt.bindings",
+            "policySha256": [
+              "or",
+              [
+                "at",
+                "$renderedReceipt",
+                "policySha256"
+              ],
+              "unmeasured"
+            ],
+            "observerSha256": [
+              "or",
+              [
+                "at",
+                "$renderedReceipt",
+                "observerSha256"
+              ],
+              "unmeasured"
+            ],
+            "observerHashMethod": "sha256-utf8-lf",
+            "observationPlan": [
+              "or",
+              [
+                "at",
+                "$renderedReceipt",
+                "observationPlan"
+              ],
+              {}
+            ],
+            "observationContract": [
+              "or",
+              [
+                "at",
+                "$renderedReceipt",
+                "observationContract"
+              ],
+              "No browser observations yet."
+            ],
+            "report": "$renderedReceipt.report",
+            "rawObservations": "rendered-observations.json"
+          }
+        },
+        "into": "renderedJSON"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/rendered-layout.json",
+          "text": "$renderedJSON"
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$renderedReceipt.snapshots"
+        },
+        "into": "renderedRawJSON"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/rendered-observations.json",
+          "text": "$renderedRawJSON"
+        },
+        "into": "_"
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "assurance.rendered.boot",
+          "mode": "browser",
+          "grantProfile": "readerBrowser",
+          "queries": [
+            "list",
+            "assurance.rendered.boot",
+            "html.serialize",
+            "html.escape",
+            "html.cssText"
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "budget": 20000000
+        },
+        "into": "renderedRuntime"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/rendered-runtime.js",
+          "text": "$renderedRuntime"
+        },
+        "into": "_"
+      },
+      {
+        "let": "portfolioPage",
+        "value": {
+          "route": "assurance/rendered-layout/index.html",
+          "prefix": "../../",
+          "canonical": "https://aaronalderman.com/assurance/rendered-layout/",
+          "title": "Rendered layout assurance — Aaron Alderman",
+          "description": "Desktop and mobile browser observations, algebra-owned layout rules and visible review candidates.",
+          "body": [
+            "list",
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-intro"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    "ASSURANCE / RENDERED LAYOUT"
+                  ]
+                },
+                {
+                  "tag": "h1",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Measured, still discerned."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "The algebra compares real browser rectangles, heading relationships and document dimensions at desktop and mobile widths. Aberrations are preserved for review."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../"
+                      },
+                      "children": [
+                        "list",
+                        "All assurance topics"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../navigation-layout/"
+                      },
+                      "children": [
+                        "list",
+                        "Navigation source checks"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../rendered-layout.json"
+                      },
+                      "children": [
+                        "list",
+                        "Raw observations and findings"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Evidence and its limits"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Desktop: 1280 × 800. Mobile width: 390 × 844. Each published route is loaded in the browser with its scripts, styles and content. The initial loaded state is measured; this does not certify other engines, physical devices, interactive states or the purpose of whitespace."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "A difference in alignment or a large gap is observable. Whether it is unnecessary remains a review decision. The audit never repairs a page automatically."
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Browser findings"
+                  ]
+                },
+                {
+                  "tag": "details",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "summary",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Inspect desktop and mobile findings"
+                      ]
+                    },
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "id": "rendered-results"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Loading the recorded browser evidence…"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "script",
+              "attrs": {
+                "src": "../rendered-runtime.js",
+                "defer": true
+              },
+              "children": [
+                "list"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "assurance.portfolio.document"
       }
     ]
   }

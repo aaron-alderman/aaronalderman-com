@@ -44,7 +44,7 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  assert.equal(b.subarray(1,4).toString(),'PNG');assert.equal(b.readUInt32BE(16),1672);assert.equal(b.readUInt32BE(20),941);
  assert.ok(b.length<5_000_000);
  const xml=await read('dist/sitemap.xml'),urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
- const expected=['','mission/','writing/','writing/power-must-serve-life/','writing/faith-with-open-hands/','assurance/','assurance/identities/','assurance/accessibility/','assurance/internationalisation/','assurance/maturity/','gate.html','atlas.html','questions.html','questions-sourcerer.html','questions-author.html','questions-dad.html','relational-geometry/','inspection/source-algebra.html',...Object.keys(scenes).map(id=>`places/${id}.html`),...['temple','temple/films','sourcery','sourcery/films','claimipedia','worldwright','encounter','kingdom','world-modelling','creativity','the-field','the-field/correction'].map(slug=>slug+'/')].map(route=>'https://aaronalderman.com/'+route);
+ const expected=['','mission/','writing/','writing/power-must-serve-life/','writing/faith-with-open-hands/','assurance/','assurance/identities/','assurance/accessibility/','assurance/internationalisation/','assurance/maturity/','assurance/rendered-layout/','gate.html','atlas.html','questions.html','questions-sourcerer.html','questions-author.html','questions-dad.html','relational-geometry/','inspection/source-algebra.html',...Object.keys(scenes).map(id=>`places/${id}.html`),...['temple','temple/films','sourcery','sourcery/films','claimipedia','worldwright','encounter','kingdom','world-modelling','creativity','the-field','the-field/correction'].map(slug=>slug+'/')].map(route=>'https://aaronalderman.com/'+route);
  for(const room of JSON.parse(await read('source/reading/rooms.json')).rooms)expected.push(room.essay.canonical);
  for(const item of JSON.parse(await read('source/hierarchy.json')).items)for(const route of [item.href,'inspection/'+item.id+'.html']){const url='https://aaronalderman.com/'+route;if(!expected.includes(url))expected.push(url);}
  for(const identity of ['sourcerer','author','dad','christian'])for(const route of ['index.html','threads.html','atlas.html','questions.html',...Object.keys(scenes).map(id=>`places/${id}.html`)])expected.push(`https://aaronalderman.com/worlds/${identity}/${route}`);
@@ -90,10 +90,10 @@ test('historical oracle bytes, passive resources and declared mechanism successo
 test('algebra owns the publication with the existing admission rules, ports and budget',async()=>{
  assert.equal(receipt.assurance.places,40);assert.equal(receipt.assurance.sourceNotes,29);
  assert.equal(receipt.execution.limit,20_000_000);assert.ok(receipt.execution.totalSteps<20_000_000);
- assert.equal(receipt.admission.passes,27);assert.deepEqual(receipt.mjsImports,[]);
+ assert.equal(receipt.admission.passes,29);assert.deepEqual(receipt.mjsImports,[]);
  for(const file of ['source/expedition.rel','source/presentation.rel','algebra/publication.process.json','source/gateway.rel','source/gateway-presentation.rel','algebra/gateway.process.json'])assert.equal(receipt.sources[file],sha(await fs.readFile(path.join(root,file))));
  for(const [file,hash]of Object.entries(receipt.artifacts))if(/\.(?:js|mjs|cjs)$/.test(file)){
-  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js','identity-runtime.js','inspection/runtime.js',...contract.readerWorkshopSuccessor.runtimes].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
+  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js','identity-runtime.js','inspection/runtime.js','assurance/rendered-runtime.js',...contract.readerWorkshopSuccessor.runtimes].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
   const retained=file.startsWith('retained/')?file:'retained/'+file;
   assert.equal(hash,contract.compatibilityOrigin.sha256[retained],file+' is unchanged compatibility code');
  }
@@ -171,8 +171,8 @@ test('navigation/layout discovery covers the complete generated HTML artifact se
  assert.equal(report.pageCount,expected.length);
  const registered=JSON.parse(await read('dist/assurance/generated-pages.json'));
  assert.deepEqual(Object.keys(registered).filter(p=>p.endsWith('.css')).sort(),Object.keys(receipt.artifacts).filter(p=>p.endsWith('.css')).sort());
- assert.equal(report.geometryUnmeasured,expected.length);
- assert.ok(report.pages.every(p=>p.geometry.status==='needs-browser-evidence'));
+ assert.equal(report.geometryUnmeasured,report.pages.filter(p=>p.geometry.status!=='measured').length);
+ assert.ok(report.pages.every(p=>['measured','needs-browser-evidence'].includes(p.geometry.status)));
  assert.equal(new Set(report.pages.map(p=>p.route)).size,expected.length);
  assert.ok((await read('dist/assurance/index.html')).includes('navigation-layout/'));
 });
@@ -191,9 +191,51 @@ test('navigation/layout algebra distinguishes defects, review candidates and opa
  assert.equal((await scan(header)).geometry.status,'needs-browser-evidence');
  const published=JSON.parse(await read('dist/assurance/navigation-layout.json')),self=published.pages.find(p=>p.route==='assurance/navigation-layout/index.html');
  const finalSelf=await scan(await read('dist/assurance/navigation-layout/index.html'));
- assert.deepEqual({...finalSelf,route:self.route},self,'The report page retains the same checked observations after its final evidence rendering');
+ const {geometry:staticGeometry,...staticSelf}=finalSelf,{geometry:measuredGeometry,...reportedSelf}=self;
+ assert.deepEqual({...staticSelf,route:self.route},reportedSelf,'Final source observations are stable; browser geometry has independent receipts');
 
  const cssEntry='assurance.surface.stylesheet',cssModel=await lower({compiler:await json('algebra/lowering.process.json'),definitions:await json('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:cssEntry,queries:{[cssEntry]:q[cssEntry]}},mode:'model',ports:valuePorts(),limit:20000000});
  for(const [css,status]of [['body{padding-bottom:80px}','undecided'],['body:has(> .microsite-return){padding-bottom:80px}','not-observed'],['/*body{padding-bottom:80px}*/','not-observed'],['body{padding-bottom:0px}','not-observed']])assert.equal((await invoke({model:cssModel,entry:cssEntry,input:{eventInput:{route:'test.css',css}},ports:valuePorts(),limit:20000000})).value.status,status,css);
+
+});
+
+test('rendered assurance covers both viewports, binds current artifacts and replays the admitted algebra',async()=>{
+ const {createRenderedAssessor}=await import('./tooling/assess-rendered-layout.mjs');
+ const published=JSON.parse(await read('dist/assurance/rendered-layout.json')),snapshots=JSON.parse(await read('dist/assurance/rendered-observations.json'));
+ const assessor=await createRenderedAssessor(),observationPlan=(await assessor.plan()).value;
+ assert.equal((await assessor.acceptPlan(published.observationPlan)).value.ok,true);
+ const planSha=sha(JSON.stringify(published.observationPlan));
+ const expected=Object.keys(receipt.artifacts).filter(p=>p.endsWith('.html')).flatMap(route=>['desktop','mobile'].map(profile=>route+'|'+profile)).sort();
+ assert.deepEqual(snapshots.map(s=>s.route+'|'+s.profile).sort(),expected,'Every generated route needs exactly one observation at each declared width');
+ for(const s of snapshots){assert.equal(s.planSha256,planSha,'The captured browser observation plan must match the algebra');assert.equal(new URL(s.url).pathname,'/'+s.route);assert.equal(s.viewport.width,s.profile==='desktop'?1280:390);assert.equal(s.viewport.height,s.profile==='desktop'?800:844);assert.equal(s.readyState,'complete',s.route);assert.equal(s.fontStatus,'loaded',s.route);}
+ for(const [file,hash]of Object.entries(receipt.artifacts).filter(([file])=>/\.(html|css|js|svg|png|webp|jpg|jpeg|woff|woff2)$/.test(file)))assert.equal(published.bindings[file],hash,'Browser evidence is stale for '+file+'; remeasure affected routes before release');
+ assert.equal(published.observerSha256,sha((await read('tooling/rendered-browser-observer.mjs')).replace(/\r\n/g,'\n')));
+ const replay=await assessor.report(snapshots,published.observationPlan);
+ assert.equal(published.policySha256,assessor.policySha256);assert.deepEqual(published.report,JSON.parse(JSON.stringify(replay.value)));
+ assert.equal(published.report.observationCount,expected.length);
+ assert.ok(published.report.assessments.every(a=>a.status==='measured'));
+ const sourceFindings=published.report.findings.filter(f=>f.route==='assurance/navigation-layout/index.html'&&f.finding.text==='Source findings');
+ for(const profile of ['desktop','mobile'])assert.ok(sourceFindings.some(f=>f.profile===profile&&f.finding.rule==='structure.heading-content-rail'),'Source findings rail aberration must remain captured at '+profile);
+ assert.ok(published.report.findings.some(f=>f.finding.text==='Stylesheet space reservations'&&f.finding.rule==='structure.heading-only-region'));
+ assert.ok(published.report.findings.some(f=>f.route!=='assurance/navigation-layout/index.html'),'The audit must seek other pages, not only the supplied example');
+ const navigation=JSON.parse(await read('dist/assurance/navigation-layout.json'));assert.equal(navigation.geometryUnmeasured,0);assert.ok(navigation.pages.every(p=>p.geometry.status==='measured'));
+ assert.ok((await read('dist/assurance/navigation-layout/index.html')).includes('<section class="assurance-products"><h2>Source findings</h2>'),'The example remains unfixed for discernment');
+});
+
+test('rendered geometry rules do not depend on a supplied heading title or assume every gap is waste',async()=>{
+ const {createRenderedAssessor}=await import('./tooling/assess-rendered-layout.mjs'),assessor=await createRenderedAssessor(),snapshots=JSON.parse(await read('dist/assurance/rendered-observations.json'));
+ const observed=snapshots.find(s=>s.route==='assurance/navigation-layout/index.html'&&s.profile==='desktop'),renamed=structuredClone(observed),heading=renamed.headings.find(h=>h.text==='Source findings');heading.text='An unrelated section title';
+ const duplicated=structuredClone(observed);for(const region of duplicated.regions)region.contentRects.push(...region.contentRects);
+ assert.deepEqual((await assessor.assess(duplicated)).value,(await assessor.assess(observed)).value,'Content-edge deduplication preserves the verdict');
+ const original=await assessor.assess(observed),variant=await assessor.assess(renamed);assert.deepEqual(variant.value.findings.map(f=>f.rule),original.value.findings.map(f=>f.rule));
+ const peers=renamed.headings.filter(h=>h.rank===heading.rank&&h.rect.left>0);heading.rect={...heading.rect,left:peers[0].rect.left,right:peers[0].rect.right,width:peers[0].rect.width};
+ const aligned=await assessor.assess(renamed);assert.ok(!aligned.value.findings.some(f=>f.rule==='structure.heading-content-rail'&&f.node===heading.path));
+ const overflow=structuredClone(observed);overflow.document.scrollWidth=overflow.viewport.width+24;assert.ok((await assessor.assess(overflow)).value.findings.some(f=>f.rule==='layout.document-horizontal-overflow'));
+ const reserve=structuredClone(observed);reserve.footer={path:'footer',rect:{bottom:reserve.document.scrollHeight-80}};reserve.returnWidget=true;assert.ok(!(await assessor.assess(reserve)).value.findings.some(f=>f.rule==='layout.document-trailing-space'));
+ reserve.returnWidget=false;assert.ok((await assessor.assess(reserve)).value.findings.some(f=>f.rule==='layout.document-trailing-space'));
+ const unsettled=structuredClone(observed);unsettled.fontStatus='loading';assert.equal((await assessor.assess(unsettled)).value.status,'incomplete');
+ const published=JSON.parse(await read('dist/assurance/rendered-layout.json')),thresholdReplay=structuredClone(published.observationPlan);thresholdReplay.thresholds.inset+=4;assert.equal((await assessor.acceptPlan(thresholdReplay)).value.ok,true);
+ thresholdReplay.groups.headings='h1';assert.equal((await assessor.acceptPlan(thresholdReplay)).value.ok,false);
+ await assert.rejects(assessor.report(snapshots,thresholdReplay),/RENDERED-PLAN/);
 
 });
