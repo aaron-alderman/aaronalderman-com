@@ -127,3 +127,15 @@ test('household example has full Field chrome, accessible controls, linked claim
  assert.equal((inspect.match(/id="hh-claim-\d+"/g)||[]).length,66);
  assert.ok(field.includes('households/'));
 });
+
+test('household GoG projection keeps common scales, discrete observations and exact selected data',async()=>{
+ const rows=[];for(const person of ['A','B'])for(let period=1;period<=12;period++)rows.push({person,period,closing:person==='A'?(period-1)/11:1-(period-1)/11,opening:0.5});
+ const input={view:data.household.chart,data:rows,width:340,period:5,changes:[5,9]},p=await run('household.gog.plan',input);
+ assert.equal(p.facets.length,2);assert.equal(p.facets[0].points.length,12);assert.deepEqual(portable(p.facets[0].points[0]),{x:'38.00',y:'190.00',period:1,value:0});assert.equal(p.facets[0].points[11].x,'326.00');assert.equal(p.facets[0].points[11].y,'20.00');assert.equal(p.facets[1].points[0].y,'20.00');assert.equal(p.facets[1].points[11].y,'190.00');assert.equal(p.facets[0].selected.period,5);assert.deepEqual(p.changes.map(c=>c.period),[5,9]);await assert.rejects(run('household.gog.plan',{...input,view:{...data.household.chart,frame:'polar'}}),/HH-GOG-001/);
+});
+test('chart markers include custom temporal inputs, deduplicate changes and exclude whole-run rates',async()=>{
+ const history=Array.from({length:12},(_,i)=>({period:i+1,appliedEvents:i===4?['values']:[],appliedExperienceEvents:i===8?['repair']:[]}));
+ const overrides=[{scope:'person',phase:'after'},{scope:'experience',phase:'after'},{scope:'person',phase:'initial'},{scope:'rate',phase:'run'}];
+ assert.deepEqual(await run('household.chart.changes',{history,overrides}),[1,5,9]);
+ assert.deepEqual(await run('household.chart.changes',{history:history.map(r=>({...r,appliedEvents:[],appliedExperienceEvents:[]})),overrides:[{scope:'person',phase:'after'},{scope:'rate',phase:'run'}]}),[5]);
+});

@@ -1104,6 +1104,97 @@
       "capacity-shortfall": "capacity prevented full delivery",
       "mixed-shortfall": "capacity and implementation shortfalls",
       "no-task-due": "no task was due"
+    },
+    "chart": {
+      "protocol": "the-field/gog-chart/1",
+      "frame": "cartesian",
+      "title": "Willingness to review",
+      "facet": {
+        "field": "person",
+        "values": [
+          "A",
+          "B"
+        ]
+      },
+      "encoding": {
+        "x": {
+          "field": "period",
+          "label": "Period",
+          "domain": [
+            1,
+            12
+          ]
+        },
+        "y": {
+          "field": "closing",
+          "label": "Modelled willingness",
+          "domain": [
+            0,
+            1
+          ]
+        }
+      },
+      "layers": [
+        {
+          "name": "trajectory",
+          "mark": "line",
+          "encode": {
+            "x": "period",
+            "y": "closing",
+            "stroke": "person"
+          }
+        },
+        {
+          "name": "period-observations",
+          "mark": "point",
+          "encode": {
+            "x": "period",
+            "y": "closing",
+            "stroke": "person"
+          }
+        },
+        {
+          "name": "authored-changes",
+          "mark": "rule",
+          "encode": {
+            "x": "period"
+          }
+        },
+        {
+          "name": "selected-period",
+          "mark": "rule",
+          "encode": {
+            "x": "selectedPeriod"
+          }
+        }
+      ],
+      "ticks": {
+        "x": [
+          1,
+          3,
+          5,
+          7,
+          9,
+          12
+        ],
+        "y": [
+          0,
+          0.25,
+          0.5,
+          0.75,
+          1
+        ]
+      },
+      "palette": {
+        "A": "#285d4f",
+        "B": "#946323"
+      },
+      "dashes": {
+        "A": "none",
+        "B": "6 4"
+      },
+      "semantics": "Separate person facets share fixed domains. Every point is end-of-period willingness. The selected period changes inspection, never the simulated trajectory.",
+      "basis": "Sourcery GogChart: frame, encoding, scales, layers and presentation; implemented as a bounded algebra-owned projection."
     }
   }
 }

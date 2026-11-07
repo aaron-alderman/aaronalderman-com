@@ -315,79 +315,90 @@
           "queries": [
             "append",
             [
-              "list",
-              "reader.model.calibration",
-              "reader.model.pairs",
-              "reader.model.inflate",
-              "reader.model.decode",
-              "reader.model.weights",
-              "reader.model.memory",
-              "reader.model.line",
-              "reader.model.coarse",
-              "activity.boot",
-              "activity.motion",
-              "activity.calculations",
-              "activity.click",
-              "activity.input",
-              "activity.action.reply",
-              "activity.action.door",
-              "activity.action.quiet",
-              "activity.action.cabinet",
-              "activity.action.layer",
-              "activity.action.revision",
-              "activity.action.deck",
-              "activity.action.garden-mode",
-              "activity.garden",
-              "activity.action.gate",
-              "activity.action.hide-memory",
-              "activity.action.couple-memory",
-              "activity.action.origin",
-              "activity.action.enrich",
-              "activity.erasure",
-              "activity.action.attention",
-              "activity.action.inflate",
-              "activity.action.reset-pattern",
-              "activity.action.original-bit",
-              "activity.action.flip-bit",
-              "activity.code",
-              "activity.action.rate",
-              "activity.action.scale",
-              "activity.action.amplitude",
-              "activity.action.phase",
-              "activity.action.loop-reset",
-              "activity.action.loop",
-              "activity.loop.frame",
-              "html.escape",
-              "html.serialize",
-              "html.observe",
-              "html.inspect",
-              "html.cssText",
-              "activity.source",
-              "activity.source.close",
-              "activity.source.backdrop",
-              "activity.standard.boot",
-              "household.person",
-              "household.evaluate",
-              "household.assents",
-              "household.better",
-              "household.negotiate",
-              "household.patchPerson",
-              "household.patch",
-              "household.override",
-              "household.experiencePatch",
-              "household.feedback"
+              "append",
+              [
+                "list",
+                "reader.model.calibration",
+                "reader.model.pairs",
+                "reader.model.inflate",
+                "reader.model.decode",
+                "reader.model.weights",
+                "reader.model.memory",
+                "reader.model.line",
+                "reader.model.coarse",
+                "activity.boot",
+                "activity.motion",
+                "activity.calculations",
+                "activity.click",
+                "activity.input",
+                "activity.action.reply",
+                "activity.action.door",
+                "activity.action.quiet",
+                "activity.action.cabinet",
+                "activity.action.layer",
+                "activity.action.revision",
+                "activity.action.deck",
+                "activity.action.garden-mode",
+                "activity.garden",
+                "activity.action.gate",
+                "activity.action.hide-memory",
+                "activity.action.couple-memory",
+                "activity.action.origin",
+                "activity.action.enrich",
+                "activity.erasure",
+                "activity.action.attention",
+                "activity.action.inflate",
+                "activity.action.reset-pattern",
+                "activity.action.original-bit",
+                "activity.action.flip-bit",
+                "activity.code",
+                "activity.action.rate",
+                "activity.action.scale",
+                "activity.action.amplitude",
+                "activity.action.phase",
+                "activity.action.loop-reset",
+                "activity.action.loop",
+                "activity.loop.frame",
+                "html.escape",
+                "html.serialize",
+                "html.observe",
+                "html.inspect",
+                "html.cssText",
+                "activity.source",
+                "activity.source.close",
+                "activity.source.backdrop",
+                "activity.standard.boot",
+                "household.person",
+                "household.evaluate",
+                "household.assents",
+                "household.better",
+                "household.negotiate",
+                "household.patchPerson",
+                "household.patch",
+                "household.override",
+                "household.experiencePatch",
+                "household.feedback"
+              ],
+              [
+                "list",
+                "household.period",
+                "household.run",
+                "household.scenario",
+                "household.boot",
+                "household.rebuild",
+                "household.sync",
+                "household.change",
+                "household.click",
+                "household.render"
+              ]
             ],
             [
               "list",
-              "household.period",
-              "household.run",
-              "household.scenario",
-              "household.boot",
-              "household.rebuild",
-              "household.sync",
-              "household.change",
-              "household.click",
-              "household.render"
+              "household.gog.plan",
+              "household.chart.changes",
+              "household.chart.render",
+              "household.chart.select",
+              "household.chart.resize"
             ]
           ],
           "factSubjects": [
@@ -1154,7 +1165,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "../../expedition.css?v=field-households-sections-3"
+                    "href": "../../expedition.css?v=field-households-chart-4"
                   },
                   "children": [
                     "list"
@@ -1294,7 +1305,17 @@
                   "tag": "script",
                   "attrs": {
                     "defer": true,
-                    "src": "../../reader/activity-runtime.js?v=field-households-sections-3"
+                    "src": "../../reader/activity-runtime.js?v=field-households-chart-4"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "../../reader/reader.css?v=field-households-chart-4"
                   },
                   "children": [
                     "list"
@@ -2885,6 +2906,237 @@
                                   ]
                                 },
                                 {
+                                  "tag": "section",
+                                  "attrs": {
+                                    "class": "hh-chart-panel",
+                                    "aria-labelledby": "hh-chart-heading"
+                                  },
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "header",
+                                      "attrs": {
+                                        "class": "hh-chart-header"
+                                      },
+                                      "children": [
+                                        "list",
+                                        {
+                                          "tag": "p",
+                                          "attrs": {
+                                            "class": "eyebrow"
+                                          },
+                                          "children": [
+                                            "list",
+                                            "The household over twelve periods"
+                                          ]
+                                        },
+                                        {
+                                          "tag": "h3",
+                                          "attrs": {
+                                            "id": "hh-chart-heading"
+                                          },
+                                          "children": [
+                                            "list",
+                                            "Willingness to review"
+                                          ]
+                                        },
+                                        {
+                                          "tag": "p",
+                                          "attrs": {},
+                                          "children": [
+                                            "list",
+                                            "Compare both people on the same fixed scale. Move through time to inspect what each period changed."
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "tag": "div",
+                                      "attrs": {
+                                        "id": "hh-timeline",
+                                        "class": "hh-timeline",
+                                        "aria-label": "Willingness over twelve periods"
+                                      },
+                                      "children": [
+                                        "list",
+                                        {
+                                          "tag": "p",
+                                          "attrs": {},
+                                          "children": [
+                                            "list",
+                                            "The timeline will show each person separately. Closing willingness affects the following period."
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "hh-chart-guide"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Dashed vertical lines mark authored input changes. The solid marker follows your selected period."
+                                      ]
+                                    },
+                                    {
+                                      "tag": "div",
+                                      "attrs": {
+                                        "class": "hh-chart-navigation"
+                                      },
+                                      "children": [
+                                        "list",
+                                        {
+                                          "tag": "div",
+                                          "attrs": {
+                                            "class": "hh-period-nav hh-chart-controls"
+                                          },
+                                          "children": [
+                                            "list",
+                                            {
+                                              "tag": "button",
+                                              "attrs": {
+                                                "id": "hh-prev",
+                                                "type": "button",
+                                                "disabled": true,
+                                                "aria-label": "Previous period",
+                                                "title": "Previous period"
+                                              },
+                                              "children": [
+                                                "list",
+                                                "←"
+                                              ]
+                                            },
+                                            {
+                                              "tag": "h3",
+                                              "attrs": {
+                                                "id": "hh-period-label"
+                                              },
+                                              "children": [
+                                                "list",
+                                                "Twelve periods; change begins at period 5"
+                                              ]
+                                            },
+                                            {
+                                              "tag": "button",
+                                              "attrs": {
+                                                "id": "hh-next",
+                                                "type": "button",
+                                                "disabled": true,
+                                                "aria-label": "Next period",
+                                                "title": "Next period"
+                                              },
+                                              "children": [
+                                                "list",
+                                                "→"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "tag": "div",
+                                          "attrs": {
+                                            "class": "hh-chart-scrubber"
+                                          },
+                                          "children": [
+                                            "list",
+                                            {
+                                              "tag": "label",
+                                              "attrs": {
+                                                "for": "hh-period-slider"
+                                              },
+                                              "children": [
+                                                "list",
+                                                "Choose a period to inspect"
+                                              ]
+                                            },
+                                            {
+                                              "tag": "input",
+                                              "attrs": {
+                                                "id": "hh-period-slider",
+                                                "type": "range",
+                                                "min": 1,
+                                                "max": 12,
+                                                "step": 1,
+                                                "value": 5,
+                                                "disabled": true,
+                                                "aria-label": "Period to inspect",
+                                                "aria-controls": "hh-timeline hh-people hh-events hh-budget"
+                                              },
+                                              "children": [
+                                                "list"
+                                              ]
+                                            },
+                                            {
+                                              "tag": "div",
+                                              "attrs": {
+                                                "class": "hh-scrubber-ends",
+                                                "aria-hidden": "true"
+                                              },
+                                              "children": [
+                                                "list",
+                                                {
+                                                  "tag": "span",
+                                                  "attrs": {},
+                                                  "children": [
+                                                    "list",
+                                                    "1 · beginning"
+                                                  ]
+                                                },
+                                                {
+                                                  "tag": "span",
+                                                  "attrs": {},
+                                                  "children": [
+                                                    "list",
+                                                    "12 · end"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "tag": "details",
+                                      "attrs": {
+                                        "class": "hh-chart-table"
+                                      },
+                                      "children": [
+                                        "list",
+                                        {
+                                          "tag": "summary",
+                                          "attrs": {},
+                                          "children": [
+                                            "list",
+                                            "Read exact values for all 12 periods"
+                                          ]
+                                        },
+                                        {
+                                          "tag": "div",
+                                          "attrs": {
+                                            "id": "hh-chart-values"
+                                          },
+                                          "children": [
+                                            "list",
+                                            "The values appear when the model is ready."
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "tag": "p",
+                                      "attrs": {
+                                        "class": "hh-chart-limit"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "An authored 0–1 index, not a probability or a measure of consent, happiness or trust. Closing values affect the following period."
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
                                   "tag": "p",
                                   "attrs": {
                                     "id": "hh-status",
@@ -2897,230 +3149,185 @@
                                   ]
                                 },
                                 {
-                                  "tag": "div",
+                                  "tag": "details",
                                   "attrs": {
-                                    "class": "hh-period-nav"
+                                    "class": "hh-period-detail"
                                   },
                                   "children": [
                                     "list",
                                     {
-                                      "tag": "button",
+                                      "tag": "summary",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Inspect this period’s work, responses and resources"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "div",
                                       "attrs": {
-                                        "id": "hh-prev",
-                                        "type": "button",
-                                        "disabled": true
+                                        "id": "hh-people",
+                                        "class": "hh-people"
                                       },
                                       "children": [
                                         "list",
-                                        "← Previous period"
+                                        {
+                                          "tag": "article",
+                                          "attrs": {},
+                                          "children": [
+                                            "list",
+                                            {
+                                              "tag": "h3",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "Person A"
+                                              ]
+                                            },
+                                            {
+                                              "tag": "p",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "Values, achieved work, capacity and willingness will appear here."
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "tag": "article",
+                                          "attrs": {},
+                                          "children": [
+                                            "list",
+                                            {
+                                              "tag": "h3",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "Person B"
+                                              ]
+                                            },
+                                            {
+                                              "tag": "p",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "Each account remains distinct; a household average cannot stand in for either person."
+                                              ]
+                                            }
+                                          ]
+                                        }
                                       ]
                                     },
                                     {
                                       "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "What happened, and what evidence changed willingness?"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "ol",
                                       "attrs": {
-                                        "id": "hh-period-label"
+                                        "id": "hh-events",
+                                        "class": "hh-events"
                                       },
                                       "children": [
                                         "list",
-                                        "Twelve periods; change begins at period 5"
+                                        {
+                                          "tag": "li",
+                                          "attrs": {},
+                                          "children": [
+                                            "list",
+                                            "Choose a period to inspect its request, agreement and delivery history."
+                                          ]
+                                        }
                                       ]
                                     },
                                     {
-                                      "tag": "button",
+                                      "tag": "h3",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        "Three orders of consequence"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "div",
                                       "attrs": {
-                                        "id": "hh-next",
-                                        "type": "button",
-                                        "disabled": true
+                                        "id": "hh-budget",
+                                        "class": "field-consequences"
                                       },
                                       "children": [
                                         "list",
-                                        "Next period →"
-                                      ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "tag": "div",
-                                  "attrs": {
-                                    "id": "hh-timeline",
-                                    "class": "hh-timeline",
-                                    "aria-label": "Willingness over twelve periods"
-                                  },
-                                  "children": [
-                                    "list",
-                                    {
-                                      "tag": "p",
-                                      "attrs": {},
-                                      "children": [
-                                        "list",
-                                        "The timeline will show each person separately. Closing willingness affects the following period."
-                                      ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "tag": "div",
-                                  "attrs": {
-                                    "id": "hh-people",
-                                    "class": "hh-people"
-                                  },
-                                  "children": [
-                                    "list",
-                                    {
-                                      "tag": "article",
-                                      "attrs": {},
-                                      "children": [
-                                        "list",
                                         {
-                                          "tag": "h3",
+                                          "tag": "article",
                                           "attrs": {},
                                           "children": [
                                             "list",
-                                            "Person A"
+                                            {
+                                              "tag": "h3",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "Right now"
+                                              ]
+                                            },
+                                            {
+                                              "tag": "p",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "Work delivered, unpaid backlog, paid work, expenses and reserve."
+                                              ]
+                                            }
                                           ]
                                         },
                                         {
-                                          "tag": "p",
+                                          "tag": "article",
                                           "attrs": {},
                                           "children": [
                                             "list",
-                                            "Values, achieved work, capacity and willingness will appear here."
-                                          ]
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "tag": "article",
-                                      "attrs": {},
-                                      "children": [
-                                        "list",
-                                        {
-                                          "tag": "h3",
-                                          "attrs": {},
-                                          "children": [
-                                            "list",
-                                            "Person B"
-                                          ]
-                                        },
-                                        {
-                                          "tag": "p",
-                                          "attrs": {},
-                                          "children": [
-                                            "list",
-                                            "Each account remains distinct; a household average cannot stand in for either person."
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "tag": "h3",
-                                  "attrs": {},
-                                  "children": [
-                                    "list",
-                                    "What happened, and what evidence changed willingness?"
-                                  ]
-                                },
-                                {
-                                  "tag": "ol",
-                                  "attrs": {
-                                    "id": "hh-events",
-                                    "class": "hh-events"
-                                  },
-                                  "children": [
-                                    "list",
-                                    {
-                                      "tag": "li",
-                                      "attrs": {},
-                                      "children": [
-                                        "list",
-                                        "Choose a period to inspect its request, agreement and delivery history."
-                                      ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "tag": "h3",
-                                  "attrs": {},
-                                  "children": [
-                                    "list",
-                                    "Three orders of consequence"
-                                  ]
-                                },
-                                {
-                                  "tag": "div",
-                                  "attrs": {
-                                    "id": "hh-budget",
-                                    "class": "field-consequences"
-                                  },
-                                  "children": [
-                                    "list",
-                                    {
-                                      "tag": "article",
-                                      "attrs": {},
-                                      "children": [
-                                        "list",
-                                        {
-                                          "tag": "h3",
-                                          "attrs": {},
-                                          "children": [
-                                            "list",
-                                            "Right now"
+                                            {
+                                              "tag": "h3",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "Between the partners"
+                                              ]
+                                            },
+                                            {
+                                              "tag": "p",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "Whose request was heard; which agreement was kept; what remains unknown."
+                                              ]
+                                            }
                                           ]
                                         },
                                         {
-                                          "tag": "p",
+                                          "tag": "article",
                                           "attrs": {},
                                           "children": [
                                             "list",
-                                            "Work delivered, unpaid backlog, paid work, expenses and reserve."
-                                          ]
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "tag": "article",
-                                      "attrs": {},
-                                      "children": [
-                                        "list",
-                                        {
-                                          "tag": "h3",
-                                          "attrs": {},
-                                          "children": [
-                                            "list",
-                                            "Between the partners"
-                                          ]
-                                        },
-                                        {
-                                          "tag": "p",
-                                          "attrs": {},
-                                          "children": [
-                                            "list",
-                                            "Whose request was heard; which agreement was kept; what remains unknown."
-                                          ]
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "tag": "article",
-                                      "attrs": {},
-                                      "children": [
-                                        "list",
-                                        {
-                                          "tag": "h3",
-                                          "attrs": {},
-                                          "children": [
-                                            "list",
-                                            "What can happen next"
-                                          ]
-                                        },
-                                        {
-                                          "tag": "p",
-                                          "attrs": {},
-                                          "children": [
-                                            "list",
-                                            "Closing willingness and unfinished work carry into the next period."
+                                            {
+                                              "tag": "h3",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "What can happen next"
+                                              ]
+                                            },
+                                            {
+                                              "tag": "p",
+                                              "attrs": {},
+                                              "children": [
+                                                "list",
+                                                "Closing willingness and unfinished work carry into the next period."
+                                              ]
+                                            }
                                           ]
                                         }
                                       ]
@@ -3665,7 +3872,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "../../../expedition.css?v=field-households-sections-3"
+                    "href": "../../../expedition.css?v=field-households-chart-4"
                   },
                   "children": [
                     "list"
