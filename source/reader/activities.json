@@ -581,5 +581,529 @@
     1,
     0,
     1
-  ]
+  ],
+  "household": {
+    "material": {
+      "protocol": "the-field/household-fixture/1",
+      "status": "authored-assumptions-not-measurements",
+      "base": {
+        "protocol": "the-field/household-scenario/1",
+        "id": "household-example",
+        "periods": 12,
+        "initial": {
+          "shareA": 0.125,
+          "domesticHours": 32,
+          "expenses": 160,
+          "reserve": 80,
+          "people": [
+            {
+              "id": "A",
+              "capacity": 60,
+              "wage": 5,
+              "willingness": 0.8,
+              "values": {
+                "paidHours": 36,
+                "freeHours": 8,
+                "domesticShare": 0.125,
+                "shareTolerance": 0.5,
+                "paidTolerance": 2
+              }
+            },
+            {
+              "id": "B",
+              "capacity": 60,
+              "wage": 4,
+              "willingness": 0.8,
+              "values": {
+                "paidHours": 8,
+                "freeHours": 8,
+                "domesticShare": 0.875,
+                "shareTolerance": 0.25,
+                "paidTolerance": 2
+              }
+            }
+          ]
+        },
+        "policy": {
+          "maxReallocationHours": 8,
+          "reviewHours": 0.5,
+          "gridSteps": 80
+        },
+        "events": []
+      },
+      "orientations": [
+        {
+          "id": "roles",
+          "label": "Role-based specialization",
+          "shareA": 0.125,
+          "patch": {},
+          "events": []
+        },
+        {
+          "id": "equal",
+          "label": "Equal sharing",
+          "shareA": 0.5,
+          "patch": {
+            "people": [
+              {
+                "id": "A",
+                "values": {
+                  "paidHours": 28,
+                  "domesticShare": 0.5,
+                  "shareTolerance": 0.25
+                }
+              },
+              {
+                "id": "B",
+                "values": {
+                  "paidHours": 28,
+                  "domesticShare": 0.5,
+                  "shareTolerance": 0.25
+                }
+              }
+            ]
+          },
+          "events": []
+        },
+        {
+          "id": "capacity",
+          "label": "Capacity-based specialization",
+          "shareA": 0.25,
+          "patch": {
+            "people": [
+              {
+                "id": "A",
+                "values": {
+                  "paidHours": 36,
+                  "domesticShare": 0.25,
+                  "shareTolerance": 0.5
+                }
+              },
+              {
+                "id": "B",
+                "values": {
+                  "paidHours": 24,
+                  "domesticShare": 0.75,
+                  "shareTolerance": 0.5
+                }
+              }
+            ]
+          },
+          "events": []
+        },
+        {
+          "id": "alternating",
+          "label": "Alternating priorities",
+          "shareA": 0.125,
+          "patch": {},
+          "events": [
+            {
+              "id": "planned-turn",
+              "period": 8,
+              "patch": {
+                "people": [
+                  {
+                    "id": "A",
+                    "values": {
+                      "paidHours": 16,
+                      "domesticShare": 0.7
+                    }
+                  },
+                  {
+                    "id": "B",
+                    "values": {
+                      "paidHours": 36,
+                      "domesticShare": 0.3
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "changes": [
+        {
+          "id": "none",
+          "label": "No external change",
+          "events": []
+        },
+        {
+          "id": "values",
+          "label": "B wants more paid work",
+          "events": [
+            {
+              "id": "changed-values",
+              "period": 5,
+              "patch": {
+                "people": [
+                  {
+                    "id": "B",
+                    "values": {
+                      "paidHours": 32,
+                      "domesticShare": 0.5
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "capacity",
+          "label": "B has fewer usable hours",
+          "events": [
+            {
+              "id": "changed-capacity",
+              "period": 5,
+              "patch": {
+                "people": [
+                  {
+                    "id": "B",
+                    "capacity": 36
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "demands",
+          "label": "More unpaid work is due",
+          "events": [
+            {
+              "id": "changed-demands",
+              "period": 5,
+              "patch": {
+                "domesticHours": 48
+              }
+            }
+          ]
+        },
+        {
+          "id": "combined",
+          "label": "Values change then A loses capacity",
+          "events": [
+            {
+              "id": "changed-values",
+              "period": 5,
+              "patch": {
+                "people": [
+                  {
+                    "id": "B",
+                    "values": {
+                      "paidHours": 32,
+                      "domesticShare": 0.5
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "changed-capacity-later",
+              "period": 9,
+              "patch": {
+                "people": [
+                  {
+                    "id": "A",
+                    "capacity": 36
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "adaptive": {
+      "protocol": "the-field/household-fixture/2",
+      "status": "authored-feedback-rules-not-calibrated",
+      "materialFixture": "evidence/data/the-field/household-orientations-v1.json",
+      "feedback": {
+        "enabled": true,
+        "A": {
+          "heardGain": 0.1,
+          "dismissedLoss": 0.25,
+          "keptGain": 0.04,
+          "missedLoss": 0.2,
+          "capacityLoss": 0
+        },
+        "B": {
+          "heardGain": 0.1,
+          "dismissedLoss": 0.25,
+          "keptGain": 0.04,
+          "missedLoss": 0.2,
+          "capacityLoss": 0
+        }
+      },
+      "experience": {
+        "A": {
+          "handling": "respectful",
+          "deliveryFraction": 1
+        },
+        "B": {
+          "handling": "respectful",
+          "deliveryFraction": 1
+        }
+      },
+      "profiles": [
+        {
+          "id": "constructive",
+          "label": "Respectful responses and kept agreements",
+          "events": []
+        },
+        {
+          "id": "dismissal",
+          "label": "A dismisses requests from period 5",
+          "events": [
+            {
+              "id": "dismissal-starts",
+              "period": 5,
+              "person": "A",
+              "handling": "dismissive"
+            }
+          ]
+        },
+        {
+          "id": "unkept",
+          "label": "A delivers half the assigned work",
+          "events": [
+            {
+              "id": "implementation-shortfall",
+              "period": 5,
+              "person": "A",
+              "deliveryFraction": 0.5
+            }
+          ]
+        },
+        {
+          "id": "repair",
+          "label": "Dismissal and shortfall then changed practice",
+          "events": [
+            {
+              "id": "rupture",
+              "period": 5,
+              "person": "A",
+              "handling": "dismissive",
+              "deliveryFraction": 0.5
+            },
+            {
+              "id": "changed-practice",
+              "period": 9,
+              "person": "A",
+              "handling": "respectful",
+              "deliveryFraction": 1
+            },
+            {
+              "id": "invitation-to-B",
+              "period": 9,
+              "person": "B",
+              "outreach": "respectful"
+            }
+          ]
+        },
+        {
+          "id": "unknown",
+          "label": "Response quality remains unknown",
+          "events": [
+            {
+              "id": "handling-unknown-A",
+              "period": 1,
+              "person": "A",
+              "handling": "unknown"
+            },
+            {
+              "id": "handling-unknown-B",
+              "period": 1,
+              "person": "B",
+              "handling": "unknown"
+            }
+          ]
+        }
+      ]
+    },
+    "controls": [
+      {
+        "key": "capacity",
+        "scope": "person",
+        "min": 0,
+        "max": 168,
+        "step": 1,
+        "unit": "hours / period",
+        "label": "Usable capacity"
+      },
+      {
+        "key": "willingness",
+        "scope": "person",
+        "min": 0,
+        "max": 1,
+        "step": 0.05,
+        "unit": "0–1; opening value",
+        "label": "Willingness to review"
+      },
+      {
+        "key": "paidHours",
+        "scope": "person",
+        "min": 0,
+        "max": 168,
+        "step": 1,
+        "unit": "hours / period",
+        "label": "Desired paid work"
+      },
+      {
+        "key": "freeHours",
+        "scope": "person",
+        "min": 0,
+        "max": 168,
+        "step": 1,
+        "unit": "hours / period",
+        "label": "Desired unallocated time"
+      },
+      {
+        "key": "domesticShare",
+        "scope": "person",
+        "min": 0,
+        "max": 1,
+        "step": 0.05,
+        "unit": "fraction of unpaid work",
+        "label": "Desired domestic share"
+      },
+      {
+        "key": "shareTolerance",
+        "scope": "person",
+        "min": 0,
+        "max": 1,
+        "step": 0.05,
+        "unit": "fraction either side of target",
+        "label": "Domestic-share tolerance"
+      },
+      {
+        "key": "paidTolerance",
+        "scope": "person",
+        "min": 0,
+        "max": 168,
+        "step": 1,
+        "unit": "hours below paid-work target",
+        "label": "Paid-work tolerance"
+      },
+      {
+        "key": "wage",
+        "scope": "person",
+        "min": 0,
+        "max": 200,
+        "step": 1,
+        "unit": "money units / paid hour",
+        "label": "Wage"
+      },
+      {
+        "key": "handling",
+        "scope": "experience",
+        "min": null,
+        "max": null,
+        "step": null,
+        "unit": "authored response quality",
+        "label": "How requests are handled"
+      },
+      {
+        "key": "deliveryFraction",
+        "scope": "experience",
+        "min": 0,
+        "max": 1,
+        "step": 0.05,
+        "unit": "fraction of achievable assigned work",
+        "label": "Agreement implementation"
+      },
+      {
+        "key": "heardGain",
+        "scope": "rate",
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "unit": "0–1; whole-run assumption",
+        "label": "Gain after being heard"
+      },
+      {
+        "key": "dismissedLoss",
+        "scope": "rate",
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "unit": "0–1; whole-run assumption",
+        "label": "Loss after dismissal"
+      },
+      {
+        "key": "keptGain",
+        "scope": "rate",
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "unit": "0–1; whole-run assumption",
+        "label": "Gain after a kept agreement"
+      },
+      {
+        "key": "missedLoss",
+        "scope": "rate",
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "unit": "0–1; whole-run assumption",
+        "label": "Loss after implementation shortfall"
+      },
+      {
+        "key": "capacityLoss",
+        "scope": "rate",
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "unit": "0–1; whole-run assumption",
+        "label": "Loss after capacity shortfall"
+      },
+      {
+        "key": "domesticHours",
+        "scope": "resource",
+        "min": 0,
+        "max": 168,
+        "step": 1,
+        "unit": "unpaid hours / period",
+        "label": "New domestic demand"
+      },
+      {
+        "key": "expenses",
+        "scope": "resource",
+        "min": 0,
+        "max": 10000,
+        "step": 10,
+        "unit": "money units / period",
+        "label": "Essential expenses"
+      },
+      {
+        "key": "reserve",
+        "scope": "resource",
+        "min": 0,
+        "max": 50000,
+        "step": 10,
+        "unit": "money units initially",
+        "label": "Opening reserve"
+      }
+    ],
+    "reviewLabels": {
+      "no-request": "no request triggered",
+      "review-not-open": "review is not open",
+      "review-time-unavailable": "no time available for review",
+      "no-joint-proposal-on-grid": "no jointly acceptable proposal found",
+      "request-dismissed": "the request was dismissed",
+      "revised": "both accepted a revised allocation"
+    },
+    "evidenceLabels": {
+      "heard": "request heard",
+      "dismissed": "request dismissed",
+      "unknown": "response quality unknown",
+      "outreach": "explicit respectful outreach",
+      "kept": "agreement kept",
+      "implementation-shortfall": "achievable work not delivered",
+      "capacity-shortfall": "capacity prevented full delivery",
+      "mixed-shortfall": "capacity and implementation shortfalls",
+      "no-task-due": "no task was due"
+    }
+  }
 }

@@ -3,506 +3,49 @@
   "queries": {
     "activity.boot": [
       {
-        "port": "state.set",
-        "args": {
-          "key": "quiet",
-          "value": false
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "revisionOpen",
-          "value": false
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "gate",
-          "value": false
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "memoryHidden",
-          "value": false
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "enriched",
-          "value": false
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "loopRunning",
-          "value": false
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "step",
-          "value": 0
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "bits",
-          "value": [
-            "list",
-            0,
-            0,
-            0
-          ]
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "original",
-          "value": 0
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "mode",
-          "value": "budget"
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "coupled",
-          "value": true
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "origin",
-          "value": "a"
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.location",
-        "args": {},
-        "into": "location"
-      },
-      {
-        "port": "text.slice",
-        "args": {
-          "value": "$location.hash",
-          "start": 1
-        },
-        "into": "id"
-      },
-      {
-        "let": "id",
-        "value": [
-          "or",
-          "$id",
-          "observation"
-        ]
-      },
-      {
-        "port": "record.get",
-        "args": {
-          "record": "$data.activities",
-          "key": "$id"
-        },
-        "into": "activity"
-      },
-      {
-        "assert": "$activity",
-        "message": "READER-PLACE: Unknown activity."
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "activity",
-          "value": "$activity"
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.attribute",
-        "args": {
-          "ref": "body",
-          "name": "data-activity",
-          "value": "$activity.id"
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.title",
-        "args": {
-          "value": [
-            "concat",
-            "$activity.title",
-            " — Aaron Alderman"
-          ]
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.content",
-        "args": {
-          "ref": "#activity",
-          "html": "$activity.html"
-        },
-        "into": "_"
-      },
-      {
-        "let": "input",
-        "value": {
-          "tag": "p",
-          "attrs": {},
-          "children": [
-            "list",
-            "$activity.instruction"
-          ]
-        }
-      },
-      {
-        "call": "html.serialize"
-      },
-      {
-        "let": "markup",
-        "value": "$result"
-      },
-      {
-        "port": "browser.content",
-        "args": {
-          "ref": "#activity-help",
-          "html": "$markup"
-        },
-        "into": "_"
-      },
-      {
         "port": "browser.select",
         "args": {
-          "selector": ".encounter-label"
+          "selector": "#household-root"
         },
-        "into": "labels"
+        "into": "hhRoot"
       },
       {
-        "each": "$labels",
-        "as": "label",
-        "steps": [
-          {
-            "port": "browser.write",
-            "args": {
-              "ref": "$label.ref",
-              "name": "textContent",
-              "value": "$activity.title"
-            },
-            "into": "_"
-          }
-        ]
-      },
-      {
-        "when": "$activity.note",
+        "when": [
+          "eq",
+          [
+            "count",
+            "$hhRoot"
+          ],
+          0
+        ],
         "then": [
           {
-            "port": "browser.select",
-            "args": {
-              "selector": ".demo-note,.world-note"
-            },
-            "into": "notes"
-          },
-          {
-            "each": "$notes",
-            "as": "note",
-            "steps": [
-              {
-                "port": "browser.write",
-                "args": {
-                  "ref": "$note.ref",
-                  "name": "textContent",
-                  "value": "$activity.note"
-                },
-                "into": "_"
-              }
-            ]
+            "call": "activity.standard.boot"
           }
         ]
-      },
-      {
-        "port": "browser.select",
-        "args": {
-          "selector": ".equation-note"
-        },
-        "into": "equations"
-      },
-      {
-        "each": "$equations",
-        "as": "equation",
-        "steps": [
-          {
-            "port": "browser.property",
-            "args": {
-              "ref": "$equation.ref",
-              "name": "outerHTML"
-            },
-            "into": "equationHTML"
-          },
-          {
-            "port": "browser.replace",
-            "args": {
-              "ref": "$equation.ref",
-              "html": [
-                "concat",
-                "<details class=\"calculation-detail\"><summary>See the calculation</summary>",
-                "$equationHTML",
-                "</details>"
-              ]
-            },
-            "into": "_"
-          }
-        ]
-      },
-      {
-        "call": "activity.calculations"
-      },
-      {
-        "port": "browser.environment",
-        "args": {},
-        "into": "environment"
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "motion",
-          "value": [
-            "not",
-            "$environment.reduced"
-          ]
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.attribute",
-        "args": {
-          "ref": "body",
-          "name": "data-motion",
-          "value": [
-            "if",
-            "$environment.reduced",
-            "paused",
-            "on"
-          ]
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.write",
-        "args": {
-          "ref": "#motion-toggle",
-          "name": "textContent",
-          "value": [
-            "if",
-            "$environment.reduced",
-            "Reduced motion",
-            "Motion on"
-          ]
-        },
-        "into": "_"
-      },
-      {
-        "port": "state.get",
-        "args": {
-          "key": "activityBound"
-        },
-        "into": "activityBound"
       },
       {
         "when": [
           "not",
-          "$activityBound"
+          [
+            "eq",
+            [
+              "count",
+              "$hhRoot"
+            ],
+            0
+          ]
         ],
         "then": [
           {
-            "port": "browser.on",
+            "port": "kernel.invoke",
             "args": {
-              "ref": "#activity-source",
-              "event": "click",
-              "query": "activity.source.backdrop",
+              "query": "household.boot",
               "input": {}
-            },
-            "into": "_"
-          },
-          {
-            "port": "browser.on",
-            "args": {
-              "ref": "document",
-              "event": "click",
-              "query": "activity.source",
-              "input": {},
-              "delegate": "[data-source]"
-            },
-            "into": "_"
-          },
-          {
-            "port": "browser.on",
-            "args": {
-              "ref": "#activity-source-close",
-              "event": "click",
-              "query": "activity.source.close",
-              "input": {}
-            },
-            "into": "_"
-          },
-          {
-            "port": "browser.on",
-            "args": {
-              "ref": "document",
-              "event": "click",
-              "query": "activity.click",
-              "input": {},
-              "delegate": "button[data-world],button[data-encounter],button[data-demo]"
-            },
-            "into": "_"
-          },
-          {
-            "port": "browser.on",
-            "args": {
-              "ref": "document",
-              "event": "input",
-              "query": "activity.input",
-              "input": {},
-              "delegate": "input[type=range]"
-            },
-            "into": "_"
-          },
-          {
-            "port": "browser.on",
-            "args": {
-              "ref": "window",
-              "event": "hashchange",
-              "query": "activity.boot",
-              "input": {}
-            },
-            "into": "_"
-          },
-          {
-            "port": "browser.on",
-            "args": {
-              "ref": "#motion-toggle",
-              "event": "click",
-              "query": "activity.motion",
-              "input": {}
-            },
-            "into": "_"
-          },
-          {
-            "port": "state.set",
-            "args": {
-              "key": "activityBound",
-              "value": true
             },
             "into": "_"
           }
         ]
-      },
-      {
-        "port": "storage.read",
-        "args": {
-          "key": "worldwright-motion"
-        },
-        "into": "preference"
-      },
-      {
-        "port": "browser.environment",
-        "args": {},
-        "into": "environment"
-      },
-      {
-        "let": "motion",
-        "value": [
-          "and",
-          [
-            "not",
-            "$environment.reduced"
-          ],
-          [
-            "not",
-            [
-              "eq",
-              "$preference.value",
-              "paused"
-            ]
-          ]
-        ]
-      },
-      {
-        "port": "state.set",
-        "args": {
-          "key": "motion",
-          "value": "$motion"
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.write",
-        "args": {
-          "ref": "#motion-toggle",
-          "name": "disabled",
-          "value": "$environment.reduced"
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.attribute",
-        "args": {
-          "ref": "body",
-          "name": "data-motion",
-          "value": [
-            "if",
-            "$motion",
-            "on",
-            "paused"
-          ]
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.write",
-        "args": {
-          "ref": "#motion-toggle",
-          "name": "textContent",
-          "value": [
-            "if",
-            "$environment.reduced",
-            "Reduced motion",
-            [
-              "if",
-              "$motion",
-              "Motion on",
-              "Motion paused"
-            ]
-          ]
-        },
-        "into": "_"
       }
     ],
     "activity.motion": [
@@ -4322,6 +3865,2755 @@
             ]
           }
         ]
+      }
+    ],
+    "activity.standard.boot": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "quiet",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "revisionOpen",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "gate",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "memoryHidden",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "enriched",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "loopRunning",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "step",
+          "value": 0
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "bits",
+          "value": [
+            "list",
+            0,
+            0,
+            0
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "original",
+          "value": 0
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "mode",
+          "value": "budget"
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "coupled",
+          "value": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "origin",
+          "value": "a"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.location",
+        "args": {},
+        "into": "location"
+      },
+      {
+        "port": "text.slice",
+        "args": {
+          "value": "$location.hash",
+          "start": 1
+        },
+        "into": "id"
+      },
+      {
+        "let": "id",
+        "value": [
+          "or",
+          "$id",
+          "observation"
+        ]
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$data.activities",
+          "key": "$id"
+        },
+        "into": "activity"
+      },
+      {
+        "assert": "$activity",
+        "message": "READER-PLACE: Unknown activity."
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "activity",
+          "value": "$activity"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-activity",
+          "value": "$activity.id"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.title",
+        "args": {
+          "value": [
+            "concat",
+            "$activity.title",
+            " — Aaron Alderman"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#activity",
+          "html": "$activity.html"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "p",
+          "attrs": {},
+          "children": [
+            "list",
+            "$activity.instruction"
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#activity-help",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": ".encounter-label"
+        },
+        "into": "labels"
+      },
+      {
+        "each": "$labels",
+        "as": "label",
+        "steps": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$label.ref",
+              "name": "textContent",
+              "value": "$activity.title"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "when": "$activity.note",
+        "then": [
+          {
+            "port": "browser.select",
+            "args": {
+              "selector": ".demo-note,.world-note"
+            },
+            "into": "notes"
+          },
+          {
+            "each": "$notes",
+            "as": "note",
+            "steps": [
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "$note.ref",
+                  "name": "textContent",
+                  "value": "$activity.note"
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": ".equation-note"
+        },
+        "into": "equations"
+      },
+      {
+        "each": "$equations",
+        "as": "equation",
+        "steps": [
+          {
+            "port": "browser.property",
+            "args": {
+              "ref": "$equation.ref",
+              "name": "outerHTML"
+            },
+            "into": "equationHTML"
+          },
+          {
+            "port": "browser.replace",
+            "args": {
+              "ref": "$equation.ref",
+              "html": [
+                "concat",
+                "<details class=\"calculation-detail\"><summary>See the calculation</summary>",
+                "$equationHTML",
+                "</details>"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "call": "activity.calculations"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "environment"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "motion",
+          "value": [
+            "not",
+            "$environment.reduced"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-motion",
+          "value": [
+            "if",
+            "$environment.reduced",
+            "paused",
+            "on"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#motion-toggle",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$environment.reduced",
+            "Reduced motion",
+            "Motion on"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "activityBound"
+        },
+        "into": "activityBound"
+      },
+      {
+        "when": [
+          "not",
+          "$activityBound"
+        ],
+        "then": [
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#activity-source",
+              "event": "click",
+              "query": "activity.source.backdrop",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "document",
+              "event": "click",
+              "query": "activity.source",
+              "input": {},
+              "delegate": "[data-source]"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#activity-source-close",
+              "event": "click",
+              "query": "activity.source.close",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "document",
+              "event": "click",
+              "query": "activity.click",
+              "input": {},
+              "delegate": "button[data-world],button[data-encounter],button[data-demo]"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "document",
+              "event": "input",
+              "query": "activity.input",
+              "input": {},
+              "delegate": "input[type=range]"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "window",
+              "event": "hashchange",
+              "query": "activity.boot",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#motion-toggle",
+              "event": "click",
+              "query": "activity.motion",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "activityBound",
+              "value": true
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "storage.read",
+        "args": {
+          "key": "worldwright-motion"
+        },
+        "into": "preference"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "environment"
+      },
+      {
+        "let": "motion",
+        "value": [
+          "and",
+          [
+            "not",
+            "$environment.reduced"
+          ],
+          [
+            "not",
+            [
+              "eq",
+              "$preference.value",
+              "paused"
+            ]
+          ]
+        ]
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "motion",
+          "value": "$motion"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#motion-toggle",
+          "name": "disabled",
+          "value": "$environment.reduced"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-motion",
+          "value": [
+            "if",
+            "$motion",
+            "on",
+            "paused"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#motion-toggle",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$environment.reduced",
+            "Reduced motion",
+            [
+              "if",
+              "$motion",
+              "Motion on",
+              "Motion paused"
+            ]
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "household.boot": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-orientation",
+          "value": "roles"
+        },
+        "into": "hp135"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-change",
+          "value": "values"
+        },
+        "into": "hp136"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-profile",
+          "value": "constructive"
+        },
+        "into": "hp137"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-enabled",
+          "value": true
+        },
+        "into": "hp138"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-person",
+          "value": "A"
+        },
+        "into": "hp139"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-phase",
+          "value": "initial"
+        },
+        "into": "hp140"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-period",
+          "value": 5
+        },
+        "into": "hp141"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-overrides",
+          "value": [
+            "list"
+          ]
+        },
+        "into": "hp142"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#household-root",
+          "event": "change",
+          "delegate": "input,select",
+          "query": "household.change",
+          "input": {}
+        },
+        "into": "hp143"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#household-root",
+          "event": "click",
+          "delegate": "button",
+          "query": "household.click",
+          "input": {}
+        },
+        "into": "hp144"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.rebuild",
+          "input": {}
+        },
+        "into": "hq145"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "#household-root input,#household-root select,#household-root button"
+        },
+        "into": "controls"
+      },
+      {
+        "each": "$controls",
+        "as": "control",
+        "steps": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$control.ref",
+              "name": "disabled",
+              "value": false
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "household.rebuild": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-orientation"
+        },
+        "into": "orientation"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-change"
+        },
+        "into": "change"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-profile"
+        },
+        "into": "profile"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-enabled"
+        },
+        "into": "enabled"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-overrides"
+        },
+        "into": "overrides"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.scenario",
+          "input": {
+            "orientation": "$orientation",
+            "change": "$change",
+            "profile": "$profile",
+            "enabled": "$enabled"
+          }
+        },
+        "into": "scenario"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-scenario",
+          "value": "$scenario"
+        },
+        "into": "hp146"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.run",
+          "input": {
+            "scenario": "$scenario",
+            "overrides": "$overrides"
+          }
+        },
+        "into": "run"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-run",
+          "value": "$run"
+        },
+        "into": "hp147"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.render",
+          "input": {}
+        },
+        "into": "hq148"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.sync",
+          "input": {}
+        },
+        "into": "hq149"
+      }
+    ],
+    "household.sync": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-run"
+        },
+        "into": "run"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-scenario"
+        },
+        "into": "scenario"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-person"
+        },
+        "into": "person"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-phase"
+        },
+        "into": "phase"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-overrides"
+        },
+        "into": "overrides"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-orientation"
+        },
+        "into": "orientation"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-change"
+        },
+        "into": "change"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-profile"
+        },
+        "into": "profile"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-enabled"
+        },
+        "into": "enabled"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-orientation",
+          "name": "value",
+          "value": "$orientation"
+        },
+        "into": "hp150"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-change",
+          "name": "value",
+          "value": "$change"
+        },
+        "into": "hp151"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-profile",
+          "name": "value",
+          "value": "$profile"
+        },
+        "into": "hp152"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-person",
+          "name": "value",
+          "value": "$person"
+        },
+        "into": "hp153"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-phase",
+          "name": "value",
+          "value": "$phase"
+        },
+        "into": "hp154"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-enabled",
+          "name": "checked",
+          "value": "$enabled"
+        },
+        "into": "hp155"
+      },
+      {
+        "let": "row",
+        "value": [
+          "at",
+          "$run.history",
+          [
+            "if",
+            [
+              "eq",
+              "$phase",
+              "initial"
+            ],
+            0,
+            4
+          ]
+        ]
+      },
+      {
+        "let": "per",
+        "value": [
+          "at",
+          "$row.assumptions",
+          [
+            "if",
+            [
+              "eq",
+              "$person",
+              "A"
+            ],
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "fold": "$data.household.controls",
+        "as": "def",
+        "accumulator": "unused",
+        "initial": null,
+        "steps": [
+          {
+            "let": "phaseKey",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$def.scope",
+                "rate"
+              ],
+              "run",
+              [
+                "if",
+                [
+                  "eq",
+                  "$def.scope",
+                  "resource"
+                ],
+                "initial",
+                "$phase"
+              ]
+            ]
+          },
+          {
+            "let": "id",
+            "value": [
+              "concat",
+              "$def.scope",
+              "-",
+              [
+                "if",
+                [
+                  "eq",
+                  "$def.scope",
+                  "resource"
+                ],
+                "household",
+                "$person"
+              ],
+              "-",
+              "$phaseKey",
+              "-",
+              "$def.key"
+            ]
+          },
+          {
+            "let": "edit",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$overrides",
+                "e",
+                [
+                  "eq",
+                  "$e.id",
+                  "$id"
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "let": "base",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$def.scope",
+                "person"
+              ],
+              [
+                "if",
+                [
+                  "includes",
+                  [
+                    "list",
+                    "capacity",
+                    "willingness",
+                    "wage"
+                  ],
+                  "$def.key"
+                ],
+                [
+                  "at",
+                  "$per",
+                  "$def.key"
+                ],
+                [
+                  "at",
+                  "$per.values",
+                  "$def.key"
+                ]
+              ],
+              [
+                "if",
+                [
+                  "eq",
+                  "$def.scope",
+                  "experience"
+                ],
+                [
+                  "at",
+                  [
+                    "at",
+                    "$row.experience",
+                    "$person"
+                  ],
+                  "$def.key"
+                ],
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$def.scope",
+                    "rate"
+                  ],
+                  [
+                    "at",
+                    [
+                      "at",
+                      "$scenario.feedback",
+                      "$person"
+                    ],
+                    "$def.key"
+                  ],
+                  [
+                    "at",
+                    "$scenario.material.initial",
+                    "$def.key"
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "value",
+            "value": [
+              "if",
+              "$edit",
+              [
+                "at",
+                "$edit",
+                "value"
+              ],
+              "$base"
+            ]
+          },
+          {
+            "let": "ref",
+            "value": [
+              "concat",
+              [
+                "if",
+                [
+                  "eq",
+                  "$def.scope",
+                  "resource"
+                ],
+                "#hh-resource-",
+                "#hh-param-"
+              ],
+              "$def.key"
+            ]
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$ref",
+              "name": "value",
+              "value": "$value"
+            },
+            "into": "hp156"
+          },
+          {
+            "port": "browser.select",
+            "args": {
+              "selector": [
+                "concat",
+                "$ref",
+                "-value"
+              ]
+            },
+            "into": "outputs"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                [
+                  "count",
+                  "$outputs"
+                ],
+                0
+              ]
+            },
+            "into": "hn157"
+          },
+          {
+            "when": "$hn157",
+            "then": [
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": [
+                    "concat",
+                    "$ref",
+                    "-value"
+                  ],
+                  "name": "textContent",
+                  "value": [
+                    "concat",
+                    "$value",
+                    " ",
+                    "$def.unit"
+                  ]
+                },
+                "into": "hp158"
+              }
+            ]
+          }
+        ],
+        "yield": null,
+        "into": "unused"
+      }
+    ],
+    "household.change": [
+      {
+        "let": "target",
+        "value": "$eventInput.matched"
+      },
+      {
+        "let": "id",
+        "value": [
+          "at",
+          "$target.attributes",
+          "id"
+        ]
+      },
+      {
+        "let": "preset",
+        "value": [
+          "includes",
+          [
+            "list",
+            "hh-orientation",
+            "hh-change",
+            "hh-profile",
+            "hh-enabled"
+          ],
+          "$id"
+        ]
+      },
+      {
+        "when": "$preset",
+        "then": [
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-orientation"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-orientation",
+                  "value": "$target.value"
+                },
+                "into": "hp159"
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-change"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-change",
+                  "value": "$target.value"
+                },
+                "into": "hp160"
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-profile"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-profile",
+                  "value": "$target.value"
+                },
+                "into": "hp161"
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-enabled"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-enabled",
+                  "value": "$target.checked"
+                },
+                "into": "hp162"
+              }
+            ]
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "hh-overrides",
+              "value": [
+                "list"
+              ]
+            },
+            "into": "hp163"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.rebuild",
+              "input": {}
+            },
+            "into": "hq164"
+          }
+        ]
+      },
+      {
+        "when": [
+          "includes",
+          [
+            "list",
+            "hh-person",
+            "hh-phase"
+          ],
+          "$id"
+        ],
+        "then": [
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-person"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-person",
+                  "value": "$target.value"
+                },
+                "into": "hp165"
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-phase"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-phase",
+                  "value": "$target.value"
+                },
+                "into": "hp166"
+              }
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.sync",
+              "input": {}
+            },
+            "into": "hq167"
+          }
+        ]
+      },
+      {
+        "when": [
+          "and",
+          [
+            "not",
+            "$preset"
+          ],
+          [
+            "not",
+            [
+              "includes",
+              [
+                "list",
+                "hh-person",
+                "hh-phase"
+              ],
+              "$id"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "state.get",
+            "args": {
+              "key": "hh-person"
+            },
+            "into": "person"
+          },
+          {
+            "port": "state.get",
+            "args": {
+              "key": "hh-phase"
+            },
+            "into": "phase"
+          },
+          {
+            "port": "state.get",
+            "args": {
+              "key": "hh-overrides"
+            },
+            "into": "overrides"
+          },
+          {
+            "let": "key",
+            "value": [
+              "at",
+              "$target.attributes",
+              "data-hh-key"
+            ]
+          },
+          {
+            "let": "scope",
+            "value": [
+              "at",
+              "$target.attributes",
+              "data-hh-scope"
+            ]
+          },
+          {
+            "let": "def",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$data.household.controls",
+                "d",
+                [
+                  "and",
+                  [
+                    "eq",
+                    "$d.key",
+                    "$key"
+                  ],
+                  [
+                    "eq",
+                    "$d.scope",
+                    "$scope"
+                  ]
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "when": "$def",
+            "then": [
+              {
+                "let": "value",
+                "value": "$target.value"
+              },
+              {
+                "when": [
+                  "not",
+                  [
+                    "eq",
+                    "$key",
+                    "handling"
+                  ]
+                ],
+                "then": [
+                  {
+                    "port": "number.parse",
+                    "args": {
+                      "value": "$target.value"
+                    },
+                    "into": "numeric"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "max",
+                      "values": [
+                        "list",
+                        "$def.min",
+                        [
+                          "or",
+                          "$numeric",
+                          0
+                        ]
+                      ]
+                    },
+                    "into": "hn169"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "min",
+                      "values": [
+                        "list",
+                        "$def.max",
+                        "$hn169"
+                      ]
+                    },
+                    "into": "hn168"
+                  },
+                  {
+                    "let": "value",
+                    "value": "$hn168"
+                  }
+                ]
+              },
+              {
+                "let": "phaseKey",
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$scope",
+                    "rate"
+                  ],
+                  "run",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$scope",
+                      "resource"
+                    ],
+                    "initial",
+                    "$phase"
+                  ]
+                ]
+              },
+              {
+                "let": "editId",
+                "value": [
+                  "concat",
+                  "$scope",
+                  "-",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$scope",
+                      "resource"
+                    ],
+                    "household",
+                    "$person"
+                  ],
+                  "-",
+                  "$phaseKey",
+                  "-",
+                  "$key"
+                ]
+              },
+              {
+                "let": "overrides",
+                "value": [
+                  "append",
+                  [
+                    "filter",
+                    "$overrides",
+                    "e",
+                    [
+                      "not",
+                      [
+                        "eq",
+                        "$e.id",
+                        "$editId"
+                      ]
+                    ]
+                  ],
+                  [
+                    "list",
+                    {
+                      "id": "$editId",
+                      "scope": "$scope",
+                      "person": "$person",
+                      "phase": "$phaseKey",
+                      "key": "$key",
+                      "value": "$value"
+                    }
+                  ]
+                ]
+              },
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-overrides",
+                  "value": "$overrides"
+                },
+                "into": "hp170"
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "household.rebuild",
+                  "input": {}
+                },
+                "into": "hq171"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "household.click": [
+      {
+        "let": "id",
+        "value": [
+          "at",
+          "$eventInput.matched.attributes",
+          "id"
+        ]
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-period"
+        },
+        "into": "period"
+      },
+      {
+        "when": [
+          "eq",
+          "$id",
+          "hh-reset"
+        ],
+        "then": [
+          {
+            "port": "state.set",
+            "args": {
+              "key": "hh-overrides",
+              "value": [
+                "list"
+              ]
+            },
+            "into": "hp172"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.rebuild",
+              "input": {}
+            },
+            "into": "hq173"
+          }
+        ]
+      },
+      {
+        "when": [
+          "includes",
+          [
+            "list",
+            "hh-prev",
+            "hh-next"
+          ],
+          "$id"
+        ],
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$period",
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$id",
+                    "hh-next"
+                  ],
+                  1,
+                  -1
+                ]
+              ]
+            },
+            "into": "hn177"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "min",
+              "values": [
+                "list",
+                12,
+                "$hn177"
+              ]
+            },
+            "into": "hn176"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "max",
+              "values": [
+                "list",
+                1,
+                "$hn176"
+              ]
+            },
+            "into": "hn175"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "hh-period",
+              "value": "$hn175"
+            },
+            "into": "hp174"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.render",
+              "input": {}
+            },
+            "into": "hq178"
+          }
+        ]
+      },
+      {
+        "let": "selected",
+        "value": [
+          "at",
+          "$eventInput.matched.attributes",
+          "data-hh-period"
+        ]
+      },
+      {
+        "when": "$selected",
+        "then": [
+          {
+            "port": "number.parse",
+            "args": {
+              "value": "$selected"
+            },
+            "into": "n"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "hh-period",
+              "value": "$n"
+            },
+            "into": "hp179"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.render",
+              "input": {}
+            },
+            "into": "hq180"
+          }
+        ]
+      }
+    ],
+    "household.render": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-run"
+        },
+        "into": "run"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-period"
+        },
+        "into": "period"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-overrides"
+        },
+        "into": "overrides"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$period",
+            1
+          ]
+        },
+        "into": "hn181"
+      },
+      {
+        "let": "row",
+        "value": [
+          "at",
+          "$run.history",
+          "$hn181"
+        ]
+      },
+      {
+        "let": "reviewText",
+        "value": [
+          "at",
+          "$data.household.reviewLabels",
+          "$row.review.status"
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-period-label",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Period ",
+            "$period",
+            " of 12"
+          ]
+        },
+        "into": "hp182"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-status",
+          "name": "textContent",
+          "value": [
+            "concat",
+            [
+              "if",
+              [
+                "eq",
+                "$row.review.requester",
+                null
+              ],
+              "No request is triggered.",
+              [
+                "concat",
+                "$row.review.requester",
+                " requests review: ",
+                "$reviewText",
+                "."
+              ]
+            ],
+            " End-of-period evidence changes willingness for the next period."
+          ]
+        },
+        "into": "hp183"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-prev",
+          "name": "disabled",
+          "value": [
+            "eq",
+            "$period",
+            1
+          ]
+        },
+        "into": "hp184"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-next",
+          "name": "disabled",
+          "value": [
+            "eq",
+            "$period",
+            12
+          ]
+        },
+        "into": "hp185"
+      },
+      {
+        "fold": "$row.people",
+        "as": "per",
+        "accumulator": "cards",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "assumption",
+            "value": [
+              "at",
+              "$row.assumptions",
+              [
+                "if",
+                [
+                  "eq",
+                  "$per.id",
+                  "A"
+                ],
+                0,
+                1
+              ]
+            ]
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$per.paid",
+              "digits": 1
+            },
+            "into": "hp186"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$per.free",
+              "digits": 1
+            },
+            "into": "hp187"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$per.domestic",
+              "digits": 1
+            },
+            "into": "hp188"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$assumption.capacity",
+              "digits": 1
+            },
+            "into": "hp189"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": [
+                "at",
+                "$row.willingnessOpening",
+                "$per.id"
+              ],
+              "digits": 3
+            },
+            "into": "hp190"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": [
+                "at",
+                "$row.willingnessClosing",
+                "$per.id"
+              ],
+              "digits": 3
+            },
+            "into": "hp191"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$assumption.values.paidHours",
+              "digits": 1
+            },
+            "into": "hp192"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$per.domesticDue",
+              "digits": 1
+            },
+            "into": "hp193"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$assumption.values.freeHours",
+              "digits": 1
+            },
+            "into": "hp194"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$assumption.values.domesticShare",
+                100
+              ]
+            },
+            "into": "hn196"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn196",
+              "digits": 0
+            },
+            "into": "hp195"
+          }
+        ],
+        "yield": [
+          "append",
+          "$cards",
+          [
+            "list",
+            {
+              "tag": "article",
+              "attrs": {
+                "class": [
+                  "concat",
+                  "hh-person hh-person-",
+                  "$per.id"
+                ]
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "field-eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "Person ",
+                      "$per.id"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "h3",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "if",
+                      "$per.goalsWithinBounds",
+                      "Within stated bounds",
+                      "Some stated bounds unmet"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "Capacity ",
+                      "$hp189",
+                      "h · desired paid work ",
+                      "$hp192",
+                      "h."
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "Desired unallocated time ",
+                      "$hp194",
+                      "h · preferred unpaid share ",
+                      "$hp195",
+                      "%."
+                    ]
+                  ]
+                },
+                {
+                  "tag": "dl",
+                  "attrs": {
+                    "class": "hh-metrics"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Paid work"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "$hp186",
+                          "h"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Unpaid work delivered / due"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "$hp188",
+                          " / ",
+                          "$hp193",
+                          "h"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Unallocated time"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "$hp187",
+                          "h"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Willingness: opening → next"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "$hp190",
+                          " → ",
+                          "$hp191"
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "hh-small"
+                  },
+                  "children": [
+                    "list",
+                    "Bounds are this person’s authored values. No household happiness or human worth is scored."
+                  ]
+                }
+              ]
+            }
+          ]
+        ],
+        "into": "cards"
+      },
+      {
+        "let": "input",
+        "value": "$cards"
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hh-people",
+          "html": "$result"
+        },
+        "into": "hp197"
+      },
+      {
+        "fold": "$run.history",
+        "as": "r",
+        "accumulator": "chart",
+        "initial": {
+          "a": "",
+          "b": "",
+          "buttons": [
+            "list"
+          ]
+        },
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$r.period",
+                1
+              ]
+            },
+            "into": "hn201"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$hn201",
+                46
+              ]
+            },
+            "into": "hn200"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                30,
+                "$hn200"
+              ]
+            },
+            "into": "hn199"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn199",
+              "digits": 2
+            },
+            "into": "hp198"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$r.willingnessClosing.A",
+                140
+              ]
+            },
+            "into": "hn204"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                170,
+                "$hn204"
+              ]
+            },
+            "into": "hn203"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn203",
+              "digits": 2
+            },
+            "into": "hp202"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$r.willingnessClosing.B",
+                140
+              ]
+            },
+            "into": "hn207"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                170,
+                "$hn207"
+              ]
+            },
+            "into": "hn206"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn206",
+              "digits": 2
+            },
+            "into": "hp205"
+          }
+        ],
+        "yield": {
+          "a": [
+            "concat",
+            "$chart.a",
+            [
+              "if",
+              [
+                "eq",
+                "$r.period",
+                1
+              ],
+              "M",
+              " L"
+            ],
+            "$hp198",
+            ",",
+            "$hp202"
+          ],
+          "b": [
+            "concat",
+            "$chart.b",
+            [
+              "if",
+              [
+                "eq",
+                "$r.period",
+                1
+              ],
+              "M",
+              " L"
+            ],
+            "$hp198",
+            ",",
+            "$hp205"
+          ],
+          "buttons": [
+            "append",
+            "$chart.buttons",
+            [
+              "list",
+              {
+                "tag": "button",
+                "attrs": {
+                  "type": "button",
+                  "data-hh-period": "$r.period",
+                  "aria-pressed": [
+                    "if",
+                    [
+                      "eq",
+                      "$r.period",
+                      "$period"
+                    ],
+                    "true",
+                    "false"
+                  ],
+                  "class": [
+                    "if",
+                    [
+                      "eq",
+                      "$r.period",
+                      "$period"
+                    ],
+                    "is-current",
+                    ""
+                  ]
+                },
+                "children": [
+                  "list",
+                  "$r.period"
+                ]
+              }
+            ]
+          ]
+        },
+        "into": "chart"
+      },
+      {
+        "let": "input",
+        "value": [
+          "list",
+          {
+            "tag": "div",
+            "attrs": {
+              "class": "hh-chart-key"
+            },
+            "children": [
+              "list",
+              "Willingness after each period · A: green · B: ochre · 0 to 1"
+            ]
+          },
+          {
+            "tag": "svg",
+            "attrs": {
+              "viewBox": "0 0 566 205",
+              "role": "img",
+              "aria-label": "Separate willingness trajectories for A and B over twelve periods"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "path",
+                "attrs": {
+                  "d": "M30 30V170H536",
+                  "stroke": "#c7c9bc",
+                  "fill": "none"
+                },
+                "children": [
+                  "list"
+                ]
+              },
+              {
+                "tag": "text",
+                "attrs": {
+                  "x": "8",
+                  "y": "35",
+                  "fill": "#526255"
+                },
+                "children": [
+                  "list",
+                  "1"
+                ]
+              },
+              {
+                "tag": "text",
+                "attrs": {
+                  "x": "8",
+                  "y": "175",
+                  "fill": "#526255"
+                },
+                "children": [
+                  "list",
+                  "0"
+                ]
+              },
+              {
+                "tag": "path",
+                "attrs": {
+                  "d": "$chart.a",
+                  "stroke": "#285d4f",
+                  "stroke-width": "3",
+                  "fill": "none"
+                },
+                "children": [
+                  "list"
+                ]
+              },
+              {
+                "tag": "path",
+                "attrs": {
+                  "d": "$chart.b",
+                  "stroke": "#b57d36",
+                  "stroke-width": "3",
+                  "fill": "none",
+                  "stroke-dasharray": "7 4"
+                },
+                "children": [
+                  "list"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "div",
+            "attrs": {
+              "class": "hh-periods",
+              "aria-label": "Select period"
+            },
+            "children": [
+              "list",
+              "$chart.buttons"
+            ]
+          }
+        ]
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hh-timeline",
+          "html": "$result"
+        },
+        "into": "hp208"
+      },
+      {
+        "fold": "$row.willingnessUpdates",
+        "as": "ev",
+        "accumulator": "items",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "cause",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$row.evidence",
+                "e",
+                [
+                  "eq",
+                  "$e.id",
+                  "$ev.evidenceId"
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$ev.before",
+              "digits": 3
+            },
+            "into": "hp209"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$ev.after",
+              "digits": 3
+            },
+            "into": "hp210"
+          }
+        ],
+        "yield": [
+          "append",
+          "$items",
+          [
+            "list",
+            {
+              "tag": "li",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "strong",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "$ev.person",
+                      " observed ",
+                      "$cause.actor",
+                      ": ",
+                      [
+                        "at",
+                        "$data.household.evidenceLabels",
+                        "$ev.kind"
+                      ]
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "$hp209",
+                      " → ",
+                      "$hp210",
+                      " · evidence ",
+                      "$ev.evidenceId"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "hh-small"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$ev.kind",
+                        "capacity-shortfall"
+                      ],
+                      "A capacity constraint is distinct from non-implementation.",
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$ev.kind",
+                          "heard"
+                        ],
+                        "Being heard does not imply that the requested remedy was granted.",
+                        "Authored evidence updates the observer’s willingness."
+                      ]
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        ],
+        "into": "items"
+      },
+      {
+        "let": "input",
+        "value": "$items"
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hh-events",
+          "html": "$result"
+        },
+        "into": "hp211"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$row.income",
+          "digits": 1
+        },
+        "into": "hp212"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$row.spent",
+          "digits": 1
+        },
+        "into": "hp213"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$row.reserve",
+          "digits": 1
+        },
+        "into": "hp214"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$row.backlog",
+          "digits": 1
+        },
+        "into": "hp215"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$row.unmetExpenses",
+          "digits": 1
+        },
+        "into": "hp216"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$row.shareA",
+            100
+          ]
+        },
+        "into": "hn218"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$hn218",
+          "digits": 1
+        },
+        "into": "hp217"
+      },
+      {
+        "let": "input",
+        "value": [
+          "list",
+          {
+            "tag": "article",
+            "attrs": {},
+            "children": [
+              "list",
+              {
+                "tag": "h3",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Immediate work & resources"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "concat",
+                    "Income ",
+                    "$hp212",
+                    " · essentials paid ",
+                    "$hp213",
+                    " · unpaid essentials ",
+                    "$hp216",
+                    "."
+                  ]
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "concat",
+                    "Domestic backlog ",
+                    "$hp215",
+                    " hours; reserve ",
+                    "$hp214",
+                    " money units."
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "article",
+            "attrs": {},
+            "children": [
+              "list",
+              {
+                "tag": "h3",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Relational consequences"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "concat",
+                    "Current allocation: A carries ",
+                    "$hp217",
+                    "% of unpaid demand. Review: ",
+                    "$reviewText",
+                    "."
+                  ]
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Willingness responds to directed evidence; trust is unknown and standing is unchanged."
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "article",
+            "attrs": {},
+            "children": [
+              "list",
+              {
+                "tag": "h3",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "What carries forward"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Unfinished work, remaining resources, the allocation, and each person’s changed willingness enter the next period. A changed preference is an input, never a breach."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "hh-small"
+                },
+                "children": [
+                  "list",
+                  [
+                    "concat",
+                    [
+                      "count",
+                      "$overrides"
+                    ],
+                    " explicit parameter overrides. Preset changes clear these; Reset clears overrides."
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hh-budget",
+          "html": "$result"
+        },
+        "into": "hp219"
       }
     ]
   }
