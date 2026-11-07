@@ -227,9 +227,60 @@
       "typeLabel": "Coordination"
     },
     {
+      "id": "simulation",
+      "name": "Simulation",
+      "group": "progress",
+      "href": "simulation/",
+      "description": "Explore how systems behave, from models of possible worlds to an industrial chain from mine to port.",
+      "status": "In progress",
+      "icon": {
+        "tag": "svg",
+        "attrs": {
+          "viewBox": "0 0 32 32",
+          "fill": "none",
+          "stroke": "currentColor",
+          "stroke-width": 1.5,
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "aria-hidden": "true",
+          "class": "hierarchy-icon"
+        },
+        "children": [
+          {
+            "tag": "circle",
+            "attrs": {
+              "cx": 16,
+              "cy": 16,
+              "r": 11
+            },
+            "children": []
+          },
+          {
+            "tag": "path",
+            "attrs": {
+              "d": "M5 16h22M16 5c-8 8-8 14 0 22 8-8 8-14 0-22Z"
+            },
+            "children": []
+          }
+        ]
+      },
+      "links": [
+        [
+          "../world-modelling/",
+          "World Modelling — mechanisms and possibilities"
+        ],
+        [
+          "../foundry/",
+          "Foundry — an industrial system from mine to port"
+        ]
+      ],
+      "type": "simulation",
+      "typeLabel": "Simulation"
+    },
+    {
       "id": "world-modelling",
       "name": "World Modelling",
-      "group": "progress",
+      "group": "simulation-project",
       "href": "world-modelling/",
       "description": "Explore mechanisms, possibilities and consequences.",
       "status": "In progress",
@@ -322,7 +373,7 @@
     {
       "id": "foundry",
       "name": "Foundry",
-      "group": "progress",
+      "group": "simulation-project",
       "href": "foundry/",
       "description": "Follow an industrial system from mine to port.",
       "status": "In progress",
@@ -360,6 +411,48 @@
       ],
       "type": "simulation",
       "typeLabel": "Simulation"
+    },
+    {
+      "id": "usewords",
+      "name": "Usewords",
+      "group": "progress",
+      "href": "usewords/",
+      "description": "Start with what matters. Develop questions, positions and proposals with AI assistance, while keeping people’s words, uncertainty and disagreement visible.",
+      "status": "Local prototype",
+      "icon": {
+        "tag": "svg",
+        "attrs": {
+          "viewBox": "0 0 32 32",
+          "fill": "none",
+          "stroke": "currentColor",
+          "stroke-width": 1.5,
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "aria-hidden": "true",
+          "class": "hierarchy-icon"
+        },
+        "children": [
+          {
+            "tag": "path",
+            "attrs": {
+              "d": "M5 7h7v7H5ZM17 9h10M5 21l3 3 6-7M17 22h10"
+            },
+            "children": []
+          }
+        ]
+      },
+      "links": [
+        [
+          "../inspection/usewords.html",
+          "Read the project’s philosophy and prototype boundaries"
+        ],
+        [
+          "../sourcery/",
+          "Explore the process algebra beneath it"
+        ]
+      ],
+      "type": "coordination",
+      "typeLabel": "Coordination"
     },
     {
       "id": "creator-studio",
@@ -541,10 +634,6 @@
         [
           "../relationship-manager/",
           "Explore rupture and repair"
-        ],
-        [
-          "households/",
-          "Households over time"
         ],
         [
           "correction/",

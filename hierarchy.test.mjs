@@ -127,9 +127,9 @@ test('the algebra preserves query strings, fragments and explicit shared exits w
 
 test('the homepage hierarchy preserves the author order and routes every tool to its own microsite',()=>{
  const groups=Object.fromEntries(['foundation','platform','application','progress','tool'].map(g=>[g,catalogue.items.filter(i=>i.group===g).map(i=>i.name)]));
- assert.deepEqual(groups,{foundation:['Temple'],platform:['Sourcery'],application:['Claimipedia','Claimipedia Science'],progress:['Worldwright','Kingdom','World Modelling','Tradie','Foundry','Creator Studio'],tool:['Encounter','Mission Control','The Field','SuperCRM','Timesheet','Workgarden','Harborboard','Relationship Manager']});
+ assert.deepEqual(groups,{foundation:['Temple'],platform:['Sourcery'],application:['Claimipedia','Claimipedia Science'],progress:['Worldwright','Kingdom','Simulation','Tradie','Usewords','Creator Studio'],tool:['Encounter','Mission Control','The Field','SuperCRM','Timesheet','Workgarden','Harborboard','Relationship Manager']});
  const home=fs.readFileSync('dist/index.html','utf8');
- for(const item of catalogue.items){assert.ok(home.includes('data-item="'+item.id+'"'));assert.ok(home.includes('href="'+item.href+'"'));assert.ok(home.includes('href="inspection/'+item.id+'.html"'));assert.ok(fs.existsSync('dist/'+item.href+'index.html'));assert.ok(fs.existsSync('dist/inspection/'+item.id+'.html'));}
+ for(const item of catalogue.items){if(item.group!=='simulation-project'){assert.ok(home.includes('data-item="'+item.id+'"'));assert.ok(home.includes('href="inspection/'+item.id+'.html"'));}assert.ok(home.includes('href="'+item.href+'"'));assert.ok(fs.existsSync('dist/'+item.href+'index.html'));assert.ok(fs.existsSync('dist/inspection/'+item.id+'.html'));}
  assert.ok(!home.includes('Shared capabilities'));assert.ok(!home.includes('Proposed connections'));
 });
 
@@ -152,6 +152,15 @@ test('sharing uses exact typed identity and counts each consumer once',async()=>
  const rows=[{item:'a',relation:'pack',target:'same'},{item:'a',relation:'pack',target:'same'},{item:'b',relation:'pack',target:'same'},{item:'c',relation:'dependsOn',target:'same'},{item:'d',relation:'pack',target:'similar'}];
  assert.deepEqual(await run('hierarchy.shared',{rows,relation:'pack',target:'same'}),['a','b']);assert.deepEqual(await run('hierarchy.shared',{rows,relation:'dependsOn',target:'same'}),['c']);
  const actual=read('dist/inspection/bindings.json').rows;const peers=await run('hierarchy.shared',{rows:actual,relation:'pack',target:'pack.sourcery.workItemPlanning.v1'});assert.ok(peers.includes('harborboard'));assert.ok(peers.includes('supercrm'));assert.ok(!peers.includes('workgarden'));
+});
+
+test('source indexing preserves typed sharing, duplicate witnesses and their order',async()=>{
+ const rows=[{item:'a',relation:'pack',target:'same'},{item:'a',relation:'pack',target:'same'},{item:'b',relation:'pack',target:'same'},{item:'c',relation:'dependsOn',target:'same'},{item:'d',relation:'pack',target:'similar'}];
+ const entry='index.test',index=read('algebra/hierarchy.process.json').queries['hierarchy.build'].find(s=>s.let==='hRowsByTarget');
+ const compiled=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry,queries:{[entry]:[index,{let:'result',value:'$hRowsByTarget'}]}},mode:'model',ports:valuePorts(),limit:20000000});
+ const groups=(await invoke({model:compiled,entry,input:{hRows:rows},ports:valuePorts(),limit:20000000})).value;
+ assert.deepEqual(groups.map(g=>g.target),['same','similar']);assert.deepEqual(groups[0].rows,rows.slice(0,4));
+ for(const relation of ['pack','dependsOn'])assert.deepEqual(await run('hierarchy.shared',{rows:groups[0].rows,relation,target:'same'}),await run('hierarchy.shared',{rows,relation,target:'same'}));
 });
 
 test('malformed, unsupported and stale source-line bindings refuse rather than fabricating connections',async()=>{
@@ -291,7 +300,7 @@ test('each homepage perspective curates real projects without changing their pur
  vm.runInContext(fs.readFileSync('dist/identity-runtime.js','utf8').replace(/startBrowser\(model,factIndex,grants\)\.catch[^\n]+/,'')+'\nglobalThis.capture=model;',context);
  const themes=JSON.parse(JSON.stringify(context.capture.data.themes)),all=tree=>[tree,...(tree.childNodes??[]).flatMap(all)],attr=(node,name)=>node.attrs?.find(a=>a.name===name)?.value,text=node=>(node.value??'')+(node.childNodes??[]).map(text).join('');
  const expected={sourcerer:['claimipedia','relational-geometry'],christian:['the-field','relationship-manager','claimipedia'],dad:['relationship-manager','the-field','workgarden'],author:['encounter','the-field','claimipedia']};
- const shapes={sourcerer:['worldwright','kingdom','world-modelling','tradie','foundry','creator-studio'],christian:['kingdom','worldwright','creator-studio'],dad:['creator-studio','worldwright','kingdom'],author:['worldwright','creator-studio','world-modelling']};
+ const shapes={sourcerer:['worldwright','kingdom','simulation','tradie','usewords','creator-studio'],christian:['kingdom','worldwright','creator-studio'],dad:['creator-studio','worldwright','kingdom'],author:['worldwright','creator-studio','simulation']};
  const headlines=new Set();
  for(const theme of themes){
   const nodes=all(parseFragment(theme.catalogueHTML)),sections=nodes.filter(n=>n.nodeName==='section'),cards=nodes.filter(n=>n.nodeName==='article'),directory=nodes.find(n=>attr(n,'id')==='all-projects');
@@ -412,11 +421,11 @@ test('catalogue product evidence is scoped independently and failures block auto
  assert.ok(base.profiles.flatMap(s=>s.gates).filter(g=>g.level>=3).every(g=>g.status==='not-evidenced'));
 });
 
-test('all eighteen catalogue products publish independent receipts, gaps and a light assurance presentation',()=>{
+test('all catalogue products publish independent receipts, gaps and a light assurance presentation',()=>{
  const report=JSON.parse(fs.readFileSync('dist/assurance/catalogue.json','utf8')),portfolio=JSON.parse(fs.readFileSync('dist/assurance/topics.json','utf8'));
- assert.equal(report.protocol,'worldwright/catalogue-assurance/1');assert.equal(report.products.length,18);assert.equal(new Set(report.products.map(p=>p.scopeId)).size,18);assert.equal(report.roadmap.length,216);
+ assert.equal(report.protocol,'worldwright/catalogue-assurance/1');assert.equal(report.products.length,catalogue.items.length);assert.equal(new Set(report.products.map(p=>p.scopeId)).size,catalogue.items.length);assert.equal(report.roadmap.length,report.products.flatMap(p=>p.profiles.flatMap(s=>s.gates.filter(g=>g.status!=='supported'))).length);
  for(const product of report.products){const item=catalogue.items.find(p=>p.id===product.id);assert.equal(product.route,item.href+'index.html');assert.deepEqual(product.profiles.map(s=>s.level),[2,2,1]);assert.ok(product.markup.skipTarget);assert.ok(product.markup.altAttributes);assert.ok(product.profiles.flatMap(s=>s.gates).filter(g=>g.level>=3).every(g=>g.status==='not-evidenced'));const missing=product.profiles.flatMap(s=>s.gates.filter(g=>g.status!=='supported'));assert.equal(report.roadmap.filter(r=>r.product===product.id).length,missing.length);assert.deepEqual(portfolio.products.find(p=>p.id===product.id),product);}
- const maturity=fs.readFileSync('dist/assurance/maturity/index.html','utf8');assert.equal((maturity.match(/class="assurance-product"/g)||[]).length,18);assert.match(maturity,/Automatically supported:/);assert.match(maturity,/Automatic failures:/);assert.match(maturity,/Human evidence still needed:/);assert.match(maturity,/Policy \/ implementation gaps:/);
+ const maturity=fs.readFileSync('dist/assurance/maturity/index.html','utf8');assert.equal((maturity.match(/class="assurance-product"/g)||[]).length,catalogue.items.length);assert.match(maturity,/Automatically supported:/);assert.match(maturity,/Automatic failures:/);assert.match(maturity,/Human evidence still needed:/);assert.match(maturity,/Policy \/ implementation gaps:/);
  for(const route of ['','identities/','accessibility/','internationalisation/','maturity/'])assert.match(fs.readFileSync('dist/assurance/'+route+'index.html','utf8'),/data-light="assurance"/);
  const css=fs.readFileSync('dist/expedition.css','utf8');assert.match(css,/body\[data-light="assurance"\]/);assert.match(css,/#f5f4ec/);assert.match(css,/assurance-meter/);
 });

@@ -1065,6 +1065,23 @@
         },
         "steps": [
           {
+            "let": "hTargetGroup",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$hRowsByTarget",
+                "group",
+                [
+                  "eq",
+                  "$group.target",
+                  "$hRow.target"
+                ]
+              ],
+              0
+            ]
+          },
+          {
             "let": "hCapabilityViews",
             "value": "$hCardScan.views"
           },
@@ -1105,7 +1122,7 @@
               {
                 "let": "eventInput",
                 "value": {
-                  "rows": "$hRows",
+                  "rows": "$hTargetGroup.rows",
                   "relation": "$hRow.relation",
                   "target": "$hRow.target"
                 }
@@ -1138,7 +1155,7 @@
                     "let": "hWitnesses",
                     "value": [
                       "filter",
-                      "$hRows",
+                      "$hTargetGroup.rows",
                       "hWitness",
                       [
                         "and",
@@ -2264,6 +2281,35 @@
       },
       {
         "call": "hierarchy.extract"
+      },
+      {
+        "let": "hRowsByTarget",
+        "value": [
+          "map",
+          [
+            "distinct",
+            [
+              "map",
+              "$hRows",
+              "row",
+              "$row.target"
+            ]
+          ],
+          "target",
+          {
+            "target": "$target",
+            "rows": [
+              "filter",
+              "$hRows",
+              "row",
+              [
+                "eq",
+                "$row.target",
+                "$target"
+              ]
+            ]
+          }
+        ]
       },
       {
         "call": "hierarchy.viewer.build"
@@ -8317,27 +8363,7 @@
                                       "list",
                                       "Inspect"
                                     ]
-                                  },
-                                  [
-                                    "if",
-                                    [
-                                      "eq",
-                                      "$hItem.id",
-                                      "the-field"
-                                    ],
-                                    {
-                                      "tag": "a",
-                                      "attrs": {
-                                        "href": "the-field/households/",
-                                        "class": "hierarchy-household"
-                                      },
-                                      "children": [
-                                        "list",
-                                        "Households over time →"
-                                      ]
-                                    },
-                                    null
-                                  ]
+                                  }
                                 ]
                               }
                             ]
@@ -8717,27 +8743,7 @@
                                       "list",
                                       "Inspect"
                                     ]
-                                  },
-                                  [
-                                    "if",
-                                    [
-                                      "eq",
-                                      "$hItem.id",
-                                      "the-field"
-                                    ],
-                                    {
-                                      "tag": "a",
-                                      "attrs": {
-                                        "href": "the-field/households/",
-                                        "class": "hierarchy-household"
-                                      },
-                                      "children": [
-                                        "list",
-                                        "Households over time →"
-                                      ]
-                                    },
-                                    null
-                                  ]
+                                  }
                                 ]
                               }
                             ]
@@ -9109,17 +9115,35 @@
                                     [
                                       "eq",
                                       "$hItem.id",
-                                      "the-field"
+                                      "simulation"
                                     ],
                                     {
                                       "tag": "a",
                                       "attrs": {
-                                        "href": "the-field/households/",
-                                        "class": "hierarchy-household"
+                                        "href": "world-modelling/"
                                       },
                                       "children": [
                                         "list",
-                                        "Households over time →"
+                                        "World Modelling"
+                                      ]
+                                    },
+                                    null
+                                  ],
+                                  [
+                                    "if",
+                                    [
+                                      "eq",
+                                      "$hItem.id",
+                                      "simulation"
+                                    ],
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "foundry/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Foundry"
                                       ]
                                     },
                                     null
@@ -9489,27 +9513,7 @@
                                       "list",
                                       "Inspect"
                                     ]
-                                  },
-                                  [
-                                    "if",
-                                    [
-                                      "eq",
-                                      "$hItem.id",
-                                      "the-field"
-                                    ],
-                                    {
-                                      "tag": "a",
-                                      "attrs": {
-                                        "href": "the-field/households/",
-                                        "class": "hierarchy-household"
-                                      },
-                                      "children": [
-                                        "list",
-                                        "Households over time →"
-                                      ]
-                                    },
-                                    null
-                                  ]
+                                  }
                                 ]
                               }
                             ]
