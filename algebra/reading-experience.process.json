@@ -2135,7 +2135,65 @@
               "provenance"
             ],
             "rawObservations": "/tooling/assurance/reading-experience-capture.json"
-          }
+          },
+          "regressionChecks": [
+            "map",
+            "$input.policy.requiredPasses",
+            "target",
+            [
+              "let",
+              "matches",
+              [
+                "filter",
+                "$rows",
+                "r",
+                [
+                  "and",
+                  [
+                    "eq",
+                    "$r.route",
+                    "$target.route"
+                  ],
+                  [
+                    "eq",
+                    "$r.profile",
+                    "$target.profile"
+                  ],
+                  [
+                    "eq",
+                    "$r.rule",
+                    "$target.rule"
+                  ]
+                ]
+              ],
+              {
+                "route": "$target.route",
+                "profile": "$target.profile",
+                "rule": "$target.rule",
+                "status": [
+                  "if",
+                  [
+                    "eq",
+                    [
+                      "count",
+                      "$matches"
+                    ],
+                    1
+                  ],
+                  [
+                    "at",
+                    [
+                      "at",
+                      "$matches",
+                      0
+                    ],
+                    "status"
+                  ],
+                  "needs-browser-evidence"
+                ]
+              }
+            ]
+          ]
         }
       }
     ],
@@ -2506,6 +2564,16 @@
                 "$eventInput.counts.routes",
                 0
               ]
+            ],
+            [
+              "every",
+              "$eventInput.regressionChecks",
+              "r",
+              [
+                "eq",
+                "$r.status",
+                "passed"
+              ]
             ]
           ],
           "status": [
@@ -2518,7 +2586,7 @@
             "checked-with-review-obligations",
             "findings-require-triage"
           ],
-          "boundary": "This initial rollout gates missing browser evidence. Observed failures stay visible for triage and do not become passes or accessibility certification."
+          "boundary": "Missing browser evidence and the explicitly required Temple/Claimipedia text-spacing regression checks are release gates. Other observed findings remain visible for triage."
         }
       }
     ]

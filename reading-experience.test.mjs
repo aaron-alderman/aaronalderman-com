@@ -48,6 +48,12 @@ test('absent browser evidence never becomes a browser pass; changed bindings ref
  const pending=await assessor.run('experience.report',input);assert.equal(pending.status,'needs-browser-evidence');assert.equal(pending.counts.passed,0);assert.equal(pending.counts.missing,policy.plan.routes.length*(policy.plan.profiles.length+1));
  for(const key of ['planSha256','observerSha256','bindings']){const capture={protocol:'worldwright/reading-experience-observations/1',planSha256:'plan',observerSha256:'observer',bindings:{'fixture.html':'hash'},snapshots:[],journeys:[]};capture[key]=key==='bindings'?{}:'stale';await assert.rejects(assessor.run('experience.report',{...input,capture}),/stale/);}
 });
+test('the repaired Temple and Claimipedia spacing cases are explicit release gates',async()=>{
+ assert.deepEqual(policy.requiredPasses.map(r=>[r.route,r.profile,r.rule]),[['temple/index.html','text-spacing','zoom.document-overflow'],['claimipedia/index.html','text-spacing','zoom.document-overflow']]);
+ const report={status:'browser-observed',counts:{routes:20,missing:0,failed:0},regressionChecks:policy.requiredPasses.map(r=>({...r,status:'passed'}))};
+ assert.equal((await assessor.run('experience.gate',report)).ok,true);
+ for(const status of ['failed','needs-browser-evidence','needs-review']){const changed=structuredClone(report);changed.regressionChecks[0].status=status;assert.equal((await assessor.run('experience.gate',changed)).ok,false,status);}
+});
 test('a complete fixture report keeps every route and preserves normalized assessment identities',async()=>{
  const configuration=structuredClone(policy);configuration.plan.routes=[{path:'fixture.html',skip:'#main',next:null},{path:'second.html',skip:'#main',next:null}];configuration.plan.profiles=configuration.plan.profiles.slice(0,1);
  const viewport=configuration.plan.profiles[0],snapshots=configuration.plan.routes.map(r=>({route:r.path,url:'http://fixture/'+r.path,profile:viewport.id,viewport:{width:viewport.width,height:viewport.height},readyState:'complete',fontStatus:'loaded',spacingApplied:false,document:{clientWidth:1280,scrollWidth:1280},blocks:[],texts:[text()],truncatedTexts:false,truncatedBlocks:false}));

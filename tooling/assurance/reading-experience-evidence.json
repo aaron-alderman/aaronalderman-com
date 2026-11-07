@@ -1,6 +1,6 @@
 {
   "protocol": "worldwright/reading-experience-evidence/1",
-  "policySha256": "eb7be84caf309f2e5cfd3839f06863e94d9acc6cd8ea803ab75fdc20a364ed46",
+  "policySha256": "309f87f908965778ea506336f280c7db3400a70870a4fad5a5f25ef4b5334df6",
   "policy": {
     "protocol": "temple/surface-process-module/1",
     "entry": "experience.report",
@@ -2138,7 +2138,65 @@
                 "provenance"
               ],
               "rawObservations": "/tooling/assurance/reading-experience-capture.json"
-            }
+            },
+            "regressionChecks": [
+              "map",
+              "$input.policy.requiredPasses",
+              "target",
+              [
+                "let",
+                "matches",
+                [
+                  "filter",
+                  "$rows",
+                  "r",
+                  [
+                    "and",
+                    [
+                      "eq",
+                      "$r.route",
+                      "$target.route"
+                    ],
+                    [
+                      "eq",
+                      "$r.profile",
+                      "$target.profile"
+                    ],
+                    [
+                      "eq",
+                      "$r.rule",
+                      "$target.rule"
+                    ]
+                  ]
+                ],
+                {
+                  "route": "$target.route",
+                  "profile": "$target.profile",
+                  "rule": "$target.rule",
+                  "status": [
+                    "if",
+                    [
+                      "eq",
+                      [
+                        "count",
+                        "$matches"
+                      ],
+                      1
+                    ],
+                    [
+                      "at",
+                      [
+                        "at",
+                        "$matches",
+                        0
+                      ],
+                      "status"
+                    ],
+                    "needs-browser-evidence"
+                  ]
+                }
+              ]
+            ]
           }
         }
       ],
@@ -2509,6 +2567,16 @@
                   "$eventInput.counts.routes",
                   0
                 ]
+              ],
+              [
+                "every",
+                "$eventInput.regressionChecks",
+                "r",
+                [
+                  "eq",
+                  "$r.status",
+                  "passed"
+                ]
               ]
             ],
             "status": [
@@ -2521,7 +2589,7 @@
               "checked-with-review-obligations",
               "findings-require-triage"
             ],
-            "boundary": "This initial rollout gates missing browser evidence. Observed failures stay visible for triage and do not become passes or accessibility certification."
+            "boundary": "Missing browser evidence and the explicitly required Temple/Claimipedia text-spacing regression checks are release gates. Other observed findings remain visible for triage."
           }
         }
       ]
@@ -2813,7 +2881,19 @@
         "Which terms or sentences needed explanation?"
       ],
       "reviews": []
-    }
+    },
+    "requiredPasses": [
+      {
+        "route": "temple/index.html",
+        "profile": "text-spacing",
+        "rule": "zoom.document-overflow"
+      },
+      {
+        "route": "claimipedia/index.html",
+        "profile": "text-spacing",
+        "rule": "zoom.document-overflow"
+      }
+    ]
   },
   "plan": {
     "protocol": "worldwright/reading-experience-plan/1",
@@ -3329,9 +3409,21 @@
           "Which terms or sentences needed explanation?"
         ],
         "reviews": []
-      }
+      },
+      "requiredPasses": [
+        {
+          "route": "temple/index.html",
+          "profile": "text-spacing",
+          "rule": "zoom.document-overflow"
+        },
+        {
+          "route": "claimipedia/index.html",
+          "profile": "text-spacing",
+          "rule": "zoom.document-overflow"
+        }
+      ]
     },
-    "policySha256": "eb7be84caf309f2e5cfd3839f06863e94d9acc6cd8ea803ab75fdc20a364ed46",
+    "policySha256": "309f87f908965778ea506336f280c7db3400a70870a4fad5a5f25ef4b5334df6",
     "planSha256": "0a5114fa4e4acfcfb6d7c3864b0aa8e4f0d07c6d7c063415643f19c65f672139",
     "observerSha256": "fefcc1ddf2afaa67370a88eee344e75a811284fd1612904890cddb1d08636fbb",
     "bindings": {
@@ -3339,7 +3431,7 @@
       "assets/microsite-return.css": "c7142fcc5f80648a575ad074349a7bf95732876a80818b98fe4de52b36d225cb",
       "temple/assets/covenant.css": "64e189820f4aea0b91bc820a9d5006317f93d8bbc315358b08bec5587460141c",
       "sourcery/assets/css/story.css": "529d84e31dc439d43efa46b0b2cc64935b0581e07e830e93c6bda013753e0642",
-      "temple/index.html": "30725dac3e81e23a711903892165431e19028a64b9053c27315ac9041889a8ab",
+      "temple/index.html": "039fe86c164b3f4bbe151e7ac4b0096585b28dc72dfc27be1191b654ce97f5ae",
       "temple/films/index.html": "ec3c665d79591b920bbea7f1a0eea8fd516d4c24a2be69b997bf36cd59857854",
       "sourcery/index.html": "e266f43021a4d6052f5ac03bd28fb13d3fa09840c8884e4271f1888a69c22cfe",
       "sourcery/films/index.html": "5b7d73b67746bf7083b4554c13bd1b4741c85f610591af980f8d45456456ac6e",
@@ -3347,9 +3439,9 @@
       "sourcery/runtime.js": "649fb8e1d3a0bed36e8292bc55e6ddb00b2a3963bca821bb59e9920009083f41",
       "temple/early.js": "90000f969e272bf04d0f6e2f0e5a8ca38c102ffa535ae89ce53914a8a72397de",
       "claimipedia/runtime.js": "58bdc3e6fe44997ec2a660270e99f245223012c9a26964d72791b647c8b4c8cd",
-      "claimipedia/claimipedia.css": "6f2d726d610f0e7516eeed1308192a52e94a4baa652e06c46a110d6c3b1bdbe5",
+      "claimipedia/claimipedia.css": "4052df8a702e9a2902eb96641b0954712f9962940ad7299d6f11edf9bd8886a9",
       "claimipedia/mark.svg": "b633f6d21438a1e60ba7a52f0aebdc47400e752291e5e9bb24abbe426a16e733",
-      "claimipedia/index.html": "adf69c9185fb07a8a014fbe508a962952786fc743e77ff407a1d9322232bd381",
+      "claimipedia/index.html": "c5620bb6bd8794625d5f3e88fd7b1908404b3215740dded480c94d9af55e580a",
       "worldwright/index.html": "7771432de6db6ee5adf9d11f1ada79977c595a54eb911303ae31d59bf894270b",
       "atlas-runtime.js": "81f84312f364d6477fff9d780e82a8a5febf8c223ebdf1505f31f7bdc0d55061",
       "atlas.html": "5282eab00e06fa93ceb9e40cbc38c45d59a2052e17acb15ea25f662fdf7e2e4a",
@@ -4056,13 +4148,25 @@
           "Which terms or sentences needed explanation?"
         ],
         "reviews": []
-      }
+      },
+      "requiredPasses": [
+        {
+          "route": "temple/index.html",
+          "profile": "text-spacing",
+          "rule": "zoom.document-overflow"
+        },
+        {
+          "route": "claimipedia/index.html",
+          "profile": "text-spacing",
+          "rule": "zoom.document-overflow"
+        }
+      ]
     },
-    "policySha256": "eb7be84caf309f2e5cfd3839f06863e94d9acc6cd8ea803ab75fdc20a364ed46",
+    "policySha256": "309f87f908965778ea506336f280c7db3400a70870a4fad5a5f25ef4b5334df6",
     "pages": [
       {
         "route": "temple/index.html",
-        "sourceSha256": "30725dac3e81e23a711903892165431e19028a64b9053c27315ac9041889a8ab",
+        "sourceSha256": "039fe86c164b3f4bbe151e7ac4b0096585b28dc72dfc27be1191b654ce97f5ae",
         "foundMain": true,
         "blocks": [
           "Temple · the foundation",
@@ -4243,7 +4347,7 @@
       },
       {
         "route": "claimipedia/index.html",
-        "sourceSha256": "adf69c9185fb07a8a014fbe508a962952786fc743e77ff407a1d9322232bd381",
+        "sourceSha256": "c5620bb6bd8794625d5f3e88fd7b1908404b3215740dded480c94d9af55e580a",
         "foundMain": true,
         "blocks": [
           "Claimipedia / A shared world of inquiry",
@@ -22155,7 +22259,7 @@
     ],
     "boundary": "One Chromium run and bounded selectors, widths and states. This does not certify accessibility, arbitrary CSS painting, actual browser-toolbar zoom, screen-reader use or comprehension. Reflow, clipping and hit tests are measured; purpose and visual quality require review. Native media/control text and visually hidden input proxies require visual review. Identical repeated host observations are grouped.",
     "evidence": {
-      "policySha256": "eb7be84caf309f2e5cfd3839f06863e94d9acc6cd8ea803ab75fdc20a364ed46",
+      "policySha256": "309f87f908965778ea506336f280c7db3400a70870a4fad5a5f25ef4b5334df6",
       "planSha256": "0a5114fa4e4acfcfb6d7c3864b0aa8e4f0d07c6d7c063415643f19c65f672139",
       "observerSha256": "fefcc1ddf2afaa67370a88eee344e75a811284fd1612904890cddb1d08636fbb",
       "artifactBindings": {
@@ -22163,7 +22267,7 @@
         "assets/microsite-return.css": "c7142fcc5f80648a575ad074349a7bf95732876a80818b98fe4de52b36d225cb",
         "temple/assets/covenant.css": "64e189820f4aea0b91bc820a9d5006317f93d8bbc315358b08bec5587460141c",
         "sourcery/assets/css/story.css": "529d84e31dc439d43efa46b0b2cc64935b0581e07e830e93c6bda013753e0642",
-        "temple/index.html": "30725dac3e81e23a711903892165431e19028a64b9053c27315ac9041889a8ab",
+        "temple/index.html": "039fe86c164b3f4bbe151e7ac4b0096585b28dc72dfc27be1191b654ce97f5ae",
         "temple/films/index.html": "ec3c665d79591b920bbea7f1a0eea8fd516d4c24a2be69b997bf36cd59857854",
         "sourcery/index.html": "e266f43021a4d6052f5ac03bd28fb13d3fa09840c8884e4271f1888a69c22cfe",
         "sourcery/films/index.html": "5b7d73b67746bf7083b4554c13bd1b4741c85f610591af980f8d45456456ac6e",
@@ -22171,9 +22275,9 @@
         "sourcery/runtime.js": "649fb8e1d3a0bed36e8292bc55e6ddb00b2a3963bca821bb59e9920009083f41",
         "temple/early.js": "90000f969e272bf04d0f6e2f0e5a8ca38c102ffa535ae89ce53914a8a72397de",
         "claimipedia/runtime.js": "58bdc3e6fe44997ec2a660270e99f245223012c9a26964d72791b647c8b4c8cd",
-        "claimipedia/claimipedia.css": "6f2d726d610f0e7516eeed1308192a52e94a4baa652e06c46a110d6c3b1bdbe5",
+        "claimipedia/claimipedia.css": "4052df8a702e9a2902eb96641b0954712f9962940ad7299d6f11edf9bd8886a9",
         "claimipedia/mark.svg": "b633f6d21438a1e60ba7a52f0aebdc47400e752291e5e9bb24abbe426a16e733",
-        "claimipedia/index.html": "adf69c9185fb07a8a014fbe508a962952786fc743e77ff407a1d9322232bd381",
+        "claimipedia/index.html": "c5620bb6bd8794625d5f3e88fd7b1908404b3215740dded480c94d9af55e580a",
         "worldwright/index.html": "7771432de6db6ee5adf9d11f1ada79977c595a54eb911303ae31d59bf894270b",
         "atlas-runtime.js": "81f84312f364d6477fff9d780e82a8a5febf8c223ebdf1505f31f7bdc0d55061",
         "atlas.html": "5282eab00e06fa93ceb9e40cbc38c45d59a2052e17acb15ea25f662fdf7e2e4a",
@@ -22592,7 +22696,21 @@
         "assurance/navigation-layout/index.html": "d64c4cda119320c6a0ef5c5f8fac5d70048fbd42c9377a507fc5859c25f3da61"
       },
       "rawObservations": "/tooling/assurance/reading-experience-capture.json"
-    }
+    },
+    "regressionChecks": [
+      {
+        "route": "temple/index.html",
+        "profile": "text-spacing",
+        "rule": "zoom.document-overflow",
+        "status": "needs-browser-evidence"
+      },
+      {
+        "route": "claimipedia/index.html",
+        "profile": "text-spacing",
+        "rule": "zoom.document-overflow",
+        "status": "needs-browser-evidence"
+      }
+    ]
   },
   "language": {
     "protocol": "worldwright/plain-language-report/1",
@@ -29505,11 +29623,11 @@
     ],
     "boundary": "Automated prompts are review candidates, not claims that prose is bad, undefined or misunderstood. Preserve voice and technical precision. Zero prompts never establishes comprehension. A human review must remain tied to the current source hash.",
     "evidence": {
-      "policySha256": "eb7be84caf309f2e5cfd3839f06863e94d9acc6cd8ea803ab75fdc20a364ed46",
+      "policySha256": "309f87f908965778ea506336f280c7db3400a70870a4fad5a5f25ef4b5334df6",
       "documents": [
         {
           "route": "temple/index.html",
-          "sha256": "30725dac3e81e23a711903892165431e19028a64b9053c27315ac9041889a8ab",
+          "sha256": "039fe86c164b3f4bbe151e7ac4b0096585b28dc72dfc27be1191b654ce97f5ae",
           "mainFound": true,
           "blocksObserved": 12
         },
@@ -29533,7 +29651,7 @@
         },
         {
           "route": "claimipedia/index.html",
-          "sha256": "adf69c9185fb07a8a014fbe508a962952786fc743e77ff407a1d9322232bd381",
+          "sha256": "c5620bb6bd8794625d5f3e88fd7b1908404b3215740dded480c94d9af55e580a",
           "mainFound": true,
           "blocksObserved": 12
         },

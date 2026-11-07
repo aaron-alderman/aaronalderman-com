@@ -29,9 +29,10 @@ Native media controls, textless hosts and visually hidden inputs remain review
 work. Repeated identical host observations are grouped. Attributed edge cases
 from the first CI run are retained under `fixtures/first-browser-edge-cases.json`.
 
-Missing browser evidence is a release gate in this first rollout. Observed
-failures remain published triage work, alongside review candidates; they are
-never converted into passes. `experience.gate` owns that rollout policy.
+Missing browser evidence and the specifically required Temple/Claimipedia
+text-spacing overflow regressions are release gates. Other observed findings
+remain published triage work, alongside review candidates; they are never
+converted into passes. `experience.gate` owns that rollout policy.
 
 Plain-language review scans the first twelve non-code prose blocks and forty
 main-content link labels of every generated HTML route. Specialist terms,
