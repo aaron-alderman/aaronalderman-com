@@ -76,3 +76,9 @@ Repository care: [licensing](LICENSE.md), [Christian stewardship covenant](CHRIS
 ## The Field article
 
 [Can power leave room for correction?](https://aaronalderman.com/the-field/correction/) is a sectioned long-form inquiry with optional mathematics, a synthetic intervention comparison and a bounded methods note and selected-result table. `source/the-field/correction-article.json` owns its prose and semantic blocks. `hierarchy.correctionArticle.build` in `algebra/hierarchy.process.json` projects the reading page through the existing HTML algebra; `source/stylesheets/field-correction.json` owns the stylesheet through the existing CSS catalogue. The main Field page and catalogue link to it, and its canonical URL is registered for the sitemap. Artwork provenance is in `source/the-field/correction-artwork.json`.
+
+## Mission and thoughts
+
+The personal expedition remains the homepage. Its shared header links to the mission at `/mission/`, Thoughts at `/writing/`, and My Mind at `/`. The mission introduces the full scroll at `/writing/power-must-serve-life/`; both reading pages work without JavaScript. The existing reading-path and workshop links remain in encounter-page bodies.
+
+`source/front-doors.rel` owns the mission, writing-index and scroll trees, shared styles and canonical registrations. `algebra/publication.process.json` composes them through the existing HTML and CSS algebras in the normal `publication.build` entry. The illustration and generation provenance live in `assets/scroll/`. `mission-publication.test.mjs` checks navigation, source notes, local resources and full-build receipt binding. No native mechanisms, grants or execution limits change.

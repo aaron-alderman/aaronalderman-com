@@ -246,6 +246,12 @@
         "into": "_"
       },
       {
+        "call": "publication.scroll.pages"
+      },
+      {
+        "call": "publication.mission.page"
+      },
+      {
         "each": [
           "subjects",
           "isa",
@@ -499,6 +505,17 @@
     ],
     "publication.styles": [
       {
+        "port": "json.parse",
+        "args": {
+          "text": [
+            "one",
+            "scroll.styles",
+            "plan"
+          ]
+        },
+        "into": "scrollRules"
+      },
+      {
         "let": "cssPlan",
         "value": {
           "imports": [
@@ -512,60 +529,139 @@
             [
               "append",
               [
-                "map",
+                "append",
                 [
-                  "filter",
+                  "map",
                   [
-                    "subjects",
-                    "isa",
-                    "StyleRule"
+                    "filter",
+                    [
+                      "subjects",
+                      "isa",
+                      "StyleRule"
+                    ],
+                    "rule",
+                    [
+                      "eq",
+                      [
+                        "one",
+                        "$rule",
+                        "projection"
+                      ],
+                      "$projection"
+                    ]
                   ],
                   "rule",
-                  [
-                    "eq",
-                    [
+                  {
+                    "id": "$rule",
+                    "selector": [
                       "one",
                       "$rule",
-                      "projection"
+                      "selector"
                     ],
-                    "$projection"
-                  ]
+                    "context": [
+                      "optional",
+                      "$rule",
+                      "context"
+                    ],
+                    "declarations": [
+                      "map",
+                      [
+                        "objects",
+                        "$rule",
+                        "declaration"
+                      ],
+                      "decl",
+                      {
+                        "property": [
+                          "one",
+                          "$decl",
+                          "property"
+                        ],
+                        "value": [
+                          "one",
+                          "$decl",
+                          "value"
+                        ]
+                      }
+                    ]
+                  }
                 ],
-                "rule",
-                {
-                  "id": "$rule",
-                  "selector": [
-                    "one",
-                    "$rule",
-                    "selector"
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$projection",
+                    "main"
                   ],
-                  "context": [
-                    "optional",
-                    "$rule",
-                    "context"
-                  ],
-                  "declarations": [
+                  [
                     "map",
                     [
-                      "objects",
-                      "$rule",
-                      "declaration"
+                      "subjects",
+                      "isa",
+                      "IdentityTheme"
                     ],
-                    "decl",
+                    "theme",
                     {
-                      "property": [
-                        "one",
-                        "$decl",
-                        "property"
+                      "id": [
+                        "concat",
+                        "questions.palette.",
+                        [
+                          "one",
+                          "$theme",
+                          "key"
+                        ]
                       ],
-                      "value": [
-                        "one",
-                        "$decl",
-                        "value"
-                      ]
+                      "selector": [
+                        "concat",
+                        "html:has(body[data-question-identity=\"",
+                        [
+                          "one",
+                          "$theme",
+                          "key"
+                        ],
+                        "\"]),body[data-question-identity=\"",
+                        [
+                          "one",
+                          "$theme",
+                          "key"
+                        ],
+                        "\"]",
+                        ", .identity-catalogue[data-perspective=\"",
+                        [
+                          "one",
+                          "$theme",
+                          "key"
+                        ],
+                        "\"]"
+                      ],
+                      "declarations": [
+                        "map",
+                        [
+                          "objects",
+                          "$theme",
+                          "questionColour"
+                        ],
+                        "decl",
+                        {
+                          "property": [
+                            "one",
+                            "$decl",
+                            "property"
+                          ],
+                          "value": [
+                            "one",
+                            "$decl",
+                            "value"
+                          ]
+                        }
+                      ],
+                      "context": null
                     }
+                  ],
+                  [
+                    "list"
                   ]
-                }
+                ]
               ],
               [
                 "if",
@@ -581,62 +677,45 @@
                     "isa",
                     "IdentityTheme"
                   ],
-                  "theme",
+                  "t",
                   {
                     "id": [
                       "concat",
-                      "questions.palette.",
+                      "identity.type.",
                       [
                         "one",
-                        "$theme",
+                        "$t",
                         "key"
                       ]
                     ],
                     "selector": [
                       "concat",
-                      "html:has(body[data-question-identity=\"",
+                      "body[data-identity=\"",
                       [
                         "one",
-                        "$theme",
+                        "$t",
                         "key"
                       ],
-                      "\"]),body[data-question-identity=\"",
+                      "\"],body[data-question-identity=\"",
                       [
                         "one",
-                        "$theme",
-                        "key"
-                      ],
-                      "\"]",
-                      ", .identity-catalogue[data-perspective=\"",
-                      [
-                        "one",
-                        "$theme",
+                        "$t",
                         "key"
                       ],
                       "\"]"
                     ],
+                    "context": null,
                     "declarations": [
-                      "map",
-                      [
-                        "objects",
-                        "$theme",
-                        "questionColour"
-                      ],
-                      "decl",
+                      "list",
                       {
-                        "property": [
-                          "one",
-                          "$decl",
-                          "property"
-                        ],
+                        "property": "--identity-display-font",
                         "value": [
                           "one",
-                          "$decl",
-                          "value"
+                          "$t",
+                          "displayFont"
                         ]
                       }
-                    ],
-                    "context": null
+                    ]
                   }
                 ],
                 [
@@ -651,54 +730,7 @@
                 "$projection",
                 "main"
               ],
-              [
-                "map",
-                [
-                  "subjects",
-                  "isa",
-                  "IdentityTheme"
-                ],
-                "t",
-                {
-                  "id": [
-                    "concat",
-                    "identity.type.",
-                    [
-                      "one",
-                      "$t",
-                      "key"
-                    ]
-                  ],
-                  "selector": [
-                    "concat",
-                    "body[data-identity=\"",
-                    [
-                      "one",
-                      "$t",
-                      "key"
-                    ],
-                    "\"],body[data-question-identity=\"",
-                    [
-                      "one",
-                      "$t",
-                      "key"
-                    ],
-                    "\"]"
-                  ],
-                  "context": null,
-                  "declarations": [
-                    "list",
-                    {
-                      "property": "--identity-display-font",
-                      "value": [
-                        "one",
-                        "$t",
-                        "displayFont"
-                      ]
-                    }
-                  ]
-                }
-              ],
+              "$scrollRules",
               [
                 "list"
               ]
@@ -1549,80 +1581,34 @@
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": [
-                              "if",
-                              [
-                                "eq",
-                                "$canonical",
-                                [
-                                  "one",
-                                  "site",
-                                  "origin"
-                                ]
-                              ],
-                              [
-                                "one",
-                                "identity.sourcerer",
-                                "threadsHref"
-                              ],
-                              [
-                                "concat",
-                                "$prefix",
-                                "gate.html"
-                              ]
-                            ],
-                            "class": "gate-nav",
-                            "id": "identity-threads-nav"
+                            "href": "/mission/",
+                            "class": "mission-nav"
                           },
                           "children": [
                             "list",
-                            "Reading paths ↗"
+                            "The mission"
                           ]
                         },
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": [
-                              "if",
-                              [
-                                "eq",
-                                "$canonical",
-                                [
-                                  "one",
-                                  "site",
-                                  "origin"
-                                ]
-                              ],
-                              [
-                                "one",
-                                "identity.sourcerer",
-                                "atlasHref"
-                              ],
-                              [
-                                "concat",
-                                "$prefix",
-                                "atlas.html"
-                              ]
-                            ],
-                            "id": "identity-map-nav"
+                            "href": "/writing/",
+                            "class": "nav-thoughts"
                           },
                           "children": [
                             "list",
-                            "Explore the map"
+                            "Thoughts"
                           ]
                         },
                         {
                           "tag": "a",
                           "attrs": {
-                            "href": [
-                              "concat",
-                              "$prefix",
-                              "retained/workshop/index.html"
-                            ]
+                            "href": "/",
+                            "class": "nav-mind"
                           },
                           "children": [
                             "list",
-                            "Shared workshop ↗"
+                            "My Mind"
                           ]
                         }
                       ]
@@ -3185,6 +3171,37 @@
                     ]
                   }
                 ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "reading-paths-return"
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "../gate.html",
+                      "class": "gate-nav"
+                    },
+                    "children": [
+                      "list",
+                      "Reading paths →"
+                    ]
+                  },
+                  " · ",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "../retained/workshop/index.html"
+                    },
+                    "children": [
+                      "list",
+                      "Shared workshop ↗"
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -3721,24 +3738,6 @@
           "ref": "#identity-home-link",
           "name": "href",
           "value": "$chosen.homeHref"
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.attribute",
-        "args": {
-          "ref": "#identity-threads-nav",
-          "name": "href",
-          "value": "$chosen.threadsHref"
-        },
-        "into": "_"
-      },
-      {
-        "port": "browser.attribute",
-        "args": {
-          "ref": "#identity-map-nav",
-          "name": "href",
-          "value": "$chosen.atlasHref"
         },
         "into": "_"
       },
@@ -9259,7 +9258,7 @@
               "list",
               {
                 "id": "nav.routes",
-                "value": "Shared workshop and full-screen reader; perspective changes use explicit identity URLs.",
+                "value": "The mission, thoughts and personal expedition are shared; perspective changes retain explicit identity URLs and reading pages retain the interactive reader exit.",
                 "global": "$sharedToolRoutesBound",
                 "checks": [
                   "list",
@@ -9268,8 +9267,12 @@
                     "html": "$home",
                     "expected": [
                       "list",
-                      "href=\"/retained/workshop/index.html\"",
-                      "Shared workshop ↗"
+                      "href=\"/mission/\"",
+                      "The mission",
+                      "href=\"/writing/\"",
+                      "Thoughts",
+                      "href=\"/\"",
+                      "My Mind"
                     ]
                   },
                   {
@@ -9277,8 +9280,12 @@
                     "html": "$threads",
                     "expected": [
                       "list",
-                      "href=\"/retained/workshop/index.html\"",
-                      "Shared workshop ↗"
+                      "href=\"/mission/\"",
+                      "The mission",
+                      "href=\"/writing/\"",
+                      "Thoughts",
+                      "href=\"/\"",
+                      "My Mind"
                     ]
                   },
                   {
@@ -11946,6 +11953,161 @@
             "call": "html.escape"
           }
         ]
+      }
+    ],
+    "publication.scroll.pages": [
+      {
+        "port": "json.parse",
+        "args": {
+          "text": [
+            "one",
+            "scroll.index",
+            "tree"
+          ]
+        },
+        "into": "body"
+      },
+      {
+        "let": "prefix",
+        "value": "../"
+      },
+      {
+        "let": "pageTitle",
+        "value": "Thoughts — Aaron Alderman"
+      },
+      {
+        "let": "description",
+        "value": "Essays on power, understanding, faith, and what we can build together."
+      },
+      {
+        "let": "canonical",
+        "value": "https://aaronalderman.com/writing/"
+      },
+      {
+        "let": "light",
+        "value": "home"
+      },
+      {
+        "call": "publication.document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "writing/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": [
+            "one",
+            "scroll.article",
+            "tree"
+          ]
+        },
+        "into": "body"
+      },
+      {
+        "let": "prefix",
+        "value": "../../"
+      },
+      {
+        "let": "pageTitle",
+        "value": "Power Must Serve Life — Aaron Alderman"
+      },
+      {
+        "let": "description",
+        "value": "The full arc of a kenotic programme for science, computing, and human flourishing."
+      },
+      {
+        "let": "canonical",
+        "value": "https://aaronalderman.com/writing/power-must-serve-life/"
+      },
+      {
+        "let": "light",
+        "value": "home"
+      },
+      {
+        "call": "publication.document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "writing/power-must-serve-life/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "prefix",
+        "value": ""
+      }
+    ],
+    "publication.mission": [
+      {
+        "port": "json.parse",
+        "args": {
+          "text": [
+            "one",
+            "scroll.invitation",
+            "tree"
+          ]
+        },
+        "into": "result"
+      }
+    ],
+    "publication.mission.page": [
+      {
+        "call": "publication.mission"
+      },
+      {
+        "let": "body",
+        "value": "$result"
+      },
+      {
+        "let": "prefix",
+        "value": "../"
+      },
+      {
+        "let": "pageTitle",
+        "value": "The mission — Aaron Alderman"
+      },
+      {
+        "let": "description",
+        "value": "I believe we can build a civilisation in which growing intelligence gives people greater freedom to live, understand, create, and care."
+      },
+      {
+        "let": "canonical",
+        "value": "https://aaronalderman.com/mission/"
+      },
+      {
+        "let": "light",
+        "value": "home"
+      },
+      {
+        "call": "publication.document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "mission/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
       }
     ]
   }
