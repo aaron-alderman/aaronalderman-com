@@ -72,3 +72,7 @@ Run `npm run author -- proposal.json`. A preview stages sources, installs depend
 Tests verify models, checked edits, source fidelity, reproducible output, CSS ownership and complete browser-bundle envelopes. The browser audit checks HTML/SVG execution surfaces and reader/workshop interactions. Receipts in `verification/` identify their exact source version and scope. They are engineering evidence, not independent or scientific validation.
 
 Repository care: [licensing](LICENSE.md), [Christian stewardship covenant](CHRISTIAN_STEWARDSHIP_COVENANT.md), and [source/evidence hygiene](STEWARDSHIP.md).
+
+## The Field article
+
+[Can power leave room for correction?](https://aaronalderman.com/the-field/correction/) is a sectioned long-form inquiry with optional mathematics, a synthetic intervention comparison and a bounded methods note and selected-result table. `source/the-field/correction-article.json` owns its prose and semantic blocks. `hierarchy.correctionArticle.build` in `algebra/hierarchy.process.json` projects the reading page through the existing HTML algebra; `source/stylesheets/field-correction.json` owns the stylesheet through the existing CSS catalogue. The main Field page and catalogue link to it, and its canonical URL is registered for the sitemap. Artwork provenance is in `source/the-field/correction-artwork.json`.
