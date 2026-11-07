@@ -1,0 +1,191 @@
+{
+  "protocol": "worldwright/assurance-portfolio-release/1",
+  "base": "e3d725e0843d33902e46a0b0fc0444457d5bf82f",
+  "authoring": {
+    "applied": true,
+    "contractSha256": "26bbe8aad79579795e979bc2c93627d37d75f2e092859e1b2241316b1faef6d0",
+    "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7",
+    "files": [
+      {
+        "file": "algebra/publication.process.json",
+        "beforeSha256": "2831563d08aa7f69496f8803ae9d63cc6ba0d2f6bc8f5ff3c715b3242773ff52",
+        "afterSha256": "81f8ed0250967f90c1bb59b8f547af155c1d01a92e97977871771013b325c346"
+      },
+      {
+        "file": "algebra/hierarchy.process.json",
+        "beforeSha256": "518a4ce0d23603bcc85879f836c3893e3e175d767b5adcc81d6a6fee3ac0addf",
+        "afterSha256": "ff71016497ab762ad0c9bd0ea28956b697ecda025f021bb30d848f99d8856312"
+      },
+      {
+        "file": "algebra/atlas.process.json",
+        "beforeSha256": "3e895614f69f22746078e848f1a27b0b5c66edfaab5a5a4a75e4b3770dbc3fdb",
+        "afterSha256": "2e2b394897e5b343cb3a8ce521647e12727c232943536fc35f1e966a17211696"
+      },
+      {
+        "file": "source/hierarchy.rel",
+        "beforeSha256": "83f05bdc7506fbf21c877dd27bc9c5a5189866063f1b48ad239ba3b2b8dbfc6a",
+        "afterSha256": "09ae914b7d8fed72e56c4374048c676481012792c18c8655568da8eef50e7f51"
+      },
+      {
+        "file": "source/expedition.rel",
+        "beforeSha256": "024fe15c617629240df3d8d3e76a145b7e7f50356e044ac493647d0776514fe7",
+        "afterSha256": "72d076590b3c67b3e1882f0191721241b0e6a322425c3fb7042f7cc63a9825f5"
+      }
+    ]
+  },
+  "cleanCheckout": {
+    "revision": "47489edc6913f54b7af9dab6fe2b4c6519e97e12",
+    "archiveSha256": "5c0e49c20aea4f8ccc610e69d75f43a6dce42d2fde036ecadbb9a8804691b278",
+    "excludedRoots": [
+      ".build",
+      "node_modules",
+      "dist"
+    ],
+    "contractSha256": "0bb150275b0bf23a87fcf298a5ccf3aeea33c77f3fad88af9667c7f839a3bab3",
+    "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7"
+  },
+  "topics": [
+    {
+      "id": "identity",
+      "title": "Identity & world coherence",
+      "href": "/assurance/identities/",
+      "description": "The first worked example: declared identity intent, generated mappings, discovery and open relationships.",
+      "sagas": [
+        "identity"
+      ]
+    },
+    {
+      "id": "accessibility",
+      "title": "Accessibility",
+      "href": "/assurance/accessibility/",
+      "description": "The second worked example: selected markup evidence, human evaluation and accessible journeys in use.",
+      "sagas": [
+        "accessibility"
+      ]
+    },
+    {
+      "id": "internationalisation",
+      "title": "Internationalisation",
+      "href": "/assurance/internationalisation/",
+      "description": "An independent saga for locale policy, localisable content, language review and locale journeys.",
+      "sagas": [
+        "internationalisation"
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "id": "identity",
+      "level": 2,
+      "scope": "Identity assignments and generated entry journeys across the root and four identity homepages.",
+      "openGates": [
+        "identity.meaning",
+        "identity.use",
+        "identity.maintenance"
+      ]
+    },
+    {
+      "id": "accessibility",
+      "level": 2,
+      "scope": "Selected homepage markup checks across five entry routes. Human keyboard, assistive-technology, reflow and visual evaluation remain open.",
+      "openGates": [
+        "access.review",
+        "access.use",
+        "access.maintenance"
+      ]
+    },
+    {
+      "id": "internationalisation",
+      "level": 1,
+      "scope": "Readiness of the currently English homepage entry routes for localisation. Target audiences, supported locales and fallback policy remain undecided.",
+      "openGates": [
+        "i18n.locales",
+        "i18n.messages",
+        "i18n.formatting",
+        "i18n.review",
+        "i18n.use",
+        "i18n.maintenance"
+      ]
+    }
+  ],
+  "products": {
+    "count": 19,
+    "assessed": [
+      "aaronalderman"
+    ],
+    "unassessed": 18
+  },
+  "roadmap": {
+    "items": 12,
+    "next": 5,
+    "later": 7,
+    "owners": "Unassigned; no dates promised"
+  },
+  "identitySummary": [
+    {
+      "status": "intentionally-invariant",
+      "count": 13
+    },
+    {
+      "status": "identity-mapped",
+      "count": 62
+    },
+    {
+      "status": "missing",
+      "count": 0
+    },
+    {
+      "status": "undecided",
+      "count": 6
+    }
+  ],
+  "execution": {
+    "indexSteps": 5086775,
+    "applicationSteps": 14458163,
+    "totalSteps": 19544938,
+    "limit": 20000000
+  },
+  "nativeSourcesUnchanged": true,
+  "checks": {
+    "tests": 208,
+    "passed": 208,
+    "failed": 0,
+    "presentation": "passed",
+    "routeCompatibility": "Identity HTML at /assurance/identities/; existing JSON endpoints retained; root status anchors link to the detailed report.",
+    "negative": "Wrong scope, kind, incomplete attribution, ambiguous receipts, false results and undefined intermediate levels block promotion. Partial, duplicated and empty route coverage blocks machine evidence.",
+    "browser": {
+      "index": "Three independent topic cards",
+      "mobile": {
+        "width": 375,
+        "scrollWidth": 375
+      },
+      "roadmap": "Internationalisation topic links to its next evidence gates",
+      "products": 19
+    }
+  },
+  "boundary": "Evidence maturity is scoped by product and saga. Catalogue delivery labels do not supply assurance. No composite product score is calculated. These levels are separate from WCAG conformance or promised locale support. Higher-level review, use and maintenance receipts are not supplied by this release.",
+  "standardsReferences": [
+    "https://www.w3.org/WAI/test-evaluate/",
+    "https://www.w3.org/International/questions/qa-i18n"
+  ],
+  "sources": {
+    "algebra/publication.process.json": "81f8ed0250967f90c1bb59b8f547af155c1d01a92e97977871771013b325c346",
+    "algebra/hierarchy.process.json": "2cd4a6de0b04fef82f44c9274598861e8f2dd9c012bbfe8dcd24d6081113781f",
+    "algebra/atlas.process.json": "2e2b394897e5b343cb3a8ce521647e12727c232943536fc35f1e966a17211696",
+    "algebra/html.process.json": "e6909f3da53e00ee51e67170d464e26d25e7b05e35b845a9a6be866052f1da9e",
+    "source/hierarchy.rel": "09ae914b7d8fed72e56c4374048c676481012792c18c8655568da8eef50e7f51",
+    "source/expedition.rel": "60e2ed04839671c26f1ed91b8bcf5b819698cbcca41623a56c5bb6bbdff2bdb3",
+    "source/authoring-contract.json": "0bb150275b0bf23a87fcf298a5ccf3aeea33c77f3fad88af9667c7f839a3bab3",
+    "hierarchy.test.mjs": "9c529ea67d5662f0e3c08c3a8f1acc58a90f61429025da19886cbc98ef0a1d3c",
+    "algebra-publication.test.mjs": "fbcae848a5406e608b25262b1abf48d183ac6ed789a7cd2bf86acfa0f03611ab",
+    "dist/assurance/index.html": "7edc7f9a39a328d7867fb5cd79b95d9ea9053e5d2ebf44ce52d3df0e12b20d56",
+    "dist/assurance/identities/index.html": "6ab8a2ec3269058a586202e31815cebdaff0b10ceef933bf32df67404e66c106",
+    "dist/assurance/accessibility/index.html": "5cccad23f8d04e780c681babff400e1be52683e99b41c61264fa8a433ecad302",
+    "dist/assurance/internationalisation/index.html": "f43e2e0b9d52b95df25246ba49d2e01b87d540488709769044726a51073ab815",
+    "dist/assurance/maturity/index.html": "a01d0d50dd68f134199d092a623171fb4776d21a6240c8a0458098af389119f9",
+    "dist/assurance/topics.json": "e2d50683b181b282afc61ca2e1dcafe5a5d1e2bd7efc495c0f32d060a4f62daf",
+    "dist/assurance/entry-markup.json": "6b2036fc402dc480fd9ffad5742eeb20ff63f8a482e0ced17ad12cb0474be681",
+    "dist/build-receipt.json": "5be888d28ad79424493f1721d17a825214f1bc7de3cfa5f2fbeb89fbd95db1cd"
+  },
+  "corpus": "corpus/assurance/assurance_portfolio.md"
+}

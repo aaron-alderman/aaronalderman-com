@@ -4258,6 +4258,9 @@
       },
       {
         "call": "hierarchy.identityQuestions.build"
+      },
+      {
+        "call": "hierarchy.correctionArticle.build"
       }
     ],
     "hierarchy.usecase.build": [
@@ -6542,6 +6545,89 @@
                                     "loading": "lazy",
                                     "width": 1672,
                                     "height": 941
+                                  },
+                                  "children": [
+                                    "list"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "section",
+                          "attrs": {
+                            "class": "q-section hh-field-card field-correction-card"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "div",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "eyebrow"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "The Field / An inquiry into power"
+                                  ]
+                                },
+                                {
+                                  "tag": "h2",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "Can power leave room for correction?"
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "Follow satire and 1 Samuel 8 into a worked model of trust, delegated authority and the resources needed to challenge again."
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "correction/",
+                                    "class": "q-text-link"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Read the essay and worked example →"
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "hh-field-note"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "A philosophical proposal · synthetic results · open to correction"
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "figure",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "img",
+                                  "attrs": {
+                                    "src": "../assets/the-field/correction-light-lattice-v1.webp",
+                                    "alt": "Violet, amber and blue light geometry beside a person in a softly lit room.",
+                                    "loading": "lazy",
+                                    "width": "1672",
+                                    "height": "941"
                                   },
                                   "children": [
                                     "list"
@@ -9494,6 +9580,882 @@
             ]
           }
         ]
+      }
+    ],
+    "hierarchy.correctionArticle.build": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/the-field/correction-article.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/the-field/correction-article.json"
+        },
+        "into": "fieldArticleText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$fieldArticleText"
+        },
+        "into": "fieldArticle"
+      },
+      {
+        "assert": [
+          "eq",
+          "$fieldArticle.protocol",
+          "the-field/reading-article/1"
+        ],
+        "message": "The Field article must retain its declared content schema."
+      },
+      {
+        "call": "publication.stewardship.view"
+      },
+      {
+        "let": "stewardshipLinks",
+        "value": "$result"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "html",
+          "attrs": {
+            "lang": "en"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "head",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "charset": "utf-8"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "theme-color",
+                    "content": "#faf7ef"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "title",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Can power leave room for correction? — The Field — Aaron Alderman"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "description",
+                    "content": "$fieldArticle.description"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "canonical",
+                    "href": "https://aaronalderman.com/the-field/correction/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": [
+                      "concat",
+                      "../../expedition.css?v=",
+                      [
+                        "one",
+                        "site",
+                        "stylesheetVersion"
+                      ]
+                    ]
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "link",
+                  "attrs": {
+                    "rel": "stylesheet",
+                    "href": "article.css?v=correction-1"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:title",
+                    "content": "$fieldArticle.title"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:description",
+                    "content": "$fieldArticle.description"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:url",
+                    "content": "https://aaronalderman.com/the-field/correction/"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:type",
+                    "content": "article"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image",
+                    "content": "https://aaronalderman.com/assets/the-field/correction-light-lattice-v1.webp"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:width",
+                    "content": "1672"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:height",
+                    "content": "941"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "property": "og:image:alt",
+                    "content": "$fieldArticle.heroAlt"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:card",
+                    "content": "summary_large_image"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:title",
+                    "content": "$fieldArticle.title"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:description",
+                    "content": "$fieldArticle.description"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image",
+                    "content": "https://aaronalderman.com/assets/the-field/correction-light-lattice-v1.webp"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "meta",
+                  "attrs": {
+                    "name": "twitter:image:alt",
+                    "content": "$fieldArticle.heroAlt"
+                  },
+                  "children": [
+                    "list"
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "body",
+              "attrs": {
+                "class": "field-correction-reading"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "#main",
+                    "class": "skip"
+                  },
+                  "children": [
+                    "list",
+                    "Skip to content"
+                  ]
+                },
+                {
+                  "tag": "header",
+                  "attrs": {
+                    "class": "masthead"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../../index.html",
+                        "class": "brand",
+                        "aria-label": "Aaron Alderman"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "span",
+                          "attrs": {
+                            "class": "brand-name"
+                          },
+                          "children": [
+                            "list",
+                            "Aaron ",
+                            {
+                              "tag": "span",
+                              "attrs": {
+                                "class": "brand-surname"
+                              },
+                              "children": [
+                                "list",
+                                "Alderman"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Site"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../../questions.html"
+                          },
+                          "children": [
+                            "list",
+                            "Questions"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../../gate.html"
+                          },
+                          "children": [
+                            "list",
+                            "Threads"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../../atlas.html"
+                          },
+                          "children": [
+                            "list",
+                            "Atlas / Map"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "main",
+                  "attrs": {
+                    "id": "main",
+                    "class": "field-reading-page"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "header",
+                      "attrs": {
+                        "class": "field-essay-hero"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "div",
+                          "attrs": {
+                            "class": "field-essay-opening"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "eyebrow"
+                              },
+                              "children": [
+                                "list",
+                                "The Field / A longer inquiry"
+                              ]
+                            },
+                            {
+                              "tag": "h1",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Can power leave room for ",
+                                {
+                                  "tag": "em",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "correction?"
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "lead"
+                              },
+                              "children": [
+                                "list",
+                                "$fieldArticle.description"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "field-essay-meta"
+                              },
+                              "children": [
+                                "list",
+                                "An essay, a biblical reading, and a synthetic worked example."
+                              ]
+                            },
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "aria-label": "Ways into this essay",
+                                "class": "field-essay-entrances"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "#samuel"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Begin with 1 Samuel 8"
+                                  ]
+                                },
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "#interventions"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Go to the worked results"
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "field-essay-meta"
+                              },
+                              "children": [
+                                "list",
+                                "7 November 2026 · About 35 minutes"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "figure",
+                          "attrs": {
+                            "class": "field-essay-art"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "img",
+                              "attrs": {
+                                "src": "$fieldArticle.hero",
+                                "alt": "$fieldArticle.heroAlt",
+                                "width": "1672",
+                                "height": "941",
+                                "fetchpriority": "high"
+                              },
+                              "children": [
+                                "list"
+                              ]
+                            },
+                            {
+                              "tag": "figcaption",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "AI-generated editorial artwork."
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "class": "field-essay-layout"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "aside",
+                          "attrs": {
+                            "class": "field-essay-toc"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "nav",
+                              "attrs": {
+                                "aria-label": "Article contents"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "eyebrow"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "In this essay"
+                                  ]
+                                },
+                                {
+                                  "tag": "ol",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    [
+                                      "map",
+                                      "$fieldArticle.sections",
+                                      "fieldSection",
+                                      {
+                                        "tag": "li",
+                                        "attrs": {},
+                                        "children": [
+                                          "list",
+                                          {
+                                            "tag": "a",
+                                            "attrs": {
+                                              "href": [
+                                                "concat",
+                                                "#",
+                                                "$fieldSection.id"
+                                              ]
+                                            },
+                                            "children": [
+                                              "list",
+                                              "$fieldSection.title"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  ]
+                                },
+                                {
+                                  "tag": "div",
+                                  "attrs": {
+                                    "class": "field-toc-foot"
+                                  },
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "#sources"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Sources and model limits"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "../"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Return to The Field"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "article",
+                          "attrs": {
+                            "class": "field-essay-body",
+                            "aria-label": "$fieldArticle.title"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "div",
+                              "attrs": {
+                                "class": "field-essay-intro"
+                              },
+                              "children": [
+                                "list",
+                                "$fieldArticle.intro"
+                              ]
+                            },
+                            [
+                              "map",
+                              "$fieldArticle.sections",
+                              "fieldSection",
+                              {
+                                "tag": "section",
+                                "attrs": {
+                                  "id": "$fieldSection.id",
+                                  "aria-labelledby": [
+                                    "concat",
+                                    "$fieldSection.id",
+                                    "-heading"
+                                  ]
+                                },
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "h2",
+                                    "attrs": {
+                                      "id": [
+                                        "concat",
+                                        "$fieldSection.id",
+                                        "-heading"
+                                      ]
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$fieldSection.title"
+                                    ]
+                                  },
+                                  "$fieldSection.blocks"
+                                ]
+                              }
+                            ],
+                            {
+                              "tag": "section",
+                              "attrs": {
+                                "id": "sources",
+                                "aria-labelledby": "sources-heading",
+                                "class": "field-essay-sources"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "h2",
+                                  "attrs": {
+                                    "id": "sources-heading"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Sources and model limits"
+                                  ]
+                                },
+                                "$fieldArticle.footer",
+                                {
+                                  "tag": "ul",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "li",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        {
+                                          "tag": "a",
+                                          "attrs": {
+                                            "href": "../../source/the-field/correction-results.json"
+                                          },
+                                          "children": [
+                                            "list",
+                                            "Inspect the selected result table (JSON)"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "tag": "li",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        {
+                                          "tag": "a",
+                                          "attrs": {
+                                            "href": "../../source/the-field/correction-article.json"
+                                          },
+                                          "children": [
+                                            "list",
+                                            "Inspect this article’s structured source (JSON)"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "tag": "p",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "This page publishes the argument, declared assumptions and selected results. The wider research packet remains local. Changes to the mechanisms, observations or uncertainty bounds may change the reported outcomes."
+                                  ]
+                                },
+                                {
+                                  "tag": "nav",
+                                  "attrs": {
+                                    "aria-label": "Continue or leave",
+                                    "class": "field-essay-continue"
+                                  },
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "../"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Return to The Field →"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "../households/"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Explore households over time →"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "../../places/kenosis.html"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Read about power and kenosis →"
+                                      ]
+                                    },
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": "#main"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "Back to the opening ↑"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "footer",
+                  "attrs": {
+                    "class": "footer"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "div",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "strong",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Aaron Alderman"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "A few things I’ve built. A few things I’m still trying to understand."
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "nav",
+                      "attrs": {
+                        "aria-label": "Elsewhere"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://github.com/aaron-alderman"
+                          },
+                          "children": [
+                            "list",
+                            "GitHub ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://www.linkedin.com/in/aaron-alderman/"
+                          },
+                          "children": [
+                            "list",
+                            "LinkedIn ↗"
+                          ]
+                        },
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "https://worldwright.io/"
+                          },
+                          "children": [
+                            "list",
+                            "Built with Worldwright.io ↗"
+                          ]
+                        }
+                      ]
+                    },
+                    "$stewardshipLinks"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "the-field/correction/index.html",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
       }
     ]
   }
