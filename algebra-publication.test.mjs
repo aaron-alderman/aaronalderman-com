@@ -46,6 +46,7 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  const xml=await read('dist/sitemap.xml'),urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
  const expected=['','mission/','writing/','writing/power-must-serve-life/','writing/faith-with-open-hands/','assurance/','assurance/identities/','assurance/accessibility/','assurance/internationalisation/','assurance/maturity/','assurance/rendered-layout/','roadmap/','gate.html','atlas.html','questions.html','questions-sourcerer.html','questions-author.html','questions-dad.html','relational-geometry/','inspection/source-algebra.html',...Object.keys(scenes).map(id=>`places/${id}.html`),...['temple','temple/films','sourcery','sourcery/films','claimipedia','worldwright','encounter','kingdom','world-modelling','creativity','the-field','the-field/correction'].map(slug=>slug+'/')].map(route=>'https://aaronalderman.com/'+route);
  expected.push('https://aaronalderman.com/assurance/contrast/');
+ expected.push('https://aaronalderman.com/assurance/reading-experience/','https://aaronalderman.com/assurance/plain-language/');
  for(const room of JSON.parse(await read('source/reading/rooms.json')).rooms)expected.push(room.essay.canonical);
  for(const item of JSON.parse(await read('source/hierarchy.json')).items)for(const route of [item.href,'inspection/'+item.id+'.html']){const url='https://aaronalderman.com/'+route;if(!expected.includes(url))expected.push(url);}
  for(const identity of ['sourcerer','author','dad','christian'])for(const route of ['index.html','threads.html','atlas.html','questions.html',...Object.keys(scenes).map(id=>`places/${id}.html`)])expected.push(`https://aaronalderman.com/worlds/${identity}/${route}`);
@@ -91,10 +92,10 @@ test('historical oracle bytes, passive resources and declared mechanism successo
 test('algebra owns the publication with the existing admission rules, ports and budget',async()=>{
  assert.equal(receipt.assurance.places,40);assert.equal(receipt.assurance.sourceNotes,29);
  assert.equal(receipt.execution.limit,20_000_000);assert.ok(receipt.execution.totalSteps<20_000_000);
- assert.equal(receipt.admission.passes,31);assert.deepEqual(receipt.mjsImports,[]);
+ assert.equal(receipt.admission.passes,33);assert.deepEqual(receipt.mjsImports,[]);
  for(const file of ['source/expedition.rel','source/presentation.rel','algebra/publication.process.json','source/gateway.rel','source/gateway-presentation.rel','algebra/gateway.process.json'])assert.equal(receipt.sources[file],sha(await fs.readFile(path.join(root,file))));
  for(const [file,hash]of Object.entries(receipt.artifacts))if(/\.(?:js|mjs|cjs)$/.test(file)){
-  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js','identity-runtime.js','inspection/runtime.js','assurance/rendered-runtime.js','roadmap/runtime.js',...contract.readerWorkshopSuccessor.runtimes].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
+  if(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js','identity-runtime.js','inspection/runtime.js','assurance/rendered-runtime.js','assurance/experience-runtime.js','roadmap/runtime.js',...contract.readerWorkshopSuccessor.runtimes].includes(file)){assert.ok((await read('dist/'+file)).includes('const model=hydrateSnapshot('));continue;}
   const retained=file.startsWith('retained/')?file:'retained/'+file;
   assert.equal(hash,contract.compatibilityOrigin.sha256[retained],file+' is unchanged compatibility code');
  }

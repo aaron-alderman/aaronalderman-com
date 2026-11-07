@@ -578,6 +578,9 @@
         "call": "assurance.contrast.publish"
       },
       {
+        "call": "assurance.experience.publish"
+      },
+      {
         "call": "assurance.rendered.publish"
       },
       {
@@ -25612,6 +25615,687 @@
                     }
                   ]
                 }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "assurance.portfolio.document"
+      }
+    ],
+    "assurance.experience.boot": [
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#experience-download"
+        },
+        "into": "downloadLink"
+      },
+      {
+        "let": "reportUrl",
+        "value": [
+          "at",
+          "$downloadLink.attributes",
+          "href"
+        ]
+      },
+      {
+        "port": "asset.text",
+        "args": {
+          "url": "$reportUrl",
+          "cache": "no-store"
+        },
+        "into": "experienceJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$experienceJSON"
+        },
+        "into": "experienceReport"
+      },
+      {
+        "let": "languageTrack",
+        "value": [
+          "eq",
+          "$experienceReport.protocol",
+          "worldwright/plain-language-report/1"
+        ]
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "div",
+          "attrs": {},
+          "children": [
+            "list",
+            {
+              "tag": "h2",
+              "attrs": {},
+              "children": [
+                "list",
+                "Current evidence"
+              ]
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                "Status: ",
+                "$experienceReport.status"
+              ]
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                "$experienceReport.scope"
+              ]
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                [
+                  "if",
+                  "$languageTrack",
+                  [
+                    "concat",
+                    "$experienceReport.counts.routes",
+                    " pages · ",
+                    "$experienceReport.counts.candidates",
+                    " automatic review candidates · ",
+                    "$experienceReport.counts.reviewed",
+                    " recorded human reviews."
+                  ],
+                  [
+                    "concat",
+                    "$experienceReport.counts.routes",
+                    " routes · ",
+                    "$experienceReport.counts.passed",
+                    " passed bounded observations · ",
+                    "$experienceReport.counts.failed",
+                    " failures · ",
+                    "$experienceReport.counts.review",
+                    " review candidates · ",
+                    "$experienceReport.counts.missing",
+                    " missing browser observations."
+                  ]
+                ]
+              ]
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                "$experienceReport.boundary"
+              ]
+            },
+            {
+              "tag": "details",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "summary",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Inspect findings and review obligations"
+                  ]
+                },
+                {
+                  "tag": "ul",
+                  "attrs": {},
+                  "children": [
+                    "map",
+                    "$experienceReport.findings",
+                    "f",
+                    {
+                      "tag": "li",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "/",
+                              "$f.route"
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            "$f.route"
+                          ]
+                        },
+                        " · ",
+                        "$f.profile",
+                        " · ",
+                        {
+                          "tag": "strong",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "$f.status"
+                          ]
+                        },
+                        " · ",
+                        "$f.rule",
+                        " — ",
+                        "$f.evidence",
+                        " ",
+                        {
+                          "tag": "q",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "$f.text"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#experience-results",
+          "html": "$result"
+        },
+        "into": "_"
+      }
+    ],
+    "assurance.experience.publish": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "algebra/reading-experience.process.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "algebra/reading-experience.process.json"
+        },
+        "into": "experiencePolicyText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$experiencePolicyText"
+        },
+        "into": "experiencePolicy"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/assurance/reading-experience.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/assurance/reading-experience.json"
+        },
+        "into": "experienceConfigurationText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$experienceConfigurationText"
+        },
+        "into": "experienceConfiguration"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "tooling/assurance/reading-experience-evidence.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "tooling/assurance/reading-experience-evidence.json"
+        },
+        "into": "experienceEvidenceText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$experienceEvidenceText"
+        },
+        "into": "experienceEvidence"
+      },
+      {
+        "assert": [
+          "eq",
+          "$experiencePolicy",
+          "$experienceEvidence.policy"
+        ],
+        "message": "Reading experience policy evidence is stale."
+      },
+      {
+        "assert": [
+          "eq",
+          "$experienceConfiguration",
+          "$experienceEvidence.configuration"
+        ],
+        "message": "Reading experience configuration evidence is stale."
+      },
+      {
+        "port": "file.remove",
+        "args": {
+          "path": "tooling/reading-experience-observer.mjs"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "tooling/assurance/reading-experience-capture.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$experienceEvidence.browser"
+        },
+        "into": "experienceBrowserJSON"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/reading-experience.json",
+          "text": "$experienceBrowserJSON"
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$experienceEvidence.language"
+        },
+        "into": "experienceLanguageJSON"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/plain-language.json",
+          "text": "$experienceLanguageJSON"
+        },
+        "into": "_"
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "assurance.experience.boot",
+          "mode": "browser",
+          "grantProfile": "readerBrowser",
+          "queries": [
+            "list",
+            "assurance.experience.boot",
+            "html.serialize",
+            "html.escape",
+            "html.cssText"
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "budget": 20000000
+        },
+        "into": "experienceRuntime"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/experience-runtime.js",
+          "text": "$experienceRuntime"
+        },
+        "into": "_"
+      },
+      {
+        "let": "portfolioPage",
+        "value": {
+          "route": "assurance/reading-experience/index.html",
+          "prefix": "../../",
+          "canonical": "https://aaronalderman.com/assurance/reading-experience/",
+          "title": "Reading experience assurance — Aaron Alderman",
+          "description": "Browser observations check text contrast, narrow reading layouts, increased text spacing, and real Tab and Enter journeys. The declared scope covers twenty reader routes.",
+          "body": [
+            "list",
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "ASSURANCE / Reading experience assurance"
+                  ]
+                },
+                {
+                  "tag": "h1",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Can you read it, enlarge it, and find your way?"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Browser observations check text contrast, narrow reading layouts, increased text spacing, and real Tab and Enter journeys. The declared scope covers twenty reader routes."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../"
+                      },
+                      "children": [
+                        "list",
+                        "All assurance topics"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../reading-experience.json",
+                        "id": "experience-download"
+                      },
+                      "children": [
+                        "list",
+                        "Download the evidence"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "https://github.com/aaron-alderman/aaronalderman-com/actions/workflows/pages.yml"
+                      },
+                      "children": [
+                        "list",
+                        "Browser CI runs"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Three distinct checks"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Contrast pairs actual computed text colour with the first supported opaque surface. Images, transparency and complex painting remain review work."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Zoom checks use CSS widths equivalent to 200% and 400% zoom from a 1280px viewport. A separate profile applies increased text spacing. These are reflow checks, not a recording of browser-toolbar zoom."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Keyboard journeys enter the main content, return home, and follow the declared Questions and atlas-place links. Focus visibility and obstruction are recorded along the way."
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "id": "experience-results"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "The current report is available through “Download the evidence”. Interactive findings load below when scripts are available."
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "script",
+              "attrs": {
+                "src": "../experience-runtime.js",
+                "defer": true
+              },
+              "children": [
+                "list"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "assurance.portfolio.document"
+      },
+      {
+        "let": "portfolioPage",
+        "value": {
+          "route": "assurance/plain-language/index.html",
+          "prefix": "../../",
+          "canonical": "https://aaronalderman.com/assurance/plain-language/",
+          "title": "Plain-language assurance — Aaron Alderman",
+          "description": "Clarity deserves its own review track. Automatic prompts help locate difficult passages; a reader’s account of what they understood supplies a different kind of evidence.",
+          "body": [
+            "list",
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "ASSURANCE / Plain-language assurance"
+                  ]
+                },
+                {
+                  "tag": "h1",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Can someone else understand what I mean?"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Clarity deserves its own review track. Automatic prompts help locate difficult passages; a reader’s account of what they understood supplies a different kind of evidence."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../"
+                      },
+                      "children": [
+                        "list",
+                        "All assurance topics"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../plain-language.json",
+                        "id": "experience-download"
+                      },
+                      "children": [
+                        "list",
+                        "Download the evidence"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "https://github.com/aaron-alderman/aaronalderman-com/actions/workflows/pages.yml"
+                      },
+                      "children": [
+                        "list",
+                        "Browser CI runs"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Prompts that preserve your voice"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "The opening twelve prose blocks of each page are checked for selected specialist terms, long sentences and vague link labels. These are reasons to look more closely, not automatic judgments about the writing."
+                  ]
+                },
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "What a reader review needs"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Ask a reader to explain the page in their own words, identify what the work is for, and describe a next step. Record confusing terms and passages, the method and date, and the exact document reviewed. An empty automatic queue never establishes understanding."
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "id": "experience-results"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "The current report is available through “Download the evidence”. Interactive findings load below when scripts are available."
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "script",
+              "attrs": {
+                "src": "../experience-runtime.js",
+                "defer": true
+              },
+              "children": [
+                "list"
               ]
             }
           ]

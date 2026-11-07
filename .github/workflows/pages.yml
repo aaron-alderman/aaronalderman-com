@@ -11,13 +11,12 @@ concurrency:
   group: pages
   cancel-in-progress: false
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  verify:
+    runs-on: ubuntu-24.04
     env:
       PAGES_ARTIFACT_NAME: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      artifact_name: ${{ steps.package-name.outputs.name }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
@@ -27,17 +26,41 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Compile the algebra-owned publication
         run: npm run build
+      - name: Observe rendered contrast, reflow and keyboard journeys
+        run: node tooling/run-reading-browser-ci.mjs
+      - name: Retain raw browser observations and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reading-experience-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .build/reading-experience-ci/
+          if-no-files-found: warn
+      - name: Bind the final publication evidence
+        run: |
+          node tooling/assess-reading-contrast.mjs
+          npm run build
+          node tooling/assess-reading-experience.mjs --check
       - name: Check the portable publication
         run: npm run test:portable
       - name: Verify microsite presentation from declared dependencies
         run: node tooling/verify-microsite-presentation.mjs dist
-      - uses: actions/configure-pages@v5
+      - name: Record the verified artifact name
+        id: package-name
+        run: echo "name=${PAGES_ARTIFACT_NAME}" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-pages-artifact@v4
         with:
           name: ${{ env.PAGES_ARTIFACT_NAME }}
           path: dist
-      - name: Publish
+  deploy:
+    needs: verify
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Publish the verified artifact
         id: deployment
         uses: actions/deploy-pages@v4
         with:
-          artifact_name: ${{ env.PAGES_ARTIFACT_NAME }}
+          artifact_name: ${{ needs.verify.outputs.artifact_name }}
