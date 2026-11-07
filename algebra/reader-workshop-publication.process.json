@@ -1154,7 +1154,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "../../expedition.css?v=field-households-qa-2"
+                    "href": "../../expedition.css?v=field-households-sections-3"
                   },
                   "children": [
                     "list"
@@ -1294,7 +1294,7 @@
                   "tag": "script",
                   "attrs": {
                     "defer": true,
-                    "src": "../../reader/activity-runtime.js?v=field-households-qa-2"
+                    "src": "../../reader/activity-runtime.js?v=field-households-sections-3"
                   },
                   "children": [
                     "list"
@@ -1480,7 +1480,9 @@
                         {
                           "tag": "section",
                           "attrs": {
-                            "class": "q-section hh-introduction"
+                            "class": "q-section hh-introduction hh-section hh-chapter hh-chapter-soft",
+                            "id": "hh-question",
+                            "aria-labelledby": "hh-question-heading"
                           },
                           "children": [
                             "list",
@@ -1496,7 +1498,9 @@
                             },
                             {
                               "tag": "h2",
-                              "attrs": {},
+                              "attrs": {
+                                "id": "hh-question-heading"
+                              },
                               "children": [
                                 "list",
                                 "When a request returns, it brings a history."
@@ -1530,13 +1534,27 @@
                             {
                               "tag": "section",
                               "attrs": {
-                                "class": "q-section hh-section"
+                                "class": "q-section hh-section hh-chapter",
+                                "id": "hh-arrangement",
+                                "aria-labelledby": "hh-arrangement-heading"
                               },
                               "children": [
                                 "list",
                                 {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "eyebrow"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Set up the household"
+                                  ]
+                                },
+                                {
                                   "tag": "h2",
-                                  "attrs": {},
+                                  "attrs": {
+                                    "id": "hh-arrangement-heading"
+                                  },
                                   "children": [
                                     "list",
                                     "Begin with an arrangement, then introduce change."
@@ -2840,13 +2858,27 @@
                             {
                               "tag": "section",
                               "attrs": {
-                                "class": "q-section hh-section"
+                                "class": "q-section hh-section hh-chapter hh-chapter-soft",
+                                "id": "hh-evolution",
+                                "aria-labelledby": "hh-evolution-heading"
                               },
                               "children": [
                                 "list",
                                 {
+                                  "tag": "p",
+                                  "attrs": {
+                                    "class": "eyebrow"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Through time"
+                                  ]
+                                },
+                                {
                                   "tag": "h2",
-                                  "attrs": {},
+                                  "attrs": {
+                                    "id": "hh-evolution-heading"
+                                  },
                                   "children": [
                                     "list",
                                     "Follow the household, one period at a time."
@@ -3145,13 +3177,27 @@
                         {
                           "tag": "section",
                           "attrs": {
-                            "class": "q-section hh-section"
+                            "class": "q-section hh-section hh-chapter",
+                            "id": "hh-consequences",
+                            "aria-labelledby": "hh-consequences-heading"
                           },
                           "children": [
                             "list",
                             {
+                              "tag": "p",
+                              "attrs": {
+                                "class": "eyebrow"
+                              },
+                              "children": [
+                                "list",
+                                "Read the consequences"
+                              ]
+                            },
+                            {
                               "tag": "h2",
-                              "attrs": {},
+                              "attrs": {
+                                "id": "hh-consequences-heading"
+                              },
                               "children": [
                                 "list",
                                 "An allocation is one question. Correction is another."
@@ -3619,7 +3665,7 @@
                   "tag": "link",
                   "attrs": {
                     "rel": "stylesheet",
-                    "href": "../../../expedition.css?v=field-households-qa-2"
+                    "href": "../../../expedition.css?v=field-households-sections-3"
                   },
                   "children": [
                     "list"
