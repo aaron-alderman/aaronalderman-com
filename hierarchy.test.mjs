@@ -53,7 +53,7 @@ test('the eight decisions distinguish scoped invariants from identity mappings w
  assert.match(decisions.aesthetics.humanReview,/Required/);assert.match(decisions.aesthetics.boundary,/not inferred/);
  assert.equal(report.rows.filter(r=>['missing','undecided'].includes(r.status)).length,0);
  const css=fs.readFileSync('dist/expedition.css','utf8');assert.ok(css.includes('--q-paper:#f3f7ef;'));assert.ok(css.includes('--q-action:#365c40;'));assert.ok(!css.includes('infinite'));
- const author=fs.readFileSync('dist/worlds/author/questions.html','utf8');assert.ok(author.includes('content="#f3f7ef"'));assert.ok(author.includes('rel="canonical" href="https://aaronalderman.com/worlds/author/questions.html"'));assert.ok(author.includes('href="/expedition.css?v=field-households-1"'));
+ const author=fs.readFileSync('dist/worlds/author/questions.html','utf8');assert.ok(author.includes('content="#f3f7ef"'));assert.ok(author.includes('rel="canonical" href="https://aaronalderman.com/worlds/author/questions.html"'));assert.ok(author.includes('href="/expedition.css?v='+fs.readFileSync('source/expedition.rel','utf8').match(/"stylesheetVersion", "([^"]+)"/)[1]+'"'));
 });
 
 test('a declared decision stays missing without complete, matching per-identity verification',async()=>{
