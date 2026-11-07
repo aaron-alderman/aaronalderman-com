@@ -10,52 +10,39 @@
         "into": "escaped"
       },
       {
-        "fold": [
-          "list",
-          [
-            "list",
-            "&",
-            "&amp;"
-          ],
-          [
-            "list",
-            "<",
-            "&lt;"
-          ],
-          [
-            "list",
-            ">",
-            "&gt;"
-          ],
-          [
-            "list",
-            "\"",
-            "&quot;"
-          ]
-        ],
-        "as": "replacement",
-        "accumulator": "escaped",
-        "initial": "$escaped",
-        "steps": [
-          {
-            "port": "text.replaceAll",
-            "args": {
-              "value": "$escaped",
-              "search": [
-                "at",
-                "$replacement",
-                0
-              ],
-              "replacement": [
-                "at",
-                "$replacement",
-                1
-              ]
-            },
-            "into": "escaped"
-          }
-        ],
-        "yield": "$escaped",
+        "port": "text.replaceAll",
+        "args": {
+          "value": "$escaped",
+          "search": "&",
+          "replacement": "&amp;"
+        },
+        "into": "htmlEscape1"
+      },
+      {
+        "port": "text.replaceAll",
+        "args": {
+          "value": "$htmlEscape1",
+          "search": "<",
+          "replacement": "&lt;"
+        },
+        "into": "htmlEscape2"
+      },
+      {
+        "port": "text.replaceAll",
+        "args": {
+          "value": "$htmlEscape2",
+          "search": ">",
+          "replacement": "&gt;"
+        },
+        "into": "htmlEscape3"
+      },
+      {
+        "port": "text.replaceAll",
+        "args": {
+          "value": "$htmlEscape3",
+          "search": "\"",
+          "replacement": "&quot;"
+        },
         "into": "result"
       }
     ],
