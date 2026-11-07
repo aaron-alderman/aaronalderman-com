@@ -4373,6 +4373,27 @@
     ],
     "household.boot": [
       {
+        "port": "browser.on",
+        "args": {
+          "ref": "#household-root",
+          "event": "input",
+          "delegate": "#hh-period-slider",
+          "query": "household.chart.select",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "window",
+          "event": "resize",
+          "query": "household.chart.resize",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
         "port": "state.set",
         "args": {
           "key": "hh-orientation",
@@ -4983,6 +5004,25 @@
         ]
       },
       {
+        "when": [
+          "eq",
+          "$id",
+          "hh-period-slider"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.chart.select",
+              "input": {
+                "matched": "$target"
+              }
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
         "let": "preset",
         "value": [
           "includes",
@@ -5093,7 +5133,8 @@
           [
             "list",
             "hh-person",
-            "hh-phase"
+            "hh-phase",
+            "hh-period-slider"
           ],
           "$id"
         ],
@@ -5156,7 +5197,8 @@
               [
                 "list",
                 "hh-person",
-                "hh-phase"
+                "hh-phase",
+                "hh-period-slider"
               ],
               "$id"
             ]
@@ -5973,310 +6015,12 @@
         "into": "hp197"
       },
       {
-        "fold": "$run.history",
-        "as": "r",
-        "accumulator": "chart",
-        "initial": {
-          "a": "",
-          "b": "",
-          "buttons": [
-            "list"
-          ]
-        },
-        "steps": [
-          {
-            "port": "number.calculate",
-            "args": {
-              "operation": "subtract",
-              "values": [
-                "list",
-                "$r.period",
-                1
-              ]
-            },
-            "into": "hn201"
-          },
-          {
-            "port": "number.calculate",
-            "args": {
-              "operation": "multiply",
-              "values": [
-                "list",
-                "$hn201",
-                46
-              ]
-            },
-            "into": "hn200"
-          },
-          {
-            "port": "number.calculate",
-            "args": {
-              "operation": "add",
-              "values": [
-                "list",
-                30,
-                "$hn200"
-              ]
-            },
-            "into": "hn199"
-          },
-          {
-            "port": "number.format",
-            "args": {
-              "value": "$hn199",
-              "digits": 2
-            },
-            "into": "hp198"
-          },
-          {
-            "port": "number.calculate",
-            "args": {
-              "operation": "multiply",
-              "values": [
-                "list",
-                "$r.willingnessClosing.A",
-                140
-              ]
-            },
-            "into": "hn204"
-          },
-          {
-            "port": "number.calculate",
-            "args": {
-              "operation": "subtract",
-              "values": [
-                "list",
-                170,
-                "$hn204"
-              ]
-            },
-            "into": "hn203"
-          },
-          {
-            "port": "number.format",
-            "args": {
-              "value": "$hn203",
-              "digits": 2
-            },
-            "into": "hp202"
-          },
-          {
-            "port": "number.calculate",
-            "args": {
-              "operation": "multiply",
-              "values": [
-                "list",
-                "$r.willingnessClosing.B",
-                140
-              ]
-            },
-            "into": "hn207"
-          },
-          {
-            "port": "number.calculate",
-            "args": {
-              "operation": "subtract",
-              "values": [
-                "list",
-                170,
-                "$hn207"
-              ]
-            },
-            "into": "hn206"
-          },
-          {
-            "port": "number.format",
-            "args": {
-              "value": "$hn206",
-              "digits": 2
-            },
-            "into": "hp205"
-          }
-        ],
-        "yield": {
-          "a": [
-            "concat",
-            "$chart.a",
-            [
-              "if",
-              [
-                "eq",
-                "$r.period",
-                1
-              ],
-              "M",
-              " L"
-            ],
-            "$hp198",
-            ",",
-            "$hp202"
-          ],
-          "b": [
-            "concat",
-            "$chart.b",
-            [
-              "if",
-              [
-                "eq",
-                "$r.period",
-                1
-              ],
-              "M",
-              " L"
-            ],
-            "$hp198",
-            ",",
-            "$hp205"
-          ],
-          "buttons": [
-            "append",
-            "$chart.buttons",
-            [
-              "list",
-              {
-                "tag": "button",
-                "attrs": {
-                  "type": "button",
-                  "data-hh-period": "$r.period",
-                  "aria-pressed": [
-                    "if",
-                    [
-                      "eq",
-                      "$r.period",
-                      "$period"
-                    ],
-                    "true",
-                    "false"
-                  ],
-                  "class": [
-                    "if",
-                    [
-                      "eq",
-                      "$r.period",
-                      "$period"
-                    ],
-                    "is-current",
-                    ""
-                  ]
-                },
-                "children": [
-                  "list",
-                  "$r.period"
-                ]
-              }
-            ]
-          ]
-        },
-        "into": "chart"
-      },
-      {
-        "let": "input",
-        "value": [
-          "list",
-          {
-            "tag": "div",
-            "attrs": {
-              "class": "hh-chart-key"
-            },
-            "children": [
-              "list",
-              "Willingness after each period · A: green · B: ochre · 0 to 1"
-            ]
-          },
-          {
-            "tag": "svg",
-            "attrs": {
-              "viewBox": "0 0 566 205",
-              "role": "img",
-              "aria-label": "Separate willingness trajectories for A and B over twelve periods"
-            },
-            "children": [
-              "list",
-              {
-                "tag": "path",
-                "attrs": {
-                  "d": "M30 30V170H536",
-                  "stroke": "#c7c9bc",
-                  "fill": "none"
-                },
-                "children": [
-                  "list"
-                ]
-              },
-              {
-                "tag": "text",
-                "attrs": {
-                  "x": "8",
-                  "y": "35",
-                  "fill": "#526255"
-                },
-                "children": [
-                  "list",
-                  "1"
-                ]
-              },
-              {
-                "tag": "text",
-                "attrs": {
-                  "x": "8",
-                  "y": "175",
-                  "fill": "#526255"
-                },
-                "children": [
-                  "list",
-                  "0"
-                ]
-              },
-              {
-                "tag": "path",
-                "attrs": {
-                  "d": "$chart.a",
-                  "stroke": "#285d4f",
-                  "stroke-width": "3",
-                  "fill": "none"
-                },
-                "children": [
-                  "list"
-                ]
-              },
-              {
-                "tag": "path",
-                "attrs": {
-                  "d": "$chart.b",
-                  "stroke": "#b57d36",
-                  "stroke-width": "3",
-                  "fill": "none",
-                  "stroke-dasharray": "7 4"
-                },
-                "children": [
-                  "list"
-                ]
-              }
-            ]
-          },
-          {
-            "tag": "div",
-            "attrs": {
-              "class": "hh-periods",
-              "aria-label": "Select period"
-            },
-            "children": [
-              "list",
-              "$chart.buttons"
-            ]
-          }
-        ]
-      },
-      {
-        "call": "html.serialize"
-      },
-      {
-        "port": "browser.content",
+        "port": "kernel.invoke",
         "args": {
-          "ref": "#hh-timeline",
-          "html": "$result"
+          "query": "household.chart.render",
+          "input": {}
         },
-        "into": "hp208"
+        "into": "_"
       },
       {
         "fold": "$row.willingnessUpdates",
@@ -6614,6 +6358,1782 @@
           "html": "$result"
         },
         "into": "hp219"
+      }
+    ],
+    "household.gog.plan": [
+      {
+        "let": "view",
+        "value": "$eventInput.view"
+      },
+      {
+        "assert": [
+          "eq",
+          "$view.frame",
+          "cartesian"
+        ],
+        "message": "HH-GOG-001: This projection requires a cartesian frame."
+      },
+      {
+        "let": "frame",
+        "value": {
+          "width": "$eventInput.width",
+          "height": 244,
+          "left": 38,
+          "right": 14,
+          "top": 20,
+          "bottom": 190
+        }
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$frame.width",
+            "$frame.left"
+          ]
+        },
+        "into": "hn136"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$hn136",
+            "$frame.right"
+          ]
+        },
+        "into": "hn135"
+      },
+      {
+        "let": "xRange",
+        "value": "$hn135"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$frame.bottom",
+            "$frame.top"
+          ]
+        },
+        "into": "hn137"
+      },
+      {
+        "let": "yRange",
+        "value": "$hn137"
+      },
+      {
+        "let": "xMin",
+        "value": [
+          "at",
+          "$view.encoding.x.domain",
+          0
+        ]
+      },
+      {
+        "let": "xMax",
+        "value": [
+          "at",
+          "$view.encoding.x.domain",
+          1
+        ]
+      },
+      {
+        "let": "yMin",
+        "value": [
+          "at",
+          "$view.encoding.y.domain",
+          0
+        ]
+      },
+      {
+        "let": "yMax",
+        "value": [
+          "at",
+          "$view.encoding.y.domain",
+          1
+        ]
+      },
+      {
+        "fold": "$view.facet.values",
+        "as": "person",
+        "accumulator": "facets",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "rows",
+            "value": [
+              "filter",
+              "$eventInput.data",
+              "r",
+              [
+                "eq",
+                [
+                  "at",
+                  "$r",
+                  "$view.facet.field"
+                ],
+                "$person"
+              ]
+            ]
+          },
+          {
+            "let": "selected",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$rows",
+                "r",
+                [
+                  "eq",
+                  [
+                    "at",
+                    "$r",
+                    "$view.encoding.x.field"
+                  ],
+                  "$eventInput.period"
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "fold": "$rows",
+            "as": "r",
+            "accumulator": "geometry",
+            "initial": {
+              "path": "",
+              "points": [
+                "list"
+              ]
+            },
+            "steps": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$r",
+                      "$view.encoding.x.field"
+                    ],
+                    "$xMin"
+                  ]
+                },
+                "into": "hn142"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    "$xMax",
+                    "$xMin"
+                  ]
+                },
+                "into": "hn143"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "divide",
+                  "values": [
+                    "list",
+                    "$hn142",
+                    "$hn143"
+                  ]
+                },
+                "into": "hn141"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    "$hn141",
+                    "$xRange"
+                  ]
+                },
+                "into": "hn140"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    "$frame.left",
+                    "$hn140"
+                  ]
+                },
+                "into": "hn139"
+              },
+              {
+                "port": "number.format",
+                "args": {
+                  "value": "$hn139",
+                  "digits": 2
+                },
+                "into": "hp138"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$r",
+                      "$view.encoding.y.field"
+                    ],
+                    "$yMin"
+                  ]
+                },
+                "into": "hn148"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    "$yMax",
+                    "$yMin"
+                  ]
+                },
+                "into": "hn149"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "divide",
+                  "values": [
+                    "list",
+                    "$hn148",
+                    "$hn149"
+                  ]
+                },
+                "into": "hn147"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    "$hn147",
+                    "$yRange"
+                  ]
+                },
+                "into": "hn146"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    "$frame.bottom",
+                    "$hn146"
+                  ]
+                },
+                "into": "hn145"
+              },
+              {
+                "port": "number.format",
+                "args": {
+                  "value": "$hn145",
+                  "digits": 2
+                },
+                "into": "hp144"
+              }
+            ],
+            "yield": {
+              "path": [
+                "concat",
+                "$geometry.path",
+                [
+                  "if",
+                  [
+                    "eq",
+                    [
+                      "count",
+                      "$geometry.points"
+                    ],
+                    0
+                  ],
+                  "M",
+                  "L"
+                ],
+                "$hp138",
+                ",",
+                "$hp144",
+                " "
+              ],
+              "points": [
+                "append",
+                "$geometry.points",
+                [
+                  "list",
+                  {
+                    "x": "$hp138",
+                    "y": "$hp144",
+                    "period": [
+                      "at",
+                      "$r",
+                      "$view.encoding.x.field"
+                    ],
+                    "value": [
+                      "at",
+                      "$r",
+                      "$view.encoding.y.field"
+                    ]
+                  }
+                ]
+              ]
+            },
+            "into": "geometry"
+          }
+        ],
+        "yield": [
+          "append",
+          "$facets",
+          [
+            "list",
+            {
+              "person": "$person",
+              "color": [
+                "at",
+                "$view.palette",
+                "$person"
+              ],
+              "dash": [
+                "at",
+                "$view.dashes",
+                "$person"
+              ],
+              "selected": "$selected",
+              "line": "$geometry.path",
+              "points": "$geometry.points"
+            }
+          ]
+        ],
+        "into": "facets"
+      },
+      {
+        "fold": "$view.ticks.y",
+        "as": "tick",
+        "accumulator": "yTicks",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$tick",
+              "digits": 2
+            },
+            "into": "hp150"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$tick",
+                "$yMin"
+              ]
+            },
+            "into": "hn155"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$yMax",
+                "$yMin"
+              ]
+            },
+            "into": "hn156"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$hn155",
+                "$hn156"
+              ]
+            },
+            "into": "hn154"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$hn154",
+                "$yRange"
+              ]
+            },
+            "into": "hn153"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$frame.bottom",
+                "$hn153"
+              ]
+            },
+            "into": "hn152"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn152",
+              "digits": 2
+            },
+            "into": "hp151"
+          }
+        ],
+        "yield": [
+          "append",
+          "$yTicks",
+          [
+            "list",
+            {
+              "value": "$tick",
+              "label": "$hp150",
+              "y": "$hp151"
+            }
+          ]
+        ],
+        "into": "yTicks"
+      },
+      {
+        "fold": "$view.ticks.x",
+        "as": "tick",
+        "accumulator": "xTicks",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$tick",
+                "$xMin"
+              ]
+            },
+            "into": "hn161"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$xMax",
+                "$xMin"
+              ]
+            },
+            "into": "hn162"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$hn161",
+                "$hn162"
+              ]
+            },
+            "into": "hn160"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$hn160",
+                "$xRange"
+              ]
+            },
+            "into": "hn159"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$frame.left",
+                "$hn159"
+              ]
+            },
+            "into": "hn158"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn158",
+              "digits": 2
+            },
+            "into": "hp157"
+          }
+        ],
+        "yield": [
+          "append",
+          "$xTicks",
+          [
+            "list",
+            {
+              "value": "$tick",
+              "x": "$hp157"
+            }
+          ]
+        ],
+        "into": "xTicks"
+      },
+      {
+        "fold": "$eventInput.changes",
+        "as": "change",
+        "accumulator": "changes",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$change",
+                "$xMin"
+              ]
+            },
+            "into": "hn167"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$xMax",
+                "$xMin"
+              ]
+            },
+            "into": "hn168"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$hn167",
+                "$hn168"
+              ]
+            },
+            "into": "hn166"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$hn166",
+                "$xRange"
+              ]
+            },
+            "into": "hn165"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$frame.left",
+                "$hn165"
+              ]
+            },
+            "into": "hn164"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn164",
+              "digits": 2
+            },
+            "into": "hp163"
+          }
+        ],
+        "yield": [
+          "append",
+          "$changes",
+          [
+            "list",
+            {
+              "period": "$change",
+              "x": "$hp163"
+            }
+          ]
+        ],
+        "into": "changes"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$eventInput.period",
+            "$xMin"
+          ]
+        },
+        "into": "hn173"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$xMax",
+            "$xMin"
+          ]
+        },
+        "into": "hn174"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            "$hn173",
+            "$hn174"
+          ]
+        },
+        "into": "hn172"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$hn172",
+            "$xRange"
+          ]
+        },
+        "into": "hn171"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$frame.left",
+            "$hn171"
+          ]
+        },
+        "into": "hn170"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$hn170",
+          "digits": 2
+        },
+        "into": "hp169"
+      },
+      {
+        "let": "result",
+        "value": {
+          "frame": "$frame",
+          "encoding": "$view.encoding",
+          "layers": "$view.layers",
+          "facets": "$facets",
+          "yTicks": "$yTicks",
+          "xTicks": "$xTicks",
+          "changes": "$changes",
+          "selectedX": "$hp169"
+        }
+      }
+    ],
+    "household.chart.render": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-run"
+        },
+        "into": "run"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-period"
+        },
+        "into": "period"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "environment"
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#hh-timeline"
+        },
+        "into": "target"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greater",
+          "values": [
+            "list",
+            "$environment.width",
+            900
+          ]
+        },
+        "into": "hn176"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$target.rect.width",
+            24
+          ]
+        },
+        "into": "hn178"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            "$hn178",
+            2
+          ]
+        },
+        "into": "hn177"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "floor",
+          "values": [
+            "list",
+            [
+              "if",
+              "$hn176",
+              "$hn177",
+              "$target.rect.width"
+            ]
+          ]
+        },
+        "into": "hn175"
+      },
+      {
+        "let": "width",
+        "value": "$hn175"
+      },
+      {
+        "fold": "$run.history",
+        "as": "r",
+        "accumulator": "longData",
+        "initial": [
+          "list"
+        ],
+        "steps": [],
+        "yield": [
+          "append",
+          "$longData",
+          [
+            "list",
+            {
+              "person": "A",
+              "period": "$r.period",
+              "closing": "$r.willingnessClosing.A",
+              "opening": "$r.willingnessOpening.A"
+            },
+            {
+              "person": "B",
+              "period": "$r.period",
+              "closing": "$r.willingnessClosing.B",
+              "opening": "$r.willingnessOpening.B"
+            }
+          ]
+        ],
+        "into": "longData"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-overrides"
+        },
+        "into": "overrides"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.chart.changes",
+          "input": {
+            "history": "$run.history",
+            "overrides": "$overrides"
+          }
+        },
+        "into": "changes"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.gog.plan",
+          "input": {
+            "view": "$data.household.chart",
+            "data": "$longData",
+            "width": "$width",
+            "period": "$period",
+            "changes": "$changes"
+          }
+        },
+        "into": "plan"
+      },
+      {
+        "fold": "$plan.facets",
+        "as": "facet",
+        "accumulator": "figures",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$facet.selected.closing",
+              "digits": 3
+            },
+            "into": "hp179"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$facet.selected.closing",
+                "$facet.selected.opening"
+              ]
+            },
+            "into": "hn180"
+          },
+          {
+            "let": "delta",
+            "value": "$hn180"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$delta",
+              "digits": 3
+            },
+            "into": "hp181"
+          },
+          {
+            "fold": "$plan.yTicks",
+            "as": "tick",
+            "accumulator": "grid",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    "$plan.frame.width",
+                    "$plan.frame.right"
+                  ]
+                },
+                "into": "hn182"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    "$tick.y",
+                    4
+                  ]
+                },
+                "into": "hn183"
+              }
+            ],
+            "yield": [
+              "append",
+              "$grid",
+              [
+                "list",
+                {
+                  "tag": "line",
+                  "attrs": {
+                    "x1": "$plan.frame.left",
+                    "x2": "$hn182",
+                    "y1": "$tick.y",
+                    "y2": "$tick.y",
+                    "stroke": "#e1e7e3",
+                    "stroke-width": 1
+                  },
+                  "children": [
+                    "list"
+                  ]
+                },
+                {
+                  "tag": "text",
+                  "attrs": {
+                    "x": 30,
+                    "y": "$hn183",
+                    "text-anchor": "end",
+                    "fill": "#526255",
+                    "font-size": 12
+                  },
+                  "children": [
+                    "list",
+                    "$tick.label"
+                  ]
+                }
+              ]
+            ],
+            "into": "grid"
+          },
+          {
+            "fold": "$plan.xTicks",
+            "as": "tick",
+            "accumulator": "xticks",
+            "initial": [
+              "list"
+            ],
+            "steps": [],
+            "yield": [
+              "append",
+              "$xticks",
+              [
+                "list",
+                {
+                  "tag": "text",
+                  "attrs": {
+                    "x": "$tick.x",
+                    "y": 211,
+                    "text-anchor": "middle",
+                    "fill": "#526255",
+                    "font-size": 12
+                  },
+                  "children": [
+                    "list",
+                    "$tick.value"
+                  ]
+                }
+              ]
+            ],
+            "into": "xticks"
+          },
+          {
+            "fold": "$plan.changes",
+            "as": "change",
+            "accumulator": "changeRules",
+            "initial": [
+              "list"
+            ],
+            "steps": [],
+            "yield": [
+              "append",
+              "$changeRules",
+              [
+                "list",
+                {
+                  "tag": "line",
+                  "attrs": {
+                    "x1": "$change.x",
+                    "x2": "$change.x",
+                    "y1": 20,
+                    "y2": 190,
+                    "stroke": "#b5c2ba",
+                    "stroke-width": 1,
+                    "stroke-dasharray": "3 4"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "title",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "Authored input changes at period ",
+                          "$change.period"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ],
+            "into": "changeRules"
+          },
+          {
+            "fold": "$facet.points",
+            "as": "point",
+            "accumulator": "dots",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "port": "number.format",
+                "args": {
+                  "value": "$point.value",
+                  "digits": 3
+                },
+                "into": "hp184"
+              }
+            ],
+            "yield": [
+              "append",
+              "$dots",
+              [
+                "list",
+                {
+                  "tag": "circle",
+                  "attrs": {
+                    "cx": "$point.x",
+                    "cy": "$point.y",
+                    "r": [
+                      "if",
+                      [
+                        "eq",
+                        "$point.period",
+                        "$period"
+                      ],
+                      6,
+                      3
+                    ],
+                    "fill": [
+                      "if",
+                      [
+                        "eq",
+                        "$point.period",
+                        "$period"
+                      ],
+                      "$facet.color",
+                      "#fff"
+                    ],
+                    "stroke": "$facet.color",
+                    "stroke-width": 2
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "title",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "Person ",
+                          "$facet.person",
+                          " · period ",
+                          "$point.period",
+                          ": ",
+                          "$hp184"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ],
+            "into": "dots"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greaterEqual",
+              "values": [
+                "list",
+                "$delta",
+                0
+              ]
+            },
+            "into": "hn185"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$plan.frame.width",
+                2
+              ]
+            },
+            "into": "hn186"
+          }
+        ],
+        "yield": [
+          "append",
+          "$figures",
+          [
+            "list",
+            {
+              "tag": "figure",
+              "attrs": {
+                "class": [
+                  "concat",
+                  "hh-chart-facet hh-chart-person-",
+                  "$facet.person"
+                ]
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "figcaption",
+                  "attrs": {
+                    "class": "hh-facet-heading"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "div",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "h4",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            [
+                              "concat",
+                              "Person ",
+                              "$facet.person"
+                            ]
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            [
+                              "concat",
+                              "End of period ",
+                              "$period"
+                            ]
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "class": "hh-facet-value"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "strong",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "$hp179"
+                          ]
+                        },
+                        {
+                          "tag": "span",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            [
+                              "concat",
+                              [
+                                "if",
+                                "$hn185",
+                                "+",
+                                ""
+                              ],
+                              "$hp181",
+                              " this period"
+                            ]
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "svg",
+                  "attrs": {
+                    "viewBox": [
+                      "concat",
+                      "0 0 ",
+                      "$plan.frame.width",
+                      " 244"
+                    ],
+                    "role": "img",
+                    "aria-label": [
+                      "concat",
+                      "Person ",
+                      "$facet.person",
+                      ": willingness to review over periods 1 to 12. Selected period ",
+                      "$period"
+                    ],
+                    "data-gog-facet": "$facet.person"
+                  },
+                  "children": [
+                    "list",
+                    "$grid",
+                    [
+                      "if",
+                      [
+                        "some",
+                        "$plan.layers",
+                        "layer",
+                        [
+                          "eq",
+                          "$layer.name",
+                          "authored-changes"
+                        ]
+                      ],
+                      "$changeRules",
+                      [
+                        "list"
+                      ]
+                    ],
+                    [
+                      "if",
+                      [
+                        "some",
+                        "$plan.layers",
+                        "layer",
+                        [
+                          "eq",
+                          "$layer.name",
+                          "selected-period"
+                        ]
+                      ],
+                      {
+                        "tag": "line",
+                        "attrs": {
+                          "x1": "$plan.selectedX",
+                          "x2": "$plan.selectedX",
+                          "y1": 14,
+                          "y2": 194,
+                          "stroke": "#64736a",
+                          "stroke-width": 1.5
+                        },
+                        "children": [
+                          "list"
+                        ]
+                      },
+                      null
+                    ],
+                    [
+                      "if",
+                      [
+                        "some",
+                        "$plan.layers",
+                        "layer",
+                        [
+                          "and",
+                          [
+                            "eq",
+                            "$layer.name",
+                            "trajectory"
+                          ],
+                          [
+                            "eq",
+                            "$layer.mark",
+                            "line"
+                          ]
+                        ]
+                      ],
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "$facet.line",
+                          "stroke": "$facet.color",
+                          "stroke-width": 3,
+                          "fill": "none",
+                          "stroke-linejoin": "round",
+                          "stroke-linecap": "round",
+                          "stroke-dasharray": "$facet.dash",
+                          "data-gog-layer": "trajectory"
+                        },
+                        "children": [
+                          "list"
+                        ]
+                      },
+                      null
+                    ],
+                    [
+                      "if",
+                      [
+                        "some",
+                        "$plan.layers",
+                        "layer",
+                        [
+                          "eq",
+                          "$layer.mark",
+                          "point"
+                        ]
+                      ],
+                      "$dots",
+                      [
+                        "list"
+                      ]
+                    ],
+                    "$xticks",
+                    {
+                      "tag": "text",
+                      "attrs": {
+                        "x": "$hn186",
+                        "y": 236,
+                        "text-anchor": "middle",
+                        "fill": "#526255",
+                        "font-size": 12
+                      },
+                      "children": [
+                        "list",
+                        "Period"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        ],
+        "into": "figures"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "div",
+          "attrs": {
+            "class": "hh-chart-facets"
+          },
+          "children": [
+            "list",
+            "$figures"
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hh-timeline",
+          "html": "$result"
+        },
+        "into": "hp187"
+      },
+      {
+        "fold": "$run.history",
+        "as": "r",
+        "accumulator": "rows",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$r.willingnessClosing.A",
+              "digits": 3
+            },
+            "into": "hp188"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$r.willingnessClosing.B",
+              "digits": 3
+            },
+            "into": "hp189"
+          }
+        ],
+        "yield": [
+          "append",
+          "$rows",
+          [
+            "list",
+            {
+              "tag": "tr",
+              "attrs": {
+                "aria-current": [
+                  "if",
+                  [
+                    "eq",
+                    "$r.period",
+                    "$period"
+                  ],
+                  "true",
+                  "false"
+                ]
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "th",
+                  "attrs": {
+                    "scope": "row"
+                  },
+                  "children": [
+                    "list",
+                    "$r.period"
+                  ]
+                },
+                {
+                  "tag": "td",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$hp188"
+                  ]
+                },
+                {
+                  "tag": "td",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "$hp189"
+                  ]
+                }
+              ]
+            }
+          ]
+        ],
+        "into": "rows"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "table",
+          "attrs": {
+            "class": "hh-chart-values"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "caption",
+              "attrs": {},
+              "children": [
+                "list",
+                "End-of-period willingness, on the model’s 0–1 scale"
+              ]
+            },
+            {
+              "tag": "thead",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "tr",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "th",
+                      "attrs": {
+                        "scope": "col"
+                      },
+                      "children": [
+                        "list",
+                        "Period"
+                      ]
+                    },
+                    {
+                      "tag": "th",
+                      "attrs": {
+                        "scope": "col"
+                      },
+                      "children": [
+                        "list",
+                        "Person A"
+                      ]
+                    },
+                    {
+                      "tag": "th",
+                      "attrs": {
+                        "scope": "col"
+                      },
+                      "children": [
+                        "list",
+                        "Person B"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "tbody",
+              "attrs": {},
+              "children": [
+                "list",
+                "$rows"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hh-chart-values",
+          "html": "$result"
+        },
+        "into": "hp190"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-period-slider",
+          "name": "value",
+          "value": "$period"
+        },
+        "into": "hp191"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#hh-period-slider",
+          "name": "aria-valuetext",
+          "value": [
+            "concat",
+            "Period ",
+            "$period",
+            " of 12"
+          ]
+        },
+        "into": "hp192"
+      }
+    ],
+    "household.chart.select": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.matched.value"
+        },
+        "into": "n"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            12,
+            "$n"
+          ]
+        },
+        "into": "hn195"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "max",
+          "values": [
+            "list",
+            1,
+            "$hn195"
+          ]
+        },
+        "into": "hn194"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-period",
+          "value": "$hn194"
+        },
+        "into": "hp193"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.render",
+          "input": {}
+        },
+        "into": "hq196"
+      }
+    ],
+    "household.chart.resize": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-run"
+        },
+        "into": "ready"
+      },
+      {
+        "when": "$ready",
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.chart.render",
+              "input": {}
+            },
+            "into": "hq197"
+          }
+        ]
+      }
+    ],
+    "household.chart.changes": [
+      {
+        "fold": "$eventInput.history",
+        "as": "row",
+        "accumulator": "periods",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "preset",
+            "value": [
+              "not",
+              [
+                "eq",
+                [
+                  "add",
+                  [
+                    "count",
+                    "$row.appliedEvents"
+                  ],
+                  [
+                    "count",
+                    "$row.appliedExperienceEvents"
+                  ]
+                ],
+                0
+              ]
+            ]
+          },
+          {
+            "let": "custom",
+            "value": [
+              "some",
+              "$eventInput.overrides",
+              "edit",
+              [
+                "and",
+                [
+                  "not",
+                  [
+                    "eq",
+                    "$edit.scope",
+                    "rate"
+                  ]
+                ],
+                [
+                  "includes",
+                  [
+                    "list",
+                    "initial",
+                    "after"
+                  ],
+                  "$edit.phase"
+                ],
+                [
+                  "eq",
+                  "$row.period",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$edit.phase",
+                      "after"
+                    ],
+                    5,
+                    1
+                  ]
+                ]
+              ]
+            ]
+          }
+        ],
+        "yield": [
+          "if",
+          [
+            "or",
+            "$preset",
+            "$custom"
+          ],
+          [
+            "append",
+            "$periods",
+            [
+              "list",
+              "$row.period"
+            ]
+          ],
+          "$periods"
+        ],
+        "into": "periods"
+      },
+      {
+        "let": "result",
+        "value": "$periods"
       }
     ]
   }

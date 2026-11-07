@@ -713,6 +713,690 @@
           }
         ],
         "selector": ".reader-region[hidden],.reader-territory[hidden]"
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-panel",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "background",
+            "value": "#fff",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "border",
+            "value": "1px solid #d8e0da",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "border-radius",
+            "value": "16px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "padding",
+            "value": "clamp(14px,2.5vw,24px)",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "margin",
+            "value": "2rem 0",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-header h3",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "font-size",
+            "value": "28px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "margin",
+            "value": ".5rem 0 1rem",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-header>p:not(.eyebrow)",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "margin-bottom",
+            "value": "1.5rem",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-facets",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "display",
+            "value": "grid",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "grid-template-columns",
+            "value": "repeat(2,minmax(0,1fr))",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "gap",
+            "value": "24px",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-facet",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "margin",
+            "value": "0",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "min-width",
+            "value": "0",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-facet-heading",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "display",
+            "value": "flex",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "justify-content",
+            "value": "space-between",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "gap",
+            "value": "12px",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-facet-heading h4",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "font-size",
+            "value": "18px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "margin",
+            "value": "0",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-facet-heading p,.hh-facet-value span",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "font-size",
+            "value": "13px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "margin",
+            "value": "0",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-facet-value",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "text-align",
+            "value": "right",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-facet-value span",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "display",
+            "value": "block",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-facet-value strong",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "font",
+            "value": "400 32px/1.1 Georgia,serif",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-person-A h4,.hh-chart-person-A strong",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "color",
+            "value": "#285d4f",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-person-B h4,.hh-chart-person-B strong",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "color",
+            "value": "#946323",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-panel svg",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "display",
+            "value": "block",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "width",
+            "value": "100%",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "height",
+            "value": "244px",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-guide,.hh-chart-limit",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "font-size",
+            "value": "13px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "color",
+            "value": "#526255",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-navigation",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "border-top",
+            "value": "1px solid #e1e7e3",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "padding-top",
+            "value": "1rem",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-controls",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "display",
+            "value": "grid",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "grid-template-columns",
+            "value": "44px 1fr 44px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "gap",
+            "value": "8px",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-controls h3",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "font-size",
+            "value": "16px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "margin",
+            "value": "0",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "text-align",
+            "value": "center",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-controls button",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "min-height",
+            "value": "44px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "min-width",
+            "value": "44px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "width",
+            "value": "44px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "padding",
+            "value": "0",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-scrubber label",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "display",
+            "value": "block",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "font-size",
+            "value": "13px",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-scrubber input",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "width",
+            "value": "100%",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "min-height",
+            "value": "44px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "margin",
+            "value": "0",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "accent-color",
+            "value": "#285d4f",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-scrubber-ends",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "display",
+            "value": "flex",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "justify-content",
+            "value": "space-between",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "font-size",
+            "value": "12px",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-panel :focus-visible",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "outline",
+            "value": "3px solid #986c20",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "outline-offset",
+            "value": "3px",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-table,.hh-period-detail",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "border-top",
+            "value": "1px solid #cbd4c5",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "margin-top",
+            "value": "1rem",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-table summary,.hh-period-detail>summary",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "min-height",
+            "value": "44px",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "cursor",
+            "value": "pointer",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "font-weight",
+            "value": "600",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "padding",
+            "value": ".6rem 0",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-values",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "width",
+            "value": "100%",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "border-collapse",
+            "value": "collapse",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "font-size",
+            "value": "14px",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-values th,.hh-chart-values td",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "text-align",
+            "value": "right",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "padding",
+            "value": ".5rem",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "border-bottom",
+            "value": "1px solid #e1e7e3",
+            "between": ":",
+            "semicolon": ";"
+          },
+          {
+            "kind": "decl",
+            "property": "color",
+            "value": "#293f34",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-values th:first-child,.hh-chart-values caption",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "text-align",
+            "value": "left",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-values caption",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "font-size",
+            "value": "13px",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "rule",
+        "selector": ".hh-chart-values tr[aria-current=\"true\"]",
+        "children": [
+          {
+            "kind": "decl",
+            "property": "background",
+            "value": "#edf0e5",
+            "between": ":",
+            "semicolon": ";"
+          }
+        ]
+      },
+      {
+        "kind": "atrule",
+        "name": "media",
+        "params": "(max-width:900px)",
+        "afterName": " ",
+        "children": [
+          {
+            "kind": "rule",
+            "selector": ".hh-chart-facets",
+            "children": [
+              {
+                "kind": "decl",
+                "property": "grid-template-columns",
+                "value": "1fr",
+                "between": ":",
+                "semicolon": ";"
+              }
+            ]
+          }
+        ]
       }
     ],
     "after": "\n"
