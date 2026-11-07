@@ -404,7 +404,7 @@ test('catalogue product evidence is scoped independently and failures block auto
  const portfolio=JSON.parse(fs.readFileSync('dist/assurance/topics.json','utf8'));
  const input={id:'fixture',name:'Fixture',route:'fixture/index.html',deliveryLabel:'Live example',scopeId:'catalogue-entry/fixture/1',policy:'Generated entry only.',binding:true,markup:{languageMarker:true,utf8:true,skipTarget:true,altAttributes:true},sagas:portfolio.sagas.map(s=>({id:s.id,title:s.title})),obligations:portfolio.sagas.flatMap(s=>s.gates.map(g=>({...g,saga:s.id})))};
  const assess=async x=>(await invoke({model:compiled,entry,input:{eventInput:x},ports:valuePorts(),limit:20000000})).value;
- const base=await assess(input);assert.deepEqual(base.profiles.map(s=>s.level),[2,2,1]);assert.ok(base.profiles.flatMap(s=>s.gates).filter(g=>g.evidence).every(g=>g.evidence.scope===input.scopeId));
+ const base=await assess(input);assert.deepEqual(base.profiles.map(s=>s.level),[2,2,1]);assert.ok(base.profiles.every(s=>s.saga===s.id),'retain the existing portfolio profile saga field');assert.ok(base.profiles.flatMap(s=>s.gates).filter(g=>g.evidence).every(g=>g.evidence.scope===input.scopeId));
  for(const field of ['languageMarker','skipTarget','altAttributes']){const changed=structuredClone(input);changed.markup[field]=false;const result=await assess(changed);assert.equal(result.profiles.find(s=>s.id==='accessibility').level,1);assert.equal(result.profiles.find(s=>s.id==='identity').level,2);}
  const binding=structuredClone(input);binding.binding=false;assert.equal((await assess(binding)).profiles.find(s=>s.id==='identity').level,1);
  const missingPolicy=structuredClone(input);missingPolicy.policy='';assert.ok((await assess(missingPolicy)).profiles.every(s=>s.level===0));

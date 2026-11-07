@@ -16054,6 +16054,15 @@
           },
           {
             "call": "assurance.saga.classify"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$result",
+              "key": "saga",
+              "value": "$s.id"
+            },
+            "into": "result"
           }
         ],
         "yield": [

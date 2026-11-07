@@ -6606,7 +6606,7 @@
       },
       {
         "let": "light",
-        "value": "home"
+        "value": "assurance"
       },
       {
         "call": "publication.document"
@@ -11534,30 +11534,20 @@
       },
       {
         "when": [
-          "and",
+          "not",
           [
-            "not",
+            "includes",
             [
-              "eq",
-              "$input",
-              null
-            ]
-          ],
-          [
-            "not",
-            [
-              "eq",
-              "$input",
-              false
-            ]
-          ],
-          [
-            "not",
-            [
-              "eq",
-              "$kind.type",
-              "undefined"
-            ]
+              "list",
+              null,
+              false,
+              [
+                "at",
+                {},
+                "absent"
+              ]
+            ],
+            "$input"
           ]
         ],
         "then": [
@@ -11589,11 +11579,9 @@
           },
           {
             "when": [
-              "and",
-              [
-                "not",
-                "$kind.array"
-              ],
+              "if",
+              "$kind.array",
+              false,
               [
                 "not",
                 [
@@ -11611,11 +11599,9 @@
           },
           {
             "when": [
-              "and",
-              [
-                "not",
-                "$kind.array"
-              ],
+              "if",
+              "$kind.array",
+              false,
               [
                 "eq",
                 "$kind.type",
@@ -11690,34 +11676,20 @@
                   },
                   {
                     "when": [
-                      "and",
+                      "not",
                       [
-                        "not",
+                        "includes",
                         [
-                          "eq",
-                          "$value",
-                          null
-                        ]
-                      ],
-                      [
-                        "not",
-                        [
-                          "eq",
-                          "$value",
-                          false
-                        ]
-                      ],
-                      [
-                        "not",
-                        [
-                          "eq",
-                          "$value",
+                          "list",
+                          null,
+                          false,
                           [
                             "at",
                             {},
                             "absent"
                           ]
-                        ]
+                        ],
+                        "$value"
                       ]
                     ],
                     "then": [
@@ -12667,7 +12639,7 @@
       },
       {
         "let": "light",
-        "value": "home"
+        "value": "assurance"
       },
       {
         "call": "publication.document"
@@ -13192,11 +13164,14 @@
         ]
       },
       {
+        "call": "assurance.catalogue.build"
+      },
+      {
         "let": "portfolioReport",
         "value": {
           "protocol": "worldwright/assurance-portfolio/1",
           "product": "aaronalderman",
-          "scope": "Root and identity homepage entry routes; individual catalogue products are unassessed.",
+          "scope": "Five homepage entry routes plus 18 catalogue front doors; every product and saga retains its own bounded scope.",
           "levels": [
             "map",
             [
@@ -13274,7 +13249,11 @@
             }
           ],
           "sagas": "$sagaProfiles",
-          "roadmap": "$roadmap",
+          "roadmap": [
+            "append",
+            "$roadmap",
+            "$catalogueRoadmap"
+          ],
           "products": [
             "append",
             [
@@ -13294,26 +13273,7 @@
                 ]
               }
             ],
-            [
-              "map",
-              "$identityCatalogue.items",
-              "p",
-              {
-                "id": "$p.id",
-                "name": "$p.name",
-                "deliveryLabel": "$p.status",
-                "scope": "Not assessed",
-                "profiles": [
-                  "map",
-                  "$sagaProfiles",
-                  "s",
-                  {
-                    "saga": "$s.id",
-                    "level": 0
-                  }
-                ]
-              }
-            ]
+            "$catalogueProducts"
           ],
           "boundary": "Evidence maturity is scoped by product and saga. Catalogue delivery labels do not supply assurance. No composite product score is calculated. These levels are separate from WCAG conformance or promised locale support. Higher-level review, use and maintenance receipts are not supplied by this release."
         }
@@ -13395,6 +13355,131 @@
                     "list",
                     "Assurance is a collection of questions about a product. Each topic declares its scope, shows its evidence and keeps its unfinished work visible."
                   ]
+                },
+                {
+                  "tag": "svg",
+                  "attrs": {
+                    "viewBox": "0 0 160 180",
+                    "fill": "none",
+                    "aria-hidden": "true",
+                    "class": "assurance-shield"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "circle",
+                      "attrs": {
+                        "cx": 80,
+                        "cy": 82,
+                        "r": 68,
+                        "stroke": "#c5dcd2",
+                        "stroke-width": 1
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "path",
+                      "attrs": {
+                        "d": "M80 12 137 36v49c0 37-25 63-57 80-32-17-57-43-57-80V36Z",
+                        "fill": "#e1efe7",
+                        "stroke": "#216257",
+                        "stroke-width": 2
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "path",
+                      "attrs": {
+                        "d": "M80 30 120 47v37c0 28-18 48-40 63-22-15-40-35-40-63V47Z",
+                        "fill": "#faf9f1",
+                        "stroke": "#b48a43",
+                        "stroke-width": 2
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "path",
+                      "attrs": {
+                        "d": "M57 84 74 101 105 66",
+                        "stroke": "#216257",
+                        "stroke-width": 5,
+                        "stroke-linecap": "round",
+                        "stroke-linejoin": "round"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "assurance-proof-strip"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "strong",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "count",
+                          "$catalogueProducts"
+                        ]
+                      ]
+                    },
+                    " catalogue front doors assessed"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "strong",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "count",
+                          "$portfolioReport.topics"
+                        ]
+                      ]
+                    },
+                    " independent assurance topics"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "strong",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Evidence before confidence"
+                      ]
+                    },
+                    " · open gaps stay visible"
+                  ]
                 }
               ]
             },
@@ -13412,10 +13497,40 @@
                   {
                     "tag": "section",
                     "attrs": {
-                      "class": "assurance-boundary"
+                      "class": "assurance-boundary",
+                      "data-topic": "$t.id"
                     },
                     "children": [
                       "list",
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "assurance-symbol",
+                          "aria-hidden": "true"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "if",
+                            [
+                              "eq",
+                              "$t.id",
+                              "identity"
+                            ],
+                            "◈",
+                            [
+                              "if",
+                              [
+                                "eq",
+                                "$t.id",
+                                "accessibility"
+                              ],
+                              "◎",
+                              "✺"
+                            ]
+                          ]
+                        ]
+                      },
                       {
                         "tag": "h2",
                         "attrs": {},
@@ -13745,6 +13860,68 @@
                         "list",
                         "The current assessment covers five homepage entry routes. Levels describe evidence maturity within that scope; every topic keeps its own requirements and open work."
                       ]
+                    },
+                    {
+                      "tag": "svg",
+                      "attrs": {
+                        "viewBox": "0 0 160 180",
+                        "fill": "none",
+                        "aria-hidden": "true",
+                        "class": "assurance-shield"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "circle",
+                          "attrs": {
+                            "cx": 80,
+                            "cy": 82,
+                            "r": 68,
+                            "stroke": "#c5dcd2",
+                            "stroke-width": 1
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "path",
+                          "attrs": {
+                            "d": "M80 12 137 36v49c0 37-25 63-57 80-32-17-57-43-57-80V36Z",
+                            "fill": "#e1efe7",
+                            "stroke": "#216257",
+                            "stroke-width": 2
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "path",
+                          "attrs": {
+                            "d": "M80 30 120 47v37c0 28-18 48-40 63-22-15-40-35-40-63V47Z",
+                            "fill": "#faf9f1",
+                            "stroke": "#b48a43",
+                            "stroke-width": 2
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        },
+                        {
+                          "tag": "path",
+                          "attrs": {
+                            "d": "M57 84 74 101 105 66",
+                            "stroke": "#216257",
+                            "stroke-width": 5,
+                            "stroke-linecap": "round",
+                            "stroke-linejoin": "round"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        }
+                      ]
                     }
                   ]
                 },
@@ -14014,6 +14191,49 @@
                       ]
                     }
                   ]
+                },
+                {
+                  "tag": "section",
+                  "attrs": {
+                    "class": "assurance-boundary"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Catalogue product assessments"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "All ",
+                          [
+                            "count",
+                            "$catalogueProducts"
+                          ],
+                          " catalogue front doors now have independent product profiles. Automatic checks report their own passes and failures; human and locale evidence remains open."
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "/assurance/maturity/"
+                      },
+                      "children": [
+                        "list",
+                        "Compare products and inspect their evidence →"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -14090,6 +14310,68 @@
                     "list",
                     "A catalogue label such as “Live example” or “In progress” describes delivery. It does not establish an assurance level. “Unassessed” records the absence of an assessment, without judging a product’s underlying quality."
                   ]
+                },
+                {
+                  "tag": "svg",
+                  "attrs": {
+                    "viewBox": "0 0 160 180",
+                    "fill": "none",
+                    "aria-hidden": "true",
+                    "class": "assurance-shield"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "circle",
+                      "attrs": {
+                        "cx": 80,
+                        "cy": 82,
+                        "r": 68,
+                        "stroke": "#c5dcd2",
+                        "stroke-width": 1
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "path",
+                      "attrs": {
+                        "d": "M80 12 137 36v49c0 37-25 63-57 80-32-17-57-43-57-80V36Z",
+                        "fill": "#e1efe7",
+                        "stroke": "#216257",
+                        "stroke-width": 2
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "path",
+                      "attrs": {
+                        "d": "M80 30 120 47v37c0 28-18 48-40 63-22-15-40-35-40-63V47Z",
+                        "fill": "#faf9f1",
+                        "stroke": "#b48a43",
+                        "stroke-width": 2
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "path",
+                      "attrs": {
+                        "d": "M57 84 74 101 105 66",
+                        "stroke": "#216257",
+                        "stroke-width": 5,
+                        "stroke-linecap": "round",
+                        "stroke-linejoin": "round"
+                      },
+                      "children": [
+                        "list"
+                      ]
+                    }
+                  ]
                 }
               ]
             },
@@ -14161,7 +14443,7 @@
                   "attrs": {},
                   "children": [
                     "list",
-                    "The website row covers homepage entry routes only. The catalogue products have not been assessed by this offering."
+                    "Each catalogue entry now has its own static assessment. Expand a product below to see automatic passes, failures and evidence still needed."
                   ]
                 },
                 {
@@ -14251,7 +14533,29 @@
                                     },
                                     "children": [
                                       "list",
-                                      "$p.name"
+                                      [
+                                        "if",
+                                        [
+                                          "eq",
+                                          "$p.id",
+                                          "aaronalderman"
+                                        ],
+                                        "$p.name",
+                                        {
+                                          "tag": "a",
+                                          "attrs": {
+                                            "href": [
+                                              "concat",
+                                              "#product-",
+                                              "$p.id"
+                                            ]
+                                          },
+                                          "children": [
+                                            "list",
+                                            "$p.name"
+                                          ]
+                                        }
+                                      ]
                                     ]
                                   },
                                   {
@@ -14270,7 +14574,8 @@
                                         [
                                           "concat",
                                           "$p.deliveryLabel",
-                                          " · Unassessed"
+                                          " · ",
+                                          "$p.scope"
                                         ]
                                       ]
                                     ]
@@ -14284,6 +14589,17 @@
                                       "attrs": {},
                                       "children": [
                                         "list",
+                                        {
+                                          "tag": "span",
+                                          "attrs": {
+                                            "class": "assurance-meter",
+                                            "data-level": "$profile.level",
+                                            "aria-hidden": "true"
+                                          },
+                                          "children": [
+                                            "list"
+                                          ]
+                                        },
                                         [
                                           "at",
                                           "$levelNames",
@@ -14305,6 +14621,401 @@
                     }
                   ]
                 }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Inside each catalogue assessment"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Automatic observations are separate from human judgment. A failed required gate holds its topic at Scoped. Metadata alone cannot establish internationalisation readiness."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../catalogue.json"
+                      },
+                      "children": [
+                        "list",
+                        "Inspect all product observations, gates and roadmap items ↗"
+                      ]
+                    }
+                  ]
+                },
+                [
+                  "map",
+                  "$catalogueProducts",
+                  "product",
+                  {
+                    "tag": "details",
+                    "attrs": {
+                      "class": "assurance-product",
+                      "id": [
+                        "concat",
+                        "product-",
+                        "$product.id"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "summary",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "$product.name",
+                          {
+                            "tag": "span",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "Entry assessment →"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "href": [
+                                "concat",
+                                "/",
+                                "$product.route"
+                              ]
+                            },
+                            "children": [
+                              "list",
+                              "$product.route"
+                            ]
+                          },
+                          " · ",
+                          "$product.scope"
+                        ]
+                      },
+                      [
+                        "map",
+                        "$product.profiles",
+                        "s",
+                        {
+                          "tag": "div",
+                          "attrs": {
+                            "data-topic": "$s.id",
+                            "class": "assurance-product-topic"
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "h3",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "$s.title",
+                                " · Level ",
+                                "$s.level",
+                                " — ",
+                                [
+                                  "at",
+                                  "$levelNames",
+                                  [
+                                    "concat",
+                                    "",
+                                    "$s.level"
+                                  ]
+                                ]
+                              ]
+                            },
+                            {
+                              "tag": "span",
+                              "attrs": {
+                                "class": "assurance-meter",
+                                "data-level": "$s.level",
+                                "aria-hidden": "true"
+                              },
+                              "children": [
+                                "list"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "strong",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "Automatically supported: "
+                                  ]
+                                },
+                                [
+                                  "fold",
+                                  [
+                                    "filter",
+                                    "$s.gates",
+                                    "g",
+                                    [
+                                      "and",
+                                      [
+                                        "eq",
+                                        "$g.kind",
+                                        "machine"
+                                      ],
+                                      [
+                                        "eq",
+                                        "$g.status",
+                                        "supported"
+                                      ]
+                                    ]
+                                  ],
+                                  "g",
+                                  "text",
+                                  "",
+                                  [
+                                    "if",
+                                    [
+                                      "eq",
+                                      "$text",
+                                      ""
+                                    ],
+                                    "$g.label",
+                                    [
+                                      "concat",
+                                      "$text",
+                                      "; ",
+                                      "$g.label"
+                                    ]
+                                  ]
+                                ]
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "strong",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "Automatic failures: "
+                                  ]
+                                },
+                                [
+                                  "or",
+                                  [
+                                    "fold",
+                                    [
+                                      "filter",
+                                      "$s.gates",
+                                      "g",
+                                      [
+                                        "eq",
+                                        "$g.status",
+                                        "failed"
+                                      ]
+                                    ],
+                                    "g",
+                                    "text",
+                                    "",
+                                    [
+                                      "if",
+                                      [
+                                        "eq",
+                                        "$text",
+                                        ""
+                                      ],
+                                      "$g.label",
+                                      [
+                                        "concat",
+                                        "$text",
+                                        "; ",
+                                        "$g.label"
+                                      ]
+                                    ]
+                                  ],
+                                  "None in this scope."
+                                ]
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "strong",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "Human evidence still needed: "
+                                  ]
+                                },
+                                [
+                                  "or",
+                                  [
+                                    "fold",
+                                    [
+                                      "filter",
+                                      "$s.gates",
+                                      "g",
+                                      [
+                                        "and",
+                                        [
+                                          "includes",
+                                          [
+                                            "list",
+                                            "human",
+                                            "use",
+                                            "maintenance"
+                                          ],
+                                          "$g.kind"
+                                        ],
+                                        [
+                                          "not",
+                                          [
+                                            "eq",
+                                            "$g.status",
+                                            "supported"
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    "g",
+                                    "text",
+                                    "",
+                                    [
+                                      "if",
+                                      [
+                                        "eq",
+                                        "$text",
+                                        ""
+                                      ],
+                                      "$g.label",
+                                      [
+                                        "concat",
+                                        "$text",
+                                        "; ",
+                                        "$g.label"
+                                      ]
+                                    ]
+                                  ],
+                                  "None recorded as missing."
+                                ],
+                                {
+                                  "tag": "br",
+                                  "attrs": {},
+                                  "children": [
+                                    "list"
+                                  ]
+                                },
+                                {
+                                  "tag": "strong",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "Policy / implementation gaps: "
+                                  ]
+                                },
+                                [
+                                  "or",
+                                  [
+                                    "fold",
+                                    [
+                                      "filter",
+                                      "$s.gates",
+                                      "g",
+                                      [
+                                        "and",
+                                        [
+                                          "not",
+                                          [
+                                            "includes",
+                                            [
+                                              "list",
+                                              "human",
+                                              "use",
+                                              "maintenance"
+                                            ],
+                                            "$g.kind"
+                                          ]
+                                        ],
+                                        [
+                                          "not",
+                                          [
+                                            "eq",
+                                            "$g.status",
+                                            "supported"
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    "g",
+                                    "text",
+                                    "",
+                                    [
+                                      "if",
+                                      [
+                                        "eq",
+                                        "$text",
+                                        ""
+                                      ],
+                                      "$g.label",
+                                      [
+                                        "concat",
+                                        "$text",
+                                        "; ",
+                                        "$g.label"
+                                      ]
+                                    ]
+                                  ],
+                                  "None in this scope."
+                                ]
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "assurance-scope-note"
+                        },
+                        "children": [
+                          "list",
+                          "$product.boundary"
+                        ]
+                      }
+                    ]
+                  }
+                ]
               ]
             },
             [
@@ -14460,6 +15171,1149 @@
       },
       {
         "call": "assurance.portfolio.document"
+      }
+    ],
+    "assurance.catalogue.scan": [
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$eventInput.html",
+          "pattern": "(<(?:[^>\"']|\"[^\"]*\"|'[^']*')*>)"
+        },
+        "into": "pieces"
+      },
+      {
+        "fold": "$pieces",
+        "as": "piece",
+        "accumulator": "scan",
+        "initial": {
+          "ordinal": 0,
+          "observed": [
+            "list"
+          ]
+        },
+        "steps": [
+          {
+            "let": "found",
+            "value": [
+              "list"
+            ]
+          },
+          {
+            "let": "ordinal",
+            "value": [
+              "add",
+              "$scan.ordinal",
+              1
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$piece",
+              "pattern": "^<[A-Za-z]"
+            },
+            "into": "opening"
+          },
+          {
+            "when": "$opening",
+            "then": [
+              {
+                "port": "text.split",
+                "args": {
+                  "value": "$piece",
+                  "pattern": "^<([A-Za-z][A-Za-z0-9:-]*)"
+                },
+                "into": "head"
+              },
+              {
+                "port": "text.lowerCase",
+                "args": {
+                  "value": [
+                    "at",
+                    "$head",
+                    1
+                  ]
+                },
+                "into": "tag"
+              },
+              {
+                "port": "text.split",
+                "args": {
+                  "value": [
+                    "at",
+                    "$head",
+                    2
+                  ],
+                  "pattern": "^((?:[^>\"']|\"[^\"]*\"|'[^']*')*)>"
+                },
+                "into": "tail"
+              },
+              {
+                "port": "text.split",
+                "args": {
+                  "value": [
+                    "at",
+                    "$tail",
+                    1
+                  ],
+                  "pattern": "(?:\\s+([^\\s=<>/]+(?:\\s*=\\s*(?:\"[^\"]*\"|'[^']*'|[^\\s>]+))?))|(?:\\s*/?\\s*$)"
+                },
+                "into": "attributes"
+              },
+              {
+                "fold": "$attributes",
+                "as": "ap",
+                "accumulator": "entries",
+                "initial": [
+                  "list"
+                ],
+                "steps": [
+                  {
+                    "port": "text.matches",
+                    "args": {
+                      "value": [
+                        "or",
+                        "$ap",
+                        ""
+                      ],
+                      "pattern": "^(?:id|class|href|alt|lang|charset)(?:\\s*=|$)",
+                      "flags": "i"
+                    },
+                    "into": "wanted"
+                  },
+                  {
+                    "let": "entry",
+                    "value": [
+                      "list"
+                    ]
+                  },
+                  {
+                    "when": "$wanted",
+                    "then": [
+                      {
+                        "port": "text.split",
+                        "args": {
+                          "value": "$ap",
+                          "pattern": "^([^=\\s]+)(?:\\s*=\\s*(?:\"([\\s\\S]*)\"|'([\\s\\S]*)'|([^\\s>]+)))?$"
+                        },
+                        "into": "parts"
+                      },
+                      {
+                        "port": "text.lowerCase",
+                        "args": {
+                          "value": [
+                            "at",
+                            "$parts",
+                            1
+                          ]
+                        },
+                        "into": "name"
+                      },
+                      {
+                        "let": "attributeValue",
+                        "value": [
+                          "if",
+                          [
+                            "not",
+                            [
+                              "eq",
+                              [
+                                "at",
+                                "$parts",
+                                2
+                              ],
+                              [
+                                "at",
+                                {},
+                                "absent"
+                              ]
+                            ]
+                          ],
+                          [
+                            "at",
+                            "$parts",
+                            2
+                          ],
+                          [
+                            "if",
+                            [
+                              "not",
+                              [
+                                "eq",
+                                [
+                                  "at",
+                                  "$parts",
+                                  3
+                                ],
+                                [
+                                  "at",
+                                  {},
+                                  "absent"
+                                ]
+                              ]
+                            ],
+                            [
+                              "at",
+                              "$parts",
+                              3
+                            ],
+                            [
+                              "if",
+                              [
+                                "not",
+                                [
+                                  "eq",
+                                  [
+                                    "at",
+                                    "$parts",
+                                    4
+                                  ],
+                                  [
+                                    "at",
+                                    {},
+                                    "absent"
+                                  ]
+                                ]
+                              ],
+                              [
+                                "at",
+                                "$parts",
+                                4
+                              ],
+                              ""
+                            ]
+                          ]
+                        ]
+                      },
+                      {
+                        "let": "entry",
+                        "value": [
+                          "list",
+                          {
+                            "ordinal": "$ordinal",
+                            "tag": "$tag",
+                            "sink": "$name",
+                            "value": "$attributeValue"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "yield": [
+                  "append",
+                  "$entries",
+                  "$entry"
+                ],
+                "into": "found"
+              },
+              {
+                "when": [
+                  "eq",
+                  "$tag",
+                  "img"
+                ],
+                "then": [
+                  {
+                    "let": "found",
+                    "value": [
+                      "append",
+                      "$found",
+                      [
+                        "list",
+                        {
+                          "ordinal": "$ordinal",
+                          "tag": "img",
+                          "sink": "element",
+                          "value": true
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": {
+          "ordinal": "$ordinal",
+          "observed": [
+            "append",
+            "$scan.observed",
+            "$found"
+          ]
+        },
+        "into": "scan"
+      },
+      {
+        "let": "result",
+        "value": "$scan.observed"
+      }
+    ],
+    "assurance.catalogue.observe": [
+      {
+        "port": "text.matches",
+        "args": {
+          "value": "$eventInput.html",
+          "pattern": "<template\\b",
+          "flags": "i"
+        },
+        "into": "hasTemplate"
+      },
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$eventInput.html",
+          "pattern": "(<[sS][cC][rR][iI][pP][tT]\\b[^>]*>[\\s\\S]*?</[sS][cC][rR][iI][pP][tT]\\s*>|<[sS][tT][yY][lL][eE]\\b[^>]*>[\\s\\S]*?</[sS][tT][yY][lL][eE]\\s*>|<[tT][eE][xX][tT][aA][rR][eE][aA]\\b[^>]*>[\\s\\S]*?</[tT][eE][xX][tT][aA][rR][eE][aA]\\s*>|<[tT][eE][mM][pP][lL][aA][tT][eE]\\b[^>]*>[\\s\\S]*?</[tT][eE][mM][pP][lL][aA][tT][eE]\\s*>|<!--[\\s\\S]*?-->|<(?:[^>\"']|\"[^\"]*\"|'[^']*')*>)"
+        },
+        "into": "tokens"
+      },
+      {
+        "fold": "$tokens",
+        "as": "token",
+        "accumulator": "selected",
+        "initial": "",
+        "steps": [
+          {
+            "port": "text.matches",
+            "args": {
+              "value": [
+                "or",
+                "$token",
+                ""
+              ],
+              "pattern": "^<(?:html|img|meta)\\b|^<(?!script\\b|style\\b|textarea\\b|template\\b)[A-Za-z][^>]*\\s(?:id|class)\\s*=",
+              "flags": "i"
+            },
+            "into": "relevant"
+          }
+        ],
+        "yield": [
+          "if",
+          "$relevant",
+          [
+            "concat",
+            "$selected",
+            "$token"
+          ],
+          "$selected"
+        ],
+        "into": "selected"
+      },
+      {
+        "let": "eventInput",
+        "value": {
+          "html": "$selected"
+        }
+      },
+      {
+        "call": "assurance.catalogue.scan"
+      },
+      {
+        "let": "observations",
+        "value": "$result"
+      },
+      {
+        "let": "anchors",
+        "value": [
+          "filter",
+          "$observations",
+          "o",
+          [
+            "and",
+            [
+              "eq",
+              "$o.tag",
+              "a"
+            ],
+            [
+              "eq",
+              "$o.sink",
+              "class"
+            ]
+          ]
+        ]
+      },
+      {
+        "fold": "$anchors",
+        "as": "a",
+        "accumulator": "targets",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$a.value",
+              "pattern": "(?:^|\\s)(?:skip|skip-link|claim-skip)(?:\\s|$)"
+            },
+            "into": "isSkip"
+          },
+          {
+            "let": "hrefs",
+            "value": [
+              "filter",
+              "$observations",
+              "o",
+              [
+                "and",
+                [
+                  "eq",
+                  "$o.ordinal",
+                  "$a.ordinal"
+                ],
+                [
+                  "eq",
+                  "$o.sink",
+                  "href"
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "href",
+            "value": [
+              "if",
+              [
+                "eq",
+                [
+                  "count",
+                  "$hrefs"
+                ],
+                1
+              ],
+              [
+                "at",
+                "$hrefs",
+                0
+              ],
+              {
+                "value": ""
+              }
+            ]
+          },
+          {
+            "port": "text.matches",
+            "args": {
+              "value": "$href.value",
+              "pattern": "^#[^\\s#]+$"
+            },
+            "into": "fragment"
+          },
+          {
+            "port": "text.slice",
+            "args": {
+              "value": "$href.value",
+              "start": 1
+            },
+            "into": "target"
+          },
+          {
+            "let": "bound",
+            "value": [
+              "and",
+              "$isSkip",
+              "$fragment",
+              [
+                "eq",
+                [
+                  "count",
+                  [
+                    "filter",
+                    "$observations",
+                    "o",
+                    [
+                      "and",
+                      [
+                        "eq",
+                        "$o.sink",
+                        "id"
+                      ],
+                      [
+                        "eq",
+                        "$o.value",
+                        "$target"
+                      ]
+                    ]
+                  ]
+                ],
+                1
+              ]
+            ]
+          }
+        ],
+        "yield": [
+          "if",
+          "$bound",
+          [
+            "append",
+            "$targets",
+            [
+              "list",
+              "$target"
+            ]
+          ],
+          "$targets"
+        ],
+        "into": "targets"
+      },
+      {
+        "let": "eventInput",
+        "value": {
+          "pages": [
+            "list",
+            {
+              "file": "entry",
+              "observations": "$observations"
+            }
+          ]
+        }
+      },
+      {
+        "call": "assurance.entry.observe"
+      },
+      {
+        "let": "markup",
+        "value": [
+          "at",
+          "$result",
+          0
+        ]
+      },
+      {
+        "port": "text.trim",
+        "args": {
+          "value": "$markup.language"
+        },
+        "into": "language"
+      },
+      {
+        "let": "result",
+        "value": {
+          "language": "$language",
+          "charset": "$markup.charset",
+          "languageMarker": [
+            "and",
+            [
+              "not",
+              "$hasTemplate"
+            ],
+            [
+              "not",
+              [
+                "eq",
+                "$language",
+                ""
+              ]
+            ],
+            [
+              "eq",
+              [
+                "count",
+                [
+                  "filter",
+                  "$observations",
+                  "o",
+                  [
+                    "and",
+                    [
+                      "eq",
+                      "$o.tag",
+                      "html"
+                    ],
+                    [
+                      "eq",
+                      "$o.sink",
+                      "lang"
+                    ]
+                  ]
+                ]
+              ],
+              1
+            ]
+          ],
+          "utf8": [
+            "and",
+            [
+              "not",
+              "$hasTemplate"
+            ],
+            "$markup.utf8",
+            [
+              "eq",
+              [
+                "count",
+                [
+                  "filter",
+                  "$observations",
+                  "o",
+                  [
+                    "and",
+                    [
+                      "eq",
+                      "$o.tag",
+                      "meta"
+                    ],
+                    [
+                      "eq",
+                      "$o.sink",
+                      "charset"
+                    ]
+                  ]
+                ]
+              ],
+              1
+            ]
+          ],
+          "images": "$markup.images",
+          "missingAlt": "$markup.missingAlt",
+          "altAttributes": [
+            "and",
+            [
+              "not",
+              "$hasTemplate"
+            ],
+            "$markup.altAttributes"
+          ],
+          "skipTarget": [
+            "and",
+            [
+              "not",
+              "$hasTemplate"
+            ],
+            [
+              "not",
+              [
+                "eq",
+                [
+                  "count",
+                  "$targets"
+                ],
+                0
+              ]
+            ]
+          ],
+          "skipTargets": "$targets",
+          "inertMarkupUnassessed": "$hasTemplate",
+          "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+        }
+      }
+    ],
+    "assurance.catalogue.classify": [
+      {
+        "let": "productInput",
+        "value": "$eventInput"
+      },
+      {
+        "let": "productGates",
+        "value": "$eventInput.obligations"
+      },
+      {
+        "port": "text.trim",
+        "args": {
+          "value": [
+            "if",
+            "$productInput.policy",
+            "$productInput.policy",
+            ""
+          ]
+        },
+        "into": "policyText"
+      },
+      {
+        "fold": "$productInput.sagas",
+        "as": "s",
+        "accumulator": "profiles",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "gates",
+            "value": [
+              "map",
+              [
+                "filter",
+                "$productGates",
+                "g",
+                [
+                  "eq",
+                  "$g.saga",
+                  "$s.id"
+                ]
+              ],
+              "g",
+              {
+                "id": "$g.id",
+                "saga": "$g.saga",
+                "level": "$g.level",
+                "kind": "$g.kind",
+                "label": [
+                  "if",
+                  [
+                    "eq",
+                    "$g.id",
+                    "identity.pipeline"
+                  ],
+                  "Catalogue identity binding",
+                  "$g.label"
+                ],
+                "next": [
+                  "if",
+                  [
+                    "eq",
+                    "$g.id",
+                    "identity.meaning"
+                  ],
+                  "Review the entry and its catalogue representation; declare internal relationships as invariant, identity-mapped or undecided. Record reviewer, method, source and date.",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$g.id",
+                      "access.language"
+                    ],
+                    "Keep a nonempty language marker on the assessed entry route.",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$g.id",
+                        "access.skip"
+                      ],
+                      "Keep a recognisable skip link and one matching destination on the assessed entry route.",
+                      "$g.next"
+                    ]
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "fold": "$gates",
+            "as": "g",
+            "accumulator": "proofs",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "let": "available",
+                "value": [
+                  "includes",
+                  [
+                    "list",
+                    "identity.scope",
+                    "identity.pipeline",
+                    "access.scope",
+                    "access.language",
+                    "access.skip",
+                    "access.alternatives",
+                    "i18n.scope",
+                    "i18n.metadata"
+                  ],
+                  "$g.id"
+                ]
+              },
+              {
+                "let": "ok",
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$g.kind",
+                    "declaration"
+                  ],
+                  [
+                    "not",
+                    [
+                      "eq",
+                      "$policyText",
+                      ""
+                    ]
+                  ],
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$g.id",
+                      "identity.pipeline"
+                    ],
+                    "$productInput.binding",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$g.id",
+                        "access.language"
+                      ],
+                      "$productInput.markup.languageMarker",
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$g.id",
+                          "access.skip"
+                        ],
+                        "$productInput.markup.skipTarget",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$g.id",
+                            "access.alternatives"
+                          ],
+                          "$productInput.markup.altAttributes",
+                          [
+                            "and",
+                            "$productInput.markup.languageMarker",
+                            "$productInput.markup.utf8"
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              },
+              {
+                "let": "proof",
+                "value": {
+                  "id": "$g.id",
+                  "kind": "$g.kind",
+                  "scope": "$productInput.scopeId",
+                  "ok": "$ok",
+                  "source": [
+                    "if",
+                    [
+                      "eq",
+                      "$g.kind",
+                      "declaration"
+                    ],
+                    "source/hierarchy.rel",
+                    [
+                      "concat",
+                      "/assurance/catalogue.json#",
+                      "$productInput.id"
+                    ]
+                  ],
+                  "issuer": "Algebra catalogue assessment",
+                  "method": [
+                    "if",
+                    [
+                      "eq",
+                      "$g.kind",
+                      "declaration"
+                    ],
+                    "Authored policy: assess the generated catalogue entry route and its homepage identity binding only.",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$g.id",
+                        "identity.pipeline"
+                      ],
+                      "Generated entry exists and the matching homepage catalogue identity row is mapped. Internal product identity policy remains unreviewed.",
+                      "Selected static opening-tag attribute observation on the generated entry route."
+                    ]
+                  ],
+                  "observedAt": "current build"
+                }
+              }
+            ],
+            "yield": [
+              "if",
+              "$available",
+              [
+                "append",
+                "$proofs",
+                [
+                  "list",
+                  "$proof"
+                ]
+              ],
+              "$proofs"
+            ],
+            "into": "proofs"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "id": "$s.id",
+              "title": "$s.title",
+              "scope": "$productInput.scopeId",
+              "scopeText": [
+                "concat",
+                "$productInput.route",
+                " and its homepage catalogue identity binding; internal routes, runtime states and external services excluded."
+              ],
+              "obligations": "$gates",
+              "evidence": "$proofs"
+            }
+          },
+          {
+            "call": "assurance.saga.classify"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$result",
+              "key": "saga",
+              "value": "$s.id"
+            },
+            "into": "result"
+          }
+        ],
+        "yield": [
+          "append",
+          "$profiles",
+          [
+            "list",
+            "$result"
+          ]
+        ],
+        "into": "productProfiles"
+      },
+      {
+        "let": "result",
+        "value": {
+          "id": "$productInput.id",
+          "name": "$productInput.name",
+          "route": "$productInput.route",
+          "deliveryLabel": "$productInput.deliveryLabel",
+          "scope": [
+            "concat",
+            "Generated entry only: ",
+            "$productInput.route"
+          ],
+          "scopeId": "$productInput.scopeId",
+          "markup": "$productInput.markup",
+          "binding": "$productInput.binding",
+          "profiles": "$productProfiles",
+          "boundary": "A front-door assessment, not assurance of a complete application. Higher-level human, use and maintenance evidence is absent."
+        }
+      }
+    ],
+    "assurance.catalogue.build": [
+      {
+        "fold": "$identityCatalogue.items",
+        "as": "item",
+        "accumulator": "products",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "route",
+            "value": [
+              "concat",
+              "$item.href",
+              "index.html"
+            ]
+          },
+          {
+            "port": "file.read",
+            "args": {
+              "path": "$route"
+            },
+            "into": "productHTML"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "html": "$productHTML"
+            }
+          },
+          {
+            "call": "assurance.catalogue.observe"
+          },
+          {
+            "let": "productMarkup",
+            "value": "$result"
+          },
+          {
+            "let": "bindingRows",
+            "value": [
+              "filter",
+              "$identityTopicReport.rows",
+              "r",
+              [
+                "eq",
+                "$r.id",
+                [
+                  "concat",
+                  "app.",
+                  "$item.id"
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "binding",
+            "value": [
+              "and",
+              [
+                "eq",
+                [
+                  "count",
+                  "$bindingRows"
+                ],
+                1
+              ],
+              [
+                "eq",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$bindingRows",
+                    0
+                  ],
+                  "status"
+                ],
+                "identity-mapped"
+              ]
+            ]
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "id": "$item.id",
+              "name": "$item.name",
+              "deliveryLabel": "$item.status",
+              "route": "$route",
+              "scopeId": [
+                "concat",
+                "catalogue-entry/",
+                "$item.id",
+                "/1"
+              ],
+              "policy": [
+                "one",
+                "assurance.catalogue.policy",
+                "scope"
+              ],
+              "markup": "$productMarkup",
+              "binding": "$binding",
+              "obligations": "$obligations",
+              "sagas": [
+                "map",
+                "$sagaProfiles",
+                "s",
+                {
+                  "id": "$s.id",
+                  "title": "$s.title"
+                }
+              ]
+            }
+          },
+          {
+            "call": "assurance.catalogue.classify"
+          }
+        ],
+        "yield": [
+          "append",
+          "$products",
+          [
+            "list",
+            "$result"
+          ]
+        ],
+        "into": "catalogueProducts"
+      },
+      {
+        "let": "catalogueRoadmap",
+        "value": [
+          "fold",
+          "$catalogueProducts",
+          "product",
+          "items",
+          [
+            "list"
+          ],
+          [
+            "append",
+            "$items",
+            [
+              "fold",
+              "$product.profiles",
+              "s",
+              "rows",
+              [
+                "list"
+              ],
+              [
+                "append",
+                "$rows",
+                [
+                  "map",
+                  [
+                    "filter",
+                    "$s.gates",
+                    "g",
+                    [
+                      "not",
+                      [
+                        "eq",
+                        "$g.status",
+                        "supported"
+                      ]
+                    ]
+                  ],
+                  "g",
+                  {
+                    "id": [
+                      "concat",
+                      "$product.id",
+                      ":",
+                      "$g.id"
+                    ],
+                    "obligation": "$g.id",
+                    "product": "$product.id",
+                    "saga": "$s.id",
+                    "label": "$g.label",
+                    "scope": "$product.scopeId",
+                    "targetLevel": "$g.level",
+                    "state": "$g.status",
+                    "horizon": [
+                      "if",
+                      [
+                        "eq",
+                        "$g.level",
+                        "$s.nextLevel"
+                      ],
+                      "next",
+                      "later"
+                    ],
+                    "action": "$g.next",
+                    "owner": "Unassigned"
+                  }
+                ]
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": {
+            "protocol": "worldwright/catalogue-assurance/1",
+            "products": "$catalogueProducts",
+            "roadmap": "$catalogueRoadmap",
+            "boundary": "Generated catalogue entry routes. No remote services, authenticated application flows, nested pages or runtime states assessed. Human review, audience use and maintenance evidence remain open. The build receipt binds the generated route bytes."
+          }
+        },
+        "into": "catalogueJSON"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/catalogue.json",
+          "text": "$catalogueJSON"
+        },
+        "into": "_"
       }
     ]
   }
