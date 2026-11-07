@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {parse} from 'parse5';
 import {createRequire} from 'node:module';
 import {createExperienceAssessor,read,sha,artifactBindings,observerSha256,prosePages,assertExperienceReplay} from './tooling/assess-reading-experience.mjs';
 const assessor=await createExperienceAssessor(),policy=read('source/assurance/reading-experience.json');
@@ -49,10 +50,47 @@ test('absent browser evidence never becomes a browser pass; changed bindings ref
  for(const key of ['planSha256','observerSha256','bindings']){const capture={protocol:'worldwright/reading-experience-observations/1',planSha256:'plan',observerSha256:'observer',bindings:{'fixture.html':'hash'},snapshots:[],journeys:[]};capture[key]=key==='bindings'?{}:'stale';await assert.rejects(assessor.run('experience.report',{...input,capture}),/stale/);}
 });
 test('the repaired Temple and Claimipedia spacing cases are explicit release gates',async()=>{
- assert.deepEqual(policy.requiredPasses.map(r=>[r.route,r.profile,r.rule]),[['temple/index.html','text-spacing','zoom.document-overflow'],['claimipedia/index.html','text-spacing','zoom.document-overflow']]);
+ assert.deepEqual(policy.requiredPasses.filter(r=>r.rule==='zoom.document-overflow').map(r=>[r.route,r.profile,r.rule]),[['temple/index.html','text-spacing','zoom.document-overflow'],['claimipedia/index.html','text-spacing','zoom.document-overflow']]);
  const report={status:'browser-observed',counts:{routes:20,missing:0,failed:0},regressionChecks:policy.requiredPasses.map(r=>({...r,status:'passed'}))};
  assert.equal((await assessor.run('experience.gate',report)).ok,true);
  for(const status of ['failed','needs-browser-evidence','needs-review']){const changed=structuredClone(report);changed.regressionChecks[0].status=status;assert.equal((await assessor.run('experience.gate',changed)).ok,false,status);}
+});
+
+function cardImage(changes={}){return {path:'card img',src:'fixture.png',purpose:'illustration',focus:'center',complete:true,naturalWidth:1000,naturalHeight:1500,rect:{left:20,top:20,right:112,bottom:150,width:92,height:130},frame:{left:0,top:0,right:400,bottom:300},hasFrame:true,contentWidth:90,contentHeight:128,fit:'cover',position:'50% 50%',borderWidth:1,...changes};}
+test('image assurance distinguishes a valid crop, a failed load, distortion and frame overflow',async()=>{
+ const run=image=>assessor.run('experience.image',{image,policy:policy.plan.images});
+ assert.ok((await run(cardImage())).every(r=>r.status==='passed'));
+ for(const [changes,rule]of [[{naturalWidth:0,naturalHeight:0},'images.loaded'],[{fit:'fill',contentWidth:200,contentHeight:100},'images.distortion'],[{rect:{left:-5,top:20,right:112,bottom:150}},'images.bounds'],[{fit:'contain'},'images.purpose-framing'],[{borderWidth:0},'images.purpose-framing'],[{position:'85% 50%'},'images.purpose-framing']])assert.equal((await run(cardImage(changes))).find(r=>r.rule===rule).status,'failed',rule);
+ assert.equal((await run(cardImage({complete:false,naturalWidth:0,naturalHeight:0}))).find(r=>r.rule==='images.loaded').status,'needs-review');
+ assert.equal((await run(cardImage({purpose:'unclassified'}))).find(r=>r.rule==='images.purpose-framing').status,'needs-review');
+ assert.ok((await run(cardImage({fit:'fill',contentWidth:100,contentHeight:150}))).some(r=>r.rule==='images.distortion'&&r.status==='passed'),'Proportionate fill is not distortion');
+});
+test('image purposes survive reordering and missing observations cannot satisfy the release gate',async()=>{
+ const illustration=cardImage(),emblem=cardImage({path:'emblem img',purpose:'emblem',fit:'contain',borderWidth:0});
+ const run=(images,changes={})=>assessor.run('experience.images',{snapshot:{images,truncatedImages:false,...changes},policy:policy.plan.images,expected:2});
+ for(const images of [[illustration,emblem],[emblem,illustration]])assert.ok((await run(images)).every(r=>r.status==='passed'));
+ for(const images of [[],[illustration],[illustration,cardImage({fit:'contain'})]])assert.equal((await run(images)).at(-1).status,'failed');
+ assert.equal((await run([illustration,emblem],{truncatedImages:true})).at(-1).status,'failed');
+ const wrongSize=structuredClone(emblem);wrongSize.rect.width=96;wrongSize.rect.right=116;assert.equal((await run([illustration,wrongSize])).find(r=>r.rule==='images.consistent-size'&&r.path==='emblem img').status,'failed');
+ const combined=await assessor.run('experience.snapshot',{snapshot:{images:[illustration,emblem],truncatedImages:false,document:{clientWidth:320,scrollWidth:320},texts:[text()],blocks:[],truncatedTexts:false,truncatedBlocks:false},imagePolicy:policy.plan.images,requiredImageCount:2});assert.ok(combined.some(r=>r.rule==='contrast.rendered-pair'));assert.ok(combined.some(r=>r.rule==='images.required-frames'&&r.status==='passed'));assert.equal(combined.filter(r=>r.rule==='images.loaded').length,2);
+ const required=policy.requiredPasses.filter(r=>r.rule==='images.required-frames');assert.equal(required.length,20);assert.equal(new Set(required.map(r=>r.route)).size,5);
+ const report={status:'browser-observed',counts:{routes:21,missing:0,failed:0},regressionChecks:policy.requiredPasses.map(r=>({...r,status:'passed'}))};report.regressionChecks.at(-1).status='needs-review';assert.equal((await assessor.run('experience.gate',report)).ok,false);
+});
+test('all five published Questions variants declare image purposes without positional styling',()=>{
+ for(const route of policy.plan.routes.filter(r=>r.requiredImageCount)){
+  const cards=[];function visit(n){const attrs=Object.fromEntries((n.attrs??[]).map(a=>[a.name,a.value]));if(n.tagName==='a'&&attrs.class==='q-question'){assert.equal(attrs['data-image-frame'],'question-card');const img=n.childNodes.find(c=>c.tagName==='img');cards.push(Object.fromEntries(img.attrs.map(a=>[a.name,a.value])));}for(const c of n.childNodes??[])visit(c);}
+  visit(parse(fs.readFileSync('dist/'+route.path,'utf8')));assert.equal(cards.length,route.requiredImageCount);
+  for(const card of cards){assert.equal(card['data-image-purpose'],card.src.includes('/world-emblems/')?'emblem':'illustration');assert.equal(card['data-image-focus'],card.src.endsWith('open-workshop-daylight-v2.png')?'right':'center');}
+ }
+ const css=fs.readFileSync('dist/expedition.css','utf8');assert.ok(!css.includes('.q-question:nth-child'));assert.ok(!css.includes('.q-question:last-child>img'));assert.ok(css.includes('[data-image-purpose="emblem"]'));
+});
+test('the bound browser report carries image verdicts through to the release gate',async()=>{
+ const configuration=structuredClone(policy);configuration.plan.routes=[{path:'fixture.html',skip:'#main',next:null,requiredImageCount:2}];configuration.plan.profiles=configuration.plan.profiles.slice(0,1);configuration.requiredPasses=[{route:'fixture.html',profile:'desktop',rule:'images.required-frames'}];
+ const viewport=configuration.plan.profiles[0],snapshot={route:'fixture.html',url:'http://fixture/fixture.html',profile:viewport.id,viewport:{width:viewport.width,height:viewport.height},readyState:'complete',fontStatus:'loaded',spacingApplied:false,document:{clientWidth:1280,scrollWidth:1280},blocks:[],texts:[text()],truncatedTexts:false,truncatedBlocks:false,images:[cardImage(),cardImage({path:'second img',purpose:'emblem',fit:'contain',borderWidth:0})],truncatedImages:false};
+ const capture={protocol:'worldwright/reading-experience-observations/1',origin:'http://fixture',planSha256:'plan',observerSha256:'observer',bindings:{},snapshots:[snapshot],journeys:[journey()]};
+ const run=()=>assessor.run('experience.report',{policy:configuration,planSha256:'plan',observerSha256:'observer',bindings:{},capture});
+ let report=await run();assert.equal(report.counts.failed,0);assert.equal(report.assessments.filter(r=>r.rule==='images.loaded').length,2);assert.equal((await assessor.run('experience.gate',report)).ok,true);
+ snapshot.images[1].fit='cover';report=await run();assert.equal(report.regressionChecks[0].status,'failed');assert.equal((await assessor.run('experience.gate',report)).ok,false);
 });
 test('a complete fixture report keeps every route and preserves normalized assessment identities',async()=>{
  const configuration=structuredClone(policy);configuration.plan.routes=[{path:'fixture.html',skip:'#main',next:null},{path:'second.html',skip:'#main',next:null}];configuration.plan.profiles=configuration.plan.profiles.slice(0,1);

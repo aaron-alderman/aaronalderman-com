@@ -1,6 +1,6 @@
 {
   "protocol": "worldwright/reading-experience-policy/1",
-  "scope": "Twenty representative reader routes. Initial, hovered navigation and keyboard-focused states; Chromium only. Equivalent CSS viewport reflow, not browser-toolbar zoom. Plain-language review covers the opening twelve prose blocks and forty link labels of each HTML route.",
+  "scope": "Twenty-one representative reader routes. Initial, hovered navigation and keyboard-focused states; Chromium only. Equivalent CSS viewport reflow, not browser-toolbar zoom. Plain-language review covers the opening twelve prose blocks and forty link labels of each HTML route. Image checks cover every Questions card on the five Questions routes; artistic crop quality remains visual review.",
   "plan": {
     "protocol": "worldwright/reading-experience-plan/1",
     "routes": [
@@ -37,7 +37,8 @@
       {
         "path": "worlds/christian/questions.html",
         "skip": "#main",
-        "next": null
+        "next": null,
+        "requiredImageCount": 6
       },
       {
         "path": "worlds/christian/threads.html",
@@ -57,7 +58,8 @@
       {
         "path": "worlds/dad/questions.html",
         "skip": "#main",
-        "next": null
+        "next": null,
+        "requiredImageCount": 4
       },
       {
         "path": "worlds/dad/threads.html",
@@ -77,7 +79,8 @@
       {
         "path": "worlds/sourcerer/questions.html",
         "skip": "#main",
-        "next": null
+        "next": null,
+        "requiredImageCount": 4
       },
       {
         "path": "worlds/sourcerer/threads.html",
@@ -97,7 +100,8 @@
       {
         "path": "worlds/author/questions.html",
         "skip": "#main",
-        "next": null
+        "next": null,
+        "requiredImageCount": 4
       },
       {
         "path": "worlds/author/threads.html",
@@ -128,6 +132,12 @@
         "path": "claimipedia/index.html",
         "skip": "#main",
         "next": null
+      },
+      {
+        "path": "questions.html",
+        "skip": "#main",
+        "next": null,
+        "requiredImageCount": 6
       }
     ],
     "profiles": [
@@ -223,7 +233,40 @@
         "x": 0,
         "y": 0
       },
-      "keyboardViewport": "desktop"
+      "keyboardViewport": "desktop",
+      "imageReadiness": "Scroll each selected card image into view and await load or a bounded timeout, then return to the original scroll position before observation. This exercises lazy loading."
+    },
+    "images": {
+      "selector": ".q-question>img",
+      "frameSelector": "[data-image-frame]",
+      "max": 40,
+      "loadTimeoutMs": 5000,
+      "boundsTolerance": 1,
+      "distortionTolerance": 0.03,
+      "purposes": [
+        {
+          "name": "illustration",
+          "fit": "cover",
+          "borderWidth": 1
+        },
+        {
+          "name": "emblem",
+          "fit": "contain",
+          "borderWidth": 0
+        }
+      ],
+      "focuses": [
+        {
+          "name": "center",
+          "position": "50% 50%"
+        },
+        {
+          "name": "right",
+          "position": "85% 50%"
+        }
+      ],
+      "purposeAttribute": "data-image-purpose",
+      "focusAttribute": "data-image-focus"
     }
   },
   "language": {
@@ -295,6 +338,106 @@
       "route": "claimipedia/index.html",
       "profile": "text-spacing",
       "rule": "zoom.document-overflow"
+    },
+    {
+      "route": "worlds/christian/questions.html",
+      "profile": "desktop",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/christian/questions.html",
+      "profile": "zoom-200-equivalent",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/christian/questions.html",
+      "profile": "zoom-400-equivalent",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/christian/questions.html",
+      "profile": "text-spacing",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/dad/questions.html",
+      "profile": "desktop",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/dad/questions.html",
+      "profile": "zoom-200-equivalent",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/dad/questions.html",
+      "profile": "zoom-400-equivalent",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/dad/questions.html",
+      "profile": "text-spacing",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/sourcerer/questions.html",
+      "profile": "desktop",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/sourcerer/questions.html",
+      "profile": "zoom-200-equivalent",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/sourcerer/questions.html",
+      "profile": "zoom-400-equivalent",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/sourcerer/questions.html",
+      "profile": "text-spacing",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/author/questions.html",
+      "profile": "desktop",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/author/questions.html",
+      "profile": "zoom-200-equivalent",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/author/questions.html",
+      "profile": "zoom-400-equivalent",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "worlds/author/questions.html",
+      "profile": "text-spacing",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "questions.html",
+      "profile": "desktop",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "questions.html",
+      "profile": "zoom-200-equivalent",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "questions.html",
+      "profile": "zoom-400-equivalent",
+      "rule": "images.required-frames"
+    },
+    {
+      "route": "questions.html",
+      "profile": "text-spacing",
+      "rule": "images.required-frames"
     }
   ]
 }

@@ -719,8 +719,20 @@
     ],
     "experience.snapshot": [
       {
-        "let": "s",
+        "let": "imageContext",
         "value": "$eventInput"
+      },
+      {
+        "let": "s",
+        "value": [
+          "or",
+          [
+            "at",
+            "$eventInput",
+            "snapshot"
+          ],
+          "$eventInput"
+        ]
       },
       {
         "port": "number.calculate",
@@ -1239,6 +1251,42 @@
           ]
         ],
         "into": "rows"
+      },
+      {
+        "when": [
+          "or",
+          [
+            "at",
+            "$imageContext",
+            "requiredImageCount"
+          ],
+          false
+        ],
+        "then": [
+          {
+            "let": "readingRows",
+            "value": "$rows"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "snapshot": "$s",
+              "policy": "$imageContext.imagePolicy",
+              "expected": "$imageContext.requiredImageCount"
+            }
+          },
+          {
+            "call": "experience.images"
+          },
+          {
+            "let": "rows",
+            "value": [
+              "append",
+              "$readingRows",
+              "$result"
+            ]
+          }
+        ]
       },
       {
         "let": "result",
@@ -1833,7 +1881,15 @@
                   },
                   {
                     "let": "eventInput",
-                    "value": "$snapshot"
+                    "value": {
+                      "snapshot": "$snapshot",
+                      "imagePolicy": "$input.policy.plan.images",
+                      "requiredImageCount": [
+                        "at",
+                        "$route",
+                        "requiredImageCount"
+                      ]
+                    }
                   },
                   {
                     "call": "experience.snapshot"
@@ -2013,7 +2069,7 @@
         "let": "result",
         "value": {
           "protocol": "worldwright/reading-experience-report/1",
-          "title": "Rendered contrast, zoom and keyboard journeys",
+          "title": "Rendered contrast, reflow, keyboard journeys and image framing",
           "scope": "$input.policy.scope",
           "status": [
             "if",
@@ -2097,7 +2153,7 @@
             ]
           ],
           "assessments": "$rows",
-          "boundary": "One Chromium run and bounded selectors, widths and states. This does not certify accessibility, arbitrary CSS painting, actual browser-toolbar zoom, screen-reader use or comprehension. Reflow, clipping and hit tests are measured; purpose and visual quality require review. Native media/control text and visually hidden input proxies require visual review. Identical repeated host observations are grouped.",
+          "boundary": "One Chromium run and bounded selectors, widths and states. This does not certify accessibility, arbitrary CSS painting, actual browser-toolbar zoom, screen-reader use or comprehension. Reflow, clipping and hit tests are measured; purpose and visual quality require review. Native media/control text and visually hidden input proxies require visual review. Identical repeated host observations are grouped. Image loading, aspect preservation and declared Questions-card frames are measured; image meaning and artistic crops require visual review.",
           "evidence": {
             "policySha256": [
               "at",
@@ -2586,8 +2642,624 @@
             "checked-with-review-obligations",
             "findings-require-triage"
           ],
-          "boundary": "Missing browser evidence and the explicitly required Temple/Claimipedia text-spacing regression checks are release gates. Other observed findings remain visible for triage."
+          "boundary": "Missing browser evidence, the repaired Temple/Claimipedia spacing cases and every required Questions-image frame case are release gates. Other observed findings remain visible for triage."
         }
+      }
+    ],
+    "experience.image": [
+      {
+        "let": "i",
+        "value": "$eventInput.image"
+      },
+      {
+        "let": "policy",
+        "value": "$eventInput.policy"
+      },
+      {
+        "let": "purpose",
+        "value": [
+          "filter",
+          "$policy.purposes",
+          "p",
+          [
+            "eq",
+            "$p.name",
+            "$i.purpose"
+          ]
+        ]
+      },
+      {
+        "let": "focus",
+        "value": [
+          "filter",
+          "$policy.focuses",
+          "f",
+          [
+            "eq",
+            "$f.name",
+            "$i.focus"
+          ]
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greater",
+          "values": [
+            "list",
+            "$i.naturalWidth",
+            0
+          ]
+        },
+        "into": "hasWidth"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greater",
+          "values": [
+            "list",
+            "$i.naturalHeight",
+            0
+          ]
+        },
+        "into": "hasHeight"
+      },
+      {
+        "let": "loaded",
+        "value": [
+          "and",
+          "$i.complete",
+          "$hasWidth",
+          "$hasHeight"
+        ]
+      },
+      {
+        "let": "distorted",
+        "value": false
+      },
+      {
+        "when": [
+          "and",
+          "$loaded",
+          [
+            "eq",
+            "$i.fit",
+            "fill"
+          ]
+        ],
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$i.contentWidth",
+                "$i.contentHeight"
+              ]
+            },
+            "into": "actualRatio"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$i.naturalWidth",
+                "$i.naturalHeight"
+              ]
+            },
+            "into": "sourceRatio"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$actualRatio",
+                "$sourceRatio"
+              ]
+            },
+            "into": "relativeRatio"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$relativeRatio",
+                1
+              ]
+            },
+            "into": "ratioDelta"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "abs",
+              "values": [
+                "list",
+                "$ratioDelta"
+              ]
+            },
+            "into": "ratioError"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$ratioError",
+                "$policy.distortionTolerance"
+              ]
+            },
+            "into": "distorted"
+          }
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$i.frame.left",
+            "$policy.boundsTolerance"
+          ]
+        },
+        "into": "left"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$i.frame.top",
+            "$policy.boundsTolerance"
+          ]
+        },
+        "into": "top"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$i.frame.right",
+            "$policy.boundsTolerance"
+          ]
+        },
+        "into": "right"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$i.frame.bottom",
+            "$policy.boundsTolerance"
+          ]
+        },
+        "into": "bottom"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greaterEqual",
+          "values": [
+            "list",
+            "$i.rect.left",
+            "$left"
+          ]
+        },
+        "into": "leftOK"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greaterEqual",
+          "values": [
+            "list",
+            "$i.rect.top",
+            "$top"
+          ]
+        },
+        "into": "topOK"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "lessEqual",
+          "values": [
+            "list",
+            "$i.rect.right",
+            "$right"
+          ]
+        },
+        "into": "rightOK"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "lessEqual",
+          "values": [
+            "list",
+            "$i.rect.bottom",
+            "$bottom"
+          ]
+        },
+        "into": "bottomOK"
+      },
+      {
+        "let": "known",
+        "value": [
+          "and",
+          [
+            "eq",
+            [
+              "count",
+              "$purpose"
+            ],
+            1
+          ],
+          [
+            "eq",
+            [
+              "count",
+              "$focus"
+            ],
+            1
+          ]
+        ]
+      },
+      {
+        "let": "framing",
+        "value": [
+          "if",
+          "$known",
+          [
+            "and",
+            [
+              "eq",
+              "$i.fit",
+              [
+                "at",
+                [
+                  "at",
+                  "$purpose",
+                  0
+                ],
+                "fit"
+              ]
+            ],
+            [
+              "eq",
+              "$i.borderWidth",
+              [
+                "at",
+                [
+                  "at",
+                  "$purpose",
+                  0
+                ],
+                "borderWidth"
+              ]
+            ],
+            [
+              "eq",
+              "$i.position",
+              [
+                "at",
+                [
+                  "at",
+                  "$focus",
+                  0
+                ],
+                "position"
+              ]
+            ]
+          ],
+          false
+        ]
+      },
+      {
+        "let": "result",
+        "value": [
+          "list",
+          {
+            "rule": "images.loaded",
+            "status": [
+              "if",
+              "$loaded",
+              "passed",
+              [
+                "if",
+                "$i.complete",
+                "failed",
+                "needs-review"
+              ]
+            ],
+            "path": "$i.path",
+            "text": "$i.src",
+            "evidence": "Selected image must finish loading with nonzero natural dimensions; an unfinished request remains review work."
+          },
+          {
+            "rule": "images.distortion",
+            "status": [
+              "if",
+              [
+                "not",
+                "$loaded"
+              ],
+              "needs-review",
+              [
+                "if",
+                "$distorted",
+                "failed",
+                "passed"
+              ]
+            ],
+            "path": "$i.path",
+            "text": "$i.src",
+            "evidence": "Compare the content-box ratio to the natural ratio for fill; cover and contain preserve proportions. Artistic cropping is not certified."
+          },
+          {
+            "rule": "images.bounds",
+            "status": [
+              "if",
+              [
+                "and",
+                "$i.hasFrame",
+                "$leftOK",
+                "$topOK",
+                "$rightOK",
+                "$bottomOK"
+              ],
+              "passed",
+              "failed"
+            ],
+            "path": "$i.path",
+            "text": "$i.src",
+            "evidence": "The image box must remain within its explicitly declared card frame, allowing the configured rounding tolerance."
+          },
+          {
+            "rule": "images.purpose-framing",
+            "status": [
+              "if",
+              "$known",
+              [
+                "if",
+                "$framing",
+                "passed",
+                "failed"
+              ],
+              "needs-review"
+            ],
+            "path": "$i.path",
+            "text": "$i.src",
+            "evidence": "Computed fit, border and focal position must match the authored purpose and focus, independent of card order."
+          }
+        ]
+      }
+    ],
+    "experience.images": [
+      {
+        "let": "input",
+        "value": "$eventInput"
+      },
+      {
+        "let": "images",
+        "value": [
+          "or",
+          [
+            "at",
+            "$input.snapshot",
+            "images"
+          ],
+          [
+            "list"
+          ]
+        ]
+      },
+      {
+        "fold": "$images",
+        "as": "i",
+        "accumulator": "rows",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "eventInput",
+            "value": {
+              "image": "$i",
+              "policy": "$input.policy"
+            }
+          },
+          {
+            "call": "experience.image"
+          },
+          {
+            "let": "imageVerdicts",
+            "value": "$result"
+          },
+          {
+            "let": "referenceFrame",
+            "value": [
+              "at",
+              [
+                "at",
+                "$images",
+                0
+              ],
+              "rect"
+            ]
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$i.rect.width",
+                "$referenceFrame.width"
+              ]
+            },
+            "into": "widthDelta"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$i.rect.height",
+                "$referenceFrame.height"
+              ]
+            },
+            "into": "heightDelta"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "abs",
+              "values": [
+                "list",
+                "$widthDelta"
+              ]
+            },
+            "into": "widthError"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "abs",
+              "values": [
+                "list",
+                "$heightDelta"
+              ]
+            },
+            "into": "heightError"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                "$widthError",
+                "$input.policy.boundsTolerance"
+              ]
+            },
+            "into": "widthConsistent"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                "$heightError",
+                "$input.policy.boundsTolerance"
+              ]
+            },
+            "into": "heightConsistent"
+          },
+          {
+            "let": "result",
+            "value": [
+              "append",
+              "$imageVerdicts",
+              [
+                "list",
+                {
+                  "rule": "images.consistent-size",
+                  "status": [
+                    "if",
+                    [
+                      "and",
+                      "$widthConsistent",
+                      "$heightConsistent"
+                    ],
+                    "passed",
+                    "failed"
+                  ],
+                  "path": "$i.path",
+                  "text": "$i.src",
+                  "evidence": "Questions-card image frames must share the same rendered width and height at this viewport, within the configured rounding tolerance. Purpose changes fitting inside the frame, not its size."
+                }
+              ]
+            ]
+          }
+        ],
+        "yield": [
+          "append",
+          "$rows",
+          "$result"
+        ],
+        "into": "rows"
+      },
+      {
+        "let": "complete",
+        "value": [
+          "and",
+          [
+            "eq",
+            [
+              "count",
+              "$images"
+            ],
+            "$input.expected"
+          ],
+          [
+            "eq",
+            [
+              "at",
+              "$input.snapshot",
+              "truncatedImages"
+            ],
+            false
+          ],
+          [
+            "every",
+            "$rows",
+            "r",
+            [
+              "eq",
+              "$r.status",
+              "passed"
+            ]
+          ]
+        ]
+      },
+      {
+        "let": "result",
+        "value": [
+          "append",
+          "$rows",
+          [
+            "list",
+            {
+              "rule": "images.required-frames",
+              "status": [
+                "if",
+                "$complete",
+                "passed",
+                "failed"
+              ],
+              "path": ".q-question>img",
+              "evidence": "Every expected Questions card image must be observed, loaded, undistorted, within its frame and consistent with its declared purpose. Missing or unconfirmed measurements cannot pass."
+            }
+          ]
+        ]
       }
     ]
   }
