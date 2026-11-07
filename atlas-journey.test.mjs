@@ -97,7 +97,7 @@ test('the homepage provides a native keyboard button and an announced theme stat
  assert.match(html,/<button[^>]*id="identity-switch"/);
  assert.match(html,/aria-label="Discover another side of Aaron: change the perspective and projects"/);
  assert.match(html,/id="identity-status"[^>]*aria-live="polite"/);
- assert.match(html,/src="identity-runtime.js\?v=identity-decisions-1" defer/);
+ assert.match(html,/src="identity-runtime.js\?v=compact-workbench-tops-1" defer/);
  assert.match(html,/<img[^>]*id="identity-background"/);
 });
 test('every identity publishes a distinct optimized hero image',()=>{
