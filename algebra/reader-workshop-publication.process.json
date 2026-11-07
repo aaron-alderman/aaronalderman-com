@@ -133,6 +133,17 @@
         "into": "activities"
       },
       {
+        "let": "input",
+        "value": "$activities"
+      },
+      {
+        "call": "stylesheet.activities"
+      },
+      {
+        "let": "activities",
+        "value": "$result"
+      },
+      {
         "port": "file.copy",
         "args": {
           "path": "source/workshop/provenance.json"
@@ -700,28 +711,6 @@
       {
         "port": "file.copy",
         "args": {
-          "path": "source/reader/reader.css"
-        },
-        "into": "_"
-      },
-      {
-        "port": "file.read",
-        "args": {
-          "path": "source/reader/reader.css"
-        },
-        "into": "document"
-      },
-      {
-        "port": "file.write",
-        "args": {
-          "path": "reader/reader.css",
-          "text": "$document"
-        },
-        "into": "_"
-      },
-      {
-        "port": "file.copy",
-        "args": {
           "path": "source/workshop/document.html"
         },
         "into": "_"
@@ -817,6 +806,9 @@
           "text": "$workshopReadme"
         },
         "into": "_"
+      },
+      {
+        "call": "stylesheet.build"
       }
     ]
   }

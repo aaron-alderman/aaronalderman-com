@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "node serve.mjs",
-    "test": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs activity-layout.test.mjs atlas.test.mjs atlas-journey.test.mjs authoring.test.mjs reader-workshop-algebra.test.mjs hierarchy.test.mjs process-authoring.test.mjs batch-process-authoring.test.mjs authoring-workflow.test.mjs document-inspection.test.mjs expansion.test.mjs expedition.test.mjs workshop.test.mjs microsite-process-authoring.test.mjs microsite-publication-process-authoring.test.mjs",
+    "test": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs activity-layout.test.mjs atlas.test.mjs atlas-journey.test.mjs authoring.test.mjs reader-workshop-algebra.test.mjs hierarchy.test.mjs process-authoring.test.mjs batch-process-authoring.test.mjs authoring-workflow.test.mjs document-inspection.test.mjs expansion.test.mjs expedition.test.mjs workshop.test.mjs microsite-process-authoring.test.mjs microsite-publication-process-authoring.test.mjs stylesheet-algebra.test.mjs",
     "build": "node bootstrap/run.cjs . dist bootstrap/site.json",
     "author": "node tooling/author.mjs",
     "test:browser": "node tooling/verify-reader-workshop-browser.mjs",
     "verify:clean": "node tooling/author.mjs source/authoring/requests/clean-verification.json",
-    "test:portable": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs activity-layout.test.mjs atlas.test.mjs atlas-journey.test.mjs authoring.test.mjs reader-workshop-algebra.test.mjs hierarchy.test.mjs process-authoring.test.mjs batch-process-authoring.test.mjs authoring-workflow.test.mjs document-inspection.test.mjs expansion.test.mjs expedition.test.mjs workshop.test.mjs microsite-process-authoring.test.mjs microsite-publication-process-authoring.test.mjs",
+    "test:portable": "node --test reading.test.mjs publication.test.mjs algebra-publication.test.mjs microsite-fidelity.test.mjs microsite-publication.test.mjs claimipedia-review.test.mjs encounter-microsite.test.mjs activity-layout.test.mjs atlas.test.mjs atlas-journey.test.mjs authoring.test.mjs reader-workshop-algebra.test.mjs hierarchy.test.mjs process-authoring.test.mjs batch-process-authoring.test.mjs authoring-workflow.test.mjs document-inspection.test.mjs expansion.test.mjs expedition.test.mjs workshop.test.mjs microsite-process-authoring.test.mjs microsite-publication-process-authoring.test.mjs stylesheet-algebra.test.mjs",
     "verify:presentation": "node tooling/verify-microsite-presentation.mjs dist"
   },
   "license": "SEE LICENSE IN LICENSE.md",
