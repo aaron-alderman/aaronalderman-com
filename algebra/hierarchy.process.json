@@ -9287,20 +9287,20 @@
                           {
                             "tag": "div",
                             "attrs": {
-                              "class": "hierarchy-emblem"
+                              "class": "tool-card-top"
                             },
                             "children": [
                               "list",
-                              "$hItem.icon"
-                            ]
-                          },
-                          {
-                            "tag": "div",
-                            "attrs": {
-                              "class": "hierarchy-card-content"
-                            },
-                            "children": [
-                              "list",
+                              {
+                                "tag": "div",
+                                "attrs": {
+                                  "class": "hierarchy-emblem"
+                                },
+                                "children": [
+                                  "list",
+                                  "$hItem.icon"
+                                ]
+                              },
                               {
                                 "tag": "p",
                                 "attrs": {
@@ -9329,7 +9329,16 @@
                                     ]
                                   }
                                 ]
-                              },
+                              }
+                            ]
+                          },
+                          {
+                            "tag": "div",
+                            "attrs": {
+                              "class": "hierarchy-card-content"
+                            },
+                            "children": [
+                              "list",
                               {
                                 "tag": "h3",
                                 "attrs": {},
