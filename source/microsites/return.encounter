@@ -83,7 +83,7 @@ process microsite.return.styles:
       },
       {
         id = "return.space";
-        selector = "body";
+        selector = "body:has(> .microsite-return)";
         context = null;
         declarations = list({ property = "padding-bottom"; value = "80px" })
       },
@@ -306,8 +306,10 @@ process microsite.return.project:
   let returnDocument = one($msDocument, "path")
   call microsite.return.decorate
 
+# Header navigation eligibility is evaluated by the shared publication algebra.
 process microsite.return.decorate:
-  when not(includes($result, "id=\"microsite-return\"")):
+  call microsite.return.inspectHome
+  when and(not($returnHasHome), not(includes($result, "id=\"microsite-return\""))):
     let returnMarkup = $result
     port text.split { value = $returnDocument; pattern = "/" } → returnParts
     port text.join { values = map(range(add(count($returnParts), -1)), "level", "../"); separator = "" } → returnPrefix

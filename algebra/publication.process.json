@@ -16477,6 +16477,372 @@
         },
         "into": "_"
       }
+    ],
+    "microsite.return.inspectHome": [
+      {
+        "let": "returnHasHome",
+        "value": false
+      },
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$result",
+          "pattern": "<!--[\\s\\S]*?-->|<[sS][cC][rR][iI][pP][tT]\\b[^>]*>[\\s\\S]*?</[sS][cC][rR][iI][pP][tT]\\s*>|<[sS][tT][yY][lL][eE]\\b[^>]*>[\\s\\S]*?</[sS][tT][yY][lL][eE]\\s*>|<[tT][eE][xX][tT][aA][rR][eE][aA]\\b[^>]*>[\\s\\S]*?</[tT][eE][xX][tT][aA][rR][eE][aA]\\s*>|<[tT][eE][mM][pP][lL][aA][tT][eE]\\b[^>]*>[\\s\\S]*?</[tT][eE][mM][pP][lL][aA][tT][eE]\\s*>"
+        },
+        "into": "returnVisiblePieces"
+      },
+      {
+        "port": "text.join",
+        "args": {
+          "values": "$returnVisiblePieces",
+          "separator": ""
+        },
+        "into": "returnVisibleMarkup"
+      },
+      {
+        "port": "text.split",
+        "args": {
+          "value": "$returnVisibleMarkup",
+          "pattern": "<[hH][eE][aA][dD][eE][rR]\\b(?:[^>\"']|\"[^\"]*\"|'[^']*')*>([\\s\\S]*?)</[hH][eE][aA][dD][eE][rR]\\s*>"
+        },
+        "into": "returnHeaders"
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$returnHeaders"
+            ],
+            1
+          ]
+        ],
+        "then": [
+          {
+            "port": "text.split",
+            "args": {
+              "value": [
+                "at",
+                "$returnHeaders",
+                1
+              ],
+              "pattern": "<[aA]\\b((?:[^>\"']|\"[^\"]*\"|'[^']*')*)>"
+            },
+            "into": "returnAnchors"
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                [
+                  "count",
+                  "$returnAnchors"
+                ],
+                1
+              ]
+            ],
+            "then": [
+              {
+                "port": "text.split",
+                "args": {
+                  "value": [
+                    "at",
+                    "$returnAnchors",
+                    1
+                  ],
+                  "pattern": "(?:\\s+([^\\s=<>/]+(?:\\s*=\\s*(?:\"[^\"]*\"|'[^']*'|[^\\s>]+))?))|(?:\\s*/?\\s*$)"
+                },
+                "into": "returnAttributePieces"
+              },
+              {
+                "fold": "$returnAttributePieces",
+                "as": "returnAttribute",
+                "accumulator": "attributes",
+                "initial": {
+                  "label": "",
+                  "href": "",
+                  "labels": 0,
+                  "hrefs": 0
+                },
+                "steps": [
+                  {
+                    "let": "next",
+                    "value": "$attributes"
+                  },
+                  {
+                    "port": "text.matches",
+                    "args": {
+                      "value": [
+                        "if",
+                        "$returnAttribute",
+                        "$returnAttribute",
+                        " "
+                      ],
+                      "pattern": "^(?:aria-label|href)\\s*=",
+                      "flags": "i"
+                    },
+                    "into": "returnWanted"
+                  },
+                  {
+                    "when": "$returnWanted",
+                    "then": [
+                      {
+                        "port": "text.split",
+                        "args": {
+                          "value": "$returnAttribute",
+                          "pattern": "^([^=\\s]+)\\s*=\\s*(?:\"([\\s\\S]*)\"|'([\\s\\S]*)'|([^\\s>]+))$"
+                        },
+                        "into": "returnAttributeParts"
+                      },
+                      {
+                        "port": "text.lowerCase",
+                        "args": {
+                          "value": [
+                            "at",
+                            "$returnAttributeParts",
+                            1
+                          ]
+                        },
+                        "into": "returnAttributeName"
+                      },
+                      {
+                        "let": "returnAttributeValue",
+                        "value": [
+                          "if",
+                          [
+                            "not",
+                            [
+                              "eq",
+                              [
+                                "at",
+                                "$returnAttributeParts",
+                                2
+                              ],
+                              [
+                                "at",
+                                {},
+                                "absent"
+                              ]
+                            ]
+                          ],
+                          [
+                            "at",
+                            "$returnAttributeParts",
+                            2
+                          ],
+                          [
+                            "if",
+                            [
+                              "not",
+                              [
+                                "eq",
+                                [
+                                  "at",
+                                  "$returnAttributeParts",
+                                  3
+                                ],
+                                [
+                                  "at",
+                                  {},
+                                  "absent"
+                                ]
+                              ]
+                            ],
+                            [
+                              "at",
+                              "$returnAttributeParts",
+                              3
+                            ],
+                            [
+                              "at",
+                              "$returnAttributeParts",
+                              4
+                            ]
+                          ]
+                        ]
+                      },
+                      {
+                        "when": [
+                          "eq",
+                          "$returnAttributeName",
+                          "aria-label"
+                        ],
+                        "then": [
+                          {
+                            "let": "next",
+                            "value": {
+                              "label": "$returnAttributeValue",
+                              "href": "$attributes.href",
+                              "labels": [
+                                "add",
+                                "$attributes.labels",
+                                1
+                              ],
+                              "hrefs": "$attributes.hrefs"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "when": [
+                          "eq",
+                          "$returnAttributeName",
+                          "href"
+                        ],
+                        "then": [
+                          {
+                            "let": "next",
+                            "value": {
+                              "label": "$attributes.label",
+                              "href": "$returnAttributeValue",
+                              "labels": "$attributes.labels",
+                              "hrefs": [
+                                "add",
+                                "$attributes.hrefs",
+                                1
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "yield": "$next",
+                "into": "returnHomeAttributes"
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    "$returnHomeAttributes.label",
+                    "Aaron Alderman"
+                  ],
+                  [
+                    "eq",
+                    "$returnHomeAttributes.labels",
+                    1
+                  ],
+                  [
+                    "eq",
+                    "$returnHomeAttributes.hrefs",
+                    1
+                  ]
+                ],
+                "then": [
+                  {
+                    "port": "text.indexOf",
+                    "args": {
+                      "value": "$returnHomeAttributes.href",
+                      "search": [
+                        "one",
+                        "site",
+                        "origin"
+                      ]
+                    },
+                    "into": "returnOriginAt"
+                  },
+                  {
+                    "let": "returnHomeHref",
+                    "value": "$returnHomeAttributes.href"
+                  },
+                  {
+                    "when": [
+                      "eq",
+                      "$returnOriginAt",
+                      0
+                    ],
+                    "then": [
+                      {
+                        "port": "text.slice",
+                        "args": {
+                          "value": "$returnHomeHref",
+                          "start": [
+                            "count",
+                            [
+                              "one",
+                              "site",
+                              "origin"
+                            ]
+                          ]
+                        },
+                        "into": "returnHomeSuffix"
+                      },
+                      {
+                        "let": "returnHomeHref",
+                        "value": [
+                          "concat",
+                          "/",
+                          "$returnHomeSuffix"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "try": [
+                      {
+                        "port": "url.resolve",
+                        "args": {
+                          "href": "$returnHomeHref",
+                          "route": "$returnDocument"
+                        },
+                        "into": "returnHomeTarget"
+                      },
+                      {
+                        "let": "returnHasHome",
+                        "value": [
+                          "and",
+                          [
+                            "not",
+                            "$returnHomeTarget.external"
+                          ],
+                          [
+                            "includes",
+                            [
+                              "append",
+                              [
+                                "list",
+                                "",
+                                "index.html"
+                              ],
+                              [
+                                "map",
+                                [
+                                  "subjects",
+                                  "isa",
+                                  "IdentityTheme"
+                                ],
+                                "theme",
+                                [
+                                  "one",
+                                  "$theme",
+                                  "homeRoute"
+                                ]
+                              ]
+                            ],
+                            "$returnHomeTarget.route"
+                          ]
+                        ]
+                      }
+                    ],
+                    "error": "returnHomeError",
+                    "catch": [
+                      {
+                        "let": "returnHasHome",
+                        "value": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     ]
   }
 }
