@@ -1,0 +1,102 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/authoring-workflow/1"
+
+# Acceptance policy for the admitted browser programme's actual observations.
+# Counters supplied by the browser are checked against each captured row.
+process images.report.write:
+  port document.observe { file = "tooling/assurance/image-evidence.json" } → previous
+  port json.stringify { value = $imageReport; space = 2 } → reportText
+  port document.commit { changes = list({ file = "tooling/assurance/image-evidence.json"; beforeSha256 = $previous.sha256; text = concat($reportText, "\n") }) } → _
+  let result = $imageReport
+
+process images.prepare:
+  let imageReport = {
+    protocol = "worldwright/questions-image-assurance/1";
+    status = "needs-browser-evidence";
+    scope = "Five Questions projections at four declared widths; real loading and geometry plus source fitting. Two deliberate broken-image/size counterexamples must also be rejected.";
+    counts = { cases = 20; passed = 0; missing = 20; counterexamples = 8 };
+    boundary = "Preparation is not a browser pass. Source cover/contain fitting prevents stretch by construction; arbitrary computed CSS and artistic cropping are not certified."
+  }
+  call images.report.write
+
+process images.verify:
+  port document.observe { file = "tooling/assurance/reading-experience-capture.json" } → captureFile
+  port json.parse { text = $captureFile.text } → capture
+  assert and(not(eq($capture, null)), eq($capture.protocol, "worldwright/reading-experience-observations/1"))
+    otherwise "IMAGE-EVIDENCE-001: Real browser observations are required."
+  port document.observe { file = "tooling/assurance/reading-experience-evidence.json" } → experienceFile
+  port json.parse { text = $experienceFile.text } → experience
+  port json.stringify { value = $capture } → actualCapture
+  port json.stringify { value = $experience.browserInput.capture } → boundCapture
+  assert eq($actualCapture, $boundCapture)
+    otherwise "IMAGE-EVIDENCE-002: The image observations differ from the bound browser evidence."
+  let cases = list(
+    { id = "main"; expected = 6; negative = "none" },
+    { id = "christian"; expected = 6; negative = "none" },
+    { id = "dad"; expected = 4; negative = "none" },
+    { id = "sourcerer"; expected = 4; negative = "none" },
+    { id = "author"; expected = 4; negative = "none" },
+    { id = "counterexample-broken"; expected = 4; negative = "loaded" },
+    { id = "counterexample-size"; expected = 4; negative = "size" }
+  )
+  let profiles = list("desktop", "zoom-200-equivalent", "zoom-400-equivalent", "text-spacing")
+  fold $cases as imageCase; measuredCases starts list():
+    fold $profiles as profile; caseRows starts $measuredCases:
+      let route = concat("assurance/images/", $imageCase.id, ".html")
+      let selected = filter($capture.snapshots, "snapshot", and(eq($snapshot.route, $route), eq($snapshot.profile, $profile)))
+      assert eq(count($selected), 1)
+        otherwise "IMAGE-EVIDENCE-003: Missing or duplicate image case."
+      let snapshot = at($selected, 0)
+      assert and(eq($snapshot.readyState, "complete"), eq($snapshot.fontStatus, "loaded"), not($snapshot.truncatedBlocks))
+        otherwise "IMAGE-EVIDENCE-004: Image observation coverage is incomplete."
+      let summaryBlocks = filter($snapshot.blocks, "block", eq($block.path, "[id=\"image-assurance-status\"]"))
+      assert eq(count($summaryBlocks), 1)
+        otherwise "IMAGE-EVIDENCE-005: The admitted image programme did not provide a summary."
+      port json.parse { text = at(at($summaryBlocks, 0), "text") } → summary
+      assert and(eq($summary.protocol, "images/1"), eq($summary.observed, $imageCase.expected), eq($summary.expected, $imageCase.expected), $summary.complete)
+        otherwise "IMAGE-EVIDENCE-005: The image programme did not observe every expected card."
+      fold $snapshot.blocks as block; imageRows starts list():
+        port text.matches { value = $block.text; pattern = "^\\{\"n\":" } → imageRow
+        when $imageRow:
+          port json.parse { text = $block.text } → row
+        yield if($imageRow, append($imageRows, list($row)), $imageRows) → imageRows
+      assert eq(count($imageRows), $imageCase.expected)
+        otherwise "IMAGE-EVIDENCE-006: Individual image observations are absent, truncated or duplicated."
+      let expectedWidth = if(eq($profile, "desktop"), 92, 65)
+      let expectedHeight = if(eq($profile, "desktop"), 130, 96)
+      fold range($imageCase.expected) as ordinal; verdicts starts list():
+        let matches = filter($imageRows, "row", eq($row.n, $ordinal))
+        assert eq(count($matches), 1)
+          otherwise "IMAGE-EVIDENCE-007: Image ordinals do not uniquely cover the cards."
+        let row = at($matches, 0)
+        port json.stringify { value = $row.nw } → widthText
+        port json.stringify { value = $row.nh } → heightText
+        port text.matches { value = $widthText; pattern = "^[1-9][0-9]*$" } → naturalWidth
+        port text.matches { value = $heightText; pattern = "^[1-9][0-9]*$" } → naturalHeight
+        let loaded = and(eq($row.loaded, true), $naturalWidth, $naturalHeight)
+        let size = and(eq($row.size, true), eq($row.w, $expectedWidth), eq($row.h, $expectedHeight))
+        let purpose = and(eq($row.known, true), includes(list("illustration", "emblem"), $row.kind), eq($row.fit, if(eq($row.kind, "emblem"), "contain", "cover")))
+        yield append($verdicts, list({ loaded = $loaded; size = $size; passed = and($loaded, $size, eq($row.bounds, true), $purpose) })) → verdicts
+      let failures = count(filter($verdicts, "verdict", not($verdict.passed)))
+      assert eq($summary.failed, $failures)
+        otherwise "IMAGE-EVIDENCE-008: Summary counters disagree with the observed rows."
+      when eq($imageCase.negative, "none"):
+        assert eq($failures, 0)
+          otherwise "IMAGE-EVIDENCE-009: A real Questions image failed assurance."
+      when not(eq($imageCase.negative, "none")):
+        let detected = filter($verdicts, "verdict", not(at($verdict, $imageCase.negative)))
+        assert not(eq(count($detected), 0))
+          otherwise "IMAGE-EVIDENCE-010: A deliberate counterexample incorrectly passed."
+      yield append($caseRows, list({ route = $route; profile = $profile; observed = count($imageRows); expectedFailure = $imageCase.negative; status = "passed" })) → measuredCases
+    yield $measuredCases → measuredCases
+  port document.observe { file = "source/assurance/image-verification.encounter" } → authority
+  let imageReport = {
+    protocol = "worldwright/questions-image-assurance/1";
+    status = "browser-observed";
+    scope = "Five Questions projections at four widths. Image loading, natural dimensions, declared frame sizes and card bounds are measured. Source fitting and artistic crop review are separate.";
+    counts = { cases = 20; passed = 20; missing = 0; counterexamples = 8; counterexamplesRejected = 8 };
+    cases = $measuredCases;
+    evidence = { captureSha256 = $captureFile.sha256; policySha256 = $authority.sha256; provenance = $capture.provenance; family = $capture.provenance.evidenceFamily };
+    boundary = "The published Questions projections are copied for diagnosis with eager image loading; this does not test scrolling-triggered lazy loading. Existing native browser mechanisms and the unchanged observer supply the evidence. Source cover/contain contracts prevent stretch by construction; arbitrary computed CSS, other routes and artistic crop quality remain outside the automatic checks."
+  }
+  call images.report.write

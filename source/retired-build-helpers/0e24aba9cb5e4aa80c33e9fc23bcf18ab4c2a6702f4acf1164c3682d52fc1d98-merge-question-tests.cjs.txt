@@ -1,0 +1,1 @@
+const fs=require('fs');const f='hierarchy.test.mjs';let s=fs.readFileSync(f,'utf8');s=s.replace(/<<<<<<< HEAD\r?\n[\s\S]*?=======\r?\n([\s\S]*?)>>>>>>> [^\r\n]+\r?\n/g,(_,theirs)=>theirs);if(/<<<<<<<|=======|>>>>>>>/.test(s))throw Error('Unresolved test conflict');fs.writeFileSync(f,s);

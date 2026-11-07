@@ -12,7 +12,7 @@ const file='source/front-doors.rel',change={file,beforeSha256:'observed-hash',te
 const request=(changes=[change],apply=false)=>({protocol:'worldwright/authoring-proposal/1',apply,changes});
 async function run(proposal,options={}) {
  const calls=options.calls??[];
- const ports={...valuePorts(),'document.observe':()=>({sha256:'observed-hash',text:'old REL'}),
+ const ports={...valuePorts(),'document.entries':()=>[],'document.observe':()=>({sha256:'observed-hash',text:'old REL'}),
   'publication.stage':args=>{calls.push(['stage',args]);return {id:'candidate'};},
   'publication.validate':({commands})=>{calls.push(['validate']);return {ok:true,runs:commands.map(command=>({command:[command.tool,...command.args],status:options.valid===false?1:0,error:null})),log:'validation.json',receipt:{}};},
   'document.commit':args=>{calls.push(['commit',args]);return {files:args.changes};},

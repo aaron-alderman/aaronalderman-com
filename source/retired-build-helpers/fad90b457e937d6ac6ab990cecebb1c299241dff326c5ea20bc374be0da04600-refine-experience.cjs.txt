@@ -1,0 +1,18 @@
+const fs=require('fs'),file='algebra/reading-experience.process.json',p=JSON.parse(fs.readFileSync(file)),q=p.queries,L=(name,value)=>({let:name,value}),eq=(a,b)=>['eq',a,b],and=(...x)=>['and',...x],not=x=>['not',x];
+const cf='source/assurance/reading-experience.json',config=JSON.parse(fs.readFileSync(cf));config.plan.keyboard.homePaths=['/','/index.html',...['christian','dad','sourcerer','author'].map(k=>'/worlds/'+k+'/index.html')];
+fs.writeFileSync(cf,JSON.stringify(config,null,2)+'\n');
+q['experience.keyboard'][0].value='$eventInput.journey';q['experience.keyboard'].splice(1,0,L('keyboardPlan','$eventInput.plan'));
+q['experience.keyboard'].find(s=>s.let==='trusted').value=and(['some','$s.events','e',and('$e.trusted',eq('$e.key','Tab'))],['some','$s.events','e',and('$e.trusted',eq('$e.key','Enter'))]);
+const skip=q['experience.keyboard'].find(s=>s.let==='rows').value[1];skip.status[1]=and('$trusted','$s.foundSkip','$s.skipTargetExists',eq('$s.afterSkip.hash','$s.skip'));
+const focus=q['experience.keyboard'].find(s=>s.fold==='$s.focuses');focus.steps.find(s=>s.let==='indicator').value[3]=and(not(eq('$f.beforePaint',null)),not(eq('$f.beforePaint','$f.afterPaint')));
+const ret=q['experience.keyboard'].findLast(s=>s.let==='rows').value[2][1];ret.status[1]=and('$trusted','$s.foundReturn',eq('$s.afterReturn.origin','$s.origin'),['includes','$keyboardPlan.homePaths','$s.afterReturn.path']);
+const routes=q['experience.report'].find(s=>s.fold==='$input.policy.plan.routes');const k=routes.steps.find(s=>s.when);k.then[0].value={journey:['at','$keyboardMatches',0],plan:'$input.policy.plan.keyboard'};
+const captures=routes.steps.find(s=>s.fold==='$input.policy.plan.profiles').steps.find(s=>s.when).then;
+captures.splice(1,0,{assert:eq('$snapshot.readyState','complete'),message:'Browser document was not ready.'},{assert:eq('$snapshot.fontStatus','loaded'),message:'Browser fonts were not ready.'});
+q['experience.snapshot'].splice(3,0,L('out',['append','$out',['if',['some','$s.texts','t',eq('$t.tag','H1')],['list'],['list',{rule:'coverage.rendered-title',status:'needs-review',path:'h1',evidence:'No visible H1 was observed within the declared selector scope.'}]]]));
+q['experience.gate']=[L('result',{ok:eq('$eventInput.counts.missing',0),status:['if',eq('$eventInput.counts.failed',0),'checked-with-review-obligations','findings-require-triage'],boundary:'This initial rollout gates missing browser evidence. Observed failures stay visible for triage and do not become passes or accessibility certification.'})];
+// Data projection is not a decision that a human understood the prose.
+q['language.report'].splice(-1,0,L('rows',['distinct','$rows']));
+for(const s of q['experience.contrast']){if(s.let==='result')s.value.state='$text.state';if(s.when)for(const t of s.then)if(t.let==='result')t.value.state='$text.state';}
+for(const expr of [routes.steps[0].yield[2][3],routes.yield[2][2][3]])if(expr&&typeof expr==='object'&&!Array.isArray(expr))expr.state=['at','$r','state'];
+fs.writeFileSync(file,JSON.stringify(p,null,2)+'\n');

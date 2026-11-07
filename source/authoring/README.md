@@ -86,3 +86,43 @@ command results and build source hashes identify exactly what was verified.
 Node, npm, Git and tar are host prerequisites. No project-local dependency cache
 or ignored helper is required. The temporary checkout and logs are retained as
 evidence; the tracked receipt is a follow-up record of the verified revision.
+
+## Required authoring provenance
+
+`worldwright/provenance-gate/1` is implemented in `workflow.encounter`. The PR
+check runs the programme and runner from the trusted base revision, not the
+candidate. Native Git supplies the complete, unfiltered raw change observation;
+the algebra replays `source/authoring/requests/release.proposal`, checks current
+predecessor hashes and authority, then matches every functional changed byte to
+the planned writes. A historical receipt, its `ok` flag, or passing visual tests
+cannot replace this replay. Native script changes, unowned JSON and direct edits
+to generated module outputs refuse. Generated `dist/` and the three declared
+assurance captures/reports are regenerated and checked by the publication job.
+The main-branch job independently repeats the gate before building or observing.
+The base-policy PR check must be a required branch-protection status with admin
+enforcement; changing the candidate workflow cannot replace the base check.
+
+`worldwright/source-registration/1` registers a readable `.encounter` owner.
+Its frontend/profile JSON, manifest selection and owner bindings are generated
+by the authoring programme. The selected ports must already exist in the build
+or workshop profiles. There is no new native adapter, interpreter or raw JSON
+application source. Existing declared legacy JSON owners remain editable only
+through the same checked proposal route; their filename alone grants nothing.
+Authoring-control maintenance is a separate explicitly authorized trust-anchor
+change, not an exception an ordinary release proposal can grant itself.
+
+`worldwright/apply-release/1` reads that same committed proposal, checks for active
+helpers and derives the write flag inside the programme. The proposal stays a
+read-only replay request for CI. Registration generates the Questions publication
+hook and bounded diagnostic route selection, so those JSON structures are not
+hand-authored application policies. The source and image-observation acceptance
+rules live in `workflow.encounter` and `source/assurance/image-verification.encounter`.
+The image report is a derived data output. Existing `browser.property` mechanisms
+observe image completion and natural dimensions; no new JavaScript observer is
+required. The image verification step is mandatory before publication.
+
+Ordinary candidate validation uses the preceding `dist/` only as an evidence
+preparation seed. It refreshes pending evidence, builds from declared owners,
+refreshes exact artifact bindings, rebuilds, and checks the full test set. Seeded
+bytes do not become source owners or browser passes. Clean verification removes
+that seed and still rebuilds with `.build`, dependencies and output absent.

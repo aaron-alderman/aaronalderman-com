@@ -1,0 +1,116 @@
+const fs=require('fs');const read=p=>JSON.parse(fs.readFileSync(p,'utf8')),save=(p,x)=>fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
+const catalogue=read('source/hierarchy.json'),h=read('algebra/hierarchy.process.json'),p=read('algebra/publication.process.json');const {parseRel}=require('../bootstrap/ports/rel-codec.cjs');
+const facts=parseRel(fs.readFileSync('source/hierarchy.rel','utf8')+'\n'+fs.readFileSync('source/questions.rel','utf8'));const get=(s,k)=>facts.find(x=>x.s===s&&x.p===k)?.o;
+const sourceRows=[],fact=(s,k,v)=>sourceRows.push('('+[s,k,v].map(JSON.stringify).join(', ')+')');
+const slots=['foundation','application','progress','tool'],anchors=['foundation','applications','taking-shape','tooling'],labels=['Foundation & platform','Applications & programmes','Taking shape','Tools & workbenches'];
+const views={
+ sourcerer:{intro:'The work through a Sourcerer’s eyes',note:'How an idea becomes something people can inspect, use and change.',sections:[
+ ['Make the rules visible.','Temple and Sourcery form the execution foundation and authoring platform beneath this ecosystem. I want power, permission and change to have an account people can inspect.',['temple','sourcery']],
+ ['Put an explanation to the test.','Knowledge and scientific inquiry need more than a convincing answer: sources, disagreement and checks another person can repeat.',['claimipedia','relational-geometry']],
+ ['Build the next possibility.','These projects are in development. Each explores a different setting for the same question: what should a system make possible, and how can people remain in charge?',catalogue.items.filter(x=>x.group==='progress').map(x=>x.id)],
+ ['Give the work a next step.','Smaller tools for research, coordination and practice. Their stated maturity still matters; a working example and a complete product are different stages.',catalogue.items.filter(x=>x.group==='tool').map(x=>x.id)]
+ ]},
+ christian:{intro:'The work through a Christian’s eyes',note:'Faith becomes concrete in how I attend, share power and remain answerable.',sections:[
+ ['Power needs an account of itself.','The software beneath this work should make authority visible, leave room for refusal and preserve a path to correction. These are engineering commitments I want to bring into the way I serve.',['temple','sourcery']],
+ ['Let conviction meet a real situation.','These are places to examine a choice, listen across disagreement and ask what care requires. They support reflection; they do not settle another person’s standing.',['the-field','relationship-manager','claimipedia']],
+ ['Imagine a more faithful shared life.','Work in development around formation, stories and the ways we learn to live together. I want these possibilities to remain open to correction by the people they affect.',['kingdom','worldwright','creator-studio']],
+ ['Let care show up in the work.','Practical companions for attending to commitments, making time visible and following a change back to its reasons.',['workgarden','timesheet','encounter']]
+ ]},
+ dad:{intro:'The work through Dad’s eyes',note:'Presence, growing room and the ordinary work of keeping a promise.',sections:[
+ ['Tools should make room for people.','I want technology to support care without taking over judgment. Clear permission, understandable behaviour and the possibility of repair matter to the things I choose to build.',['temple','sourcery']],
+ ['Attend before trying to fix.','Experiments in attention, boundaries and making time. I’m drawn to tools that help me notice the person and the commitments around a situation.',['relationship-manager','the-field','workgarden']],
+ ['Leave room for wonder and growing.','Stories, creative play and shared formation are different ways of making room for a life beyond my own plans. These projects are still taking shape.',['creator-studio','worldwright','kingdom']],
+ ['See what a promise will cost.','Making time and dependencies visible can help me notice a collision before somebody else has to carry its cost.',['timesheet','harborboard']]
+ ]},
+ author:{intro:'The work through an Author’s eyes',note:'Words make worlds. Worlds teach us what to notice.',sections:[
+ ['Give an imagined world a coherent frame.','Temple and Sourcery provide an explicit way to describe behaviour and compose its parts. I’m interested in how that can support a world whose choices and changes remain understandable.',['temple','sourcery']],
+ ['Follow meaning into consequences.','A story asks people to believe, notice and choose. These examples help me examine an interpretation, an encounter or the evidence behind a real-world claim.',['encounter','the-field','claimipedia']],
+ ['Let a story find its form.','Worlds, scenes and creative tools in development: room for more than one route through a story, more than one medium, and consequences that continue beyond a single scene.',['worldwright','creator-studio','world-modelling']],
+ ['Make space for the unfinished work.','Creative work also needs a place, a next step and an honest view of what depends on what.',['workgarden','harborboard']]
+ ]}
+};
+const notes={
+ sourcerer:{temple:'I want execution and change to remain inspectable.',sourcery:'A shared process algebra for composing meaning and behaviour.',claimipedia:'Keep an answer connected to its evidence and its objections.','relational-geometry':'A concrete scientific programme with explicit models and reproducible checks.',worldwright:'Explore how story choices can compose into a continuing world.',kingdom:'Explore the structures of formation and shared life.','world-modelling':'Make mechanisms and their possible consequences explicit.',tradie:'Follow a commitment from enquiry into actual work.',foundry:'Trace dependencies across a whole industrial system.','creator-studio':'Bring several creative forms into one developing workspace.',encounter:'A small example of inspecting meaning and following change.','mission-control':'Coordinate agent-assisted research without hiding the work behind it.','the-field':'Examine a bounded encounter without turning judgment into a score.',supercrm:'Keep people and obligations visible alongside coordinated work.',timesheet:'Give time and approval a traceable account.',workgarden:'Turn an unfinished task into a place and a next step.',harborboard:'See dependencies before changing a plan.','relationship-manager':'Keep boundaries and repair in view when assistance becomes complicated.'},
+ christian:{temple:'Power should remain answerable for what it does.',sourcery:'I want the systems I compose to make room for human judgment.','the-field':'Bring a question about following Jesus into one concrete encounter.','relationship-manager':'Care may require a boundary, a refusal or repair.',claimipedia:'Hold a conviction with reasons others can examine.',kingdom:'The developing project most directly concerned with faith and formation.',worldwright:'Stories can make room for lives and choices beyond my own.','creator-studio':'Explore how an idea might take a form another person can enter.',workgarden:'A commitment needs somewhere to live and a next action.',timesheet:'Time is part of what an undertaking asks of people.',encounter:'Practise noticing what an interpretation and a change actually involve.'},
+ dad:{temple:'I want the tools around us to stay within the authority people gave them.',sourcery:'Understandable systems leave more room for my own attention.','relationship-manager':'A place to think about listening, boundaries and repair.','the-field':'Slow down with a situation before deciding what somebody needs.',workgarden:'Give an ordinary commitment a place and a next step.','creator-studio':'An idea could become a story, a drawing or something to explore together.',worldwright:'Make room for curiosity and more than one way through a story.',kingdom:'Consider the shape of formation and shared life as a developing inquiry.',timesheet:'Notice what I am promising with my time.',harborboard:'See a clash of commitments before it becomes somebody else’s problem.'},
+ author:{temple:'A world needs a dependable account of how its rules act.',sourcery:'Compose the pieces of an interactive world in a common language.',encounter:'Look closely at meaning and what a revision changes.','the-field':'Explore a situation through choices, relationships and uncertainty.',claimipedia:'Distinguish an invented world from a claim about the real one.',worldwright:'The developing storytelling platform at the centre of this perspective.','creator-studio':'Let an idea move between prose, images, film and interaction.','world-modelling':'Ask what a mechanism makes possible beyond the immediate scene.',workgarden:'Give the unfinished scene a place to wait and a next step.',harborboard:'Keep the structure of a larger creative undertaking in view.'}
+};
+for(const [role,v]of Object.entries(views)){
+ const theme='identity.'+role;fact(theme,'catalogueIntro',v.intro);fact(theme,'catalogueNote',v.note);
+ for(let i=0;i<4;i++){
+  const [title,note,items]=v.sections[i],s='identity.collection.'+role+'.'+slots[i];fact(s,'isa','IdentityCollection');fact(s,'identity',role);fact(s,'title',title);fact(s,'note',note);
+  const art=i===0?get(theme,'questionHero'):i===1?(role==='christian'?'assets/questions/open-workshop-daylight-v2.png':get(theme,'questionsImage')):get(theme,'threadsImage');fact(s,'image',art);
+  for(const id of items){if(!catalogue.items.some(x=>x.id===id)||!notes[role][id])throw Error('Missing curated project or reason: '+role+' '+id);fact(s,'item',id);fact('identity.card.'+role+'.'+id,'note',notes[role][id]);}
+ }
+}
+fs.appendFileSync('source/hierarchy.rel','\n'+sourceRows.join('\n')+'\n');
+const e=(tag,attrs={},...children)=>({tag,attrs,children:['list',...children]});
+const walk=(x,fn)=>{if(x&&typeof x==='object'){fn(x);Object.values(x).forEach(y=>walk(y,fn));}};
+const original=h.queries['hierarchy.home'][1].value.children.slice(1);
+const sections=original.map((section,i)=>{
+ const col=['concat','identity.collection.','$identityKey','.'+slots[i]];
+ const template=section.children[2].children[1][3]; // Original catalogue card, including its real type, availability and source links.
+ const card=structuredClone(template);card.attrs['data-perspective']='$identityKey';
+ walk(card,n=>{if(n.attrs?.class==='hierarchy-card-content'){const index=n.children.findIndex(x=>x?.attrs?.class==='hierarchy-description');n.children.splice(index+1,0,e('p',{class:'identity-card-note'},['one',['concat','identity.card.','$identityKey','.','$hItem.id'],'note']));}});
+ const heading=e('div',{class:'hierarchy-section-heading identity-section-heading'},e('div',{class:'identity-section-copy'},e('p',{class:'eyebrow'},labels[i]),e('h2',{id:anchors[i]+'-heading'},['one',col,'title']),e('p',{class:'identity-section-note'},['one',col,'note'])),e('img',{class:'identity-section-art',src:['one',col,'image'],alt:'',width:640,height:360,loading:'lazy',decoding:'async','aria-hidden':'true'}));
+ const selected=['map',['objects',col,'item'],'selectedId',['let','hItem',['at',['filter','$identityCatalogue.items','candidate',['eq','$candidate.id','$selectedId']],0],card]];
+ return e('section',{...section.attrs,'aria-labelledby':anchors[i]+'-heading','data-collection':slots[i]},heading,e('div',section.children[2].attrs,selected));
+});
+const directory=e('details',{class:'identity-directory',id:'all-projects'},e('summary',{},'All projects · the complete catalogue'),e('p',{},'This perspective is one way into the work. Every project remains available here, with its original purpose and development status.'),e('nav',{'aria-label':'Complete project catalogue',class:'identity-directory-grid'},['map','$identityCatalogue.items','project',e('a',{href:'$project.href'},e('strong',{},'$project.name'),e('span',{},'$project.status'))]));
+h.queries['identity.catalogue.view']=[
+ {assert:['every',['list',...slots],'slot',['every',['objects',['concat','identity.collection.','$identityKey','.','$slot'],'item'],'selectedId',['some','$identityCatalogue.items','candidate',['eq','$candidate.id','$selectedId']]]],message:'IDENTITY-CATALOGUE-001: Every curated project must exist in the source catalogue.'},
+ {let:'result',value:['list',e('div',{class:'identity-catalogue-intro'},e('p',{class:'eyebrow'},['one',['concat','identity.','$identityKey'],'catalogueIntro']),e('p',{},['one',['concat','identity.','$identityKey'],'catalogueNote']),e('a',{href:'#all-projects',class:'identity-directory-link'},'See all projects ↓')),...sections,directory]}
+];
+h.queries['hierarchy.home']=[{call:'hierarchy.load'},{let:'identityCatalogue',value:'$hCatalogue'},{let:'identityKey',value:'sourcerer'},{call:'identity.catalogue.view'},{let:'result',value:e('div',{class:'hierarchy-home identity-catalogue',id:'microsites','data-perspective':'sourcerer',role:'region','aria-label':'The work through a Sourcerer’s eyes'},'$result')}];save('algebra/hierarchy.process.json',h);
+const bundle=p.queries['identity.runtime.build'][0];const themeFields=bundle.args.data.themes[3];const themeRecord=Object.fromEntries(Object.entries(themeFields).map(([key,expr])=>[key,['one','$identitySubject',expr[2]]]));themeRecord.catalogueHTML='$result';themeRecord.catalogueIntro=['one','$identitySubject','catalogueIntro'];
+p.queries['identity.runtime.build']=[{port:'file.read',args:{path:'source/hierarchy.json'},into:'identityText'},{port:'json.parse',args:{text:'$identityText'},into:'identityCatalogue'},{fold:['subjects','isa','IdentityTheme'],as:'identitySubject',accumulator:'identityViews',initial:['list'],steps:[{let:'identityKey',value:['one','$identitySubject','key']},{call:'identity.catalogue.view'},{let:'input',value:'$result'},{call:'html.serialize'}],yield:['append','$identityViews',['list',themeRecord]],into:'identityThemes'},...p.queries['identity.runtime.build']];
+bundle.args.data.themes='$identityThemes';
+const change=p.queries['identity.change'],statusIndex=change.findIndex(x=>x.args?.ref==='#identity-status');change.splice(statusIndex,0,{port:'browser.content',args:{ref:'#microsites',html:'$chosen.catalogueHTML'},into:'_'},{port:'browser.attribute',args:{ref:'#microsites',name:'data-perspective',value:'$chosen.key'},into:'_'},{port:'browser.attribute',args:{ref:'#microsites',name:'aria-label',value:'$chosen.catalogueIntro'},into:'_'});
+change.find(x=>x.args?.ref==='#identity-status').args.value=['concat','Now viewing Aaron as ','$chosen.label','. Project selections and descriptions updated. Press again to discover another side.'];
+walk(p.queries['publication.home'],n=>{if(n.attrs?.id==='identity-switch')n.attrs['aria-controls']='microsites';if(n.tag==='script'&&n.attrs?.src?.startsWith?.('identity-runtime.js'))n.attrs.src='identity-runtime.js?v=identity-collections-1';});
+// Reuse the exact palette facts that colour each corresponding Questions page.
+const palette=p.queries['publication.styles'][0].value.rules[2][2][3];palette.selector.push(', .identity-catalogue[data-perspective="',['one','$theme','key'],'"]');
+save('algebra/publication.process.json',p);
+const rows=[];let count=0;function rule(selector,decls,context){const s='identity.collections.style.'+(++count);rows.push([s,'isa','StyleRule'],[s,'projection','main'],[s,'selector',selector]);if(context)rows.push([s,'context',context]);for(const [key,value]of Object.entries(decls)){const d=s+'.'+key;rows.push([s,'declaration',d],[d,'property',key],[d,'value',value]);}}
+const root='#microsites.identity-catalogue';
+rule(root,{'--ink':'var(--q-ink)','--muted':'var(--q-muted)','--accent':'var(--q-accent)','--paper':'var(--q-paper)',background:'var(--q-paper)',color:'var(--q-ink)'});
+rule(root+' .identity-catalogue-intro',{display:'flex','flex-wrap':'wrap','align-items':'center',gap:'10px 26px',padding:'28px max(6%,calc((100vw - 1100px)/2))',background:'var(--q-wash)','border-bottom':'1px solid var(--q-line)'});
+rule(root+' .identity-catalogue-intro p',{margin:'0','max-width':'68ch'});
+rule(root+' .identity-catalogue-intro .eyebrow',{color:'var(--q-action)','flex-basis':'100%'});
+rule(root+' .identity-directory-link',{color:'var(--q-action)','text-decoration':'underline','text-underline-offset':'4px','min-height':'44px',display:'inline-flex','align-items':'center','margin-left':'auto'});
+rule(root+' .hierarchy-section.home-fold',{background:'var(--q-paper)',color:'var(--q-ink)','border-color':'var(--q-line)',padding:'52px max(6%,calc((100vw - 1100px)/2))'});
+rule(root+' .home-fold-applications',{background:'linear-gradient(135deg,var(--q-wash),var(--q-paper))'});
+rule(root+' .home-fold-progress',{background:'var(--q-wash)'});
+rule(root+' .home-fold-tooling',{background:'var(--q-paper)','background-size':'auto'});
+rule(root+' .identity-section-heading',{display:'grid','grid-template-columns':'minmax(0,1fr) minmax(220px,300px)',gap:'36px','align-items':'center',margin:'0 0 28px'});
+rule(root+' .identity-section-heading h2',{'font-size':'clamp(30px,3.2vw,44px)','line-height':'1.12','max-width':'24ch',margin:'10px 0 16px',color:'var(--q-ink)'});
+rule(root+' .identity-section-heading .eyebrow',{color:'var(--q-action)',margin:'0','font-size':'11px'});
+rule(root+' .identity-section-heading .identity-section-note',{'font-size':'15px','line-height':'1.75',color:'var(--q-muted)','max-width':'68ch',margin:'0'});
+rule(root+' .identity-section-art',{width:'100%','aspect-ratio':'16 / 9',height:'auto','object-fit':'cover','object-position':'75% center','border-radius':'66px 10px 10px 10px',border:'1px solid var(--q-line)','box-shadow':'0 10px 30px var(--q-shadow)'});
+const lights={execution:'#765316',platform:'#694187',knowledge:'#276751',research:'#255e84',creation:'#8c3f67',simulation:'#65509a',coordination:'#7b561f',practice:'#925131',care:'#23656b'};
+for(const [type,light]of Object.entries(lights))rule(root+' .hierarchy-card[data-type="'+type+'"]',{'--card-light':light,'--card-edge':'color-mix(in srgb,'+light+' 35%,var(--q-paper))','--card-wash':'color-mix(in srgb,'+light+' 8%,var(--q-surface))'});
+rule(root+' .hierarchy-card[data-type]',{background:'radial-gradient(ellipse at 0 0,var(--card-wash),transparent 85%),var(--q-surface)',color:'var(--q-ink)','border-color':'var(--card-edge)','border-top':'3px solid var(--card-light)','box-shadow':'0 7px 24px var(--q-shadow)',padding:'22px','min-height':'0'});
+rule(root+' .hierarchy-card[data-type] h3',{color:'var(--q-ink)'});
+rule(root+' .hierarchy-card[data-type] .hierarchy-description',{color:'var(--q-muted)','font-size':'14px','line-height':'1.7'});
+rule(root+' .hierarchy-card[data-type] .card-stage',{color:'var(--q-muted)'});
+rule(root+' .hierarchy-card[data-type] .identity-card-note',{'font-size':'14px','line-height':'1.65',color:'var(--q-ink)','border-top':'1px solid var(--card-edge)',padding:'12px 0 0',margin:'12px 0 16px'});
+rule(root+' .hierarchy-card[data-type] .hierarchy-actions a',{color:'var(--card-light)','min-height':'44px',display:'inline-flex','align-items':'center'});
+rule(root+' .hierarchy-card[data-type] .hierarchy-status',{color:'var(--q-muted)'});
+rule(root+' .hierarchy-card[data-type]:hover,'+root+' .hierarchy-card[data-type]:focus-within',{'border-color':'var(--card-light)','box-shadow':'0 14px 32px var(--q-shadow)'});
+rule(root+' .hierarchy-card[data-type] .hierarchy-usecase,'+root+' .hierarchy-card[data-type] .science-mission-note',{color:'var(--q-muted)'});
+rule(root+' .identity-directory',{padding:'32px max(6%,calc((100vw - 1100px)/2)) 48px',background:'var(--q-wash)','border-top':'1px solid var(--q-line)',color:'var(--q-ink)'});
+rule(root+' .identity-directory summary',{'font-family':'var(--serif)','font-size':'24px','min-height':'48px',cursor:'pointer'});
+rule(root+' .identity-directory>p',{color:'var(--q-muted)','max-width':'65ch','line-height':'1.7'});
+rule(root+' .identity-directory-grid',{display:'grid','grid-template-columns':'repeat(3,minmax(0,1fr))',gap:'10px 20px','margin-top':'24px'});
+rule(root+' .identity-directory-grid a',{display:'flex','flex-direction':'column',gap:'5px',padding:'12px','min-height':'48px',color:'var(--q-ink)',background:'var(--q-surface)',border:'1px solid var(--q-line)','border-radius':'8px'});
+rule(root+' .identity-directory-grid span',{'font-size':'12px',color:'var(--q-muted)'});
+rule(root+' :focus-visible',{outline:'3px solid var(--q-focus)','outline-offset':'5px'});
+rule(root+' .identity-section-heading',{'grid-template-columns':'minmax(0,1fr) minmax(150px,220px)',gap:'24px'},'(min-width: 701px) and (max-width: 1000px)');
+rule(root+' .identity-section-heading',{'grid-template-columns':'1fr',gap:'22px'},'(max-width: 700px)');
+rule(root+' .identity-section-art',{'max-height':'180px','border-radius':'48px 8px 8px 8px'},'(max-width: 700px)');
+rule(root+' .identity-directory-grid',{'grid-template-columns':'1fr'},'(max-width: 700px)');
+rule(root+' .hierarchy-section.home-fold',{padding:'34px 6%'},'(max-width: 700px)');
+rule(root+' .hierarchy-card[data-type]',{transition:'none',transform:'none'},'(prefers-reduced-motion: reduce)');
+fs.appendFileSync('source/hierarchy.rel','\n'+rows.map(x=>'('+x.map(JSON.stringify).join(', ')+')').join('\n')+'\n');
+fs.writeFileSync('.build/identity-curation-expected.json',JSON.stringify(views,null,2));
+console.log('Authored four curated catalogue views with '+sourceRows.length+' content facts and '+count+' presentation rules.');

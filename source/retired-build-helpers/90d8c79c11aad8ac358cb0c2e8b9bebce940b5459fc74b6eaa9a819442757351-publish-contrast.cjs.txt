@@ -1,0 +1,41 @@
+const fs=require('fs');
+const file='algebra/publication.process.json',p=JSON.parse(fs.readFileSync(file)),q=p.queries;
+const names=['assurance.contrast.input','assurance.contrast.luminance','assurance.contrast.ratio','assurance.contrast.evaluate','assurance.contrast.currentness'];
+const node=(tag,...children)=>({tag,attrs:{},children:['list',...children]});
+const link=(href,label)=>({tag:'a',attrs:{href},children:['list',label]});
+const section=(...children)=>({tag:'section',attrs:{class:'assurance-boundary'},children:['list',...children]});
+q['assurance.contrast.publish']=[
+ {port:'file.read',args:{path:'tooling/assurance/contrast-evidence.json'},into:'contrastJSON'},
+ {port:'json.parse',args:{text:'$contrastJSON'},into:'contrastEvidence'},
+ {let:'eventInput',value:{reading:'$readingData',faith:'$faithReading'}},
+ {call:'assurance.contrast.input'},
+ {assert:['eq','$result','$contrastEvidence.current.inputs'],message:'Contrast source evidence is stale; replay the admitted assessor.'},
+ {port:'file.read',args:{path:file},into:'contrastPolicyJSON'},
+ {port:'json.parse',args:{text:'$contrastPolicyJSON'},into:'contrastPolicySource'},
+ ...names.map(n=>({assert:['eq',['at','$contrastPolicySource.queries',n],['at','$contrastEvidence.policy',n]],message:'Contrast policy evidence is stale: '+n})),
+ {assert:['and',['eq','$contrastEvidence.current.report.failed',0],['eq','$contrastEvidence.current.report.review',0]],message:'Reading component contrast contract requires attention.'},
+ {port:'file.write',args:{path:'assurance/contrast.json',text:'$contrastJSON'},into:'_'},
+ {let:'portfolioPage',value:{route:'assurance/contrast/index.html',prefix:'../../',canonical:'https://aaronalderman.com/assurance/contrast/',title:'Reading contrast assurance — Aaron Alderman',description:'Source evidence for readable reading-page headers, titles and footers, including the original regression and its repair.',body:['list',
+  section(node('p','ASSURANCE / READING CONTRAST'),node('h1','Light behind the words.'),node('p','A reading theme changed the text to dark ink while three essays retained dark masthead and footer surfaces. The shared component rules now pair foreground and background across Christian, Dad, Sourcerer and Author reading pages.'),node('p',link('../','All assurance topics'),' · ',link('../contrast.json','Download before-and-after evidence'))),
+  section(node('h2','What the algebra checks'),node('p','Twenty component pairings cover eight reading pages: mastheads, footers and essay title surfaces. The admitted algebra evaluates selector coverage, explicit opaque colour pairs and the WCAG sRGB contrast formula. Its conservative 4.5:1 threshold also protects small navigation and supporting text.'),node('p',['concat','Original low-contrast source pairings: ','$contrastEvidence.baseline.report.failed','. Current failures: ','$contrastEvidence.current.report.failed','. Source cases requiring review: ','$contrastEvidence.current.report.review','.']),node('p',link('https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html','WCAG contrast guidance'))),
+  section(node('h2','The repaired source pairs'),{tag:'ul',attrs:{},children:['map','$contrastEvidence.current.report.cases','case',node('li',link(['concat','/','$case.route'],'$case.route'),' · ','$case.component',' · ','$case.foreground',' on ','$case.background',' · ','$case.status')]}),
+  section(node('h2','What remains to verify'),node('p','This is a bounded authored component contract, not a complete CSS cascade or accessibility certification. Gradients, interaction states, other templates and actual browser colours require separate observation. Fresh browser colour evidence has not been collected. Earlier browser geometry captures are retained with their original artifact bindings and marked for recapture when dependencies change.'),node('p',link('../rendered-layout/','Inspect historical browser layout evidence')))
+ ]}}, {call:'assurance.portfolio.document'}
+];
+q['publication.build'].splice(q['publication.build'].findIndex(s=>s.call==='assurance.rendered.publish'),0,{call:'assurance.contrast.publish'});
+q['assurance.rendered.publish'].find(s=>s.into==='renderedJSON').args.value.currentness='$contrastEvidence.currentness';
+const surface=q['assurance.surface.build'].find(s=>s.let==='surfacePages'&&s.value?.[0]==='map');
+surface.value[3][3].geometry.status[1].push(['eq',['at',['at','$contrastEvidence.currentness.byRoute','$page.route'],'status'],'current-artifact-bindings']);
+surface.value[3][3].geometry.currentness=['or',['at','$contrastEvidence.currentness.byRoute','$page.route'],{status:'needs-browser-recapture'}];
+// Historical geometry stays immutable; its freshness is displayed separately.
+const boot=q['assurance.rendered.boot'].find(s=>s.let==='input').value.children;
+boot.splice(1,0,node('p','Historical capture: current artifact bindings are checked separately in the downloadable evidence. Changed or missing dependencies need browser recapture. No browser text colours were measured.'));
+function visit(v){if(typeof v==='string'){return v.replace('Each published route is loaded in the browser with its scripts, styles and content.','The recorded routes were loaded with their scripts, styles and content at capture time. Currentness metadata identifies stale or missing coverage.');}if(Array.isArray(v))return v.map(visit);if(v&&typeof v==='object')for(const k of Object.keys(v))v[k]=visit(v[k]);return v;}
+visit(q['assurance.rendered.publish']);
+const portfolio=q['assurance.portfolio.build'].filter(s=>s.let==='portfolioPage');
+for(const s of portfolio)if(s.value.route==='assurance/index.html')s.value.body.splice(1,0,section(node('h2','Reading contrast'),node('p',link('contrast/','Inspect source contrast checks and the repaired dark-on-dark regression'))));
+// Exact authored selector branches: descendant-only declarations cannot satisfy the component contract.
+const rule=q['assurance.contrast.evaluate'][1].steps[1].steps.find(s=>s.let==='rules');
+rule.value[3][2][3]=['includes',['concat',',','$rule.selector',','],['concat',',','$selector',',']];
+fs.writeFileSync(file,JSON.stringify(p,null,2)+'\n');
+const rel='source/expedition.rel';fs.writeFileSync(rel,fs.readFileSync(rel,'utf8').replace('reading-rooms-1','reading-contrast-1')+'\n("page.reading-contrast", "isa", "StandalonePage")\n("page.reading-contrast", "canonical", "https://aaronalderman.com/assurance/contrast/")\n');

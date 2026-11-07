@@ -1,0 +1,1 @@
+const fs=require('fs');const s=fs.readFileSync('source/expedition.rel','utf8').split(/\r?\n/);for(const l of s)if(/^\("place\./.test(l)&&/"(title|question|short|summary|description|region)"/.test(l))console.log(l);console.log('TRAIL FACTS');for(const l of s)if(/"(Trail|question|summary|description|label)"/.test(l)&&(/trail\./.test(l)))console.log(l);

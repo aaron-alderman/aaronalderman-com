@@ -1,0 +1,26 @@
+const fs=require('fs'),save=(p,x)=>fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
+const p='algebra/hierarchy.process.json',m=JSON.parse(fs.readFileSync(p));function walk(n,fn){if(n&&typeof n==='object'){fn(n);Object.values(n).forEach(x=>walk(x,fn));}}
+walk(m.queries['hierarchy.home'],n=>{if(n.attrs?.class==='hierarchy-section home-fold home-fold-progress'){walk(n,x=>{if(x.attrs?.class==='hierarchy-card'){const icon=x.children.find(c=>c?.attrs?.class==='hierarchy-emblem'),content=x.children.find(c=>c?.attrs?.class==='hierarchy-card-content'),status=content.children.find(c=>c?.attrs?.class==='hierarchy-status');content.children=content.children.filter(c=>c!==status);x.children=['list',{tag:'div',attrs:{class:'progress-card-top'},children:['list',icon,status]},content];}});}});save(p,m);
+let rel=fs.readFileSync('source/hierarchy.rel','utf8'),i=0;const put=(s,p,o)=>{rel+='('+[s,p,o].map(JSON.stringify).join(', ')+')\n';};function style(selector,props,context){const s='braided-entry.style.'+(++i);put(s,'isa','StyleRule');put(s,'projection','main');put(s,'selector',selector);if(context)put(s,'context',context);for(const [k,v]of Object.entries(props)){put(s,'declaration',s+'.'+k);put(s+'.'+k,'property',k);put(s+'.'+k,'value',v);}}
+style('.hierarchy-progress .progress-card-top',{display:'flex','align-items':'center',gap:'12px','margin-bottom':'12px','min-height':'44px'});
+style('.hierarchy-progress .progress-card-top .hierarchy-emblem',{flex:'0 0 44px',width:'44px',height:'44px',margin:'0',display:'flex','align-items':'center','justify-content':'center'});
+style('.hierarchy-progress .progress-card-top .hierarchy-emblem .hierarchy-icon',{width:'30px',height:'30px'});
+style('.hierarchy-progress .progress-card-top .hierarchy-emblem .world-emblem',{width:'44px',height:'44px'});
+style('.hierarchy-progress .progress-card-top .hierarchy-status',{display:'flex',flex:'1','flex-wrap':'wrap',gap:'5px 8px',margin:'0','align-items':'center'});
+style('.hierarchy-progress .hierarchy-card-content h3',{margin:'0 0 8px'});
+style('.begin-door',{position:'relative',isolation:'isolate','--braid-a':'#f0d59b','--braid-b':'#9fc8e4',border:'1px solid #d7bd8280','border-radius':'15px',transition:'transform .3s ease,box-shadow .3s ease,border-color .3s ease'});
+style('.begin-door#threads',{'--braid-b':'#e4a9c2'});style('.begin-door#atlas',{'--braid-b':'#bdb1ee'});
+style('.begin-door::before',{content:'""',position:'absolute',inset:'0',padding:'6px','border-radius':'inherit','pointer-events':'none','z-index':'3',background:'repeating-linear-gradient(135deg,transparent 0 4px,var(--braid-a) 4px 6px,#423524 6px 7px,transparent 7px 12px),repeating-linear-gradient(45deg,transparent 0 4px,var(--braid-b) 4px 6px,#283240 6px 7px,transparent 7px 12px),linear-gradient(#24303e,#141c29)','background-size':'17px 17px,17px 17px,100% 100%','background-position':'0 0,0 0,0 0','-webkit-mask':'linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0)','-webkit-mask-composite':'xor',mask:'linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0)','mask-composite':'exclude',opacity:'.8',transition:'background-position .6s ease,opacity .3s ease,filter .3s ease'});
+style('.begin-door::after',{content:'""',position:'absolute',inset:'6px','border-radius':'9px',border:'1px solid #e9ce973b','pointer-events':'none','z-index':'3',transition:'border-color .3s ease'});
+style('.begin-door-copy',{padding:'18px 21px 20px'});
+style('.begin-door:hover,.begin-door:focus-visible',{transform:'translateY(-4px)','border-color':'var(--braid-a)','box-shadow':'0 20px 45px #0007,0 0 24px #e6c88920'});
+style('.begin-door:hover::before,.begin-door:focus-visible::before',{'background-position':'12px 0,-12px 0,0 0',opacity:'1',filter:'brightness(1.18)'});
+style('.begin-door:hover::after,.begin-door:focus-visible::after',{'border-color':'#f0d59b88'});
+style('.begin-door-copy>span',{transition:'transform .3s ease,color .3s ease',color:'var(--braid-a)'});
+style('.begin-door:hover .begin-door-copy>span,.begin-door:focus-visible .begin-door-copy>span',{transform:'translate(3px,-3px)',color:'#fff1d2'});
+style('.begin-door:focus-visible',{outline:'2px solid var(--braid-a)','outline-offset':'5px'});
+style('.begin-door,.begin-door::before,.begin-door::after,.begin-door-copy>span',{transition:'none !important',transform:'none !important'},'(prefers-reduced-motion: reduce)');
+style('.begin-door',{border:'2px solid CanvasText'},'(forced-colors: active)');style('.begin-door::before,.begin-door::after',{display:'none'},'(forced-colors: active)');
+fs.writeFileSync('source/hierarchy.rel',rel);
+const version='braided-1',f='source/expedition.rel';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/("stylesheetVersion", ")[^"]+/, '$1'+version));
+for(const file of ['algebra/hierarchy.process.json','algebra-publication.test.mjs'])fs.writeFileSync(file,fs.readFileSync(file,'utf8').replaceAll('expedition.css?v=card-types-1','expedition.css?v='+version));

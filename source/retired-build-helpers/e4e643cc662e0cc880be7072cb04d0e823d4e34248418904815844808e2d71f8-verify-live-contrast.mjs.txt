@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+const root=process.env.CONTRAST_VERIFY_ORIGIN||'https://aaronalderman.com/';
+const paths=['writing/make-the-magic-answerable/','writing/being-here-as-dad/','writing/a-world-someone-else-can-enter/','expedition.css?v=reading-contrast-1','assurance/contrast/','assurance/contrast.json','assurance/rendered-layout.json','assurance/navigation-layout.json'];
+const responses=await Promise.all(paths.map(async path=>{const r=await fetch(root+path,{cache:'no-store'});assert.equal(r.status,200,path);return await r.text();}));
+for(let i=0;i<3;i++)assert.ok(responses[i].includes('expedition.css?v=reading-contrast-1'),paths[i]);
+assert.ok(responses[3].includes('body:has(:is(.faith-threads,.reading-room,.faith-essay,.reading-essay)) .masthead{background:var(--reading-bg);color:var(--reading-text);'));
+assert.ok(responses[3].includes('body:has(:is(.faith-threads,.reading-room,.faith-essay,.reading-essay)) .footer{color:var(--reading-muted);background:var(--reading-wash);'));
+assert.ok(responses[4].includes('Light behind the words.'));
+const proof=JSON.parse(responses[5]),rendered=JSON.parse(responses[6]),navigation=JSON.parse(responses[7]);
+assert.equal(proof.baseline.report.failed,6);assert.equal(proof.current.report.failed,0);assert.equal(proof.current.report.review,0);assert.equal(proof.current.report.cases.length,20);assert.equal(proof.current.report.browserColourEvidence,'not-collected');
+assert.equal(rendered.currentness.byRoute['writing/make-the-magic-answerable/index.html'].status,'needs-browser-recapture');
+assert.equal(navigation.pages.find(p=>p.route==='writing/make-the-magic-answerable/index.html').geometry.status,'needs-browser-evidence');
+console.log(JSON.stringify({verified:paths,sourceContrastFailures:0,browserColours:'pending'}));

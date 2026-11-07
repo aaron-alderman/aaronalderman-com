@@ -21,7 +21,7 @@ function fixture(options={}){
  const calls=[];
  const ports={...valuePorts(),...computationalPorts(),
   'document.observe':({file})=>files.has(file)?{exists:true,text:files.get(file),sha256:sha(files.get(file))}:{exists:false,text:null,sha256:null},
-  'document.entries':()=>[{name:'old.cjs',kind:'file'},{name:'unique.log',kind:'file'},{name:'directory.cjs',kind:'directory'}],
+  'document.entries':()=>options.entries??[{name:'old.cjs',kind:'file'},{name:'unique.log',kind:'file'},{name:'directory.cjs',kind:'directory'}],
   'process.compile':()=>({surface:options.surface??original,sourceHash:sha(text)}),
   'process.lower':({model})=>{calls.push(['lower',model]);return options.differentLowering&&calls.filter(c=>c[0]==='lower').length===2?{different:true}:model;},
   'publication.stage':args=>{calls.push(['stage',args]);return {id:'candidate'};},
@@ -96,7 +96,7 @@ test('archive collisions refuse retirement and source switching before validatio
 });
 test('clean verification requires a clean revision and absent build, installed dependencies and generated output',async()=>{
  for(const [checkout,code]of [[{clean:false},'CLEAN-001'],[{clean:true,excludedBuild:false,excludedDependencies:true,excludedOutput:true},'CLEAN-002']]){const f=fixture({checkout});await assert.rejects(f.run({protocol:'worldwright/clean-verification/1'}),new RegExp(code));assert.ok(!f.calls.some(c=>c[0]==='validate'));}
- const f=fixture(),receipt=await f.run({protocol:'worldwright/clean-verification/1'});assert.equal(receipt.protocol,'worldwright/clean-checkout-receipt/1');assert.ok(!f.calls.some(c=>c[0]==='commit'));const commands=f.calls.find(c=>c[0]==='validate')[1];assert.equal(commands[0].tool,'npm');assert.equal(commands[0].args[0],'ci');assert.equal(commands[1].args[0],'bootstrap/run.cjs');
+ const f=fixture(),receipt=await f.run({protocol:'worldwright/clean-verification/1'});assert.equal(receipt.protocol,'worldwright/clean-checkout-receipt/1');assert.ok(!f.calls.some(c=>c[0]==='commit'));const commands=f.calls.find(c=>c[0]==='validate')[1];assert.equal(commands[0].tool,'npm');assert.equal(commands[0].args[0],'ci');assert.equal(commands.filter(c=>c.args[0]==='bootstrap/run.cjs').length,2);assert.ok(commands.some(c=>c.args[0]==='tooling/assess-reading-experience.mjs'&&c.args.includes('--check')));
 });
 test('normal verification has no .build input and does not rewrite presentation evidence',()=>{
  assert.deepEqual([...contract.checks].sort(),fs.readdirSync('.').filter(f=>f.endsWith('.test.mjs')).sort(),'Every repository test belongs to the declared verification set');
@@ -116,4 +116,41 @@ test('retired helpers remain hashed evidence with no active executable counterpa
  assert.ok(fs.existsSync(contract.retirement.index),'Retirement evidence must accompany the repaired workflow');
  const evidence=read(contract.retirement.index);assert.ok(evidence.items.length>0);
  for(const item of evidence.items){assert.equal(sha(fs.readFileSync(item.archive)),item.sha256);assert.ok(item.archive.endsWith('.txt'));assert.ok(!fs.existsSync(item.original));}
+});
+
+function provenanceFixture(options={}){
+ const file='source/questions.rel',old='old REL',next='new REL';
+ const proposal={protocol:'worldwright/authoring-proposal/1',apply:false,changes:[{file,beforeSha256:sha(old),text:next}],...options.proposal};
+ const raw=options.raw??':100644 100644 '+ 'a'.repeat(40)+' '+'b'.repeat(40)+' M\t'+file+'\n';
+ const f=fixture({entries:options.entries??[],files:[[file,old],['.build/provenance/candidate/'+file,options.actual??next],['.build/provenance/candidate/source/authoring/requests/release.proposal',JSON.stringify(proposal)],['.build/provenance/changes.raw',raw]]});
+ return {...f,runGate:()=>f.run({protocol:'worldwright/provenance-gate/1',candidate:'.build/provenance/candidate',diff:'.build/provenance/changes.raw',claimedReceipt:{ok:true,approved:true}})};
+}
+test('publication provenance replays authority and exact bytes without trusting claimed receipts',async()=>{
+ const f=provenanceFixture(),r=await f.runGate();assert.equal(r.status,'source-plan-replayed');assert.deepEqual(r.files,['source/questions.rel']);assert.ok(!f.calls.some(c=>['commit','stage','validate'].includes(c[0])));
+ for(const [options,code]of [[{actual:'unplanned bytes'},'PROVENANCE-011'],[{proposal:{apply:true}},'PROVENANCE-002'],[{entries:[{name:'escape.mjs',kind:'file'}]},'PROVENANCE-001']])await assert.rejects(provenanceFixture(options).runGate(),new RegExp(code));
+ for(const file of ['tooling/reading-experience-observer.mjs','algebra/unowned-image.process.json','algebra/microsite-return.process.json','verification/claimed-approved.json','.github/workflows/pages.yml']){const raw=':100644 100644 '+'a'.repeat(40)+' '+'b'.repeat(40)+' M\t'+file+'\n';await assert.rejects(provenanceFixture({raw}).runGate(),/PROVENANCE-010/);}
+ const noProposal=provenanceFixture();noProposal.files.delete('.build/provenance/candidate/source/authoring/requests/release.proposal');await assert.rejects(noProposal.runGate(),/PROVENANCE-005/);
+ const omitted=provenanceFixture({raw:':100644 100644 '+'a'.repeat(40)+' '+'b'.repeat(40)+' M\tdist/questions.html\n'});await assert.rejects(omitted.runGate(),/PROVENANCE-012/);
+});
+
+function imageEvidenceFixture(change=()=>{}){
+ const specs=[['main',6],['christian',6],['dad',4],['sourcerer',4],['author',4],['counterexample-broken',4],['counterexample-size',4]],profiles=['desktop','zoom-200-equivalent','zoom-400-equivalent','text-spacing'];
+ const capture={protocol:'worldwright/reading-experience-observations/1',provenance:{evidenceFamily:'test-fixture-not-browser-evidence'},snapshots:specs.flatMap(([id,expected])=>profiles.map(profile=>{
+  const rows=Array.from({length:expected},(_,i)=>({n:i+1,kind:'illustration',fit:'cover',loaded:id!=='counterexample-broken',nw:id==='counterexample-broken'?0:1000,nh:id==='counterexample-broken'?0:1500,w:id==='counterexample-size'&&i===1?140:profile==='desktop'?92:65,h:profile==='desktop'?130:96,bounds:true,size:!(id==='counterexample-size'&&i===1),known:true}));
+  const failed=rows.filter(r=>!r.loaded||!r.size).length,summary={protocol:'images/1',observed:expected,expected,failed,complete:true};
+  return {route:'assurance/images/'+id+'.html',profile,readyState:'complete',fontStatus:'loaded',truncatedBlocks:false,blocks:[{path:'[id="image-assurance-status"]',text:JSON.stringify(summary)},...rows.map((r,i)=>({path:'row-'+i,text:JSON.stringify(r)}))]};
+ }))};change(capture);
+ const committed=[],ports={...valuePorts(),...computationalPorts(),'document.observe':({file})=>{let text;if(file==='tooling/assurance/reading-experience-capture.json')text=JSON.stringify(capture);else if(file==='tooling/assurance/reading-experience-evidence.json')text=JSON.stringify({browserInput:{capture}});else if(file==='source/assurance/image-verification.encounter')text=fs.readFileSync(file,'utf8');else return {exists:false,sha256:null,text:null};return {exists:true,text,sha256:sha(text)};},'document.commit':({changes})=>{committed.push(...changes);return {files:changes};}};
+ return {committed,async run(){return (await invoke({model,entry:'author.run',input:{contract,request:{protocol:'worldwright/images-verify/1'}},ports,limit:contract.budget})).value;}};
+}
+test('image evidence verifies individual observations and rejects false summaries and lost counterexamples',async()=>{
+ const good=imageEvidenceFixture(),report=await good.run();assert.equal(report.status,'browser-observed');assert.equal(report.cases.length,28);assert.equal(report.counts.counterexamplesRejected,8);assert.equal(good.committed.length,1);
+ const row=(s,i)=>JSON.parse(s.blocks[i+1].text),save=(s,i,r)=>s.blocks[i+1].text=JSON.stringify(r),summary=s=>JSON.parse(s.blocks[0].text),saveSummary=(s,r)=>s.blocks[0].text=JSON.stringify(r);
+ const cases=[
+  [c=>c.snapshots.pop(),'IMAGE-EVIDENCE-003'],
+  [c=>c.snapshots[0].blocks.pop(),'IMAGE-EVIDENCE-006'],
+  [c=>{const s=c.snapshots[0],r=row(s,0);r.loaded=false;r.nw=0;save(s,0,r);},'IMAGE-EVIDENCE-008'],
+  [c=>{const s=c.snapshots[0],r=row(s,0);r.w=140;r.size=false;save(s,0,r);const h=summary(s);h.failed=1;saveSummary(s,h);},'IMAGE-EVIDENCE-009'],
+  [c=>{const s=c.snapshots.find(s=>s.route.includes('counterexample-size')),r=row(s,1);r.w=s.profile==='desktop'?92:65;r.size=true;save(s,1,r);const h=summary(s);h.failed=0;saveSummary(s,h);},'IMAGE-EVIDENCE-010']
+ ];for(const [change,code]of cases)await assert.rejects(imageEvidenceFixture(change).run(),new RegExp(code));
 });

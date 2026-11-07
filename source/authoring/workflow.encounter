@@ -8,9 +8,11 @@ process author.run:
   assert $requestKind.plain
     otherwise "AUTHOR-001: Request must be a record."
   let protocol = at($request, "protocol")
-  assert includes(list("worldwright/authoring-proposal/1", "worldwright/source-migration/1", "worldwright/retire-helpers/1", "worldwright/clean-verification/1"), $protocol)
+  assert includes(list("worldwright/authoring-proposal/1", "worldwright/source-migration/1", "worldwright/retire-helpers/1", "worldwright/clean-verification/1", "worldwright/provenance-gate/1", "worldwright/provenance-selftest/1", "worldwright/source-registration/1", "worldwright/apply-release/1", "worldwright/images-prepare/1", "worldwright/images-verify/1"), $protocol)
     otherwise "AUTHOR-002: Unknown proposal protocol."
   when eq($protocol, "worldwright/authoring-proposal/1"):
+    let helperDirectory = ".build"
+    call author.provenance.helpers
     call author.edit
   when eq($protocol, "worldwright/source-migration/1"):
     call author.migration.prepare
@@ -22,6 +24,22 @@ process author.run:
     call author.transaction
   when eq($protocol, "worldwright/clean-verification/1"):
     call author.clean.run
+  when eq($protocol, "worldwright/provenance-gate/1"):
+    call author.provenance.run
+  when eq($protocol, "worldwright/provenance-selftest/1"):
+    call author.provenance.selftest
+  when eq($protocol, "worldwright/source-registration/1"):
+    let helperDirectory = ".build"
+    call author.provenance.helpers
+    call author.registration.prepare
+    let proposal = $result
+    call author.transaction
+  when eq($protocol, "worldwright/apply-release/1"):
+    call author.release
+  when eq($protocol, "worldwright/images-prepare/1"):
+    call images.prepare
+  when eq($protocol, "worldwright/images-verify/1"):
+    call images.verify
 
 process author.flag:
   port value.describe { value = at($request, "apply") } → applyType
@@ -45,12 +63,22 @@ process author.validation:
   port record.put { record = $validation; key = "ok"; value = true } → validation
 
 process author.commands:
-  let result = list(
+  let preparation = if(eq(at($request, "protocol"), "worldwright/clean-verification/1"), list(), list(
+    { tool = "node"; args = list("tooling/assess-reading-experience.mjs") },
+    { tool = "node"; args = list("tooling/assess-reading-contrast.mjs") }
+  ))
+  let result = append(list(
     { tool = "npm"; args = list("ci", "--ignore-scripts", "--no-audit", "--no-fund", "--cache", ".npm-cache") },
+    { tool = "node"; args = list("tooling/author.mjs", "source/authoring/requests/images-prepare.request") }
+  ), append($preparation, list(
     { tool = "node"; args = list("bootstrap/run.cjs", ".", "dist", "bootstrap/site.json") },
+    { tool = "node"; args = list("tooling/assess-reading-experience.mjs") },
+    { tool = "node"; args = list("tooling/assess-reading-contrast.mjs") },
+    { tool = "node"; args = list("bootstrap/run.cjs", ".", "dist", "bootstrap/site.json") },
+    { tool = "node"; args = list("tooling/assess-reading-experience.mjs", "--check") },
     { tool = "node"; args = append(list("--test"), $contract.checks) },
     { tool = "node"; args = list("tooling/verify-microsite-presentation.mjs", "dist") }
-  )
+  )))
 
 process author.transaction:
   port publication.stage { changes = $proposal.changes } → candidate
@@ -234,3 +262,244 @@ process author.clean.run:
     file = $contract.clean.receipt;
     value = { protocol = "worldwright/clean-checkout-receipt/1"; checkout = $checkout; validation = $validation; applied = false }
   } → result
+
+# Publication replays these constraints from the preceding trusted revision.
+# Git emits observations; this programme owns classification and acceptance.
+# A proposed receipt is never treated as evidence that author.run executed.
+process author.provenance.kind:
+  port text.matches { value = $file; pattern = "^dist/" } → generatedOutput
+  port text.matches { value = $file; pattern = "^tooling/assurance/(?:reading-experience-(?:capture|evidence)|contrast-evidence|image-evidence)\\.json$" } → generatedEvidence
+  let transport = eq($file, "source/authoring/requests/release.proposal")
+  port text.matches { value = $file; pattern = "\\.(?:mjs|cjs|js|py)$" } → executable
+  port text.matches { value = $file; pattern = "(?:^|/)\\.\\.(?:/|$)|^/|\\\\|[\\r\\n\\t]" } → escaping
+  let selected = filter($planned, "change", eq($change.file, $file))
+  let result = {
+    allowed = and(not($escaping), or($generatedOutput, and(not($executable), or($generatedEvidence, $transport, eq(count($selected), 1)))));
+    ignored = or($generatedOutput, $generatedEvidence, $transport);
+    selected = $selected
+  }
+
+process author.provenance.helpers:
+  port document.entries { directory = $helperDirectory } → helperEntries
+  each filter($helperEntries, "entry", eq($entry.kind, "file")) as helperEntry:
+    port text.matches { value = $helperEntry.name; pattern = "\\.(?:mjs|cjs|js|py)$" } → helperExecutable
+    assert not($helperExecutable)
+      otherwise "PROVENANCE-001: Active one-off helpers are forbidden. Retire them through author.run before authoring."
+
+process author.provenance.plan:
+  let request = $replayProposal
+  call author.flag
+  assert not($request.apply)
+    otherwise "PROVENANCE-002: Release proposals must request a replay, not a write to the trusted checkout."
+  when eq($request.protocol, "worldwright/authoring-proposal/1"):
+    call author.prepare
+  when eq($request.protocol, "worldwright/source-registration/1"):
+    call author.registration.prepare
+  when eq($request.protocol, "worldwright/source-migration/1"):
+    call author.migration.prepare
+  assert includes(list("worldwright/authoring-proposal/1", "worldwright/source-registration/1", "worldwright/source-migration/1"), $request.protocol)
+    otherwise "PROVENANCE-003: This proposal protocol cannot authorize a publication."
+
+process author.provenance.run:
+  let gateRequest = $request
+  assert eq($gateRequest.protocol, "worldwright/provenance-gate/1")
+    otherwise "PROVENANCE-004: Expected the provenance request."
+  assert and(eq($gateRequest.candidate, ".build/provenance/candidate"), eq($gateRequest.diff, ".build/provenance/changes.raw"))
+    otherwise "PROVENANCE-004: Only the CI-established candidate and Git transcript are accepted."
+  let helperDirectory = ".build"
+  call author.provenance.helpers
+  port document.observe { file = concat($gateRequest.candidate, "/source/authoring/requests/release.proposal") } → proposed
+  assert $proposed.exists
+    otherwise "PROVENANCE-005: Publication has no authoring proposal."
+  port json.parse { text = $proposed.text } → replayProposal
+  call author.provenance.plan
+  let planned = $result.changes
+  port document.observe { file = $gateRequest.diff } → gitDiff
+  assert $gitDiff.exists
+    otherwise "PROVENANCE-006: Missing native Git change observation."
+  port text.split { value = $gitDiff.text; pattern = "\\r?\\n" } → lines
+  let changed = list()
+  fold filter($lines, "line", not(eq($line, ""))) as line; observedChanges starts list():
+    port text.split { value = $line; pattern = "\\t" } → fields
+    assert eq(count($fields), 2)
+      otherwise "PROVENANCE-007: Malformed or quoted Git path."
+    port text.split { value = at($fields, 0); pattern = " " } → metadata
+    assert eq(count($metadata), 5)
+      otherwise "PROVENANCE-007: Malformed Git metadata."
+    assert and(includes(list(":100644", ":100755", ":000000"), at($metadata, 0)), includes(list("100644", "100755", "000000"), at($metadata, 1)), includes(list("M", "A", "D"), at($metadata, 4)))
+      otherwise "PROVENANCE-008: Symlinks, submodules, renames and ambiguous change types refuse."
+    let file = at($fields, 1)
+    assert not(includes($observedChanges, $file))
+      otherwise "PROVENANCE-009: Duplicate Git path."
+    call author.provenance.kind
+    let classification = $result
+    assert $classification.allowed
+      otherwise "PROVENANCE-010: Changed bytes are outside the approved authoring plan; native scripts and unowned JSON cannot be authorized by a receipt."
+    when not($classification.ignored):
+      let change = at($classification.selected, 0)
+      port document.observe { file = concat($gateRequest.candidate, "/", $file) } → actual
+      assert if(eq($change.text, null), not($actual.exists), and($actual.exists, eq($actual.text, $change.text)))
+        otherwise "PROVENANCE-011: Candidate bytes differ from the algebra-replayed proposal."
+    yield append($observedChanges, list($file)) → changed
+  each $planned as expectedChange:
+    assert includes($changed, $expectedChange.file)
+      otherwise "PROVENANCE-012: A planned write is absent from the actual change set."
+  let result = {
+    protocol = "worldwright/authoring-provenance/1";
+    status = "source-plan-replayed";
+    proposalSha256 = $proposed.sha256;
+    diffSha256 = $gitDiff.sha256;
+    files = map($planned, "change", $change.file);
+    boundary = "The trusted preceding revision replayed authoring authority and matched every functional changed byte. CI must rebuild, regenerate evidence and validate the same candidate before publication. This is execution evidence, not a signature authenticating a claimed historical receipt."
+  }
+
+process author.provenance.selftest:
+  let planned = list({ file = "source/questions.rel"; beforeSha256 = "fixture"; text = "candidate REL" })
+  let cases = list(
+    { file = "source/questions.rel"; allowed = true },
+    { file = "dist/questions.html"; allowed = true },
+    { file = "dist/assurance/questions-images-runtime.js"; allowed = true },
+    { file = "tooling/assurance/reading-experience-evidence.json"; allowed = true },
+    { file = ".build/image-helper.mjs"; allowed = false },
+    { file = "tooling/reading-experience-observer.mjs"; allowed = false },
+    { file = "algebra/new-image-policy.process.json"; allowed = false },
+    { file = "source/new-image-policy.json"; allowed = false },
+    { file = "algebra/microsite-return.process.json"; allowed = false },
+    { file = "source/questions.rel/../bypass"; allowed = false },
+    { file = ".github/workflows/pages.yml"; allowed = false }
+  )
+  each $cases as testCase:
+    let file = $testCase.file
+    call author.provenance.kind
+    assert eq($result.allowed, $testCase.allowed)
+      otherwise "PROVENANCE-TEST: Classification counterexample failed."
+  let result = { protocol = "worldwright/provenance-selftest/1"; passed = count($cases); failed = 0 }
+
+process author.release:
+  let helperDirectory = ".build"
+  call author.provenance.helpers
+  port document.observe { file = "source/authoring/requests/release.proposal" } → release
+  assert $release.exists
+    otherwise "RELEASE-001: Supply the exact proposal that CI will replay."
+  port json.parse { text = $release.text } → replayProposal
+  call author.provenance.plan
+  let proposal = $result
+  port record.put { record = $replayProposal; key = "apply"; value = true } → request
+  call author.transaction
+
+# New readable owners are registered by this programme, not by editing manifests
+# or writing executable JSON. All frontend metadata below is generated data.
+process author.registration.prepare:
+  call author.flag
+  let registrationRequest = $request
+  port text.matches { value = $request.id; pattern = "^[a-z][a-z0-9-]{2,60}$" } → validId
+  assert $validId
+    otherwise "REGISTER-001: A bounded source identity is required."
+  let sourceFile = concat("source/assurance/", $request.id, ".encounter")
+  let outputFile = concat("algebra/", $request.id, ".process.json")
+  let profileFile = concat("source/assurance/", $request.id, ".profile.json")
+  let frontendFile = concat("bootstrap/frontends/", $request.id, ".json")
+  each list($sourceFile, $profileFile, $frontendFile) as absentFile:
+    port document.observe { file = $absentFile } → absent
+    assert not($absent.exists)
+      otherwise "REGISTER-002: Registration cannot overwrite an existing owner or frontend."
+  assert eq($request.baseFrontend, "bootstrap/frontends/microsite-temple-ui.json")
+    otherwise "REGISTER-003: The existing bounded frontend is required."
+  port document.observe { file = $request.baseFrontend } → frontendBefore
+  assert eq($frontendBefore.sha256, $request.frontendSha256)
+    otherwise "REGISTER-004: Stale frontend authority."
+  port json.parse { text = $frontendBefore.text } → frontend
+  let originalProfileFile = $frontend.data.lpPolicy.file
+  port document.observe { file = $frontend.data.lpPolicy.file } → profileBefore
+  port json.parse { text = $profileBefore.text } → profile
+  port document.observe { file = "bootstrap/ports.json" } → portsBefore
+  port json.parse { text = $portsBefore.text } → portPolicy
+  let availablePorts = distinct(append($portPolicy.profiles.build, $portPolicy.profiles.workshopBrowser))
+  assert isArray($request.ports)
+    otherwise "REGISTER-005: Explicit existing mechanisms are required."
+  each $request.ports as selectedPort:
+    assert includes($availablePorts, $selectedPort)
+      otherwise "REGISTER-005: Registration cannot invent or widen native mechanisms."
+  port record.put { record = $profile; key = "name"; value = concat("encounter/assurance/", $request.id, "/1") } → profile
+  port record.put { record = $profile; key = "directPorts"; value = distinct($request.ports) } → profile
+  port record.put { record = $profile; key = "statementForms"; value = distinct(append($profile.statementForms, list("assert"))) } → profile
+  port record.put { record = $profile; key = "operators"; value = distinct(append($profile.operators, list("one", "subjects", "objects"))) } → profile
+  port json.stringify { value = $profile; space = 2 } → profileText
+  let profileText = concat($profileText, "\n")
+  port digest.sha256 { text = $profileText } → profileHash
+  port record.put { record = $frontend.data.lpPolicy; key = "file"; value = $profileFile } → profileSelection
+  port record.put { record = $frontend.data; key = "lpPolicy"; value = $profileSelection } → frontendData
+  port record.put { record = $frontend; key = "data"; value = $frontendData } → frontend
+  port record.put { record = $frontend; key = "files"; value = map($frontend.files, "dependency", if(eq($dependency.path, $originalProfileFile), { path = $profileFile; sha256 = $profileHash }, $dependency)) } → frontend
+  port record.entries { value = $frontend } → frontendEntries
+  port record.fromEntries { entries = filter($frontendEntries, "pair", not(eq(at($pair, 0), "identity"))) } → unsignedFrontend
+  port json.stringify { value = $unsignedFrontend } → unsignedText
+  port digest.sha256 { text = $unsignedText } → identity
+  port record.put { record = $unsignedFrontend; key = "identity"; value = $identity } → frontend
+  port json.stringify { value = $frontend; space = 2 } → frontendText
+  let frontendText = concat($frontendText, "\n")
+  port document.observe { file = "bootstrap/site.json" } → manifestBefore
+  port json.parse { text = $manifestBefore.text } → manifest
+  assert not(includes($manifest.modules, $outputFile))
+    otherwise "REGISTER-006: The proposed generated output already has a JSON authority."
+  let selected = or(at($manifest, "processModules"), list())
+  assert eq(count(filter($selected, "selection", or(eq($selection.file, $sourceFile), eq($selection.output, $outputFile)))), 0)
+    otherwise "REGISTER-006: Conflicting process authority."
+  port record.put { record = $manifest; key = "processModules"; value = append($selected, list({ file = $sourceFile; output = $outputFile; frontend = $frontendFile })) } → manifest
+  port json.stringify { value = $manifest; space = 2 } → manifestText
+  port document.observe { file = "source/authoring-contract.json" } → contractBefore
+  let nextContract = $contract
+  port record.put { record = $nextContract; key = "editable"; value = distinct(append($nextContract.editable, list($sourceFile, "source/assurance/reading-experience.json"))) } → nextContract
+  port record.put { record = $nextContract.owners; key = "applicationProcesses"; value = append($nextContract.owners.applicationProcesses, list($sourceFile)) } → nextOwners
+  port record.put { record = $nextContract; key = "owners"; value = $nextOwners } → nextContract
+  port record.put { record = $nextContract.generated; key = $outputFile; value = { source = $sourceFile; frontend = $frontendFile } } → nextGenerated
+  port record.put { record = $nextContract; key = "generated"; value = $nextGenerated } → nextContract
+  port record.put { record = $nextContract.migration; key = "frontends"; value = append($nextContract.migration.frontends, list($frontendFile)) } → nextMigration
+  port record.put { record = $nextContract; key = "migration"; value = $nextMigration } → nextContract
+  port json.stringify { value = $nextContract; space = 2 } → contractText
+  let changes = list(
+    { file = $sourceFile; beforeSha256 = null; text = $registrationRequest.text },
+    { file = $profileFile; beforeSha256 = null; text = $profileText },
+    { file = $frontendFile; beforeSha256 = null; text = $frontendText },
+    { file = "bootstrap/site.json"; beforeSha256 = $manifestBefore.sha256; text = concat($manifestText, "\n") },
+    { file = "source/authoring-contract.json"; beforeSha256 = $contractBefore.sha256; text = concat($contractText, "\n") }
+  )
+  assert eq($registrationRequest.buildEntry, "images.publish")
+    otherwise "REGISTER-007: This registration installs the declared Questions image projection."
+  port document.observe { file = "algebra/publication.process.json" } → publicationBefore
+  port json.parse { text = $publicationBefore.text } → publicationModule
+  let buildSteps = at($publicationModule.queries, "publication.build")
+  assert eq(count(filter($buildSteps, "step", eq(at($step, "call"), "microsite.return.all"))), 1)
+    otherwise "REGISTER-007: The declared publication insertion point is ambiguous."
+  fold $buildSteps as step; integrated starts list():
+    yield append($integrated, if(eq(at($step, "call"), "microsite.return.all"), list({ call = $registrationRequest.buildEntry }, $step), list($step))) → integrated
+  port record.put { record = $publicationModule.queries; key = "publication.build"; value = $integrated } → publicationQueries
+  port record.put { record = $publicationModule; key = "queries"; value = $publicationQueries } → publicationModule
+  port json.stringify { value = $publicationModule; space = 2 } → publicationText
+  let changes = append($changes, list({ file = "algebra/publication.process.json"; beforeSha256 = $publicationBefore.sha256; text = concat($publicationText, "\n") }))
+  port document.observe { file = "source/assurance/reading-experience.json" } → browserBefore
+  port json.parse { text = $browserBefore.text } → browserConfiguration
+  assert and(isArray($registrationRequest.browserRoutes), includes(range(16), count($registrationRequest.browserRoutes)))
+    otherwise "REGISTER-008: Bounded image observation routes are required."
+  each $registrationRequest.browserRoutes as diagnosticRoute:
+    port text.matches { value = $diagnosticRoute; pattern = "^assurance/images/[a-z-]+\\.html$" } → diagnosticPath
+    assert $diagnosticPath
+      otherwise "REGISTER-008: Browser diagnostics must stay inside the image assurance directory."
+    assert eq(count(filter($browserConfiguration.plan.routes, "route", eq($route.path, $diagnosticRoute))), 0)
+      otherwise "REGISTER-008: Duplicate browser route."
+  port record.put { record = $browserConfiguration.plan; key = "routes"; value = append($browserConfiguration.plan.routes, map($registrationRequest.browserRoutes, "route", { path = $route; skip = "#main"; next = null })) } → browserPlan
+  port record.put { record = $browserConfiguration; key = "plan"; value = $browserPlan } → browserConfiguration
+  port record.put { record = $browserConfiguration; key = "scope"; value = "Declared reader routes plus five Questions image diagnostics and two deliberate counterexamples. Chromium at desktop, two equivalent reflow widths and increased text spacing. Images have a separate algebra-owned assurance report; artistic cropping remains visual review." } → browserConfiguration
+  port json.stringify { value = $browserConfiguration; space = 2 } → browserText
+  let changes = append($changes, list({ file = "source/assurance/reading-experience.json"; beforeSha256 = $browserBefore.sha256; text = concat($browserText, "\n") }))
+  when not(eq(count(or(at($registrationRequest, "changes"), list())), 0)):
+    let previousContract = $contract
+    let contract = $nextContract
+    let request = { protocol = "worldwright/authoring-proposal/1"; apply = $registrationRequest.apply; changes = $registrationRequest.changes }
+    call author.prepare
+    let changes = append($changes, $result.changes)
+    let contract = $previousContract
+  let request = $registrationRequest
+  assert eq(count(distinct(map($changes, "change", $change.file))), count($changes))
+    otherwise "REGISTER-009: A source or control has more than one planned write."
+  let result = { changes = $changes; files = map($changes, "change", $change.file); evidence = list({ kind = "registered-readable-source"; source = $sourceFile; output = $outputFile; frontend = $frontendFile; profileSha256 = $profileHash; nativeMechanisms = "existing build and workshop profiles only" }) }

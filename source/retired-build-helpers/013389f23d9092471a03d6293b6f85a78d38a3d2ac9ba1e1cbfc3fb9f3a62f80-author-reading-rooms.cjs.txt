@@ -1,0 +1,188 @@
+const fs=require('fs');
+const read=p=>JSON.parse(fs.readFileSync(p,'utf8')),write=(p,v)=>fs.writeFileSync(p,JSON.stringify(v,null,2)+'\n');
+const el=(tag,children=[],attrs={})=>({tag,attrs,children:Array.isArray(children)?children:[children]}),p=text=>el('p',text),a=(href,text,attrs={})=>el('a',text,{href,...attrs});
+const palettes={
+ dad:{bg:'#fff6ec',text:'#44372e',muted:'#6c584b',accent:'#88532c',action:'#28626a',hover:'#1b4e55',surface:'#fffdfa',wash:'#f4e9d8',line:'#ddceba',edge:'#b18250',glow:'#efc69166'},
+ sourcerer:{bg:'#f8f5ff',text:'#34334c',muted:'#5e586e',accent:'#814b72',action:'#5c457f',hover:'#44315f',surface:'#fffdfd',wash:'#eee7f6',line:'#d6cce2',edge:'#a16e98',glow:'#dfbfe866'},
+ author:{bg:'#faf6ed',text:'#333c33',muted:'#596351',accent:'#77602e',action:'#435e40',hover:'#30452e',surface:'#fffdf7',wash:'#ececdb',line:'#d1d3bb',edge:'#9b8850',glow:'#d4ddb566'}
+};
+const roomDefinitions=[
+ {
+  key:'dad',label:'Dad',slug:'being-here-as-dad',title:'Being here is part of the work.',deck:'On attention, boundaries, play and repair as Dad.',introHeading:'A person before a problem.',
+  copy:'What does it mean to be here as Dad? Begin with attention, make room for another will, and stay willing to repair the moments I get wrong.',
+  pathNote:'Follow attention into presence, boundaries into room to grow, and an imperfect moment into the work of repair.',
+  question:'What does it mean to be here as Dad?',teaser:'The work includes listening, protection, play and letting a child become someone I cannot script. A personal essay about the kind of presence I want to offer.',
+  alt:'An imagined coastal verandah, where an adult and a child examine a shell beside a wooden boat and everyday tools.',
+  kickers:['01 / ATTENTION & PRESENCE','02 / BOUNDARIES & GROWTH','03 / RETURN & REPAIR'],
+  opening:[
+   'I can be busy doing things for a child and still miss the person asking for my attention. The question I want to keep near is small enough to belong in an ordinary day: am I here with you, or only managing what happens next?',
+   'Being Dad gives care a particular responsibility. There is power in being the adult: the ability to decide, explain, protect, hurry, refuse. I want that power to help another person grow a life of their own. These are commitments I want to practise, with room to notice where my actions fall short.'
+  ],
+  sections:[
+   ['attention','Be here before solving it.',[
+    'There is a difference between hearing the outline of a difficulty and understanding what it is like for the person living it. I want to leave a little room between the first explanation I form and the answer I give.',
+    'That can mean putting something down, asking another question or letting a silence last. It can also mean joining what has caught a child’s attention without needing it to become useful. A shell, a drawing or a half-built thing can be worth our time before it becomes a lesson.',
+    'Attention is not a performance of endless availability. Work, tiredness and other responsibilities are real. I can be honest about a limit and make a promise I can keep: I cannot do this now; here is when I will come back. The return matters as much as the promise.'
+   ]],
+   ['boundaries','Let protection make room for growth.',[
+    'A child’s growing will belongs in the relationship. I do not want agreement with me to become the measure of whether they are good, safe to love or worth hearing. Disagreement can be something we learn to handle together.',
+    'There are still boundaries to hold. Protecting someone, stopping harm and accepting the responsibility to decide can be part of care. The question is whether a boundary serves the person and the situation, or mainly protects my convenience, pride or need to be obeyed.',
+    'When I can offer a real choice, I want it to be real. When I cannot, I should say so without disguising an instruction as a question. Room to grow depends partly on knowing which choices are actually open.'
+   ]],
+   ['play','Leave some of life unmeasured.',[
+    'I do not want every shared hour to carry an improvement target. Play, wandering, making something peculiar and laughing at a joke that goes nowhere can belong to a good life without proving a result.',
+    'My interest in systems makes this a useful question to keep asking. A plan can help me remember what matters, but the plan should remain answerable to the people it is meant to serve. A child is not a project whose value appears in a progress report.',
+    'I want curiosity to have room to surprise both of us. Sometimes the better next step is to follow the question a little further instead of turning it into the answer I had prepared.'
+   ]],
+   ['repair','Return after getting it wrong.',[
+    'The difficult test of care often arrives after an impatient answer or a promise I have failed to keep. I want repair to begin with what I actually did, rather than a long account of why I meant well.',
+    'An apology should not make a child responsible for making me feel better. I can name the action, hear its effect and say what I will try to change. Forgiveness cannot be demanded as proof that the apology worked.',
+    'Repair also needs something beyond a sentence. A kept commitment, a changed habit or a boundary that becomes clearer gives the words a place in what follows. I can return without pretending that the difficult moment never happened.'
+   ]],
+   ['growing','Help a life become its own.',[
+    'I want to offer belonging that leaves room for difference: interests I do not share, questions I cannot answer and a future I cannot author on someone else’s behalf. Care can prepare a person to choose without trying to choose their whole life for them.',
+    'The same care needs to reach the wider household. My responsibilities sit among other people’s needs, limits and relationships. Being Dad is a particular role in that shared life, with a duty to listen beyond my own account of it.',
+    'The question I want to return to is practical: what would make my care more dependable here? Sometimes it is attention; sometimes a protective no; sometimes an apology; sometimes the simple pleasure of being together.'
+   ]]
+  ],
+  practiceTitle:'A question for an ordinary moment',practice:'Before deciding what to do, ask: what needs protection, what room can I give, and what promise can I actually keep?',
+  links:[['/worlds/dad/questions.html','Stay with a personal question →'],['/the-field/','Explore a situation in The Field →']],
+  sourceIntro:'This essay follows the corpus’s philosophical questions about care, attention, power and correction. The examples are invitations to reflection, rather than accounts of a particular child or family event.',
+  sources:[['/worlds/dad/places/care.html','Remember to care.','Begin with the person who needs attention.'],['/worlds/dad/places/listening.html','Listening and another point of view','Leave room to hear an account beyond my own.'],['/worlds/dad/places/restraint.html','Restraint and responsibility','Ask whose room to act a boundary or restraint protects.'],['/worlds/dad/places/revision.html','Revision and returning','Make correction part of what happens next.']]
+ },
+ {
+  key:'sourcerer',label:'Sourcerer',slug:'make-the-magic-answerable',title:'Make the magic answerable.',deck:'On building things people can understand, question and change.',introHeading:'Wonder, with its workings in view.',
+  copy:'How does an idea become something people can inspect, use and change? Follow observation into explanation, permission into action, and a mistake into repair.',
+  pathNote:'Follow the work from evidence to explanation, from permission to action, and from a changed system to a way back.',
+  question:'What do I owe the people who use what I build?',teaser:'Making something possible is the beginning. The deeper work is to keep its meaning, authority and consequences visible to the people living with it.',
+  alt:'An imagined observatory and open workshop overlooking a mountain valley beneath a carefully drawn, star-filled sky.',
+  kickers:['01 / EVIDENCE & EXPLANATION','02 / AUTHORITY & PERMISSION','03 / MEMORY & CORRECTION'],
+  opening:[
+   'I like the moment an idea becomes something you can use: a description turns into a page, a question becomes an experiment, a small tool removes a difficulty. There is wonder in that transition. I want the wonder to survive a closer look.',
+   'Sourcerer is the name for this side of my work. It brings curiosity about the world together with the craft of making systems. The question beneath both is what would let another person understand the work well enough to question it, use it responsibly and change it.'
+  ],
+  sections:[
+   ['understanding','Start with the distinction that matters.',[
+    'Before building an answer, I need to be clear about the question. What did we observe? What are we trying to make possible? Which part of the explanation is supplied by evidence, and which part have I chosen?',
+    'A model is useful partly because it leaves things out. I want those omissions to remain visible beside its results. A neat diagram, a persuasive story or a familiar mathematical form can help me think without establishing that the world behaves that way.',
+    'The same discipline matters in software. A screen may look complete while the meanings beneath it are still vague. Naming the people, objects, decisions and relationships gives us something more specific to inspect than an attractive interface.'
+   ]],
+   ['meaning','Make meaning something people can work with.',[
+    'The process algebra is a way of describing actions and how they compose: what an action receives, what it changes, which conditions it requires and what follows. It lets a definition do practical work instead of remaining a comment beside unrelated code.',
+    'That does not remove the need for judgment. Someone still chooses what a term means and whether the definition is suitable. I want those choices to have names, sources and versions, so another person can ask what has been assumed and what an edit would alter.',
+    'The aim is a closer relationship between what we say a system does and what it actually executes. When that relationship is incomplete, the missing connection should be visible. A declaration on its own is not a deployed capability.'
+   ]],
+   ['permission','Ask who is allowed to make the change.',[
+    'Being able to run an operation does not settle whether I am entitled to run it. A proposed change needs a person or role with the relevant authority, a clear scope and a chance to inspect what will happen.',
+    'AI assistance makes this distinction especially useful. A suggestion can help someone understand a matter without gaining permission to act for them. Producing fluent text, finding a plausible plan and authorising its consequences are different steps.',
+    'A refusal can be a useful result. A system that says the source changed, the authority is absent or the proposal exceeds its scope is giving us information we can act on. I would rather preserve that boundary than make apparent success depend on silently crossing it.'
+   ]],
+   ['checking','Let a check say exactly what it established.',[
+    'A passing test should have a readable scope. It may show that a calculation reproduces, that a document preserves its structure or that a request was checked against a particular rule. Those are useful achievements. Their names should match their reach.',
+    'Reproducing a result does not make its assumptions true. An internally consistent account can still describe the wrong situation. A prototype can demonstrate an operation while leaving reliability, accessibility or real-world usefulness unresolved.',
+    'I want adverse results to remain part of the record. A counterexample, a failed comparison or a missing source can save more work than another convincing demonstration. The explanation should remain able to change when the evidence does.'
+   ]],
+   ['repair','Design for the moment something goes wrong.',[
+    'Change needs memory. I want to be able to ask which definition was active, what someone proposed, who accepted it and what the system actually did. A useful history preserves differences instead of compressing them into a story in which everything was always intended.',
+    'Replay and undo also need honest meanings. Replaying a recorded sequence can reproduce the sequence without reproducing a person’s reasons. Reversing a local edit does not necessarily reverse an email already sent, a disclosure already made or someone else’s lost time.',
+    'The engineering question is therefore specific: what can be reversed, what needs a new decision, and what requires repair outside the software? I want that question in the design before the first confident click.'
+   ]],
+   ['capability','Leave people with capability they can keep.',[
+    'A good tool should make its user more capable of understanding and acting. That asks for readable explanations, useful exports, inspectable definitions and a way to continue when the original maker is absent.',
+    'Temple, Sourcery, Worldwright and the other projects explore parts of that ambition. Their individual maturity still matters. The wider purpose does not let me describe an intended connection as a completed service.',
+    'The magic I want to make is something a person can live with: useful enough to matter, legible enough to question and bounded enough that helping does not quietly become taking over.'
+   ]]
+  ],
+  practiceTitle:'A question before the next build',practice:'What does this operation mean, who may authorise it, what evidence supports it, and what happens if it is wrong?',
+  links:[['/sourcery/','Explore Sourcery →'],['/inspection/','Inspect the work →']],
+  sourceIntro:'This essay draws on the corpus’s separation of authored meaning, executable definitions, source evidence and admitted authority. The linked projects and checks retain their own stated scope.',
+  sources:[['/temple/','Temple: rules and authority','The execution foundation and its boundaries.'],['/sourcery/','Sourcery: explicit descriptions','The authoring platform and the process algebra.'],['https://github.com/aaron-alderman/aaronalderman-com/blob/main/source/authoring/README.md','The site’s authoring contract','How source changes, validation and acceptance are distinguished.'],['/assurance/navigation-layout/','Navigation and layout assurance','A concrete, limited check rather than a blanket claim of quality.']]
+ },
+ {
+  key:'author',label:'Author',slug:'a-world-someone-else-can-enter',title:'A world someone else can enter.',deck:'On attention, imagination and the responsibility of shaping a story.',introHeading:'Make room for the reader.',
+  copy:'What does a story owe the lives it touches? Begin with attention, give imagined possibilities a shape, and leave room for a reader’s own understanding.',
+  pathNote:'Follow attention toward a first sentence, possibility into an imagined world, and a finished draft back into revision.',
+  question:'What does a story owe the lives it touches?',teaser:'A story can offer another way of seeing. I want to shape that invitation with care for the people represented and room for the person who reads.',
+  alt:'An imagined writer’s notebook and pen beside a warm brass lamp, with rain on a window overlooking a green garden.',
+  kickers:['01 / ATTENTION & WITNESS','02 / POSSIBILITY & WORLD','03 / REVISION & RESPONSIBILITY'],
+  opening:[
+   'A story begins with a choice about what to notice. A gesture can become an opening; a silence can change a scene; a detail that looked incidental can ask to be seen again. I want to stay with that attention before deciding what the story must mean.',
+   'The Author side of this world is about shaping an experience another person can enter. It includes the pleasure of making things up and the responsibility of knowing when invention, interpretation and an account of real events need different labels.'
+  ],
+  sections:[
+   ['attention','Attend to a life before turning it into a story.',[
+    'A person can exceed the role a plot offers them. I want to ask what a scene leaves outside the frame: another point of view, an ordinary need, a relationship that does not exist simply to advance the central character.',
+    'When a story draws on real life, the ability to describe someone does not give me unlimited authority over their account. I need to consider what is mine to tell, what requires permission and where a faithful uncertainty belongs.',
+    'I can also choose a more general scene when a lesson does not need a private history. That distance can give a reader room to recognise something without requiring them to inherit the author’s circumstances or conclusions.'
+   ]],
+   ['imagination','Give the invented world something to resist.',[
+    'Imagination can make room for a possibility that ordinary habits have hidden. A world becomes more interesting when its relationships and consequences have enough shape that an easy answer cannot resolve everything.',
+    'I want the work to keep track of what its choices cost. A character’s action should meet the world and the other people in it. A beautiful setting can deepen that encounter when it offers something to explore, rather than only decorating an explanation.',
+    'Fiction can make an emotional or ethical possibility intelligible. Its power to move a reader does not turn an invented event into historical evidence. Naming the kind of work being offered protects both imagination and truth.'
+   ]],
+   ['reader','Invite a reader without assigning them a private story.',[
+    'A reader brings experiences I cannot know. I can offer a question, a scene or a change in perspective without telling them what they secretly fear or what a chosen route proves about their character.',
+    'I like the possibility that the same scene can mean something different on return. An earlier detail can acquire weight because the reader has encountered another relationship or point of view. The story can invite that recognition and leave its personal meaning with them.',
+    'A branching world makes this responsibility more visible. Choosing a route should give a reader a meaningful way to explore. It should not disguise an assessment of their worth as a playful interaction.'
+   ]],
+   ['play','Let beauty and humour have room to work.',[
+    'A story does not need to explain every image immediately. A small joke can release pressure; an odd detail can invite a second look; a quiet stretch can let the reader’s attention settle somewhere the argument did not predict.',
+    'I want beauty to be part of that invitation. Colour, rhythm, space and movement can help a world feel inhabited. They also need to serve the reading: a sentence should remain readable, an action recognisable and an unfamiliar idea approachable.',
+    'The pleasure of the work can carry a serious question without turning every encounter into instruction. Sometimes the reader needs a little space to discover the connection themselves.'
+   ]],
+   ['revision','Let revision change what I thought the story was.',[
+    'Revision can begin with a sentence and reach the frame around it. Whose account became too convenient? Which consequence did I avoid? Does the scene invite attention, or keep pressing the reader toward the response I wanted?',
+    'I want to distinguish what a reader actually says from my interpretation of their response. Disagreement may reveal a weakness, a different experience or a live tension the story should preserve. It does not have to be converted into a single measure of success.',
+    'A faithful draft can become clearer without becoming less particular. Sometimes the better change is to remove a claim I cannot support, leave an uncertainty visible or allow a character more room than the first outline gave them.'
+   ]],
+   ['worlds','Compose a world that remains open.',[
+    'Worldwright is the developing platform for this kind of storytelling: a composition whose scenes, relationships and routes can be inspected. The present site is one evolving use of that idea, with working examples and unfinished joins.',
+    'The ambition is for an author to shape a coherent world while a reader finds a journey within it. Reusable structure can support that freedom, provided the structure does not mistake a record of navigation for an account of someone’s inner life.',
+    'The question I want beside the next draft is generous and exacting: what can another person discover here that I have made room for, but have not already decided on their behalf?'
+   ]]
+  ],
+  practiceTitle:'A question beside the next draft',practice:'Whose point of view is missing, what kind of truth am I claiming, and where can the reader make a connection of their own?',
+  links:[['/worldwright/','Explore Worldwright →'],['/worlds/author/questions.html','Stay with an author’s question →']],
+  sourceIntro:'This essay follows the corpus’s distinction between a composed world and a reader’s journey, along with its questions about attention, representation and revision. It offers an authoring direction, not a claim about any reader’s private state.',
+  sources:[['/worldwright/','Worldwright: the developing storytelling platform','World, composition and reader journey.'],['/worlds/author/places/representation.html','What a representation leaves out','The frame is a choice that can be examined.'],['/worlds/author/places/texts.html','Reading and interpretation','Leave room to distinguish a text from a reading of it.'],['/worlds/author/places/revision.html','Revision as part of the work','An opportunity to reconsider the frame, not only the phrasing.']]
+ }
+];
+function makeRoom(d){
+ const url='/writing/'+d.slug+'/',image='/assets/identities/optimized/'+d.key+'-questions-v2.webp';
+ const content=[...d.opening.map(p),el('nav',[el('p','IN THIS ESSAY',{class:'eyebrow'}),el('ol',d.sections.map(([id,title])=>el('li',a('#'+id,title))))],{'aria-label':'In this essay',class:'faith-essay-contents'}),...d.sections.map(([id,title,paragraphs],i)=>el('section',[el('p',String(i+1).padStart(2,'0'),{class:'faith-section-number','aria-hidden':'true'}),el('h2',title),...paragraphs.map(p)],{id,class:'faith-essay-section'})),el('aside',[el('h2',d.practiceTitle),p(d.practice),el('div',d.links.map(([href,label],i)=>a(href,label,{class:i?'faith-secondary':'faith-button'})),{class:'faith-essay-actions'})],{class:'faith-practice-note'}),el('section',[el('p','SOURCES & FURTHER READING',{class:'eyebrow'}),el('h2','The threads behind this essay.'),p(d.sourceIntro),el('ol',d.sources.map(([href,label,note])=>el('li',[el('h3',a(href,label)),p(note)]))),p(a('/worlds/'+d.key+'/threads.html','Return to the '+d.label+' reading paths ←'))],{id:'sources',class:'faith-essay-sources'})];
+ const body=el('article',[el('header',[el('p','AARON ALDERMAN / '+d.label.toUpperCase(),{class:'eyebrow'}),el('h1',d.title),el('p',d.deck,{class:'faith-essay-deck'}),el('p','A personal essay · A working reflection, open to correction',{class:'faith-meta'}),el('img',[],{src:image,alt:d.alt,width:768,height:432,decoding:'async',class:'faith-essay-art'})],{class:'faith-essay-header'}),el('div',content,{class:'faith-essay-body'})],{class:'reading-essay','data-reading-room':d.key});
+ const teaser=el('section',[el('div',[el('p','BEGIN WITH A PERSONAL ESSAY',{class:'eyebrow'}),el('h2',a(url,d.question)),p(d.teaser),el('div',[a(url,'Read: '+d.title.replace(/\.$/,'')+' →',{class:'faith-button'}),el('span','A personal essay · '+d.label,{class:'faith-meta'})],{class:'faith-feature-actions'})]),el('img',[],{src:image,alt:'',width:768,height:432,loading:'lazy',decoding:'async'})],{class:'faith-feature','aria-label':'Begin with a '+d.label+' essay'});
+ return {key:d.key,label:d.label,introHeading:d.introHeading,pathNote:d.pathNote,light:'reading-'+d.key,palette:palettes[d.key],teaser,essay:{title:d.title+' — Aaron Alderman',description:d.deck+' '+d.teaser,canonical:'https://aaronalderman.com'+url,path:url.slice(1)+'index.html',image:image.slice(1),imageAlt:d.alt,body}};
+}
+const faith=read('source/faith/reading.json'),styles=structuredClone(faith.styles);
+const defaults={bg:'#f8f5ec',text:'#293d32',muted:'#5a695e',accent:'#76551e',action:'#35573f',hover:'#25452f',surface:'#fffdf7',wash:'#edf1e3',line:'#d6ddc9',edge:'#ad8d48',glow:'#e7dfbf66'};
+const colorMap={bg:['#f8f5ec','#fbf9f0'],text:['#293d32','#3b5140'],muted:['#5a695e','#526253','#5c6757','#4b5d50','#5c695d'],accent:['#76551e','#78653d','#806221'],action:['#35573f','#3a5f45','#466447','#46684f','#53694c'],hover:['#25452f'],surface:['#fffdf7','#fffef8'],wash:['#edf1e3','#f0f3e8','#edf0e5','#f3edda'],line:['#d6ddc9','#d9ddcf','#d8ddce','#d9ddcc','#cdd6bf','#d2dcc4','#d1d9c4','#d6d6ba','#cbd6bf','#d1d9c4','#e2e6d8','#a6b59a'],edge:['#ad8d48','#d8c99b','#a99c69','#a78a43','#ac955c80']};
+const replaceColors=s=>{for(const [key,colors]of Object.entries(colorMap))for(const color of colors)s=s.replaceAll(color,'var(--reading-'+key+')');return s;};
+for(const r of styles){r.selector=r.selector.replaceAll('.faith-threads',':is(.faith-threads,.reading-room)').replace(/\.faith-essay(?![-\w])/g,':is(.faith-essay,.reading-essay)');for(const d of r.declarations){d.value=replaceColors(d.value);if(d.property==='background'&&d.value.startsWith('radial-gradient'))d.value='radial-gradient(ellipse at 85% 6%,var(--reading-glow),transparent 42%),linear-gradient(140deg,var(--reading-bg),var(--reading-wash))';if(d.value==='#fbf9f1ed')d.value='var(--reading-bg)';}}
+styles[0].selector='body:has(.faith-threads),body[data-light="faith-reading"],body:has(.reading-room),body:has(.reading-essay)';
+styles[0].declarations.unshift(...Object.entries(defaults).map(([key,value])=>({property:'--reading-'+key,value})));
+for(const [key,palette]of Object.entries(palettes))styles.push({id:'reading.palette.'+key,selector:`body:has(.reading-room[data-reading-room="${key}"]),body:has(.reading-essay[data-reading-room="${key}"])`,context:null,declarations:Object.entries(palette).map(([name,value])=>({property:'--reading-'+name,value}))});
+styles.push({id:'reading.entry.heading',selector:'.reading-essay .faith-practice-note h2',context:null,declarations:[{property:'font-size',value:'26px'}]});
+const rooms=roomDefinitions.map(makeRoom);fs.mkdirSync('source/reading',{recursive:true});write('source/reading/rooms.json',{protocol:'worldwright/reading-rooms/1',scope:'Three personal reflective essays and identity-specific presentation, with shared rendering and no invented autobiographical incidents.',rooms,styles});
+delete faith.styles;write('source/faith/reading.json',faith);
+const mp='algebra/publication.process.json',m=read(mp),q=m.queries;
+q['reading.rooms.load']=[{port:'file.copy',args:{path:'source/reading/rooms.json'},into:'_'},{port:'file.read',args:{path:'source/reading/rooms.json'},into:'readingRoomText'},{port:'json.parse',args:{text:'$readingRoomText'},into:'readingData'},{let:'readingRooms',value:['append',['list',{key:'christian',label:'Christian',introHeading:'A faith I can live, and a reading I can question.',pathNote:'Move from interpretation into power, hope and the people close at hand. Each path has three short readings.',light:'faith-reading',palette:defaults,teaser:'$faithReading.teaser',essay:{title:'$faithReading.title',description:'$faithReading.description',canonical:'$faithReading.canonical',path:'$faithReading.path',body:'$faithReading.body',image:'assets/identities/optimized/christian-questions-v2.webp',imageAlt:'An imagined open Bible beneath an olive tree in warm morning light.'}}],'$readingData.rooms']}];
+q['publication.build'].splice(q['publication.build'].findIndex(s=>s.call==='faith.reading.load')+1,0,{call:'reading.rooms.load'});
+const build=q['faith.reading.build'];const registration=build.filter(s=>s.let==='surfaceWritePath'||s.call==='assurance.surface.register');
+q['faith.reading.build']=[{each:'$readingRooms',as:'readingRoom',steps:[{let:'prefix',value:'../../'},{let:'pageTitle',value:'$readingRoom.essay.title'},{let:'description',value:'$readingRoom.essay.description'},{let:'canonical',value:'$readingRoom.essay.canonical'},{let:'light',value:'$readingRoom.light'},{let:'body',value:'$readingRoom.essay.body'},{call:'publication.document'},...registration.map(s=>s.let?{...s,value:'$readingRoom.essay.path'}:s),{port:'file.write',args:{path:'$readingRoom.essay.path',text:['concat','<!doctype html>\n','$result']},into:'_'}]},{let:'prefix',value:''}];
+function visit(n,f){if(!n||typeof n!=='object')return;f(n);Object.values(n).forEach(v=>Array.isArray(v)?v.forEach(x=>visit(x,f)):visit(v,f));}
+visit(q['publication.styles'],n=>{if(Array.isArray(n)){for(let i=0;i<n.length;i++)if(n[i]==='$faithReading.styles')n[i]='$readingData.styles';}});
+const threads=q['identity.threads.view'],tree=threads.find(s=>s.let==='result').value;
+threads.unshift({let:'activeReading',value:['at',['filter','$readingRooms','room',['eq','$room.key',['one','$journeyIdentity','key']]],0]},{assert:'$activeReading',message:'READING-ROOM-001: Every identity must have an authored opening essay.'});
+for(let i=0;i<tree.length;i++){const v=tree[i];if(Array.isArray(v)&&v[0]==='if'&&v[2]==='$faithReading.teaser')tree[i]='$activeReading.teaser';if(Array.isArray(v)&&v[0]==='if'&&v[2]?.tag==='div'&&JSON.stringify(v[2]).includes('faith-paths-heading')){const heading=v[2];visit(heading,n=>{if(n.attrs?.class==='faith-paths-note')n.children=['list','$activeReading.pathNote'];});tree[i]=heading;}}
+visit(tree,n=>{if(n.tag==='article'&&n.attrs?.class==='identity-thread'){for(let i=0;i<n.children.length;i++){const v=n.children[i];if(Array.isArray(v)&&v[0]==='if'&&['faith-thread-art','faith-thread-kicker'].includes(v[2]?.attrs?.class))n.children[i]=v[2];}}if(n.tag==='ol')n.attrs.role='list';});
+const wrapper=threads.at(-1);wrapper.value={tag:'div',attrs:{class:['if',['eq','$journeyIdentity','identity.christian'],'faith-threads','reading-room'],'data-reading-room':'$activeReading.key'},children:['list','$result']};
+visit(q['identity.journey.intro'],n=>{if(n.tag==='h2')n.children=['list',['if',['eq','$journeyKind','threads'],'$activeReading.introHeading','A perspective on shared terrain.']];});
+q['publication.document'].splice(2,0,{let:'documentReading',value:['at',['filter','$readingRooms','room',['eq','$room.essay.canonical','$canonical']],0]},{let:'documentThreadReading',value:['if',['and','$documentWorld','$documentIsThread'],['at',['filter','$readingRooms','room',['eq','$room.key',['one','$documentWorld','key']]],0],null]});
+visit(q['publication.document'],n=>{if(n.tag!=='meta')return;const prop=n.attrs.property??n.attrs.name;if(['og:image','twitter:image','og:image:alt','twitter:image:alt','og:type','theme-color'].includes(prop)){let old=n.attrs.content;if(Array.isArray(old)&&old[0]==='if'&&JSON.stringify(old[1]).includes('faith-with-open-hands'))old=old[3];if(['og:image','twitter:image'].includes(prop))n.attrs.content=['if','$documentReading',['concat','https://aaronalderman.com/','$documentReading.essay.image'],old];if(['og:image:alt','twitter:image:alt'].includes(prop))n.attrs.content=['if','$documentReading','$documentReading.essay.imageAlt',old];if(prop==='og:type')n.attrs.content=['if','$documentReading','article',old];if(prop==='theme-color')n.attrs.content=['if','$documentReading','$documentReading.palette.bg',['if','$documentThreadReading','$documentThreadReading.palette.bg',old]];}});
+write(mp,m);
+let facts=fs.readFileSync('source/hierarchy.rel','utf8');for(const d of roomDefinitions){facts=facts.replace(new RegExp('\\("identity\\.'+d.key+'", "threadsTitle", "[^"\\n]+"\\)'),`("identity.${d.key}", "threadsTitle", ${JSON.stringify(d.title)})`).replace(new RegExp('\\("identity\\.'+d.key+'", "threadsCopy", "[^"\\n]+"\\)'),`("identity.${d.key}", "threadsCopy", ${JSON.stringify(d.copy)})`);for(let i=0;i<3;i++)facts+=`\n("identity.${d.key}.thread.${i}", "image", "assets/identities/optimized/${d.key}-${['questions','atlas','threads'][i]}-v2.webp")\n("identity.${d.key}.thread.${i}", "kicker", ${JSON.stringify(d.kickers[i])})\n`;facts+=`\n("reading.essay.${d.key}", "isa", "StandalonePage")\n("reading.essay.${d.key}", "canonical", "https://aaronalderman.com/writing/${d.slug}/")\n`;}
+fs.writeFileSync('source/hierarchy.rel',facts);fs.writeFileSync('source/expedition.rel',fs.readFileSync('source/expedition.rel','utf8').replace(/("stylesheetVersion", ")[^"]+("\))/,'$1reading-rooms-1$2'));
+const {parseRel}=require('../bootstrap/ports/rel-codec.cjs');let front=fs.readFileSync('source/front-doors.rel','utf8');const oldIndex=parseRel(front).find(f=>f.s==='scroll.index'&&f.p==='tree').o,index=JSON.parse(oldIndex);for(const room of rooms)index.children.splice(index.children.length-1,0,el('article',[el('p',room.label.toUpperCase()+' / A PERSONAL ESSAY',{class:'mission-eyebrow'}),el('h2',a('/'+room.essay.path.replace('index.html',''),room.essay.title.replace(' — Aaron Alderman',''))),p(room.essay.description),a('/'+room.essay.path.replace('index.html',''),'Read the essay →',{class:'mission-text-link'})],{class:'writing-feature'}));front=front.replace('("scroll.index", "tree", '+JSON.stringify(oldIndex)+')','("scroll.index", "tree", '+JSON.stringify(JSON.stringify(index))+')');fs.writeFileSync('source/front-doors.rel',front);
+// A repeated source-row lookup belongs inside the existing uniqueness guard.
+const hp='algebra/hierarchy.process.json',h=read(hp),scan=h.queries['hierarchy.inspect.build'].find(s=>s.fold==='$hItemRows'),lookup=scan.steps.find(s=>s.let==='hTargetGroup');scan.steps.splice(scan.steps.indexOf(lookup),1);scan.steps.find(s=>s.when).then.unshift(lookup);write(hp,h);

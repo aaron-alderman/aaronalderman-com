@@ -1,0 +1,1 @@
+const fs=require('fs');let files=['index.html','gate.html','atlas.html','questions.html','places/personal.html','creator-studio/index.html'];for(const f of files){const s=fs.readFileSync('dist/'+f,'utf8');console.log(f,(s.match(/class="footer-stewardship"/g)||[]).length);}console.log('paths', (fs.readFileSync('dist/gate.html','utf8').match(/class="corpus-door"/g)||[]).length);

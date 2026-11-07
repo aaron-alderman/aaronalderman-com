@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const before=JSON.parse(fs.readFileSync('.build/browser-evidence-42394118012/observations.json'));
+const after=JSON.parse(fs.readFileSync(process.argv[2]));
+const targets=[['temple/index.html','[id="cmd-title"]'],['claimipedia/index.html','[id="claimipedia-title"]']];
+const compared=[];
+for(const [route,path]of targets)for(const profile of ['desktop','zoom-200-equivalent','zoom-400-equivalent']){
+ const a=before.snapshots.find(s=>s.route===route&&s.profile===profile).blocks.find(b=>b.path===path),b=after.snapshots.find(s=>s.route===route&&s.profile===profile).blocks.find(b=>b.path===path);assert.ok(a&&b);
+ for(const field of ['text','fontSize','lineHeight','letterSpacing','wordSpacing','paragraphGap'])assert.deepEqual(b[field],a[field],route+' '+profile+' '+field);
+ for(const field of ['left','top','width','height'])assert.ok(Math.abs(a.rect[field]-b.rect[field])<=.05,route+' '+profile+' '+field+' changed');
+ compared.push({route,profile,normalHeadingMetrics:'preserved'});
+}
+console.log(JSON.stringify({beforeRun:before.provenance.run,afterRun:after.provenance.run,compared},null,2));

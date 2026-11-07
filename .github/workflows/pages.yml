@@ -19,15 +19,47 @@ jobs:
       artifact_name: ${{ steps.package-name.outputs.name }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Replay authoring provenance from the preceding revision
+        env:
+          AUTHORING_BASE: ${{ github.event.before }}
+        shell: bash
+        run: |
+          test -n "$AUTHORING_BASE"
+          test "$AUTHORING_BASE" != 0000000000000000000000000000000000000000
+          mkdir -p .build/provenance/trusted
+          git archive "$AUTHORING_BASE" | tar -x -C .build/provenance/trusted
+          mkdir -p .build/provenance/trusted/.build/provenance/candidate
+          git archive "$GITHUB_SHA" | tar -x -C .build/provenance/trusted/.build/provenance/candidate
+          git -c core.quotepath=true diff --raw --no-abbrev --no-renames --no-ext-diff "$AUTHORING_BASE" "$GITHUB_SHA" > .build/provenance/trusted/.build/provenance/changes.raw
+          node .build/provenance/trusted/tooling/author.mjs .build/provenance/trusted/source/authoring/requests/provenance-selftest.request
+          node .build/provenance/trusted/tooling/author.mjs .build/provenance/trusted/source/authoring/requests/provenance-gate.request > .build/provenance/replay.json
+      - name: Retain the provenance replay
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authoring-provenance-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .build/provenance/replay.json
+          if-no-files-found: warn
       - name: Install declared verification dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Compile the algebra-owned publication
         run: npm run build
       - name: Observe rendered contrast, reflow and keyboard journeys
         run: node tooling/run-reading-browser-ci.mjs
+      - name: Verify Questions image observations through the algebra
+        run: node tooling/author.mjs source/authoring/requests/images-verify.request
+      - name: Retain image assurance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-assurance-${{ github.run_id }}-${{ github.run_attempt }}
+          path: tooling/assurance/image-evidence.json
+          if-no-files-found: warn
       - name: Retain raw browser observations and screenshots
         if: always()
         uses: actions/upload-artifact@v4

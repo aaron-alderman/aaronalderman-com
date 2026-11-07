@@ -69,6 +69,8 @@
     "source/the-field/correction-results.json"
   ],
   "grants": [
+    "digest.sha256",
+    "record.fromEntries",
     "value.describe",
     "document.observe",
     "document.entries",
@@ -88,6 +90,7 @@
     "checkout.stage"
   ],
   "inputDirectories": [
+    "dist",
     "bootstrap",
     "algebra",
     "source",
@@ -185,7 +188,8 @@
     ],
     "authoringPolicy": [
       "algebra/authoring.process.json",
-      "source/authoring/workflow.encounter"
+      "source/authoring/workflow.encounter",
+      "source/assurance/image-verification.encounter"
     ],
     "mechanism": "tooling/author.mjs"
   },
@@ -249,6 +253,10 @@
     }
   },
   "processSources": [
+    {
+      "file": "source/assurance/image-verification.encounter",
+      "frontend": "bootstrap/frontends/authoring-workflow.json"
+    },
     {
       "file": "source/authoring/workflow.encounter",
       "frontend": "bootstrap/frontends/authoring-workflow.json"
