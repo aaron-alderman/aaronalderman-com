@@ -1,0 +1,2079 @@
+{
+  "protocol": "worldwright/catalogue-assurance-release/1",
+  "baseRevision": "20edb37de849c2bb1bc08bf624b4115126ade3e9",
+  "integratedRemote": "bc53ec0",
+  "authoring": [
+    {
+      "receipt": "catalogue-assurance-author-final",
+      "sha256": "f9e7a164dc9fc9cd3bd401a248478e7b62cf427d59c540f6a2b27dcd26e14b69",
+      "files": [
+        "algebra/publication.process.json",
+        "source/hierarchy.rel",
+        "source/expedition.rel"
+      ],
+      "commit": {
+        "files": [
+          {
+            "file": "algebra/publication.process.json",
+            "beforeSha256": "81f8ed0250967f90c1bb59b8f547af155c1d01a92e97977871771013b325c346",
+            "afterSha256": "ed449ee95b4c76dc06698b35a340b1ba1ba0750fd0004528d6ca5590d7df7cb3"
+          },
+          {
+            "file": "source/hierarchy.rel",
+            "beforeSha256": "09ae914b7d8fed72e56c4374048c676481012792c18c8655568da8eef50e7f51",
+            "afterSha256": "11da72b7444e027d8df4678ff5f67c5c821ff502d9f70bf6b92467b84bc93c4b"
+          },
+          {
+            "file": "source/expedition.rel",
+            "beforeSha256": "60e2ed04839671c26f1ed91b8bcf5b819698cbcca41623a56c5bb6bbdff2bdb3",
+            "afterSha256": "f18e5880eb267e2abe02cbfe38eab12b7f9b8e5939d4675dcf30fc163b0120d2"
+          }
+        ]
+      },
+      "contractSha256": "0bb150275b0bf23a87fcf298a5ccf3aeea33c77f3fad88af9667c7f839a3bab3",
+      "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7",
+      "checks": [
+        {
+          "command": [
+            "npm",
+            "ci",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund",
+            "--cache",
+            ".npm-cache"
+          ],
+          "status": 0,
+          "stdoutSha256": "786380e99df2ce9226683724a5bf0de6e373fea78486defb07f08d9c7b659139",
+          "stderrSha256": "c82c4bb27554d682b2b2139960af67bcb57d3a57adb3bdc429d489ff80ee7c89"
+        },
+        {
+          "command": [
+            "node",
+            "bootstrap/run.cjs",
+            ".",
+            "dist",
+            "bootstrap/site.json"
+          ],
+          "status": 0,
+          "stdoutSha256": "618b4cb15c38d3af7c17ffd5337cc6b45f26b3cd5ea765e4e35cdcb906fa79ea",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "command": [
+            "node",
+            "--test",
+            "reading.test.mjs",
+            "publication.test.mjs",
+            "algebra-publication.test.mjs",
+            "microsite-fidelity.test.mjs",
+            "microsite-publication.test.mjs",
+            "claimipedia-review.test.mjs",
+            "encounter-microsite.test.mjs",
+            "activity-layout.test.mjs",
+            "atlas.test.mjs",
+            "atlas-journey.test.mjs",
+            "authoring.test.mjs",
+            "reader-workshop-algebra.test.mjs",
+            "hierarchy.test.mjs",
+            "process-authoring.test.mjs",
+            "batch-process-authoring.test.mjs",
+            "authoring-workflow.test.mjs",
+            "document-inspection.test.mjs",
+            "expansion.test.mjs",
+            "expedition.test.mjs",
+            "workshop.test.mjs",
+            "microsite-process-authoring.test.mjs",
+            "microsite-publication-process-authoring.test.mjs",
+            "stylesheet-algebra.test.mjs",
+            "field-correction-article.test.mjs",
+            "html-escaping.test.mjs"
+          ],
+          "status": 0,
+          "stdoutSha256": "f8026c4c6ea0cb42ceb1fca70658fcb80c6bfd79dc4a381fde7da31c8bb56ee4",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "command": [
+            "node",
+            "tooling/verify-microsite-presentation.mjs",
+            "dist"
+          ],
+          "status": 0,
+          "stdoutSha256": "4265cf34e739107d1c00392150f82b5410af4ec1ffb9a761c286d0e5147e579b",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "receipt": "catalogue-assurance-refinement-result",
+      "sha256": "79be7610b06b56601c54cb8b7caa4dbe36477c4cb6375e964862cd693d1c5ad8",
+      "files": [
+        "algebra/publication.process.json",
+        "source/hierarchy.rel"
+      ],
+      "commit": {
+        "files": [
+          {
+            "file": "algebra/publication.process.json",
+            "beforeSha256": "ed449ee95b4c76dc06698b35a340b1ba1ba0750fd0004528d6ca5590d7df7cb3",
+            "afterSha256": "75306e8b8a48e62a18380f3c0bc3517bee1acd2ba76754f621dc8b4fabd67adb"
+          },
+          {
+            "file": "source/hierarchy.rel",
+            "beforeSha256": "11da72b7444e027d8df4678ff5f67c5c821ff502d9f70bf6b92467b84bc93c4b",
+            "afterSha256": "b89e4035cbed412fd9c0b25a8690033b8abe4c5a04d464886415687c07b1b6a3"
+          }
+        ]
+      },
+      "contractSha256": "0bb150275b0bf23a87fcf298a5ccf3aeea33c77f3fad88af9667c7f839a3bab3",
+      "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7",
+      "checks": [
+        {
+          "command": [
+            "npm",
+            "ci",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund",
+            "--cache",
+            ".npm-cache"
+          ],
+          "status": 0,
+          "stdoutSha256": "786380e99df2ce9226683724a5bf0de6e373fea78486defb07f08d9c7b659139",
+          "stderrSha256": "c82c4bb27554d682b2b2139960af67bcb57d3a57adb3bdc429d489ff80ee7c89"
+        },
+        {
+          "command": [
+            "node",
+            "bootstrap/run.cjs",
+            ".",
+            "dist",
+            "bootstrap/site.json"
+          ],
+          "status": 0,
+          "stdoutSha256": "618b4cb15c38d3af7c17ffd5337cc6b45f26b3cd5ea765e4e35cdcb906fa79ea",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "command": [
+            "node",
+            "--test",
+            "reading.test.mjs",
+            "publication.test.mjs",
+            "algebra-publication.test.mjs",
+            "microsite-fidelity.test.mjs",
+            "microsite-publication.test.mjs",
+            "claimipedia-review.test.mjs",
+            "encounter-microsite.test.mjs",
+            "activity-layout.test.mjs",
+            "atlas.test.mjs",
+            "atlas-journey.test.mjs",
+            "authoring.test.mjs",
+            "reader-workshop-algebra.test.mjs",
+            "hierarchy.test.mjs",
+            "process-authoring.test.mjs",
+            "batch-process-authoring.test.mjs",
+            "authoring-workflow.test.mjs",
+            "document-inspection.test.mjs",
+            "expansion.test.mjs",
+            "expedition.test.mjs",
+            "workshop.test.mjs",
+            "microsite-process-authoring.test.mjs",
+            "microsite-publication-process-authoring.test.mjs",
+            "stylesheet-algebra.test.mjs",
+            "field-correction-article.test.mjs",
+            "html-escaping.test.mjs"
+          ],
+          "status": 0,
+          "stdoutSha256": "dc97564605f5c7e5b293c36461e68da4283fe47f30b0b3103705c0c79b8393e7",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "command": [
+            "node",
+            "tooling/verify-microsite-presentation.mjs",
+            "dist"
+          ],
+          "status": 0,
+          "stdoutSha256": "4265cf34e739107d1c00392150f82b5410af4ec1ffb9a761c286d0e5147e579b",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "receipt": "catalogue-assurance-integrated-result",
+      "sha256": "3e72a675cb584214f63e7bee664ff072e7b16a15668efd42d64fd44d3b2a3260",
+      "files": [
+        "algebra/publication.process.json"
+      ],
+      "commit": {
+        "files": [
+          {
+            "file": "algebra/publication.process.json",
+            "beforeSha256": "75306e8b8a48e62a18380f3c0bc3517bee1acd2ba76754f621dc8b4fabd67adb",
+            "afterSha256": "7de070be1aad820c7d581cf7c31b518cee1ba9028d0fb231bb8b26a89a960ca6"
+          }
+        ]
+      },
+      "contractSha256": "0bb150275b0bf23a87fcf298a5ccf3aeea33c77f3fad88af9667c7f839a3bab3",
+      "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7",
+      "checks": [
+        {
+          "command": [
+            "npm",
+            "ci",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund",
+            "--cache",
+            ".npm-cache"
+          ],
+          "status": 0,
+          "stdoutSha256": "65c731cd02e19c79f6f5a3e84a4dd64a49acd6c47d2ee551d7cc9da191e8c96c",
+          "stderrSha256": "c82c4bb27554d682b2b2139960af67bcb57d3a57adb3bdc429d489ff80ee7c89"
+        },
+        {
+          "command": [
+            "node",
+            "bootstrap/run.cjs",
+            ".",
+            "dist",
+            "bootstrap/site.json"
+          ],
+          "status": 0,
+          "stdoutSha256": "3d599955899fcc2c4c5835bdabe36f324ee893ca8f8d6d532831f18730160e83",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "command": [
+            "node",
+            "--test",
+            "reading.test.mjs",
+            "publication.test.mjs",
+            "algebra-publication.test.mjs",
+            "microsite-fidelity.test.mjs",
+            "microsite-publication.test.mjs",
+            "claimipedia-review.test.mjs",
+            "encounter-microsite.test.mjs",
+            "activity-layout.test.mjs",
+            "atlas.test.mjs",
+            "atlas-journey.test.mjs",
+            "authoring.test.mjs",
+            "reader-workshop-algebra.test.mjs",
+            "hierarchy.test.mjs",
+            "process-authoring.test.mjs",
+            "batch-process-authoring.test.mjs",
+            "authoring-workflow.test.mjs",
+            "document-inspection.test.mjs",
+            "expansion.test.mjs",
+            "expedition.test.mjs",
+            "workshop.test.mjs",
+            "microsite-process-authoring.test.mjs",
+            "microsite-publication-process-authoring.test.mjs",
+            "stylesheet-algebra.test.mjs",
+            "field-correction-article.test.mjs",
+            "html-escaping.test.mjs"
+          ],
+          "status": 0,
+          "stdoutSha256": "e48bd565bdcbb45efdd88ec906bc0e09f3da0bad73737387c5a2d9500ad6917e",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "command": [
+            "node",
+            "tooling/verify-microsite-presentation.mjs",
+            "dist"
+          ],
+          "status": 0,
+          "stdoutSha256": "4265cf34e739107d1c00392150f82b5410af4ec1ffb9a761c286d0e5147e579b",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  ],
+  "execution": {
+    "indexSteps": 5174947,
+    "applicationSteps": 14509286,
+    "totalSteps": 19684233,
+    "limit": 20000000
+  },
+  "nativeSourcesUnchanged": true,
+  "mechanismUnchanged": true,
+  "scope": "Five homepage entry routes and 18 generated catalogue front doors. Product internals, nested routes, remote services and runtime states are excluded.",
+  "products": [
+    {
+      "id": "temple",
+      "route": "temple/index.html",
+      "scopeId": "catalogue-entry/temple/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "gate"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "sourcery",
+      "route": "sourcery/index.html",
+      "scopeId": "catalogue-entry/sourcery/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en-AU",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "claimipedia",
+      "route": "claimipedia/index.html",
+      "scopeId": "catalogue-entry/claimipedia/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 4,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "relational-geometry",
+      "route": "claimipedia-science/index.html",
+      "scopeId": "catalogue-entry/relational-geometry/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 1,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "worldwright",
+      "route": "worldwright/index.html",
+      "scopeId": "catalogue-entry/worldwright/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 1,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "kingdom",
+      "route": "kingdom/index.html",
+      "scopeId": "catalogue-entry/kingdom/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "world-modelling",
+      "route": "world-modelling/index.html",
+      "scopeId": "catalogue-entry/world-modelling/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "tradie",
+      "route": "tradie/index.html",
+      "scopeId": "catalogue-entry/tradie/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "foundry",
+      "route": "foundry/index.html",
+      "scopeId": "catalogue-entry/foundry/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "creator-studio",
+      "route": "creator-studio/index.html",
+      "scopeId": "catalogue-entry/creator-studio/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 1,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "encounter",
+      "route": "encounter/index.html",
+      "scopeId": "catalogue-entry/encounter/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "mission-control",
+      "route": "mission-control/index.html",
+      "scopeId": "catalogue-entry/mission-control/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "the-field",
+      "route": "the-field/index.html",
+      "scopeId": "catalogue-entry/the-field/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 3,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "supercrm",
+      "route": "supercrm/index.html",
+      "scopeId": "catalogue-entry/supercrm/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "timesheet",
+      "route": "timesheet/index.html",
+      "scopeId": "catalogue-entry/timesheet/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "workgarden",
+      "route": "workgarden/index.html",
+      "scopeId": "catalogue-entry/workgarden/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "harborboard",
+      "route": "harborboard/index.html",
+      "scopeId": "catalogue-entry/harborboard/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    },
+    {
+      "id": "relationship-manager",
+      "route": "relationship-manager/index.html",
+      "scopeId": "catalogue-entry/relationship-manager/1",
+      "profiles": [
+        {
+          "saga": "identity",
+          "level": 2
+        },
+        {
+          "saga": "accessibility",
+          "level": 2
+        },
+        {
+          "saga": "internationalisation",
+          "level": 1
+        }
+      ],
+      "markup": {
+        "language": "en",
+        "charset": "utf-8",
+        "languageMarker": true,
+        "utf8": true,
+        "images": 0,
+        "missingAlt": [],
+        "altAttributes": true,
+        "skipTarget": true,
+        "skipTargets": [
+          "main"
+        ],
+        "inertMarkupUnassessed": false,
+        "boundary": "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+      },
+      "openObligations": [
+        {
+          "id": "identity.meaning",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "identity.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "access.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.locales",
+          "kind": "declaration",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.messages",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.formatting",
+          "kind": "machine",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.review",
+          "kind": "human",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.use",
+          "kind": "use",
+          "status": "not-evidenced"
+        },
+        {
+          "id": "i18n.maintenance",
+          "kind": "maintenance",
+          "status": "not-evidenced"
+        }
+      ]
+    }
+  ],
+  "roadmap": {
+    "total": 228,
+    "website": 12,
+    "catalogue": 216,
+    "next": 95,
+    "later": 133,
+    "owners": "Unassigned"
+  },
+  "checks": {
+    "tests": 211,
+    "passed": 211,
+    "failed": 0,
+    "presentation": "passed",
+    "negative": "Broken/duplicate skip destinations, missing alt, missing/empty language, absent scope policy, opaque-script/comment bait and template markup cannot gain automatic assurance. Wrong scope/kind and incomplete or ambiguous receipts remain blocked.",
+    "serialization": "Differential portable-tree and rejection tests preserve the shared HTML serializer semantics; guards avoid redundant deep comparisons.",
+    "compatibility": "Existing identity JSON routes and per-product profile saga fields retained.",
+    "browser": {
+      "desktop": "Ivory/teal shield design, distinct topic colours, evidence level bars and expandable product panels.",
+      "mobile": {
+        "clientWidth": 375,
+        "scrollWidth": 375,
+        "table": "Own named scroll region"
+      },
+      "contrast": "Legacy identity status tiles changed to dark teal on pale green; human evidence and policy/implementation gaps are separate."
+    }
+  },
+  "sources": {
+    "algebra/publication.process.json": "7de070be1aad820c7d581cf7c31b518cee1ba9028d0fb231bb8b26a89a960ca6",
+    "algebra/hierarchy.process.json": "6f576f7a30b9f377ad5a2de0c6d6861817a581a4afd8bb6601c012912e55aa9a",
+    "source/hierarchy.rel": "b89e4035cbed412fd9c0b25a8690033b8abe4c5a04d464886415687c07b1b6a3",
+    "source/expedition.rel": "3acbf4e9bc1856cb7370636470c007bf082f862c4d2d463a89688b5a33c93d1d",
+    "source/stylesheets/field-correction.json": "4dd092128fc8d322b0d96706711162d31237abe8f805012c9dc437a9c71bfd7e",
+    "source/the-field/correction-article.json": "e78a2014d2ee55ebda0a90d0aea313de00cd47262a3ab82018d2587c97204f6b",
+    "source/the-field/correction-artwork.json": "8afb10194b6516e66038e72187ad5acc6b3db61b43b5a9f35365cf6518c728d6",
+    "hierarchy.test.mjs": "27fb8279b607a58d93ad464d1a59e84707ab7cff0e33bdaff83adbcddad81159"
+  },
+  "outputs": {
+    "assurance/index.html": "1122f456d10385ab5044bbea8961930ad5fcef36398a628de1e65efc973247e1",
+    "assurance/maturity/index.html": "e84bb85f36ef2800b043ff37a8dcb2ce75f0f2ca6ab000b1e2f7de20940165f5",
+    "assurance/catalogue.json": "23ac7663c420116988c6a574399801c55190f2131c4742d501c6b3d5ed87a803",
+    "assurance/topics.json": "0342f4766a43dc91e470b885cff8476c4be63046c390ca52f58d1555c19ac356",
+    "expedition.css": "f670c41335d4b074b8dd3472dc52ea572a488e6965580d6d8c6d794e291746b8"
+  },
+  "corpus": "corpus/assurance/assurance_portfolio.md",
+  "boundary": "Evidence levels apply only to their declared scopes. These checks do not establish WCAG conformance, semantic fitness, authenticated application behaviour or promised locale support. No human/use/maintenance receipts are supplied. Shared observations are one evidence family."
+}

@@ -2,22 +2,22 @@
   "protocol": "aaronalderman/local-publication-qualification/1",
   "date": "2026-11-07",
   "timezone": "Australia/Perth",
-  "sourceBaseline": "96cbb090a29f918a7ad3a205df6c24a5b0651023",
+  "sourceBaseline": "f769ef913dee886c5bc8078041b3fd489ea285b6",
   "scope": "Requested Jesus-centred editorial revision, restrained emphasis and responsive margin notes; mobile invitation return-link overlap repair.",
   "entry": "publication.build",
   "execution": {
-    "indexSteps": 5084366,
-    "applicationSteps": 14845085,
-    "totalSteps": 19929451,
+    "indexSteps": 5171795,
+    "applicationSteps": 14793465,
+    "totalSteps": 19965260,
     "limit": 20000000
   },
-  "artifactCount": 645,
-  "buildReceiptSha256": "2203e6037b64906ba34ebc1b0701e94791cf90b9eb2151430af35d1493a89f12",
+  "artifactCount": 646,
+  "buildReceiptSha256": "54e3e3268ab92d1d38953dceb75f07d23600443919c381ed74ba7872ec582b90",
   "sourceSha256": {
     "source/front-doors.rel": "0be275b8ccbc388f5c9891e055e8cfd7e8c9283fbdff0b5d7891fcb736d483c3",
     "source/expedition.rel": "057e2c8aad61ca4c665dd54e63251efb66cfbb5d3849405e3d89e898ccb65744",
-    "source/hierarchy.rel": "1478112bfb3ba7005a286e587b6947ff87cc4b87c0d4cef9b630f3225983b60f",
-    "algebra/publication.process.json": "e02259b2585bc9cd89be7231166e3517a7e01695a5717b1ea2e93e6964398056"
+    "source/hierarchy.rel": "28acc6faf3850145028742626f45d019cc240b78904a27db3bb2026b77b02fc7",
+    "algebra/publication.process.json": "d24c794cf2ae47838cfbbaa0b14edd62f3d4cd4c268ddf0b8b59567fe974dc32"
   },
   "artworkSha256": "89cd80f02e60dc3e0d131f22dbcaaeeeed73e7ef07974b9d0f86e2c587c250ae",
   "nativeFilesCompared": 15,
@@ -99,7 +99,8 @@
     "passed": 211,
     "failed": 0,
     "skipped": 0,
-    "includesFreshArtifactReproduction": true
+    "includesFreshArtifactReproduction": true,
+    "scope": "Accepted editorial candidate before upstream integration; final integrated suite is recorded in GitHub Actions."
   },
   "browserChecks": [
     "Live mission invitation and full scroll destinations checked",
@@ -111,7 +112,9 @@
   "boundary": "Engineering evidence for this source state; same local validation run, not independent scientific validation.",
   "comicSha256": "37b078a6dfd5fc4e6b85c61bd5374eec4469393db24d52ac2110b5b805b98256",
   "integration": {
-    "upstream": "96cbb090a29f918a7ad3a205df6c24a5b0651023",
-    "validationSha256": "dabb8a606392adda03b9834f8832e3cd5273c24aa5aa41c1fa21380c0cccdc05"
+    "upstream": "f769ef913dee886c5bc8078041b3fd489ea285b6",
+    "validationSha256": "dabb8a606392adda03b9834f8832e3cd5273c24aa5aa41c1fa21380c0cccdc05",
+    "scope": "Accepted authoring transaction passed all 211 tests before upstream integration. The integrated publication build, mission tests and presentation comparison passed locally. The existing Pages workflow rechecks the full final revision before deployment.",
+    "presentationSha256": "4265cf34e739107d1c00392150f82b5410af4ec1ffb9a761c286d0e5147e579b"
   }
 }
