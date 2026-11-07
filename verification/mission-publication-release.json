@@ -2,22 +2,22 @@
   "protocol": "aaronalderman/local-publication-qualification/1",
   "date": "2026-11-07",
   "timezone": "Australia/Perth",
-  "sourceBaseline": "e00c313e1d1662e7d4daf0cae703a46413327f68",
+  "sourceBaseline": "98e61fd7dded2986f7d5bbffa6a855d38571f444",
   "scope": "Handwritten corpus annotations, taped paper and stickers, three inline pen sketches, and existing-destination links; equivalent child-array rendering avoids redundant process dispatch.",
   "entry": "publication.build",
   "execution": {
     "indexSteps": 5178665,
-    "applicationSteps": 14495767,
-    "totalSteps": 19674432,
+    "applicationSteps": 14465672,
+    "totalSteps": 19644337,
     "limit": 20000000
   },
   "artifactCount": 646,
-  "buildReceiptSha256": "c7b9fc8f548a66093795d45d3f9ddfb84bf4cfbb3c901ceb136f80ee78b14b71",
+  "buildReceiptSha256": "db4e39f1efcf1ed36a6792334befeb5f753c736b1050d11e9548c53e4b9f5ddf",
   "sourceSha256": {
     "source/front-doors.rel": "9fda2ee28ad38b3edc7417ffa384bcd41d4d7058471f017640fcbc989532e2a3",
     "source/expedition.rel": "eef0926c4afe4ada40114e282ff9242a662a5c338910f07b11db36e41542ce43",
     "source/hierarchy.rel": "ad1aed5cff59fae8847a84b95a04ba58badf292b5fa2e3124857712efa2e1382",
-    "algebra/publication.process.json": "f05737807418a4571c7204075f55cc56da48c1d3f0015b75169f9d322304f550"
+    "algebra/publication.process.json": "ce97efdf722597558135851ce7d6a21c23e34c9ca19e3f011e65df963ede7c41"
   },
   "artworkSha256": "89cd80f02e60dc3e0d131f22dbcaaeeeed73e7ef07974b9d0f86e2c587c250ae",
   "nativeFilesCompared": 15,
@@ -99,7 +99,8 @@
     "passed": 215,
     "failed": 0,
     "skipped": 0,
-    "includesFreshArtifactReproduction": true
+    "includesFreshArtifactReproduction": true,
+    "scope": "Accepted candidate before the independent published header update was merged; final integrated suite is recorded in GitHub Actions."
   },
   "browserChecks": [
     "1280px and 1500px desktop corpus annotations and sketches",
@@ -110,8 +111,10 @@
   "boundary": "Engineering evidence for this source state; same local validation run, not independent scientific validation.",
   "comicSha256": "37b078a6dfd5fc4e6b85c61bd5374eec4469393db24d52ac2110b5b805b98256",
   "integration": {
-    "upstream": "e00c313e1d1662e7d4daf0cae703a46413327f68",
+    "upstream": "98e61fd7dded2986f7d5bbffa6a855d38571f444",
     "validationSha256": "f33bc94aa4999e41b47d88312b2fc43dee30ce929a61d4bfa96140a4c77fdaab",
-    "renderingCorrespondenceSha256": "67710ca7d70626595c244d133a9b9d935654091c8198c04e86d23febdcbbdece"
+    "renderingCorrespondenceSha256": "67710ca7d70626595c244d133a9b9d935654091c8198c04e86d23febdcbbdece",
+    "scope": "The accepted annotation candidate passed all 215 tests before integration. The final integrated build, serializer regression, mission tests and presentation checks passed locally; Pages rechecks the full final revision before publication.",
+    "presentationSha256": "4265cf34e739107d1c00392150f82b5410af4ec1ffb9a761c286d0e5147e579b"
   }
 }
