@@ -7,7 +7,8 @@ export function observeReadingExperience(input){
  const rect=n=>{const r=n.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
  const visible=n=>{const s=getComputedStyle(n),r=rect(n);return s.display!=='none'&&s.visibility==='visible'&&r.width>0&&r.height>0;};
  const style=n=>{const s=getComputedStyle(n);return {color:s.color,background:s.backgroundColor,border:s.borderColor,outline:s.outline,shadow:s.boxShadow};};
- const describe=n=>{const s=getComputedStyle(n);return {path:path(n),tag:n.tagName,text:(n.textContent??'').trim().slice(0,200),rect:rect(n),clientWidth:n.clientWidth,clientHeight:n.clientHeight,scrollWidth:n.scrollWidth,scrollHeight:n.scrollHeight,overflowX:s.overflowX,overflowY:s.overflowY};};
+ const number=v=>{const x=parseFloat(v);return Number.isFinite(x)?x:null;};
+ const describe=n=>{const s=getComputedStyle(n);return {path:path(n),tag:n.tagName,text:(n.textContent??'').trim().slice(0,200),rect:rect(n),clientWidth:n.clientWidth,clientHeight:n.clientHeight,scrollWidth:n.scrollWidth,scrollHeight:n.scrollHeight,overflowX:s.overflowX,overflowY:s.overflowY,fontSize:number(s.fontSize),lineHeight:number(s.lineHeight),letterSpacing:s.letterSpacing==='normal'?0:number(s.letterSpacing),wordSpacing:s.wordSpacing==='normal'?0:number(s.wordSpacing),paragraphGap:number(s.marginBlockEnd)};};
  const paint=n=>{const s=getComputedStyle(n),layers=[];for(let p=n;p;p=p.parentElement){const cs=getComputedStyle(p);layers.push({path:path(p),rgba:rgba(cs.backgroundColor),image:cs.backgroundImage,opacity:Number(cs.opacity),filter:cs.filter,blend:cs.mixBlendMode});}return {foreground:rgba(s.color),layers};};
  if(input.operation==='install-keyboard'){
   const observed={events:[],before:new Map([...doc.querySelectorAll('a,button,input,select,textarea,summary,[tabindex]')].map(n=>[n,style(n)]))};
@@ -15,7 +16,7 @@ export function observeReadingExperience(input){
  }
  if(input.operation==='focus'){
   const n=doc.activeElement,s=getComputedStyle(n),r=rect(n),before=win.__readingKeyboard?.before.get(n)??null,now=style(n);
-  return {...describe(n),focusVisible:n.matches(':focus-visible'),outlineStyle:s.outlineStyle,outlineWidth:parseFloat(s.outlineWidth)||0,boxShadow:s.boxShadow,beforePaint:before,afterPaint:now,paint:paint(n),fontSize:parseFloat(s.fontSize),fontWeight:Number(s.fontWeight)||400,points:plan.keyboard.points.map(([u,v])=>{const x=r.left+r.width*u,y=r.top+r.height*v,hit=doc.elementFromPoint(x,y);return {x,y,hit:path(hit),ownsHit:!!hit&&(hit===n||n.contains(hit))};})};
+  return {...describe(n),associatedLabels:[...(n.labels??[])].map(describe),focusVisible:n.matches(':focus-visible'),outlineStyle:s.outlineStyle,outlineWidth:parseFloat(s.outlineWidth)||0,boxShadow:s.boxShadow,beforePaint:before,afterPaint:now,paint:paint(n),fontSize:parseFloat(s.fontSize),fontWeight:Number(s.fontWeight)||400,points:plan.keyboard.points.map(([u,v])=>{const x=r.left+r.width*u,y=r.top+r.height*v,hit=doc.elementFromPoint(x,y);return {x,y,hit:path(hit),ownsHit:!!hit&&(hit===n||n.contains(hit))};})};
  }
  if(input.operation==='keyboard-events')return win.__readingKeyboard?.events??[];
  const texts=[...doc.querySelectorAll(plan.textSelectors)].filter(visible),blocks=[...doc.querySelectorAll(plan.blockSelectors)].filter(visible);

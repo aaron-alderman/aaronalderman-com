@@ -23,6 +23,11 @@ four Questions entrances and an atlas-place link; focus visibility and hit-test
 observations remain bounded measures rather than accessibility certification.
 Keyboard journeys use the first declared desktop viewport; its observed size
 is retained in each journey. These checks do not evaluate animation behaviour.
+The spacing profile also checks the computed line height, letter spacing, word
+spacing and paragraph gap; an inserted stylesheet alone is not sufficient.
+Native media controls, textless hosts and visually hidden inputs remain review
+work. Repeated identical host observations are grouped. Attributed edge cases
+from the first CI run are retained under `fixtures/first-browser-edge-cases.json`.
 
 Missing browser evidence is a release gate in this first rollout. Observed
 failures remain published triage work, alongside review candidates; they are

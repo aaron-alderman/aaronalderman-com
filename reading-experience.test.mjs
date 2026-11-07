@@ -24,6 +24,12 @@ test('zoom rules detect horizontal loss and concealed title overflow without con
  r=await assessor.run('experience.snapshot',{...base,blocks:[{...clipped,overflowY:'auto'}]});assert.ok(!r.some(f=>f.rule==='zoom.clipped-content'));
  r=await assessor.run('experience.snapshot',{...base,truncatedBlocks:true});assert.ok(r.some(f=>f.rule==='coverage.observer-limit'&&f.status==='needs-review'));
 });
+test('text-spacing coverage checks computed values as well as the requested override',async()=>{
+ const block={path:'p',tag:'P',text:'A readable paragraph.',fontSize:16,lineHeight:24,letterSpacing:1.92,wordSpacing:2.56,paragraphGap:32,clientWidth:300,scrollWidth:300,clientHeight:100,scrollHeight:100,overflowX:'visible',overflowY:'visible'};
+ const snapshot={spacingApplied:true,document:{clientWidth:320,scrollWidth:320},texts:[text()],blocks:[block],truncatedTexts:false,truncatedBlocks:false};
+ let r=await assessor.run('experience.snapshot',snapshot);assert.ok(r.some(f=>f.rule==='zoom.spacing-override'&&f.status==='passed'));
+ for(const changed of [{letterSpacing:0},{wordSpacing:0},{lineHeight:null},{paragraphGap:0}]){r=await assessor.run('experience.snapshot',{...snapshot,blocks:[{...block,...changed}]});assert.ok(r.some(f=>f.rule==='zoom.spacing-override'&&f.status==='needs-review'));}
+});
 function journey(){return {route:'fixture.html',origin:'http://fixture',skip:'#main',returnSelector:'a.home',foundSkip:true,skipTargetExists:true,afterSkip:{hash:'#main',path:'/fixture.html'},foundReturn:true,afterReturn:{origin:'http://fixture',path:'/'},events:[{key:'Tab',trusted:true},{key:'Enter',trusted:true}],focuses:[{...text(),path:'a.home',text:'Home',points:[{ownsHit:true}],outlineWidth:2,outlineStyle:'solid',boxShadow:'none',beforePaint:{color:'black'},afterPaint:{color:'black'},focusVisible:true}]};}
 test('keyboard journeys require trusted input, visible focus and the declared destination',async()=>{
  const run=s=>assessor.run('experience.keyboard',{journey:s,plan:{homePaths:['/']},route:{next:null}});
@@ -31,6 +37,11 @@ test('keyboard journeys require trusted input, visible focus and the declared de
  for(const change of [s=>s.events.forEach(e=>e.trusted=false),s=>s.events=s.events.filter(e=>e.key==='Tab'),s=>s.afterSkip.hash='#elsewhere',s=>s.afterReturn.path='/wrong']){const s=journey();change(s);assert.ok((await run(s)).some(f=>f.status==='failed'));}
  const hidden=journey();hidden.focuses[0].points=[{ownsHit:false}];assert.ok((await run(hidden)).some(f=>f.rule==='keyboard.focus-obscured'&&f.status==='failed'));
  const uncertain=journey();uncertain.focuses[0].outlineWidth=0;uncertain.focuses[0].outlineStyle='none';assert.ok((await run(uncertain)).some(f=>f.rule==='keyboard.focus-indicator'&&f.status==='needs-review'));
+});
+test('the first browser run’s native-control counterexamples retain honest review boundaries',async()=>{
+ const fixture=read('tooling/assurance/fixtures/first-browser-edge-cases.json');assert.equal(fixture.evidenceFamily,'github-actions:42391940007:1');
+ const video=await assessor.run('experience.contrast',{...fixture.video,state:'keyboard-focus'});assert.equal(video.status,'needs-review');assert.equal(video.ratio,null);assert.match(video.evidence,/native control/);
+ const j=journey();j.focuses=[fixture.hiddenInput];const r=await assessor.run('experience.keyboard',{journey:j,plan:{homePaths:['/']},route:{next:null}});assert.ok(r.some(f=>f.rule==='keyboard.focus-obscured'&&f.status==='needs-review'));assert.ok(!r.some(f=>f.status==='failed'));
 });
 test('absent browser evidence never becomes a browser pass; changed bindings refuse replay',async()=>{
  const input={policy,planSha256:'plan',observerSha256:'observer',bindings:{'fixture.html':'hash'},capture:null};

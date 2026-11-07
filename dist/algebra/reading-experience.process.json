@@ -450,6 +450,66 @@
         "value": "$eventInput"
       },
       {
+        "port": "text.trim",
+        "args": {
+          "value": [
+            "if",
+            [
+              "eq",
+              [
+                "at",
+                "$text",
+                "text"
+              ],
+              null
+            ],
+            "",
+            [
+              "at",
+              "$text",
+              "text"
+            ]
+          ]
+        },
+        "into": "trimmedText"
+      },
+      {
+        "let": "supportedText",
+        "value": [
+          "and",
+          [
+            "not",
+            [
+              "eq",
+              "$trimmedText",
+              ""
+            ]
+          ],
+          [
+            "not",
+            [
+              "includes",
+              [
+                "list",
+                "VIDEO",
+                "AUDIO",
+                "IMG",
+                "CANVAS",
+                "INPUT",
+                "SELECT",
+                "TEXTAREA",
+                "SVG"
+              ],
+              [
+                "at",
+                "$text",
+                "tag"
+              ]
+            ]
+          ]
+        ]
+      },
+      {
         "let": "eventInput",
         "value": "$text.paint"
       },
@@ -469,12 +529,21 @@
           "text": "$text.text",
           "ratio": null,
           "minimum": null,
-          "evidence": "The paint stack includes transparency, imagery, a filter, blend or an unsupported colour. Visual review is required.",
+          "evidence": [
+            "if",
+            "$supportedText",
+            "The paint stack includes transparency, imagery, a filter, blend or an unsupported colour. Visual review is required.",
+            "The focused host is a native control, media surface or has no observed text. Its CSS text colour is not evidence of the rendered control text."
+          ],
           "state": "$text.state"
         }
       },
       {
-        "when": "$pair.known",
+        "when": [
+          "and",
+          "$pair.known",
+          "$supportedText"
+        ],
         "then": [
           {
             "let": "eventInput",
@@ -811,26 +880,312 @@
                 ]
               ]
             ]
+          },
+          {
+            "let": "spacingRows",
+            "value": [
+              "list"
+            ]
+          },
+          {
+            "when": [
+              "and",
+              [
+                "at",
+                "$s",
+                "spacingApplied"
+              ],
+              [
+                "includes",
+                [
+                  "list",
+                  "H1",
+                  "H2",
+                  "H3",
+                  "P",
+                  "LI",
+                  "A",
+                  "BUTTON",
+                  "SUMMARY"
+                ],
+                "$b.tag"
+              ]
+            ],
+            "then": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    "$b.fontSize",
+                    1.5
+                  ]
+                },
+                "into": "requiredLine"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    "$b.fontSize",
+                    0.12
+                  ]
+                },
+                "into": "requiredLetter"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    "$b.fontSize",
+                    0.16
+                  ]
+                },
+                "into": "requiredWord"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    "$b.fontSize",
+                    2
+                  ]
+                },
+                "into": "requiredGap"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$b",
+                      "lineHeight"
+                    ],
+                    0.02
+                  ]
+                },
+                "into": "withTolerance"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greaterEqual",
+                  "values": [
+                    "list",
+                    "$withTolerance",
+                    "$requiredLine"
+                  ]
+                },
+                "into": "lineOK"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$b",
+                      "letterSpacing"
+                    ],
+                    0.02
+                  ]
+                },
+                "into": "withTolerance"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greaterEqual",
+                  "values": [
+                    "list",
+                    "$withTolerance",
+                    "$requiredLetter"
+                  ]
+                },
+                "into": "letterOK"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$b",
+                      "wordSpacing"
+                    ],
+                    0.02
+                  ]
+                },
+                "into": "withTolerance"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greaterEqual",
+                  "values": [
+                    "list",
+                    "$withTolerance",
+                    "$requiredWord"
+                  ]
+                },
+                "into": "wordOK"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      "$b",
+                      "paragraphGap"
+                    ],
+                    0.02
+                  ]
+                },
+                "into": "withTolerance"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "greaterEqual",
+                  "values": [
+                    "list",
+                    "$withTolerance",
+                    "$requiredGap"
+                  ]
+                },
+                "into": "gapOK"
+              },
+              {
+                "let": "spacingKnown",
+                "value": [
+                  "and",
+                  [
+                    "not",
+                    [
+                      "eq",
+                      [
+                        "at",
+                        "$b",
+                        "lineHeight"
+                      ],
+                      null
+                    ]
+                  ],
+                  [
+                    "not",
+                    [
+                      "eq",
+                      [
+                        "at",
+                        "$b",
+                        "letterSpacing"
+                      ],
+                      null
+                    ]
+                  ],
+                  [
+                    "not",
+                    [
+                      "eq",
+                      [
+                        "at",
+                        "$b",
+                        "wordSpacing"
+                      ],
+                      null
+                    ]
+                  ]
+                ]
+              },
+              {
+                "let": "spacingOK",
+                "value": [
+                  "and",
+                  "$spacingKnown",
+                  "$lineOK",
+                  "$letterOK",
+                  "$wordOK",
+                  [
+                    "or",
+                    [
+                      "not",
+                      [
+                        "eq",
+                        "$b.tag",
+                        "P"
+                      ]
+                    ],
+                    "$gapOK"
+                  ]
+                ]
+              },
+              {
+                "let": "spacingRows",
+                "value": [
+                  "list",
+                  {
+                    "rule": "zoom.spacing-override",
+                    "status": [
+                      "if",
+                      "$spacingOK",
+                      "passed",
+                      "needs-review"
+                    ],
+                    "path": "$b.path",
+                    "text": "$b.text",
+                    "evidence": [
+                      "if",
+                      "$spacingOK",
+                      "Computed line height, tracking, word spacing and paragraph gap confirm the declared text-spacing stress condition.",
+                      "The requested text-spacing minimum could not be confirmed on this element. Review the test condition before inferring spacing resilience."
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ],
         "yield": [
-          "if",
-          "$clipped",
+          "append",
+          "$rows",
           [
             "append",
-            "$rows",
+            "$spacingRows",
             [
-              "list",
-              {
-                "rule": "zoom.clipped-content",
-                "status": "needs-review",
-                "path": "$b.path",
-                "text": "$b.text",
-                "evidence": "Concealed overflow is measured. Review whether this is intentional hidden content or a loss of readable content."
-              }
+              "if",
+              "$clipped",
+              [
+                "list",
+                {
+                  "rule": "zoom.clipped-content",
+                  "status": "needs-review",
+                  "path": "$b.path",
+                  "text": "$b.text",
+                  "evidence": "Concealed overflow is measured. Review whether this is intentional hidden content or a loss of readable content."
+                }
+              ],
+              [
+                "list"
+              ]
             ]
-          ],
-          "$rows"
+          ]
         ],
         "into": "rows"
       },
@@ -982,6 +1337,75 @@
           {
             "port": "number.calculate",
             "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$f",
+                    "rect"
+                  ],
+                  "width"
+                ],
+                2
+              ]
+            },
+            "into": "tinyWidth"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$f",
+                    "rect"
+                  ],
+                  "height"
+                ],
+                2
+              ]
+            },
+            "into": "tinyHeight"
+          },
+          {
+            "let": "hiddenNative",
+            "value": [
+              "and",
+              [
+                "eq",
+                "$f.tag",
+                "INPUT"
+              ],
+              [
+                "or",
+                [
+                  "eq",
+                  [
+                    "at",
+                    [
+                      "at",
+                      "$f.paint.layers",
+                      0
+                    ],
+                    "opacity"
+                  ],
+                  0
+                ],
+                "$tinyWidth",
+                "$tinyHeight"
+              ]
+            ]
+          },
+          {
+            "port": "number.calculate",
+            "args": {
               "operation": "greater",
               "values": [
                 "list",
@@ -1044,7 +1468,8 @@
               "state": "keyboard-focus",
               "fontSize": "$f.fontSize",
               "fontWeight": "$f.fontWeight",
-              "paint": "$f.paint"
+              "paint": "$f.paint",
+              "tag": "$f.tag"
             }
           },
           {
@@ -1066,11 +1491,21 @@
                 "if",
                 "$visible",
                 "passed",
-                "failed"
+                [
+                  "if",
+                  "$hiddenNative",
+                  "needs-review",
+                  "failed"
+                ]
               ],
               "path": "$f.path",
               "text": "$f.text",
-              "evidence": "At least one declared sample point of the keyboard-focused component must remain visible and unobscured."
+              "evidence": [
+                "if",
+                "$hiddenNative",
+                "The native input is visually hidden. Review focus communication on its associated visible label or proxy.",
+                "At least one declared sample point of the keyboard-focused component must remain visible and unobscured."
+              ]
             },
             {
               "rule": "keyboard.focus-indicator",
@@ -1078,6 +1513,10 @@
                 "if",
                 [
                   "and",
+                  [
+                    "not",
+                    "$hiddenNative"
+                  ],
                   "$f.focusVisible",
                   "$indicator"
                 ],
@@ -1564,6 +2003,13 @@
         "into": "rows"
       },
       {
+        "let": "rows",
+        "value": [
+          "distinct",
+          "$rows"
+        ]
+      },
+      {
         "let": "result",
         "value": {
           "protocol": "worldwright/reading-experience-report/1",
@@ -1651,7 +2097,7 @@
             ]
           ],
           "assessments": "$rows",
-          "boundary": "One Chromium run and bounded selectors, widths and states. This does not certify accessibility, arbitrary CSS painting, actual browser-toolbar zoom, screen-reader use or comprehension. Reflow, clipping and hit tests are measured; purpose and visual quality require review.",
+          "boundary": "One Chromium run and bounded selectors, widths and states. This does not certify accessibility, arbitrary CSS painting, actual browser-toolbar zoom, screen-reader use or comprehension. Reflow, clipping and hit tests are measured; purpose and visual quality require review. Native media/control text and visually hidden input proxies require visual review. Identical repeated host observations are grouped.",
           "evidence": {
             "policySha256": [
               "at",
