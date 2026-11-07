@@ -7,6 +7,9 @@
         "value": "identity.sourcerer"
       },
       {
+        "call": "faith.reading.load"
+      },
+      {
         "call": "identity.runtime.build"
       },
       {
@@ -247,6 +250,9 @@
       },
       {
         "call": "publication.scroll.pages"
+      },
+      {
+        "call": "faith.reading.build"
       },
       {
         "call": "publication.mission.page"
@@ -742,6 +748,27 @@
         }
       },
       {
+        "when": [
+          "eq",
+          "$projection",
+          "main"
+        ],
+        "then": [
+          {
+            "let": "cssPlan",
+            "value": {
+              "imports": "$cssPlan.imports",
+              "tokens": "$cssPlan.tokens",
+              "rules": [
+                "append",
+                "$cssPlan.rules",
+                "$faithReading.styles"
+              ]
+            }
+          }
+        ]
+      },
+      {
         "call": "css.renderPlan"
       },
       {
@@ -894,13 +921,30 @@
                     "name": "theme-color",
                     "content": [
                       "if",
-                      "$documentWorld",
                       [
-                        "one",
-                        "$documentWorld",
-                        "homeThemeColor"
+                        "or",
+                        [
+                          "eq",
+                          "$canonical",
+                          "https://aaronalderman.com/writing/faith-with-open-hands/"
+                        ],
+                        [
+                          "eq",
+                          "$canonical",
+                          "https://aaronalderman.com/worlds/christian/threads.html"
+                        ]
                       ],
-                      "#0c111b"
+                      "#f8f5ec",
+                      [
+                        "if",
+                        "$documentWorld",
+                        [
+                          "one",
+                          "$documentWorld",
+                          "homeThemeColor"
+                        ],
+                        "#0c111b"
+                      ]
                     ]
                   },
                   "children": [
@@ -939,7 +983,16 @@
                   "tag": "meta",
                   "attrs": {
                     "property": "og:type",
-                    "content": "website"
+                    "content": [
+                      "if",
+                      [
+                        "eq",
+                        "$canonical",
+                        "https://aaronalderman.com/writing/faith-with-open-hands/"
+                      ],
+                      "article",
+                      "website"
+                    ]
                   },
                   "children": [
                     "list"
@@ -1025,41 +1078,15 @@
                     "property": "og:image",
                     "content": [
                       "if",
-                      "$documentWorld",
                       [
-                        "concat",
-                        [
-                          "one",
-                          "site",
-                          "origin"
-                        ],
-                        [
-                          "one",
-                          "$documentWorld",
-                          [
-                            "if",
-                            "$documentIsThread",
-                            "threadsImage",
-                            "image"
-                          ]
-                        ]
+                        "eq",
+                        "$canonical",
+                        "https://aaronalderman.com/writing/faith-with-open-hands/"
                       ],
+                      "https://aaronalderman.com/assets/identities/optimized/christian-questions-v2.webp",
                       [
                         "if",
-                        [
-                          "eq",
-                          "$canonical",
-                          [
-                            "one",
-                            "site",
-                            "origin"
-                          ]
-                        ],
-                        [
-                          "one",
-                          "sharing.home",
-                          "image"
-                        ],
+                        "$documentWorld",
                         [
                           "concat",
                           [
@@ -1069,8 +1096,43 @@
                           ],
                           [
                             "one",
-                            "site",
+                            "$documentWorld",
+                            [
+                              "if",
+                              "$documentIsThread",
+                              "threadsImage",
+                              "image"
+                            ]
+                          ]
+                        ],
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$canonical",
+                            [
+                              "one",
+                              "site",
+                              "origin"
+                            ]
+                          ],
+                          [
+                            "one",
+                            "sharing.home",
                             "image"
+                          ],
+                          [
+                            "concat",
+                            [
+                              "one",
+                              "site",
+                              "origin"
+                            ],
+                            [
+                              "one",
+                              "site",
+                              "image"
+                            ]
                           ]
                         ]
                       ]
@@ -1086,32 +1148,41 @@
                     "property": "og:image:alt",
                     "content": [
                       "if",
-                      "$documentWorld",
                       [
-                        "one",
-                        "$documentWorld",
-                        "homeShareAlt"
+                        "eq",
+                        "$canonical",
+                        "https://aaronalderman.com/writing/faith-with-open-hands/"
                       ],
+                      "An imagined open Bible beneath an olive tree in warm morning light.",
                       [
                         "if",
+                        "$documentWorld",
                         [
-                          "eq",
-                          "$canonical",
+                          "one",
+                          "$documentWorld",
+                          "homeShareAlt"
+                        ],
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$canonical",
+                            [
+                              "one",
+                              "site",
+                              "origin"
+                            ]
+                          ],
+                          [
+                            "one",
+                            "sharing.home",
+                            "alt"
+                          ],
                           [
                             "one",
                             "site",
-                            "origin"
+                            "imageAlt"
                           ]
-                        ],
-                        [
-                          "one",
-                          "sharing.home",
-                          "alt"
-                        ],
-                        [
-                          "one",
-                          "site",
-                          "imageAlt"
                         ]
                       ]
                     ]
@@ -1190,41 +1261,15 @@
                     "name": "twitter:image",
                     "content": [
                       "if",
-                      "$documentWorld",
                       [
-                        "concat",
-                        [
-                          "one",
-                          "site",
-                          "origin"
-                        ],
-                        [
-                          "one",
-                          "$documentWorld",
-                          [
-                            "if",
-                            "$documentIsThread",
-                            "threadsImage",
-                            "image"
-                          ]
-                        ]
+                        "eq",
+                        "$canonical",
+                        "https://aaronalderman.com/writing/faith-with-open-hands/"
                       ],
+                      "https://aaronalderman.com/assets/identities/optimized/christian-questions-v2.webp",
                       [
                         "if",
-                        [
-                          "eq",
-                          "$canonical",
-                          [
-                            "one",
-                            "site",
-                            "origin"
-                          ]
-                        ],
-                        [
-                          "one",
-                          "sharing.home",
-                          "image"
-                        ],
+                        "$documentWorld",
                         [
                           "concat",
                           [
@@ -1234,8 +1279,43 @@
                           ],
                           [
                             "one",
-                            "site",
+                            "$documentWorld",
+                            [
+                              "if",
+                              "$documentIsThread",
+                              "threadsImage",
+                              "image"
+                            ]
+                          ]
+                        ],
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$canonical",
+                            [
+                              "one",
+                              "site",
+                              "origin"
+                            ]
+                          ],
+                          [
+                            "one",
+                            "sharing.home",
                             "image"
+                          ],
+                          [
+                            "concat",
+                            [
+                              "one",
+                              "site",
+                              "origin"
+                            ],
+                            [
+                              "one",
+                              "site",
+                              "image"
+                            ]
                           ]
                         ]
                       ]
@@ -1251,32 +1331,41 @@
                     "name": "twitter:image:alt",
                     "content": [
                       "if",
-                      "$documentWorld",
                       [
-                        "one",
-                        "$documentWorld",
-                        "homeShareAlt"
+                        "eq",
+                        "$canonical",
+                        "https://aaronalderman.com/writing/faith-with-open-hands/"
                       ],
+                      "An imagined open Bible beneath an olive tree in warm morning light.",
                       [
                         "if",
+                        "$documentWorld",
                         [
-                          "eq",
-                          "$canonical",
+                          "one",
+                          "$documentWorld",
+                          "homeShareAlt"
+                        ],
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$canonical",
+                            [
+                              "one",
+                              "site",
+                              "origin"
+                            ]
+                          ],
+                          [
+                            "one",
+                            "sharing.home",
+                            "alt"
+                          ],
                           [
                             "one",
                             "site",
-                            "origin"
+                            "imageAlt"
                           ]
-                        ],
-                        [
-                          "one",
-                          "sharing.home",
-                          "alt"
-                        ],
-                        [
-                          "one",
-                          "site",
-                          "imageAlt"
                         ]
                       ]
                     ]
@@ -7010,12 +7099,29 @@
                     [
                       "if",
                       [
-                        "eq",
-                        "$journeyKind",
-                        "threads"
+                        "and",
+                        [
+                          "eq",
+                          "$journeyIdentity",
+                          "identity.christian"
+                        ],
+                        [
+                          "eq",
+                          "$journeyKind",
+                          "threads"
+                        ]
                       ],
-                      "An idea becomes a path.",
-                      "A perspective on shared terrain."
+                      "A faith I can live, and a reading I can question.",
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$journeyKind",
+                          "threads"
+                        ],
+                        "An idea becomes a path.",
+                        "A perspective on shared terrain."
+                      ]
                     ]
                   ]
                 },
@@ -7104,6 +7210,62 @@
             ]
           },
           "$journeyIntro",
+          [
+            "if",
+            [
+              "eq",
+              "$journeyIdentity",
+              "identity.christian"
+            ],
+            "$faithReading.teaser",
+            null
+          ],
+          [
+            "if",
+            [
+              "eq",
+              "$journeyIdentity",
+              "identity.christian"
+            ],
+            {
+              "tag": "div",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    "FOLLOW A THREAD INTO LIFE"
+                  ]
+                },
+                {
+                  "tag": "h2",
+                  "attrs": {
+                    "class": "faith-paths-heading"
+                  },
+                  "children": [
+                    "list",
+                    "Three ways to keep reading."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "faith-paths-note"
+                  },
+                  "children": [
+                    "list",
+                    "Move from interpretation into power, hope and the people close at hand. Each path has three short readings."
+                  ]
+                }
+              ]
+            },
+            null
+          ],
           {
             "tag": "section",
             "attrs": {
@@ -7127,6 +7289,57 @@
                   },
                   "children": [
                     "list",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$journeyIdentity",
+                        "identity.christian"
+                      ],
+                      {
+                        "tag": "img",
+                        "attrs": {
+                          "class": "faith-thread-art",
+                          "src": [
+                            "one",
+                            "$t",
+                            "image"
+                          ],
+                          "alt": "",
+                          "width": 768,
+                          "height": 432,
+                          "loading": "lazy",
+                          "decoding": "async"
+                        },
+                        "children": [
+                          "list"
+                        ]
+                      },
+                      null
+                    ],
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$journeyIdentity",
+                        "identity.christian"
+                      ],
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "class": "faith-thread-kicker"
+                        },
+                        "children": [
+                          "list",
+                          [
+                            "one",
+                            "$t",
+                            "kicker"
+                          ]
+                        ]
+                      },
+                      null
+                    ],
                     {
                       "tag": "h2",
                       "attrs": {},
@@ -7253,6 +7466,28 @@
               }
             ]
           }
+        ]
+      },
+      {
+        "let": "result",
+        "value": [
+          "if",
+          [
+            "eq",
+            "$journeyIdentity",
+            "identity.christian"
+          ],
+          {
+            "tag": "div",
+            "attrs": {
+              "class": "faith-threads"
+            },
+            "children": [
+              "list",
+              "$result"
+            ]
+          },
+          "$result"
         ]
       }
     ],
@@ -16883,6 +17118,87 @@
             ]
           }
         ]
+      }
+    ],
+    "faith.reading.load": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/faith/reading.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/faith/reading.json"
+        },
+        "into": "faithReadingText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$faithReadingText"
+        },
+        "into": "faithReading"
+      },
+      {
+        "each": "$faithReading.sources",
+        "as": "faithSource",
+        "steps": [
+          {
+            "port": "file.copy",
+            "args": {
+              "path": "$faithSource.path"
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "faith.reading.build": [
+      {
+        "let": "prefix",
+        "value": "../../"
+      },
+      {
+        "let": "pageTitle",
+        "value": "$faithReading.title"
+      },
+      {
+        "let": "description",
+        "value": "$faithReading.description"
+      },
+      {
+        "let": "canonical",
+        "value": "$faithReading.canonical"
+      },
+      {
+        "let": "light",
+        "value": "faith-reading"
+      },
+      {
+        "let": "body",
+        "value": "$faithReading.body"
+      },
+      {
+        "call": "publication.document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "$faithReading.path",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "prefix",
+        "value": ""
       }
     ]
   }
