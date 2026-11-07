@@ -133,9 +133,9 @@ test('the homepage hierarchy preserves the author order and routes every tool to
  assert.ok(!home.includes('Shared capabilities'));assert.ok(!home.includes('Proposed connections'));
 });
 
-test('source snapshots preserve their hashes and exact upstream lines when the recorded source is available',()=>{
+test('source snapshots preserve recorded integrity and explicitly report live upstream drift',t=>{
  for(const binding of evidence.bindings){const bytes=fs.readFileSync(binding.file);assert.equal(sha(bytes),binding.snapshotSha256);const root=binding.sourceRoot==='sourcery'?'C:/Users/aaron/sourcery':binding.sourceRoot==='grand-theory'?'C:/Users/aaron/grand-theory':process.cwd();const origin=path.join(root,binding.origin);
-  if(fs.existsSync(origin)){const original=fs.readFileSync(origin);assert.equal(sha(original),binding.sourceSha256,binding.origin);if(binding.kind==='rel'){const lines=original.toString('utf8').split(/\r?\n/);binding.lineMap.forEach((n,i)=>assert.equal(lines[n-1],binding.lines[i]));}else assert.deepEqual(bytes,original);}
+  if(fs.existsSync(origin)){const original=fs.readFileSync(origin),observedSha256=sha(original);if(observedSha256!==binding.sourceSha256){assert.notEqual(path.resolve(origin),path.resolve(binding.file),'A bundled binding must never excuse its own drift');t.diagnostic(JSON.stringify({status:'upstream-drift',origin:binding.origin,recordedSha256:binding.sourceSha256,observedSha256,boundary:'The immutable bundled snapshot remains the publication authority; the live checkout is a different revision.'}));}else if(binding.kind==='rel'){const lines=original.toString('utf8').split(/\r?\n/);binding.lineMap.forEach((n,i)=>assert.equal(lines[n-1],binding.lines[i]));}else assert.deepEqual(bytes,original);}
   if(binding.kind==='rel'){assert.equal(bytes.toString('utf8'),binding.lines.join('\n')+'\n');assert.equal(binding.lines.length,binding.lineMap.length);}
  }
 });

@@ -572,6 +572,9 @@
         "call": "readerworkshop.build"
       },
       {
+        "call": "assurance.roadmap.publish"
+      },
+      {
         "call": "assurance.rendered.publish"
       },
       {
@@ -14262,6 +14265,41 @@
                   ]
                 }
               ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Assurance roadmap"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "A scoped work queue from findings and missing evidence: priorities, ownership, workflow, dependencies and verification."
+                  ]
+                },
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "roadmap/"
+                  },
+                  "children": [
+                    "list",
+                    "Open the assurance roadmap →"
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -21006,6 +21044,2614 @@
               "tag": "script",
               "attrs": {
                 "src": "../rendered-runtime.js",
+                "defer": true
+              },
+              "children": [
+                "list"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "assurance.portfolio.document"
+      }
+    ],
+    "assurance.roadmap.collect": [
+      {
+        "let": "inputReports",
+        "value": "$eventInput"
+      },
+      {
+        "let": "caseRows",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "fold": "$inputReports.rendered.report.findings",
+        "as": "f",
+        "accumulator": "cases",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "case",
+            "value": {
+              "origin": "rendered",
+              "topic": "rendered-layout",
+              "rule": "$f.finding.rule",
+              "node": "$f.finding.node",
+              "route": "$f.route",
+              "profile": "$f.profile",
+              "status": "$f.finding.status",
+              "reason": "$f.finding.evidence",
+              "version": [
+                "concat",
+                "$inputReports.rendered.capturedAt",
+                ":",
+                "$inputReports.rendered.policySha256"
+              ]
+            }
+          },
+          {
+            "port": "json.stringify",
+            "args": {
+              "value": [
+                "list",
+                "rendered",
+                "$case.rule",
+                "$case.node"
+              ]
+            },
+            "into": "caseKey"
+          }
+        ],
+        "yield": [
+          "append",
+          "$cases",
+          [
+            "list",
+            {
+              "key": "$caseKey",
+              "value": "$case"
+            }
+          ]
+        ],
+        "into": "caseRows"
+      },
+      {
+        "fold": "$inputReports.source.pages",
+        "as": "page",
+        "accumulator": "cases",
+        "initial": "$caseRows",
+        "steps": [
+          {
+            "let": "pageCases",
+            "value": [
+              "map",
+              "$page.findings",
+              "f",
+              {
+                "key": [
+                  "concat",
+                  "source:",
+                  "$f.rule",
+                  ":",
+                  "$f.selector"
+                ],
+                "value": {
+                  "origin": "source",
+                  "topic": "navigation-layout",
+                  "rule": "$f.rule",
+                  "node": "$f.selector",
+                  "route": "$page.route",
+                  "profile": "source",
+                  "status": "$f.status",
+                  "reason": "$f.evidence",
+                  "version": "current source audit"
+                }
+              }
+            ]
+          }
+        ],
+        "yield": [
+          "append",
+          "$cases",
+          "$pageCases"
+        ],
+        "into": "caseRows"
+      },
+      {
+        "let": "caseRows",
+        "value": [
+          "append",
+          "$caseRows",
+          [
+            "map",
+            "$inputReports.source.stylesheetFindings",
+            "f",
+            {
+              "key": [
+                "concat",
+                "source:",
+                "$f.rule",
+                ":",
+                "$f.route"
+              ],
+              "value": {
+                "origin": "source",
+                "topic": "navigation-layout",
+                "rule": "$f.rule",
+                "node": "$f.route",
+                "route": "$f.route",
+                "profile": "source",
+                "status": "$f.status",
+                "reason": "$f.evidence",
+                "version": "current stylesheet audit"
+              }
+            }
+          ]
+        ]
+      },
+      {
+        "fold": [
+          "distinct",
+          [
+            "map",
+            "$caseRows",
+            "c",
+            "$c.key"
+          ]
+        ],
+        "as": "key",
+        "accumulator": "items",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "cases",
+            "value": [
+              "map",
+              [
+                "filter",
+                "$caseRows",
+                "c",
+                [
+                  "eq",
+                  "$c.key",
+                  "$key"
+                ]
+              ],
+              "c",
+              "$c.value"
+            ]
+          },
+          {
+            "let": "first",
+            "value": [
+              "at",
+              "$cases",
+              0
+            ]
+          },
+          {
+            "let": "rule",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$inputReports.workflow.rules",
+                "r",
+                [
+                  "eq",
+                  "$r.id",
+                  "$first.rule"
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "let": "item",
+            "value": {
+              "id": [
+                "concat",
+                "observation:",
+                "$key"
+              ],
+              "title": [
+                "if",
+                [
+                  "at",
+                  "$rule",
+                  "title"
+                ],
+                [
+                  "at",
+                  "$rule",
+                  "title"
+                ],
+                "$first.rule"
+              ],
+              "origin": "$first.origin",
+              "kind": "discernment",
+              "product": "aaronalderman",
+              "topic": "$first.topic",
+              "scope": "$first.node",
+              "priority": [
+                "if",
+                [
+                  "at",
+                  "$rule",
+                  "priority"
+                ],
+                [
+                  "at",
+                  "$rule",
+                  "priority"
+                ],
+                "P2"
+              ],
+              "horizon": "now",
+              "defaultStage": "triage",
+              "targetLevel": 0,
+              "nextAction": [
+                "if",
+                [
+                  "at",
+                  "$rule",
+                  "action"
+                ],
+                [
+                  "at",
+                  "$rule",
+                  "action"
+                ],
+                "Inspect the located observations and record whether a change or an explicit acceptance is appropriate."
+              ],
+              "doneWhen": [
+                "if",
+                [
+                  "at",
+                  "$rule",
+                  "done"
+                ],
+                [
+                  "at",
+                  "$rule",
+                  "done"
+                ],
+                "Fresh scoped evidence verifies the chosen correction or acceptance."
+              ],
+              "evidence": [
+                "list",
+                {
+                  "href": [
+                    "if",
+                    [
+                      "eq",
+                      "$first.origin",
+                      "rendered"
+                    ],
+                    "/assurance/rendered-layout/",
+                    "/assurance/navigation-layout/"
+                  ],
+                  "label": "Assurance observations"
+                }
+              ],
+              "routes": [
+                "distinct",
+                [
+                  "map",
+                  "$cases",
+                  "c",
+                  "$c.route"
+                ]
+              ],
+              "profiles": [
+                "distinct",
+                [
+                  "map",
+                  "$cases",
+                  "c",
+                  "$c.profile"
+                ]
+              ],
+              "occurrences": [
+                "count",
+                "$cases"
+              ],
+              "sourceState": "$first.status",
+              "sourceVersion": "$first.version",
+              "example": "$first.reason"
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$items",
+          [
+            "list",
+            "$item"
+          ]
+        ],
+        "into": "observedItems"
+      },
+      {
+        "fold": "$inputReports.topics.roadmap",
+        "as": "g",
+        "accumulator": "items",
+        "initial": "$observedItems",
+        "steps": [
+          {
+            "port": "json.stringify",
+            "args": {
+              "value": [
+                "list",
+                "gate",
+                "$g.product",
+                "$g.id"
+              ]
+            },
+            "into": "gateKey"
+          },
+          {
+            "let": "item",
+            "value": {
+              "id": [
+                "concat",
+                "gate:",
+                "$gateKey"
+              ],
+              "title": "$g.label",
+              "origin": "maturity",
+              "kind": "evidence",
+              "product": "$g.product",
+              "topic": "$g.saga",
+              "scope": [
+                "if",
+                [
+                  "at",
+                  "$g",
+                  "scope"
+                ],
+                [
+                  "at",
+                  "$g",
+                  "scope"
+                ],
+                "homepage entry routes"
+              ],
+              "priority": [
+                "if",
+                [
+                  "eq",
+                  "$g.horizon",
+                  "next"
+                ],
+                "P2",
+                "P3"
+              ],
+              "horizon": [
+                "if",
+                [
+                  "eq",
+                  "$g.horizon",
+                  "next"
+                ],
+                "next",
+                "later"
+              ],
+              "defaultStage": "todo",
+              "targetLevel": "$g.targetLevel",
+              "nextAction": "$g.action",
+              "doneWhen": [
+                "concat",
+                "The ",
+                "$g.label",
+                " obligation is supported in its declared scope; a matching verification receipt records the evidence and review."
+              ],
+              "evidence": [
+                "list",
+                {
+                  "href": "/assurance/maturity/",
+                  "label": "Product evidence gates"
+                }
+              ],
+              "routes": [
+                "list"
+              ],
+              "profiles": [
+                "list"
+              ],
+              "occurrences": 1,
+              "sourceState": "$g.state",
+              "sourceVersion": [
+                "concat",
+                "$g.product",
+                ":",
+                "$g.saga",
+                ":",
+                "$g.targetLevel",
+                ":",
+                "$g.state"
+              ],
+              "example": "Assurance maturity is scoped per product and topic; completing this task does not by itself promote a maturity level."
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$items",
+          [
+            "list",
+            "$item"
+          ]
+        ],
+        "into": "observedItems"
+      },
+      {
+        "fold": [
+          "filter",
+          "$inputReports.identity.rows",
+          "r",
+          [
+            "not",
+            [
+              "includes",
+              [
+                "list",
+                "identity-mapped",
+                "intentionally-invariant"
+              ],
+              "$r.status"
+            ]
+          ]
+        ],
+        "as": "r",
+        "accumulator": "items",
+        "initial": "$observedItems",
+        "steps": [
+          {
+            "let": "item",
+            "value": {
+              "id": [
+                "concat",
+                "identity:",
+                "$r.id"
+              ],
+              "title": "$r.label",
+              "origin": "identity",
+              "kind": "discernment",
+              "product": "aaronalderman",
+              "topic": "identity",
+              "scope": [
+                "if",
+                [
+                  "eq",
+                  "$r.target",
+                  ""
+                ],
+                "$r.sink",
+                "$r.target"
+              ],
+              "priority": [
+                "if",
+                [
+                  "eq",
+                  "$r.status",
+                  "missing"
+                ],
+                "P1",
+                "P2"
+              ],
+              "horizon": "now",
+              "defaultStage": "triage",
+              "targetLevel": 0,
+              "nextAction": "$r.next",
+              "doneWhen": "Exact selector/property relationships have declared intent and supporting evidence. A whole subtree is not waived by completing this grouped work item.",
+              "evidence": [
+                "list",
+                {
+                  "href": "/assurance/identities/",
+                  "label": "Identity relationship evidence"
+                }
+              ],
+              "routes": [
+                "map",
+                [
+                  "if",
+                  [
+                    "at",
+                    "$r",
+                    "discovery"
+                  ],
+                  [
+                    "at",
+                    "$r",
+                    "discovery"
+                  ],
+                  [
+                    "list"
+                  ]
+                ],
+                "d",
+                "$d.file"
+              ],
+              "profiles": [
+                "list"
+              ],
+              "occurrences": [
+                "fold",
+                [
+                  "if",
+                  [
+                    "at",
+                    "$r",
+                    "discovery"
+                  ],
+                  [
+                    "at",
+                    "$r",
+                    "discovery"
+                  ],
+                  [
+                    "list"
+                  ]
+                ],
+                "d",
+                "n",
+                0,
+                [
+                  "add",
+                  "$n",
+                  "$d.count"
+                ]
+              ],
+              "sourceState": "$r.status",
+              "sourceVersion": [
+                "concat",
+                "$r.id",
+                ":",
+                "$r.status"
+              ],
+              "example": "$r.reason"
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$items",
+          [
+            "list",
+            "$item"
+          ]
+        ],
+        "into": "observedItems"
+      },
+      {
+        "fold": [
+          "filter",
+          "$inputReports.source.pages",
+          "page",
+          [
+            "not",
+            [
+              "eq",
+              "$page.geometry.status",
+              "measured"
+            ]
+          ]
+        ],
+        "as": "page",
+        "accumulator": "items",
+        "initial": "$observedItems",
+        "steps": [
+          {
+            "let": "item",
+            "value": {
+              "id": [
+                "concat",
+                "browser-coverage:",
+                "$page.route"
+              ],
+              "title": "Obtain current desktop/mobile browser evidence",
+              "origin": "coverage",
+              "kind": "verification",
+              "product": "aaronalderman",
+              "topic": "rendered-layout",
+              "scope": "$page.route",
+              "priority": "P1",
+              "horizon": "now",
+              "defaultStage": "todo",
+              "targetLevel": 0,
+              "nextAction": "Measure the route at both declared widths and bind the observations to the current artifacts.",
+              "doneWhen": "Both declared profiles have current, complete readings; retain a verification receipt before closing this item.",
+              "evidence": [
+                "list",
+                {
+                  "href": "/assurance/navigation-layout.json",
+                  "label": "Coverage evidence"
+                }
+              ],
+              "routes": [
+                "list",
+                "$page.route"
+              ],
+              "profiles": [
+                "list",
+                "desktop",
+                "mobile"
+              ],
+              "occurrences": 1,
+              "sourceState": "$page.geometry.status",
+              "sourceVersion": "$page.geometry.status",
+              "example": "Missing evidence is work, not a passing layout result."
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$items",
+          [
+            "list",
+            "$item"
+          ]
+        ],
+        "into": "observedItems"
+      },
+      {
+        "let": "result",
+        "value": "$observedItems"
+      }
+    ],
+    "assurance.roadmap.derive": [
+      {
+        "let": "todoInput",
+        "value": "$eventInput"
+      },
+      {
+        "call": "assurance.roadmap.collect"
+      },
+      {
+        "let": "currentItems",
+        "value": "$result"
+      },
+      {
+        "fold": [
+          "distinct",
+          [
+            "append",
+            [
+              "map",
+              "$currentItems",
+              "i",
+              "$i.id"
+            ],
+            [
+              "map",
+              "$todoInput.workflow.ledger",
+              "i",
+              "$i.id"
+            ]
+          ]
+        ],
+        "as": "id",
+        "accumulator": "todoItems",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "current",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$currentItems",
+                "i",
+                [
+                  "eq",
+                  "$i.id",
+                  "$id"
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "let": "prior",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$todoInput.workflow.ledger",
+                "i",
+                [
+                  "eq",
+                  "$i.id",
+                  "$id"
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "let": "base",
+            "value": [
+              "or",
+              "$current",
+              "$prior"
+            ]
+          },
+          {
+            "let": "active",
+            "value": [
+              "if",
+              "$current",
+              true,
+              false
+            ]
+          },
+          {
+            "let": "decisions",
+            "value": [
+              "filter",
+              "$todoInput.workflow.decisions",
+              "d",
+              [
+                "eq",
+                "$d.itemId",
+                "$id"
+              ]
+            ]
+          },
+          {
+            "assert": [
+              "includes",
+              [
+                "list",
+                0,
+                1
+              ],
+              [
+                "count",
+                "$decisions"
+              ]
+            ],
+            "message": "ROADMAP-DECISION: More than one current decision names this item."
+          },
+          {
+            "let": "decision",
+            "value": [
+              "at",
+              "$decisions",
+              0
+            ]
+          },
+          {
+            "let": "owner",
+            "value": [
+              "if",
+              [
+                "at",
+                "$decision",
+                "owner"
+              ],
+              [
+                "at",
+                "$decision",
+                "owner"
+              ],
+              "Unassigned"
+            ]
+          },
+          {
+            "let": "requested",
+            "value": [
+              "if",
+              [
+                "at",
+                "$decision",
+                "stage"
+              ],
+              [
+                "at",
+                "$decision",
+                "stage"
+              ],
+              ""
+            ]
+          },
+          {
+            "port": "json.stringify",
+            "args": {
+              "value": [
+                "list",
+                "$id",
+                "$active",
+                "$base.sourceState",
+                "$base.scope",
+                "$base.routes",
+                "$base.occurrences",
+                [
+                  "if",
+                  "$current",
+                  "$current.sourceVersion",
+                  "absent from current assurance"
+                ]
+              ]
+            },
+            "into": "verificationKey"
+          },
+          {
+            "let": "receipts",
+            "value": [
+              "filter",
+              "$todoInput.workflow.receipts",
+              "r",
+              [
+                "and",
+                [
+                  "eq",
+                  "$r.itemId",
+                  "$id"
+                ],
+                [
+                  "eq",
+                  "$r.verificationKey",
+                  "$verificationKey"
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    [
+                      "if",
+                      [
+                        "at",
+                        "$r",
+                        "source"
+                      ],
+                      [
+                        "at",
+                        "$r",
+                        "source"
+                      ],
+                      ""
+                    ],
+                    ""
+                  ]
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    [
+                      "if",
+                      [
+                        "at",
+                        "$r",
+                        "issuer"
+                      ],
+                      [
+                        "at",
+                        "$r",
+                        "issuer"
+                      ],
+                      ""
+                    ],
+                    ""
+                  ]
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    [
+                      "if",
+                      [
+                        "at",
+                        "$r",
+                        "observedAt"
+                      ],
+                      [
+                        "at",
+                        "$r",
+                        "observedAt"
+                      ],
+                      ""
+                    ],
+                    ""
+                  ]
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    [
+                      "if",
+                      [
+                        "at",
+                        "$r",
+                        "method"
+                      ],
+                      [
+                        "at",
+                        "$r",
+                        "method"
+                      ],
+                      ""
+                    ],
+                    ""
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "verified",
+            "value": [
+              "some",
+              "$receipts",
+              "r",
+              [
+                "eq",
+                "$r.verdict",
+                "verified"
+              ]
+            ]
+          },
+          {
+            "let": "accepted",
+            "value": [
+              "some",
+              "$receipts",
+              "r",
+              [
+                "and",
+                [
+                  "eq",
+                  "$r.verdict",
+                  "accepted"
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    [
+                      "if",
+                      [
+                        "at",
+                        "$r",
+                        "rationale"
+                      ],
+                      [
+                        "at",
+                        "$r",
+                        "rationale"
+                      ],
+                      ""
+                    ],
+                    ""
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "stage",
+            "value": [
+              "if",
+              "$active",
+              "$base.defaultStage",
+              "verification-required"
+            ]
+          },
+          {
+            "let": "issue",
+            "value": ""
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$requested",
+                ""
+              ]
+            ],
+            "then": [
+              {
+                "let": "stage",
+                "value": "$requested"
+              },
+              {
+                "when": [
+                  "not",
+                  [
+                    "includes",
+                    [
+                      "list",
+                      "triage",
+                      "todo",
+                      "in-progress",
+                      "blocked",
+                      "verification-required",
+                      "done",
+                      "accepted"
+                    ],
+                    "$requested"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "stage",
+                    "value": "triage"
+                  },
+                  {
+                    "let": "issue",
+                    "value": "Unknown workflow stage; the declaration needs review."
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    "$requested",
+                    "done"
+                  ],
+                  [
+                    "or",
+                    "$active",
+                    [
+                      "not",
+                      "$verified"
+                    ]
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "stage",
+                    "value": "verification-required"
+                  },
+                  {
+                    "let": "issue",
+                    "value": "Completion requires absence from current assurance plus a matching scoped verification receipt."
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    "$requested",
+                    "accepted"
+                  ],
+                  [
+                    "not",
+                    "$accepted"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "stage",
+                    "value": "verification-required"
+                  },
+                  {
+                    "let": "issue",
+                    "value": "Acceptance requires a current scoped receipt with an explicit rationale."
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    "$requested",
+                    "in-progress"
+                  ],
+                  [
+                    "eq",
+                    "$owner",
+                    "Unassigned"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "stage",
+                    "value": "triage"
+                  },
+                  {
+                    "let": "issue",
+                    "value": "Assign an owner before marking work in progress."
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    "$requested",
+                    "blocked"
+                  ],
+                  [
+                    "eq",
+                    [
+                      "if",
+                      [
+                        "at",
+                        "$decision",
+                        "reason"
+                      ],
+                      [
+                        "at",
+                        "$decision",
+                        "reason"
+                      ],
+                      ""
+                    ],
+                    ""
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "stage",
+                    "value": "triage"
+                  },
+                  {
+                    "let": "issue",
+                    "value": "A blocked item needs a recorded blocking reason."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "fold": [
+              "filter",
+              "$currentItems",
+              "other",
+              [
+                "and",
+                [
+                  "eq",
+                  "$base.kind",
+                  "evidence"
+                ],
+                [
+                  "eq",
+                  "$other.kind",
+                  "evidence"
+                ],
+                [
+                  "eq",
+                  "$other.product",
+                  "$base.product"
+                ],
+                [
+                  "eq",
+                  "$other.topic",
+                  "$base.topic"
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    "$other.id",
+                    "$id"
+                  ]
+                ]
+              ]
+            ],
+            "as": "other",
+            "accumulator": "deps",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "less",
+                  "values": [
+                    "list",
+                    "$other.targetLevel",
+                    "$base.targetLevel"
+                  ]
+                },
+                "into": "earlier"
+              }
+            ],
+            "yield": [
+              "if",
+              "$earlier",
+              [
+                "append",
+                "$deps",
+                [
+                  "list",
+                  "$other.id"
+                ]
+              ],
+              "$deps"
+            ],
+            "into": "dependencies"
+          },
+          {
+            "when": [
+              "and",
+              [
+                "eq",
+                "$stage",
+                "in-progress"
+              ],
+              [
+                "not",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$dependencies"
+                  ],
+                  0
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "let": "stage",
+                "value": "blocked"
+              },
+              {
+                "let": "issue",
+                "value": "Earlier evidence gates remain open."
+              }
+            ]
+          },
+          {
+            "let": "priority",
+            "value": [
+              "if",
+              [
+                "at",
+                "$decision",
+                "priority"
+              ],
+              [
+                "at",
+                "$decision",
+                "priority"
+              ],
+              "$base.priority"
+            ]
+          },
+          {
+            "when": [
+              "not",
+              [
+                "includes",
+                [
+                  "list",
+                  "P1",
+                  "P2",
+                  "P3"
+                ],
+                "$priority"
+              ]
+            ],
+            "then": [
+              {
+                "let": "priority",
+                "value": "$base.priority"
+              },
+              {
+                "let": "issue",
+                "value": "Unknown priority; the observed priority is retained."
+              }
+            ]
+          },
+          {
+            "let": "item",
+            "value": {
+              "id": "$id",
+              "title": "$base.title",
+              "productName": [
+                "let",
+                "productRecord",
+                [
+                  "at",
+                  [
+                    "filter",
+                    "$todoInput.topics.products",
+                    "p",
+                    [
+                      "eq",
+                      "$p.id",
+                      "$base.product"
+                    ]
+                  ],
+                  0
+                ],
+                [
+                  "if",
+                  [
+                    "at",
+                    "$productRecord",
+                    "name"
+                  ],
+                  [
+                    "at",
+                    "$productRecord",
+                    "name"
+                  ],
+                  "$base.product"
+                ]
+              ],
+              "origin": "$base.origin",
+              "kind": "$base.kind",
+              "product": "$base.product",
+              "topic": "$base.topic",
+              "scope": "$base.scope",
+              "priority": "$priority",
+              "horizon": "$base.horizon",
+              "stage": "$stage",
+              "owner": "$owner",
+              "active": "$active",
+              "sourceState": [
+                "if",
+                "$active",
+                "$base.sourceState",
+                "not-observed"
+              ],
+              "nextAction": "$base.nextAction",
+              "doneWhen": "$base.doneWhen",
+              "dependsOn": "$dependencies",
+              "evidence": "$base.evidence",
+              "routes": "$base.routes",
+              "profiles": "$base.profiles",
+              "occurrences": [
+                "if",
+                "$active",
+                "$base.occurrences",
+                0
+              ],
+              "example": "$base.example",
+              "verificationKey": "$verificationKey",
+              "workflowIssue": "$issue",
+              "decisionReason": [
+                "if",
+                [
+                  "at",
+                  "$decision",
+                  "reason"
+                ],
+                [
+                  "at",
+                  "$decision",
+                  "reason"
+                ],
+                ""
+              ],
+              "verificationEvidence": "$receipts",
+              "defaultStage": "$base.defaultStage",
+              "targetLevel": "$base.targetLevel",
+              "sourceVersion": "$base.sourceVersion"
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$todoItems",
+          [
+            "list",
+            "$item"
+          ]
+        ],
+        "into": "todoItems"
+      },
+      {
+        "let": "todoItems",
+        "value": [
+          "fold",
+          [
+            "list",
+            "P1",
+            "P2",
+            "P3"
+          ],
+          "priority",
+          "ordered",
+          [
+            "list"
+          ],
+          [
+            "append",
+            "$ordered",
+            [
+              "filter",
+              "$todoItems",
+              "item",
+              [
+                "eq",
+                "$item.priority",
+                "$priority"
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "let": "result",
+        "value": {
+          "protocol": "worldwright/assurance-roadmap/1",
+          "products": [
+            "map",
+            "$todoInput.topics.products",
+            "p",
+            {
+              "id": "$p.id",
+              "name": "$p.name"
+            }
+          ],
+          "topicNames": {
+            "identity": "Identity mappings",
+            "accessibility": "Accessibility",
+            "internationalisation": "Internationalisation",
+            "rendered-layout": "Rendered layout",
+            "navigation-layout": "Navigation source checks"
+          },
+          "workflowIssues": [
+            "map",
+            [
+              "filter",
+              "$todoInput.workflow.decisions",
+              "d",
+              [
+                "not",
+                [
+                  "includes",
+                  [
+                    "map",
+                    "$todoItems",
+                    "i",
+                    "$i.id"
+                  ],
+                  "$d.itemId"
+                ]
+              ]
+            ],
+            "d",
+            {
+              "itemId": "$d.itemId",
+              "issue": "No current or retained task matches this decision."
+            }
+          ],
+          "items": "$todoItems",
+          "total": [
+            "count",
+            "$todoItems"
+          ],
+          "active": [
+            "count",
+            [
+              "filter",
+              "$todoItems",
+              "i",
+              "$i.active"
+            ]
+          ],
+          "retained": [
+            "count",
+            [
+              "filter",
+              "$todoItems",
+              "i",
+              [
+                "not",
+                "$i.active"
+              ]
+            ]
+          ],
+          "stages": [
+            "map",
+            [
+              "list",
+              "triage",
+              "todo",
+              "in-progress",
+              "blocked",
+              "verification-required",
+              "done",
+              "accepted"
+            ],
+            "stage",
+            {
+              "stage": "$stage",
+              "count": [
+                "count",
+                [
+                  "filter",
+                  "$todoItems",
+                  "i",
+                  [
+                    "eq",
+                    "$i.stage",
+                    "$stage"
+                  ]
+                ]
+              ]
+            }
+          ],
+          "boundary": "This is a scoped work queue, not a release commitment or a composite maturity score. Repeated pages and viewport observations are grouped by rule and selector, without asserting a shared root cause. Workflow and receipts are authored corpus records; their presence does not authenticate an external reviewer. Disappearance never closes a task automatically."
+        }
+      }
+    ],
+    "assurance.roadmap.boot": [
+      {
+        "port": "asset.text",
+        "args": {
+          "url": "../topics.json",
+          "cache": "no-store"
+        },
+        "into": "todoJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$todoJSON"
+        },
+        "into": "todotopics"
+      },
+      {
+        "port": "asset.text",
+        "args": {
+          "url": "../identity-mappings.json",
+          "cache": "no-store"
+        },
+        "into": "todoJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$todoJSON"
+        },
+        "into": "todoidentity"
+      },
+      {
+        "port": "asset.text",
+        "args": {
+          "url": "../navigation-layout.json",
+          "cache": "no-store"
+        },
+        "into": "todoJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$todoJSON"
+        },
+        "into": "todosource"
+      },
+      {
+        "port": "asset.text",
+        "args": {
+          "url": "../rendered-layout.json",
+          "cache": "no-store"
+        },
+        "into": "todoJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$todoJSON"
+        },
+        "into": "todorendered"
+      },
+      {
+        "let": "eventInput",
+        "value": {
+          "topics": "$todotopics",
+          "identity": "$todoidentity",
+          "source": "$todosource",
+          "rendered": "$todorendered",
+          "workflow": "$data.workflow"
+        }
+      },
+      {
+        "call": "assurance.roadmap.derive"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "assurance-roadmap",
+          "value": "$result"
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$result"
+        },
+        "into": "todoExport"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#todo-json",
+          "name": "value",
+          "value": "$todoExport"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#todo-controls",
+          "event": "change",
+          "query": "assurance.roadmap.refresh",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "assurance-roadmap"
+        },
+        "into": "todoReport"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "select",
+          "attrs": {
+            "id": "todo-product"
+          },
+          "children": [
+            "list",
+            {
+              "tag": "option",
+              "attrs": {
+                "value": "all"
+              },
+              "children": [
+                "list",
+                "All products"
+              ]
+            },
+            {
+              "tag": "optgroup",
+              "attrs": {
+                "label": "Products"
+              },
+              "children": [
+                "map",
+                "$todoReport.products",
+                "product",
+                {
+                  "tag": "option",
+                  "attrs": {
+                    "value": "$product.id"
+                  },
+                  "children": [
+                    "list",
+                    "$product.name"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#todo-product-host",
+          "html": "$result"
+        },
+        "into": "_"
+      },
+      {
+        "call": "assurance.roadmap.refresh"
+      }
+    ],
+    "assurance.roadmap.refresh": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "assurance-roadmap"
+        },
+        "into": "todoReport"
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#todo-product"
+        },
+        "into": "productChoice"
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#todo-horizon"
+        },
+        "into": "horizonChoice"
+      },
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#todo-stage"
+        },
+        "into": "stageChoice"
+      },
+      {
+        "let": "visibleItems",
+        "value": [
+          "filter",
+          "$todoReport.items",
+          "i",
+          [
+            "and",
+            [
+              "or",
+              [
+                "eq",
+                "$productChoice.value",
+                "all"
+              ],
+              [
+                "eq",
+                "$i.product",
+                "$productChoice.value"
+              ]
+            ],
+            [
+              "or",
+              [
+                "eq",
+                "$horizonChoice.value",
+                "all"
+              ],
+              [
+                "eq",
+                "$i.horizon",
+                "$horizonChoice.value"
+              ]
+            ],
+            [
+              "or",
+              [
+                "eq",
+                "$stageChoice.value",
+                "all"
+              ],
+              [
+                "eq",
+                "$i.stage",
+                "$stageChoice.value"
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "div",
+          "attrs": {},
+          "children": [
+            "list",
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                [
+                  "concat",
+                  [
+                    "count",
+                    "$visibleItems"
+                  ],
+                  " shown · ",
+                  "$todoReport.total",
+                  " work items · ",
+                  "$todoReport.active",
+                  " observed in current assurance · ",
+                  [
+                    "count",
+                    "$todoReport.workflowIssues"
+                  ],
+                  " workflow declaration issues."
+                ]
+              ]
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                "$todoReport.boundary"
+              ]
+            },
+            {
+              "tag": "div",
+              "attrs": {},
+              "children": [
+                "map",
+                "$visibleItems",
+                "item",
+                {
+                  "tag": "article",
+                  "attrs": {
+                    "class": "assurance-boundary",
+                    "style": "min-width:0;overflow-wrap:anywhere;"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "details",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "summary",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            {
+                              "tag": "strong",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "$item.priority",
+                                " · ",
+                                "$item.stage"
+                              ]
+                            },
+                            " · ",
+                            "$item.title"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Product: ",
+                            "$item.productName",
+                            " · Topic: ",
+                            "$item.topic",
+                            " · Owner: ",
+                            "$item.owner"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Scope: ",
+                            {
+                              "tag": "code",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "$item.scope"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "$item.nextAction"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            {
+                              "tag": "strong",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Completion criteria: "
+                              ]
+                            },
+                            "$item.doneWhen"
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "$item.occurrences",
+                            " current observations · ",
+                            [
+                              "count",
+                              "$item.routes"
+                            ],
+                            " affected routes · retained history: ",
+                            [
+                              "if",
+                              "$item.active",
+                              "no",
+                              "yes"
+                            ]
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "$item.example"
+                          ]
+                        },
+                        [
+                          "if",
+                          [
+                            "or",
+                            "$item.workflowIssue",
+                            "$item.decisionReason"
+                          ],
+                          {
+                            "tag": "p",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "Workflow note: ",
+                              "$item.workflowIssue",
+                              " ",
+                              "$item.decisionReason"
+                            ]
+                          },
+                          ""
+                        ],
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Earlier evidence prerequisites: ",
+                            [
+                              "count",
+                              "$item.dependsOn"
+                            ]
+                          ]
+                        },
+                        {
+                          "tag": "ul",
+                          "attrs": {},
+                          "children": [
+                            "map",
+                            "$item.evidence",
+                            "e",
+                            {
+                              "tag": "li",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "a",
+                                  "attrs": {
+                                    "href": "$e.href"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "$e.label"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "details",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            {
+                              "tag": "summary",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Affected routes"
+                              ]
+                            },
+                            {
+                              "tag": "ul",
+                              "attrs": {},
+                              "children": [
+                                "map",
+                                "$item.routes",
+                                "route",
+                                {
+                                  "tag": "li",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "a",
+                                      "attrs": {
+                                        "href": [
+                                          "concat",
+                                          "/",
+                                          "$route"
+                                        ]
+                                      },
+                                      "children": [
+                                        "list",
+                                        "$route"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "details",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            {
+                              "tag": "summary",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Corpus record and verification key"
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Stable item ID: ",
+                                {
+                                  "tag": "code",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "$item.id"
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "tag": "p",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "Verification key: ",
+                                {
+                                  "tag": "code",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "$item.verificationKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#todo-results",
+          "html": "$result"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#todo-results",
+          "name": "data-ready",
+          "value": "true"
+        },
+        "into": "_"
+      }
+    ],
+    "assurance.roadmap.publish": [
+      {
+        "port": "json.parse",
+        "args": {
+          "text": [
+            "one",
+            "assurance.roadmap",
+            "workflow"
+          ]
+        },
+        "into": "todoWorkflow"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$todoWorkflow"
+        },
+        "into": "todoWorkflowJSON"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/roadmap-workflow.json",
+          "text": "$todoWorkflowJSON"
+        },
+        "into": "_"
+      },
+      {
+        "port": "runtime.bundle",
+        "args": {
+          "entry": "assurance.roadmap.boot",
+          "mode": "browser",
+          "grantProfile": "readerBrowser",
+          "queries": [
+            "list",
+            "assurance.roadmap.boot",
+            "assurance.roadmap.refresh",
+            "assurance.roadmap.collect",
+            "assurance.roadmap.derive",
+            "html.serialize",
+            "html.escape",
+            "html.cssText"
+          ],
+          "factSubjects": [
+            "list"
+          ],
+          "data": {
+            "workflow": "$todoWorkflow"
+          },
+          "budget": 20000000
+        },
+        "into": "todoRuntime"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/roadmap-runtime.js",
+          "text": "$todoRuntime"
+        },
+        "into": "_"
+      },
+      {
+        "let": "portfolioPage",
+        "value": {
+          "route": "assurance/roadmap/index.html",
+          "prefix": "../../",
+          "canonical": "https://aaronalderman.com/assurance/roadmap/",
+          "title": "Assurance roadmap — Aaron Alderman",
+          "description": "A corpus-owned work queue derived from assurance findings, missing evidence and scoped maturity gates.",
+          "body": [
+            "list",
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-intro"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    "ASSURANCE / ROADMAP"
+                  ]
+                },
+                {
+                  "tag": "h1",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "From evidence to work."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "A governed queue for what assurance reveals: discernment, corrections and missing evidence. Repeated observations become scoped work items, with ownership, dependencies and completion criteria."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../"
+                      },
+                      "children": [
+                        "list",
+                        "Assurance topics"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../maturity/"
+                      },
+                      "children": [
+                        "list",
+                        "Maturity profiles"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../roadmap-workflow.json"
+                      },
+                      "children": [
+                        "list",
+                        "Workflow declarations (JSON)"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "How work moves"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Triage → to do → in progress or blocked → verification → done or explicitly accepted. No owner or delivery date is invented. A finding is not automatically a bug; disappearance is not completion."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Closure needs a matching verification key, evidence, method, reviewer and date. Acceptance also needs a rationale. Source observations remain visible and do not change maturity levels when a workflow status changes."
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Work queue"
+                  ]
+                },
+                {
+                  "tag": "details",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "summary",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Inspect roadmap and todo"
+                      ]
+                    },
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "id": "todo-controls",
+                        "style": "display:flex;flex-wrap:wrap;gap:1rem;align-items:end;"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "label",
+                          "attrs": {
+                            "style": "display:grid;gap:.35rem;min-width:0;"
+                          },
+                          "children": [
+                            "list",
+                            "Product",
+                            {
+                              "tag": "span",
+                              "attrs": {
+                                "id": "todo-product-host"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "select",
+                                  "attrs": {
+                                    "id": "todo-product"
+                                  },
+                                  "children": [
+                                    "list",
+                                    {
+                                      "tag": "option",
+                                      "attrs": {
+                                        "value": "all"
+                                      },
+                                      "children": [
+                                        "list",
+                                        "All products"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "label",
+                          "attrs": {
+                            "style": "display:grid;gap:.35rem;min-width:0;"
+                          },
+                          "children": [
+                            "list",
+                            "Horizon",
+                            {
+                              "tag": "select",
+                              "attrs": {
+                                "id": "todo-horizon"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "now"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Now: triage findings"
+                                  ]
+                                },
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "next"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Next evidence gates"
+                                  ]
+                                },
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "later"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Later evidence gates"
+                                  ]
+                                },
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "all"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "All horizons"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "label",
+                          "attrs": {
+                            "style": "display:grid;gap:.35rem;min-width:0;"
+                          },
+                          "children": [
+                            "list",
+                            "Status",
+                            {
+                              "tag": "select",
+                              "attrs": {
+                                "id": "todo-stage"
+                              },
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "all"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "All statuses"
+                                  ]
+                                },
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "triage"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Triage"
+                                  ]
+                                },
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "todo"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "To do"
+                                  ]
+                                },
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "in-progress"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "In progress"
+                                  ]
+                                },
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "blocked"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Blocked"
+                                  ]
+                                },
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "verification-required"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Verification required"
+                                  ]
+                                },
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "done"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Done"
+                                  ]
+                                },
+                                {
+                                  "tag": "option",
+                                  "attrs": {
+                                    "value": "accepted"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Accepted"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "details",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "summary",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Machine-readable roadmap"
+                          ]
+                        },
+                        {
+                          "tag": "textarea",
+                          "attrs": {
+                            "id": "todo-json",
+                            "readonly": true,
+                            "rows": 12,
+                            "style": "width:100%;box-sizing:border-box;",
+                            "aria-label": "Current roadmap JSON"
+                          },
+                          "children": [
+                            "list"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "id": "todo-results",
+                        "aria-live": "polite"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "Loading assurance-derived work…"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "script",
+              "attrs": {
+                "src": "../roadmap-runtime.js",
                 "defer": true
               },
               "children": [

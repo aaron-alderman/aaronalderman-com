@@ -52,7 +52,7 @@ test('forty activity source documents retain controls and contain no executable 
 
 test('the published execution graph contains only admitted bundles and generic native mechanisms',async()=>{
  const receipt=read('dist/build-receipt.json'),contract=read('source/publication-contract.json');
- const allowed=new Set(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js','identity-runtime.js','inspection/runtime.js','assurance/rendered-runtime.js',...contract.readerWorkshopSuccessor.runtimes]);
+ const allowed=new Set(['temple/runtime.js','temple/early.js','sourcery/runtime.js','claimipedia/runtime.js','encounter/runtime.js','atlas-runtime.js','identity-runtime.js','inspection/runtime.js','assurance/rendered-runtime.js','assurance/roadmap-runtime.js',...contract.readerWorkshopSuccessor.runtimes]);
  for(const file of Object.keys(receipt.artifacts)){
   if(!/\.(?:m?js|html)$/.test(file))continue;
   const content=fs.readFileSync(new URL('dist/'+file,import.meta.url),'utf8');

@@ -1,0 +1,168 @@
+{
+  "protocol": "worldwright/assurance-roadmap-release/1",
+  "baseRevision": "a397026b77fdff4c724994227f51d18f149a4816",
+  "authoring": {
+    "receiptSha256": "a553682fa03f820f565cb066d214ef8709c2fbacc515170d6366752e7471c307",
+    "commit": {
+      "files": [
+        {
+          "file": "algebra/publication.process.json",
+          "beforeSha256": "7b44195b5276e151524d66f70a630d4c82bee5cba8e6ec46588ebaa3beba402a",
+          "afterSha256": "360ca902fc652823d4c313bf2b5502e1a60dbf6fd5fe383ac49a93024c14c62d"
+        },
+        {
+          "file": "source/hierarchy.rel",
+          "beforeSha256": "efb1684af811da3ff002a5e5522001e79ffbad0968635b827ee676fdc93548c5",
+          "afterSha256": "85b660a70f3a2d16cc5ee6212397e50b5a3db3b96a52c23a17cb6e001f710aaa"
+        }
+      ]
+    },
+    "contractSha256": "2837864b57a1f7eeb7ae8daa21c2474d149854b69d6dfa9f700107c832dfb915",
+    "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7",
+    "applied": true
+  },
+  "roadmap": {
+    "total": 270,
+    "active": 270,
+    "retained": 0,
+    "stages": [
+      {
+        "stage": "triage",
+        "count": 18
+      },
+      {
+        "stage": "todo",
+        "count": 252
+      },
+      {
+        "stage": "in-progress",
+        "count": 0
+      },
+      {
+        "stage": "blocked",
+        "count": 0
+      },
+      {
+        "stage": "verification-required",
+        "count": 0
+      },
+      {
+        "stage": "done",
+        "count": 0
+      },
+      {
+        "stage": "accepted",
+        "count": 0
+      }
+    ],
+    "origins": {
+      "rendered": 12,
+      "maturity": 252,
+      "identity": 6
+    },
+    "derivationSteps": 1996565,
+    "decisions": 0,
+    "receipts": 0,
+    "boundary": "This is a scoped work queue, not a release commitment or a composite maturity score. Repeated pages and viewport observations are grouped by rule and selector, without asserting a shared root cause. Workflow and receipts are authored corpus records; their presence does not authenticate an external reviewer. Disappearance never closes a task automatically."
+  },
+  "browser": {
+    "routes": 306,
+    "readings": 612,
+    "reviewOccurrences": 429,
+    "unmeasured": 0,
+    "policySha256": "a08438c0d0ff4d79a28f91c39114fcb9c6eab1b4ddd95d708abe7b47004c79f0",
+    "observerSha256": "16b3502c73a844e59a089d2bac58d614c48dfd50ed65236b527a132399b0d87a",
+    "scope": "Initial loaded state at both declared iframe viewports. Expanded roadmap filters and task details additionally checked in the supported browser; a 390px viewport has document scrollWidth 375px after expanding the verification key."
+  },
+  "verification": {
+    "commands": [
+      {
+        "command": [
+          "npm",
+          "ci",
+          "--ignore-scripts",
+          "--no-audit",
+          "--no-fund",
+          "--cache",
+          ".npm-cache"
+        ],
+        "status": 0
+      },
+      {
+        "command": [
+          "node",
+          "bootstrap/run.cjs",
+          ".",
+          "dist",
+          "bootstrap/site.json"
+        ],
+        "status": 0
+      },
+      {
+        "command": [
+          "node",
+          "--test",
+          "reading.test.mjs",
+          "publication.test.mjs",
+          "algebra-publication.test.mjs",
+          "microsite-fidelity.test.mjs",
+          "microsite-publication.test.mjs",
+          "claimipedia-review.test.mjs",
+          "encounter-microsite.test.mjs",
+          "activity-layout.test.mjs",
+          "atlas.test.mjs",
+          "atlas-journey.test.mjs",
+          "authoring.test.mjs",
+          "reader-workshop-algebra.test.mjs",
+          "hierarchy.test.mjs",
+          "process-authoring.test.mjs",
+          "batch-process-authoring.test.mjs",
+          "authoring-workflow.test.mjs",
+          "document-inspection.test.mjs",
+          "expansion.test.mjs",
+          "expedition.test.mjs",
+          "workshop.test.mjs",
+          "microsite-process-authoring.test.mjs",
+          "microsite-publication-process-authoring.test.mjs",
+          "stylesheet-algebra.test.mjs",
+          "field-correction-article.test.mjs",
+          "html-escaping.test.mjs",
+          "mission-publication.test.mjs"
+        ],
+        "status": 0
+      },
+      {
+        "command": [
+          "node",
+          "tooling/verify-microsite-presentation.mjs",
+          "dist"
+        ],
+        "status": 0
+      }
+    ],
+    "nativeSourcesUnchanged": true,
+    "portProfilesUnchanged": true,
+    "execution": {
+      "indexSteps": 5186839,
+      "applicationSteps": 14786778,
+      "totalSteps": 19973617,
+      "limit": 20000000
+    },
+    "sourceExamplePreserved": true,
+    "upstreamDrift": [
+      {
+        "status": "upstream-drift",
+        "origin": "applications/usewords-lightning/README.md",
+        "recordedSha256": "59e6e7e3c59d02d9d3f92b3bb8c0a19b7b46e09aac1ad7947b2208e053bffb3f",
+        "observedSha256": "0fdc65d954b01c01c1b4ca95ebbac446a1666191a86d9af4f7dd17521dd0dab5",
+        "boundary": "The immutable bundled snapshot remains the publication authority; the live checkout is a different revision."
+      }
+    ]
+  },
+  "limits": [
+    "Priorities indicate review order, not certified defect severity.",
+    "Ownership and external evidence remain authored declarations, not authenticated reviewer identities.",
+    "Current findings are combined with the authored persistent ledger; update the ledger through corpus authoring when admitting newly discovered work.",
+    "The existing Source findings aberration is captured, not corrected."
+  ]
+}
