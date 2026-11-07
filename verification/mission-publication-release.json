@@ -2,22 +2,22 @@
   "protocol": "aaronalderman/local-publication-qualification/1",
   "date": "2026-11-07",
   "timezone": "Australia/Perth",
-  "sourceBaseline": "711f617f06a1a3932a6032e082425259edc57954",
-  "scope": "Full local publication qualification; no push or deployment.",
+  "sourceBaseline": "70d5f9a43929c45335a6bc4dbeff503c0d93cad9",
+  "scope": "Integrated publication qualification before the authorized GitHub Pages deployment.",
   "entry": "publication.build",
   "execution": {
-    "indexSteps": 5041953,
-    "applicationSteps": 14383087,
-    "totalSteps": 19425040,
+    "indexSteps": 5083623,
+    "applicationSteps": 14783751,
+    "totalSteps": 19867374,
     "limit": 20000000
   },
-  "artifactCount": 637,
-  "buildReceiptSha256": "e05d20170d31bc001c0e3784a4cf18ca82400fef86e3daf60d99424e54c13bcb",
+  "artifactCount": 643,
+  "buildReceiptSha256": "162e20cb8d4924a07752a58babefcfb8dac3f8152bb4e3699173976d3845208a",
   "sourceSha256": {
     "source/front-doors.rel": "b06f283289b2059964b08ebc506d17a93f832fa073d44e15e63ece434c18d611",
-    "source/expedition.rel": "f971c7c1047db5dbd521bf47d995995fe90c95c4cf8419794ec99703120746fa",
-    "source/hierarchy.rel": "02e6af35a2506df096438e0d1b4e31a7620b75dcf6bf5ebc3326cdc256782233",
-    "algebra/publication.process.json": "a36abba7ef561ee7f417a3cca9cfcc121c103f08f29042591da47edfec94f4e9"
+    "source/expedition.rel": "8b531a06a3d641d0223c9ee4a8131b06e1ebe86fe6849930633efbf4e6a12045",
+    "source/hierarchy.rel": "1478112bfb3ba7005a286e587b6947ff87cc4b87c0d4cef9b630f3225983b60f",
+    "algebra/publication.process.json": "e02259b2585bc9cd89be7231166e3517a7e01695a5717b1ea2e93e6964398056"
   },
   "artworkSha256": "89cd80f02e60dc3e0d131f22dbcaaeeeed73e7ef07974b9d0f86e2c587c250ae",
   "nativeFilesCompared": 15,
@@ -27,21 +27,10 @@
     "applied": true,
     "protocol": "worldwright/authoring-receipt/2",
     "receiptSha256": "288cdcc78a45ad71d71b35829dee7f5799507180d2a5d9bd0d034a4fe165cbda",
-    "mechanismSha256": "7ba3d118ed6d77703c6c8a90c3d56659bb1d457ebf72d54a9fc31330c2414ace"
+    "mechanismSha256": "7ba3d118ed6d77703c6c8a90c3d56659bb1d457ebf72d54a9fc31330c2414ace",
+    "scope": "The approved design was authored and accepted at revision 9c0b648; the current main branch was subsequently integrated through Git and revalidated."
   },
   "checks": [
-    {
-      "command": [
-        "npm",
-        "ci",
-        "--ignore-scripts",
-        "--no-audit",
-        "--no-fund",
-        "--cache",
-        ".npm-cache"
-      ],
-      "status": 0
-    },
     {
       "command": [
         "node",
@@ -54,34 +43,9 @@
     },
     {
       "command": [
-        "node",
-        "--test",
-        "reading.test.mjs",
-        "publication.test.mjs",
-        "algebra-publication.test.mjs",
-        "microsite-fidelity.test.mjs",
-        "microsite-publication.test.mjs",
-        "claimipedia-review.test.mjs",
-        "encounter-microsite.test.mjs",
-        "activity-layout.test.mjs",
-        "atlas.test.mjs",
-        "atlas-journey.test.mjs",
-        "authoring.test.mjs",
-        "reader-workshop-algebra.test.mjs",
-        "hierarchy.test.mjs",
-        "process-authoring.test.mjs",
-        "batch-process-authoring.test.mjs",
-        "authoring-workflow.test.mjs",
-        "document-inspection.test.mjs",
-        "expansion.test.mjs",
-        "expedition.test.mjs",
-        "workshop.test.mjs",
-        "microsite-process-authoring.test.mjs",
-        "microsite-publication-process-authoring.test.mjs",
-        "stylesheet-algebra.test.mjs",
-        "field-correction-article.test.mjs",
-        "html-escaping.test.mjs",
-        "mission-publication.test.mjs"
+        "npm",
+        "run",
+        "test:portable"
       ],
       "status": 0
     },
@@ -95,7 +59,7 @@
     }
   ],
   "portableTests": {
-    "passed": 207,
+    "passed": 211,
     "failed": 0,
     "skipped": 0,
     "includesFreshArtifactReproduction": true
@@ -108,5 +72,22 @@
     "Redundant floating return link no longer covers the comic"
   ],
   "boundary": "Engineering evidence for this source state; same local validation run, not independent scientific validation.",
-  "comicSha256": "37b078a6dfd5fc4e6b85c61bd5374eec4469393db24d52ac2110b5b805b98256"
+  "comicSha256": "37b078a6dfd5fc4e6b85c61bd5374eec4469393db24d52ac2110b5b805b98256",
+  "approvedRevision": "9c0b64880ed1a6c0600be1a29529fe91092dc2ff",
+  "integration": {
+    "upstream": "70d5f9a43929c45335a6bc4dbeff503c0d93cad9",
+    "designPreservation": {
+      "approved": "9c0b64880ed1a6c0600be1a29529fe91092dc2ff",
+      "designFiles": [
+        "source/front-doors.rel",
+        "assets/scroll/power-to-life-v1.webp",
+        "assets/scroll/agency-triptych-v1.webp"
+      ],
+      "designUnchanged": true,
+      "nativeBytesUnchanged": true,
+      "publicationConfigurationUnchanged": true
+    },
+    "portableLogSha256": "2ed1fcabc0274a9263839a2f4a38bfbfbed0d26d2a763a1549d0c6129311fc8c",
+    "presentationLogSha256": "8780fb6f6c390bcfc2c7fe4f7f21b06b8bb1fc70706ef5ede90610eda44a53b5"
+  }
 }

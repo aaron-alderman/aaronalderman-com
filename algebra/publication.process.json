@@ -345,6 +345,9 @@
         "call": "identity.assurance.build"
       },
       {
+        "call": "assurance.portfolio.build"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "robots.txt",
@@ -1705,7 +1708,7 @@
                           },
                           "children": [
                             "list",
-                            "Identity assurance"
+                            "Assurance"
                           ]
                         }
                       ]
@@ -5671,6 +5674,23 @@
               "list",
               {
                 "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  {
+                    "tag": "a",
+                    "attrs": {
+                      "href": "/assurance/"
+                    },
+                    "children": [
+                      "list",
+                      "← All assurance topics"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "p",
                 "attrs": {
                   "class": "eyebrow"
                 },
@@ -5711,7 +5731,7 @@
                   {
                     "tag": "a",
                     "attrs": {
-                      "href": "identity-mappings.json"
+                      "href": "../identity-mappings.json"
                     },
                     "children": [
                       "list",
@@ -5857,7 +5877,7 @@
                   {
                     "tag": "a",
                     "attrs": {
-                      "href": "identity-discovery.json"
+                      "href": "../identity-discovery.json"
                     },
                     "children": [
                       "list",
@@ -6040,7 +6060,7 @@
                   {
                     "tag": "a",
                     "attrs": {
-                      "href": "identity-decisions.json"
+                      "href": "../identity-decisions.json"
                     },
                     "children": [
                       "list",
@@ -6544,7 +6564,7 @@
                                     {
                                       "tag": "a",
                                       "attrs": {
-                                        "href": "identity-discovery.json"
+                                        "href": "../identity-discovery.json"
                                       },
                                       "children": [
                                         "list",
@@ -6569,7 +6589,7 @@
       },
       {
         "let": "prefix",
-        "value": "../"
+        "value": "../../"
       },
       {
         "let": "pageTitle",
@@ -6581,7 +6601,7 @@
       },
       {
         "let": "canonical",
-        "value": "https://aaronalderman.com/assurance/"
+        "value": "https://aaronalderman.com/assurance/identities/"
       },
       {
         "let": "light",
@@ -6593,7 +6613,7 @@
       {
         "port": "file.write",
         "args": {
-          "path": "assurance/index.html",
+          "path": "assurance/identities/index.html",
           "text": [
             "concat",
             "<!doctype html>\n",
@@ -11953,6 +11973,2500 @@
             "call": "html.escape"
           }
         ]
+      }
+    ],
+    "assurance.saga.classify": [
+      {
+        "fold": "$eventInput.obligations",
+        "as": "gate",
+        "accumulator": "gateResults",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "candidates",
+            "value": [
+              "filter",
+              "$eventInput.evidence",
+              "e",
+              [
+                "eq",
+                "$e.id",
+                "$gate.id"
+              ]
+            ]
+          },
+          {
+            "let": "proof",
+            "value": [
+              "if",
+              [
+                "eq",
+                [
+                  "count",
+                  "$candidates"
+                ],
+                1
+              ],
+              [
+                "at",
+                "$candidates",
+                0
+              ],
+              {}
+            ]
+          },
+          {
+            "let": "qualified",
+            "value": [
+              "and",
+              [
+                "includes",
+                [
+                  "list",
+                  "declaration",
+                  "machine",
+                  "human",
+                  "use",
+                  "maintenance"
+                ],
+                "$gate.kind"
+              ],
+              [
+                "eq",
+                [
+                  "count",
+                  "$candidates"
+                ],
+                1
+              ],
+              [
+                "eq",
+                "$proof.kind",
+                "$gate.kind"
+              ],
+              [
+                "eq",
+                "$proof.scope",
+                "$eventInput.scope"
+              ],
+              "$proof.source",
+              "$proof.issuer",
+              "$proof.method",
+              "$proof.observedAt"
+            ]
+          },
+          {
+            "port": "value.describe",
+            "args": {
+              "value": [
+                "at",
+                "$proof",
+                "source"
+              ]
+            },
+            "into": "sourceKind"
+          },
+          {
+            "port": "value.describe",
+            "args": {
+              "value": [
+                "at",
+                "$proof",
+                "issuer"
+              ]
+            },
+            "into": "issuerKind"
+          },
+          {
+            "port": "value.describe",
+            "args": {
+              "value": [
+                "at",
+                "$proof",
+                "method"
+              ]
+            },
+            "into": "methodKind"
+          },
+          {
+            "port": "value.describe",
+            "args": {
+              "value": [
+                "at",
+                "$proof",
+                "observedAt"
+              ]
+            },
+            "into": "dateKind"
+          },
+          {
+            "let": "qualified",
+            "value": [
+              "and",
+              "$qualified",
+              [
+                "eq",
+                "$sourceKind.type",
+                "string"
+              ],
+              [
+                "eq",
+                "$issuerKind.type",
+                "string"
+              ],
+              [
+                "eq",
+                "$methodKind.type",
+                "string"
+              ],
+              [
+                "eq",
+                "$dateKind.type",
+                "string"
+              ]
+            ]
+          },
+          {
+            "when": "$qualified",
+            "then": [
+              {
+                "port": "text.trim",
+                "args": {
+                  "value": "$proof.source"
+                },
+                "into": "sourceText"
+              },
+              {
+                "port": "text.trim",
+                "args": {
+                  "value": "$proof.issuer"
+                },
+                "into": "issuerText"
+              },
+              {
+                "port": "text.trim",
+                "args": {
+                  "value": "$proof.method"
+                },
+                "into": "methodText"
+              },
+              {
+                "port": "text.trim",
+                "args": {
+                  "value": "$proof.observedAt"
+                },
+                "into": "dateText"
+              },
+              {
+                "let": "qualified",
+                "value": [
+                  "and",
+                  [
+                    "not",
+                    [
+                      "eq",
+                      "$sourceText",
+                      ""
+                    ]
+                  ],
+                  [
+                    "not",
+                    [
+                      "eq",
+                      "$issuerText",
+                      ""
+                    ]
+                  ],
+                  [
+                    "not",
+                    [
+                      "eq",
+                      "$methodText",
+                      ""
+                    ]
+                  ],
+                  [
+                    "not",
+                    [
+                      "eq",
+                      "$dateText",
+                      ""
+                    ]
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "when": [
+              "and",
+              "$qualified",
+              [
+                "includes",
+                [
+                  "list",
+                  "human",
+                  "use",
+                  "maintenance"
+                ],
+                "$gate.kind"
+              ]
+            ],
+            "then": [
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$proof.observedAt",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "into": "dated"
+              },
+              {
+                "let": "qualified",
+                "value": [
+                  "and",
+                  "$qualified",
+                  "$dated"
+                ]
+              }
+            ]
+          },
+          {
+            "let": "gateResult",
+            "value": {
+              "id": "$gate.id",
+              "level": "$gate.level",
+              "kind": "$gate.kind",
+              "label": "$gate.label",
+              "next": "$gate.next",
+              "status": [
+                "if",
+                "$qualified",
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$proof.ok",
+                    true
+                  ],
+                  "supported",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$proof.ok",
+                      false
+                    ],
+                    "failed",
+                    "not-evidenced"
+                  ]
+                ],
+                "not-evidenced"
+              ],
+              "evidence": [
+                "if",
+                "$qualified",
+                "$proof",
+                null
+              ]
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$gateResults",
+          [
+            "list",
+            "$gateResult"
+          ]
+        ],
+        "into": "gateResults"
+      },
+      {
+        "fold": [
+          "list",
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "as": "level",
+        "accumulator": "achieved",
+        "initial": 0,
+        "steps": [
+          {
+            "let": "required",
+            "value": [
+              "filter",
+              "$gateResults",
+              "g",
+              [
+                "eq",
+                "$g.level",
+                "$level"
+              ]
+            ]
+          }
+        ],
+        "yield": [
+          "if",
+          [
+            "and",
+            [
+              "eq",
+              "$achieved",
+              [
+                "add",
+                "$level",
+                -1
+              ]
+            ],
+            [
+              "not",
+              [
+                "eq",
+                [
+                  "count",
+                  "$required"
+                ],
+                0
+              ]
+            ],
+            [
+              "every",
+              "$required",
+              "g",
+              [
+                "eq",
+                "$g.status",
+                "supported"
+              ]
+            ]
+          ],
+          "$level",
+          "$achieved"
+        ],
+        "into": "achieved"
+      },
+      {
+        "let": "result",
+        "value": {
+          "id": "$eventInput.id",
+          "title": "$eventInput.title",
+          "scope": "$eventInput.scopeText",
+          "scopeId": "$eventInput.scope",
+          "level": "$achieved",
+          "gates": "$gateResults",
+          "nextLevel": [
+            "if",
+            [
+              "eq",
+              "$achieved",
+              5
+            ],
+            null,
+            [
+              "add",
+              "$achieved",
+              1
+            ]
+          ],
+          "boundary": "Levels describe the maturity of evidence within this scope. Receipt metadata is checked; authenticity, evaluation quality and broader product readiness require their own review."
+        }
+      }
+    ],
+    "assurance.entry.observe": [
+      {
+        "fold": "$eventInput.pages",
+        "as": "page",
+        "accumulator": "entryEvidence",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "fold": "$page.observations",
+            "as": "o",
+            "accumulator": "scan",
+            "initial": {
+              "language": "",
+              "charset": "",
+              "skip": false,
+              "main": false,
+              "images": {}
+            },
+            "steps": [
+              {
+                "let": "language",
+                "value": "$scan.language"
+              },
+              {
+                "let": "charset",
+                "value": "$scan.charset"
+              },
+              {
+                "let": "skip",
+                "value": "$scan.skip"
+              },
+              {
+                "let": "main",
+                "value": "$scan.main"
+              },
+              {
+                "let": "images",
+                "value": "$scan.images"
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    "$o.tag",
+                    "html"
+                  ],
+                  [
+                    "eq",
+                    "$o.sink",
+                    "lang"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "language",
+                    "value": "$o.value"
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    "$o.tag",
+                    "meta"
+                  ],
+                  [
+                    "eq",
+                    "$o.sink",
+                    "charset"
+                  ]
+                ],
+                "then": [
+                  {
+                    "port": "text.lowerCase",
+                    "args": {
+                      "value": "$o.value"
+                    },
+                    "into": "charset"
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    "$o.sink",
+                    "href"
+                  ],
+                  [
+                    "eq",
+                    "$o.value",
+                    "#main"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "skip",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "and",
+                  [
+                    "eq",
+                    "$o.sink",
+                    "id"
+                  ],
+                  [
+                    "eq",
+                    "$o.value",
+                    "main"
+                  ]
+                ],
+                "then": [
+                  {
+                    "let": "main",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "when": [
+                  "eq",
+                  "$o.tag",
+                  "img"
+                ],
+                "then": [
+                  {
+                    "let": "image",
+                    "value": [
+                      "or",
+                      [
+                        "at",
+                        "$images",
+                        "$o.ordinal"
+                      ],
+                      {}
+                    ]
+                  },
+                  {
+                    "port": "record.put",
+                    "args": {
+                      "record": "$image",
+                      "key": "$o.sink",
+                      "value": "$o.value"
+                    },
+                    "into": "image"
+                  },
+                  {
+                    "port": "record.put",
+                    "args": {
+                      "record": "$images",
+                      "key": "$o.ordinal",
+                      "value": "$image"
+                    },
+                    "into": "images"
+                  }
+                ]
+              }
+            ],
+            "yield": {
+              "language": "$language",
+              "charset": "$charset",
+              "skip": "$skip",
+              "main": "$main",
+              "images": "$images"
+            },
+            "into": "scan"
+          },
+          {
+            "port": "record.entries",
+            "args": {
+              "value": "$scan.images"
+            },
+            "into": "images"
+          },
+          {
+            "let": "missingAlt",
+            "value": [
+              "filter",
+              "$images",
+              "i",
+              [
+                "eq",
+                [
+                  "at",
+                  [
+                    "at",
+                    "$i",
+                    1
+                  ],
+                  "alt"
+                ],
+                [
+                  "at",
+                  {},
+                  "absent"
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "pageEvidence",
+            "value": {
+              "file": "$page.file",
+              "language": "$scan.language",
+              "charset": "$scan.charset",
+              "languageMarker": [
+                "not",
+                [
+                  "eq",
+                  "$scan.language",
+                  ""
+                ]
+              ],
+              "skipTarget": [
+                "and",
+                "$scan.skip",
+                "$scan.main"
+              ],
+              "images": [
+                "count",
+                "$images"
+              ],
+              "missingAlt": [
+                "map",
+                "$missingAlt",
+                "i",
+                [
+                  "at",
+                  "$i",
+                  0
+                ]
+              ],
+              "altAttributes": [
+                "eq",
+                [
+                  "count",
+                  "$missingAlt"
+                ],
+                0
+              ],
+              "utf8": [
+                "eq",
+                "$scan.charset",
+                "utf-8"
+              ]
+            }
+          }
+        ],
+        "yield": [
+          "append",
+          "$entryEvidence",
+          [
+            "list",
+            "$pageEvidence"
+          ]
+        ],
+        "into": "entryEvidence"
+      },
+      {
+        "let": "result",
+        "value": "$entryEvidence"
+      }
+    ],
+    "assurance.portfolio.document": [
+      {
+        "let": "body",
+        "value": "$portfolioPage.body"
+      },
+      {
+        "let": "prefix",
+        "value": "$portfolioPage.prefix"
+      },
+      {
+        "let": "pageTitle",
+        "value": "$portfolioPage.title"
+      },
+      {
+        "let": "description",
+        "value": "$portfolioPage.description"
+      },
+      {
+        "let": "canonical",
+        "value": "$portfolioPage.canonical"
+      },
+      {
+        "let": "light",
+        "value": "home"
+      },
+      {
+        "call": "publication.document"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "$portfolioPage.route",
+          "text": [
+            "concat",
+            "<!doctype html>\n",
+            "$result"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "assurance.portfolio.build": [
+      {
+        "let": "identityTopicReport",
+        "value": "$report"
+      },
+      {
+        "let": "eventInput",
+        "value": {
+          "pages": "$discoveryPages"
+        }
+      },
+      {
+        "call": "assurance.entry.observe"
+      },
+      {
+        "let": "entryEvidence",
+        "value": "$result"
+      },
+      {
+        "let": "entryCoverage",
+        "value": [
+          "and",
+          [
+            "not",
+            [
+              "eq",
+              [
+                "count",
+                "$entryEvidence"
+              ],
+              0
+            ]
+          ],
+          [
+            "eq",
+            [
+              "count",
+              "$entryEvidence"
+            ],
+            [
+              "count",
+              "$discoveryDocuments"
+            ]
+          ],
+          [
+            "every",
+            "$discoveryDocuments",
+            "expected",
+            [
+              "eq",
+              [
+                "count",
+                [
+                  "filter",
+                  "$entryEvidence",
+                  "p",
+                  [
+                    "eq",
+                    "$p.file",
+                    "$expected.file"
+                  ]
+                ]
+              ],
+              1
+            ]
+          ]
+        ]
+      },
+      {
+        "let": "obligations",
+        "value": [
+          "map",
+          [
+            "subjects",
+            "isa",
+            "AssuranceObligation"
+          ],
+          "s",
+          {
+            "id": [
+              "one",
+              "$s",
+              "id"
+            ],
+            "saga": [
+              "one",
+              "$s",
+              "saga"
+            ],
+            "level": [
+              "add",
+              [
+                "one",
+                "$s",
+                "level"
+              ],
+              0
+            ],
+            "kind": [
+              "one",
+              "$s",
+              "kind"
+            ],
+            "label": [
+              "one",
+              "$s",
+              "label"
+            ],
+            "next": [
+              "one",
+              "$s",
+              "next"
+            ]
+          }
+        ]
+      },
+      {
+        "let": "levelNames",
+        "value": {
+          "0": "Unassessed",
+          "1": "Scoped",
+          "2": "Mechanically checked",
+          "3": "Human reviewed",
+          "4": "Experienced in use",
+          "5": "Maintained"
+        }
+      },
+      {
+        "fold": [
+          "subjects",
+          "isa",
+          "AssuranceSaga"
+        ],
+        "as": "sagaSubject",
+        "accumulator": "profiles",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "sagaId",
+            "value": [
+              "one",
+              "$sagaSubject",
+              "id"
+            ]
+          },
+          {
+            "let": "scopeId",
+            "value": [
+              "one",
+              "$sagaSubject",
+              "scopeId"
+            ]
+          },
+          {
+            "let": "sagaGates",
+            "value": [
+              "filter",
+              "$obligations",
+              "g",
+              [
+                "eq",
+                "$g.saga",
+                "$sagaId"
+              ]
+            ]
+          },
+          {
+            "fold": "$sagaGates",
+            "as": "g",
+            "accumulator": "evidence",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "let": "available",
+                "value": [
+                  "includes",
+                  [
+                    "list",
+                    "identity.scope",
+                    "identity.pipeline",
+                    "access.scope",
+                    "access.language",
+                    "access.skip",
+                    "access.alternatives",
+                    "i18n.scope",
+                    "i18n.metadata"
+                  ],
+                  "$g.id"
+                ]
+              },
+              {
+                "let": "ok",
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$g.kind",
+                    "declaration"
+                  ],
+                  [
+                    "not",
+                    [
+                      "eq",
+                      [
+                        "one",
+                        "$sagaSubject",
+                        "scope"
+                      ],
+                      ""
+                    ]
+                  ],
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$g.id",
+                      "identity.pipeline"
+                    ],
+                    [
+                      "and",
+                      [
+                        "eq",
+                        [
+                          "count",
+                          [
+                            "filter",
+                            "$identityTopicReport.rows",
+                            "r",
+                            [
+                              "eq",
+                              "$r.status",
+                              "missing"
+                            ]
+                          ]
+                        ],
+                        0
+                      ],
+                      [
+                        "eq",
+                        [
+                          "count",
+                          "$entryEvidence"
+                        ],
+                        [
+                          "add",
+                          [
+                            "count",
+                            [
+                              "subjects",
+                              "isa",
+                              "IdentityTheme"
+                            ]
+                          ],
+                          1
+                        ]
+                      ]
+                    ],
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$g.id",
+                        "access.language"
+                      ],
+                      [
+                        "every",
+                        "$entryEvidence",
+                        "p",
+                        "$p.languageMarker"
+                      ],
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$g.id",
+                          "access.skip"
+                        ],
+                        [
+                          "every",
+                          "$entryEvidence",
+                          "p",
+                          "$p.skipTarget"
+                        ],
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$g.id",
+                            "access.alternatives"
+                          ],
+                          [
+                            "every",
+                            "$entryEvidence",
+                            "p",
+                            "$p.altAttributes"
+                          ],
+                          [
+                            "if",
+                            [
+                              "eq",
+                              "$g.id",
+                              "i18n.metadata"
+                            ],
+                            [
+                              "every",
+                              "$entryEvidence",
+                              "p",
+                              [
+                                "and",
+                                "$p.languageMarker",
+                                "$p.utf8"
+                              ]
+                            ],
+                            false
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              },
+              {
+                "let": "method",
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$g.kind",
+                    "declaration"
+                  ],
+                  "Authored scope and explicit boundaries.",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$g.id",
+                      "identity.pipeline"
+                    ],
+                    "Current identity mapping and discovery reports; undecided groups remain open work.",
+                    "Current generated entry markup; presence checks only."
+                  ]
+                ]
+              },
+              {
+                "let": "ok",
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$g.kind",
+                    "machine"
+                  ],
+                  [
+                    "and",
+                    "$entryCoverage",
+                    "$ok"
+                  ],
+                  "$ok"
+                ]
+              },
+              {
+                "let": "proof",
+                "value": {
+                  "id": "$g.id",
+                  "kind": "$g.kind",
+                  "scope": "$scopeId",
+                  "ok": "$ok",
+                  "source": [
+                    "if",
+                    [
+                      "eq",
+                      "$g.kind",
+                      "declaration"
+                    ],
+                    "source/hierarchy.rel",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$g.id",
+                        "identity.pipeline"
+                      ],
+                      "/assurance/identity-mappings.json",
+                      "/assurance/entry-markup.json"
+                    ]
+                  ],
+                  "issuer": [
+                    "if",
+                    [
+                      "eq",
+                      "$g.kind",
+                      "declaration"
+                    ],
+                    "Authored scope record",
+                    "Algebra build"
+                  ],
+                  "method": "$method",
+                  "observedAt": "current build"
+                }
+              }
+            ],
+            "yield": [
+              "if",
+              "$available",
+              [
+                "append",
+                "$evidence",
+                [
+                  "list",
+                  "$proof"
+                ]
+              ],
+              "$evidence"
+            ],
+            "into": "evidence"
+          },
+          {
+            "let": "eventInput",
+            "value": {
+              "id": "$sagaId",
+              "title": [
+                "one",
+                "$sagaSubject",
+                "title"
+              ],
+              "scopeText": [
+                "one",
+                "$sagaSubject",
+                "scope"
+              ],
+              "scope": "$scopeId",
+              "obligations": "$sagaGates",
+              "evidence": "$evidence"
+            }
+          },
+          {
+            "call": "assurance.saga.classify"
+          }
+        ],
+        "yield": [
+          "append",
+          "$profiles",
+          [
+            "list",
+            "$result"
+          ]
+        ],
+        "into": "sagaProfiles"
+      },
+      {
+        "let": "roadmap",
+        "value": [
+          "fold",
+          "$sagaProfiles",
+          "s",
+          "rows",
+          [
+            "list"
+          ],
+          [
+            "append",
+            "$rows",
+            [
+              "map",
+              [
+                "filter",
+                "$s.gates",
+                "g",
+                [
+                  "not",
+                  [
+                    "eq",
+                    "$g.status",
+                    "supported"
+                  ]
+                ]
+              ],
+              "g",
+              {
+                "id": "$g.id",
+                "saga": "$s.id",
+                "label": "$g.label",
+                "targetLevel": "$g.level",
+                "state": "$g.status",
+                "horizon": [
+                  "if",
+                  [
+                    "eq",
+                    "$g.level",
+                    "$s.nextLevel"
+                  ],
+                  "next",
+                  "later"
+                ],
+                "action": "$g.next",
+                "owner": "Unassigned",
+                "product": "aaronalderman"
+              }
+            ]
+          ]
+        ]
+      },
+      {
+        "let": "portfolioReport",
+        "value": {
+          "protocol": "worldwright/assurance-portfolio/1",
+          "product": "aaronalderman",
+          "scope": "Root and identity homepage entry routes; individual catalogue products are unassessed.",
+          "levels": [
+            "map",
+            [
+              "subjects",
+              "isa",
+              "AssuranceLevel"
+            ],
+            "s",
+            {
+              "number": [
+                "add",
+                [
+                  "one",
+                  "$s",
+                  "number"
+                ],
+                0
+              ],
+              "label": [
+                "one",
+                "$s",
+                "label"
+              ],
+              "meaning": [
+                "one",
+                "$s",
+                "meaning"
+              ]
+            }
+          ],
+          "entryCoverage": "$entryCoverage",
+          "topics": [
+            "map",
+            [
+              "subjects",
+              "isa",
+              "AssuranceTopic"
+            ],
+            "s",
+            {
+              "id": [
+                "one",
+                "$s",
+                "id"
+              ],
+              "title": [
+                "one",
+                "$s",
+                "title"
+              ],
+              "href": [
+                "one",
+                "$s",
+                "href"
+              ],
+              "description": [
+                "one",
+                "$s",
+                "description"
+              ],
+              "sagas": [
+                "map",
+                [
+                  "objects",
+                  "$s",
+                  "saga"
+                ],
+                "a",
+                [
+                  "one",
+                  "$a",
+                  "id"
+                ]
+              ]
+            }
+          ],
+          "sagas": "$sagaProfiles",
+          "roadmap": "$roadmap",
+          "products": [
+            "append",
+            [
+              "list",
+              {
+                "id": "aaronalderman",
+                "name": "Aaron Alderman website",
+                "scope": "Homepage entry routes only",
+                "profiles": [
+                  "map",
+                  "$sagaProfiles",
+                  "s",
+                  {
+                    "saga": "$s.id",
+                    "level": "$s.level"
+                  }
+                ]
+              }
+            ],
+            [
+              "map",
+              "$identityCatalogue.items",
+              "p",
+              {
+                "id": "$p.id",
+                "name": "$p.name",
+                "deliveryLabel": "$p.status",
+                "scope": "Not assessed",
+                "profiles": [
+                  "map",
+                  "$sagaProfiles",
+                  "s",
+                  {
+                    "saga": "$s.id",
+                    "level": 0
+                  }
+                ]
+              }
+            ]
+          ],
+          "boundary": "Evidence maturity is scoped by product and saga. Catalogue delivery labels do not supply assurance. No composite product score is calculated. These levels are separate from WCAG conformance or promised locale support. Higher-level review, use and maintenance receipts are not supplied by this release."
+        }
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": {
+            "protocol": "worldwright/entry-markup/1",
+            "scope": "Five generated homepage entry routes",
+            "pages": "$entryEvidence",
+            "boundary": "Language, skip-target and image-alt attribute presence only. Empty alt text may be appropriate for decoration; meaning, browser behaviour and accessibility conformance require evaluation."
+          }
+        },
+        "into": "entryJSON"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/entry-markup.json",
+          "text": "$entryJSON"
+        },
+        "into": "_"
+      },
+      {
+        "port": "json.stringify",
+        "args": {
+          "value": "$portfolioReport"
+        },
+        "into": "portfolioJSON"
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/topics.json",
+          "text": "$portfolioJSON"
+        },
+        "into": "_"
+      },
+      {
+        "let": "portfolioPage",
+        "value": {
+          "route": "assurance/index.html",
+          "prefix": "../",
+          "canonical": "https://aaronalderman.com/assurance/",
+          "title": "Assurance topics — Aaron Alderman",
+          "description": "Scoped assurance topics, evidence maturity and the next work needed to strengthen each claim.",
+          "body": [
+            "list",
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-intro"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    "ASSURANCE / TOPICS"
+                  ]
+                },
+                {
+                  "tag": "h1",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "What can we stand behind?"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Assurance is a collection of questions about a product. Each topic declares its scope, shows its evidence and keeps its unfinished work visible."
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "assurance-topic-grid"
+              },
+              "children": [
+                "list",
+                [
+                  "map",
+                  "$portfolioReport.topics",
+                  "t",
+                  {
+                    "tag": "section",
+                    "attrs": {
+                      "class": "assurance-boundary"
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "h2",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "href": "$t.href"
+                            },
+                            "children": [
+                              "list",
+                              "$t.title"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "$t.description"
+                        ]
+                      },
+                      {
+                        "tag": "ul",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "map",
+                            [
+                              "filter",
+                              "$sagaProfiles",
+                              "s",
+                              [
+                                "includes",
+                                "$t.sagas",
+                                "$s.id"
+                              ]
+                            ],
+                            "s",
+                            {
+                              "tag": "li",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                "$s.title",
+                                " · Level ",
+                                "$s.level",
+                                " — ",
+                                [
+                                  "at",
+                                  "$levelNames",
+                                  [
+                                    "concat",
+                                    "",
+                                    "$s.level"
+                                  ]
+                                ]
+                              ]
+                            }
+                          ]
+                        ]
+                      },
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$t.id",
+                          "identity"
+                        ],
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            [
+                              "concat",
+                              "Identity inventory: ",
+                              [
+                                "count",
+                                "$identityTopicReport.rows"
+                              ],
+                              " review rows; open work remains visible in the detailed report."
+                            ]
+                          ]
+                        },
+                        {
+                          "tag": "p",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            "This topic has its own evidence gates, scope and roadmap."
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "From assurance to a product roadmap"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "A roadmap item names the evidence needed for the next level. Product maturity is a profile across topics, with scope and open work alongside each level."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "/assurance/maturity/"
+                      },
+                      "children": [
+                        "list",
+                        "Explore maturity profiles and the evidence roadmap →"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "topics.json"
+                      },
+                      "children": [
+                        "list",
+                        "Download topics, levels and roadmap evidence ↗"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Identity report shortcuts"
+                  ]
+                },
+                [
+                  "map",
+                  [
+                    "list",
+                    "intentionally-invariant",
+                    "identity-mapped",
+                    "missing",
+                    "undecided"
+                  ],
+                  "status",
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "id": [
+                        "concat",
+                        "status-",
+                        "$status"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "a",
+                        "attrs": {
+                          "href": [
+                            "concat",
+                            "/assurance/identities/#status-",
+                            "$status"
+                          ]
+                        },
+                        "children": [
+                          "list",
+                          "Identity report: ",
+                          "$status"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "assurance.portfolio.document"
+      },
+      {
+        "each": [
+          "filter",
+          "$portfolioReport.topics",
+          "topic",
+          [
+            "not",
+            [
+              "eq",
+              "$topic.id",
+              "identity"
+            ]
+          ]
+        ],
+        "as": "topic",
+        "steps": [
+          {
+            "let": "portfolioPage",
+            "value": {
+              "route": [
+                "concat",
+                "assurance/",
+                "$topic.id",
+                "/index.html"
+              ],
+              "prefix": "../../",
+              "canonical": [
+                "concat",
+                "https://aaronalderman.com",
+                "$topic.href"
+              ],
+              "title": [
+                "concat",
+                "$topic.title",
+                " assurance — Aaron Alderman"
+              ],
+              "description": "$topic.description",
+              "body": [
+                "list",
+                {
+                  "tag": "section",
+                  "attrs": {
+                    "class": "assurance-intro"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "/assurance/"
+                          },
+                          "children": [
+                            "list",
+                            "← All assurance topics"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "eyebrow"
+                      },
+                      "children": [
+                        "list",
+                        "ASSURANCE / INDEPENDENT TOPIC"
+                      ]
+                    },
+                    {
+                      "tag": "h1",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$topic.id",
+                            "accessibility"
+                          ],
+                          "Who can take part?",
+                          "Ready for other languages and locales?"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "$topic.description"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "The current assessment covers five homepage entry routes. Levels describe evidence maturity within that scope; every topic keeps its own requirements and open work."
+                      ]
+                    }
+                  ]
+                },
+                [
+                  "map",
+                  [
+                    "filter",
+                    "$sagaProfiles",
+                    "s",
+                    [
+                      "includes",
+                      "$topic.sagas",
+                      "$s.id"
+                    ]
+                  ],
+                  "s",
+                  {
+                    "tag": "section",
+                    "attrs": {
+                      "class": "assurance-boundary",
+                      "id": [
+                        "concat",
+                        "saga-",
+                        "$s.id"
+                      ]
+                    },
+                    "children": [
+                      "list",
+                      {
+                        "tag": "h2",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "$s.title"
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "strong",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "Level ",
+                              "$s.level",
+                              " — ",
+                              [
+                                "at",
+                                "$levelNames",
+                                [
+                                  "concat",
+                                  "",
+                                  "$s.level"
+                                ]
+                              ]
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          "$s.scope"
+                        ]
+                      },
+                      {
+                        "tag": "ul",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          [
+                            "map",
+                            "$s.gates",
+                            "g",
+                            {
+                              "tag": "li",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "strong",
+                                  "attrs": {},
+                                  "children": [
+                                    "list",
+                                    "$g.label"
+                                  ]
+                                },
+                                " · ",
+                                "$g.status",
+                                " · level ",
+                                "$g.level",
+                                [
+                                  "if",
+                                  [
+                                    "eq",
+                                    "$g.status",
+                                    "supported"
+                                  ],
+                                  {
+                                    "tag": "span",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      " — ",
+                                      [
+                                        "at",
+                                        [
+                                          "at",
+                                          "$g",
+                                          "evidence"
+                                        ],
+                                        "method"
+                                      ]
+                                    ]
+                                  },
+                                  {
+                                    "tag": "span",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      " — ",
+                                      "$g.next"
+                                    ]
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        ]
+                      },
+                      {
+                        "tag": "p",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "a",
+                            "attrs": {
+                              "href": [
+                                "concat",
+                                "/assurance/maturity/#roadmap-",
+                                "$s.id"
+                              ]
+                            },
+                            "children": [
+                              "list",
+                              "See the evidence roadmap →"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                {
+                  "tag": "section",
+                  "attrs": {
+                    "class": "assurance-boundary"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "What the current evidence establishes"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "if",
+                          [
+                            "eq",
+                            "$topic.id",
+                            "accessibility"
+                          ],
+                          "The automatic checks cover document language markers, a skip link with its target and image alt-attribute presence. Alternative-text meaning, focus order, keyboard operation, assistive technology, reflow and visual contrast remain evaluation work. WCAG conformance requires a separate scoped evaluation.",
+                          "Language and UTF-8 markers are observed. Supported locale commitments, message/content externalisation, locale selection, fallback, formatting and text direction have not been evidenced by this assessment. Linguistic and cultural review are later obligations."
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": "../entry-markup.json"
+                          },
+                          "children": [
+                            "list",
+                            "Inspect the generated markup evidence ↗"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "section",
+                  "attrs": {
+                    "class": "assurance-boundary"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "h2",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Evaluation reference"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "if",
+                              [
+                                "eq",
+                                "$topic.id",
+                                "accessibility"
+                              ],
+                              "https://www.w3.org/WAI/test-evaluate/",
+                              "https://www.w3.org/International/questions/qa-i18n"
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            [
+                              "if",
+                              [
+                                "eq",
+                                "$topic.id",
+                                "accessibility"
+                              ],
+                              "W3C: evaluating web accessibility ↗",
+                              "W3C: internationalisation and localisation ↗"
+                            ]
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Human and audience evaluation receipts have not been recorded for this saga."
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "call": "assurance.portfolio.document"
+          }
+        ]
+      },
+      {
+        "let": "portfolioPage",
+        "value": {
+          "route": "assurance/maturity/index.html",
+          "prefix": "../../",
+          "canonical": "https://aaronalderman.com/assurance/maturity/",
+          "title": "Product maturity & evidence roadmap — Aaron Alderman",
+          "description": "A scoped maturity profile by assurance saga, and the evidence work needed to advance it.",
+          "body": [
+            "list",
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-intro"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "/assurance/"
+                      },
+                      "children": [
+                        "list",
+                        "← All assurance topics"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    "ASSURANCE / MATURITY & ROADMAP"
+                  ]
+                },
+                {
+                  "tag": "h1",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Maturity that shows its work."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Each product has a profile across assurance topics. The level records the evidence available for a stated scope; open obligations remain visible."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "A catalogue label such as “Live example” or “In progress” describes delivery. It does not establish an assurance level. “Unassessed” records the absence of an assessment, without judging a product’s underlying quality."
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Evidence levels"
+                  ]
+                },
+                {
+                  "tag": "ol",
+                  "attrs": {
+                    "start": 0
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "map",
+                      "$portfolioReport.levels",
+                      "level",
+                      {
+                        "tag": "li",
+                        "attrs": {},
+                        "children": [
+                          "list",
+                          {
+                            "tag": "strong",
+                            "attrs": {},
+                            "children": [
+                              "list",
+                              "$level.label"
+                            ]
+                          },
+                          " — ",
+                          "$level.meaning"
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Product profiles"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "The website row covers homepage entry routes only. The catalogue products have not been assessed by this offering."
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "class": "hierarchy-table-wrap",
+                    "role": "region",
+                    "aria-label": "Product assurance profiles",
+                    "tabindex": 0
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "table",
+                      "attrs": {
+                        "class": "hierarchy-table"
+                      },
+                      "children": [
+                        "list",
+                        {
+                          "tag": "thead",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            {
+                              "tag": "tr",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                {
+                                  "tag": "th",
+                                  "attrs": {
+                                    "scope": "col"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Product"
+                                  ]
+                                },
+                                {
+                                  "tag": "th",
+                                  "attrs": {
+                                    "scope": "col"
+                                  },
+                                  "children": [
+                                    "list",
+                                    "Delivery / assessment scope"
+                                  ]
+                                },
+                                [
+                                  "map",
+                                  "$sagaProfiles",
+                                  "s",
+                                  {
+                                    "tag": "th",
+                                    "attrs": {
+                                      "scope": "col"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$s.title"
+                                    ]
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "tbody",
+                          "attrs": {},
+                          "children": [
+                            "list",
+                            [
+                              "map",
+                              "$portfolioReport.products",
+                              "p",
+                              {
+                                "tag": "tr",
+                                "attrs": {},
+                                "children": [
+                                  "list",
+                                  {
+                                    "tag": "th",
+                                    "attrs": {
+                                      "scope": "row"
+                                    },
+                                    "children": [
+                                      "list",
+                                      "$p.name"
+                                    ]
+                                  },
+                                  {
+                                    "tag": "td",
+                                    "attrs": {},
+                                    "children": [
+                                      "list",
+                                      [
+                                        "if",
+                                        [
+                                          "eq",
+                                          "$p.id",
+                                          "aaronalderman"
+                                        ],
+                                        "Homepage entry routes only",
+                                        [
+                                          "concat",
+                                          "$p.deliveryLabel",
+                                          " · Unassessed"
+                                        ]
+                                      ]
+                                    ]
+                                  },
+                                  [
+                                    "map",
+                                    "$p.profiles",
+                                    "profile",
+                                    {
+                                      "tag": "td",
+                                      "attrs": {},
+                                      "children": [
+                                        "list",
+                                        [
+                                          "at",
+                                          "$levelNames",
+                                          [
+                                            "concat",
+                                            "",
+                                            "$profile.level"
+                                          ]
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                ]
+                              }
+                            ]
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            [
+              "map",
+              "$sagaProfiles",
+              "s",
+              {
+                "tag": "section",
+                "attrs": {
+                  "class": "assurance-boundary",
+                  "id": [
+                    "concat",
+                    "roadmap-",
+                    "$s.id"
+                  ]
+                },
+                "children": [
+                  "list",
+                  {
+                    "tag": "h2",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "$s.title",
+                      " roadmap"
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Current: level ",
+                      "$s.level",
+                      " · ",
+                      [
+                        "at",
+                        "$levelNames",
+                        [
+                          "concat",
+                          "",
+                          "$s.level"
+                        ]
+                      ],
+                      ". Owner assignment and delivery dates remain open."
+                    ]
+                  },
+                  {
+                    "tag": "ul",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      [
+                        "map",
+                        [
+                          "filter",
+                          "$roadmap",
+                          "r",
+                          [
+                            "eq",
+                            "$r.saga",
+                            "$s.id"
+                          ]
+                        ],
+                        "r",
+                        {
+                          "tag": "li",
+                          "attrs": {
+                            "id": [
+                              "concat",
+                              "gate-",
+                              "$r.id"
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            {
+                              "tag": "strong",
+                              "attrs": {},
+                              "children": [
+                                "list",
+                                [
+                                  "if",
+                                  [
+                                    "eq",
+                                    "$r.horizon",
+                                    "next"
+                                  ],
+                                  "Next evidence gate: ",
+                                  "Later: "
+                                ],
+                                "$r.label"
+                              ]
+                            },
+                            " · level ",
+                            "$r.targetLevel",
+                            " · ",
+                            "$r.state",
+                            " — ",
+                            "$r.action"
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ],
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "How a level changes"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Every required gate at a level and every earlier level needs matching evidence. Missing, failed, ambiguous or differently scoped receipts block promotion. New evidence can lower a level when a required check fails. Source, issuer, method and observation date accompany each accepted receipt; those fields alone do not authenticate an evaluation."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../topics.json"
+                      },
+                      "children": [
+                        "list",
+                        "Download the maturity profile and roadmap ↗"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "assurance.portfolio.document"
       }
     ],
     "publication.scroll.pages": [
