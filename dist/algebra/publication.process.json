@@ -18,6 +18,9 @@
         "call": "faith.reading.load"
       },
       {
+        "call": "reading.rooms.load"
+      },
+      {
         "call": "identity.runtime.build"
       },
       {
@@ -849,7 +852,7 @@
               "rules": [
                 "append",
                 "$cssPlan.rules",
-                "$faithReading.styles"
+                "$readingData.styles"
               ]
             }
           }
@@ -955,6 +958,53 @@
         ]
       },
       {
+        "let": "documentReading",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$readingRooms",
+            "room",
+            [
+              "eq",
+              "$room.essay.canonical",
+              "$canonical"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "documentThreadReading",
+        "value": [
+          "if",
+          [
+            "and",
+            "$documentWorld",
+            "$documentIsThread"
+          ],
+          [
+            "at",
+            [
+              "filter",
+              "$readingRooms",
+              "room",
+              [
+                "eq",
+                "$room.key",
+                [
+                  "one",
+                  "$documentWorld",
+                  "key"
+                ]
+              ]
+            ],
+            0
+          ],
+          null
+        ]
+      },
+      {
         "let": "stewardshipInput",
         "value": "$result"
       },
@@ -1008,29 +1058,22 @@
                     "name": "theme-color",
                     "content": [
                       "if",
-                      [
-                        "or",
-                        [
-                          "eq",
-                          "$canonical",
-                          "https://aaronalderman.com/writing/faith-with-open-hands/"
-                        ],
-                        [
-                          "eq",
-                          "$canonical",
-                          "https://aaronalderman.com/worlds/christian/threads.html"
-                        ]
-                      ],
-                      "#f8f5ec",
+                      "$documentReading",
+                      "$documentReading.palette.bg",
                       [
                         "if",
-                        "$documentWorld",
+                        "$documentThreadReading",
+                        "$documentThreadReading.palette.bg",
                         [
-                          "one",
+                          "if",
                           "$documentWorld",
-                          "homeThemeColor"
-                        ],
-                        "#0c111b"
+                          [
+                            "one",
+                            "$documentWorld",
+                            "homeThemeColor"
+                          ],
+                          "#0c111b"
+                        ]
                       ]
                     ]
                   },
@@ -1072,11 +1115,7 @@
                     "property": "og:type",
                     "content": [
                       "if",
-                      [
-                        "eq",
-                        "$canonical",
-                        "https://aaronalderman.com/writing/faith-with-open-hands/"
-                      ],
+                      "$documentReading",
                       "article",
                       "website"
                     ]
@@ -1165,12 +1204,12 @@
                     "property": "og:image",
                     "content": [
                       "if",
+                      "$documentReading",
                       [
-                        "eq",
-                        "$canonical",
-                        "https://aaronalderman.com/writing/faith-with-open-hands/"
+                        "concat",
+                        "https://aaronalderman.com/",
+                        "$documentReading.essay.image"
                       ],
-                      "https://aaronalderman.com/assets/identities/optimized/christian-questions-v2.webp",
                       [
                         "if",
                         "$documentWorld",
@@ -1235,12 +1274,8 @@
                     "property": "og:image:alt",
                     "content": [
                       "if",
-                      [
-                        "eq",
-                        "$canonical",
-                        "https://aaronalderman.com/writing/faith-with-open-hands/"
-                      ],
-                      "An imagined open Bible beneath an olive tree in warm morning light.",
+                      "$documentReading",
+                      "$documentReading.essay.imageAlt",
                       [
                         "if",
                         "$documentWorld",
@@ -1348,12 +1383,12 @@
                     "name": "twitter:image",
                     "content": [
                       "if",
+                      "$documentReading",
                       [
-                        "eq",
-                        "$canonical",
-                        "https://aaronalderman.com/writing/faith-with-open-hands/"
+                        "concat",
+                        "https://aaronalderman.com/",
+                        "$documentReading.essay.image"
                       ],
-                      "https://aaronalderman.com/assets/identities/optimized/christian-questions-v2.webp",
                       [
                         "if",
                         "$documentWorld",
@@ -1418,12 +1453,8 @@
                     "name": "twitter:image:alt",
                     "content": [
                       "if",
-                      [
-                        "eq",
-                        "$canonical",
-                        "https://aaronalderman.com/writing/faith-with-open-hands/"
-                      ],
-                      "An imagined open Bible beneath an olive tree in warm morning light.",
+                      "$documentReading",
+                      "$documentReading.essay.imageAlt",
                       [
                         "if",
                         "$documentWorld",
@@ -7193,29 +7224,12 @@
                     [
                       "if",
                       [
-                        "and",
-                        [
-                          "eq",
-                          "$journeyIdentity",
-                          "identity.christian"
-                        ],
-                        [
-                          "eq",
-                          "$journeyKind",
-                          "threads"
-                        ]
+                        "eq",
+                        "$journeyKind",
+                        "threads"
                       ],
-                      "A faith I can live, and a reading I can question.",
-                      [
-                        "if",
-                        [
-                          "eq",
-                          "$journeyKind",
-                          "threads"
-                        ],
-                        "An idea becomes a path.",
-                        "A perspective on shared terrain."
-                      ]
+                      "$activeReading.introHeading",
+                      "A perspective on shared terrain."
                     ]
                   ]
                 },
@@ -7252,6 +7266,31 @@
       }
     ],
     "identity.threads.view": [
+      {
+        "let": "activeReading",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$readingRooms",
+            "room",
+            [
+              "eq",
+              "$room.key",
+              [
+                "one",
+                "$journeyIdentity",
+                "key"
+              ]
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "assert": "$activeReading",
+        "message": "READING-ROOM-001: Every identity must have an authored opening essay."
+      },
       {
         "let": "journeyKind",
         "value": "threads"
@@ -7304,62 +7343,44 @@
             ]
           },
           "$journeyIntro",
-          [
-            "if",
-            [
-              "eq",
-              "$journeyIdentity",
-              "identity.christian"
-            ],
-            "$faithReading.teaser",
-            null
-          ],
-          [
-            "if",
-            [
-              "eq",
-              "$journeyIdentity",
-              "identity.christian"
-            ],
-            {
-              "tag": "div",
-              "attrs": {},
-              "children": [
-                "list",
-                {
-                  "tag": "p",
-                  "attrs": {
-                    "class": "eyebrow"
-                  },
-                  "children": [
-                    "list",
-                    "FOLLOW A THREAD INTO LIFE"
-                  ]
+          "$activeReading.teaser",
+          {
+            "tag": "div",
+            "attrs": {},
+            "children": [
+              "list",
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "eyebrow"
                 },
-                {
-                  "tag": "h2",
-                  "attrs": {
-                    "class": "faith-paths-heading"
-                  },
-                  "children": [
-                    "list",
-                    "Three ways to keep reading."
-                  ]
+                "children": [
+                  "list",
+                  "FOLLOW A THREAD INTO LIFE"
+                ]
+              },
+              {
+                "tag": "h2",
+                "attrs": {
+                  "class": "faith-paths-heading"
                 },
-                {
-                  "tag": "p",
-                  "attrs": {
-                    "class": "faith-paths-note"
-                  },
-                  "children": [
-                    "list",
-                    "Move from interpretation into power, hope and the people close at hand. Each path has three short readings."
-                  ]
-                }
-              ]
-            },
-            null
-          ],
+                "children": [
+                  "list",
+                  "Three ways to keep reading."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "faith-paths-note"
+                },
+                "children": [
+                  "list",
+                  "$activeReading.pathNote"
+                ]
+              }
+            ]
+          },
           {
             "tag": "section",
             "attrs": {
@@ -7383,57 +7404,39 @@
                   },
                   "children": [
                     "list",
-                    [
-                      "if",
-                      [
-                        "eq",
-                        "$journeyIdentity",
-                        "identity.christian"
-                      ],
-                      {
-                        "tag": "img",
-                        "attrs": {
-                          "class": "faith-thread-art",
-                          "src": [
-                            "one",
-                            "$t",
-                            "image"
-                          ],
-                          "alt": "",
-                          "width": 768,
-                          "height": 432,
-                          "loading": "lazy",
-                          "decoding": "async"
-                        },
-                        "children": [
-                          "list"
-                        ]
+                    {
+                      "tag": "img",
+                      "attrs": {
+                        "class": "faith-thread-art",
+                        "src": [
+                          "one",
+                          "$t",
+                          "image"
+                        ],
+                        "alt": "",
+                        "width": 768,
+                        "height": 432,
+                        "loading": "lazy",
+                        "decoding": "async"
                       },
-                      null
-                    ],
-                    [
-                      "if",
-                      [
-                        "eq",
-                        "$journeyIdentity",
-                        "identity.christian"
-                      ],
-                      {
-                        "tag": "p",
-                        "attrs": {
-                          "class": "faith-thread-kicker"
-                        },
-                        "children": [
-                          "list",
-                          [
-                            "one",
-                            "$t",
-                            "kicker"
-                          ]
-                        ]
+                      "children": [
+                        "list"
+                      ]
+                    },
+                    {
+                      "tag": "p",
+                      "attrs": {
+                        "class": "faith-thread-kicker"
                       },
-                      null
-                    ],
+                      "children": [
+                        "list",
+                        [
+                          "one",
+                          "$t",
+                          "kicker"
+                        ]
+                      ]
+                    },
                     {
                       "tag": "h2",
                       "attrs": {},
@@ -7460,7 +7463,9 @@
                     },
                     {
                       "tag": "ol",
-                      "attrs": {},
+                      "attrs": {
+                        "role": "list"
+                      },
                       "children": [
                         "list",
                         [
@@ -7564,25 +7569,26 @@
       },
       {
         "let": "result",
-        "value": [
-          "if",
-          [
-            "eq",
-            "$journeyIdentity",
-            "identity.christian"
-          ],
-          {
-            "tag": "div",
-            "attrs": {
-              "class": "faith-threads"
-            },
-            "children": [
-              "list",
-              "$result"
-            ]
+        "value": {
+          "tag": "div",
+          "attrs": {
+            "class": [
+              "if",
+              [
+                "eq",
+                "$journeyIdentity",
+                "identity.christian"
+              ],
+              "faith-threads",
+              "reading-room"
+            ],
+            "data-reading-room": "$activeReading.key"
           },
-          "$result"
-        ]
+          "children": [
+            "list",
+            "$result"
+          ]
+        }
       }
     ],
     "identity.reading.context": [
@@ -17373,50 +17379,56 @@
     ],
     "faith.reading.build": [
       {
-        "let": "prefix",
-        "value": "../../"
-      },
-      {
-        "let": "pageTitle",
-        "value": "$faithReading.title"
-      },
-      {
-        "let": "description",
-        "value": "$faithReading.description"
-      },
-      {
-        "let": "canonical",
-        "value": "$faithReading.canonical"
-      },
-      {
-        "let": "light",
-        "value": "faith-reading"
-      },
-      {
-        "let": "body",
-        "value": "$faithReading.body"
-      },
-      {
-        "call": "publication.document"
-      },
-      {
-        "let": "surfaceWritePath",
-        "value": "$faithReading.path"
-      },
-      {
-        "call": "assurance.surface.register"
-      },
-      {
-        "port": "file.write",
-        "args": {
-          "path": "$faithReading.path",
-          "text": [
-            "concat",
-            "<!doctype html>\n",
-            "$result"
-          ]
-        },
-        "into": "_"
+        "each": "$readingRooms",
+        "as": "readingRoom",
+        "steps": [
+          {
+            "let": "prefix",
+            "value": "../../"
+          },
+          {
+            "let": "pageTitle",
+            "value": "$readingRoom.essay.title"
+          },
+          {
+            "let": "description",
+            "value": "$readingRoom.essay.description"
+          },
+          {
+            "let": "canonical",
+            "value": "$readingRoom.essay.canonical"
+          },
+          {
+            "let": "light",
+            "value": "$readingRoom.light"
+          },
+          {
+            "let": "body",
+            "value": "$readingRoom.essay.body"
+          },
+          {
+            "call": "publication.document"
+          },
+          {
+            "let": "surfaceWritePath",
+            "value": "$readingRoom.essay.path"
+          },
+          {
+            "call": "assurance.surface.register"
+          },
+          {
+            "port": "file.write",
+            "args": {
+              "path": "$readingRoom.essay.path",
+              "text": [
+                "concat",
+                "<!doctype html>\n",
+                "$result"
+              ]
+            },
+            "into": "_"
+          }
+        ]
       },
       {
         "let": "prefix",
@@ -18630,6 +18642,69 @@
           "text": "$surfaceRegistryJSON"
         },
         "into": "_"
+      }
+    ],
+    "reading.rooms.load": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "source/reading/rooms.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "source/reading/rooms.json"
+        },
+        "into": "readingRoomText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$readingRoomText"
+        },
+        "into": "readingData"
+      },
+      {
+        "let": "readingRooms",
+        "value": [
+          "append",
+          [
+            "list",
+            {
+              "key": "christian",
+              "label": "Christian",
+              "introHeading": "A faith I can live, and a reading I can question.",
+              "pathNote": "Move from interpretation into power, hope and the people close at hand. Each path has three short readings.",
+              "light": "faith-reading",
+              "palette": {
+                "bg": "#f8f5ec",
+                "text": "#293d32",
+                "muted": "#5a695e",
+                "accent": "#76551e",
+                "action": "#35573f",
+                "hover": "#25452f",
+                "surface": "#fffdf7",
+                "wash": "#edf1e3",
+                "line": "#d6ddc9",
+                "edge": "#ad8d48",
+                "glow": "#e7dfbf66"
+              },
+              "teaser": "$faithReading.teaser",
+              "essay": {
+                "title": "$faithReading.title",
+                "description": "$faithReading.description",
+                "canonical": "$faithReading.canonical",
+                "path": "$faithReading.path",
+                "body": "$faithReading.body",
+                "image": "assets/identities/optimized/christian-questions-v2.webp",
+                "imageAlt": "An imagined open Bible beneath an olive tree in warm morning light."
+              }
+            }
+          ],
+          "$readingData.rooms"
+        ]
       }
     ]
   }

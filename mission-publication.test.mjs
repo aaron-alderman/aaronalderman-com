@@ -24,8 +24,46 @@ test('the Christian reading room introduces the essay and preserves three illust
  assert.ok(nodes.some(n=>n.tagName==='a'&&attr(n,'href')==='/writing/faith-with-open-hands/'));
  for(const identity of ['dad','author','sourcerer'])assert.ok(!fs.readFileSync('dist/worlds/'+identity+'/threads.html','utf8').includes('class="faith-threads"'));
  const css=fs.readFileSync('dist/expedition.css','utf8');
- assert.ok(css.includes('body:has(.faith-threads),body[data-light="faith-reading"]{color-scheme:light;'));
- assert.ok(css.includes('.faith-threads .identity-thread:hover .faith-thread-art{transform:none;}'));
+ assert.ok(css.includes('body:has(.faith-threads),body[data-light="faith-reading"],body:has(.reading-room),body:has(.reading-essay)'));
+ assert.ok(css.includes(':is(.faith-threads,.reading-room) .identity-thread:hover .faith-thread-art{transform:none;}'));
+});
+
+test('Dad, Sourcerer and Author have distinct reading rooms and complete illustrated paths',()=>{
+ const rooms=read('source/reading/rooms.json').rooms;
+ assert.deepEqual(rooms.map(r=>r.key),['dad','sourcerer','author']);
+ assert.equal(new Set(rooms.map(r=>r.palette.action)).size,3);
+ const covers=new Set();
+ for(const room of rooms){
+  const route='worlds/'+room.key+'/threads.html',nodes=page(route);
+  const wrapper=nodes.find(n=>attr(n,'class')==='reading-room');assert.ok(wrapper,room.key);assert.equal(attr(wrapper,'data-reading-room'),room.key);
+  assert.equal(text(nodes.find(n=>n.tagName==='h1')),room.essay.title.replace(' — Aaron Alderman',''));
+  assert.ok(nodes.some(n=>n.tagName==='a'&&attr(n,'href')===new URL(room.essay.canonical).pathname));
+  const cards=nodes.filter(n=>attr(n,'class')==='identity-thread');assert.equal(cards.length,3);
+  const art=cards.map(card=>{const image=walk(card).find(n=>n.tagName==='img');assert.ok(image);assert.equal(attr(image,'alt'),'');assert.equal(walk(card).filter(n=>n.tagName==='li').length,3);assert.ok(walk(card).some(n=>n.tagName==='ol'&&attr(n,'role')==='list'));return attr(image,'src');});
+  assert.equal(new Set(art).size,3);assert.ok(art.every(src=>src.includes('/'+room.key+'-')));
+  for(const image of nodes.filter(n=>n.tagName==='img'))assert.ok(fs.existsSync('dist/'+attr(image,'src')));
+  const essay=page(room.essay.path);assert.equal(text(essay.find(n=>n.tagName==='h1')),room.essay.title.replace(' — Aaron Alderman',''));
+  assert.ok(essay.filter(n=>n.tagName==='section').length>=6);
+  assert.equal(attr(essay.find(n=>n.tagName==='meta'&&attr(n,'property')==='og:type'),'content'),'article');
+  assert.equal(attr(essay.find(n=>n.tagName==='meta'&&attr(n,'name')==='theme-color'),'content'),room.palette.bg);
+  const cover=attr(essay.find(n=>n.tagName==='meta'&&attr(n,'property')==='og:image'),'content');assert.equal(cover,'https://aaronalderman.com/'+room.essay.image);covers.add(cover);
+  assert.ok(fs.readFileSync('dist/writing/index.html','utf8').includes(new URL(room.essay.canonical).pathname));
+  assert.ok(fs.readFileSync('dist/sitemap.xml','utf8').includes(room.essay.canonical));
+ }
+ assert.equal(covers.size,3);
+});
+
+test('all new reading-room and essay links retain valid local destinations and fragments',()=>{
+ for(const room of read('source/reading/rooms.json').rooms)for(const route of ['worlds/'+room.key+'/threads.html',room.essay.path]){
+  const base=new URL(route,'https://aaronalderman.com/');
+  for(const node of page(route)){const href=attr(node,'href');if(!href)continue;const url=new URL(href,base);if(url.origin!==base.origin)continue;const file='dist/'+url.pathname.slice(1)+(url.pathname.endsWith('/')?'index.html':'');assert.ok(fs.existsSync(file),route+' '+href);if(url.hash){const target=walk(parse(fs.readFileSync(file,'utf8')));assert.ok(target.some(n=>attr(n,'id')===decodeURIComponent(url.hash.slice(1))),route+' '+href);}}
+ }
+});
+
+test('each reading palette keeps text and action labels legible',()=>{
+ const luminance=hex=>{const rgb=hex.slice(1).match(/../g).map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];};
+ const contrast=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+ for(const room of read('source/reading/rooms.json').rooms){for(const key of ['text','muted','accent'])assert.ok(contrast(room.palette[key],room.palette.bg)>=4.5,room.key+' '+key);assert.ok(contrast('#ffffff',room.palette.action)>=4.5,room.key+' button');}
 });
 
 test('the faith essay has complete readings, accurate sharing metadata and resolvable navigation',()=>{

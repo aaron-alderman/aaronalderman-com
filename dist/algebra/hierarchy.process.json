@@ -1072,23 +1072,6 @@
         },
         "steps": [
           {
-            "let": "hTargetGroup",
-            "value": [
-              "at",
-              [
-                "filter",
-                "$hRowsByTarget",
-                "group",
-                [
-                  "eq",
-                  "$group.target",
-                  "$hRow.target"
-                ]
-              ],
-              0
-            ]
-          },
-          {
             "let": "hCapabilityViews",
             "value": "$hCardScan.views"
           },
@@ -1115,6 +1098,23 @@
               ]
             ],
             "then": [
+              {
+                "let": "hTargetGroup",
+                "value": [
+                  "at",
+                  [
+                    "filter",
+                    "$hRowsByTarget",
+                    "group",
+                    [
+                      "eq",
+                      "$group.target",
+                      "$hRow.target"
+                    ]
+                  ],
+                  0
+                ]
+              },
               {
                 "let": "hSeen",
                 "value": [

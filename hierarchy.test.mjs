@@ -110,7 +110,7 @@ test('assurance refuses a wired route when destination evidence or identity retu
  const classify=async x=>(await invoke({model:compiled,entry,input:{eventInput:x},ports:valuePorts(),limit:20000000})).value;
  assert.equal((await classify(input))[0].status,'missing');input.journeyChecks['threads.context']=true;assert.equal((await classify(input))[0].status,'identity-mapped');
  const checkEntry='identity.journey.check',checkModel=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:checkEntry,queries:{[checkEntry]:p.queries[checkEntry]}},mode:'model',ports:valuePorts(),limit:20000000});
- const html=fs.readFileSync('dist/worlds/author/threads.html','utf8'),expected=['data-identity="author"','href="/worlds/author/atlas.html"','Follow the life between the lines.'];
+ const html=fs.readFileSync('dist/worlds/author/threads.html','utf8'),expected=['data-identity="author"','href="/worlds/author/atlas.html"',parseRel(fs.readFileSync('source/hierarchy.rel','utf8')).find(f=>f.s==='identity.author'&&f.p==='threadsTitle').o];
  const check=async value=>(await invoke({model:checkModel,entry:checkEntry,input:{eventInput:{html:value,expected}},ports:valuePorts(),limit:20000000})).value;
  assert.equal((await check(html)).ok,true);for(const fragment of expected)assert.equal((await check(html.replaceAll(fragment,''))).ok,false,fragment);
 });
