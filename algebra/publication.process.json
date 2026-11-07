@@ -575,6 +575,9 @@
         "call": "roadmap.publish"
       },
       {
+        "call": "assurance.contrast.publish"
+      },
+      {
         "call": "assurance.rendered.publish"
       },
       {
@@ -13773,6 +13776,40 @@
             {
               "tag": "section",
               "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Reading contrast"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "contrast/"
+                      },
+                      "children": [
+                        "list",
+                        "Inspect source contrast checks and the repaired dark-on-dark regression"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
                 "class": "assurance-intro"
               },
               "children": [
@@ -18303,13 +18340,37 @@
                           "measured"
                         ]
                       ]
+                    ],
+                    [
+                      "eq",
+                      [
+                        "at",
+                        [
+                          "at",
+                          "$contrastEvidence.currentness.byRoute",
+                          "$page.route"
+                        ],
+                        "status"
+                      ],
+                      "current-artifact-bindings"
                     ]
                   ],
                   "measured",
                   "needs-browser-evidence"
                 ],
                 "evidence": "assurance/rendered-layout.json",
-                "readings": "$readings"
+                "readings": "$readings",
+                "currentness": [
+                  "or",
+                  [
+                    "at",
+                    "$contrastEvidence.currentness.byRoute",
+                    "$page.route"
+                  ],
+                  {
+                    "status": "needs-browser-recapture"
+                  }
+                ]
               }
             }
           ]
@@ -20595,6 +20656,14 @@
               "attrs": {},
               "children": [
                 "list",
+                "Historical capture: current artifact bindings are checked separately in the downloadable evidence. Changed or missing dependencies need browser recapture. No browser text colours were measured."
+              ]
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
                 [
                   "concat",
                   "$renderedData.report.observationCount",
@@ -20818,7 +20887,8 @@
               "No browser observations yet."
             ],
             "report": "$renderedReceipt.report",
-            "rawObservations": "rendered-observations.json"
+            "rawObservations": "rendered-observations.json",
+            "currentness": "$contrastEvidence.currentness"
           }
         },
         "into": "renderedJSON"
@@ -20978,7 +21048,7 @@
                   "attrs": {},
                   "children": [
                     "list",
-                    "Desktop: 1280 × 800. Mobile width: 390 × 844. Each published route is loaded in the browser with its scripts, styles and content. The initial loaded state is measured; this does not certify other engines, physical devices, interactive states or the purpose of whitespace."
+                    "Desktop: 1280 × 800. Mobile width: 390 × 844. The recorded routes were loaded with their scripts, styles and content at capture time. Currentness metadata identifies stale or missing coverage. The initial loaded state is measured; this does not certify other engines, physical devices, interactive states or the purpose of whitespace."
                   ]
                 },
                 {
@@ -24046,6 +24116,1500 @@
                   "children": [
                     "list",
                     "Open the general roadmap →"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "call": "assurance.portfolio.document"
+      }
+    ],
+    "assurance.contrast.input": [
+      {
+        "let": "contrastData",
+        "value": "$eventInput"
+      },
+      {
+        "let": "contrastStyles",
+        "value": "$contrastData.reading.styles"
+      },
+      {
+        "let": "contrastRoot",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$contrastStyles",
+            "rule",
+            [
+              "eq",
+              "$rule.id",
+              "faith.style.0"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "port": "record.fromEntries",
+        "args": {
+          "entries": [
+            "map",
+            "$contrastRoot.declarations",
+            "d",
+            [
+              "list",
+              "$d.property",
+              "$d.value"
+            ]
+          ]
+        },
+        "into": "contrastDefaults"
+      },
+      {
+        "let": "contrastEntries",
+        "value": [
+          "append",
+          [
+            "list",
+            {
+              "key": "christian",
+              "label": "Christian",
+              "light": "faith-reading",
+              "essay": "$contrastData.faith",
+              "palette": {
+                "bg": [
+                  "at",
+                  "$contrastDefaults",
+                  "--reading-bg"
+                ],
+                "text": [
+                  "at",
+                  "$contrastDefaults",
+                  "--reading-text"
+                ],
+                "muted": [
+                  "at",
+                  "$contrastDefaults",
+                  "--reading-muted"
+                ],
+                "wash": [
+                  "at",
+                  "$contrastDefaults",
+                  "--reading-wash"
+                ]
+              }
+            }
+          ],
+          "$contrastData.reading.rooms"
+        ]
+      },
+      {
+        "let": "baseRules",
+        "value": [
+          "filter",
+          [
+            "subjects",
+            "isa",
+            "StyleRule"
+          ],
+          "r",
+          [
+            "and",
+            [
+              "includes",
+              [
+                "list",
+                ".masthead",
+                ".footer"
+              ],
+              [
+                "one",
+                "$r",
+                "selector"
+              ]
+            ],
+            [
+              "not",
+              [
+                "optional",
+                "$r",
+                "context"
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "fold": "$baseRules",
+        "as": "rule",
+        "accumulator": "base",
+        "initial": {},
+        "steps": [
+          {
+            "let": "priorBase",
+            "value": [
+              "at",
+              "$base",
+              [
+                "one",
+                "$rule",
+                "selector"
+              ]
+            ]
+          },
+          {
+            "fold": [
+              "objects",
+              "$rule",
+              "declaration"
+            ],
+            "as": "d",
+            "accumulator": "props",
+            "initial": [
+              "or",
+              "$priorBase",
+              {}
+            ],
+            "steps": [
+              {
+                "port": "record.put",
+                "args": {
+                  "record": "$props",
+                  "key": [
+                    "one",
+                    "$d",
+                    "property"
+                  ],
+                  "value": [
+                    "one",
+                    "$d",
+                    "value"
+                  ]
+                },
+                "into": "updatedProps"
+              }
+            ],
+            "yield": "$updatedProps",
+            "into": "declarations"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$base",
+              "key": [
+                "one",
+                "$rule",
+                "selector"
+              ],
+              "value": "$declarations"
+            },
+            "into": "updated"
+          }
+        ],
+        "yield": "$updated",
+        "into": "contrastBase"
+      },
+      {
+        "fold": "$contrastEntries",
+        "as": "entry",
+        "accumulator": "out",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "essayClass",
+            "value": [
+              "at",
+              "$entry.essay.body.attrs",
+              "class"
+            ]
+          },
+          {
+            "let": "variants",
+            "value": [
+              "list",
+              {
+                "kind": "essay",
+                "route": "$entry.essay.path",
+                "scopes": [
+                  "list",
+                  "body:has(:is(.faith-threads,.reading-room,.faith-essay,.reading-essay))",
+                  [
+                    "concat",
+                    "body:has(.",
+                    "$essayClass",
+                    ")"
+                  ],
+                  [
+                    "concat",
+                    "body[data-light=\"",
+                    "$entry.light",
+                    "\"]"
+                  ]
+                ]
+              },
+              {
+                "kind": "threads",
+                "route": [
+                  "one",
+                  [
+                    "concat",
+                    "identity.",
+                    "$entry.key"
+                  ],
+                  "threadsRoute"
+                ],
+                "scopes": [
+                  "list",
+                  "body:has(:is(.faith-threads,.reading-room,.faith-essay,.reading-essay))",
+                  "body:has(:is(.faith-threads,.reading-room))",
+                  "body:has(.reading-room)",
+                  "body:has(.faith-threads)"
+                ]
+              }
+            ]
+          }
+        ],
+        "yield": [
+          "append",
+          "$out",
+          [
+            "map",
+            "$variants",
+            "variant",
+            {
+              "key": "$entry.key",
+              "label": "$entry.label",
+              "kind": "$variant.kind",
+              "route": "$variant.route",
+              "scopes": "$variant.scopes",
+              "palette": "$entry.palette"
+            }
+          ]
+        ],
+        "into": "contrastCases"
+      },
+      {
+        "let": "result",
+        "value": {
+          "protocol": "worldwright/reading-contrast-input/1",
+          "styles": "$contrastStyles",
+          "cases": "$contrastCases",
+          "base": "$contrastBase"
+        }
+      }
+    ],
+    "assurance.contrast.luminance": [
+      {
+        "let": "hex",
+        "value": "$eventInput.hex"
+      },
+      {
+        "port": "text.matches",
+        "args": {
+          "value": "$hex",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "into": "knownHex"
+      },
+      {
+        "assert": "$knownHex",
+        "message": "CONTRAST-COLOR: Source calculation requires an opaque six-digit sRGB colour."
+      },
+      {
+        "fold": [
+          "list",
+          1,
+          3,
+          5
+        ],
+        "as": "offset",
+        "accumulator": "channels",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "text.slice",
+            "args": {
+              "value": "$hex",
+              "start": "$offset",
+              "end": [
+                "add",
+                "$offset",
+                2
+              ]
+            },
+            "into": "pair"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                [
+                  "concat",
+                  "0x",
+                  "$pair"
+                ],
+                255
+              ]
+            },
+            "into": "channel"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                "$channel",
+                0.04045
+              ]
+            },
+            "into": "linearBranch"
+          },
+          {
+            "when": "$linearBranch",
+            "then": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "divide",
+                  "values": [
+                    "list",
+                    "$channel",
+                    12.92
+                  ]
+                },
+                "into": "linear"
+              }
+            ]
+          },
+          {
+            "when": [
+              "not",
+              "$linearBranch"
+            ],
+            "then": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    "$channel",
+                    0.055
+                  ]
+                },
+                "into": "shifted"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "divide",
+                  "values": [
+                    "list",
+                    "$shifted",
+                    1.055
+                  ]
+                },
+                "into": "scaled"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "power",
+                  "values": [
+                    "list",
+                    "$scaled",
+                    2.4
+                  ]
+                },
+                "into": "linear"
+              }
+            ]
+          }
+        ],
+        "yield": [
+          "append",
+          "$channels",
+          [
+            "list",
+            "$linear"
+          ]
+        ],
+        "into": "channels"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$channels",
+              0
+            ],
+            0.2126
+          ]
+        },
+        "into": "red"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$channels",
+              1
+            ],
+            0.7152
+          ]
+        },
+        "into": "green"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            [
+              "at",
+              "$channels",
+              2
+            ],
+            0.0722
+          ]
+        },
+        "into": "blue"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$red",
+            "$green",
+            "$blue"
+          ]
+        },
+        "into": "result"
+      }
+    ],
+    "assurance.contrast.ratio": [
+      {
+        "let": "pairInput",
+        "value": "$eventInput"
+      },
+      {
+        "let": "eventInput",
+        "value": {
+          "hex": "$pairInput.foreground"
+        }
+      },
+      {
+        "call": "assurance.contrast.luminance"
+      },
+      {
+        "let": "foregroundLuminance",
+        "value": "$result"
+      },
+      {
+        "let": "eventInput",
+        "value": {
+          "hex": "$pairInput.background"
+        }
+      },
+      {
+        "call": "assurance.contrast.luminance"
+      },
+      {
+        "let": "backgroundLuminance",
+        "value": "$result"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "max",
+          "values": [
+            "list",
+            "$foregroundLuminance",
+            "$backgroundLuminance"
+          ]
+        },
+        "into": "lighter"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            "$foregroundLuminance",
+            "$backgroundLuminance"
+          ]
+        },
+        "into": "darker"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$lighter",
+            0.05
+          ]
+        },
+        "into": "numerator"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$darker",
+            0.05
+          ]
+        },
+        "into": "denominator"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            "$numerator",
+            "$denominator"
+          ]
+        },
+        "into": "ratio"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greaterEqual",
+          "values": [
+            "list",
+            "$ratio",
+            4.5
+          ]
+        },
+        "into": "passes"
+      },
+      {
+        "let": "result",
+        "value": {
+          "ratio": "$ratio",
+          "minimum": 4.5,
+          "passes": "$passes"
+        }
+      }
+    ],
+    "assurance.contrast.evaluate": [
+      {
+        "let": "contrastInput",
+        "value": "$eventInput"
+      },
+      {
+        "fold": "$contrastInput.cases",
+        "as": "page",
+        "accumulator": "rows",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "components",
+            "value": [
+              "append",
+              [
+                "list",
+                {
+                  "id": "masthead",
+                  "suffix": ".masthead",
+                  "foreground": "text",
+                  "background": "bg"
+                },
+                {
+                  "id": "footer",
+                  "suffix": ".footer",
+                  "foreground": "muted",
+                  "background": "wash"
+                }
+              ],
+              [
+                "if",
+                [
+                  "eq",
+                  "$page.kind",
+                  "essay"
+                ],
+                [
+                  "list",
+                  {
+                    "id": "essay-title",
+                    "suffix": ".faith-essay-header",
+                    "foreground": "text",
+                    "background": "bg"
+                  }
+                ],
+                [
+                  "list"
+                ]
+              ]
+            ]
+          },
+          {
+            "fold": "$components",
+            "as": "component",
+            "accumulator": "componentRows",
+            "initial": [
+              "list"
+            ],
+            "steps": [
+              {
+                "let": "selectors",
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$component.id",
+                    "essay-title"
+                  ],
+                  [
+                    "list",
+                    ".faith-essay-header"
+                  ],
+                  [
+                    "map",
+                    "$page.scopes",
+                    "scope",
+                    [
+                      "concat",
+                      "$scope",
+                      " ",
+                      "$component.suffix"
+                    ]
+                  ]
+                ]
+              },
+              {
+                "let": "rules",
+                "value": [
+                  "filter",
+                  "$contrastInput.styles",
+                  "rule",
+                  [
+                    "and",
+                    [
+                      "eq",
+                      "$rule.context",
+                      null
+                    ],
+                    [
+                      "some",
+                      "$selectors",
+                      "selector",
+                      [
+                        "includes",
+                        [
+                          "concat",
+                          ",",
+                          "$rule.selector",
+                          ","
+                        ],
+                        [
+                          "concat",
+                          ",",
+                          "$selector",
+                          ","
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              },
+              {
+                "port": "record.fromEntries",
+                "args": {
+                  "entries": [
+                    "fold",
+                    "$rules",
+                    "r",
+                    "pairs",
+                    [
+                      "list"
+                    ],
+                    [
+                      "append",
+                      "$pairs",
+                      [
+                        "map",
+                        "$r.declarations",
+                        "d",
+                        [
+                          "list",
+                          "$d.property",
+                          "$d.value"
+                        ]
+                      ]
+                    ]
+                  ]
+                },
+                "into": "paint"
+              },
+              {
+                "let": "bound",
+                "value": [
+                  "and",
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$paint",
+                      "color"
+                    ],
+                    [
+                      "concat",
+                      "var(--reading-",
+                      "$component.foreground",
+                      ")"
+                    ]
+                  ],
+                  [
+                    "eq",
+                    [
+                      "at",
+                      "$paint",
+                      "background"
+                    ],
+                    [
+                      "concat",
+                      "var(--reading-",
+                      "$component.background",
+                      ")"
+                    ]
+                  ]
+                ]
+              },
+              {
+                "let": "foreground",
+                "value": [
+                  "at",
+                  "$page.palette",
+                  "$component.foreground"
+                ]
+              },
+              {
+                "let": "background",
+                "value": [
+                  "if",
+                  "$bound",
+                  [
+                    "at",
+                    "$page.palette",
+                    "$component.background"
+                  ],
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$component.id",
+                      "essay-title"
+                    ],
+                    [
+                      "at",
+                      "$page.palette",
+                      "$component.background"
+                    ],
+                    [
+                      "at",
+                      [
+                        "at",
+                        "$contrastInput.base",
+                        "$component.suffix"
+                      ],
+                      "background"
+                    ]
+                  ]
+                ]
+              },
+              {
+                "let": "eventInput",
+                "value": {
+                  "foreground": "$foreground",
+                  "background": "$background"
+                }
+              },
+              {
+                "call": "assurance.contrast.ratio"
+              },
+              {
+                "let": "row",
+                "value": {
+                  "route": "$page.route",
+                  "identity": "$page.key",
+                  "component": "$component.id",
+                  "rule": "contrast.reading-component-pair",
+                  "selector": "$component.suffix",
+                  "status": [
+                    "if",
+                    "$bound",
+                    [
+                      "if",
+                      "$result.passes",
+                      "passed-source-contract",
+                      "failed-source-contrast"
+                    ],
+                    [
+                      "if",
+                      "$result.passes",
+                      "needs-source-review",
+                      "failed-source-contrast"
+                    ]
+                  ],
+                  "foreground": "$foreground",
+                  "background": "$background",
+                  "ratio": "$result.ratio",
+                  "minimum": "$result.minimum",
+                  "pairedSourceDeclarations": "$bound",
+                  "sourceSelectors": [
+                    "map",
+                    "$rules",
+                    "r",
+                    "$r.selector"
+                  ],
+                  "evidence": [
+                    "if",
+                    "$bound",
+                    "Foreground and opaque surface are explicitly paired by the authored reading-theme rule.",
+                    "The light reading theme lacks a matching complete foreground/background component rule. The legacy masthead/footer surface can survive while text inherits the reading palette."
+                  ]
+                }
+              }
+            ],
+            "yield": [
+              "append",
+              "$componentRows",
+              [
+                "list",
+                "$row"
+              ]
+            ],
+            "into": "pageRows"
+          }
+        ],
+        "yield": [
+          "append",
+          "$rows",
+          "$pageRows"
+        ],
+        "into": "contrastRows"
+      },
+      {
+        "let": "result",
+        "value": {
+          "protocol": "worldwright/reading-contrast-report/1",
+          "method": "Admitted algebra evaluates authored component bindings and the WCAG sRGB luminance formula. Source evidence, not computed browser colours.",
+          "boundary": "Bounded to the shared reading-page masthead, footer and essay title surface. Selector coverage is a declared component contract, not a general CSS cascade interpreter. Gradients, hover/focus states, arbitrary templates and actual rendered colours still require browser observation.",
+          "criterion": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html",
+          "cases": "$contrastRows",
+          "failed": [
+            "count",
+            [
+              "filter",
+              "$contrastRows",
+              "r",
+              [
+                "eq",
+                "$r.status",
+                "failed-source-contrast"
+              ]
+            ]
+          ],
+          "review": [
+            "count",
+            [
+              "filter",
+              "$contrastRows",
+              "r",
+              [
+                "eq",
+                "$r.status",
+                "needs-source-review"
+              ]
+            ]
+          ],
+          "browserColourEvidence": "not-collected"
+        }
+      }
+    ],
+    "assurance.contrast.currentness": [
+      {
+        "let": "currencyInput",
+        "value": "$eventInput"
+      },
+      {
+        "port": "record.entries",
+        "args": {
+          "value": "$currencyInput.capturedBindings"
+        },
+        "into": "capturedEntries"
+      },
+      {
+        "let": "changed",
+        "value": [
+          "filter",
+          "$capturedEntries",
+          "e",
+          [
+            "not",
+            [
+              "eq",
+              [
+                "at",
+                "$e",
+                1
+              ],
+              [
+                "at",
+                "$currencyInput.currentBindings",
+                [
+                  "at",
+                  "$e",
+                  0
+                ]
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "fold": "$changed",
+        "as": "e",
+        "accumulator": "dependencies",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "text.matches",
+            "args": {
+              "value": [
+                "at",
+                "$e",
+                0
+              ],
+              "pattern": "\\.html$"
+            },
+            "into": "isHTML"
+          }
+        ],
+        "yield": [
+          "if",
+          "$isHTML",
+          "$dependencies",
+          [
+            "append",
+            "$dependencies",
+            [
+              "list",
+              [
+                "at",
+                "$e",
+                0
+              ]
+            ]
+          ]
+        ],
+        "into": "changedDependencies"
+      },
+      {
+        "port": "record.fromEntries",
+        "args": {
+          "entries": [
+            "map",
+            "$currencyInput.routes",
+            "route",
+            [
+              "list",
+              "$route",
+              {
+                "status": [
+                  "if",
+                  [
+                    "and",
+                    [
+                      "eq",
+                      [
+                        "count",
+                        "$changedDependencies"
+                      ],
+                      0
+                    ],
+                    [
+                      "at",
+                      "$currencyInput.capturedBindings",
+                      "$route"
+                    ],
+                    [
+                      "eq",
+                      [
+                        "at",
+                        "$currencyInput.capturedBindings",
+                        "$route"
+                      ],
+                      [
+                        "at",
+                        "$currencyInput.currentBindings",
+                        "$route"
+                      ]
+                    ]
+                  ],
+                  "current-artifact-bindings",
+                  "needs-browser-recapture"
+                ],
+                "captured": [
+                  "if",
+                  [
+                    "at",
+                    "$currencyInput.capturedBindings",
+                    "$route"
+                  ],
+                  true,
+                  false
+                ]
+              }
+            ]
+          ]
+        },
+        "into": "byRoute"
+      },
+      {
+        "let": "result",
+        "value": {
+          "protocol": "worldwright/browser-evidence-currentness/1",
+          "method": "Compare the original capture bindings with the current generated artifact hashes. A shared dependency change conservatively invalidates current-layout claims across the inventory.",
+          "changedArtifacts": [
+            "map",
+            "$changed",
+            "e",
+            [
+              "at",
+              "$e",
+              0
+            ]
+          ],
+          "changedDependencies": "$changedDependencies",
+          "byRoute": "$byRoute",
+          "browserColourEvidence": "not-collected"
+        }
+      }
+    ],
+    "assurance.contrast.publish": [
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "tooling/assurance/contrast-evidence.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "tooling/assurance/contrast-evidence.json"
+        },
+        "into": "contrastJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$contrastJSON"
+        },
+        "into": "contrastEvidence"
+      },
+      {
+        "let": "eventInput",
+        "value": {
+          "reading": "$readingData",
+          "faith": "$faithReading"
+        }
+      },
+      {
+        "call": "assurance.contrast.input"
+      },
+      {
+        "assert": [
+          "eq",
+          "$result",
+          "$contrastEvidence.current.inputs"
+        ],
+        "message": "Contrast source evidence is stale; replay the admitted assessor."
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "algebra/publication.process.json"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "algebra/publication.process.json"
+        },
+        "into": "contrastPolicyJSON"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$contrastPolicyJSON"
+        },
+        "into": "contrastPolicySource"
+      },
+      {
+        "assert": [
+          "eq",
+          [
+            "at",
+            "$contrastPolicySource.queries",
+            "assurance.contrast.input"
+          ],
+          [
+            "at",
+            "$contrastEvidence.policy",
+            "assurance.contrast.input"
+          ]
+        ],
+        "message": "Contrast policy evidence is stale: assurance.contrast.input"
+      },
+      {
+        "assert": [
+          "eq",
+          [
+            "at",
+            "$contrastPolicySource.queries",
+            "assurance.contrast.luminance"
+          ],
+          [
+            "at",
+            "$contrastEvidence.policy",
+            "assurance.contrast.luminance"
+          ]
+        ],
+        "message": "Contrast policy evidence is stale: assurance.contrast.luminance"
+      },
+      {
+        "assert": [
+          "eq",
+          [
+            "at",
+            "$contrastPolicySource.queries",
+            "assurance.contrast.ratio"
+          ],
+          [
+            "at",
+            "$contrastEvidence.policy",
+            "assurance.contrast.ratio"
+          ]
+        ],
+        "message": "Contrast policy evidence is stale: assurance.contrast.ratio"
+      },
+      {
+        "assert": [
+          "eq",
+          [
+            "at",
+            "$contrastPolicySource.queries",
+            "assurance.contrast.evaluate"
+          ],
+          [
+            "at",
+            "$contrastEvidence.policy",
+            "assurance.contrast.evaluate"
+          ]
+        ],
+        "message": "Contrast policy evidence is stale: assurance.contrast.evaluate"
+      },
+      {
+        "assert": [
+          "eq",
+          [
+            "at",
+            "$contrastPolicySource.queries",
+            "assurance.contrast.currentness"
+          ],
+          [
+            "at",
+            "$contrastEvidence.policy",
+            "assurance.contrast.currentness"
+          ]
+        ],
+        "message": "Contrast policy evidence is stale: assurance.contrast.currentness"
+      },
+      {
+        "assert": [
+          "and",
+          [
+            "eq",
+            "$contrastEvidence.current.report.failed",
+            0
+          ],
+          [
+            "eq",
+            "$contrastEvidence.current.report.review",
+            0
+          ]
+        ],
+        "message": "Reading component contrast contract requires attention."
+      },
+      {
+        "port": "file.write",
+        "args": {
+          "path": "assurance/contrast.json",
+          "text": "$contrastJSON"
+        },
+        "into": "_"
+      },
+      {
+        "let": "portfolioPage",
+        "value": {
+          "route": "assurance/contrast/index.html",
+          "prefix": "../../",
+          "canonical": "https://aaronalderman.com/assurance/contrast/",
+          "title": "Reading contrast assurance — Aaron Alderman",
+          "description": "Source evidence for readable reading-page headers, titles and footers, including the original regression and its repair.",
+          "body": [
+            "list",
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "ASSURANCE / READING CONTRAST"
+                  ]
+                },
+                {
+                  "tag": "h1",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Light behind the words."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "A reading theme changed the text to dark ink while three essays retained dark masthead and footer surfaces. The shared component rules now pair foreground and background across Christian, Dad, Sourcerer and Author reading pages."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../"
+                      },
+                      "children": [
+                        "list",
+                        "All assurance topics"
+                      ]
+                    },
+                    " · ",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../contrast.json"
+                      },
+                      "children": [
+                        "list",
+                        "Download before-and-after evidence"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "What the algebra checks"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "Twenty component pairings cover eight reading pages: mastheads, footers and essay title surfaces. The admitted algebra evaluates selector coverage, explicit opaque colour pairs and the WCAG sRGB contrast formula. Its conservative 4.5:1 threshold also protects small navigation and supporting text."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "Original low-contrast source pairings: ",
+                      "$contrastEvidence.baseline.report.failed",
+                      ". Current failures: ",
+                      "$contrastEvidence.current.report.failed",
+                      ". Source cases requiring review: ",
+                      "$contrastEvidence.current.report.review",
+                      "."
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html"
+                      },
+                      "children": [
+                        "list",
+                        "WCAG contrast guidance"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "The repaired source pairs"
+                  ]
+                },
+                {
+                  "tag": "ul",
+                  "attrs": {},
+                  "children": [
+                    "map",
+                    "$contrastEvidence.current.report.cases",
+                    "case",
+                    {
+                      "tag": "li",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        {
+                          "tag": "a",
+                          "attrs": {
+                            "href": [
+                              "concat",
+                              "/",
+                              "$case.route"
+                            ]
+                          },
+                          "children": [
+                            "list",
+                            "$case.route"
+                          ]
+                        },
+                        " · ",
+                        "$case.component",
+                        " · ",
+                        "$case.foreground",
+                        " on ",
+                        "$case.background",
+                        " · ",
+                        "$case.status"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "section",
+              "attrs": {
+                "class": "assurance-boundary"
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "h2",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "What remains to verify"
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    "This is a bounded authored component contract, not a complete CSS cascade or accessibility certification. Gradients, interaction states, other templates and actual browser colours require separate observation. Fresh browser colour evidence has not been collected. Earlier browser geometry captures are retained with their original artifact bindings and marked for recapture when dependencies change."
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    {
+                      "tag": "a",
+                      "attrs": {
+                        "href": "../rendered-layout/"
+                      },
+                      "children": [
+                        "list",
+                        "Inspect historical browser layout evidence"
+                      ]
+                    }
                   ]
                 }
               ]

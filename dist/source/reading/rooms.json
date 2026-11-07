@@ -2477,7 +2477,7 @@
     },
     {
       "id": "faith.style.2",
-      "selector": "body:has(:is(.faith-threads,.reading-room)) .masthead,body[data-light=\"faith-reading\"] .masthead",
+      "selector": "body:has(:is(.faith-threads,.reading-room,.faith-essay,.reading-essay)) .masthead",
       "context": null,
       "declarations": [
         {
@@ -2496,7 +2496,7 @@
     },
     {
       "id": "faith.style.3",
-      "selector": "body:has(:is(.faith-threads,.reading-room)) .monogram,body[data-light=\"faith-reading\"] .monogram",
+      "selector": "body:has(:is(.faith-threads,.reading-room,.faith-essay,.reading-essay)) .monogram",
       "context": null,
       "declarations": [
         {
@@ -2511,7 +2511,7 @@
     },
     {
       "id": "faith.style.4",
-      "selector": "body:has(:is(.faith-threads,.reading-room)) .footer,body[data-light=\"faith-reading\"] .footer",
+      "selector": "body:has(:is(.faith-threads,.reading-room,.faith-essay,.reading-essay)) .footer",
       "context": null,
       "declarations": [
         {
@@ -3517,6 +3517,14 @@
         {
           "property": "padding",
           "value": "64px 0 0"
+        },
+        {
+          "property": "color",
+          "value": "var(--reading-text)"
+        },
+        {
+          "property": "background",
+          "value": "var(--reading-bg)"
         }
       ]
     },

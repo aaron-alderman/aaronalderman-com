@@ -1102,17 +1102,8 @@
                 "let": "hTargetGroup",
                 "value": [
                   "at",
-                  [
-                    "filter",
-                    "$hRowsByTarget",
-                    "group",
-                    [
-                      "eq",
-                      "$group.target",
-                      "$hRow.target"
-                    ]
-                  ],
-                  0
+                  "$hTargetIndex",
+                  "$hRow.target"
                 ]
               },
               {
@@ -2302,33 +2293,7 @@
         "call": "hierarchy.extract"
       },
       {
-        "let": "hRowsByTarget",
-        "value": [
-          "map",
-          [
-            "distinct",
-            [
-              "map",
-              "$hRows",
-              "row",
-              "$row.target"
-            ]
-          ],
-          "target",
-          {
-            "target": "$target",
-            "rows": [
-              "filter",
-              "$hRows",
-              "row",
-              [
-                "eq",
-                "$row.target",
-                "$target"
-              ]
-            ]
-          }
-        ]
+        "call": "hierarchy.index.targets"
       },
       {
         "call": "hierarchy.viewer.build"
@@ -10549,6 +10514,93 @@
           ]
         },
         "into": "_"
+      }
+    ],
+    "hierarchy.index.targets": [
+      {
+        "fold": "$hRows",
+        "as": "row",
+        "accumulator": "scan",
+        "initial": {
+          "index": {},
+          "order": [
+            "list"
+          ]
+        },
+        "steps": [
+          {
+            "port": "record.get",
+            "args": {
+              "record": "$scan.index",
+              "key": "$row.target"
+            },
+            "into": "priorGroup"
+          },
+          {
+            "port": "record.put",
+            "args": {
+              "record": "$scan.index",
+              "key": "$row.target",
+              "value": {
+                "target": "$row.target",
+                "rows": [
+                  "append",
+                  [
+                    "if",
+                    "$priorGroup",
+                    "$priorGroup.rows",
+                    [
+                      "list"
+                    ]
+                  ],
+                  [
+                    "list",
+                    "$row"
+                  ]
+                ]
+              }
+            },
+            "into": "updatedIndex"
+          }
+        ],
+        "yield": {
+          "index": "$updatedIndex",
+          "order": [
+            "if",
+            "$priorGroup",
+            "$scan.order",
+            [
+              "append",
+              "$scan.order",
+              [
+                "list",
+                "$row.target"
+              ]
+            ]
+          ]
+        },
+        "into": "targetScan"
+      },
+      {
+        "let": "hTargetIndex",
+        "value": "$targetScan.index"
+      },
+      {
+        "let": "hRowsByTarget",
+        "value": [
+          "map",
+          "$targetScan.order",
+          "target",
+          [
+            "at",
+            "$hTargetIndex",
+            "$target"
+          ]
+        ]
+      },
+      {
+        "let": "result",
+        "value": "$hRowsByTarget"
       }
     ]
   }

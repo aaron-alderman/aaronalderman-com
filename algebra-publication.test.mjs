@@ -45,6 +45,7 @@ test('the social image is a real correctly described bitmap; sitemap includes al
  assert.ok(b.length<5_000_000);
  const xml=await read('dist/sitemap.xml'),urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
  const expected=['','mission/','writing/','writing/power-must-serve-life/','writing/faith-with-open-hands/','assurance/','assurance/identities/','assurance/accessibility/','assurance/internationalisation/','assurance/maturity/','assurance/rendered-layout/','roadmap/','gate.html','atlas.html','questions.html','questions-sourcerer.html','questions-author.html','questions-dad.html','relational-geometry/','inspection/source-algebra.html',...Object.keys(scenes).map(id=>`places/${id}.html`),...['temple','temple/films','sourcery','sourcery/films','claimipedia','worldwright','encounter','kingdom','world-modelling','creativity','the-field','the-field/correction'].map(slug=>slug+'/')].map(route=>'https://aaronalderman.com/'+route);
+ expected.push('https://aaronalderman.com/assurance/contrast/');
  for(const room of JSON.parse(await read('source/reading/rooms.json')).rooms)expected.push(room.essay.canonical);
  for(const item of JSON.parse(await read('source/hierarchy.json')).items)for(const route of [item.href,'inspection/'+item.id+'.html']){const url='https://aaronalderman.com/'+route;if(!expected.includes(url))expected.push(url);}
  for(const identity of ['sourcerer','author','dad','christian'])for(const route of ['index.html','threads.html','atlas.html','questions.html',...Object.keys(scenes).map(id=>`places/${id}.html`)])expected.push(`https://aaronalderman.com/worlds/${identity}/${route}`);
@@ -199,16 +200,20 @@ test('navigation/layout algebra distinguishes defects, review candidates and opa
 
 });
 
-test('rendered assurance covers both viewports, binds current artifacts and replays the admitted algebra',async()=>{
+test('rendered assurance preserves historical observations and distinguishes current artifact coverage',async()=>{
  const {createRenderedAssessor}=await import('./tooling/assess-rendered-layout.mjs');
  const published=JSON.parse(await read('dist/assurance/rendered-layout.json')),snapshots=JSON.parse(await read('dist/assurance/rendered-observations.json'));
  const assessor=await createRenderedAssessor(),observationPlan=(await assessor.plan()).value;
  assert.equal((await assessor.acceptPlan(published.observationPlan)).value.ok,true);
  const planSha=sha(JSON.stringify(published.observationPlan));
- const expected=Object.keys(receipt.artifacts).filter(p=>p.endsWith('.html')).flatMap(route=>['desktop','mobile'].map(profile=>route+'|'+profile)).sort();
- assert.deepEqual(snapshots.map(s=>s.route+'|'+s.profile).sort(),expected,'Every generated route needs exactly one observation at each declared width');
+ const original=JSON.parse(await read('tooling/assurance/browser-evidence.json'));
+ const expected=Object.keys(original.bindings).filter(p=>p.endsWith('.html')).flatMap(route=>['desktop','mobile'].map(profile=>route+'|'+profile)).sort();
+ assert.deepEqual(snapshots,original.snapshots,'Historical measurements must not be silently regenerated or relabelled');
+ assert.deepEqual(snapshots.map(s=>s.route+'|'+s.profile).sort(),expected,'Every historically captured route retains both declared widths');
  for(const s of snapshots){assert.equal(s.planSha256,planSha,'The captured browser observation plan must match the algebra');assert.equal(new URL(s.url).pathname,'/'+s.route);assert.equal(s.viewport.width,s.profile==='desktop'?1280:390);assert.equal(s.viewport.height,s.profile==='desktop'?800:844);assert.equal(s.readyState,'complete',s.route);assert.equal(s.fontStatus,'loaded',s.route);}
- for(const [file,hash]of Object.entries(receipt.artifacts).filter(([file])=>/\.(html|css|js|svg|png|webp|jpg|jpeg|woff|woff2)$/.test(file)))assert.equal(published.bindings[file],hash,'Browser evidence is stale for '+file+'; remeasure affected routes before release');
+ assert.deepEqual(published.bindings,original.bindings,'Original browser artifact bindings remain immutable');
+ const {createContrastAssessor,artifactEvidence}=await import('./tooling/assess-reading-contrast.mjs'),contrast=await createContrastAssessor();
+ assert.deepEqual(published.currentness,JSON.parse(JSON.stringify((await contrast.currentness(artifactEvidence())).value)),'Currentness must use actual current artifact bytes');
  assert.equal(published.observerSha256,sha((await read('tooling/rendered-browser-observer.mjs')).replace(/\r\n/g,'\n')));
  const replay=await assessor.report(snapshots,published.observationPlan);
  assert.equal(published.policySha256,assessor.policySha256);assert.deepEqual(published.report,JSON.parse(JSON.stringify(replay.value)));
@@ -218,7 +223,9 @@ test('rendered assurance covers both viewports, binds current artifacts and repl
  for(const profile of ['desktop','mobile'])assert.ok(sourceFindings.some(f=>f.profile===profile&&f.finding.rule==='structure.heading-content-rail'),'Source findings rail aberration must remain captured at '+profile);
  assert.ok(published.report.findings.some(f=>f.finding.text==='Stylesheet space reservations'&&f.finding.rule==='structure.heading-only-region'));
  assert.ok(published.report.findings.some(f=>f.route!=='assurance/navigation-layout/index.html'),'The audit must seek other pages, not only the supplied example');
- const navigation=JSON.parse(await read('dist/assurance/navigation-layout.json'));assert.equal(navigation.geometryUnmeasured,0);assert.ok(navigation.pages.every(p=>p.geometry.status==='measured'));
+ const navigation=JSON.parse(await read('dist/assurance/navigation-layout.json'));
+ for(const page of navigation.pages){const current=published.currentness.byRoute[page.route]?.status==='current-artifact-bindings';assert.equal(page.geometry.status,current?'measured':'needs-browser-evidence',page.route);}
+ assert.equal(navigation.geometryUnmeasured,navigation.pages.filter(p=>p.geometry.status!=='measured').length);
  assert.ok((await read('dist/assurance/navigation-layout/index.html')).includes('<section class="assurance-products"><h2>Source findings</h2>'),'The example remains unfixed for discernment');
 });
 

@@ -156,11 +156,13 @@ test('sharing uses exact typed identity and counts each consumer once',async()=>
 
 test('source indexing preserves typed sharing, duplicate witnesses and their order',async()=>{
  const rows=[{item:'a',relation:'pack',target:'same'},{item:'a',relation:'pack',target:'same'},{item:'b',relation:'pack',target:'same'},{item:'c',relation:'dependsOn',target:'same'},{item:'d',relation:'pack',target:'similar'}];
- const entry='index.test',index=read('algebra/hierarchy.process.json').queries['hierarchy.build'].find(s=>s.let==='hRowsByTarget');
- const compiled=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry,queries:{[entry]:[index,{let:'result',value:'$hRowsByTarget'}]}},mode:'model',ports:valuePorts(),limit:20000000});
+ const entry='hierarchy.index.targets',index=read('algebra/hierarchy.process.json').queries[entry];
+ const compiled=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry,queries:{[entry]:index}},mode:'model',ports:valuePorts(),limit:20000000});
  const groups=(await invoke({model:compiled,entry,input:{hRows:rows},ports:valuePorts(),limit:20000000})).value;
  assert.deepEqual(groups.map(g=>g.target),['same','similar']);assert.deepEqual(groups[0].rows,rows.slice(0,4));
  for(const relation of ['pack','dependsOn'])assert.deepEqual(await run('hierarchy.shared',{rows:groups[0].rows,relation,target:'same'}),await run('hierarchy.shared',{rows,relation,target:'same'}));
+ const numeric=(await invoke({model:compiled,entry,input:{hRows:[{target:'10'},{target:'2'},{target:'10'}]},ports:valuePorts(),limit:20000000})).value;
+ assert.deepEqual(numeric.map(g=>g.target),['10','2']);assert.equal(numeric[0].rows.length,2);
 });
 
 test('malformed, unsupported and stale source-line bindings refuse rather than fabricating connections',async()=>{
