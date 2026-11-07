@@ -2,22 +2,22 @@
   "protocol": "aaronalderman/local-publication-qualification/1",
   "date": "2026-11-07",
   "timezone": "Australia/Perth",
-  "sourceBaseline": "bc53ec0295361457b6c8d9052f58fb60306d6012",
-  "scope": "Integrated publication qualification before the authorized GitHub Pages deployment.",
+  "sourceBaseline": "f769ef913dee886c5bc8078041b3fd489ea285b6",
+  "scope": "Requested Jesus-centred editorial revision, restrained emphasis and responsive margin notes; mobile invitation return-link overlap repair.",
   "entry": "publication.build",
   "execution": {
-    "indexSteps": 5084366,
-    "applicationSteps": 14838685,
-    "totalSteps": 19923051,
+    "indexSteps": 5171795,
+    "applicationSteps": 14793465,
+    "totalSteps": 19965260,
     "limit": 20000000
   },
-  "artifactCount": 645,
-  "buildReceiptSha256": "faf91de2bcc9103aa8dc3ec47add5b8dd2d395ac575519ca7b0128c18dd40a4a",
+  "artifactCount": 646,
+  "buildReceiptSha256": "54e3e3268ab92d1d38953dceb75f07d23600443919c381ed74ba7872ec582b90",
   "sourceSha256": {
-    "source/front-doors.rel": "b06f283289b2059964b08ebc506d17a93f832fa073d44e15e63ece434c18d611",
-    "source/expedition.rel": "e8fe2cdd23645fc59e078dbee2303f6f957fab1a54cd5f60562e3c3feb8a4b65",
-    "source/hierarchy.rel": "1478112bfb3ba7005a286e587b6947ff87cc4b87c0d4cef9b630f3225983b60f",
-    "algebra/publication.process.json": "e02259b2585bc9cd89be7231166e3517a7e01695a5717b1ea2e93e6964398056"
+    "source/front-doors.rel": "0be275b8ccbc388f5c9891e055e8cfd7e8c9283fbdff0b5d7891fcb736d483c3",
+    "source/expedition.rel": "057e2c8aad61ca4c665dd54e63251efb66cfbb5d3849405e3d89e898ccb65744",
+    "source/hierarchy.rel": "28acc6faf3850145028742626f45d019cc240b78904a27db3bb2026b77b02fc7",
+    "algebra/publication.process.json": "d24c794cf2ae47838cfbbaa0b14edd62f3d4cd4c268ddf0b8b59567fe974dc32"
   },
   "artworkSha256": "89cd80f02e60dc3e0d131f22dbcaaeeeed73e7ef07974b9d0f86e2c587c250ae",
   "nativeFilesCompared": 15,
@@ -26,11 +26,23 @@
   "authoring": {
     "applied": true,
     "protocol": "worldwright/authoring-receipt/2",
-    "receiptSha256": "288cdcc78a45ad71d71b35829dee7f5799507180d2a5d9bd0d034a4fe165cbda",
+    "receiptSha256": "5b360f79bbe954173093aabdc0d9eddd918471bd9363255bd5e9479a4268da52",
     "mechanismSha256": "7ba3d118ed6d77703c6c8a90c3d56659bb1d457ebf72d54a9fc31330c2414ace",
-    "scope": "The approved design was authored and accepted at revision 9c0b648; the current main branch was subsequently integrated through Git and revalidated."
+    "scope": "Requested Jesus-centred editorial revision, restrained emphasis and responsive margin notes; mobile invitation return-link overlap repair."
   },
   "checks": [
+    {
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+        "--cache",
+        ".npm-cache"
+      ],
+      "status": 0
+    },
     {
       "command": [
         "node",
@@ -43,9 +55,34 @@
     },
     {
       "command": [
-        "npm",
-        "run",
-        "test:portable"
+        "node",
+        "--test",
+        "reading.test.mjs",
+        "publication.test.mjs",
+        "algebra-publication.test.mjs",
+        "microsite-fidelity.test.mjs",
+        "microsite-publication.test.mjs",
+        "claimipedia-review.test.mjs",
+        "encounter-microsite.test.mjs",
+        "activity-layout.test.mjs",
+        "atlas.test.mjs",
+        "atlas-journey.test.mjs",
+        "authoring.test.mjs",
+        "reader-workshop-algebra.test.mjs",
+        "hierarchy.test.mjs",
+        "process-authoring.test.mjs",
+        "batch-process-authoring.test.mjs",
+        "authoring-workflow.test.mjs",
+        "document-inspection.test.mjs",
+        "expansion.test.mjs",
+        "expedition.test.mjs",
+        "workshop.test.mjs",
+        "microsite-process-authoring.test.mjs",
+        "microsite-publication-process-authoring.test.mjs",
+        "stylesheet-algebra.test.mjs",
+        "field-correction-article.test.mjs",
+        "html-escaping.test.mjs",
+        "mission-publication.test.mjs"
       ],
       "status": 0
     },
@@ -62,35 +99,22 @@
     "passed": 211,
     "failed": 0,
     "skipped": 0,
-    "includesFreshArtifactReproduction": true
+    "includesFreshArtifactReproduction": true,
+    "scope": "Accepted editorial candidate before upstream integration; final integrated suite is recorded in GitHub Actions."
   },
   "browserChecks": [
-    "Desktop illustrated scroll opening and AI-only heading",
-    "Rolled frame stays within the viewport",
-    "Contents anchor reaches chapter ribbon",
-    "390px mobile scroll opening and navigation",
-    "Redundant floating return link no longer covers the comic"
+    "Live mission invitation and full scroll destinations checked",
+    "390px and 320px scroll fit, artwork, contents links and all five tables",
+    "1500px margin notes and 390px inline note layout",
+    "390px mission return link static, no overlay",
+    "Jesus-centred section and alignment wording verified"
   ],
   "boundary": "Engineering evidence for this source state; same local validation run, not independent scientific validation.",
   "comicSha256": "37b078a6dfd5fc4e6b85c61bd5374eec4469393db24d52ac2110b5b805b98256",
-  "approvedRevision": "9c0b64880ed1a6c0600be1a29529fe91092dc2ff",
   "integration": {
-    "upstream": "bc53ec0295361457b6c8d9052f58fb60306d6012",
-    "designPreservation": {
-      "approved": "9c0b64880ed1a6c0600be1a29529fe91092dc2ff",
-      "designFiles": [
-        "source/front-doors.rel",
-        "assets/scroll/power-to-life-v1.webp",
-        "assets/scroll/agency-triptych-v1.webp"
-      ],
-      "designUnchanged": true,
-      "nativeBytesUnchanged": true,
-      "publicationConfigurationUnchanged": true
-    },
-    "portableLogSha256": "abda8e6b9d72a34c396ffb34b95f97fa722d7a26a8a2aafb2fcf12a6b5257cb3",
-    "presentationLogSha256": "8780fb6f6c390bcfc2c7fe4f7f21b06b8bb1fc70706ef5ede90610eda44a53b5",
-    "validationNote": "Initial full suite overlapped the build and saw stale/intermediate artifacts. All seven affected checks rerun after build completion; fresh artifact reproduction passed.",
-    "algebraRecheckLogSha256": "7b630f409a0d70214370a2a54b9e80a613141d74b5897737fb2237b658be9423",
-    "dependentRecheckLogSha256": "42d0abc39972fd49bc5011d01d4229f0736a2478ae6fe33654407391f90bd0ab"
+    "upstream": "f769ef913dee886c5bc8078041b3fd489ea285b6",
+    "validationSha256": "dabb8a606392adda03b9834f8832e3cd5273c24aa5aa41c1fa21380c0cccdc05",
+    "scope": "Accepted authoring transaction passed all 211 tests before upstream integration. The integrated publication build, mission tests and presentation comparison passed locally. The existing Pages workflow rechecks the full final revision before deployment.",
+    "presentationSha256": "4265cf34e739107d1c00392150f82b5410af4ec1ffb9a761c286d0e5147e579b"
   }
 }
