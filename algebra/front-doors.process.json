@@ -498,6 +498,13 @@
         "call": "html.serialize"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "worldwright/index.html"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "worldwright/index.html",
@@ -916,6 +923,21 @@
               },
               {
                 "call": "html.serialize"
+              },
+              {
+                "let": "surfaceWritePath",
+                "value": [
+                  "concat",
+                  [
+                    "one",
+                    "$capability",
+                    "href"
+                  ],
+                  "index.html"
+                ]
+              },
+              {
+                "call": "assurance.surface.register"
               },
               {
                 "port": "file.write",

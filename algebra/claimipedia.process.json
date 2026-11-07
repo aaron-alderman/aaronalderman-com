@@ -64,6 +64,13 @@
         "call": "publication.motion"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "claimipedia/claimipedia.css"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "claimipedia/claimipedia.css",
@@ -1948,6 +1955,13 @@
       },
       {
         "call": "html.serialize"
+      },
+      {
+        "let": "surfaceWritePath",
+        "value": "claimipedia/index.html"
+      },
+      {
+        "call": "assurance.surface.register"
       },
       {
         "port": "file.write",

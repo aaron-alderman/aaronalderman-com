@@ -357,6 +357,13 @@
         "call": "publication.styles"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "encounter/encounter.css"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "encounter/encounter.css",
@@ -2066,6 +2073,13 @@
       },
       {
         "call": "html.serialize"
+      },
+      {
+        "let": "surfaceWritePath",
+        "value": "encounter/index.html"
+      },
+      {
+        "call": "assurance.surface.register"
       },
       {
         "port": "file.write",

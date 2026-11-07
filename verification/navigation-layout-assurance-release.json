@@ -1,0 +1,158 @@
+{
+  "protocol": "worldwright/navigation-layout-release/1",
+  "baseRevision": "81add0fd320f5318e1e05e0cb3ebe82f11ede01c",
+  "authoring": {
+    "receiptSha256": "a986aa9ffb7a2663d0312fdc93843ff109c2098f21eea241e3c61bc1ee69ce0a",
+    "applied": true,
+    "commit": {
+      "files": [
+        {
+          "file": "algebra/publication.process.json",
+          "beforeSha256": "433db142b585ac47c247201bf2d0fa10faebdf0357abb81bcb8294e316b27ab8",
+          "afterSha256": "5680f77d3bdddd7f33feaab4358a6cc1b0348b6d25ec22d950c8c6f632f52a49"
+        },
+        {
+          "file": "algebra/gateway.process.json",
+          "beforeSha256": "f50c0864f06391a0a813343978e7e9dfec7cba2dda86306a5ed9e4fb0399d088",
+          "afterSha256": "13fb9561662a2d7552cbcd423d55eebdf51471379ba2d4fd8f7fdf4e6a54b2db"
+        },
+        {
+          "file": "algebra/front-doors.process.json",
+          "beforeSha256": "9bc7f85cedb8c14131f7301bd1ab93b9d1b183f7fd7de91d5f5162dc54586ac8",
+          "afterSha256": "435469dcce417ebe942687b413c48b9f10763e2323eaef502dff20abf156b8cc"
+        },
+        {
+          "file": "algebra/claimipedia.process.json",
+          "beforeSha256": "dc74ccf8e8e81b15cd05178dd33b140999e28a4398130959f54a8f3f1f6ff173",
+          "afterSha256": "b39390c39774c5b0cf548ecb2f07a6975723bd6d4f76b6399aa775ef8d43906e"
+        },
+        {
+          "file": "algebra/atlas.process.json",
+          "beforeSha256": "2e2b394897e5b343cb3a8ce521647e12727c232943536fc35f1e966a17211696",
+          "afterSha256": "b785a76644ad8f963af78bbdbed145dfa52231e22fdb8a22236ebf1b36433336"
+        },
+        {
+          "file": "algebra/reader-workshop-publication.process.json",
+          "beforeSha256": "06a7124e2d18deb710f5611f7fc792e272f9c7e2e8f2e0e4287724c45cdfb3ae",
+          "afterSha256": "614432cb32e71bdd136e5e7f6ce4ad8ce36f79ffebf8c50e0b650971d0a253b7"
+        },
+        {
+          "file": "algebra/hierarchy.process.json",
+          "beforeSha256": "1643a6a9980613634d9ed69cb116f3089d54ea86a0ba843a7f5a9aba1023974c",
+          "afterSha256": "ab18e2fb805c13d1c2ff24ed476e62af4b6ccd2b97f14ff128d1f46e97fd0d53"
+        },
+        {
+          "file": "source/encounter/encounter.encounter",
+          "beforeSha256": "3674b857a657ad71e5011444aadfd3c1fdc0bdfad28ad4a46e2ed2baf4ec4f50",
+          "afterSha256": "7b85c93036e442fe87c5b325ce6c15592e82a37838d2a5d3829e23079126c0ce"
+        },
+        {
+          "file": "source/microsites/publication.encounter",
+          "beforeSha256": "c3bc456c0dd7e990eb5694186876cbcf3d59a944d2755fa6e451a6b2e5057346",
+          "afterSha256": "fde22dbfdeb2d4c96271a46d67ed5d383dcb795029a4cf2fa2ece68ab3b9ab7e"
+        },
+        {
+          "file": "source/microsites/return.encounter",
+          "beforeSha256": "d3107fea025ba840ec14fbbbe68c1ac9cf99b431d846980ba06a5aa735d2f41e",
+          "afterSha256": "1fd867cd97f772dfad905f2a7982af1d58a644b5151abe0704b226a36644eb61"
+        },
+        {
+          "file": "algebra/stylesheet.process.json",
+          "beforeSha256": "57fe726acb4f90d992e83e6718ce758691940c82e70493600845a50dce01ea02",
+          "afterSha256": "6313f82c668f02e1315564e5ba8944fea37cf3ceee3af62d40308bd7fc38fe24"
+        }
+      ]
+    },
+    "contractSha256": "2837864b57a1f7eeb7ae8daa21c2474d149854b69d6dfa9f700107c832dfb915",
+    "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7"
+  },
+  "scope": {
+    "pages": 301,
+    "stylesheets": 22,
+    "targetedFindings": 0,
+    "geometryUnmeasured": 301
+  },
+  "coverage": "Algebra-owned registration of HTML/CSS writes, copies, replacements and removals. Release tests independently compare the final registry against every generated HTML/CSS artifact. No route inventory.",
+  "rules": [
+    "navigation.redundant-home-return",
+    "layout.orphan-return-reservation",
+    "layout.inline-bottom-reservation",
+    "layout.unconditional-body-reservation"
+  ],
+  "boundary": "Lexical source checks target redundant personal home-return controls, orphan return stylesheets and explicit inline body bottom reservations. They do not certify arbitrary CSS, computed geometry, duplicate navigation intent, runtime states or visual fitness. Every page retains an open browser-evidence requirement. Registered CSS is checked for unconditional body padding-bottom/margin-bottom in positive supported units. Shorthands, variables, fractional values below one unit, selector groups, cascade and other stylesheet patterns remain outside this check.",
+  "controls": "Positive duplicate/orphan/80px controls; zero/conditional/comment/script/template and quoted-attribute negative controls. Final report-page observations remain stable after evidence rendering.",
+  "execution": {
+    "indexSteps": 5181515,
+    "applicationSteps": 14701082,
+    "totalSteps": 19882597,
+    "limit": 20000000
+  },
+  "nativeUnchanged": true,
+  "portProfilesUnchanged": true,
+  "validation": [
+    {
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+        "--cache",
+        ".npm-cache"
+      ],
+      "status": 0
+    },
+    {
+      "command": [
+        "node",
+        "bootstrap/run.cjs",
+        ".",
+        "dist",
+        "bootstrap/site.json"
+      ],
+      "status": 0
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "reading.test.mjs",
+        "publication.test.mjs",
+        "algebra-publication.test.mjs",
+        "microsite-fidelity.test.mjs",
+        "microsite-publication.test.mjs",
+        "claimipedia-review.test.mjs",
+        "encounter-microsite.test.mjs",
+        "activity-layout.test.mjs",
+        "atlas.test.mjs",
+        "atlas-journey.test.mjs",
+        "authoring.test.mjs",
+        "reader-workshop-algebra.test.mjs",
+        "hierarchy.test.mjs",
+        "process-authoring.test.mjs",
+        "batch-process-authoring.test.mjs",
+        "authoring-workflow.test.mjs",
+        "document-inspection.test.mjs",
+        "expansion.test.mjs",
+        "expedition.test.mjs",
+        "workshop.test.mjs",
+        "microsite-process-authoring.test.mjs",
+        "microsite-publication-process-authoring.test.mjs",
+        "stylesheet-algebra.test.mjs",
+        "field-correction-article.test.mjs",
+        "html-escaping.test.mjs",
+        "mission-publication.test.mjs"
+      ],
+      "status": 0
+    },
+    {
+      "command": [
+        "node",
+        "tooling/verify-microsite-presentation.mjs",
+        "dist"
+      ],
+      "status": 0
+    }
+  ],
+  "tests": "\n  ✔ new session starts independently (1050.0512ms)\n✔ portable engine preserves source/overlay ownership and unchanged-state refusals (5869.6069ms)\n✔ portable execution agrees with direct native fixture execution for the same edits (7842.0399ms)\nℹ tests 222\nℹ suites 0\nℹ pass 222\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 146172.1072\n"
+}

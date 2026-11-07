@@ -147,6 +147,8 @@ process encounter.build:
   port file.write { path = "encounter/runtime.js"; text = $runtime } → _
   let projection = "encounter"
   call publication.styles
+  let surfaceWritePath = "encounter/encounter.css"
+  call assurance.surface.register
   port file.write { path = "encounter/encounter.css"; text = $css } → _
   let input = {
     tag = "svg";
@@ -1075,5 +1077,7 @@ process encounter.build:
     )
   }
   call html.serialize
+  let surfaceWritePath = "encounter/index.html"
+  call assurance.surface.register
   port file.write { path = "encounter/index.html"; text = concat("<!doctype html>\n", $result) } → _
 

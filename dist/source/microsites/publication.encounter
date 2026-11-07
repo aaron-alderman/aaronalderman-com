@@ -9,6 +9,8 @@ process microsites.preview:
       includes(one($msAsset, "path"), "temple/"),
       includes(one($msAsset, "path"), "sourcery/")
     ):
+      let surfaceWritePath = one($msAsset, "path")
+      call assurance.surface.register
       port file.copy { path = one($msAsset, "path") } → _
   call microsites.project
 
@@ -22,11 +24,15 @@ process microsites.project:
   each subjects("isa", "MicrositeStylesheet") as msSheet:
     let input = one($msSheet, "root")
     call source.css
+    let surfaceWritePath = one($msSheet, "path")
+    call assurance.surface.register
     port file.write { path = one($msSheet, "path"); text = $result } → _
   each subjects("isa", "MicrositeDocument") as msDocument:
     let input = one($msDocument, "root")
     call source.markup
     call microsite.return.project
+    let surfaceWritePath = one($msDocument, "path")
+    call assurance.surface.register
     port file.write { path = one($msDocument, "path"); text = $result } → _
   each subjects("isa", "Microsite") as msSite:
     port json.parse { text = one($msSite, "configuration") } → msConfiguration
@@ -39,6 +45,8 @@ process microsites.project:
       data = { site = one($msSite, "name"); configuration = $msConfiguration };
       budget = 20000000
     } → msRuntime
+    let surfaceWritePath = concat(one($msSite, "name"), "/runtime.js")
+    call assurance.surface.register
     port file.write { path = concat(one($msSite, "name"), "/runtime.js"); text = $msRuntime } → _
   port runtime.bundle {
     entry = "microsite.early";

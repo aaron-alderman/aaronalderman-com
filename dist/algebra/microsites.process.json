@@ -34,6 +34,17 @@
             ],
             "then": [
               {
+                "let": "surfaceWritePath",
+                "value": [
+                  "one",
+                  "$msAsset",
+                  "path"
+                ]
+              },
+              {
+                "call": "assurance.surface.register"
+              },
+              {
                 "port": "file.copy",
                 "args": {
                   "path": [
@@ -93,6 +104,17 @@
             "call": "source.css"
           },
           {
+            "let": "surfaceWritePath",
+            "value": [
+              "one",
+              "$msSheet",
+              "path"
+            ]
+          },
+          {
+            "call": "assurance.surface.register"
+          },
+          {
             "port": "file.write",
             "args": {
               "path": [
@@ -127,6 +149,17 @@
           },
           {
             "call": "microsite.return.project"
+          },
+          {
+            "let": "surfaceWritePath",
+            "value": [
+              "one",
+              "$msDocument",
+              "path"
+            ]
+          },
+          {
+            "call": "assurance.surface.register"
           },
           {
             "port": "file.write",
@@ -186,6 +219,21 @@
               "budget": 20000000
             },
             "into": "msRuntime"
+          },
+          {
+            "let": "surfaceWritePath",
+            "value": [
+              "concat",
+              [
+                "one",
+                "$msSite",
+                "name"
+              ],
+              "/runtime.js"
+            ]
+          },
+          {
+            "call": "assurance.surface.register"
           },
           {
             "port": "file.write",

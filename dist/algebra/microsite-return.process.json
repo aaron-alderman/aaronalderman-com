@@ -740,6 +740,13 @@
         "call": "css.renderPlan"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "assets/microsite-return.css"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "assets/microsite-return.css",
@@ -1010,6 +1017,13 @@
               },
               {
                 "call": "microsite.return.decorate"
+              },
+              {
+                "let": "surfaceWritePath",
+                "value": "$returnDocument"
+              },
+              {
+                "call": "assurance.surface.register"
               },
               {
                 "port": "file.write",

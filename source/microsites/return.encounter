@@ -300,6 +300,8 @@ process microsite.return.styles:
     )
   }
   call css.renderPlan
+  let surfaceWritePath = "assets/microsite-return.css"
+  call assurance.surface.register
   port file.write { path = "assets/microsite-return.css"; text = $css } → _
 
 process microsite.return.project:
@@ -363,5 +365,7 @@ process microsite.return.all:
       let returnDocument = concat($returnRoute, "index.html")
       port file.read { path = $returnDocument } → result
       call microsite.return.decorate
+      let surfaceWritePath = $returnDocument
+      call assurance.surface.register
       port file.write { path = $returnDocument; text = $result } → _
 

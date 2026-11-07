@@ -427,6 +427,13 @@
             "as": "cssOutput",
             "steps": [
               {
+                "let": "surfaceWritePath",
+                "value": "$cssOutput"
+              },
+              {
+                "call": "assurance.surface.register"
+              },
+              {
                 "port": "file.write",
                 "args": {
                   "path": "$cssOutput",

@@ -27,6 +27,13 @@
         "call": "html.serialize"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "atlas.html"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "atlas.html",

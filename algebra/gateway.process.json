@@ -64,6 +64,17 @@
         "call": "publication.document"
       },
       {
+        "let": "surfaceWritePath",
+        "value": [
+          "one",
+          "gateway",
+          "route"
+        ]
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": [

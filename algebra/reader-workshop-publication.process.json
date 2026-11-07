@@ -676,6 +676,13 @@
         "into": "_"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "source/reader/document.html"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.copy",
         "args": {
           "path": "source/reader/document.html"
@@ -699,6 +706,13 @@
         "into": "projectedDocument"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "reader.html"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "reader.html",
@@ -716,12 +730,26 @@
         "into": "projectedDocument"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "retained/index.html"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "retained/index.html",
           "text": "$projectedDocument"
         },
         "into": "_"
+      },
+      {
+        "let": "surfaceWritePath",
+        "value": "source/reader/activity.html"
+      },
+      {
+        "call": "assurance.surface.register"
       },
       {
         "port": "file.copy",
@@ -738,12 +766,26 @@
         "into": "document"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "retained/activity.html"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "retained/activity.html",
           "text": "$document"
         },
         "into": "_"
+      },
+      {
+        "let": "surfaceWritePath",
+        "value": "source/workshop/document.html"
+      },
+      {
+        "call": "assurance.surface.register"
       },
       {
         "port": "file.copy",
@@ -769,6 +811,13 @@
         "into": "projectedDocument"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "workshop/index.html"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "workshop/index.html",
@@ -786,12 +835,26 @@
         "into": "projectedDocument"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "retained/workshop/index.html"
+      },
+      {
+        "call": "assurance.surface.register"
+      },
+      {
         "port": "file.write",
         "args": {
           "path": "retained/workshop/index.html",
           "text": "$projectedDocument"
         },
         "into": "_"
+      },
+      {
+        "let": "surfaceWritePath",
+        "value": "source/reader/document.html"
+      },
+      {
+        "call": "assurance.surface.unregister"
       },
       {
         "port": "file.remove",
@@ -801,11 +864,25 @@
         "into": "_"
       },
       {
+        "let": "surfaceWritePath",
+        "value": "source/reader/activity.html"
+      },
+      {
+        "call": "assurance.surface.unregister"
+      },
+      {
         "port": "file.remove",
         "args": {
           "path": "source/reader/activity.html"
         },
         "into": "_"
+      },
+      {
+        "let": "surfaceWritePath",
+        "value": "source/workshop/document.html"
+      },
+      {
+        "call": "assurance.surface.unregister"
       },
       {
         "port": "file.remove",
@@ -3784,6 +3861,13 @@
       },
       {
         "call": "publication.serialize"
+      },
+      {
+        "let": "surfaceWritePath",
+        "value": "the-field/households/index.html"
+      },
+      {
+        "call": "assurance.surface.register"
       },
       {
         "port": "file.write",
@@ -7035,6 +7119,13 @@
       },
       {
         "call": "publication.serialize"
+      },
+      {
+        "let": "surfaceWritePath",
+        "value": "the-field/households/inspect/index.html"
+      },
+      {
+        "call": "assurance.surface.register"
       },
       {
         "port": "file.write",

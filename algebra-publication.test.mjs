@@ -162,3 +162,37 @@ test('a fresh algebra build reproduces every publication artifact',async()=>{
  assert.deepEqual(repeated,receipt);
  for(const [file,hash]of Object.entries(receipt.artifacts))assert.equal(sha(await fs.readFile(path.join(root,'verify-build',file))),hash,file);
 });
+
+test('navigation/layout discovery covers the complete generated HTML artifact set',async()=>{
+ const report=JSON.parse(await read('dist/assurance/navigation-layout.json'));
+ const expected=Object.keys(receipt.artifacts).filter(p=>p.endsWith('.html')).sort();
+ assert.deepEqual(report.pages.map(p=>p.route).sort(),expected,'Every HTML publishing effect must register its route in the algebra; unregistered output blocks release');
+ assert.equal(report.pageCount,expected.length);
+ const registered=JSON.parse(await read('dist/assurance/generated-pages.json'));
+ assert.deepEqual(Object.keys(registered).filter(p=>p.endsWith('.css')).sort(),Object.keys(receipt.artifacts).filter(p=>p.endsWith('.css')).sort());
+ assert.equal(report.geometryUnmeasured,expected.length);
+ assert.ok(report.pages.every(p=>p.geometry.status==='needs-browser-evidence'));
+ assert.equal(new Set(report.pages.map(p=>p.route)).size,expected.length);
+ assert.ok((await read('dist/assurance/index.html')).includes('navigation-layout/'));
+});
+
+test('navigation/layout algebra distinguishes defects, review candidates and opaque examples',async()=>{
+ const require=createRequire(import.meta.url),{createKernel}=require('./bootstrap/temple-seed.cjs'),{valuePorts}=require('./bootstrap/ports/value.cjs'),{lower}=require('./bootstrap/ports/algebra-lower.cjs'),{invoke}=require('./bootstrap/ports/programme.cjs'),{indexFacts}=require('./bootstrap/ports/fact-index.cjs');
+ const json=async f=>JSON.parse(await read(f)),q=(await json('algebra/publication.process.json')).queries,entry='assurance.surface.scan';
+ const model=await lower({compiler:await json('algebra/lowering.process.json'),definitions:await json('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry,queries:{[entry]:q[entry],'microsite.return.inspectHome':q['microsite.return.inspectHome']}},mode:'model',ports:valuePorts(),limit:20000000});
+ const factIndex=await indexFacts(createKernel(valuePorts(),20000000),await json('algebra/fact-index.process.json'),[{s:'site',p:'origin',o:'https://aaronalderman.com/'}]);
+ const scan=async html=>(await invoke({model,entry,input:{factIndex,eventInput:{route:'assurance/maturity/index.html',html}},ports:{...valuePorts(),'url.resolve':({href,route})=>{const base=new URL(route,'https://temple.invalid/'),u=new URL(href,base);return{external:u.origin!==base.origin,route:u.pathname.slice(1),fragment:u.hash.slice(1)}}},limit:20000000})).value;
+ const header='<header><a aria-label="Aaron Alderman" href="/">Aaron Alderman</a></header>',widget='<a id="microsite-return" href="/">Back to Aaron Alderman</a>',style='<link rel="stylesheet" href="../../assets/microsite-return.css?v=return-2">';
+ assert.deepEqual((await scan(header+widget+style)).findings.map(f=>f.rule),['navigation.redundant-home-return']);
+ assert.deepEqual((await scan(header+style)).findings.map(f=>f.rule),['layout.orphan-return-reservation']);
+ assert.equal((await scan('<body style="padding-bottom:80px">')).findings[0].status,'undecided');
+ for(const html of [header,'<header>Temple</header>'+widget+style,'<!--'+widget+'-->'+header,'<script>'+widget+'</script>'+header,'<body style="padding-bottom:0px">','<SCRIPT>'+widget+'</SCRIPT>'+header,"<div title='<a id=\"microsite-return\">'>Example</div>"+header])assert.equal((await scan(html)).findings.length,0,html);
+ assert.equal((await scan(header)).geometry.status,'needs-browser-evidence');
+ const published=JSON.parse(await read('dist/assurance/navigation-layout.json')),self=published.pages.find(p=>p.route==='assurance/navigation-layout/index.html');
+ const finalSelf=await scan(await read('dist/assurance/navigation-layout/index.html'));
+ assert.deepEqual({...finalSelf,route:self.route},self,'The report page retains the same checked observations after its final evidence rendering');
+
+ const cssEntry='assurance.surface.stylesheet',cssModel=await lower({compiler:await json('algebra/lowering.process.json'),definitions:await json('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry:cssEntry,queries:{[cssEntry]:q[cssEntry]}},mode:'model',ports:valuePorts(),limit:20000000});
+ for(const [css,status]of [['body{padding-bottom:80px}','undecided'],['body:has(> .microsite-return){padding-bottom:80px}','not-observed'],['/*body{padding-bottom:80px}*/','not-observed'],['body{padding-bottom:0px}','not-observed']])assert.equal((await invoke({model:cssModel,entry:cssEntry,input:{eventInput:{route:'test.css',css}},ports:valuePorts(),limit:20000000})).value.status,status,css);
+
+});
