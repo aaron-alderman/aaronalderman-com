@@ -2,22 +2,22 @@
   "protocol": "aaronalderman/local-publication-qualification/1",
   "date": "2026-11-07",
   "timezone": "Australia/Perth",
-  "sourceBaseline": "e3d725e0843d33902e46a0b0fc0444457d5bf82f",
+  "sourceBaseline": "711f617f06a1a3932a6032e082425259edc57954",
   "scope": "Full local publication qualification; no push or deployment.",
   "entry": "publication.build",
   "execution": {
-    "indexSteps": 5041607,
-    "applicationSteps": 14350812,
-    "totalSteps": 19392419,
+    "indexSteps": 5041953,
+    "applicationSteps": 14383087,
+    "totalSteps": 19425040,
     "limit": 20000000
   },
-  "artifactCount": 636,
-  "buildReceiptSha256": "2ba95d106c67b8886f9033ed54444adaacdd9acc232c183414d776fc95db2330",
+  "artifactCount": 637,
+  "buildReceiptSha256": "e05d20170d31bc001c0e3784a4cf18ca82400fef86e3daf60d99424e54c13bcb",
   "sourceSha256": {
-    "source/front-doors.rel": "d288bd55ac370e037823382070246df6d551ebb596aec737e0af9c417456589a",
-    "source/expedition.rel": "1ceace75074ecc440a299d03ac60e222b06a1cedc889875119bef24df086a26e",
+    "source/front-doors.rel": "b06f283289b2059964b08ebc506d17a93f832fa073d44e15e63ece434c18d611",
+    "source/expedition.rel": "f971c7c1047db5dbd521bf47d995995fe90c95c4cf8419794ec99703120746fa",
     "source/hierarchy.rel": "02e6af35a2506df096438e0d1b4e31a7620b75dcf6bf5ebc3326cdc256782233",
-    "algebra/publication.process.json": "7e2e7bb1290fa5d218e701e8442e20bf5d187549233c89628dfcd008e46d2bf8"
+    "algebra/publication.process.json": "a36abba7ef561ee7f417a3cca9cfcc121c103f08f29042591da47edfec94f4e9"
   },
   "artworkSha256": "89cd80f02e60dc3e0d131f22dbcaaeeeed73e7ef07974b9d0f86e2c587c250ae",
   "nativeFilesCompared": 15,
@@ -26,7 +26,7 @@
   "authoring": {
     "applied": true,
     "protocol": "worldwright/authoring-receipt/2",
-    "receiptSha256": "7bc82a172a935b1ab72f5d72e4c599754664141e56fddd2f96efc3369c35235e",
+    "receiptSha256": "288cdcc78a45ad71d71b35829dee7f5799507180d2a5d9bd0d034a4fe165cbda",
     "mechanismSha256": "7ba3d118ed6d77703c6c8a90c3d56659bb1d457ebf72d54a9fc31330c2414ace"
   },
   "checks": [
@@ -101,10 +101,12 @@
     "includesFreshArtifactReproduction": true
   },
   "browserChecks": [
-    "Homepage perspective switch updates the expedition while the three header destinations remain unchanged",
-    "Mission and scroll destinations load with the approved content",
-    "Reading paths and Shared workshop remain in canonical reading-page bodies",
-    "390px mission header and layout checked"
+    "Desktop illustrated scroll opening and AI-only heading",
+    "Rolled frame stays within the viewport",
+    "Contents anchor reaches chapter ribbon",
+    "390px mobile scroll opening and navigation",
+    "Redundant floating return link no longer covers the comic"
   ],
-  "boundary": "Engineering evidence for this source state; same local validation run, not independent scientific validation."
+  "boundary": "Engineering evidence for this source state; same local validation run, not independent scientific validation.",
+  "comicSha256": "37b078a6dfd5fc4e6b85c61bd5374eec4469393db24d52ac2110b5b805b98256"
 }

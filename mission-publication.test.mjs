@@ -46,14 +46,16 @@ test('mission, thoughts and the scroll work as script-free reading destinations'
   }
  }
  const mission=page('mission/index.html');
- assert.equal(attr(mission.find(n=>n.tagName==='h1'),'aria-label'),'AI and superintelligence must serve life.');
+ assert.equal(attr(mission.find(n=>n.tagName==='h1'),'aria-label'),'AI must serve life.');
  assert.ok(mission.some(n=>text(n)==='I believe'));
  assert.ok(mission.some(n=>n.tagName==='img'&&attr(n,'src')==='/assets/scroll/power-to-life-v1.webp'));
  const scroll=page('writing/power-must-serve-life/index.html');
  assert.equal(scroll.filter(n=>n.tagName==='section').length,18);
  assert.equal(scroll.filter(n=>n.tagName==='table').length,5);
  assert.equal(scroll.filter(n=>attr(n,'id')?.startsWith('note-')).length,17);
- assert.ok(scroll.some(n=>n.tagName==='h1'&&text(n)==='Power Must Serve Life'));
+ assert.equal(attr(scroll.find(n=>n.tagName==='h1'),'aria-label'),'AI must serve life.');
+ assert.ok(scroll.some(n=>attr(n,'class')==='crayon-revision scroll-crayon-revision'&&text(n)==='AI'));
+ assert.ok(scroll.some(n=>n.tagName==='img'&&attr(n,'src')==='/assets/scroll/agency-triptych-v1.webp'));
  assert.ok(scroll.some(n=>n.tagName==='p'&&text(n).includes('Draft for review')));
 });
 
