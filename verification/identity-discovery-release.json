@@ -1,11 +1,48 @@
 {
   "protocol": "worldwright/identity-discovery-release/1",
-  "base": "bfa113c34b6f9e68566951451d2557e22c1def47",
-  "authoring": {
-    "applied": true,
-    "contractSha256": "beab900c4e1ef83eb03aed46915fa2faa9d65a94ce1773a7d6cf58c99bea67a5",
-    "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7"
-  },
+  "base": "8c68a1a94416698590338d123b7cf6ca3146c67d",
+  "integrationCommit": "44dd9c3",
+  "authoring": [
+    {
+      "applied": true,
+      "contractSha256": "26bbe8aad79579795e979bc2c93627d37d75f2e092859e1b2241316b1faef6d0",
+      "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7",
+      "files": [
+        {
+          "file": "algebra/publication.process.json",
+          "beforeSha256": "d41c567251584b186c8be835a89aba7b5e8bb78255bd6a7c76c8cac0d4c133c3",
+          "afterSha256": "5ecae0f8c21f2ac3737f629bcd243f71962698207053d26dbd86358fb8709f60"
+        },
+        {
+          "file": "algebra/stylesheet.process.json",
+          "beforeSha256": "cc71a75953a03b54b1c91c8facc4771eadfe606a471f8a6961e61198a6773731",
+          "afterSha256": "57fe726acb4f90d992e83e6718ce758691940c82e70493600845a50dce01ea02"
+        },
+        {
+          "file": "algebra/hierarchy.process.json",
+          "beforeSha256": "d83d2bb54b663571d71ad74b1285bde00743c9e7ad3787ed944246308ba079fa",
+          "afterSha256": "f284639725b37c8534eac98c8a89260d89be73db91d49ccac94ed8a6e69cea5f"
+        },
+        {
+          "file": "algebra/reader-workshop-publication.process.json",
+          "beforeSha256": "6d3cc41e70db1e4d13760fe68e38c644742310092e4edb72e833b608ea2f0d2b",
+          "afterSha256": "421e8b96556d37f6195842efad1c4a374a107edfd54383e7aff53072f6849bf1"
+        }
+      ]
+    },
+    {
+      "applied": true,
+      "contractSha256": "26bbe8aad79579795e979bc2c93627d37d75f2e092859e1b2241316b1faef6d0",
+      "mechanismSha256": "88c99fdcbb3d483522b562f16232b7d9afbe8c17ffc57b6953f1bc8b5d42daa7",
+      "files": [
+        {
+          "file": "algebra/publication.process.json",
+          "beforeSha256": "5ecae0f8c21f2ac3737f629bcd243f71962698207053d26dbd86358fb8709f60",
+          "afterSha256": "2831563d08aa7f69496f8803ae9d63cc6ba0d2f6bc8f5ff3c715b3242773ff52"
+        }
+      ]
+    }
+  ],
   "summary": [
     {
       "status": "intentionally-invariant",
@@ -26,50 +63,50 @@
   ],
   "discovery": {
     "protocol": "worldwright/identity-discovery/1",
-    "observed": 4111,
+    "observed": 4281,
     "declaredReferences": 179,
-    "undecided": 3932,
+    "undecided": 4102,
     "reviewGroups": 6,
     "pages": [
       {
         "identity": "root",
         "file": "index.html",
-        "observed": 997,
-        "undecided": 962
+        "observed": 1031,
+        "undecided": 996
       },
       {
         "identity": "sourcerer",
         "file": "worlds/sourcerer/index.html",
-        "observed": 999,
-        "undecided": 963
+        "observed": 1033,
+        "undecided": 997
       },
       {
         "identity": "author",
         "file": "worlds/author/index.html",
-        "observed": 692,
-        "undecided": 656
+        "observed": 726,
+        "undecided": 690
       },
       {
         "identity": "dad",
         "file": "worlds/dad/index.html",
-        "observed": 692,
-        "undecided": 656
+        "observed": 726,
+        "undecided": 690
       },
       {
         "identity": "christian",
         "file": "worlds/christian/index.html",
-        "observed": 731,
-        "undecided": 695
+        "observed": 765,
+        "undecided": 729
       }
     ],
     "groups": [
       {
         "id": "discovered:text",
-        "observations": 961
+        "observations": 966
       },
       {
         "id": "discovered:navigation",
-        "observations": 288
+        "observations": 293
       },
       {
         "id": "discovered:media",
@@ -77,50 +114,85 @@
       },
       {
         "id": "discovered:appearance",
-        "observations": 1482
+        "observations": 1487
       },
       {
         "id": "discovered:attributes",
-        "observations": 823
+        "observations": 978
       },
       {
         "id": "discovered:opaque",
         "observations": 5
       }
     ],
-    "bytes": 615869,
-    "method": "Algebra-owned lexical HTML scan with quote-aware tags and attributes; nonempty text and every non-id attribute are observed. Only exact element selector and property references are reconciled. No equality-based intent inference or ancestor/subtree coverage.",
-    "boundary": "This scans the five generated homepage documents, not every corpus destination or live DOM state. Comments, doctype, formatting whitespace and id locator attributes are excluded. Inline script/style bodies and external script/stylesheet dependencies are opaque and remain undecided unless precisely declared. CSS internals, runtime-only states, shadow DOM, frames and semantic/visual fitness are not certified. Token ordinals are byte-rendering evidence addresses, not stable DOM paths."
+    "bytes": 642042,
+    "method": "Algebra-owned lexical HTML scan with quote-aware tags and attributes; nonempty text and every attribute, including id are observed. Only exact element selector and property references are reconciled. No equality-based intent inference or ancestor/subtree coverage.",
+    "boundary": "This scans the five generated homepage documents, not every corpus destination or live DOM state. Comments, doctype and formatting whitespace are excluded. Inline script/style bodies and external script/stylesheet dependencies are opaque and remain undecided unless precisely declared. CSS internals, runtime-only states, shadow DOM, frames and semantic/visual fitness are not certified. Token ordinals are byte-rendering evidence addresses, not stable DOM paths."
   },
   "execution": {
-    "indexSteps": 4957428,
-    "applicationSteps": 15002697,
-    "totalSteps": 19960125,
+    "indexSteps": 5059472,
+    "applicationSteps": 14252685,
+    "totalSteps": 19312157,
     "limit": 20000000
   },
-  "mechanisms": "Existing generic text, record and file ports; native closure, grants and budgets unchanged. Rebase fact reads are cached per invocation; report HTML is compacted while retaining complete JSON evidence.",
+  "nativeSourcesUnchanged": true,
+  "mechanisms": "Existing generic ports; native closure, grants and execution budgets unchanged. Publication rendering uses the common HTML grammar with a guarded escape fast path; the declared catalogue serialization pipeline remains unchanged. CSS fallback laws retain byte-identical stylesheets.",
   "checks": {
-    "tests": 181,
-    "passed": 181,
+    "tests": 194,
+    "passed": 194,
     "failed": 0,
     "presentation": "passed",
-    "negative": "Undeclared nested copy, links, media, attributes and styles remain undecided; equal values and ancestor declarations cannot classify them; exact property references do not cover other properties. Quoted >, single quotes, empty/boolean and duplicate attributes are retained.",
+    "homepageBytesRelativeToIntegratedMain": [
+      {
+        "file": "index.html",
+        "unchanged": false,
+        "sameExceptStylesheetVersion": true
+      },
+      {
+        "file": "worlds/sourcerer/index.html",
+        "unchanged": false,
+        "sameExceptStylesheetVersion": true
+      },
+      {
+        "file": "worlds/author/index.html",
+        "unchanged": false,
+        "sameExceptStylesheetVersion": true
+      },
+      {
+        "file": "worlds/dad/index.html",
+        "unchanged": false,
+        "sameExceptStylesheetVersion": true
+      },
+      {
+        "file": "worlds/christian/index.html",
+        "unchanged": false,
+        "sameExceptStylesheetVersion": true
+      }
+    ],
+    "negative": "New nested text, links, media, styles and attributes remain undecided. Empty-element IDs are observed. Text after void elements cannot borrow their declarations. Equal values and ancestor declarations cannot close descendants; exact property references do not cover other properties.",
+    "serialization": "Generic HTML grammar equivalence; punctuation and Unicode fixtures; unsafe attributes and URLs still rejected; all stylesheet hashes match their prior serializer.",
     "browser": {
       "preview": "Discovery overview and expanded navigation evidence verified",
       "mobile": {
         "width": 375,
         "scrollWidth": 375,
-        "expanded": "Background-image world evidence and discovered navigation"
+        "expanded": "World-image and discovered navigation evidence"
       }
-    }
+    },
+    "homepageNote": "All five homepage documents match integrated main after normalizing the stylesheet-version URL. Rebuilding picks up the current source version field-households-sections-3; main had tracked the earlier field-households-1 output."
   },
   "sources": {
-    "algebra/publication.process.json": "a2a98cc1ced1c666d6e5799e728ffabe87711abfba950e1ec90fd66f96c7ffe5",
-    "hierarchy.test.mjs": "c02032efe501ffcbd21499d630388911d483c6d2cc47f9515fec809699f06649",
-    "dist/assurance/index.html": "59ebf83afb7ee482b78ddb3fa78ed37a0433478485108a35396a83db1b4af66c",
-    "dist/assurance/identity-mappings.json": "2df98809d3329e0e582eadb2d1250d36bc74e2fe7d8aad01d1ca750c28ed9cf1",
-    "dist/assurance/identity-discovery.json": "2364eb8a77fbca9062cd32c9b8ce4314c489d1e1030ef312005d817c2e7c2777",
-    "dist/build-receipt.json": "c47173cb37900b9d11e16e19b38fa8178de7f709f3359e900586ff723aeb9e43"
+    "algebra/publication.process.json": "2831563d08aa7f69496f8803ae9d63cc6ba0d2f6bc8f5ff3c715b3242773ff52",
+    "algebra/hierarchy.process.json": "f284639725b37c8534eac98c8a89260d89be73db91d49ccac94ed8a6e69cea5f",
+    "algebra/reader-workshop-publication.process.json": "421e8b96556d37f6195842efad1c4a374a107edfd54383e7aff53072f6849bf1",
+    "algebra/stylesheet.process.json": "57fe726acb4f90d992e83e6718ce758691940c82e70493600845a50dce01ea02",
+    "hierarchy.test.mjs": "3e4ffc0412a839cc02484f4eea349051875cce2a0fd1c70e22014a140a0e316e",
+    "algebra/html.process.json": "3c0daa63fd4ca49a59d3228db2dc55f74f145c3f715bc7d365de0dfbbd6261ef",
+    "source/authoring-contract.json": "26bbe8aad79579795e979bc2c93627d37d75f2e092859e1b2241316b1faef6d0",
+    "dist/assurance/index.html": "c13e83e762548393e465e37e9c045cf55f78b43aa7df7e7857150cbce3af0329",
+    "dist/assurance/identity-mappings.json": "7641a158c6f6ab1e182ba1673f13e75bf002c9e8843c523fa82f84f876e91e81",
+    "dist/assurance/identity-discovery.json": "f3871db2e8ed358a79dc85daad45e4076065f987ac180f66aec1968bd7106410",
+    "dist/build-receipt.json": "7d7d414b9b754ff92981183ea710b40d23f4d7dca68831dc7a9dac0607ea8b54"
   },
   "corpus": "corpus/assurance/identity_mapping_assurance.md"
 }

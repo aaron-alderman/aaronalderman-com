@@ -1733,7 +1733,7 @@
         }
       },
       {
-        "call": "html.serialize"
+        "call": "publication.serialize"
       }
     ],
     "publication.home": [
@@ -3350,7 +3350,7 @@
         }
       },
       {
-        "call": "html.serialize"
+        "call": "publication.serialize"
       },
       {
         "port": "file.write",
@@ -7659,7 +7659,7 @@
             "value": "$result"
           },
           {
-            "call": "html.serialize"
+            "call": "publication.serialize"
           },
           {
             "let": "eventInput",
@@ -7876,7 +7876,7 @@
                 "value": "$result"
               },
               {
-                "call": "html.serialize"
+                "call": "publication.serialize"
               },
               {
                 "let": "contextHtml",
@@ -10695,33 +10695,41 @@
                   },
                   {
                     "let": "current",
-                    "value": {
-                      "selector": "$selector",
-                      "tag": "$tag",
-                      "ordinal": "$ordinal"
-                    }
+                    "value": [
+                      "if",
+                      [
+                        "includes",
+                        [
+                          "list",
+                          "area",
+                          "base",
+                          "br",
+                          "col",
+                          "embed",
+                          "hr",
+                          "img",
+                          "input",
+                          "link",
+                          "meta",
+                          "source",
+                          "track",
+                          "wbr"
+                        ],
+                        "$tag"
+                      ],
+                      {},
+                      {
+                        "selector": "$selector",
+                        "tag": "$tag",
+                        "ordinal": "$ordinal"
+                      }
+                    ]
                   },
                   {
                     "let": "found",
                     "value": [
                       "map",
-                      [
-                        "filter",
-                        "$attributeEntries",
-                        "a",
-                        [
-                          "not",
-                          [
-                            "eq",
-                            [
-                              "at",
-                              "$a",
-                              0
-                            ],
-                            "id"
-                          ]
-                        ]
-                      ],
+                      "$attributeEntries",
                       "a",
                       {
                         "ordinal": "$ordinal",
@@ -11432,8 +11440,8 @@
         "value": {
           "protocol": "worldwright/identity-discovery/1",
           "scope": "Entire generated index.html and every IdentityTheme homeRoute, including head metadata, navigation, text, images, attributes, catalogue output and footer.",
-          "method": "Algebra-owned lexical HTML scan with quote-aware tags and attributes; nonempty text and every non-id attribute are observed. Only exact element selector and property references are reconciled. No equality-based intent inference or ancestor/subtree coverage.",
-          "boundary": "This scans the five generated homepage documents, not every corpus destination or live DOM state. Comments, doctype, formatting whitespace and id locator attributes are excluded. Inline script/style bodies and external script/stylesheet dependencies are opaque and remain undecided unless precisely declared. CSS internals, runtime-only states, shadow DOM, frames and semantic/visual fitness are not certified. Token ordinals are byte-rendering evidence addresses, not stable DOM paths.",
+          "method": "Algebra-owned lexical HTML scan with quote-aware tags and attributes; nonempty text and every attribute, including id are observed. Only exact element selector and property references are reconciled. No equality-based intent inference or ancestor/subtree coverage.",
+          "boundary": "This scans the five generated homepage documents, not every corpus destination or live DOM state. Comments, doctype and formatting whitespace are excluded. Inline script/style bodies and external script/stylesheet dependencies are opaque and remain undecided unless precisely declared. CSS internals, runtime-only states, shadow DOM, frames and semantic/visual fitness are not certified. Token ordinals are byte-rendering evidence addresses, not stable DOM paths.",
           "pages": [
             "map",
             "$discoveryPages",
@@ -11490,6 +11498,454 @@
           "text": "$discoveryJson"
         },
         "into": "_"
+      }
+    ],
+    "publication.serialize": [
+      {
+        "port": "value.describe",
+        "args": {
+          "value": "$input"
+        },
+        "into": "kind"
+      },
+      {
+        "let": "result",
+        "value": ""
+      },
+      {
+        "when": [
+          "and",
+          [
+            "not",
+            [
+              "eq",
+              "$input",
+              null
+            ]
+          ],
+          [
+            "not",
+            [
+              "eq",
+              "$input",
+              false
+            ]
+          ],
+          [
+            "not",
+            [
+              "eq",
+              "$kind.type",
+              "undefined"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "when": "$kind.array",
+            "then": [
+              {
+                "fold": "$input",
+                "as": "part",
+                "accumulator": "rendered",
+                "initial": "",
+                "steps": [
+                  {
+                    "let": "input",
+                    "value": "$part"
+                  },
+                  {
+                    "call": "publication.serialize"
+                  }
+                ],
+                "yield": [
+                  "concat",
+                  "$rendered",
+                  "$result"
+                ],
+                "into": "result"
+              }
+            ]
+          },
+          {
+            "when": [
+              "and",
+              [
+                "not",
+                "$kind.array"
+              ],
+              [
+                "not",
+                [
+                  "eq",
+                  "$kind.type",
+                  "object"
+                ]
+              ]
+            ],
+            "then": [
+              {
+                "call": "publication.escape"
+              }
+            ]
+          },
+          {
+            "when": [
+              "and",
+              [
+                "not",
+                "$kind.array"
+              ],
+              [
+                "eq",
+                "$kind.type",
+                "object"
+              ]
+            ],
+            "then": [
+              {
+                "let": "element",
+                "value": "$input"
+              },
+              {
+                "let": "tag",
+                "value": [
+                  "at",
+                  "$element",
+                  "tag"
+                ]
+              },
+              {
+                "port": "text.matches",
+                "args": {
+                  "value": "$tag",
+                  "pattern": "^[a-zA-Z][a-zA-Z0-9-]*$"
+                },
+                "into": "valid"
+              },
+              {
+                "assert": "$valid",
+                "message": "Invalid HTML tag"
+              },
+              {
+                "port": "record.entries",
+                "args": {
+                  "value": [
+                    "or",
+                    [
+                      "at",
+                      "$element",
+                      "attrs"
+                    ],
+                    {}
+                  ]
+                },
+                "into": "attributes"
+              },
+              {
+                "fold": "$attributes",
+                "as": "attribute",
+                "accumulator": "attributesText",
+                "initial": "",
+                "steps": [
+                  {
+                    "let": "key",
+                    "value": [
+                      "at",
+                      "$attribute",
+                      0
+                    ]
+                  },
+                  {
+                    "let": "value",
+                    "value": [
+                      "at",
+                      "$attribute",
+                      1
+                    ]
+                  },
+                  {
+                    "let": "attributeText",
+                    "value": ""
+                  },
+                  {
+                    "when": [
+                      "and",
+                      [
+                        "not",
+                        [
+                          "eq",
+                          "$value",
+                          null
+                        ]
+                      ],
+                      [
+                        "not",
+                        [
+                          "eq",
+                          "$value",
+                          false
+                        ]
+                      ],
+                      [
+                        "not",
+                        [
+                          "eq",
+                          "$value",
+                          [
+                            "at",
+                            {},
+                            "absent"
+                          ]
+                        ]
+                      ]
+                    ],
+                    "then": [
+                      {
+                        "port": "text.matches",
+                        "args": {
+                          "value": "$key",
+                          "pattern": "^[a-zA-Z_:][a-zA-Z0-9_:.-]*$"
+                        },
+                        "into": "valid"
+                      },
+                      {
+                        "assert": "$valid",
+                        "message": "Invalid HTML attribute"
+                      },
+                      {
+                        "port": "text.matches",
+                        "args": {
+                          "value": "$key",
+                          "pattern": "^on",
+                          "flags": "i"
+                        },
+                        "into": "eventHandler"
+                      },
+                      {
+                        "assert": [
+                          "not",
+                          "$eventHandler"
+                        ],
+                        "message": "Invalid HTML attribute"
+                      },
+                      {
+                        "when": [
+                          "includes",
+                          [
+                            "list",
+                            "href",
+                            "src",
+                            "action"
+                          ],
+                          "$key"
+                        ],
+                        "then": [
+                          {
+                            "port": "value.string",
+                            "args": {
+                              "value": "$value"
+                            },
+                            "into": "url"
+                          },
+                          {
+                            "port": "text.matches",
+                            "args": {
+                              "value": "$url",
+                              "pattern": "^\\s*(javascript|data):",
+                              "flags": "i"
+                            },
+                            "into": "unsafe"
+                          },
+                          {
+                            "assert": [
+                              "not",
+                              "$unsafe"
+                            ],
+                            "message": "Unsafe URL"
+                          }
+                        ]
+                      },
+                      {
+                        "let": "input",
+                        "value": [
+                          "if",
+                          [
+                            "eq",
+                            "$value",
+                            true
+                          ],
+                          "",
+                          "$value"
+                        ]
+                      },
+                      {
+                        "call": "publication.escape"
+                      },
+                      {
+                        "let": "attributeText",
+                        "value": [
+                          "concat",
+                          " ",
+                          "$key",
+                          "=\"",
+                          "$result",
+                          "\""
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "yield": [
+                  "concat",
+                  "$attributesText",
+                  "$attributeText"
+                ],
+                "into": "attributesText"
+              },
+              {
+                "let": "void",
+                "value": [
+                  "includes",
+                  [
+                    "list",
+                    "area",
+                    "base",
+                    "br",
+                    "col",
+                    "embed",
+                    "hr",
+                    "img",
+                    "input",
+                    "link",
+                    "meta",
+                    "source",
+                    "track",
+                    "wbr"
+                  ],
+                  "$tag"
+                ]
+              },
+              {
+                "let": "childrenText",
+                "value": ""
+              },
+              {
+                "when": [
+                  "not",
+                  "$void"
+                ],
+                "then": [
+                  {
+                    "fold": [
+                      "list",
+                      [
+                        "or",
+                        [
+                          "at",
+                          "$element",
+                          "children"
+                        ],
+                        [
+                          "list"
+                        ]
+                      ]
+                    ],
+                    "as": "child",
+                    "accumulator": "ignored",
+                    "initial": "",
+                    "steps": [
+                      {
+                        "let": "input",
+                        "value": "$child"
+                      },
+                      {
+                        "when": [
+                          "eq",
+                          "$tag",
+                          "style"
+                        ],
+                        "then": [
+                          {
+                            "call": "html.cssText"
+                          }
+                        ]
+                      },
+                      {
+                        "when": [
+                          "not",
+                          [
+                            "eq",
+                            "$tag",
+                            "style"
+                          ]
+                        ],
+                        "then": [
+                          {
+                            "call": "publication.serialize"
+                          }
+                        ]
+                      }
+                    ],
+                    "yield": "$result",
+                    "into": "childrenText"
+                  }
+                ]
+              },
+              {
+                "let": "result",
+                "value": [
+                  "concat",
+                  "<",
+                  "$tag",
+                  "$attributesText",
+                  ">",
+                  [
+                    "if",
+                    "$void",
+                    "",
+                    [
+                      "concat",
+                      "$childrenText",
+                      "</",
+                      "$tag",
+                      ">"
+                    ]
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "publication.escape": [
+      {
+        "port": "value.string",
+        "args": {
+          "value": "$input"
+        },
+        "into": "publicationEscapeText"
+      },
+      {
+        "port": "text.matches",
+        "args": {
+          "value": "$publicationEscapeText",
+          "pattern": "[&<>\"]"
+        },
+        "into": "publicationNeedsEscape"
+      },
+      {
+        "let": "result",
+        "value": "$publicationEscapeText"
+      },
+      {
+        "when": "$publicationNeedsEscape",
+        "then": [
+          {
+            "call": "html.escape"
+          }
+        ]
       }
     ]
   }

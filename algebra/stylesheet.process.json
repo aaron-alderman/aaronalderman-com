@@ -27,7 +27,7 @@
       },
       {
         "when": [
-          "or",
+          "if",
           [
             "at",
             "$cssNode",
@@ -36,7 +36,21 @@
           [
             "at",
             "$cssNode",
-            "after"
+            "before"
+          ],
+          [
+            "if",
+            [
+              "at",
+              "$cssNode",
+              "after"
+            ],
+            [
+              "at",
+              "$cssNode",
+              "after"
+            ],
+            null
           ]
         ],
         "then": [
@@ -46,22 +60,42 @@
               "value": [
                 "concat",
                 [
-                  "or",
+                  "if",
                   [
                     "at",
                     "$cssNode",
                     "before"
                   ],
-                  ""
+                  [
+                    "at",
+                    "$cssNode",
+                    "before"
+                  ],
+                  [
+                    "if",
+                    "",
+                    "",
+                    null
+                  ]
                 ],
                 [
-                  "or",
+                  "if",
                   [
                     "at",
                     "$cssNode",
                     "after"
                   ],
-                  ""
+                  [
+                    "at",
+                    "$cssNode",
+                    "after"
+                  ],
+                  [
+                    "if",
+                    "",
+                    "",
+                    null
+                  ]
                 ]
               ],
               "pattern": "^\\s*$"
@@ -76,14 +110,26 @@
       },
       {
         "fold": [
-          "or",
+          "if",
           [
             "at",
             "$cssNode",
             "children"
           ],
           [
-            "list"
+            "at",
+            "$cssNode",
+            "children"
+          ],
+          [
+            "if",
+            [
+              "list"
+            ],
+            [
+              "list"
+            ],
+            null
           ]
         ],
         "as": "cssChild",
@@ -110,13 +156,23 @@
         "value": [
           "concat",
           [
-            "or",
+            "if",
             [
               "at",
               "$cssNode",
               "before"
             ],
-            ""
+            [
+              "at",
+              "$cssNode",
+              "before"
+            ],
+            [
+              "if",
+              "",
+              "",
+              null
+            ]
           ],
           [
             "if",
@@ -133,13 +189,23 @@
               "concat",
               "$cssChildren",
               [
-                "or",
+                "if",
                 [
                   "at",
                   "$cssNode",
                   "after"
                 ],
-                ""
+                [
+                  "at",
+                  "$cssNode",
+                  "after"
+                ],
+                [
+                  "if",
+                  "",
+                  "",
+                  null
+                ]
               ]
             ],
             [
