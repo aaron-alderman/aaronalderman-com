@@ -1,25 +1,27 @@
 THE WORKSHOP
 
-The current workshop is composed from source/workshop/document.html and the
-workshop-session.process.json and workshop-lab.process.json algebras. The checked
-language, types and reverse routes reuse ec.prepare, ec.run and ec.patch.
+Edit the story title or its local web-menu label. The story and row inherit the
+source title; the menu keeps its own label. Each accepted edit produces a new
+revision and a receipt. Invalid or stale edits leave the accepted session intact.
+Changes stay in this tab and reset on reload.
 
-The session, its revisions, stale-basis checks, source/overlay edits, HTML views,
-source inspection, tabs, receipts and preview navigation all run as admitted
-Temple processes. Changes remain in this tab and reset on reload. No worker or
-application JavaScript interpreter is used. Generic native ports observe or
-modify browser elements, present sandboxed checked HTML, and invoke the kernel.
+The inspector exposes sources, expressions, processes, HTML and receipts. Preview
+navigation follows checked page-open descriptors in script-free sandboxed frames.
+The row action is displayed without an event binding. No edit is saved to an
+account, repository or shared record.
 
-The authoritative input is source/encounter/example.json in the site repository.
-Propose source, presentation or process changes with npm run author -- proposal.json
-from the repository root; npm run build regenerates the publication. The old
-regenerate.cjs and browser application modules are not published.
+Source owners in the site repository:
+- source/encounter/example.json: typed input for ec.prepare, ec.run and ec.patch.
+- source/workshop/document.html: interface.
+- source/stylesheets/contract.json: stylesheet routing and structured CSS owners.
+- algebra/workshop-lab.process.json: checked edits and snapshots.
+- algebra/workshop-session.process.json: session, revisions, inspector and previews.
+- algebra/reader-workshop-publication.process.json: documents and runtime bundles.
 
-Files under sources/ are the byte-pinned predecessor contracts, programmes and
-mechanisms used to qualify this bounded example. Their hashes identify that
-retained basis; they do not identify later volatile session edits. Comparison
-tests against one predecessor are one evidence family, not independent assurance.
+Use npm run author -- proposal.json for editable sources, then npm run build.
+The repository README and source/authoring-contract.json define the proposal
+format, authority and validation checks.
 
-No account, shared record, repository mutation, network submission or external
-effect is granted by the workshop. A row action is displayed but not bound; the
-menu's checked page-open descriptor is the only preview navigation action.
+Files under sources/ are byte-pinned comparison contracts, programmes and
+mechanisms. Their hashes identify those files; the inspector shows the active
+edited session.

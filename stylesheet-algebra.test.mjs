@@ -9,7 +9,7 @@ const {lower}=require('./bootstrap/ports/algebra-lower.cjs'),{createKernel}=requ
 const surface=read('algebra/stylesheet.process.json'),contract=read('source/stylesheets/contract.json');
 const model=await lower({compiler:read('algebra/lowering.process.json'),definitions:read('algebra/operators.expression.json'),primitives:createKernel.operators,input:{...surface,queries:{...surface.queries,'html.escape':read('algebra/html.process.json').queries['html.escape']},entry:'stylesheet.render'},mode:'model',ports:valuePorts(),limit:20000000});
 const render=async input=>(await invoke({model,entry:'stylesheet.render',input:{input},ports:valuePorts(),limit:20000000})).value;
-const projectActivities=async bindings=>(await invoke({model,entry:'stylesheet.activities',input:{input:read(contract.inline.htmlOwner)},ports:{...valuePorts(),'file.copy':()=>true,'file.read':()=>JSON.stringify(bindings??read(contract.inline.source))},limit:20000000})).value;
+const projectActivities=async bindings=>(await invoke({model,entry:'stylesheet.activities',input:{input:read(contract.inline.htmlOwner)},ports:{...valuePorts(),'file.copy':()=>true,'file.read':({path})=>JSON.stringify(path==='source/stylesheets/contract.json'?contract:bindings??read(contract.inline.source))},limit:20000000})).value;
 
 test('all stylesheet trees reproduce their outputs and keep captured comparison bytes intact',async()=>{
  for(const sheet of contract.stylesheets){
@@ -31,7 +31,21 @@ test('unknown or opaque stylesheet nodes are refused rather than copied as raw C
  for(const kind of ['raw','text','stylesheet','javascript'])await assert.rejects(render({kind,text:'body{color:red}'}),/CSS-001/);
  for(const field of ['before','after'])await assert.rejects(render({kind:'root',children:[],[field]:'body{color:red}'}),/CSS-003/);
  const writes=[];
- await assert.rejects(invoke({model,entry:'stylesheet.build',input:{},ports:{...valuePorts(),'file.copy':()=>true,'file.read':()=>JSON.stringify({protocol:'raw-css/1',root:{kind:'raw'}}),'file.write':args=>writes.push(args)},limit:20000000}),/CSS-002/);assert.deepEqual(writes,[]);
+ await assert.rejects(invoke({model,entry:'stylesheet.build',input:{},ports:{...valuePorts(),'file.copy':()=>true,'file.read':({path})=>JSON.stringify(path==='source/stylesheets/contract.json'?contract:{protocol:'raw-css/1',root:{kind:'raw'}}),'file.write':args=>writes.push(args)},limit:20000000}),/CSS-002/);assert.deepEqual(writes,[]);
+});
+
+test('the catalogue owns stylesheet and inline routing, and an unsupported catalogue is refused',async()=>{
+ const writes=[],catalog={protocol:contract.protocol,stylesheets:[{source:'chosen.json',outputs:['chosen.css']}]};
+ await invoke({model,entry:'stylesheet.build',input:{},ports:{...valuePorts(),'file.copy':()=>true,'file.read':({path})=>JSON.stringify(path==='source/stylesheets/contract.json'?catalog:{protocol:'worldwright/stylesheet-tree/1',root:{kind:'root',children:[]}}),'file.write':args=>{writes.push(args);return true;}},limit:20000000});assert.deepEqual(writes,[{path:'chosen.css',text:''}]);
+ const inlineCatalogue={...contract,inline:{...contract.inline,source:'chosen-inline.json'}},reads=[];
+ const projected=await invoke({model,entry:'stylesheet.activities',input:{input:read(contract.inline.htmlOwner)},ports:{...valuePorts(),'file.copy':()=>true,'file.read':({path})=>{reads.push(path);if(path==='source/stylesheets/contract.json')return JSON.stringify(inlineCatalogue);assert.equal(path,'chosen-inline.json');return JSON.stringify(read(contract.inline.source));}},limit:20000000});
+ assert.ok(reads.includes('chosen-inline.json'));assert.deepEqual(projected.value,await projectActivities());
+ await assert.rejects(invoke({model,entry:'stylesheet.catalog',input:{},ports:{...valuePorts(),'file.copy':()=>true,'file.read':()=>JSON.stringify({protocol:'unknown'})},limit:20000000}),/CSS-005/);
+});
+
+test('omitted formatting fields retain the same CSS meaning',async()=>{
+ const compact={kind:'root',children:[{kind:'rule',selector:'.example',children:[{kind:'decl',property:'color',between:':',value:'gold',semicolon:';'}]}]};
+ assert.equal(await render(compact),'.example{color:gold;}');
 });
 
 test('every published stylesheet has an algebra owner and no captured CSS is an active build input',()=>{

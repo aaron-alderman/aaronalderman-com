@@ -1,0 +1,149 @@
+{
+  "protocol": "worldwright/css-cleanup/1",
+  "baselineCommit": "0dc77a0ff55ea9ac38427c9d05afce74ea2e9257",
+  "classification": "Same-run engineering evidence; not independent assurance.",
+  "changes": {
+    "removedEmptyFields": 14696,
+    "sourceBytesBefore": 1259493,
+    "sourceBytesAfter": 860696,
+    "savedSourceBytes": 398797,
+    "hashes": {
+      "source/stylesheets/retained-enchantment.json": {
+        "before": "cd25233515b4b242e77472d1d71f4dc7bfd82e679a50e484fd6a52aa15d33cbd",
+        "after": "4089631eb2c9f51b44d0984c352350dd64bb7a78f613b93b9475cce44253ac79"
+      },
+      "source/stylesheets/retained-reading.json": {
+        "before": "a5039182e44d4b01122c14d67229e1ff140cda94e924b7ebe9cd7d2464987c56",
+        "after": "c940b9649d58d14edc215c1eebc3ef3dc815d9b892d91868db7b830645121f4d"
+      },
+      "source/stylesheets/retained-style.json": {
+        "before": "2358f55c45cbfdc56a084dd3db30602a3a5fd92a4900e7bd2f0d9a92b221ac3f",
+        "after": "faef974c58a8e275873df0d4b962351a87e934b378e58a582beef5842db36eb5"
+      },
+      "source/stylesheets/retained-territories.json": {
+        "before": "fe1c00e171b00d95748a0e9e54f468ef0e013bb0c6b5ff055498b88ed665fbd2",
+        "after": "40e8edb2a46449b44c76307cf529d3f6b92c0674fef500ec0af6684fb08bfc0a"
+      },
+      "source/stylesheets/retained-wider-world.json": {
+        "before": "9767f6d86cea44109d9fefd875f0a96befc5e26f0662d064e180bbdc10d80042",
+        "after": "7b7e0618082a509a594b20df621a9b4022413ad630ce25374069a37c9b0a0976"
+      },
+      "source/stylesheets/retained-workshop-style.json": {
+        "before": "50522e44c787899e5964d08b2634bd5429ce8056b816bc6145ed182be2c2181a",
+        "after": "284e668201da6b9f0a0da98cc2442f20d8e2f138219869589440c0fe75f2f81e"
+      },
+      "source/stylesheets/source-reader-reader.json": {
+        "before": "d44af309d59bbd1bf1531e5881eccef18f7a8920ac762da451b2fc1631c678ee",
+        "after": "1cd04ee94f42e61582345a211e6710fecd817e9dcfd4cd083e045c2e47e36fdf"
+      },
+      "source/stylesheets/reader-inline.json": {
+        "before": "d9dd298ee9371e5672ddfe16da256c330bd15f2d4c6c87d1bc7e13b0f3ac078f",
+        "after": "c01f35608917dc798fd773bf3789dd4278e9f9a238a776ae82093569720375c8"
+      }
+    },
+    "cssRoutingOwner": "source/stylesheets/contract.json",
+    "testEntry": "npm test delegates to test:portable",
+    "retiredGenerator": "tooling/claimipedia-workbench.mjs",
+    "readmeWordsBefore": 2585,
+    "readmeWordsAfter": 799
+  },
+  "verification": {
+    "unchanged": {
+      "stylesheets": 21,
+      "browserBundles": 12,
+      "htmlPages": 287
+    },
+    "portableTests": 191,
+    "browserChecks": 139,
+    "nativeUnchanged": true,
+    "baselineExecution": {
+      "indexSteps": 5045050,
+      "applicationSteps": 14876059,
+      "totalSteps": 19921109,
+      "limit": 20000000
+    },
+    "execution": {
+      "indexSteps": 5045050,
+      "applicationSteps": 14876064,
+      "totalSteps": 19921114,
+      "limit": 20000000
+    },
+    "buildReceiptSha256": "0aeb98338efd61b0738dcd59cd458a6367578e0af6122c76377e5c0ba94afb43",
+    "authoringPreview": {
+      "applied": false,
+      "requestSha256": "d6a0e2dc7df3dc8dc4e6416796fce7ed51d64f3b03371eae7212df37c10068de",
+      "receiptSha256": "0243756d5aec6dbd8baad55ebe59de2d364d8fb33962c35f7a927a62f281ad36",
+      "commands": [
+        {
+          "command": [
+            "npm",
+            "ci",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund",
+            "--cache",
+            ".npm-cache"
+          ],
+          "status": 0
+        },
+        {
+          "command": [
+            "node",
+            "bootstrap/run.cjs",
+            ".",
+            "dist",
+            "bootstrap/site.json"
+          ],
+          "status": 0
+        },
+        {
+          "command": [
+            "node",
+            "--test",
+            "reading.test.mjs",
+            "publication.test.mjs",
+            "algebra-publication.test.mjs",
+            "microsite-fidelity.test.mjs",
+            "microsite-publication.test.mjs",
+            "claimipedia-review.test.mjs",
+            "encounter-microsite.test.mjs",
+            "activity-layout.test.mjs",
+            "atlas.test.mjs",
+            "atlas-journey.test.mjs",
+            "authoring.test.mjs",
+            "reader-workshop-algebra.test.mjs",
+            "hierarchy.test.mjs",
+            "process-authoring.test.mjs",
+            "batch-process-authoring.test.mjs",
+            "authoring-workflow.test.mjs",
+            "document-inspection.test.mjs",
+            "expansion.test.mjs",
+            "expedition.test.mjs",
+            "workshop.test.mjs",
+            "microsite-process-authoring.test.mjs",
+            "microsite-publication-process-authoring.test.mjs",
+            "stylesheet-algebra.test.mjs"
+          ],
+          "status": 0
+        },
+        {
+          "command": [
+            "node",
+            "tooling/verify-microsite-presentation.mjs",
+            "dist"
+          ],
+          "status": 0
+        }
+      ]
+    }
+  },
+  "sourceSha256": {
+    "algebra/stylesheet.process.json": "cc71a75953a03b54b1c91c8facc4771eadfe606a471f8a6961e61198a6773731",
+    "source/stylesheets/contract.json": "4c4a0018b936133b8072db33873b07a2e586e6b894e12022f7ed866a38e9ee89",
+    "source/authoring-predecessors.json": "2aa669ac670a95d3f4cbf3121d825f9f006692b7c7f5a9fdc5b4ba76c2d14055",
+    "stylesheet-algebra.test.mjs": "fb86464e78b7b0a03d3e41efa5f050ba29874f2636bed0ab190214947af5b7e2",
+    "authoring-workflow.test.mjs": "b2c075a06c516e83c83fdd8dca2686b589b5653f28f0e9133849f82a0f4fabba",
+    "package.json": "423d0b4e33c9557512b8ecc70f9ab1ee1206e59d77c6999370a3900f2d4eaad2",
+    "README.md": "3bd895e1574acdeda3229e8fdf06d08e7404c3a065c503654cfa3f4b5041be02"
+  }
+}

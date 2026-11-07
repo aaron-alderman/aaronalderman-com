@@ -306,65 +306,14 @@
     ],
     "stylesheet.build": [
       {
-        "each": [
-          "list",
-          {
-            "source": "source/stylesheets/retained-enchantment.json",
-            "outputs": [
-              "list",
-              "retained/enchantment.css",
-              "enchantment.css"
-            ]
-          },
-          {
-            "source": "source/stylesheets/retained-reading.json",
-            "outputs": [
-              "list",
-              "retained/reading.css",
-              "reading.css"
-            ]
-          },
-          {
-            "source": "source/stylesheets/retained-style.json",
-            "outputs": [
-              "list",
-              "retained/style.css",
-              "style.css"
-            ]
-          },
-          {
-            "source": "source/stylesheets/retained-territories.json",
-            "outputs": [
-              "list",
-              "retained/territories.css",
-              "territories.css"
-            ]
-          },
-          {
-            "source": "source/stylesheets/retained-wider-world.json",
-            "outputs": [
-              "list",
-              "retained/wider-world.css",
-              "wider-world.css"
-            ]
-          },
-          {
-            "source": "source/stylesheets/retained-workshop-style.json",
-            "outputs": [
-              "list",
-              "retained/workshop/style.css",
-              "workshop/style.css"
-            ]
-          },
-          {
-            "source": "source/stylesheets/source-reader-reader.json",
-            "outputs": [
-              "list",
-              "source/reader/reader.css",
-              "reader/reader.css"
-            ]
-          }
-        ],
+        "call": "stylesheet.catalog"
+      },
+      {
+        "let": "cssOwnership",
+        "value": "$result"
+      },
+      {
+        "each": "$cssOwnership.stylesheets",
         "as": "sheet",
         "steps": [
           {
@@ -430,16 +379,23 @@
         "value": "$input"
       },
       {
+        "call": "stylesheet.catalog"
+      },
+      {
+        "let": "cssInlineSource",
+        "value": "$result.inline.source"
+      },
+      {
         "port": "file.copy",
         "args": {
-          "path": "source/stylesheets/reader-inline.json"
+          "path": "$cssInlineSource"
         },
         "into": "_"
       },
       {
         "port": "file.read",
         "args": {
-          "path": "source/stylesheets/reader-inline.json"
+          "path": "$cssInlineSource"
         },
         "into": "cssBindingsText"
       },
@@ -563,6 +519,45 @@
           "value": "$cssActivityResults"
         },
         "into": "result"
+      }
+    ],
+    "stylesheet.catalog": [
+      {
+        "let": "cssCataloguePath",
+        "value": "source/stylesheets/contract.json"
+      },
+      {
+        "port": "file.copy",
+        "args": {
+          "path": "$cssCataloguePath"
+        },
+        "into": "_"
+      },
+      {
+        "port": "file.read",
+        "args": {
+          "path": "$cssCataloguePath"
+        },
+        "into": "cssCatalogueText"
+      },
+      {
+        "port": "json.parse",
+        "args": {
+          "text": "$cssCatalogueText"
+        },
+        "into": "cssCatalogue"
+      },
+      {
+        "assert": [
+          "eq",
+          "$cssCatalogue.protocol",
+          "worldwright/css-ownership/1"
+        ],
+        "message": "CSS-005: Unsupported stylesheet catalogue."
+      },
+      {
+        "let": "result",
+        "value": "$cssCatalogue"
       }
     ]
   }

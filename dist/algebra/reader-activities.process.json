@@ -1,0 +1,6620 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "activity.boot": [
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "#household-root"
+        },
+        "into": "hhRoot"
+      },
+      {
+        "when": [
+          "eq",
+          [
+            "count",
+            "$hhRoot"
+          ],
+          0
+        ],
+        "then": [
+          {
+            "call": "activity.standard.boot"
+          }
+        ]
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            [
+              "count",
+              "$hhRoot"
+            ],
+            0
+          ]
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.boot",
+              "input": {}
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "activity.motion": [
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "environment"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "motion"
+        },
+        "into": "motion"
+      },
+      {
+        "let": "motion",
+        "value": [
+          "and",
+          [
+            "not",
+            "$environment.reduced"
+          ],
+          [
+            "not",
+            "$motion"
+          ]
+        ]
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "motion",
+          "value": "$motion"
+        },
+        "into": "_"
+      },
+      {
+        "port": "storage.write",
+        "args": {
+          "key": "worldwright-motion",
+          "value": [
+            "if",
+            "$motion",
+            "on",
+            "paused"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-motion",
+          "value": [
+            "if",
+            "$motion",
+            "on",
+            "paused"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#motion-toggle",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$motion",
+            "Motion on",
+            "Motion paused"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.calculations": [
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": ".calculation-detail"
+        },
+        "into": "details"
+      },
+      {
+        "each": "$details",
+        "as": "detail",
+        "steps": [
+          {
+            "port": "browser.relative",
+            "args": {
+              "ref": "$detail.ref",
+              "relation": "query",
+              "selector": ".equation-note"
+            },
+            "into": "equation"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$detail.ref",
+              "name": "hidden",
+              "value": "$equation.hidden"
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "activity.click": [
+      {
+        "let": "button",
+        "value": "$eventInput.matched"
+      },
+      {
+        "let": "action",
+        "value": [
+          "or",
+          [
+            "at",
+            "$button.attributes",
+            "data-world"
+          ],
+          [
+            "at",
+            "$button.attributes",
+            "data-encounter"
+          ],
+          [
+            "at",
+            "$button.attributes",
+            "data-demo"
+          ]
+        ]
+      },
+      {
+        "assert": [
+          "includes",
+          [
+            "list",
+            "reply",
+            "door",
+            "quiet",
+            "cabinet",
+            "layer",
+            "revision",
+            "deck",
+            "garden-mode",
+            "gate",
+            "hide-memory",
+            "couple-memory",
+            "origin",
+            "enrich",
+            "attention",
+            "inflate",
+            "reset-pattern",
+            "original-bit",
+            "flip-bit",
+            "rate",
+            "scale",
+            "amplitude",
+            "phase",
+            "loop",
+            "loop-reset"
+          ],
+          "$action"
+        ],
+        "message": "READER-ACTION: Unknown activity action."
+      },
+      {
+        "let": "value",
+        "value": [
+          "or",
+          [
+            "at",
+            "$button.attributes",
+            "data-value"
+          ],
+          [
+            "at",
+            "$button.attributes",
+            "data-reply"
+          ],
+          [
+            "at",
+            "$button.attributes",
+            "data-door"
+          ],
+          [
+            "at",
+            "$button.attributes",
+            "data-view"
+          ],
+          [
+            "at",
+            "$button.attributes",
+            "data-layer"
+          ]
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": [
+            "concat",
+            "activity.action.",
+            "$action"
+          ],
+          "input": {
+            "button": "$button",
+            "value": "$value"
+          }
+        },
+        "into": "result"
+      },
+      {
+        "call": "activity.calculations"
+      }
+    ],
+    "activity.input": [
+      {
+        "let": "input",
+        "value": "$eventInput.matched"
+      },
+      {
+        "let": "value",
+        "value": "$input.value"
+      },
+      {
+        "when": [
+          "eq",
+          [
+            "at",
+            "$input.attributes",
+            "id"
+          ],
+          "lens-angle"
+        ],
+        "then": [
+          {
+            "port": "number.parse",
+            "args": {
+              "value": "$value"
+            },
+            "into": "angle"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "reader.model.calibration",
+              "input": {
+                "angle": "$angle"
+              }
+            },
+            "into": "reading"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                -1,
+                "$angle"
+              ]
+            },
+            "into": "rotation"
+          },
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "#lens-axis",
+              "name": "transform",
+              "value": [
+                "concat",
+                "rotate(",
+                "$rotation",
+                " 200 165)"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#angle-value",
+              "name": "textContent",
+              "value": [
+                "concat",
+                "$angle",
+                "°"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$reading",
+              "digits": 2
+            },
+            "into": "reading"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#lens-value",
+              "name": "textContent",
+              "value": "$reading"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#lens-caption",
+              "name": "textContent",
+              "value": [
+                "if",
+                [
+                  "eq",
+                  "$angle",
+                  0
+                ],
+                "At this angle, two different points share one reading.",
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$angle",
+                    90
+                  ],
+                  "The line now shows the full difference between the points.",
+                  "Turning the line makes part of the difference visible."
+                ]
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          [
+            "at",
+            "$input.attributes",
+            "data-world-input"
+          ],
+          "garden"
+        ],
+        "then": [
+          {
+            "call": "activity.garden"
+          }
+        ]
+      },
+      {
+        "when": [
+          "eq",
+          [
+            "at",
+            "$input.attributes",
+            "data-world-input"
+          ],
+          "weights"
+        ],
+        "then": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "reader.model.weights",
+              "input": {
+                "percent": "$value"
+              }
+            },
+            "into": "scores"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$scores.a",
+              "digits": 2
+            },
+            "into": "scoreA"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$scores.b",
+              "digits": 2
+            },
+            "into": "scoreB"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#score-a",
+              "name": "textContent",
+              "value": "$scoreA"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#score-b",
+              "name": "textContent",
+              "value": "$scoreB"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "#weight-label",
+              "name": "textContent",
+              "value": [
+                "concat",
+                "$value",
+                "%"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$scores.a",
+                "$scores.b"
+              ]
+            },
+            "into": "preferA"
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": ".world-result",
+              "name": "textContent",
+              "value": [
+                "if",
+                [
+                  "eq",
+                  "$scores.a",
+                  "$scores.b"
+                ],
+                "The two plans have the same score with these priorities.",
+                [
+                  "concat",
+                  "Option ",
+                  [
+                    "if",
+                    "$preferA",
+                    "A",
+                    "B"
+                  ],
+                  " ranks higher under these declared weights. The plans’ speed and thoroughness scores have not changed."
+                ]
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "activity.action.reply": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$value"
+        },
+        "into": "index"
+      },
+      {
+        "let": "reply",
+        "value": [
+          "at",
+          "$data.conversation.replies",
+          "$index"
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-encounter=\"reply\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "let": "input",
+        "value": [
+          "list",
+          {
+            "tag": "p",
+            "attrs": {
+              "class": "conversation-line answer"
+            },
+            "children": [
+              "list",
+              "$reply.answer"
+            ]
+          },
+          {
+            "tag": "p",
+            "attrs": {
+              "class": "conversation-reflection"
+            },
+            "children": [
+              "list",
+              "$reply.question"
+            ]
+          }
+        ]
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#conversation-answer",
+          "html": "$markup"
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.door": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-encounter=\"door\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#door-answer",
+          "name": "textContent",
+          "value": [
+            "at",
+            {
+              "can": "Capability: a draft exists. Producing it has not established permission to send it.",
+              "may": "Permission: the people and authority involved still need to be identified. Availability of a button is not that authority.",
+              "should": "Responsibility: consider timing, consequences and the people affected. Permission alone does not decide whether sending is wise."
+            },
+            "$value"
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.quiet": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "quiet"
+        },
+        "into": "quiet"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "quiet",
+          "value": [
+            "not",
+            "$quiet"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "quiet",
+        "value": [
+          "not",
+          "$quiet"
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "$button.ref",
+          "name": "aria-pressed",
+          "value": "$quiet"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.class",
+        "args": {
+          "ref": ".art-panel",
+          "name": "looking-closer",
+          "value": "$quiet"
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "activity"
+        },
+        "into": "activity"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#quiet-words",
+          "name": "textContent",
+          "value": [
+            "if",
+            [
+              "eq",
+              "$activity.id",
+              "water"
+            ],
+            [
+              "if",
+              "$quiet",
+              "Perhaps the water was never the difficult part.",
+              "Even the guide has a reflection."
+            ],
+            [
+              "if",
+              "$quiet",
+              "Who else needs room in this clearing?",
+              "There is nothing to finish here."
+            ]
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.cabinet": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "let": "currents",
+        "value": [
+          "eq",
+          "$value",
+          "currents"
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-encounter=\"cabinet\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.class",
+        "args": {
+          "ref": ".art-panel",
+          "name": "spectral",
+          "value": "$currents"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "#specimen-values strong"
+        },
+        "into": "specimens"
+      },
+      {
+        "fold": "$specimens",
+        "as": "specimen",
+        "accumulator": "index",
+        "initial": 0,
+        "steps": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$specimen.ref",
+              "name": "textContent",
+              "value": [
+                "if",
+                "$currents",
+                [
+                  "at",
+                  [
+                    "list",
+                    "744",
+                    "24",
+                    "0"
+                  ],
+                  "$index"
+                ],
+                "≈"
+              ]
+            },
+            "into": "_"
+          }
+        ],
+        "yield": [
+          "add",
+          "$index",
+          1
+        ],
+        "into": "index"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#cabinet-caption",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$currents",
+            "This detailed mathematical count tells the three structures apart.",
+            "These three mathematical structures look alike in the broad measurement."
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.layer": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-encounter=\"layer\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".art-panel",
+          "name": "data-layer",
+          "value": "$value"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#layer-conditions",
+          "name": "hidden",
+          "value": [
+            "eq",
+            "$value",
+            "surface"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#layer-limits",
+          "name": "hidden",
+          "value": [
+            "not",
+            [
+              "eq",
+              "$value",
+              "limits"
+            ]
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.revision": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "revisionOpen"
+        },
+        "into": "revisionOpen"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "revisionOpen",
+          "value": [
+            "not",
+            "$revisionOpen"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "revisionOpen",
+        "value": [
+          "not",
+          "$revisionOpen"
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "$button.ref",
+          "name": "aria-expanded",
+          "value": "$revisionOpen"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#revision-after",
+          "name": "hidden",
+          "value": [
+            "not",
+            "$revisionOpen"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "$button.ref",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$revisionOpen",
+            "Keep the seam visible",
+            "Open the correction"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.class",
+        "args": {
+          "ref": ".art-panel",
+          "name": "seam-open",
+          "value": "$revisionOpen"
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.deck": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "activity"
+        },
+        "into": "activity"
+      },
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$value"
+        },
+        "into": "index"
+      },
+      {
+        "let": "deck",
+        "value": [
+          "at",
+          "$data.decks",
+          "$activity.type"
+        ]
+      },
+      {
+        "let": "item",
+        "value": [
+          "at",
+          "$deck.items",
+          "$index"
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-world=\"deck\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$item",
+            1
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".world-encounter",
+          "name": "data-open",
+          "value": "$value"
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.garden-mode": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-world=\"garden-mode\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "mode",
+          "value": "$value"
+        },
+        "into": "_"
+      },
+      {
+        "let": "mode",
+        "value": "$value"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".world-encounter",
+          "name": "data-mode",
+          "value": "$mode"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#garden-limit",
+          "name": "max",
+          "value": [
+            "if",
+            [
+              "eq",
+              "$mode",
+              "positive"
+            ],
+            "4",
+            "8"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "value",
+        "value": [
+          "if",
+          [
+            "eq",
+            "$mode",
+            "positive"
+          ],
+          "1",
+          "4"
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#garden-limit",
+          "name": "value",
+          "value": "$value"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#garden-equation",
+          "name": "hidden",
+          "value": [
+            "not",
+            [
+              "eq",
+              "$mode",
+              "positive"
+            ]
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#garden-rule-copy",
+          "name": "textContent",
+          "value": [
+            "if",
+            [
+              "eq",
+              "$mode",
+              "positive"
+            ],
+            "Strength of the link (c) =",
+            "Keep pairs whose two numbers add up to at most"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "call": "activity.garden"
+      }
+    ],
+    "activity.garden": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "mode"
+        },
+        "into": "mode"
+      },
+      {
+        "let": "mode",
+        "value": [
+          "or",
+          "$mode",
+          "budget"
+        ]
+      },
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$value"
+        },
+        "into": "value"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "reader.model.pairs",
+          "input": {
+            "value": "$value",
+            "mode": "$mode"
+          }
+        },
+        "into": "allowed"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": ".possibility-seed"
+        },
+        "into": "seeds"
+      },
+      {
+        "each": "$seeds",
+        "as": "seed",
+        "steps": [
+          {
+            "port": "number.parse",
+            "args": {
+              "value": [
+                "at",
+                "$seed.attributes",
+                "data-x"
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.parse",
+            "args": {
+              "value": [
+                "at",
+                "$seed.attributes",
+                "data-y"
+              ]
+            },
+            "into": "y"
+          },
+          {
+            "port": "browser.class",
+            "args": {
+              "ref": "$seed.ref",
+              "name": "admitted",
+              "value": [
+                "some",
+                "$allowed",
+                "pair",
+                [
+                  "eq",
+                  "$pair",
+                  [
+                    "list",
+                    "$x",
+                    "$y"
+                  ]
+                ]
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#garden-value",
+          "name": "textContent",
+          "value": "$value"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".possibility-grid",
+          "name": "aria-label",
+          "value": [
+            "concat",
+            "Twenty-five nonnegative integer pairs. ",
+            [
+              "count",
+              "$allowed"
+            ],
+            " satisfy ",
+            [
+              "if",
+              [
+                "eq",
+                "$mode",
+                "positive"
+              ],
+              "x times y no less than c squared",
+              "x plus y no greater than the budget"
+            ],
+            "."
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "concat",
+            [
+              "count",
+              "$allowed"
+            ],
+            " of 25 represented pairs satisfy ",
+            [
+              "if",
+              [
+                "eq",
+                "$mode",
+                "positive"
+              ],
+              "the rule for these two linked quantities",
+              "the shared-limit rule"
+            ],
+            "."
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.gate": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "gate"
+        },
+        "into": "gate"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "gate",
+          "value": [
+            "not",
+            "$gate"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "gate",
+        "value": [
+          "not",
+          "$gate"
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "$button.ref",
+          "name": "aria-pressed",
+          "value": "$gate"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.class",
+        "args": {
+          "ref": ".world-encounter",
+          "name": "gate-connected",
+          "value": "$gate"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$gate",
+            "You can now go from A through B to C.",
+            "There is no route from A to C in this example."
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.hide-memory": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "memoryHidden"
+        },
+        "into": "memoryHidden"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "memoryHidden",
+          "value": [
+            "not",
+            "$memoryHidden"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "memoryHidden",
+        "value": [
+          "not",
+          "$memoryHidden"
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".world-encounter",
+          "name": "data-hidden",
+          "value": "$memoryHidden"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "$button.ref",
+          "name": "aria-pressed",
+          "value": "$memoryHidden"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.class",
+        "args": {
+          "ref": "#memory-hidden",
+          "name": "trace-hidden",
+          "value": "$memoryHidden"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$memoryHidden",
+            "The dashed line is hidden. The calculation and solid line have not changed.",
+            "Both lines are shown. The other button changes whether the two parts affect each other."
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.couple-memory": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "coupled"
+        },
+        "into": "coupled"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "coupled",
+          "value": [
+            "if",
+            [
+              "eq",
+              "$coupled",
+              null
+            ],
+            false,
+            [
+              "not",
+              "$coupled"
+            ]
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "coupled",
+        "value": [
+          "if",
+          [
+            "eq",
+            "$coupled",
+            null
+          ],
+          false,
+          [
+            "not",
+            "$coupled"
+          ]
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".world-encounter",
+          "name": "data-coupled",
+          "value": "$coupled"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "$button.ref",
+          "name": "aria-pressed",
+          "value": [
+            "not",
+            "$coupled"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "reader.model.memory",
+          "input": {
+            "coupled": "$coupled"
+          }
+        },
+        "into": "trace"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "reader.model.line",
+          "input": {
+            "samples": "$trace",
+            "coordinate": "x"
+          }
+        },
+        "into": "path"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#memory-visible",
+          "name": "d",
+          "value": "$path"
+        },
+        "into": "_"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "reader.model.line",
+          "input": {
+            "samples": "$trace",
+            "coordinate": "h"
+          }
+        },
+        "into": "path"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#memory-hidden",
+          "name": "d",
+          "value": "$path"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": ".equation-note",
+          "html": [
+            "concat",
+            "x′ = −x + c·h &nbsp; h′ = −0.8h + c·x<br>x(0) = 1, h(0) = 1.2; c = ",
+            [
+              "if",
+              "$coupled",
+              "0.6",
+              "0"
+            ],
+            ". Euler step = 0.02."
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$coupled",
+            "The two parts affect each other again. Notice how the solid line changes.",
+            "The two parts no longer affect each other. This changes the calculation; hiding a line only changes the picture."
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.origin": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "origin",
+          "value": "$value"
+        },
+        "into": "_"
+      },
+      {
+        "let": "origin",
+        "value": "$value"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-world=\"origin\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "call": "activity.erasure"
+      }
+    ],
+    "activity.action.enrich": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "enriched"
+        },
+        "into": "enriched"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "enriched",
+          "value": [
+            "not",
+            "$enriched"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "enriched",
+        "value": [
+          "not",
+          "$enriched"
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "$button.ref",
+          "name": "aria-pressed",
+          "value": "$enriched"
+        },
+        "into": "_"
+      },
+      {
+        "call": "activity.erasure"
+      }
+    ],
+    "activity.erasure": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "origin"
+        },
+        "into": "origin"
+      },
+      {
+        "let": "origin",
+        "value": [
+          "or",
+          "$origin",
+          "a"
+        ]
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "enriched"
+        },
+        "into": "enriched"
+      },
+      {
+        "let": "first",
+        "value": [
+          "if",
+          [
+            "eq",
+            "$origin",
+            "a"
+          ],
+          1,
+          2
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            4,
+            "$first"
+          ]
+        },
+        "into": "second"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".world-encounter",
+          "name": "data-origin",
+          "value": "$origin"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".world-encounter",
+          "name": "data-enriched",
+          "value": [
+            "or",
+            "$enriched",
+            false
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#extra-record",
+          "name": "hidden",
+          "value": [
+            "not",
+            "$enriched"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#extra-record",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "FIRST NUMBER: ",
+            "$first"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$enriched",
+            [
+              "concat",
+              "Keeping the first number, ",
+              "$first",
+              ", and the sum, 4, tells these two pairs apart: this pair is (",
+              "$first",
+              ", ",
+              "$second",
+              ")."
+            ],
+            "Both pairs add up to 4. The sum alone cannot tell them apart."
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.attention": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-world=\"attention\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".world-encounter",
+          "name": "data-view",
+          "value": "$value"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "if",
+            [
+              "eq",
+              "$value",
+              "focus"
+            ],
+            "The leaf is emphasized; other details recede in this illustration. This does not measure your attention.",
+            "The broad view keeps several relationships available."
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.inflate": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "step"
+        },
+        "into": "step"
+      },
+      {
+        "let": "step",
+        "value": [
+          "or",
+          "$step",
+          0
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$step",
+            1
+          ]
+        },
+        "into": "nextStep"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            5,
+            "$nextStep"
+          ]
+        },
+        "into": "nextStep"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "step",
+          "value": [
+            "if",
+            [
+              "eq",
+              "inflate",
+              "reset-pattern"
+            ],
+            0,
+            "$nextStep"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "step",
+        "value": [
+          "if",
+          [
+            "eq",
+            "inflate",
+            "reset-pattern"
+          ],
+          0,
+          "$nextStep"
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "reader.model.inflate",
+          "input": {
+            "step": "$step"
+          }
+        },
+        "into": "pair"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#count-a",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$pair",
+            0
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#count-b",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$pair",
+            1
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".world-encounter",
+          "name": "data-step",
+          "value": "$step"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "[data-world=\"inflate\"]",
+          "name": "disabled",
+          "value": [
+            "eq",
+            "$step",
+            5
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$step",
+            18
+          ]
+        },
+        "into": "turn"
+      },
+      {
+        "port": "browser.style",
+        "args": {
+          "ref": ".rosette",
+          "name": "--turn",
+          "value": [
+            "concat",
+            "$turn",
+            "deg"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Step ",
+            "$step",
+            ". The exact count pair is (",
+            [
+              "at",
+              "$pair",
+              0
+            ],
+            ", ",
+            [
+              "at",
+              "$pair",
+              1
+            ],
+            ").",
+            [
+              "if",
+              [
+                "eq",
+                "$step",
+                5
+              ],
+              " This bounded example ends here; reset to inspect it again.",
+              ""
+            ]
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.reset-pattern": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "step"
+        },
+        "into": "step"
+      },
+      {
+        "let": "step",
+        "value": [
+          "or",
+          "$step",
+          0
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$step",
+            1
+          ]
+        },
+        "into": "nextStep"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            5,
+            "$nextStep"
+          ]
+        },
+        "into": "nextStep"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "step",
+          "value": [
+            "if",
+            [
+              "eq",
+              "reset-pattern",
+              "reset-pattern"
+            ],
+            0,
+            "$nextStep"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "step",
+        "value": [
+          "if",
+          [
+            "eq",
+            "reset-pattern",
+            "reset-pattern"
+          ],
+          0,
+          "$nextStep"
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "reader.model.inflate",
+          "input": {
+            "step": "$step"
+          }
+        },
+        "into": "pair"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#count-a",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$pair",
+            0
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#count-b",
+          "name": "textContent",
+          "value": [
+            "at",
+            "$pair",
+            1
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": ".world-encounter",
+          "name": "data-step",
+          "value": "$step"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "[data-world=\"inflate\"]",
+          "name": "disabled",
+          "value": [
+            "eq",
+            "$step",
+            5
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$step",
+            18
+          ]
+        },
+        "into": "turn"
+      },
+      {
+        "port": "browser.style",
+        "args": {
+          "ref": ".rosette",
+          "name": "--turn",
+          "value": [
+            "concat",
+            "$turn",
+            "deg"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Step ",
+            "$step",
+            ". The exact count pair is (",
+            [
+              "at",
+              "$pair",
+              0
+            ],
+            ", ",
+            [
+              "at",
+              "$pair",
+              1
+            ],
+            ").",
+            [
+              "if",
+              [
+                "eq",
+                "$step",
+                5
+              ],
+              " This bounded example ends here; reset to inspect it again.",
+              ""
+            ]
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.original-bit": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$value"
+        },
+        "into": "bit"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "original",
+          "value": "$bit"
+        },
+        "into": "_"
+      },
+      {
+        "let": "original",
+        "value": "$bit"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "bits",
+          "value": [
+            "list",
+            "$bit",
+            "$bit",
+            "$bit"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "bits",
+        "value": [
+          "list",
+          "$bit",
+          "$bit",
+          "$bit"
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-world=\"original-bit\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "call": "activity.code"
+      }
+    ],
+    "activity.action.flip-bit": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "bits"
+        },
+        "into": "bits"
+      },
+      {
+        "let": "bits",
+        "value": [
+          "or",
+          "$bits",
+          [
+            "list",
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$value"
+        },
+        "into": "index"
+      },
+      {
+        "fold": "$bits",
+        "as": "bit",
+        "accumulator": "position",
+        "initial": 0,
+        "steps": [],
+        "yield": [
+          "add",
+          "$position",
+          1
+        ],
+        "into": "ignored"
+      },
+      {
+        "let": "bits",
+        "value": [
+          "map",
+          [
+            "range",
+            3
+          ],
+          "n",
+          [
+            "if",
+            [
+              "eq",
+              [
+                "add",
+                "$n",
+                -1
+              ],
+              "$index"
+            ],
+            [
+              "if",
+              [
+                "eq",
+                [
+                  "at",
+                  "$bits",
+                  "$index"
+                ],
+                0
+              ],
+              1,
+              0
+            ],
+            [
+              "at",
+              "$bits",
+              [
+                "add",
+                "$n",
+                -1
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "bits",
+          "value": "$bits"
+        },
+        "into": "_"
+      },
+      {
+        "call": "activity.code"
+      }
+    ],
+    "activity.code": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "bits"
+        },
+        "into": "bits"
+      },
+      {
+        "let": "bits",
+        "value": [
+          "or",
+          "$bits",
+          [
+            "list",
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "original"
+        },
+        "into": "original"
+      },
+      {
+        "let": "original",
+        "value": [
+          "or",
+          "$original",
+          0
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-world=\"flip-bit\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "fold": "$buttons",
+        "as": "bitButton",
+        "accumulator": "index",
+        "initial": 0,
+        "steps": [
+          {
+            "let": "bit",
+            "value": [
+              "at",
+              "$bits",
+              "$index"
+            ]
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$bitButton.ref",
+              "name": "textContent",
+              "value": "$bit"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$bitButton.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$bit",
+                1
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$bitButton.ref",
+              "name": "aria-label",
+              "value": [
+                "concat",
+                "Received bit ",
+                [
+                  "add",
+                  "$index",
+                  1
+                ],
+                ": ",
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$bit",
+                    1
+                  ],
+                  "one",
+                  "zero"
+                ]
+              ]
+            },
+            "into": "_"
+          }
+        ],
+        "yield": [
+          "add",
+          "$index",
+          1
+        ],
+        "into": "index"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "reader.model.decode",
+          "input": {
+            "bits": "$bits"
+          }
+        },
+        "into": "decoded"
+      },
+      {
+        "let": "changed",
+        "value": [
+          "count",
+          [
+            "filter",
+            "$bits",
+            "bit",
+            [
+              "not",
+              [
+                "eq",
+                "$bit",
+                "$original"
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Decoder returns ",
+            "$decoded",
+            ". ",
+            "$changed",
+            " changed ",
+            [
+              "if",
+              [
+                "eq",
+                "$changed",
+                1
+              ],
+              "bit",
+              "bits"
+            ],
+            ". ",
+            [
+              "if",
+              [
+                "eq",
+                "$decoded",
+                "$original"
+              ],
+              "The original bit is recovered.",
+              "This is outside the one-flip correction budget; the original bit is not recovered."
+            ]
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.rate": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$value"
+        },
+        "into": "index"
+      },
+      {
+        "let": "rate",
+        "value": [
+          "at",
+          "$data.reportedRates",
+          "$index"
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-world=\"rate\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$rate.overlap",
+            100
+          ]
+        },
+        "into": "overlap"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$rate.loss",
+            100
+          ]
+        },
+        "into": "loss"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$overlap",
+          "digits": 2
+        },
+        "into": "overlapText"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$loss",
+          "digits": 2
+        },
+        "into": "lossText"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#rate-overlap",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "$overlapText",
+            "%"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#rate-loss",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "$lossText",
+            "%"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.style",
+        "args": {
+          "ref": "#overlap-bar",
+          "name": "width",
+          "value": [
+            "concat",
+            "$overlap",
+            "%"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.style",
+        "args": {
+          "ref": "#loss-bar",
+          "name": "width",
+          "value": [
+            "concat",
+            "$loss",
+            "%"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "if",
+            [
+              "eq",
+              "$rate.rate",
+              8
+            ],
+            "Setting 8 gives the largest return in the wanted form among these four tested settings.",
+            [
+              "concat",
+              "Setting ",
+              "$rate.rate",
+              ": return in the wanted form ",
+              "$overlapText",
+              "%, loss ",
+              "$lossText",
+              "%. The source includes the other measurements too."
+            ]
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.scale": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$value"
+        },
+        "into": "block"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "reader.model.coarse",
+          "input": {
+            "block": "$block"
+          }
+        },
+        "into": "cells"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-world=\"scale\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            4,
+            "$block"
+          ]
+        },
+        "into": "side"
+      },
+      {
+        "port": "browser.style",
+        "args": {
+          "ref": "#scale-grid",
+          "name": "grid-template-columns",
+          "value": [
+            "concat",
+            "repeat(",
+            "$side",
+            ", 1fr)"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": [
+          "map",
+          "$cells",
+          "cell",
+          {
+            "tag": "span",
+            "attrs": {
+              "style": [
+                "concat",
+                "--cell:",
+                "$cell.mean"
+              ]
+            },
+            "children": [
+              "list",
+              "$cell.total"
+            ]
+          }
+        ]
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#scale-grid",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#scale-grid",
+          "name": "aria-label",
+          "value": [
+            "concat",
+            [
+              "count",
+              "$cells"
+            ],
+            " ",
+            [
+              "if",
+              [
+                "eq",
+                [
+                  "count",
+                  "$cells"
+                ],
+                1
+              ],
+              "block",
+              "blocks"
+            ],
+            ", retained total eight. Within-block arrangements are ",
+            [
+              "if",
+              [
+                "eq",
+                "$block",
+                1
+              ],
+              "visible",
+              "not retained by this view"
+            ],
+            "."
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": ".world-result",
+          "name": "textContent",
+          "value": [
+            "if",
+            [
+              "eq",
+              "$block",
+              1
+            ],
+            "The total is 8. The fine view also preserves where the eight filled cells are.",
+            [
+              "concat",
+              [
+                "count",
+                "$cells"
+              ],
+              " ",
+              [
+                "if",
+                [
+                  "eq",
+                  [
+                    "count",
+                    "$cells"
+                  ],
+                  1
+                ],
+                "block retains",
+                "blocks retain"
+              ],
+              " total 8. The view no longer identifies the arrangement inside each block. The underlying pattern has not changed."
+            ]
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.amplitude": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#hidden-phase",
+          "name": "opacity",
+          "value": "0"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-demo=\"amplitude\"],[data-demo=\"phase\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#detector-readout",
+          "name": "textContent",
+          "value": "Same amplitude. Are they the same system?"
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.phase": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#hidden-phase",
+          "name": "opacity",
+          "value": "1"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "[data-demo=\"amplitude\"],[data-demo=\"phase\"]"
+        },
+        "into": "buttons"
+      },
+      {
+        "each": "$buttons",
+        "as": "choice",
+        "steps": [
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "$choice.ref",
+              "name": "aria-pressed",
+              "value": [
+                "eq",
+                "$choice.ref.handle",
+                "$button.ref.handle"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#detector-readout",
+          "name": "textContent",
+          "value": "The timing reference lets you tell the signals apart."
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.loop-reset": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "loopRunning",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "#return-frame",
+          "name": "transform",
+          "value": "translate(250,65) rotate(0)"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "[data-demo=\"loop\"]",
+          "name": "aria-pressed",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#loop-readout",
+          "name": "textContent",
+          "value": "Same starting point. Follow the attached frame."
+        },
+        "into": "_"
+      }
+    ],
+    "activity.action.loop": [
+      {
+        "let": "button",
+        "value": "$eventInput.button"
+      },
+      {
+        "let": "value",
+        "value": "$eventInput.value"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "loopRunning",
+          "value": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "clock.read",
+        "args": {},
+        "into": "clock"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "loopStart",
+          "value": "$clock.monotonic"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "[data-demo=\"loop\"]",
+          "name": "disabled",
+          "value": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "[data-demo=\"loop-reset\"]",
+          "name": "disabled",
+          "value": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "[data-demo=\"loop\"]",
+          "name": "aria-pressed",
+          "value": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#loop-readout",
+          "name": "textContent",
+          "value": "Following the frame around the path…"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.frame",
+        "args": {
+          "query": "activity.loop.frame",
+          "input": {}
+        },
+        "into": "_"
+      }
+    ],
+    "activity.loop.frame": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "loopRunning"
+        },
+        "into": "loopRunning"
+      },
+      {
+        "when": "$loopRunning",
+        "then": [
+          {
+            "port": "state.get",
+            "args": {
+              "key": "motion"
+            },
+            "into": "motion"
+          },
+          {
+            "port": "state.get",
+            "args": {
+              "key": "loopStart"
+            },
+            "into": "loopStart"
+          },
+          {
+            "port": "browser.environment",
+            "args": {},
+            "into": "environment"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$eventInput.time",
+                "$loopStart"
+              ]
+            },
+            "into": "elapsed"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$elapsed",
+                1800
+              ]
+            },
+            "into": "elapsed"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "min",
+              "values": [
+                "list",
+                1,
+                "$elapsed"
+              ]
+            },
+            "into": "t"
+          },
+          {
+            "let": "t",
+            "value": [
+              "if",
+              [
+                "and",
+                "$motion",
+                [
+                  "not",
+                  "$environment.reduced"
+                ]
+              ],
+              "$t",
+              1
+            ]
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$t",
+                6.283185307179586
+              ]
+            },
+            "into": "angle"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "sin",
+              "values": [
+                "list",
+                "$angle"
+              ]
+            },
+            "into": "sine"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "cos",
+              "values": [
+                "list",
+                "$angle"
+              ]
+            },
+            "into": "cosine"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                150,
+                "$sine"
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                250,
+                "$x"
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                115,
+                "$cosine"
+              ]
+            },
+            "into": "y"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                180,
+                "$y"
+              ]
+            },
+            "into": "y"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                90,
+                "$t"
+              ]
+            },
+            "into": "rotation"
+          },
+          {
+            "port": "browser.attribute",
+            "args": {
+              "ref": "#return-frame",
+              "name": "transform",
+              "value": [
+                "concat",
+                "translate(",
+                "$x",
+                ",",
+                "$y",
+                ") rotate(",
+                "$rotation",
+                ")"
+              ]
+            },
+            "into": "_"
+          },
+          {
+            "when": [
+              "not",
+              [
+                "eq",
+                "$t",
+                1
+              ]
+            ],
+            "then": [
+              {
+                "port": "browser.frame",
+                "args": {
+                  "query": "activity.loop.frame",
+                  "input": {}
+                },
+                "into": "_"
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$t",
+              1
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "loopRunning",
+                  "value": false
+                },
+                "into": "_"
+              },
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "[data-demo=\"loop\"]",
+                  "name": "disabled",
+                  "value": false
+                },
+                "into": "_"
+              },
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "[data-demo=\"loop-reset\"]",
+                  "name": "disabled",
+                  "value": false
+                },
+                "into": "_"
+              },
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "#loop-readout",
+                  "name": "textContent",
+                  "value": "Back at the start. The arrow now points a quarter-turn away."
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "activity.source": [
+      {
+        "let": "key",
+        "value": [
+          "concat",
+          "note.",
+          [
+            "at",
+            "$eventInput.matched.attributes",
+            "data-source"
+          ]
+        ]
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$data.notes",
+          "key": "$key"
+        },
+        "into": "note"
+      },
+      {
+        "assert": "$note",
+        "message": "READER-SOURCE: Unknown source note."
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "section",
+          "attrs": {},
+          "children": [
+            "list",
+            {
+              "tag": "h2",
+              "attrs": {},
+              "children": [
+                "list",
+                "$note.title"
+              ]
+            },
+            [
+              "map",
+              "$note.paragraphs",
+              "paragraph",
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "$paragraph"
+                ]
+              }
+            ],
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                "$note.note"
+              ]
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "children": [
+                "list",
+                "$note.kind"
+              ]
+            },
+            {
+              "tag": "a",
+              "attrs": {
+                "href": [
+                  "concat",
+                  "../",
+                  "$note.href"
+                ],
+                "target": "_blank",
+                "rel": "noopener"
+              },
+              "children": [
+                "list",
+                "Read the original source ↗"
+              ]
+            },
+            [
+              "if",
+              "$note.receipt",
+              {
+                "tag": "details",
+                "attrs": {},
+                "children": [
+                  "list",
+                  {
+                    "tag": "summary",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "Source file and technical details"
+                    ]
+                  },
+                  {
+                    "tag": "code",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      [
+                        "at",
+                        "$note.receipt",
+                        "path"
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      "SHA-256: a digital fingerprint used to check that this is the same file."
+                    ]
+                  },
+                  {
+                    "tag": "code",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      [
+                        "at",
+                        "$note.receipt",
+                        "sha256"
+                      ]
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {},
+                    "children": [
+                      "list",
+                      [
+                        "concat",
+                        "File size: ",
+                        [
+                          "at",
+                          "$note.receipt",
+                          "bytes"
+                        ],
+                        " bytes."
+                      ]
+                    ]
+                  }
+                ]
+              },
+              null
+            ]
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#activity-source-content",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.dialog",
+        "args": {
+          "ref": "#activity-source",
+          "open": true
+        },
+        "into": "_"
+      }
+    ],
+    "activity.source.close": [
+      {
+        "port": "browser.dialog",
+        "args": {
+          "ref": "#activity-source",
+          "open": false
+        },
+        "into": "_"
+      }
+    ],
+    "activity.source.backdrop": [
+      {
+        "port": "browser.read",
+        "args": {
+          "ref": "#activity-source"
+        },
+        "into": "dialog"
+      },
+      {
+        "when": [
+          "eq",
+          "$eventInput.event.target.ref.handle",
+          "$dialog.ref.handle"
+        ],
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                "$eventInput.event.clientX",
+                "$dialog.rect.left"
+              ]
+            },
+            "into": "left"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$eventInput.event.clientX",
+                "$dialog.rect.right"
+              ]
+            },
+            "into": "right"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                "$eventInput.event.clientY",
+                "$dialog.rect.top"
+              ]
+            },
+            "into": "above"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$eventInput.event.clientY",
+                "$dialog.rect.bottom"
+              ]
+            },
+            "into": "below"
+          },
+          {
+            "when": [
+              "or",
+              "$left",
+              "$right",
+              "$above",
+              "$below"
+            ],
+            "then": [
+              {
+                "port": "browser.dialog",
+                "args": {
+                  "ref": "#activity-source",
+                  "open": false
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "activity.standard.boot": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "quiet",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "revisionOpen",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "gate",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "memoryHidden",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "enriched",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "loopRunning",
+          "value": false
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "step",
+          "value": 0
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "bits",
+          "value": [
+            "list",
+            0,
+            0,
+            0
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "original",
+          "value": 0
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "mode",
+          "value": "budget"
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "coupled",
+          "value": true
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "origin",
+          "value": "a"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.location",
+        "args": {},
+        "into": "location"
+      },
+      {
+        "port": "text.slice",
+        "args": {
+          "value": "$location.hash",
+          "start": 1
+        },
+        "into": "id"
+      },
+      {
+        "let": "id",
+        "value": [
+          "or",
+          "$id",
+          "observation"
+        ]
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$data.activities",
+          "key": "$id"
+        },
+        "into": "activity"
+      },
+      {
+        "assert": "$activity",
+        "message": "READER-PLACE: Unknown activity."
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "activity",
+          "value": "$activity"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-activity",
+          "value": "$activity.id"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.title",
+        "args": {
+          "value": [
+            "concat",
+            "$activity.title",
+            " — Aaron Alderman"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#activity",
+          "html": "$activity.html"
+        },
+        "into": "_"
+      },
+      {
+        "let": "input",
+        "value": {
+          "tag": "p",
+          "attrs": {},
+          "children": [
+            "list",
+            "$activity.instruction"
+          ]
+        }
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "let": "markup",
+        "value": "$result"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#activity-help",
+          "html": "$markup"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": ".encounter-label"
+        },
+        "into": "labels"
+      },
+      {
+        "each": "$labels",
+        "as": "label",
+        "steps": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$label.ref",
+              "name": "textContent",
+              "value": "$activity.title"
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "when": "$activity.note",
+        "then": [
+          {
+            "port": "browser.select",
+            "args": {
+              "selector": ".demo-note,.world-note"
+            },
+            "into": "notes"
+          },
+          {
+            "each": "$notes",
+            "as": "note",
+            "steps": [
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": "$note.ref",
+                  "name": "textContent",
+                  "value": "$activity.note"
+                },
+                "into": "_"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": ".equation-note"
+        },
+        "into": "equations"
+      },
+      {
+        "each": "$equations",
+        "as": "equation",
+        "steps": [
+          {
+            "port": "browser.property",
+            "args": {
+              "ref": "$equation.ref",
+              "name": "outerHTML"
+            },
+            "into": "equationHTML"
+          },
+          {
+            "port": "browser.replace",
+            "args": {
+              "ref": "$equation.ref",
+              "html": [
+                "concat",
+                "<details class=\"calculation-detail\"><summary>See the calculation</summary>",
+                "$equationHTML",
+                "</details>"
+              ]
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "call": "activity.calculations"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "environment"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "motion",
+          "value": [
+            "not",
+            "$environment.reduced"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-motion",
+          "value": [
+            "if",
+            "$environment.reduced",
+            "paused",
+            "on"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#motion-toggle",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$environment.reduced",
+            "Reduced motion",
+            "Motion on"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "activityBound"
+        },
+        "into": "activityBound"
+      },
+      {
+        "when": [
+          "not",
+          "$activityBound"
+        ],
+        "then": [
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#activity-source",
+              "event": "click",
+              "query": "activity.source.backdrop",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "document",
+              "event": "click",
+              "query": "activity.source",
+              "input": {},
+              "delegate": "[data-source]"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#activity-source-close",
+              "event": "click",
+              "query": "activity.source.close",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "document",
+              "event": "click",
+              "query": "activity.click",
+              "input": {},
+              "delegate": "button[data-world],button[data-encounter],button[data-demo]"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "document",
+              "event": "input",
+              "query": "activity.input",
+              "input": {},
+              "delegate": "input[type=range]"
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "window",
+              "event": "hashchange",
+              "query": "activity.boot",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "browser.on",
+            "args": {
+              "ref": "#motion-toggle",
+              "event": "click",
+              "query": "activity.motion",
+              "input": {}
+            },
+            "into": "_"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "activityBound",
+              "value": true
+            },
+            "into": "_"
+          }
+        ]
+      },
+      {
+        "port": "storage.read",
+        "args": {
+          "key": "worldwright-motion"
+        },
+        "into": "preference"
+      },
+      {
+        "port": "browser.environment",
+        "args": {},
+        "into": "environment"
+      },
+      {
+        "let": "motion",
+        "value": [
+          "and",
+          [
+            "not",
+            "$environment.reduced"
+          ],
+          [
+            "not",
+            [
+              "eq",
+              "$preference.value",
+              "paused"
+            ]
+          ]
+        ]
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "motion",
+          "value": "$motion"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#motion-toggle",
+          "name": "disabled",
+          "value": "$environment.reduced"
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.attribute",
+        "args": {
+          "ref": "body",
+          "name": "data-motion",
+          "value": [
+            "if",
+            "$motion",
+            "on",
+            "paused"
+          ]
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#motion-toggle",
+          "name": "textContent",
+          "value": [
+            "if",
+            "$environment.reduced",
+            "Reduced motion",
+            [
+              "if",
+              "$motion",
+              "Motion on",
+              "Motion paused"
+            ]
+          ]
+        },
+        "into": "_"
+      }
+    ],
+    "household.boot": [
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-orientation",
+          "value": "roles"
+        },
+        "into": "hp135"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-change",
+          "value": "values"
+        },
+        "into": "hp136"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-profile",
+          "value": "constructive"
+        },
+        "into": "hp137"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-enabled",
+          "value": true
+        },
+        "into": "hp138"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-person",
+          "value": "A"
+        },
+        "into": "hp139"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-phase",
+          "value": "initial"
+        },
+        "into": "hp140"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-period",
+          "value": 5
+        },
+        "into": "hp141"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-overrides",
+          "value": [
+            "list"
+          ]
+        },
+        "into": "hp142"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#household-root",
+          "event": "change",
+          "delegate": "input,select",
+          "query": "household.change",
+          "input": {}
+        },
+        "into": "hp143"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#household-root",
+          "event": "click",
+          "delegate": "button",
+          "query": "household.click",
+          "input": {}
+        },
+        "into": "hp144"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.rebuild",
+          "input": {}
+        },
+        "into": "hq145"
+      },
+      {
+        "port": "browser.select",
+        "args": {
+          "selector": "#household-root input,#household-root select,#household-root button"
+        },
+        "into": "controls"
+      },
+      {
+        "each": "$controls",
+        "as": "control",
+        "steps": [
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$control.ref",
+              "name": "disabled",
+              "value": false
+            },
+            "into": "_"
+          }
+        ]
+      }
+    ],
+    "household.rebuild": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-orientation"
+        },
+        "into": "orientation"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-change"
+        },
+        "into": "change"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-profile"
+        },
+        "into": "profile"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-enabled"
+        },
+        "into": "enabled"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-overrides"
+        },
+        "into": "overrides"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.scenario",
+          "input": {
+            "orientation": "$orientation",
+            "change": "$change",
+            "profile": "$profile",
+            "enabled": "$enabled"
+          }
+        },
+        "into": "scenario"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-scenario",
+          "value": "$scenario"
+        },
+        "into": "hp146"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.run",
+          "input": {
+            "scenario": "$scenario",
+            "overrides": "$overrides"
+          }
+        },
+        "into": "run"
+      },
+      {
+        "port": "state.set",
+        "args": {
+          "key": "hh-run",
+          "value": "$run"
+        },
+        "into": "hp147"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.render",
+          "input": {}
+        },
+        "into": "hq148"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.sync",
+          "input": {}
+        },
+        "into": "hq149"
+      }
+    ],
+    "household.sync": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-run"
+        },
+        "into": "run"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-scenario"
+        },
+        "into": "scenario"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-person"
+        },
+        "into": "person"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-phase"
+        },
+        "into": "phase"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-overrides"
+        },
+        "into": "overrides"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-orientation"
+        },
+        "into": "orientation"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-change"
+        },
+        "into": "change"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-profile"
+        },
+        "into": "profile"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-enabled"
+        },
+        "into": "enabled"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-orientation",
+          "name": "value",
+          "value": "$orientation"
+        },
+        "into": "hp150"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-change",
+          "name": "value",
+          "value": "$change"
+        },
+        "into": "hp151"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-profile",
+          "name": "value",
+          "value": "$profile"
+        },
+        "into": "hp152"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-person",
+          "name": "value",
+          "value": "$person"
+        },
+        "into": "hp153"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-phase",
+          "name": "value",
+          "value": "$phase"
+        },
+        "into": "hp154"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-enabled",
+          "name": "checked",
+          "value": "$enabled"
+        },
+        "into": "hp155"
+      },
+      {
+        "let": "row",
+        "value": [
+          "at",
+          "$run.history",
+          [
+            "if",
+            [
+              "eq",
+              "$phase",
+              "initial"
+            ],
+            0,
+            4
+          ]
+        ]
+      },
+      {
+        "let": "per",
+        "value": [
+          "at",
+          "$row.assumptions",
+          [
+            "if",
+            [
+              "eq",
+              "$person",
+              "A"
+            ],
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "fold": "$data.household.controls",
+        "as": "def",
+        "accumulator": "unused",
+        "initial": null,
+        "steps": [
+          {
+            "let": "phaseKey",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$def.scope",
+                "rate"
+              ],
+              "run",
+              [
+                "if",
+                [
+                  "eq",
+                  "$def.scope",
+                  "resource"
+                ],
+                "initial",
+                "$phase"
+              ]
+            ]
+          },
+          {
+            "let": "id",
+            "value": [
+              "concat",
+              "$def.scope",
+              "-",
+              [
+                "if",
+                [
+                  "eq",
+                  "$def.scope",
+                  "resource"
+                ],
+                "household",
+                "$person"
+              ],
+              "-",
+              "$phaseKey",
+              "-",
+              "$def.key"
+            ]
+          },
+          {
+            "let": "edit",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$overrides",
+                "e",
+                [
+                  "eq",
+                  "$e.id",
+                  "$id"
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "let": "base",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$def.scope",
+                "person"
+              ],
+              [
+                "if",
+                [
+                  "includes",
+                  [
+                    "list",
+                    "capacity",
+                    "willingness",
+                    "wage"
+                  ],
+                  "$def.key"
+                ],
+                [
+                  "at",
+                  "$per",
+                  "$def.key"
+                ],
+                [
+                  "at",
+                  "$per.values",
+                  "$def.key"
+                ]
+              ],
+              [
+                "if",
+                [
+                  "eq",
+                  "$def.scope",
+                  "experience"
+                ],
+                [
+                  "at",
+                  [
+                    "at",
+                    "$row.experience",
+                    "$person"
+                  ],
+                  "$def.key"
+                ],
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$def.scope",
+                    "rate"
+                  ],
+                  [
+                    "at",
+                    [
+                      "at",
+                      "$scenario.feedback",
+                      "$person"
+                    ],
+                    "$def.key"
+                  ],
+                  [
+                    "at",
+                    "$scenario.material.initial",
+                    "$def.key"
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "value",
+            "value": [
+              "if",
+              "$edit",
+              [
+                "at",
+                "$edit",
+                "value"
+              ],
+              "$base"
+            ]
+          },
+          {
+            "let": "ref",
+            "value": [
+              "concat",
+              [
+                "if",
+                [
+                  "eq",
+                  "$def.scope",
+                  "resource"
+                ],
+                "#hh-resource-",
+                "#hh-param-"
+              ],
+              "$def.key"
+            ]
+          },
+          {
+            "port": "browser.write",
+            "args": {
+              "ref": "$ref",
+              "name": "value",
+              "value": "$value"
+            },
+            "into": "hp156"
+          },
+          {
+            "port": "browser.select",
+            "args": {
+              "selector": [
+                "concat",
+                "$ref",
+                "-value"
+              ]
+            },
+            "into": "outputs"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                [
+                  "count",
+                  "$outputs"
+                ],
+                0
+              ]
+            },
+            "into": "hn157"
+          },
+          {
+            "when": "$hn157",
+            "then": [
+              {
+                "port": "browser.write",
+                "args": {
+                  "ref": [
+                    "concat",
+                    "$ref",
+                    "-value"
+                  ],
+                  "name": "textContent",
+                  "value": [
+                    "concat",
+                    "$value",
+                    " ",
+                    "$def.unit"
+                  ]
+                },
+                "into": "hp158"
+              }
+            ]
+          }
+        ],
+        "yield": null,
+        "into": "unused"
+      }
+    ],
+    "household.change": [
+      {
+        "let": "target",
+        "value": "$eventInput.matched"
+      },
+      {
+        "let": "id",
+        "value": [
+          "at",
+          "$target.attributes",
+          "id"
+        ]
+      },
+      {
+        "let": "preset",
+        "value": [
+          "includes",
+          [
+            "list",
+            "hh-orientation",
+            "hh-change",
+            "hh-profile",
+            "hh-enabled"
+          ],
+          "$id"
+        ]
+      },
+      {
+        "when": "$preset",
+        "then": [
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-orientation"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-orientation",
+                  "value": "$target.value"
+                },
+                "into": "hp159"
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-change"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-change",
+                  "value": "$target.value"
+                },
+                "into": "hp160"
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-profile"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-profile",
+                  "value": "$target.value"
+                },
+                "into": "hp161"
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-enabled"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-enabled",
+                  "value": "$target.checked"
+                },
+                "into": "hp162"
+              }
+            ]
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "hh-overrides",
+              "value": [
+                "list"
+              ]
+            },
+            "into": "hp163"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.rebuild",
+              "input": {}
+            },
+            "into": "hq164"
+          }
+        ]
+      },
+      {
+        "when": [
+          "includes",
+          [
+            "list",
+            "hh-person",
+            "hh-phase"
+          ],
+          "$id"
+        ],
+        "then": [
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-person"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-person",
+                  "value": "$target.value"
+                },
+                "into": "hp165"
+              }
+            ]
+          },
+          {
+            "when": [
+              "eq",
+              "$id",
+              "hh-phase"
+            ],
+            "then": [
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-phase",
+                  "value": "$target.value"
+                },
+                "into": "hp166"
+              }
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.sync",
+              "input": {}
+            },
+            "into": "hq167"
+          }
+        ]
+      },
+      {
+        "when": [
+          "and",
+          [
+            "not",
+            "$preset"
+          ],
+          [
+            "not",
+            [
+              "includes",
+              [
+                "list",
+                "hh-person",
+                "hh-phase"
+              ],
+              "$id"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "port": "state.get",
+            "args": {
+              "key": "hh-person"
+            },
+            "into": "person"
+          },
+          {
+            "port": "state.get",
+            "args": {
+              "key": "hh-phase"
+            },
+            "into": "phase"
+          },
+          {
+            "port": "state.get",
+            "args": {
+              "key": "hh-overrides"
+            },
+            "into": "overrides"
+          },
+          {
+            "let": "key",
+            "value": [
+              "at",
+              "$target.attributes",
+              "data-hh-key"
+            ]
+          },
+          {
+            "let": "scope",
+            "value": [
+              "at",
+              "$target.attributes",
+              "data-hh-scope"
+            ]
+          },
+          {
+            "let": "def",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$data.household.controls",
+                "d",
+                [
+                  "and",
+                  [
+                    "eq",
+                    "$d.key",
+                    "$key"
+                  ],
+                  [
+                    "eq",
+                    "$d.scope",
+                    "$scope"
+                  ]
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "when": "$def",
+            "then": [
+              {
+                "let": "value",
+                "value": "$target.value"
+              },
+              {
+                "when": [
+                  "not",
+                  [
+                    "eq",
+                    "$key",
+                    "handling"
+                  ]
+                ],
+                "then": [
+                  {
+                    "port": "number.parse",
+                    "args": {
+                      "value": "$target.value"
+                    },
+                    "into": "numeric"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "max",
+                      "values": [
+                        "list",
+                        "$def.min",
+                        [
+                          "or",
+                          "$numeric",
+                          0
+                        ]
+                      ]
+                    },
+                    "into": "hn169"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "min",
+                      "values": [
+                        "list",
+                        "$def.max",
+                        "$hn169"
+                      ]
+                    },
+                    "into": "hn168"
+                  },
+                  {
+                    "let": "value",
+                    "value": "$hn168"
+                  }
+                ]
+              },
+              {
+                "let": "phaseKey",
+                "value": [
+                  "if",
+                  [
+                    "eq",
+                    "$scope",
+                    "rate"
+                  ],
+                  "run",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$scope",
+                      "resource"
+                    ],
+                    "initial",
+                    "$phase"
+                  ]
+                ]
+              },
+              {
+                "let": "editId",
+                "value": [
+                  "concat",
+                  "$scope",
+                  "-",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$scope",
+                      "resource"
+                    ],
+                    "household",
+                    "$person"
+                  ],
+                  "-",
+                  "$phaseKey",
+                  "-",
+                  "$key"
+                ]
+              },
+              {
+                "let": "overrides",
+                "value": [
+                  "append",
+                  [
+                    "filter",
+                    "$overrides",
+                    "e",
+                    [
+                      "not",
+                      [
+                        "eq",
+                        "$e.id",
+                        "$editId"
+                      ]
+                    ]
+                  ],
+                  [
+                    "list",
+                    {
+                      "id": "$editId",
+                      "scope": "$scope",
+                      "person": "$person",
+                      "phase": "$phaseKey",
+                      "key": "$key",
+                      "value": "$value"
+                    }
+                  ]
+                ]
+              },
+              {
+                "port": "state.set",
+                "args": {
+                  "key": "hh-overrides",
+                  "value": "$overrides"
+                },
+                "into": "hp170"
+              },
+              {
+                "port": "kernel.invoke",
+                "args": {
+                  "query": "household.rebuild",
+                  "input": {}
+                },
+                "into": "hq171"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "household.click": [
+      {
+        "let": "id",
+        "value": [
+          "at",
+          "$eventInput.matched.attributes",
+          "id"
+        ]
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-period"
+        },
+        "into": "period"
+      },
+      {
+        "when": [
+          "eq",
+          "$id",
+          "hh-reset"
+        ],
+        "then": [
+          {
+            "port": "state.set",
+            "args": {
+              "key": "hh-overrides",
+              "value": [
+                "list"
+              ]
+            },
+            "into": "hp172"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.rebuild",
+              "input": {}
+            },
+            "into": "hq173"
+          }
+        ]
+      },
+      {
+        "when": [
+          "includes",
+          [
+            "list",
+            "hh-prev",
+            "hh-next"
+          ],
+          "$id"
+        ],
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$period",
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$id",
+                    "hh-next"
+                  ],
+                  1,
+                  -1
+                ]
+              ]
+            },
+            "into": "hn177"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "min",
+              "values": [
+                "list",
+                12,
+                "$hn177"
+              ]
+            },
+            "into": "hn176"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "max",
+              "values": [
+                "list",
+                1,
+                "$hn176"
+              ]
+            },
+            "into": "hn175"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "hh-period",
+              "value": "$hn175"
+            },
+            "into": "hp174"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.render",
+              "input": {}
+            },
+            "into": "hq178"
+          }
+        ]
+      },
+      {
+        "let": "selected",
+        "value": [
+          "at",
+          "$eventInput.matched.attributes",
+          "data-hh-period"
+        ]
+      },
+      {
+        "when": "$selected",
+        "then": [
+          {
+            "port": "number.parse",
+            "args": {
+              "value": "$selected"
+            },
+            "into": "n"
+          },
+          {
+            "port": "state.set",
+            "args": {
+              "key": "hh-period",
+              "value": "$n"
+            },
+            "into": "hp179"
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.render",
+              "input": {}
+            },
+            "into": "hq180"
+          }
+        ]
+      }
+    ],
+    "household.render": [
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-run"
+        },
+        "into": "run"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-period"
+        },
+        "into": "period"
+      },
+      {
+        "port": "state.get",
+        "args": {
+          "key": "hh-overrides"
+        },
+        "into": "overrides"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$period",
+            1
+          ]
+        },
+        "into": "hn181"
+      },
+      {
+        "let": "row",
+        "value": [
+          "at",
+          "$run.history",
+          "$hn181"
+        ]
+      },
+      {
+        "let": "reviewText",
+        "value": [
+          "at",
+          "$data.household.reviewLabels",
+          "$row.review.status"
+        ]
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-period-label",
+          "name": "textContent",
+          "value": [
+            "concat",
+            "Period ",
+            "$period",
+            " of 12"
+          ]
+        },
+        "into": "hp182"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-status",
+          "name": "textContent",
+          "value": [
+            "concat",
+            [
+              "if",
+              [
+                "eq",
+                "$row.review.requester",
+                null
+              ],
+              "No request is triggered.",
+              [
+                "concat",
+                "$row.review.requester",
+                " requests review: ",
+                "$reviewText",
+                "."
+              ]
+            ],
+            " End-of-period evidence changes willingness for the next period."
+          ]
+        },
+        "into": "hp183"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-prev",
+          "name": "disabled",
+          "value": [
+            "eq",
+            "$period",
+            1
+          ]
+        },
+        "into": "hp184"
+      },
+      {
+        "port": "browser.write",
+        "args": {
+          "ref": "#hh-next",
+          "name": "disabled",
+          "value": [
+            "eq",
+            "$period",
+            12
+          ]
+        },
+        "into": "hp185"
+      },
+      {
+        "fold": "$row.people",
+        "as": "per",
+        "accumulator": "cards",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "assumption",
+            "value": [
+              "at",
+              "$row.assumptions",
+              [
+                "if",
+                [
+                  "eq",
+                  "$per.id",
+                  "A"
+                ],
+                0,
+                1
+              ]
+            ]
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$per.paid",
+              "digits": 1
+            },
+            "into": "hp186"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$per.free",
+              "digits": 1
+            },
+            "into": "hp187"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$per.domestic",
+              "digits": 1
+            },
+            "into": "hp188"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$assumption.capacity",
+              "digits": 1
+            },
+            "into": "hp189"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": [
+                "at",
+                "$row.willingnessOpening",
+                "$per.id"
+              ],
+              "digits": 3
+            },
+            "into": "hp190"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": [
+                "at",
+                "$row.willingnessClosing",
+                "$per.id"
+              ],
+              "digits": 3
+            },
+            "into": "hp191"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$assumption.values.paidHours",
+              "digits": 1
+            },
+            "into": "hp192"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$per.domesticDue",
+              "digits": 1
+            },
+            "into": "hp193"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$assumption.values.freeHours",
+              "digits": 1
+            },
+            "into": "hp194"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$assumption.values.domesticShare",
+                100
+              ]
+            },
+            "into": "hn196"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn196",
+              "digits": 0
+            },
+            "into": "hp195"
+          }
+        ],
+        "yield": [
+          "append",
+          "$cards",
+          [
+            "list",
+            {
+              "tag": "article",
+              "attrs": {
+                "class": [
+                  "concat",
+                  "hh-person hh-person-",
+                  "$per.id"
+                ]
+              },
+              "children": [
+                "list",
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "field-eyebrow"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "Person ",
+                      "$per.id"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "h3",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "if",
+                      "$per.goalsWithinBounds",
+                      "Within stated bounds",
+                      "Some stated bounds unmet"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "Capacity ",
+                      "$hp189",
+                      "h · desired paid work ",
+                      "$hp192",
+                      "h."
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "Desired unallocated time ",
+                      "$hp194",
+                      "h · preferred unpaid share ",
+                      "$hp195",
+                      "%."
+                    ]
+                  ]
+                },
+                {
+                  "tag": "dl",
+                  "attrs": {
+                    "class": "hh-metrics"
+                  },
+                  "children": [
+                    "list",
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Paid work"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "$hp186",
+                          "h"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Unpaid work delivered / due"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "$hp188",
+                          " / ",
+                          "$hp193",
+                          "h"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Unallocated time"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "$hp187",
+                          "h"
+                        ]
+                      ]
+                    },
+                    {
+                      "tag": "dt",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        "Willingness: opening → next"
+                      ]
+                    },
+                    {
+                      "tag": "dd",
+                      "attrs": {},
+                      "children": [
+                        "list",
+                        [
+                          "concat",
+                          "$hp190",
+                          " → ",
+                          "$hp191"
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {
+                    "class": "hh-small"
+                  },
+                  "children": [
+                    "list",
+                    "Bounds are this person’s authored values. No household happiness or human worth is scored."
+                  ]
+                }
+              ]
+            }
+          ]
+        ],
+        "into": "cards"
+      },
+      {
+        "let": "input",
+        "value": "$cards"
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hh-people",
+          "html": "$result"
+        },
+        "into": "hp197"
+      },
+      {
+        "fold": "$run.history",
+        "as": "r",
+        "accumulator": "chart",
+        "initial": {
+          "a": "",
+          "b": "",
+          "buttons": [
+            "list"
+          ]
+        },
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$r.period",
+                1
+              ]
+            },
+            "into": "hn201"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$hn201",
+                46
+              ]
+            },
+            "into": "hn200"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                30,
+                "$hn200"
+              ]
+            },
+            "into": "hn199"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn199",
+              "digits": 2
+            },
+            "into": "hp198"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$r.willingnessClosing.A",
+                140
+              ]
+            },
+            "into": "hn204"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                170,
+                "$hn204"
+              ]
+            },
+            "into": "hn203"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn203",
+              "digits": 2
+            },
+            "into": "hp202"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$r.willingnessClosing.B",
+                140
+              ]
+            },
+            "into": "hn207"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                170,
+                "$hn207"
+              ]
+            },
+            "into": "hn206"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$hn206",
+              "digits": 2
+            },
+            "into": "hp205"
+          }
+        ],
+        "yield": {
+          "a": [
+            "concat",
+            "$chart.a",
+            [
+              "if",
+              [
+                "eq",
+                "$r.period",
+                1
+              ],
+              "M",
+              " L"
+            ],
+            "$hp198",
+            ",",
+            "$hp202"
+          ],
+          "b": [
+            "concat",
+            "$chart.b",
+            [
+              "if",
+              [
+                "eq",
+                "$r.period",
+                1
+              ],
+              "M",
+              " L"
+            ],
+            "$hp198",
+            ",",
+            "$hp205"
+          ],
+          "buttons": [
+            "append",
+            "$chart.buttons",
+            [
+              "list",
+              {
+                "tag": "button",
+                "attrs": {
+                  "type": "button",
+                  "data-hh-period": "$r.period",
+                  "aria-pressed": [
+                    "if",
+                    [
+                      "eq",
+                      "$r.period",
+                      "$period"
+                    ],
+                    "true",
+                    "false"
+                  ],
+                  "class": [
+                    "if",
+                    [
+                      "eq",
+                      "$r.period",
+                      "$period"
+                    ],
+                    "is-current",
+                    ""
+                  ]
+                },
+                "children": [
+                  "list",
+                  "$r.period"
+                ]
+              }
+            ]
+          ]
+        },
+        "into": "chart"
+      },
+      {
+        "let": "input",
+        "value": [
+          "list",
+          {
+            "tag": "div",
+            "attrs": {
+              "class": "hh-chart-key"
+            },
+            "children": [
+              "list",
+              "Willingness after each period · A: green · B: ochre · 0 to 1"
+            ]
+          },
+          {
+            "tag": "svg",
+            "attrs": {
+              "viewBox": "0 0 566 205",
+              "role": "img",
+              "aria-label": "Separate willingness trajectories for A and B over twelve periods"
+            },
+            "children": [
+              "list",
+              {
+                "tag": "path",
+                "attrs": {
+                  "d": "M30 30V170H536",
+                  "stroke": "#c7c9bc",
+                  "fill": "none"
+                },
+                "children": [
+                  "list"
+                ]
+              },
+              {
+                "tag": "text",
+                "attrs": {
+                  "x": "8",
+                  "y": "35",
+                  "fill": "#526255"
+                },
+                "children": [
+                  "list",
+                  "1"
+                ]
+              },
+              {
+                "tag": "text",
+                "attrs": {
+                  "x": "8",
+                  "y": "175",
+                  "fill": "#526255"
+                },
+                "children": [
+                  "list",
+                  "0"
+                ]
+              },
+              {
+                "tag": "path",
+                "attrs": {
+                  "d": "$chart.a",
+                  "stroke": "#285d4f",
+                  "stroke-width": "3",
+                  "fill": "none"
+                },
+                "children": [
+                  "list"
+                ]
+              },
+              {
+                "tag": "path",
+                "attrs": {
+                  "d": "$chart.b",
+                  "stroke": "#b57d36",
+                  "stroke-width": "3",
+                  "fill": "none",
+                  "stroke-dasharray": "7 4"
+                },
+                "children": [
+                  "list"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "div",
+            "attrs": {
+              "class": "hh-periods",
+              "aria-label": "Select period"
+            },
+            "children": [
+              "list",
+              "$chart.buttons"
+            ]
+          }
+        ]
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hh-timeline",
+          "html": "$result"
+        },
+        "into": "hp208"
+      },
+      {
+        "fold": "$row.willingnessUpdates",
+        "as": "ev",
+        "accumulator": "items",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "cause",
+            "value": [
+              "at",
+              [
+                "filter",
+                "$row.evidence",
+                "e",
+                [
+                  "eq",
+                  "$e.id",
+                  "$ev.evidenceId"
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$ev.before",
+              "digits": 3
+            },
+            "into": "hp209"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$ev.after",
+              "digits": 3
+            },
+            "into": "hp210"
+          }
+        ],
+        "yield": [
+          "append",
+          "$items",
+          [
+            "list",
+            {
+              "tag": "li",
+              "attrs": {},
+              "children": [
+                "list",
+                {
+                  "tag": "strong",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "$ev.person",
+                      " observed ",
+                      "$cause.actor",
+                      ": ",
+                      [
+                        "at",
+                        "$data.household.evidenceLabels",
+                        "$ev.kind"
+                      ]
+                    ]
+                  ]
+                },
+                {
+                  "tag": "p",
+                  "attrs": {},
+                  "children": [
+                    "list",
+                    [
+                      "concat",
+                      "$hp209",
+                      " → ",
+                      "$hp210",
+                      " · evidence ",
+                      "$ev.evidenceId"
+                    ]
+                  ]
+                },
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "hh-small"
+                  },
+                  "children": [
+                    "list",
+                    [
+                      "if",
+                      [
+                        "eq",
+                        "$ev.kind",
+                        "capacity-shortfall"
+                      ],
+                      "A capacity constraint is distinct from non-implementation.",
+                      [
+                        "if",
+                        [
+                          "eq",
+                          "$ev.kind",
+                          "heard"
+                        ],
+                        "Being heard does not imply that the requested remedy was granted.",
+                        "Authored evidence updates the observer’s willingness."
+                      ]
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        ],
+        "into": "items"
+      },
+      {
+        "let": "input",
+        "value": "$items"
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hh-events",
+          "html": "$result"
+        },
+        "into": "hp211"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$row.income",
+          "digits": 1
+        },
+        "into": "hp212"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$row.spent",
+          "digits": 1
+        },
+        "into": "hp213"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$row.reserve",
+          "digits": 1
+        },
+        "into": "hp214"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$row.backlog",
+          "digits": 1
+        },
+        "into": "hp215"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$row.unmetExpenses",
+          "digits": 1
+        },
+        "into": "hp216"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$row.shareA",
+            100
+          ]
+        },
+        "into": "hn218"
+      },
+      {
+        "port": "number.format",
+        "args": {
+          "value": "$hn218",
+          "digits": 1
+        },
+        "into": "hp217"
+      },
+      {
+        "let": "input",
+        "value": [
+          "list",
+          {
+            "tag": "article",
+            "attrs": {},
+            "children": [
+              "list",
+              {
+                "tag": "h3",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Immediate work & resources"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "concat",
+                    "Income ",
+                    "$hp212",
+                    " · essentials paid ",
+                    "$hp213",
+                    " · unpaid essentials ",
+                    "$hp216",
+                    "."
+                  ]
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "concat",
+                    "Domestic backlog ",
+                    "$hp215",
+                    " hours; reserve ",
+                    "$hp214",
+                    " money units."
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "article",
+            "attrs": {},
+            "children": [
+              "list",
+              {
+                "tag": "h3",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Relational consequences"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  [
+                    "concat",
+                    "Current allocation: A carries ",
+                    "$hp217",
+                    "% of unpaid demand. Review: ",
+                    "$reviewText",
+                    "."
+                  ]
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Willingness responds to directed evidence; trust is unknown and standing is unchanged."
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "article",
+            "attrs": {},
+            "children": [
+              "list",
+              {
+                "tag": "h3",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "What carries forward"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {},
+                "children": [
+                  "list",
+                  "Unfinished work, remaining resources, the allocation, and each person’s changed willingness enter the next period. A changed preference is an input, never a breach."
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "class": "hh-small"
+                },
+                "children": [
+                  "list",
+                  [
+                    "concat",
+                    [
+                      "count",
+                      "$overrides"
+                    ],
+                    " explicit parameter overrides. Preset changes clear these; Reset clears overrides."
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "call": "html.serialize"
+      },
+      {
+        "port": "browser.content",
+        "args": {
+          "ref": "#hh-budget",
+          "html": "$result"
+        },
+        "into": "hp219"
+      }
+    ]
+  }
+}

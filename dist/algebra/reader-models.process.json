@@ -1,0 +1,5315 @@
+{
+  "protocol": "temple/surface-process-module/1",
+  "queries": {
+    "reader.model.calibration": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.angle"
+        },
+        "into": "angle"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$angle",
+            0.017453292519943295
+          ]
+        },
+        "into": "radians"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "sin",
+          "values": [
+            "list",
+            "$radians"
+          ]
+        },
+        "into": "sine"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$sine",
+            100
+          ]
+        },
+        "into": "scaled"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "round",
+          "values": [
+            "list",
+            "$scaled"
+          ]
+        },
+        "into": "rounded"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            "$rounded",
+            100
+          ]
+        },
+        "into": "result"
+      }
+    ],
+    "reader.model.pairs": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.value"
+        },
+        "into": "value"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$value",
+            "$value"
+          ]
+        },
+        "into": "square"
+      },
+      {
+        "fold": [
+          "range",
+          25
+        ],
+        "as": "n",
+        "accumulator": "pairs",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$n",
+                1
+              ]
+            },
+            "into": "index"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "remainder",
+              "values": [
+                "list",
+                "$index",
+                5
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$index",
+                5
+              ]
+            },
+            "into": "row"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "floor",
+              "values": [
+                "list",
+                "$row"
+              ]
+            },
+            "into": "y"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$x",
+                "$y"
+              ]
+            },
+            "into": "sum"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$x",
+                "$y"
+              ]
+            },
+            "into": "product"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                "$sum",
+                "$value"
+              ]
+            },
+            "into": "budget"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greaterEqual",
+              "values": [
+                "list",
+                "$product",
+                "$square"
+              ]
+            },
+            "into": "positive"
+          }
+        ],
+        "yield": [
+          "if",
+          [
+            "if",
+            [
+              "eq",
+              "$eventInput.mode",
+              "positive"
+            ],
+            "$positive",
+            "$budget"
+          ],
+          [
+            "append",
+            "$pairs",
+            [
+              "list",
+              [
+                "list",
+                "$x",
+                "$y"
+              ]
+            ]
+          ],
+          "$pairs"
+        ],
+        "into": "result"
+      }
+    ],
+    "reader.model.inflate": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.step"
+        },
+        "into": "step"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "max",
+          "values": [
+            "list",
+            0,
+            "$step"
+          ]
+        },
+        "into": "step"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            5,
+            "$step"
+          ]
+        },
+        "into": "step"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "ceil",
+          "values": [
+            "list",
+            "$step"
+          ]
+        },
+        "into": "step"
+      },
+      {
+        "fold": [
+          "range",
+          "$step"
+        ],
+        "as": "iteration",
+        "accumulator": "pair",
+        "initial": {
+          "a": 1,
+          "b": 1
+        },
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                2,
+                "$pair.a"
+              ]
+            },
+            "into": "double"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$double",
+                "$pair.b"
+              ]
+            },
+            "into": "a"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$pair.a",
+                "$pair.b"
+              ]
+            },
+            "into": "b"
+          }
+        ],
+        "yield": {
+          "a": "$a",
+          "b": "$b"
+        },
+        "into": "pair"
+      },
+      {
+        "let": "result",
+        "value": [
+          "list",
+          "$pair.a",
+          "$pair.b"
+        ]
+      }
+    ],
+    "reader.model.decode": [
+      {
+        "fold": "$eventInput.bits",
+        "as": "bit",
+        "accumulator": "sum",
+        "initial": 0,
+        "steps": [],
+        "yield": [
+          "add",
+          "$sum",
+          "$bit"
+        ],
+        "into": "sum"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greaterEqual",
+          "values": [
+            "list",
+            "$sum",
+            2
+          ]
+        },
+        "into": "majority"
+      },
+      {
+        "let": "result",
+        "value": [
+          "if",
+          "$majority",
+          1,
+          0
+        ]
+      }
+    ],
+    "reader.model.weights": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.percent"
+        },
+        "into": "percent"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            "$percent",
+            100
+          ]
+        },
+        "into": "weight"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            6,
+            "$weight"
+          ]
+        },
+        "into": "delta"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            2,
+            "$delta"
+          ]
+        },
+        "into": "a"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            8,
+            "$delta"
+          ]
+        },
+        "into": "b"
+      },
+      {
+        "let": "result",
+        "value": {
+          "a": "$a",
+          "b": "$b"
+        }
+      }
+    ],
+    "reader.model.memory": [
+      {
+        "let": "coupling",
+        "value": [
+          "if",
+          "$eventInput.coupled",
+          0.6,
+          0
+        ]
+      },
+      {
+        "fold": [
+          "range",
+          400
+        ],
+        "as": "iteration",
+        "accumulator": "memory",
+        "initial": {
+          "x": 1,
+          "h": 1.2,
+          "samples": [
+            "list",
+            {
+              "t": 0,
+              "x": 1,
+              "h": 1.2
+            }
+          ]
+        },
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$coupling",
+                "$memory.h"
+              ]
+            },
+            "into": "cx"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$cx",
+                "$memory.x"
+              ]
+            },
+            "into": "dx"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                -0.8,
+                "$memory.h"
+              ]
+            },
+            "into": "decay"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$coupling",
+                "$memory.x"
+              ]
+            },
+            "into": "ch"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$decay",
+                "$ch"
+              ]
+            },
+            "into": "dh"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                0.02,
+                "$dx"
+              ]
+            },
+            "into": "dx"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                0.02,
+                "$dh"
+              ]
+            },
+            "into": "dh"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$memory.x",
+                "$dx"
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$memory.h",
+                "$dh"
+              ]
+            },
+            "into": "h"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$iteration",
+                0.02
+              ]
+            },
+            "into": "time"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "remainder",
+              "values": [
+                "list",
+                "$iteration",
+                4
+              ]
+            },
+            "into": "remainder"
+          }
+        ],
+        "yield": {
+          "x": "$x",
+          "h": "$h",
+          "samples": [
+            "if",
+            [
+              "eq",
+              "$remainder",
+              0
+            ],
+            [
+              "append",
+              "$memory.samples",
+              [
+                "list",
+                {
+                  "t": "$time",
+                  "x": "$x",
+                  "h": "$h"
+                }
+              ]
+            ],
+            "$memory.samples"
+          ]
+        },
+        "into": "memory"
+      },
+      {
+        "let": "result",
+        "value": "$memory.samples"
+      }
+    ],
+    "reader.model.line": [
+      {
+        "fold": "$eventInput.samples",
+        "as": "sample",
+        "accumulator": "path",
+        "initial": "",
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$sample.t",
+                39
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                25,
+                "$x"
+              ]
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$sample",
+                  "$eventInput.coordinate"
+                ],
+                135
+              ]
+            },
+            "into": "y"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                215,
+                "$y"
+              ]
+            },
+            "into": "y"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$x",
+              "digits": 2
+            },
+            "into": "x"
+          },
+          {
+            "port": "number.format",
+            "args": {
+              "value": "$y",
+              "digits": 2
+            },
+            "into": "y"
+          }
+        ],
+        "yield": [
+          "concat",
+          "$path",
+          [
+            "if",
+            [
+              "eq",
+              "$path",
+              ""
+            ],
+            "M",
+            " L"
+          ],
+          "$x",
+          ",",
+          "$y"
+        ],
+        "into": "result"
+      }
+    ],
+    "reader.model.coarse": [
+      {
+        "port": "number.parse",
+        "args": {
+          "value": "$eventInput.block"
+        },
+        "into": "block"
+      },
+      {
+        "assert": [
+          "includes",
+          [
+            "list",
+            1,
+            2,
+            4
+          ],
+          "$block"
+        ],
+        "message": "READER-CELL: Choose block size 1, 2 or 4."
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "divide",
+          "values": [
+            "list",
+            4,
+            "$block"
+          ]
+        },
+        "into": "side"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$side",
+            "$side"
+          ]
+        },
+        "into": "blocks"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$block",
+            "$block"
+          ]
+        },
+        "into": "area"
+      },
+      {
+        "fold": [
+          "range",
+          "$blocks"
+        ],
+        "as": "blockIndex",
+        "accumulator": "cells",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$blockIndex",
+                1
+              ]
+            },
+            "into": "bi"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$bi",
+                "$side"
+              ]
+            },
+            "into": "row"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "floor",
+              "values": [
+                "list",
+                "$row"
+              ]
+            },
+            "into": "row"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$row",
+                "$block"
+              ]
+            },
+            "into": "row"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "remainder",
+              "values": [
+                "list",
+                "$bi",
+                "$side"
+              ]
+            },
+            "into": "col"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$col",
+                "$block"
+              ]
+            },
+            "into": "col"
+          },
+          {
+            "fold": [
+              "range",
+              "$area"
+            ],
+            "as": "pixel",
+            "accumulator": "sum",
+            "initial": 0,
+            "steps": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "subtract",
+                  "values": [
+                    "list",
+                    "$pixel",
+                    1
+                  ]
+                },
+                "into": "index"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "divide",
+                  "values": [
+                    "list",
+                    "$index",
+                    "$block"
+                  ]
+                },
+                "into": "y"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "floor",
+                  "values": [
+                    "list",
+                    "$y"
+                  ]
+                },
+                "into": "y"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "remainder",
+                  "values": [
+                    "list",
+                    "$index",
+                    "$block"
+                  ]
+                },
+                "into": "x"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    "$row",
+                    "$y"
+                  ]
+                },
+                "into": "y"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "multiply",
+                  "values": [
+                    "list",
+                    "$y",
+                    4
+                  ]
+                },
+                "into": "offset"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    "$offset",
+                    "$col",
+                    "$x"
+                  ]
+                },
+                "into": "offset"
+              }
+            ],
+            "yield": [
+              "add",
+              "$sum",
+              [
+                "at",
+                "$data.cellPattern",
+                "$offset"
+              ]
+            ],
+            "into": "sum"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "divide",
+              "values": [
+                "list",
+                "$sum",
+                "$area"
+              ]
+            },
+            "into": "mean"
+          }
+        ],
+        "yield": [
+          "append",
+          "$cells",
+          [
+            "list",
+            {
+              "mean": "$mean",
+              "total": "$sum"
+            }
+          ]
+        ],
+        "into": "result"
+      }
+    ],
+    "household.person": [
+      {
+        "let": "p",
+        "value": "$eventInput.person"
+      },
+      {
+        "let": "v",
+        "value": "$p.values"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$eventInput.demand",
+            "$eventInput.share"
+          ]
+        },
+        "into": "hn1"
+      },
+      {
+        "let": "due",
+        "value": "$hn1"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$p.capacity",
+            "$eventInput.reviewHours"
+          ]
+        },
+        "into": "hn3"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "max",
+          "values": [
+            "list",
+            0,
+            "$hn3"
+          ]
+        },
+        "into": "hn2"
+      },
+      {
+        "let": "available",
+        "value": "$hn2"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            "$due",
+            "$available"
+          ]
+        },
+        "into": "hn4"
+      },
+      {
+        "let": "planned",
+        "value": "$hn4"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$available",
+            "$planned"
+          ]
+        },
+        "into": "hn5"
+      },
+      {
+        "let": "remaining",
+        "value": "$hn5"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$remaining",
+            "$v.freeHours"
+          ]
+        },
+        "into": "hn8"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "max",
+          "values": [
+            "list",
+            0,
+            "$hn8"
+          ]
+        },
+        "into": "hn7"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            "$v.paidHours",
+            "$hn7"
+          ]
+        },
+        "into": "hn6"
+      },
+      {
+        "let": "plannedPaid",
+        "value": "$hn6"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$planned",
+            "$eventInput.delivery"
+          ]
+        },
+        "into": "hn9"
+      },
+      {
+        "let": "domestic",
+        "value": "$hn9"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$plannedPaid",
+            "$planned"
+          ]
+        },
+        "into": "hn12"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$hn12",
+            "$domestic"
+          ]
+        },
+        "into": "hn11"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            "$v.paidHours",
+            "$hn11"
+          ]
+        },
+        "into": "hn10"
+      },
+      {
+        "let": "paid",
+        "value": [
+          "if",
+          [
+            "eq",
+            "$eventInput.delivery",
+            1
+          ],
+          "$plannedPaid",
+          "$hn10"
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$remaining",
+            "$plannedPaid"
+          ]
+        },
+        "into": "hn13"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$p.capacity",
+            "$eventInput.reviewHours"
+          ]
+        },
+        "into": "hn16"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$hn16",
+            "$domestic"
+          ]
+        },
+        "into": "hn15"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$hn15",
+            "$paid"
+          ]
+        },
+        "into": "hn14"
+      },
+      {
+        "let": "free",
+        "value": [
+          "if",
+          [
+            "eq",
+            "$eventInput.delivery",
+            1
+          ],
+          "$hn13",
+          "$hn14"
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$v.paidHours",
+            "$paid"
+          ]
+        },
+        "into": "hn17"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$v.freeHours",
+            "$free"
+          ]
+        },
+        "into": "hn19"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "max",
+          "values": [
+            "list",
+            0,
+            "$hn19"
+          ]
+        },
+        "into": "hn18"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greater",
+          "values": [
+            "list",
+            "$eventInput.demand",
+            1e-8
+          ]
+        },
+        "into": "hn20"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$eventInput.share",
+            "$v.domesticShare"
+          ]
+        },
+        "into": "hn22"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "abs",
+          "values": [
+            "list",
+            "$hn22"
+          ]
+        },
+        "into": "hn21"
+      },
+      {
+        "let": "gaps",
+        "value": {
+          "paid": "$hn17",
+          "free": "$hn18",
+          "role": [
+            "if",
+            "$hn20",
+            "$hn21",
+            0
+          ]
+        }
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$v.paidTolerance",
+            1e-8
+          ]
+        },
+        "into": "hn24"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "lessEqual",
+          "values": [
+            "list",
+            "$gaps.paid",
+            "$hn24"
+          ]
+        },
+        "into": "hn23"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "lessEqual",
+          "values": [
+            "list",
+            "$gaps.free",
+            1e-8
+          ]
+        },
+        "into": "hn25"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$v.shareTolerance",
+            1e-8
+          ]
+        },
+        "into": "hn27"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "lessEqual",
+          "values": [
+            "list",
+            "$gaps.role",
+            "$hn27"
+          ]
+        },
+        "into": "hn26"
+      },
+      {
+        "let": "within",
+        "value": {
+          "paid": "$hn23",
+          "free": "$hn25",
+          "role": "$hn26"
+        }
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$due",
+            "$domestic"
+          ]
+        },
+        "into": "hn28"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "multiply",
+          "values": [
+            "list",
+            "$paid",
+            "$p.wage"
+          ]
+        },
+        "into": "hn29"
+      },
+      {
+        "let": "result",
+        "value": {
+          "id": "$p.id",
+          "assignedShare": "$eventInput.share",
+          "domesticDue": "$due",
+          "domestic": "$domestic",
+          "plannedDomestic": "$planned",
+          "paid": "$paid",
+          "free": "$free",
+          "reviewHours": "$eventInput.reviewHours",
+          "unusedAssignment": "$hn28",
+          "income": "$hn29",
+          "gaps": "$gaps",
+          "within": "$within",
+          "goalsWithinBounds": [
+            "and",
+            "$within.paid",
+            "$within.free",
+            "$within.role"
+          ],
+          "deliveryFraction": "$eventInput.delivery"
+        }
+      }
+    ],
+    "household.evaluate": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.person",
+          "input": {
+            "person": [
+              "at",
+              "$eventInput.people",
+              0
+            ],
+            "share": "$eventInput.shareA",
+            "demand": "$eventInput.demand",
+            "reviewHours": "$eventInput.reviewHours",
+            "delivery": "$eventInput.deliveryA"
+          }
+        },
+        "into": "a"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            1,
+            "$eventInput.shareA"
+          ]
+        },
+        "into": "hn30"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.person",
+          "input": {
+            "person": [
+              "at",
+              "$eventInput.people",
+              1
+            ],
+            "share": "$hn30",
+            "demand": "$eventInput.demand",
+            "reviewHours": "$eventInput.reviewHours",
+            "delivery": "$eventInput.deliveryB"
+          }
+        },
+        "into": "b"
+      },
+      {
+        "let": "result",
+        "value": [
+          "list",
+          "$a",
+          "$b"
+        ]
+      }
+    ],
+    "household.assents": [
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.before",
+                "gaps"
+              ],
+              "paid"
+            ],
+            1e-8
+          ]
+        },
+        "into": "hn32"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "lessEqual",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.after",
+                "gaps"
+              ],
+              "paid"
+            ],
+            "$hn32"
+          ]
+        },
+        "into": "hn31"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.before",
+                "gaps"
+              ],
+              "free"
+            ],
+            1e-8
+          ]
+        },
+        "into": "hn34"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "lessEqual",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.after",
+                "gaps"
+              ],
+              "free"
+            ],
+            "$hn34"
+          ]
+        },
+        "into": "hn33"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.before",
+                "gaps"
+              ],
+              "role"
+            ],
+            1e-8
+          ]
+        },
+        "into": "hn36"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "lessEqual",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.after",
+                "gaps"
+              ],
+              "role"
+            ],
+            "$hn36"
+          ]
+        },
+        "into": "hn35"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.before",
+                "gaps"
+              ],
+              "paid"
+            ],
+            1e-8
+          ]
+        },
+        "into": "hn38"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "less",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.after",
+                "gaps"
+              ],
+              "paid"
+            ],
+            "$hn38"
+          ]
+        },
+        "into": "hn37"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.before",
+                "gaps"
+              ],
+              "free"
+            ],
+            1e-8
+          ]
+        },
+        "into": "hn40"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "less",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.after",
+                "gaps"
+              ],
+              "free"
+            ],
+            "$hn40"
+          ]
+        },
+        "into": "hn39"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.before",
+                "gaps"
+              ],
+              "role"
+            ],
+            1e-8
+          ]
+        },
+        "into": "hn42"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "less",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$eventInput.after",
+                "gaps"
+              ],
+              "role"
+            ],
+            "$hn42"
+          ]
+        },
+        "into": "hn41"
+      },
+      {
+        "let": "result",
+        "value": [
+          "or",
+          "$eventInput.after.goalsWithinBounds",
+          [
+            "and",
+            [
+              "or",
+              [
+                "at",
+                "$eventInput.after.within",
+                "paid"
+              ],
+              "$hn31"
+            ],
+            [
+              "or",
+              [
+                "at",
+                "$eventInput.after.within",
+                "free"
+              ],
+              "$hn33"
+            ],
+            [
+              "or",
+              [
+                "at",
+                "$eventInput.after.within",
+                "role"
+              ],
+              "$hn35"
+            ],
+            [
+              "or",
+              "$hn37",
+              "$hn39",
+              "$hn41"
+            ]
+          ]
+        ]
+      }
+    ],
+    "household.better": [
+      {
+        "let": "result",
+        "value": true
+      },
+      {
+        "when": [
+          "not",
+          [
+            "eq",
+            "$eventInput.best",
+            null
+          ]
+        ],
+        "then": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput.option.score",
+                  "paid"
+                ],
+                [
+                  "at",
+                  "$eventInput.best.score",
+                  "paid"
+                ]
+              ]
+            },
+            "into": "hn45"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "abs",
+              "values": [
+                "list",
+                "$hn45"
+              ]
+            },
+            "into": "hn44"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$hn44",
+                1e-8
+              ]
+            },
+            "into": "hn43"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput.option.score",
+                  "paid"
+                ],
+                [
+                  "at",
+                  "$eventInput.best.score",
+                  "paid"
+                ]
+              ]
+            },
+            "into": "hn46"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput.option.score",
+                  "free"
+                ],
+                [
+                  "at",
+                  "$eventInput.best.score",
+                  "free"
+                ]
+              ]
+            },
+            "into": "hn49"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "abs",
+              "values": [
+                "list",
+                "$hn49"
+              ]
+            },
+            "into": "hn48"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$hn48",
+                1e-8
+              ]
+            },
+            "into": "hn47"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput.option.score",
+                  "free"
+                ],
+                [
+                  "at",
+                  "$eventInput.best.score",
+                  "free"
+                ]
+              ]
+            },
+            "into": "hn50"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput.option.score",
+                  "role"
+                ],
+                [
+                  "at",
+                  "$eventInput.best.score",
+                  "role"
+                ]
+              ]
+            },
+            "into": "hn53"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "abs",
+              "values": [
+                "list",
+                "$hn53"
+              ]
+            },
+            "into": "hn52"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "greater",
+              "values": [
+                "list",
+                "$hn52",
+                1e-8
+              ]
+            },
+            "into": "hn51"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                [
+                  "at",
+                  "$eventInput.option.score",
+                  "role"
+                ],
+                [
+                  "at",
+                  "$eventInput.best.score",
+                  "role"
+                ]
+              ]
+            },
+            "into": "hn54"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                "$eventInput.option.distance",
+                "$eventInput.best.distance"
+              ]
+            },
+            "into": "hn55"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                "$eventInput.option.share",
+                "$eventInput.best.share"
+              ]
+            },
+            "into": "hn56"
+          },
+          {
+            "let": "result",
+            "value": [
+              "if",
+              "$hn43",
+              "$hn46",
+              [
+                "if",
+                "$hn47",
+                "$hn50",
+                [
+                  "if",
+                  "$hn51",
+                  "$hn54",
+                  [
+                    "if",
+                    [
+                      "not",
+                      [
+                        "eq",
+                        "$eventInput.option.distance",
+                        "$eventInput.best.distance"
+                      ]
+                    ],
+                    "$hn55",
+                    "$hn56"
+                  ]
+                ]
+              ]
+            ]
+          }
+        ]
+      }
+    ],
+    "household.negotiate": [
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.evaluate",
+          "input": {
+            "people": "$eventInput.state.people",
+            "shareA": "$eventInput.state.shareA",
+            "demand": "$eventInput.demand",
+            "reviewHours": 0,
+            "deliveryA": 1,
+            "deliveryB": 1
+          }
+        },
+        "into": "baseline"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "remainder",
+          "values": [
+            "list",
+            "$eventInput.period",
+            2
+          ]
+        },
+        "into": "hn57"
+      },
+      {
+        "let": "first",
+        "value": [
+          "if",
+          [
+            "eq",
+            "$hn57",
+            0
+          ],
+          1,
+          0
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            1,
+            "$first"
+          ]
+        },
+        "into": "hn58"
+      },
+      {
+        "let": "second",
+        "value": "$hn58"
+      },
+      {
+        "let": "requesterIndex",
+        "value": [
+          "if",
+          [
+            "not",
+            [
+              "at",
+              [
+                "at",
+                "$baseline",
+                "$first"
+              ],
+              "goalsWithinBounds"
+            ]
+          ],
+          "$first",
+          [
+            "if",
+            [
+              "not",
+              [
+                "at",
+                [
+                  "at",
+                  "$baseline",
+                  "$second"
+                ],
+                "goalsWithinBounds"
+              ]
+            ],
+            "$second",
+            -1
+          ]
+        ]
+      },
+      {
+        "let": "result",
+        "value": {
+          "status": "no-request",
+          "requester": null,
+          "shareA": "$eventInput.state.shareA",
+          "reviewHours": 0,
+          "candidates": 0
+        }
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greaterEqual",
+          "values": [
+            "list",
+            "$requesterIndex",
+            0
+          ]
+        },
+        "into": "hn59"
+      },
+      {
+        "when": "$hn59",
+        "then": [
+          {
+            "let": "who",
+            "value": [
+              "at",
+              [
+                "at",
+                "$eventInput.state.people",
+                "$requesterIndex"
+              ],
+              "id"
+            ]
+          },
+          {
+            "let": "blockers",
+            "value": [
+              "map",
+              [
+                "filter",
+                "$eventInput.state.people",
+                "per",
+                [
+                  "eq",
+                  "$per.willingness",
+                  0
+                ]
+              ],
+              "per",
+              "$per.id"
+            ]
+          },
+          {
+            "let": "result",
+            "value": {
+              "status": "review-not-open",
+              "requester": "$who",
+              "shareA": "$eventInput.state.shareA",
+              "reviewHours": 0,
+              "candidates": 0,
+              "blockers": "$blockers"
+            }
+          },
+          {
+            "when": [
+              "eq",
+              [
+                "count",
+                "$blockers"
+              ],
+              0
+            ],
+            "then": [
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      [
+                        "at",
+                        "$eventInput.state.people",
+                        0
+                      ],
+                      "capacity"
+                    ],
+                    1e-8
+                  ]
+                },
+                "into": "hn61"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "less",
+                  "values": [
+                    "list",
+                    "$hn61",
+                    "$eventInput.policy.reviewHours"
+                  ]
+                },
+                "into": "hn60"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "add",
+                  "values": [
+                    "list",
+                    [
+                      "at",
+                      [
+                        "at",
+                        "$eventInput.state.people",
+                        1
+                      ],
+                      "capacity"
+                    ],
+                    1e-8
+                  ]
+                },
+                "into": "hn63"
+              },
+              {
+                "port": "number.calculate",
+                "args": {
+                  "operation": "less",
+                  "values": [
+                    "list",
+                    "$hn63",
+                    "$eventInput.policy.reviewHours"
+                  ]
+                },
+                "into": "hn62"
+              },
+              {
+                "let": "tooLittle",
+                "value": [
+                  "or",
+                  "$hn60",
+                  "$hn62"
+                ]
+              },
+              {
+                "let": "result",
+                "value": {
+                  "status": "review-time-unavailable",
+                  "requester": "$who",
+                  "shareA": "$eventInput.state.shareA",
+                  "reviewHours": 0,
+                  "candidates": 0
+                }
+              },
+              {
+                "when": [
+                  "not",
+                  "$tooLittle"
+                ],
+                "then": [
+                  {
+                    "port": "kernel.invoke",
+                    "args": {
+                      "query": "household.evaluate",
+                      "input": {
+                        "people": "$eventInput.state.people",
+                        "shareA": "$eventInput.state.shareA",
+                        "demand": "$eventInput.demand",
+                        "reviewHours": "$eventInput.policy.reviewHours",
+                        "deliveryA": 1,
+                        "deliveryB": 1
+                      }
+                    },
+                    "into": "before"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "min",
+                      "values": [
+                        "list",
+                        [
+                          "at",
+                          [
+                            "at",
+                            "$eventInput.state.people",
+                            0
+                          ],
+                          "willingness"
+                        ],
+                        [
+                          "at",
+                          [
+                            "at",
+                            "$eventInput.state.people",
+                            1
+                          ],
+                          "willingness"
+                        ]
+                      ]
+                    },
+                    "into": "hn65"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "multiply",
+                      "values": [
+                        "list",
+                        "$eventInput.policy.maxReallocationHours",
+                        "$hn65"
+                      ]
+                    },
+                    "into": "hn64"
+                  },
+                  {
+                    "let": "limit",
+                    "value": "$hn64"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "add",
+                      "values": [
+                        "list",
+                        "$eventInput.policy.gridSteps",
+                        1
+                      ]
+                    },
+                    "into": "hn66"
+                  },
+                  {
+                    "fold": [
+                      "range",
+                      "$hn66"
+                    ],
+                    "as": "n",
+                    "accumulator": "grid",
+                    "initial": [
+                      "list"
+                    ],
+                    "steps": [
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "subtract",
+                          "values": [
+                            "list",
+                            "$n",
+                            1
+                          ]
+                        },
+                        "into": "hn68"
+                      },
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "divide",
+                          "values": [
+                            "list",
+                            "$hn68",
+                            "$eventInput.policy.gridSteps"
+                          ]
+                        },
+                        "into": "hn67"
+                      }
+                    ],
+                    "yield": [
+                      "append",
+                      "$grid",
+                      [
+                        "list",
+                        "$hn67"
+                      ]
+                    ],
+                    "into": "grid"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "subtract",
+                      "values": [
+                        "list",
+                        1,
+                        [
+                          "at",
+                          [
+                            "at",
+                            [
+                              "at",
+                              "$eventInput.state.people",
+                              1
+                            ],
+                            "values"
+                          ],
+                          "domesticShare"
+                        ]
+                      ]
+                    },
+                    "into": "hn69"
+                  },
+                  {
+                    "let": "seeds",
+                    "value": [
+                      "list",
+                      "$eventInput.state.shareA",
+                      [
+                        "at",
+                        [
+                          "at",
+                          [
+                            "at",
+                            "$eventInput.state.people",
+                            0
+                          ],
+                          "values"
+                        ],
+                        "domesticShare"
+                      ],
+                      "$hn69"
+                    ]
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "greater",
+                      "values": [
+                        "list",
+                        "$eventInput.demand",
+                        1e-8
+                      ]
+                    },
+                    "into": "hn70"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "max",
+                      "values": [
+                        "list",
+                        "$eventInput.demand",
+                        1e-8
+                      ]
+                    },
+                    "into": "hn74"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "divide",
+                      "values": [
+                        "list",
+                        "$limit",
+                        "$hn74"
+                      ]
+                    },
+                    "into": "hn73"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "subtract",
+                      "values": [
+                        "list",
+                        "$eventInput.state.shareA",
+                        "$hn73"
+                      ]
+                    },
+                    "into": "hn72"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "max",
+                      "values": [
+                        "list",
+                        0,
+                        "$hn72"
+                      ]
+                    },
+                    "into": "hn71"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "max",
+                      "values": [
+                        "list",
+                        "$eventInput.demand",
+                        1e-8
+                      ]
+                    },
+                    "into": "hn78"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "divide",
+                      "values": [
+                        "list",
+                        "$limit",
+                        "$hn78"
+                      ]
+                    },
+                    "into": "hn77"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "add",
+                      "values": [
+                        "list",
+                        "$eventInput.state.shareA",
+                        "$hn77"
+                      ]
+                    },
+                    "into": "hn76"
+                  },
+                  {
+                    "port": "number.calculate",
+                    "args": {
+                      "operation": "min",
+                      "values": [
+                        "list",
+                        1,
+                        "$hn76"
+                      ]
+                    },
+                    "into": "hn75"
+                  },
+                  {
+                    "let": "endpoints",
+                    "value": [
+                      "if",
+                      "$hn70",
+                      [
+                        "list",
+                        "$hn71",
+                        "$hn75"
+                      ],
+                      [
+                        "list"
+                      ]
+                    ]
+                  },
+                  {
+                    "let": "options",
+                    "value": [
+                      "distinct",
+                      [
+                        "append",
+                        [
+                          "append",
+                          "$seeds",
+                          "$grid"
+                        ],
+                        "$endpoints"
+                      ]
+                    ]
+                  },
+                  {
+                    "fold": "$options",
+                    "as": "share",
+                    "accumulator": "scan",
+                    "initial": {
+                      "best": null,
+                      "count": 0
+                    },
+                    "steps": [
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "subtract",
+                          "values": [
+                            "list",
+                            "$share",
+                            "$eventInput.state.shareA"
+                          ]
+                        },
+                        "into": "hn80"
+                      },
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "abs",
+                          "values": [
+                            "list",
+                            "$hn80"
+                          ]
+                        },
+                        "into": "hn79"
+                      },
+                      {
+                        "let": "distance",
+                        "value": "$hn79"
+                      },
+                      {
+                        "let": "nextScan",
+                        "value": "$scan"
+                      },
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "greater",
+                          "values": [
+                            "list",
+                            "$distance",
+                            1e-8
+                          ]
+                        },
+                        "into": "hn81"
+                      },
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "multiply",
+                          "values": [
+                            "list",
+                            "$distance",
+                            "$eventInput.demand"
+                          ]
+                        },
+                        "into": "hn83"
+                      },
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "add",
+                          "values": [
+                            "list",
+                            "$limit",
+                            1e-8
+                          ]
+                        },
+                        "into": "hn84"
+                      },
+                      {
+                        "port": "number.calculate",
+                        "args": {
+                          "operation": "lessEqual",
+                          "values": [
+                            "list",
+                            "$hn83",
+                            "$hn84"
+                          ]
+                        },
+                        "into": "hn82"
+                      },
+                      {
+                        "when": [
+                          "and",
+                          "$hn81",
+                          "$hn82"
+                        ],
+                        "then": [
+                          {
+                            "port": "kernel.invoke",
+                            "args": {
+                              "query": "household.evaluate",
+                              "input": {
+                                "people": "$eventInput.state.people",
+                                "shareA": "$share",
+                                "demand": "$eventInput.demand",
+                                "reviewHours": "$eventInput.policy.reviewHours",
+                                "deliveryA": 1,
+                                "deliveryB": 1
+                              }
+                            },
+                            "into": "candidate"
+                          },
+                          {
+                            "port": "kernel.invoke",
+                            "args": {
+                              "query": "household.assents",
+                              "input": {
+                                "before": [
+                                  "at",
+                                  "$before",
+                                  0
+                                ],
+                                "after": [
+                                  "at",
+                                  "$candidate",
+                                  0
+                                ]
+                              }
+                            },
+                            "into": "yesA"
+                          },
+                          {
+                            "port": "kernel.invoke",
+                            "args": {
+                              "query": "household.assents",
+                              "input": {
+                                "before": [
+                                  "at",
+                                  "$before",
+                                  1
+                                ],
+                                "after": [
+                                  "at",
+                                  "$candidate",
+                                  1
+                                ]
+                              }
+                            },
+                            "into": "yesB"
+                          },
+                          {
+                            "let": "candidateRequester",
+                            "value": [
+                              "at",
+                              "$candidate",
+                              "$requesterIndex"
+                            ]
+                          },
+                          {
+                            "let": "previousRequester",
+                            "value": [
+                              "at",
+                              "$before",
+                              "$requesterIndex"
+                            ]
+                          },
+                          {
+                            "port": "number.calculate",
+                            "args": {
+                              "operation": "subtract",
+                              "values": [
+                                "list",
+                                [
+                                  "at",
+                                  [
+                                    "at",
+                                    "$previousRequester",
+                                    "gaps"
+                                  ],
+                                  "paid"
+                                ],
+                                1e-8
+                              ]
+                            },
+                            "into": "hn86"
+                          },
+                          {
+                            "port": "number.calculate",
+                            "args": {
+                              "operation": "less",
+                              "values": [
+                                "list",
+                                [
+                                  "at",
+                                  [
+                                    "at",
+                                    "$candidateRequester",
+                                    "gaps"
+                                  ],
+                                  "paid"
+                                ],
+                                "$hn86"
+                              ]
+                            },
+                            "into": "hn85"
+                          },
+                          {
+                            "port": "number.calculate",
+                            "args": {
+                              "operation": "subtract",
+                              "values": [
+                                "list",
+                                [
+                                  "at",
+                                  [
+                                    "at",
+                                    "$previousRequester",
+                                    "gaps"
+                                  ],
+                                  "free"
+                                ],
+                                1e-8
+                              ]
+                            },
+                            "into": "hn88"
+                          },
+                          {
+                            "port": "number.calculate",
+                            "args": {
+                              "operation": "less",
+                              "values": [
+                                "list",
+                                [
+                                  "at",
+                                  [
+                                    "at",
+                                    "$candidateRequester",
+                                    "gaps"
+                                  ],
+                                  "free"
+                                ],
+                                "$hn88"
+                              ]
+                            },
+                            "into": "hn87"
+                          },
+                          {
+                            "port": "number.calculate",
+                            "args": {
+                              "operation": "subtract",
+                              "values": [
+                                "list",
+                                [
+                                  "at",
+                                  [
+                                    "at",
+                                    "$previousRequester",
+                                    "gaps"
+                                  ],
+                                  "role"
+                                ],
+                                1e-8
+                              ]
+                            },
+                            "into": "hn90"
+                          },
+                          {
+                            "port": "number.calculate",
+                            "args": {
+                              "operation": "less",
+                              "values": [
+                                "list",
+                                [
+                                  "at",
+                                  [
+                                    "at",
+                                    "$candidateRequester",
+                                    "gaps"
+                                  ],
+                                  "role"
+                                ],
+                                "$hn90"
+                              ]
+                            },
+                            "into": "hn89"
+                          },
+                          {
+                            "let": "gain",
+                            "value": [
+                              "or",
+                              "$hn85",
+                              "$hn87",
+                              "$hn89"
+                            ]
+                          },
+                          {
+                            "let": "option",
+                            "value": {
+                              "share": "$share",
+                              "distance": "$distance",
+                              "score": "$candidateRequester.gaps"
+                            }
+                          },
+                          {
+                            "let": "best",
+                            "value": "$scan.best"
+                          },
+                          {
+                            "when": [
+                              "and",
+                              "$yesA",
+                              "$yesB",
+                              "$gain"
+                            ],
+                            "then": [
+                              {
+                                "port": "kernel.invoke",
+                                "args": {
+                                  "query": "household.better",
+                                  "input": {
+                                    "option": "$option",
+                                    "best": "$scan.best"
+                                  }
+                                },
+                                "into": "better"
+                              },
+                              {
+                                "let": "best",
+                                "value": [
+                                  "if",
+                                  "$better",
+                                  "$option",
+                                  "$scan.best"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "port": "number.calculate",
+                            "args": {
+                              "operation": "add",
+                              "values": [
+                                "list",
+                                "$scan.count",
+                                1
+                              ]
+                            },
+                            "into": "hn91"
+                          },
+                          {
+                            "let": "nextScan",
+                            "value": {
+                              "best": "$best",
+                              "count": "$hn91"
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "yield": "$nextScan",
+                    "into": "scan"
+                  },
+                  {
+                    "let": "result",
+                    "value": {
+                      "status": "no-joint-proposal-on-grid",
+                      "requester": "$who",
+                      "shareA": "$eventInput.state.shareA",
+                      "reviewHours": "$eventInput.policy.reviewHours",
+                      "candidates": "$scan.count"
+                    }
+                  },
+                  {
+                    "when": [
+                      "not",
+                      [
+                        "eq",
+                        "$scan.best",
+                        null
+                      ]
+                    ],
+                    "then": [
+                      {
+                        "let": "result",
+                        "value": {
+                          "status": "revised",
+                          "requester": "$who",
+                          "shareA": "$scan.best.share",
+                          "reviewHours": "$eventInput.policy.reviewHours",
+                          "candidates": "$scan.count",
+                          "assent": [
+                            "list",
+                            "A",
+                            "B"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "household.patchPerson": [
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$eventInput.patch",
+          "key": "id"
+        },
+        "into": "hp92"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$eventInput.patch",
+          "key": "capacity"
+        },
+        "into": "hp93"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$eventInput.patch",
+          "key": "wage"
+        },
+        "into": "hp94"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$eventInput.patch",
+          "key": "willingness"
+        },
+        "into": "hp95"
+      },
+      {
+        "let": "patchValues",
+        "value": [
+          "or",
+          [
+            "at",
+            "$eventInput.patch",
+            "values"
+          ],
+          {}
+        ]
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$patchValues",
+          "key": "paidHours"
+        },
+        "into": "hp96"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$patchValues",
+          "key": "freeHours"
+        },
+        "into": "hp97"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$patchValues",
+          "key": "domesticShare"
+        },
+        "into": "hp98"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$patchValues",
+          "key": "shareTolerance"
+        },
+        "into": "hp99"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$patchValues",
+          "key": "paidTolerance"
+        },
+        "into": "hp100"
+      },
+      {
+        "let": "result",
+        "value": {
+          "id": [
+            "if",
+            [
+              "eq",
+              "$hp92",
+              null
+            ],
+            [
+              "at",
+              "$eventInput.person",
+              "id"
+            ],
+            "$hp92"
+          ],
+          "capacity": [
+            "if",
+            [
+              "eq",
+              "$hp93",
+              null
+            ],
+            [
+              "at",
+              "$eventInput.person",
+              "capacity"
+            ],
+            "$hp93"
+          ],
+          "wage": [
+            "if",
+            [
+              "eq",
+              "$hp94",
+              null
+            ],
+            [
+              "at",
+              "$eventInput.person",
+              "wage"
+            ],
+            "$hp94"
+          ],
+          "willingness": [
+            "if",
+            [
+              "eq",
+              "$hp95",
+              null
+            ],
+            [
+              "at",
+              "$eventInput.person",
+              "willingness"
+            ],
+            "$hp95"
+          ],
+          "values": {
+            "paidHours": [
+              "if",
+              [
+                "eq",
+                "$hp96",
+                null
+              ],
+              [
+                "at",
+                "$eventInput.person.values",
+                "paidHours"
+              ],
+              "$hp96"
+            ],
+            "freeHours": [
+              "if",
+              [
+                "eq",
+                "$hp97",
+                null
+              ],
+              [
+                "at",
+                "$eventInput.person.values",
+                "freeHours"
+              ],
+              "$hp97"
+            ],
+            "domesticShare": [
+              "if",
+              [
+                "eq",
+                "$hp98",
+                null
+              ],
+              [
+                "at",
+                "$eventInput.person.values",
+                "domesticShare"
+              ],
+              "$hp98"
+            ],
+            "shareTolerance": [
+              "if",
+              [
+                "eq",
+                "$hp99",
+                null
+              ],
+              [
+                "at",
+                "$eventInput.person.values",
+                "shareTolerance"
+              ],
+              "$hp99"
+            ],
+            "paidTolerance": [
+              "if",
+              [
+                "eq",
+                "$hp100",
+                null
+              ],
+              [
+                "at",
+                "$eventInput.person.values",
+                "paidTolerance"
+              ],
+              "$hp100"
+            ]
+          }
+        }
+      }
+    ],
+    "household.patch": [
+      {
+        "fold": "$eventInput.state.people",
+        "as": "person",
+        "accumulator": "people",
+        "initial": [
+          "list"
+        ],
+        "steps": [
+          {
+            "let": "patch",
+            "value": [
+              "or",
+              [
+                "at",
+                [
+                  "filter",
+                  [
+                    "or",
+                    [
+                      "at",
+                      "$eventInput.patch",
+                      "people"
+                    ],
+                    [
+                      "list"
+                    ]
+                  ],
+                  "change",
+                  [
+                    "eq",
+                    "$change.id",
+                    "$person.id"
+                  ]
+                ],
+                0
+              ],
+              {}
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.patchPerson",
+              "input": {
+                "person": "$person",
+                "patch": "$patch"
+              }
+            },
+            "into": "patched"
+          }
+        ],
+        "yield": [
+          "append",
+          "$people",
+          [
+            "list",
+            "$patched"
+          ]
+        ],
+        "into": "people"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$eventInput.patch",
+          "key": "domesticHours"
+        },
+        "into": "hp101"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$eventInput.patch",
+          "key": "expenses"
+        },
+        "into": "hp102"
+      },
+      {
+        "let": "result",
+        "value": {
+          "people": "$people",
+          "shareA": "$eventInput.state.shareA",
+          "reserve": "$eventInput.state.reserve",
+          "domesticHours": [
+            "if",
+            [
+              "eq",
+              "$hp101",
+              null
+            ],
+            [
+              "at",
+              "$eventInput.state",
+              "domesticHours"
+            ],
+            "$hp101"
+          ],
+          "expenses": [
+            "if",
+            [
+              "eq",
+              "$hp102",
+              null
+            ],
+            [
+              "at",
+              "$eventInput.state",
+              "expenses"
+            ],
+            "$hp102"
+          ]
+        }
+      }
+    ],
+    "household.override": [
+      {
+        "fold": "$eventInput.state.people",
+        "as": "person",
+        "accumulator": "people",
+        "initial": [
+          "list"
+        ],
+        "steps": [],
+        "yield": [
+          "append",
+          "$people",
+          [
+            "list",
+            {
+              "id": [
+                "if",
+                [
+                  "and",
+                  [
+                    "eq",
+                    "$eventInput.change.scope",
+                    "person"
+                  ],
+                  [
+                    "eq",
+                    "$person.id",
+                    "$eventInput.change.person"
+                  ],
+                  [
+                    "eq",
+                    "$eventInput.change.key",
+                    "id"
+                  ]
+                ],
+                "$eventInput.change.value",
+                [
+                  "at",
+                  "$person",
+                  "id"
+                ]
+              ],
+              "capacity": [
+                "if",
+                [
+                  "and",
+                  [
+                    "eq",
+                    "$eventInput.change.scope",
+                    "person"
+                  ],
+                  [
+                    "eq",
+                    "$person.id",
+                    "$eventInput.change.person"
+                  ],
+                  [
+                    "eq",
+                    "$eventInput.change.key",
+                    "capacity"
+                  ]
+                ],
+                "$eventInput.change.value",
+                [
+                  "at",
+                  "$person",
+                  "capacity"
+                ]
+              ],
+              "wage": [
+                "if",
+                [
+                  "and",
+                  [
+                    "eq",
+                    "$eventInput.change.scope",
+                    "person"
+                  ],
+                  [
+                    "eq",
+                    "$person.id",
+                    "$eventInput.change.person"
+                  ],
+                  [
+                    "eq",
+                    "$eventInput.change.key",
+                    "wage"
+                  ]
+                ],
+                "$eventInput.change.value",
+                [
+                  "at",
+                  "$person",
+                  "wage"
+                ]
+              ],
+              "willingness": [
+                "if",
+                [
+                  "and",
+                  [
+                    "eq",
+                    "$eventInput.change.scope",
+                    "person"
+                  ],
+                  [
+                    "eq",
+                    "$person.id",
+                    "$eventInput.change.person"
+                  ],
+                  [
+                    "eq",
+                    "$eventInput.change.key",
+                    "willingness"
+                  ]
+                ],
+                "$eventInput.change.value",
+                [
+                  "at",
+                  "$person",
+                  "willingness"
+                ]
+              ],
+              "values": {
+                "paidHours": [
+                  "if",
+                  [
+                    "and",
+                    [
+                      "eq",
+                      "$eventInput.change.scope",
+                      "person"
+                    ],
+                    [
+                      "eq",
+                      "$person.id",
+                      "$eventInput.change.person"
+                    ],
+                    [
+                      "eq",
+                      "$eventInput.change.key",
+                      "paidHours"
+                    ]
+                  ],
+                  "$eventInput.change.value",
+                  [
+                    "at",
+                    "$person.values",
+                    "paidHours"
+                  ]
+                ],
+                "freeHours": [
+                  "if",
+                  [
+                    "and",
+                    [
+                      "eq",
+                      "$eventInput.change.scope",
+                      "person"
+                    ],
+                    [
+                      "eq",
+                      "$person.id",
+                      "$eventInput.change.person"
+                    ],
+                    [
+                      "eq",
+                      "$eventInput.change.key",
+                      "freeHours"
+                    ]
+                  ],
+                  "$eventInput.change.value",
+                  [
+                    "at",
+                    "$person.values",
+                    "freeHours"
+                  ]
+                ],
+                "domesticShare": [
+                  "if",
+                  [
+                    "and",
+                    [
+                      "eq",
+                      "$eventInput.change.scope",
+                      "person"
+                    ],
+                    [
+                      "eq",
+                      "$person.id",
+                      "$eventInput.change.person"
+                    ],
+                    [
+                      "eq",
+                      "$eventInput.change.key",
+                      "domesticShare"
+                    ]
+                  ],
+                  "$eventInput.change.value",
+                  [
+                    "at",
+                    "$person.values",
+                    "domesticShare"
+                  ]
+                ],
+                "shareTolerance": [
+                  "if",
+                  [
+                    "and",
+                    [
+                      "eq",
+                      "$eventInput.change.scope",
+                      "person"
+                    ],
+                    [
+                      "eq",
+                      "$person.id",
+                      "$eventInput.change.person"
+                    ],
+                    [
+                      "eq",
+                      "$eventInput.change.key",
+                      "shareTolerance"
+                    ]
+                  ],
+                  "$eventInput.change.value",
+                  [
+                    "at",
+                    "$person.values",
+                    "shareTolerance"
+                  ]
+                ],
+                "paidTolerance": [
+                  "if",
+                  [
+                    "and",
+                    [
+                      "eq",
+                      "$eventInput.change.scope",
+                      "person"
+                    ],
+                    [
+                      "eq",
+                      "$person.id",
+                      "$eventInput.change.person"
+                    ],
+                    [
+                      "eq",
+                      "$eventInput.change.key",
+                      "paidTolerance"
+                    ]
+                  ],
+                  "$eventInput.change.value",
+                  [
+                    "at",
+                    "$person.values",
+                    "paidTolerance"
+                  ]
+                ]
+              }
+            }
+          ]
+        ],
+        "into": "people"
+      },
+      {
+        "let": "result",
+        "value": {
+          "people": "$people",
+          "shareA": "$eventInput.state.shareA",
+          "reserve": [
+            "if",
+            [
+              "and",
+              [
+                "eq",
+                "$eventInput.change.scope",
+                "resource"
+              ],
+              [
+                "eq",
+                "$eventInput.change.key",
+                "reserve"
+              ]
+            ],
+            "$eventInput.change.value",
+            [
+              "at",
+              "$eventInput.state",
+              "reserve"
+            ]
+          ],
+          "domesticHours": [
+            "if",
+            [
+              "and",
+              [
+                "eq",
+                "$eventInput.change.scope",
+                "resource"
+              ],
+              [
+                "eq",
+                "$eventInput.change.key",
+                "domesticHours"
+              ]
+            ],
+            "$eventInput.change.value",
+            [
+              "at",
+              "$eventInput.state",
+              "domesticHours"
+            ]
+          ],
+          "expenses": [
+            "if",
+            [
+              "and",
+              [
+                "eq",
+                "$eventInput.change.scope",
+                "resource"
+              ],
+              [
+                "eq",
+                "$eventInput.change.key",
+                "expenses"
+              ]
+            ],
+            "$eventInput.change.value",
+            [
+              "at",
+              "$eventInput.state",
+              "expenses"
+            ]
+          ]
+        }
+      }
+    ],
+    "household.experiencePatch": [
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$eventInput.change",
+          "key": "handling"
+        },
+        "into": "hp103"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$eventInput.change",
+          "key": "deliveryFraction"
+        },
+        "into": "hp104"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$eventInput.change",
+          "key": "handling"
+        },
+        "into": "hp105"
+      },
+      {
+        "port": "record.get",
+        "args": {
+          "record": "$eventInput.change",
+          "key": "deliveryFraction"
+        },
+        "into": "hp106"
+      },
+      {
+        "let": "result",
+        "value": {
+          "A": {
+            "handling": [
+              "if",
+              [
+                "and",
+                [
+                  "eq",
+                  "$eventInput.change.person",
+                  "A"
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    "$hp103",
+                    null
+                  ]
+                ]
+              ],
+              "$hp103",
+              [
+                "at",
+                [
+                  "at",
+                  "$eventInput.experience",
+                  "A"
+                ],
+                "handling"
+              ]
+            ],
+            "deliveryFraction": [
+              "if",
+              [
+                "and",
+                [
+                  "eq",
+                  "$eventInput.change.person",
+                  "A"
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    "$hp104",
+                    null
+                  ]
+                ]
+              ],
+              "$hp104",
+              [
+                "at",
+                [
+                  "at",
+                  "$eventInput.experience",
+                  "A"
+                ],
+                "deliveryFraction"
+              ]
+            ]
+          },
+          "B": {
+            "handling": [
+              "if",
+              [
+                "and",
+                [
+                  "eq",
+                  "$eventInput.change.person",
+                  "B"
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    "$hp105",
+                    null
+                  ]
+                ]
+              ],
+              "$hp105",
+              [
+                "at",
+                [
+                  "at",
+                  "$eventInput.experience",
+                  "B"
+                ],
+                "handling"
+              ]
+            ],
+            "deliveryFraction": [
+              "if",
+              [
+                "and",
+                [
+                  "eq",
+                  "$eventInput.change.person",
+                  "B"
+                ],
+                [
+                  "not",
+                  [
+                    "eq",
+                    "$hp106",
+                    null
+                  ]
+                ]
+              ],
+              "$hp106",
+              [
+                "at",
+                [
+                  "at",
+                  "$eventInput.experience",
+                  "B"
+                ],
+                "deliveryFraction"
+              ]
+            ]
+          }
+        }
+      }
+    ],
+    "household.feedback": [
+      {
+        "let": "rateKey",
+        "value": [
+          "if",
+          [
+            "includes",
+            [
+              "list",
+              "heard",
+              "outreach"
+            ],
+            "$eventInput.kind"
+          ],
+          "heardGain",
+          [
+            "if",
+            [
+              "eq",
+              "$eventInput.kind",
+              "dismissed"
+            ],
+            "dismissedLoss",
+            [
+              "if",
+              [
+                "eq",
+                "$eventInput.kind",
+                "kept"
+              ],
+              "keptGain",
+              [
+                "if",
+                [
+                  "eq",
+                  "$eventInput.kind",
+                  "implementation-shortfall"
+                ],
+                "missedLoss",
+                [
+                  "if",
+                  [
+                    "eq",
+                    "$eventInput.kind",
+                    "capacity-shortfall"
+                  ],
+                  "capacityLoss",
+                  "none"
+                ]
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "let": "positive",
+        "value": [
+          "includes",
+          [
+            "list",
+            "heard",
+            "outreach",
+            "kept"
+          ],
+          "$eventInput.kind"
+        ]
+      },
+      {
+        "let": "result",
+        "value": "$eventInput.value"
+      },
+      {
+        "when": [
+          "and",
+          "$eventInput.feedback.enabled",
+          [
+            "not",
+            [
+              "eq",
+              "$rateKey",
+              "none"
+            ]
+          ]
+        ],
+        "then": [
+          {
+            "let": "override",
+            "value": [
+              "at",
+              [
+                "filter",
+                [
+                  "or",
+                  "$eventInput.overrides",
+                  [
+                    "list"
+                  ]
+                ],
+                "edit",
+                [
+                  "and",
+                  [
+                    "eq",
+                    "$edit.scope",
+                    "rate"
+                  ],
+                  [
+                    "eq",
+                    "$edit.person",
+                    "$eventInput.person"
+                  ],
+                  [
+                    "eq",
+                    "$edit.key",
+                    "$rateKey"
+                  ]
+                ]
+              ],
+              0
+            ]
+          },
+          {
+            "port": "record.get",
+            "args": {
+              "record": [
+                "or",
+                "$override",
+                {}
+              ],
+              "key": "value"
+            },
+            "into": "hp107"
+          },
+          {
+            "let": "rate",
+            "value": [
+              "if",
+              [
+                "eq",
+                "$hp107",
+                null
+              ],
+              [
+                "at",
+                [
+                  "at",
+                  "$eventInput.feedback",
+                  "$eventInput.person"
+                ],
+                "$rateKey"
+              ],
+              "$hp107"
+            ]
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                1,
+                "$eventInput.value"
+              ]
+            },
+            "into": "hn110"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$rate",
+                "$hn110"
+              ]
+            },
+            "into": "hn109"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$eventInput.value",
+                "$hn109"
+              ]
+            },
+            "into": "hn108"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                1,
+                "$rate"
+              ]
+            },
+            "into": "hn112"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "multiply",
+              "values": [
+                "list",
+                "$eventInput.value",
+                "$hn112"
+              ]
+            },
+            "into": "hn111"
+          },
+          {
+            "let": "result",
+            "value": [
+              "if",
+              "$positive",
+              "$hn108",
+              "$hn111"
+            ]
+          }
+        ]
+      }
+    ],
+    "household.period": [
+      {
+        "let": "prior",
+        "value": "$eventInput.state"
+      },
+      {
+        "let": "period",
+        "value": "$eventInput.period"
+      },
+      {
+        "let": "config",
+        "value": "$eventInput.scenario"
+      },
+      {
+        "let": "materialEvents",
+        "value": [
+          "filter",
+          "$config.material.events",
+          "e",
+          [
+            "eq",
+            "$e.period",
+            "$period"
+          ]
+        ]
+      },
+      {
+        "let": "experienceEvents",
+        "value": [
+          "filter",
+          "$config.experienceEvents",
+          "e",
+          [
+            "eq",
+            "$e.period",
+            "$period"
+          ]
+        ]
+      },
+      {
+        "fold": "$materialEvents",
+        "as": "event",
+        "accumulator": "phys",
+        "initial": "$prior.phys",
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.patch",
+              "input": {
+                "state": "$phys",
+                "patch": "$event.patch"
+              }
+            },
+            "into": "hq113"
+          }
+        ],
+        "yield": "$hq113",
+        "into": "phys"
+      },
+      {
+        "let": "activeOverrides",
+        "value": [
+          "filter",
+          [
+            "or",
+            "$eventInput.overrides",
+            [
+              "list"
+            ]
+          ],
+          "edit",
+          [
+            "or",
+            [
+              "and",
+              [
+                "eq",
+                "$edit.phase",
+                "initial"
+              ],
+              [
+                "eq",
+                "$period",
+                1
+              ]
+            ],
+            [
+              "and",
+              [
+                "eq",
+                "$edit.phase",
+                "after"
+              ],
+              [
+                "eq",
+                "$period",
+                5
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "fold": "$activeOverrides",
+        "as": "edit",
+        "accumulator": "phys",
+        "initial": "$phys",
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.override",
+              "input": {
+                "state": "$phys",
+                "change": "$edit"
+              }
+            },
+            "into": "hq114"
+          }
+        ],
+        "yield": "$hq114",
+        "into": "phys"
+      },
+      {
+        "fold": "$experienceEvents",
+        "as": "event",
+        "accumulator": "experience",
+        "initial": "$prior.experience",
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.experiencePatch",
+              "input": {
+                "experience": "$experience",
+                "change": "$event"
+              }
+            },
+            "into": "hq115"
+          }
+        ],
+        "yield": "$hq115",
+        "into": "experience"
+      },
+      {
+        "fold": [
+          "filter",
+          "$activeOverrides",
+          "edit",
+          [
+            "eq",
+            "$edit.scope",
+            "experience"
+          ]
+        ],
+        "as": "edit",
+        "accumulator": "experience",
+        "initial": "$experience",
+        "steps": [
+          {
+            "let": "change",
+            "value": {
+              "person": "$edit.person",
+              "handling": [
+                "if",
+                [
+                  "eq",
+                  "$edit.key",
+                  "handling"
+                ],
+                "$edit.value",
+                null
+              ],
+              "deliveryFraction": [
+                "if",
+                [
+                  "eq",
+                  "$edit.key",
+                  "deliveryFraction"
+                ],
+                "$edit.value",
+                null
+              ]
+            }
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.experiencePatch",
+              "input": {
+                "experience": "$experience",
+                "change": "$change"
+              }
+            },
+            "into": "hq116"
+          }
+        ],
+        "yield": "$hq116",
+        "into": "experience"
+      },
+      {
+        "let": "opening",
+        "value": {
+          "A": [
+            "at",
+            [
+              "at",
+              "$phys.people",
+              0
+            ],
+            "willingness"
+          ],
+          "B": [
+            "at",
+            [
+              "at",
+              "$phys.people",
+              1
+            ],
+            "willingness"
+          ]
+        }
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$phys.domesticHours",
+            "$prior.backlog"
+          ]
+        },
+        "into": "hn117"
+      },
+      {
+        "let": "demand",
+        "value": "$hn117"
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.negotiate",
+          "input": {
+            "state": "$phys",
+            "demand": "$demand",
+            "policy": "$config.material.policy",
+            "period": "$period"
+          }
+        },
+        "into": "review"
+      },
+      {
+        "let": "requester",
+        "value": "$review.requester"
+      },
+      {
+        "let": "responder",
+        "value": [
+          "if",
+          [
+            "eq",
+            "$requester",
+            "A"
+          ],
+          "B",
+          "A"
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "greater",
+          "values": [
+            "list",
+            [
+              "or",
+              [
+                "at",
+                "$opening",
+                "$requester"
+              ],
+              0
+            ],
+            0
+          ]
+        },
+        "into": "hn118"
+      },
+      {
+        "let": "voiced",
+        "value": [
+          "and",
+          [
+            "not",
+            [
+              "eq",
+              "$requester",
+              null
+            ]
+          ],
+          "$hn118"
+        ]
+      },
+      {
+        "when": [
+          "and",
+          "$voiced",
+          [
+            "eq",
+            [
+              "at",
+              [
+                "at",
+                "$experience",
+                "$responder"
+              ],
+              "handling"
+            ],
+            "dismissive"
+          ]
+        ],
+        "then": [
+          {
+            "let": "review",
+            "value": {
+              "status": "request-dismissed",
+              "requester": "$requester",
+              "shareA": "$phys.shareA",
+              "reviewHours": 0,
+              "candidates": 0,
+              "assent": [
+                "list"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "let": "evidence",
+        "value": [
+          "list"
+        ]
+      },
+      {
+        "when": "$voiced",
+        "then": [
+          {
+            "let": "handling",
+            "value": [
+              "at",
+              [
+                "at",
+                "$experience",
+                "$responder"
+              ],
+              "handling"
+            ]
+          },
+          {
+            "let": "evidence",
+            "value": [
+              "list",
+              {
+                "id": [
+                  "concat",
+                  "request-",
+                  "$period"
+                ],
+                "period": "$period",
+                "observer": "$requester",
+                "actor": "$responder",
+                "kind": [
+                  "if",
+                  [
+                    "eq",
+                    "$handling",
+                    "respectful"
+                  ],
+                  "heard",
+                  [
+                    "if",
+                    [
+                      "eq",
+                      "$handling",
+                      "dismissive"
+                    ],
+                    "dismissed",
+                    "unknown"
+                  ]
+                ],
+                "source": "request-response",
+                "claimType": "synthetic-assumption",
+                "reviewStatus": "$review.status",
+                "requestedRemedyGranted": [
+                  "eq",
+                  "$review.status",
+                  "revised"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "fold": [
+          "filter",
+          "$experienceEvents",
+          "e",
+          [
+            "eq",
+            [
+              "at",
+              "$e",
+              "outreach"
+            ],
+            "respectful"
+          ]
+        ],
+        "as": "event",
+        "accumulator": "evidence",
+        "initial": "$evidence",
+        "steps": [
+          {
+            "let": "alreadyHeard",
+            "value": [
+              "some",
+              "$evidence",
+              "ev",
+              [
+                "and",
+                [
+                  "eq",
+                  "$ev.observer",
+                  "$event.person"
+                ],
+                [
+                  "eq",
+                  "$ev.kind",
+                  "heard"
+                ]
+              ]
+            ]
+          }
+        ],
+        "yield": [
+          "if",
+          "$alreadyHeard",
+          "$evidence",
+          [
+            "append",
+            "$evidence",
+            [
+              "list",
+              {
+                "id": [
+                  "concat",
+                  "outreach-",
+                  "$event.id"
+                ],
+                "period": "$period",
+                "observer": "$event.person",
+                "actor": [
+                  "if",
+                  [
+                    "eq",
+                    "$event.person",
+                    "A"
+                  ],
+                  "B",
+                  "A"
+                ],
+                "kind": "outreach",
+                "source": "explicit-outreach",
+                "claimType": "synthetic-assumption"
+              }
+            ]
+          ]
+        ],
+        "into": "evidence"
+      },
+      {
+        "let": "agreement",
+        "value": [
+          "if",
+          [
+            "eq",
+            "$review.status",
+            "revised"
+          ],
+          {
+            "id": [
+              "concat",
+              "agreement-",
+              "$period"
+            ],
+            "signedAt": "$period",
+            "firstDue": "$period",
+            "shareA": "$review.shareA",
+            "endedAt": null
+          },
+          "$prior.agreement"
+        ]
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.evaluate",
+          "input": {
+            "people": "$phys.people",
+            "shareA": "$review.shareA",
+            "demand": "$demand",
+            "reviewHours": "$review.reviewHours",
+            "deliveryA": "$experience.A.deliveryFraction",
+            "deliveryB": "$experience.B.deliveryFraction"
+          }
+        },
+        "into": "people"
+      },
+      {
+        "fold": "$people",
+        "as": "person",
+        "accumulator": "deliveries",
+        "initial": {
+          "evidence": "$evidence",
+          "outcomes": [
+            "if",
+            [
+              "eq",
+              "$review.status",
+              "revised"
+            ],
+            [
+              "list",
+              {
+                "agreementId": "$prior.agreement.id",
+                "owner": "A",
+                "kind": "superseded"
+              },
+              {
+                "agreementId": "$prior.agreement.id",
+                "owner": "B",
+                "kind": "superseded"
+              }
+            ],
+            [
+              "list"
+            ]
+          ]
+        },
+        "steps": [
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$person.plannedDomestic",
+                1e-8
+              ]
+            },
+            "into": "hn120"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                "$hn120",
+                "$person.domesticDue"
+              ]
+            },
+            "into": "hn119"
+          },
+          {
+            "let": "capacityLimited",
+            "value": "$hn119"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "add",
+              "values": [
+                "list",
+                "$person.domestic",
+                1e-8
+              ]
+            },
+            "into": "hn122"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "less",
+              "values": [
+                "list",
+                "$hn122",
+                "$person.plannedDomestic"
+              ]
+            },
+            "into": "hn121"
+          },
+          {
+            "let": "implementationLimited",
+            "value": "$hn121"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "lessEqual",
+              "values": [
+                "list",
+                "$person.domesticDue",
+                1e-8
+              ]
+            },
+            "into": "hn123"
+          },
+          {
+            "let": "kind",
+            "value": [
+              "if",
+              "$hn123",
+              "no-task-due",
+              [
+                "if",
+                [
+                  "and",
+                  "$capacityLimited",
+                  "$implementationLimited"
+                ],
+                "mixed-shortfall",
+                [
+                  "if",
+                  "$capacityLimited",
+                  "capacity-shortfall",
+                  [
+                    "if",
+                    "$implementationLimited",
+                    "implementation-shortfall",
+                    "kept"
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "let": "outcome",
+            "value": {
+              "agreementId": "$agreement.id",
+              "owner": "$person.id",
+              "kind": "$kind",
+              "due": "$person.domesticDue",
+              "achievable": "$person.plannedDomestic",
+              "delivered": "$person.domestic",
+              "capacityLimited": "$capacityLimited",
+              "implementationLimited": "$implementationLimited"
+            }
+          }
+        ],
+        "yield": {
+          "evidence": [
+            "append",
+            "$deliveries.evidence",
+            [
+              "list",
+              {
+                "id": [
+                  "concat",
+                  "delivery-",
+                  "$period",
+                  "-",
+                  "$person.id"
+                ],
+                "period": "$period",
+                "observer": [
+                  "if",
+                  [
+                    "eq",
+                    "$person.id",
+                    "A"
+                  ],
+                  "B",
+                  "A"
+                ],
+                "actor": "$person.id",
+                "kind": "$kind",
+                "source": "agreement-execution",
+                "claimType": "synthetic-assumption",
+                "agreementId": "$agreement.id",
+                "due": "$person.domesticDue",
+                "achievable": "$person.plannedDomestic",
+                "delivered": "$person.domestic",
+                "capacityLimited": "$capacityLimited",
+                "implementationLimited": "$implementationLimited"
+              }
+            ]
+          ],
+          "outcomes": [
+            "append",
+            "$deliveries.outcomes",
+            [
+              "list",
+              "$outcome"
+            ]
+          ]
+        },
+        "into": "deliveries"
+      },
+      {
+        "fold": "$deliveries.evidence",
+        "as": "event",
+        "accumulator": "learning",
+        "initial": {
+          "A": "$opening.A",
+          "B": "$opening.B",
+          "updates": [
+            "list"
+          ]
+        },
+        "steps": [
+          {
+            "let": "before",
+            "value": [
+              "at",
+              "$learning",
+              "$event.observer"
+            ]
+          },
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.feedback",
+              "input": {
+                "value": "$before",
+                "kind": "$event.kind",
+                "person": "$event.observer",
+                "feedback": "$config.feedback",
+                "overrides": "$eventInput.overrides"
+              }
+            },
+            "into": "after"
+          },
+          {
+            "port": "number.calculate",
+            "args": {
+              "operation": "subtract",
+              "values": [
+                "list",
+                "$after",
+                "$before"
+              ]
+            },
+            "into": "hn124"
+          }
+        ],
+        "yield": {
+          "A": [
+            "if",
+            [
+              "eq",
+              "$event.observer",
+              "A"
+            ],
+            "$after",
+            "$learning.A"
+          ],
+          "B": [
+            "if",
+            [
+              "eq",
+              "$event.observer",
+              "B"
+            ],
+            "$after",
+            "$learning.B"
+          ],
+          "updates": [
+            "append",
+            "$learning.updates",
+            [
+              "list",
+              {
+                "evidenceId": "$event.id",
+                "person": "$event.observer",
+                "kind": "$event.kind",
+                "before": "$before",
+                "after": "$after",
+                "delta": "$hn124"
+              }
+            ]
+          ]
+        },
+        "into": "learning"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$people",
+                0
+              ],
+              "income"
+            ],
+            [
+              "at",
+              [
+                "at",
+                "$people",
+                1
+              ],
+              "income"
+            ]
+          ]
+        },
+        "into": "hn125"
+      },
+      {
+        "let": "income",
+        "value": "$hn125"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            [
+              "at",
+              [
+                "at",
+                "$people",
+                0
+              ],
+              "domestic"
+            ],
+            [
+              "at",
+              [
+                "at",
+                "$people",
+                1
+              ],
+              "domestic"
+            ]
+          ]
+        },
+        "into": "hn126"
+      },
+      {
+        "let": "completed",
+        "value": "$hn126"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$demand",
+            "$completed"
+          ]
+        },
+        "into": "hn128"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "max",
+          "values": [
+            "list",
+            0,
+            "$hn128"
+          ]
+        },
+        "into": "hn127"
+      },
+      {
+        "let": "backlog",
+        "value": "$hn127"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$phys.reserve",
+            "$income"
+          ]
+        },
+        "into": "hn130"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "min",
+          "values": [
+            "list",
+            "$phys.expenses",
+            "$hn130"
+          ]
+        },
+        "into": "hn129"
+      },
+      {
+        "let": "spent",
+        "value": "$hn129"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "add",
+          "values": [
+            "list",
+            "$phys.reserve",
+            "$income"
+          ]
+        },
+        "into": "hn132"
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$hn132",
+            "$spent"
+          ]
+        },
+        "into": "hn131"
+      },
+      {
+        "let": "reserve",
+        "value": "$hn131"
+      },
+      {
+        "let": "nextPeople",
+        "value": [
+          "map",
+          "$phys.people",
+          "person",
+          {
+            "id": "$person.id",
+            "capacity": "$person.capacity",
+            "wage": "$person.wage",
+            "willingness": [
+              "at",
+              "$learning",
+              "$person.id"
+            ],
+            "values": "$person.values"
+          }
+        ]
+      },
+      {
+        "port": "number.calculate",
+        "args": {
+          "operation": "subtract",
+          "values": [
+            "list",
+            "$phys.expenses",
+            "$spent"
+          ]
+        },
+        "into": "hn133"
+      },
+      {
+        "let": "row",
+        "value": {
+          "period": "$period",
+          "appliedEvents": [
+            "map",
+            "$materialEvents",
+            "event",
+            "$event.id"
+          ],
+          "appliedExperienceEvents": [
+            "map",
+            "$experienceEvents",
+            "event",
+            "$event.id"
+          ],
+          "assumptions": "$phys.people",
+          "experience": "$experience",
+          "recurringDemand": "$phys.domesticHours",
+          "priorBacklog": "$prior.backlog",
+          "demand": "$demand",
+          "completed": "$completed",
+          "backlog": "$backlog",
+          "previousShareA": "$phys.shareA",
+          "shareA": "$review.shareA",
+          "review": "$review",
+          "people": "$people",
+          "openingReserve": "$phys.reserve",
+          "income": "$income",
+          "expensesDue": "$phys.expenses",
+          "spent": "$spent",
+          "unmetExpenses": "$hn133",
+          "reserve": "$reserve",
+          "willingnessOpening": "$opening",
+          "willingnessClosing": {
+            "A": "$learning.A",
+            "B": "$learning.B"
+          },
+          "willingnessUpdates": "$learning.updates",
+          "evidence": "$deliveries.evidence",
+          "commitmentOutcomes": "$deliveries.outcomes",
+          "standing": {
+            "A": "unchanged",
+            "B": "unchanged"
+          },
+          "trust": {
+            "AtoB": null,
+            "BtoA": null
+          }
+        }
+      },
+      {
+        "let": "result",
+        "value": {
+          "phys": {
+            "people": "$nextPeople",
+            "shareA": "$review.shareA",
+            "domesticHours": "$phys.domesticHours",
+            "expenses": "$phys.expenses",
+            "reserve": "$reserve"
+          },
+          "experience": "$experience",
+          "agreement": "$agreement",
+          "backlog": "$backlog",
+          "history": [
+            "append",
+            "$prior.history",
+            [
+              "list",
+              "$row"
+            ]
+          ],
+          "evidence": [
+            "append",
+            "$prior.evidence",
+            "$deliveries.evidence"
+          ]
+        }
+      }
+    ],
+    "household.run": [
+      {
+        "let": "scenario",
+        "value": "$eventInput.scenario"
+      },
+      {
+        "fold": [
+          "range",
+          "$scenario.material.periods"
+        ],
+        "as": "period",
+        "accumulator": "simulation",
+        "initial": {
+          "phys": "$scenario.material.initial",
+          "experience": "$scenario.experience",
+          "agreement": {
+            "id": "initial-agreement",
+            "signedAt": 0,
+            "firstDue": 1,
+            "shareA": "$scenario.material.initial.shareA",
+            "endedAt": null
+          },
+          "backlog": 0,
+          "history": [
+            "list"
+          ],
+          "evidence": [
+            "list"
+          ]
+        },
+        "steps": [
+          {
+            "port": "kernel.invoke",
+            "args": {
+              "query": "household.period",
+              "input": {
+                "state": "$simulation",
+                "period": "$period",
+                "scenario": "$scenario",
+                "overrides": [
+                  "or",
+                  "$eventInput.overrides",
+                  [
+                    "list"
+                  ]
+                ]
+              }
+            },
+            "into": "hq134"
+          }
+        ],
+        "yield": "$hq134",
+        "into": "simulation"
+      },
+      {
+        "let": "result",
+        "value": {
+          "id": "$scenario.id",
+          "history": "$simulation.history",
+          "evidence": "$simulation.evidence"
+        }
+      }
+    ],
+    "household.scenario": [
+      {
+        "let": "catalogue",
+        "value": "$data.household.material"
+      },
+      {
+        "let": "adaptive",
+        "value": "$data.household.adaptive"
+      },
+      {
+        "let": "orientation",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$catalogue.orientations",
+            "item",
+            [
+              "eq",
+              "$item.id",
+              "$eventInput.orientation"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "change",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$catalogue.changes",
+            "item",
+            [
+              "eq",
+              "$item.id",
+              "$eventInput.change"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "let": "profile",
+        "value": [
+          "at",
+          [
+            "filter",
+            "$adaptive.profiles",
+            "item",
+            [
+              "eq",
+              "$item.id",
+              "$eventInput.profile"
+            ]
+          ],
+          0
+        ]
+      },
+      {
+        "assert": [
+          "and",
+          "$orientation",
+          "$change",
+          "$profile"
+        ],
+        "message": "HOUSEHOLD-001: Unknown scenario selection."
+      },
+      {
+        "port": "kernel.invoke",
+        "args": {
+          "query": "household.patch",
+          "input": {
+            "state": "$catalogue.base.initial",
+            "patch": "$orientation.patch"
+          }
+        },
+        "into": "initial"
+      },
+      {
+        "let": "result",
+        "value": {
+          "id": [
+            "concat",
+            "$orientation.id",
+            "/",
+            "$change.id",
+            "/",
+            "$profile.id"
+          ],
+          "material": {
+            "id": [
+              "concat",
+              "$orientation.id",
+              "/",
+              "$change.id"
+            ],
+            "periods": 12,
+            "policy": "$catalogue.base.policy",
+            "events": [
+              "append",
+              "$orientation.events",
+              "$change.events"
+            ],
+            "initial": {
+              "people": "$initial.people",
+              "shareA": "$orientation.shareA",
+              "domesticHours": "$initial.domesticHours",
+              "expenses": "$initial.expenses",
+              "reserve": "$initial.reserve"
+            }
+          },
+          "feedback": {
+            "enabled": "$eventInput.enabled",
+            "A": "$adaptive.feedback.A",
+            "B": "$adaptive.feedback.B"
+          },
+          "experience": "$adaptive.experience",
+          "experienceEvents": "$profile.events"
+        }
+      }
+    ]
+  }
+}

@@ -1,57 +1,32 @@
 {
   "protocol": "worldwright/front-doors/1",
-  "reason": "Give each project its own homepage entrance and distinguish those worlds from the corpus reading paths.",
+  "purpose": "Compose project introductions and route homepage entries through the hierarchy catalogue.",
   "owners": {
-    "catalog": "source/front-doors.rel",
+    "homepageCatalogue": "source/hierarchy.json",
+    "homepagePresentation": "source/hierarchy.rel",
+    "homepageProjection": "algebra/hierarchy.process.json",
+    "introductions": "source/front-doors.rel",
     "projection": "algebra/front-doors.process.json",
     "readingPaths": "source/gateway.rel"
   },
-  "extension": "Register another PublishedMicrosite only when its microsite has a published landing page. The homepage renders the catalog; no additional homepage rendering policy is required.",
+  "extension": "Add homepage entries and source-bound inspection in the hierarchy owners. Register standalone introductions in their source facts and composing algebra. Every advertised route must resolve to a published page.",
+  "routing": {
+    "frontdoors.home": "Delegates to hierarchy.home.",
+    "frontdoors.claimipedia": "Delegates to claimipedia.build.",
+    "frontdoors.worldwright": "Composes the Worldwright introduction.",
+    "frontdoors.capabilities": "Composes standalone introductions from CapabilitySet facts."
+  },
   "boundaries": [
-    "Homepage project entries each link only to their microsite.",
-    "Claimipedia contains an executable fictional comparison; it does not imply the full production platform is deployed.",
-    "The corpus gate follows topics, research and encounters, rather than acting as a second project directory.",
-    "The seven original project names remain recorded as provenance; reading-path labels do not define future microsite identities."
+    "Project introductions describe declared availability; a bounded demo does not imply a production service.",
+    "The corpus gate follows research topics and reading paths.",
+    "Purpose badges and availability are separate catalogue fields."
   ],
-  "stylesheetVersion": "The shared stylesheet reference includes site.stylesheetVersion. Increment that REL value whenever shared styles change so returning visitors receive the matching CSS.",
-  "claimipediaIdentity": {
-    "page": "algebra/claimipedia.process.json",
-    "presentation": "source/claimipedia.rel",
-    "motif": "source/claimipedia-motif.json",
-    "stylesheet": "claimipedia/claimipedia.css?v=motif-2",
-    "review": "algebra/claimipedia-review.process.json"
-  },
-  "entrances": {
-    "authoring": "npm run author -- proposal.json; authoritative definitions are REL and process JSON, governed by source/authoring-contract.json",
-    "icons": "Four original transparent raster illustrations in assets/world-emblems, bound by REL and rendered as decorative images.",
-    "presentation": "Distinct gold, rose, sage and blue light; decorative orbital backgrounds; explanatory copy and native anchor cards.",
-    "worldwright": "worldwright/index.html is an explicitly labelled placeholder for the storytelling and authoring product.",
-    "stylesheet": "Homepage shared stylesheet version is owned by site.stylesheetVersion in source/expedition.rel.",
-    "checks": [
-      "Desktop two-column and mobile single-column layout",
-      "No horizontal overflow at 390 CSS pixels",
-      "Keyboard Enter follows the Worldwright card",
-      "Reduced-motion CSS removes card animation and movement"
-    ],
-    "motion": "Finite hover and keyboard-focus transitions: card lift, moving highlight, orbital glow and a distinct emblem tilt/lift per world. Reduced-motion preferences disable transforms and transitions.",
-    "positioning": "Lead with the software, governing philosophy and scope. A separate illustration line introduces each bounded demo. Corpus check and source hashes: source/purpose-edition.json."
-  },
-  "sharing": {
-    "source": "source/social-sharing.rel",
-    "images": "source/social-sharing.json",
-    "authoring": "npm run author -- proposal.json; authoritative definitions are REL and process JSON, governed by source/authoring-contract.json"
-  },
-  "capabilities": {
-    "catalog": "CapabilitySet facts in source/front-doors.rel",
-    "authoring": "npm run author -- proposal.json; authoritative definitions are REL and process JSON, governed by source/authoring-contract.json",
-    "projection": "Compact SVG-icon cards in a four-column grid (two on mobile); approximately half the width and height of headline cards.",
-    "order": [
-      "Encounter",
-      "Kingdom",
-      "World Modelling",
-      "Creativity",
-      "The Field"
-    ],
-    "destinations": "Each card links to its microsite: encounter/, kingdom/, world-modelling/, creativity/, the-field/. Four new static introductions are composed by frontdoors.capabilities through the existing publication algebra; Encounter retains its live inspectable example."
-  }
+  "stylesheetVersion": "Update site.stylesheetVersion in source/expedition.rel when shared stylesheet bytes change.",
+  "authoring": "npm run author -- proposal.json; source/authoring-contract.json declares authority and validation.",
+  "verification": [
+    "algebra-publication.test.mjs",
+    "hierarchy.test.mjs",
+    "claimipedia-review.test.mjs",
+    "encounter-microsite.test.mjs"
+  ]
 }
