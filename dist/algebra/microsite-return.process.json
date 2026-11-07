@@ -151,7 +151,7 @@
             },
             {
               "id": "return.space",
-              "selector": "body",
+              "selector": "body:has(> .microsite-return)",
               "context": null,
               "declarations": [
                 "list",
@@ -763,12 +763,22 @@
     ],
     "microsite.return.decorate": [
       {
+        "call": "microsite.return.inspectHome"
+      },
+      {
         "when": [
-          "not",
+          "and",
           [
-            "includes",
-            "$result",
-            "id=\"microsite-return\""
+            "not",
+            "$returnHasHome"
+          ],
+          [
+            "not",
+            [
+              "includes",
+              "$result",
+              "id=\"microsite-return\""
+            ]
           ]
         ],
         "then": [

@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {parse} from 'parse5';
+import {createRequire} from 'node:module';
 const root=new URL('.',import.meta.url),read=f=>fs.readFileSync(new URL(f,root)),json=f=>JSON.parse(read(f)),sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const receipt=json('source/microsites/presentation-correspondence.json');
 test('all four recomposed documents retain their independently compared source structure and reading',()=>{
@@ -42,12 +44,19 @@ test('original application JavaScript is an oracle only; shipping behaviour is a
  assert.equal(build.seedSha256,json('source/publication-contract.json').nativeOrigin.sha256['bootstrap/temple-seed.cjs']);assert.equal(build.execution.limit,20_000_000);
 });
 
-test('every project microsite has exactly one algebra-owned return to the main catalogue',()=>{
+test('project pages use their header home link or one algebra-owned return widget',()=>{
  const routes=new Set(json('source/hierarchy.json').items.map(item=>item.href).filter(href=>href.endsWith('/')));
  for(const route of ['creativity/','relational-geometry/','temple/films/','sourcery/films/']) routes.add(route);
  assert.equal(routes.size,22);
  for(const route of routes){
   const html=read('dist/'+route+'index.html').toString();
+  const nodes=n=>[n,...(n.childNodes??[]).flatMap(nodes)],all=nodes(parse(html)),header=all.find(n=>n.tagName==='header'),brand=header&&nodes(header).find(n=>n.tagName==='a'),attrs=Object.fromEntries((brand?.attrs??[]).map(a=>[a.name,a.value]));
+  if(attrs['aria-label']==='Aaron Alderman'){
+   assert.ok(['/','/index.html'].includes(new URL(attrs.href,'https://aaronalderman.com/'+route).pathname),route);
+   assert.ok(!html.includes('id="microsite-return"'),route+' already has a header return');
+   assert.ok(!html.includes('assets/microsite-return.css'),route+' needs no widget spacing stylesheet');
+   continue;
+  }
   assert.equal((html.match(/id="microsite-return"/g)||[]).length,1,route);
   const anchor=html.match(/<a\b[^>]*id="microsite-return"[^>]*>[\s\S]*?<\/a>/)?.[0];
   assert.ok(anchor,route);
@@ -61,4 +70,18 @@ test('every project microsite has exactly one algebra-owned return to the main c
  assert.ok(!read('dist/index.html').toString().includes('id="microsite-return"'));
  const css=read('dist/assets/microsite-return.css').toString();
  for(const fragment of ['position:fixed','min-height:44px',':focus-visible','prefers-reduced-motion'])assert.ok(css.includes(fragment),fragment);
+ assert.match(css,/body:has\(>\s*\.microsite-return\)\s*\{\s*padding-bottom:\s*80px;?\s*\}/,'space belongs only to pages that contain the widget');
+ assert.ok(!/(?:^|\})body\{padding-bottom:80px/.test(css),'no unconditional body padding');
+ for(const route of ['assurance/','assurance/maturity/','assurance/identities/','assurance/accessibility/','assurance/internationalisation/','mission/','writing/','writing/power-must-serve-life/']){const html=read('dist/'+route+'index.html').toString();assert.ok(html.includes('aria-label="Aaron Alderman"'));assert.ok(!html.includes('id="microsite-return"'),route);assert.ok(!html.includes('assets/microsite-return.css'),route);}
+});
+
+test('return eligibility requires the actual named header anchor and a local personal home destination',async()=>{
+ const require=createRequire(import.meta.url),{createKernel}=require('./bootstrap/temple-seed.cjs'),{valuePorts}=require('./bootstrap/ports/value.cjs'),{lower}=require('./bootstrap/ports/algebra-lower.cjs'),{invoke}=require('./bootstrap/ports/programme.cjs'),{indexFacts}=require('./bootstrap/ports/fact-index.cjs');
+ const entry='return.test.inspect',queries=json('algebra/publication.process.json').queries;
+ const model=await lower({compiler:json('algebra/lowering.process.json'),definitions:json('algebra/operators.expression.json'),primitives:createKernel.operators,input:{entry,queries:{[entry]:[{call:'microsite.return.inspectHome'},{let:'result',value:{html:'$result',hasHome:'$returnHasHome'}}],'microsite.return.inspectHome':queries['microsite.return.inspectHome']}},mode:'model',ports:valuePorts(),limit:20000000});
+ const facts=[{s:'site',p:'origin',o:'https://aaronalderman.com/'},{s:'identity.author',p:'isa',o:'IdentityTheme'},{s:'identity.author',p:'homeRoute',o:'worlds/author/index.html'}],factIndex=await indexFacts(createKernel(valuePorts(),20000000),json('algebra/fact-index.process.json'),facts);
+ const inspect=async html=>{const result=await invoke({model,entry,input:{factIndex,result:html,returnDocument:'assurance/maturity/index.html'},ports:{...valuePorts(),'url.resolve':({href,route})=>{const base=new URL(route,'https://temple.invalid/'),target=new URL(href,base);return{external:target.origin!==base.origin,route:decodeURIComponent(target.pathname.slice(1)),fragment:target.hash.slice(1)};}},limit:20000000});assert.equal(result.value.html,html,'inspection leaves the page bytes unchanged');return result.value.hasHome;};
+ const header=href=>'<header><a aria-label="Aaron Alderman" href="'+href+'">Aaron <span>Alderman</span></a></header>';
+ for(const href of ['../../index.html','/','/index.html','https://aaronalderman.com/#microsites','/worlds/author/index.html'])assert.equal(await inspect(header(href)),true,href);
+ for(const html of [header('https://example.com/'),header('http://['),header('/wrong.html'),'<p>Aaron Alderman</p>','<footer><a aria-label="Aaron Alderman" href="/">Aaron Alderman</a></footer>',header('/').replace('Aaron Alderman','Temple'),'<header><a title=\'aria-label="Aaron Alderman"\' href="/">Other brand</a></header>',header('/').replace('href="/"','href="/" href="/wrong.html"'),'<!--'+header('/')+'-->','<SCRIPT>'+header('/')+'</SCRIPT>'])assert.equal(await inspect(html),false,html);
 });
