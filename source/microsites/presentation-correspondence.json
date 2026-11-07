@@ -1,17 +1,17 @@
 {
   "protocol": "worldwright/microsite-presentation-correspondence/1",
   "parser": "parse5@7.3.0",
-  "editorialSuccessorSha256": "20b5c4d7404070754d48f088c391987588ebe5011709553035ac179a6eaf499f",
+  "editorialSuccessorSha256": "a614ff6c287d3e777525e59fcceeab8d555f19ac7e3c7e8909f172a31a84082c",
   "scope": "Every document node, attribute, text, comment and namespace after the explicit author-requested editorial successor; original scripts replaced by admitted process runtime, favicon URI externalized without changing its bytes, canonical/social metadata added for the new host. Both complete stylesheets byte-identical.",
   "pages": [
     {
       "path": "temple/index.html",
       "source": "source/microsites/temple/oracle/index.html",
       "sourceSha256": "88474dedbd494fd7f8a9ccc9a9d4fce7b3e0760102cb371035c0b36dc4c1abde",
-      "outputSha256": "039fe86c164b3f4bbe151e7ac4b0096585b28dc72dfc27be1191b654ce97f5ae",
-      "normalizedDOMSha256": "0140d9ebb67df7254b59c914fe2d2922cc6575570add288b0d3a72921e2120cb",
+      "outputSha256": "3806284d3693dd25aab8437590b07581a21322c3aed6c9a54ec559f40300e553",
+      "normalizedDOMSha256": "2100bb25541a0399a2eddd5dc8f67dc48359891989e81fc6544292d301c77094",
       "navigationAddition": {
-        "priorOutputSha256": "b79434355ae9c231de3719d528fefd3ce6418686d1e57670b83a66f9dc8c32e2",
+        "priorOutputSha256": "e75cf6664ca8cd2c36eb373a873f9a7cabcab177e262725e7e1d05ef3da7f322",
         "headInsertion": "<link rel=\"stylesheet\" href=\"../assets/microsite-return.css?v=return-2\">\n",
         "bodyInsertion": "\n<a id=\"microsite-return\" class=\"microsite-return\" href=\"../index.html#microsites\" aria-label=\"Back to Aaron Alderman’s main website\" data-site=\"temple\"><span aria-hidden=\"true\">←</span><span>Back to Aaron Alderman</span></a>\n",
         "owner": "algebra/microsite-return.process.json"
@@ -32,6 +32,18 @@
         "declaration": {
           "property": "overflow-wrap",
           "value": "break-word"
+        }
+      },
+      "textSpacingFormulaSuccessor": {
+        "source": "source/microsites/editorial-successor.json",
+        "subject": "ms.temple.index.html.n474",
+        "predecessorOutputSha256": "039fe86c164b3f4bbe151e7ac4b0096585b28dc72dfc27be1191b654ce97f5ae",
+        "predecessorWithoutNavigationSha256": "b79434355ae9c231de3719d528fefd3ce6418686d1e57670b83a66f9dc8c32e2",
+        "observationFamily": "github-actions:42396807100:1",
+        "reason": "Allow the explanatory equation to wrap at existing spaces under enlarged text spacing; its nowrap min-content width otherwise enlarges the judgment grid.",
+        "declaration": {
+          "property": "white-space",
+          "value": "normal"
         }
       }
     },
