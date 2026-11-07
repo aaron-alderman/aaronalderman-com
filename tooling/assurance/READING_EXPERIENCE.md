@@ -14,7 +14,7 @@ the declared reduced-motion media setting for stable captures. Screenshots and r
 observations accompany each CI run as an artifact. Its single run is one
 evidence family, regardless of the number of repeated measurements.
 
-The current scope covers twenty-one reader routes at desktop, 200%-equivalent and
+The initial scope covers twenty reader routes at desktop, 200%-equivalent and
 400%-equivalent CSS widths, plus a text-spacing override. Reflow equivalence
 does not claim to exercise browser-toolbar zoom. Contrast is calculated only
 for supported opaque sRGB paint stacks. Imagery, transparency, blending and
@@ -33,23 +33,6 @@ Missing browser evidence and the specifically required Temple/Claimipedia
 text-spacing overflow regressions are release gates. Other observed findings
 remain published triage work, alongside review candidates; they are never
 converted into passes. `experience.gate` owns that rollout policy.
-
-Questions-card imagery has its own declared purpose and focal position. Portrait
-illustrations fill the established frame (`cover`); transparent emblems fit inside
-it (`contain`). Neither treatment depends on card order. The main Questions page
-and Christian, Dad, Sourcerer and Author variants are checked at every declared
-width, including increased text spacing. The plan owns the selectors, expected
-image counts, purposes, framing expectations and numeric tolerances.
-
-The generic observer scrolls selected images into view to exercise lazy loading,
-waits for load or a bounded timeout, then restores the original scroll position.
-It records natural dimensions, computed fit, focal position, border and content-box
-dimensions, plus image and declared-frame rectangles. Algebra classifies failed
-loads, distortion under `fill`, bounds, consistent frame sizes and purpose consistency. All expected card
-images must pass for release; omitted, hidden, unfinished or truncated observations
-cannot pass. Per-card screenshots support visual review below the fold. These
-checks cover Questions-card images, not every image or CSS background on the site;
-artistic crop quality and image meaning remain visual review.
 
 Plain-language review scans the first twelve non-code prose blocks and forty
 main-content link labels of every generated HTML route. Specialist terms,

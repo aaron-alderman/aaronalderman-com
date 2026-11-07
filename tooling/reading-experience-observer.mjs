@@ -10,17 +10,6 @@ export function observeReadingExperience(input){
  const number=v=>{const x=parseFloat(v);return Number.isFinite(x)?x:null;};
  const describe=n=>{const s=getComputedStyle(n);return {path:path(n),tag:n.tagName,text:(n.textContent??'').trim().slice(0,200),rect:rect(n),clientWidth:n.clientWidth,clientHeight:n.clientHeight,scrollWidth:n.scrollWidth,scrollHeight:n.scrollHeight,overflowX:s.overflowX,overflowY:s.overflowY,fontSize:number(s.fontSize),lineHeight:number(s.lineHeight),letterSpacing:s.letterSpacing==='normal'?0:number(s.letterSpacing),wordSpacing:s.wordSpacing==='normal'?0:number(s.wordSpacing),paragraphGap:number(s.marginBlockEnd)};};
  const paint=n=>{const s=getComputedStyle(n),layers=[];for(let p=n;p;p=p.parentElement){const cs=getComputedStyle(p);layers.push({path:path(p),rgba:rgba(cs.backgroundColor),image:cs.backgroundImage,opacity:Number(cs.opacity),filter:cs.filter,blend:cs.mixBlendMode});}return {foreground:rgba(s.color),layers};};
- if(input.operation==='prepare-images')return (async()=>{
-  const policy=plan.images;if(!policy)return [];
-  const original={left:scrollX,top:scrollY},results=[];
-  for(const n of [...doc.querySelectorAll(policy.selector)].filter(visible).slice(0,policy.max)){
-   n.scrollIntoView({block:'center',behavior:'instant'});
-   if(!n.complete)await new Promise(resolve=>{let timer;const done=()=>{clearTimeout(timer);n.removeEventListener('load',done);n.removeEventListener('error',done);resolve();};n.addEventListener('load',done,{once:true});n.addEventListener('error',done,{once:true});timer=setTimeout(done,policy.loadTimeoutMs);if(n.complete)done();});
-   if(n.complete&&n.naturalWidth)try{await n.decode();}catch{}
-   results.push({path:path(n),complete:n.complete,naturalWidth:n.naturalWidth,naturalHeight:n.naturalHeight});
-  }
-  win.scrollTo({...original,behavior:'instant'});return results;
- })();
  if(input.operation==='install-keyboard'){
   const observed={events:[],before:new Map([...doc.querySelectorAll('a,button,input,select,textarea,summary,[tabindex]')].map(n=>[n,style(n)]))};
   doc.addEventListener('keydown',e=>{const entry={key:e.key,trusted:e.isTrusted};observed.events.push(entry);if(typeof win.__readingKeyEvent==='function')win.__readingKeyEvent(JSON.stringify(entry));},true);win.__readingKeyboard=observed;return true;
@@ -31,9 +20,5 @@ export function observeReadingExperience(input){
  }
  if(input.operation==='keyboard-events')return win.__readingKeyboard?.events??[];
  const texts=[...doc.querySelectorAll(plan.textSelectors)].filter(visible),blocks=[...doc.querySelectorAll(plan.blockSelectors)].filter(visible);
- const images=plan.images?[...doc.querySelectorAll(plan.images.selector)].filter(visible):[];
- return {route:input.route,profile:input.profile,viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},url:location.href,readyState:doc.readyState,fontStatus:doc.fonts?.status??'unavailable',spacingApplied:!!doc.querySelector('#reading-spacing-override'),document:{scrollWidth:doc.documentElement.scrollWidth,clientWidth:doc.documentElement.clientWidth},truncatedTexts:texts.length>plan.maxTexts,truncatedBlocks:blocks.length>plan.maxBlocks,texts:texts.slice(0,plan.maxTexts).map(n=>({...describe(n),state:input.state??'initial',fontSize:parseFloat(getComputedStyle(n).fontSize),fontWeight:Number(getComputedStyle(n).fontWeight)||400,paint:paint(n)})),blocks:blocks.slice(0,plan.maxBlocks).map(describe),truncatedImages:images.length>(plan.images?.max??0),images:images.slice(0,plan.images?.max??0).map(n=>{
-  const s=getComputedStyle(n),frame=n.closest(plan.images.frameSelector),r=rect(n);
-  return {path:path(n),src:n.currentSrc||n.src,purpose:n.getAttribute(plan.images.purposeAttribute),focus:n.getAttribute(plan.images.focusAttribute),complete:n.complete,naturalWidth:n.naturalWidth,naturalHeight:n.naturalHeight,rect:r,hasFrame:!!frame,frame:frame?rect(frame):r,fit:s.objectFit,position:s.objectPosition,borderWidth:number(s.borderLeftWidth),contentWidth:number(s.width)-number(s.paddingLeft)-number(s.paddingRight)-(s.boxSizing==='border-box'?number(s.borderLeftWidth)+number(s.borderRightWidth):0),contentHeight:number(s.height)-number(s.paddingTop)-number(s.paddingBottom)-(s.boxSizing==='border-box'?number(s.borderTopWidth)+number(s.borderBottomWidth):0)};
- })};
+ return {route:input.route,profile:input.profile,viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},url:location.href,readyState:doc.readyState,fontStatus:doc.fonts?.status??'unavailable',spacingApplied:!!doc.querySelector('#reading-spacing-override'),document:{scrollWidth:doc.documentElement.scrollWidth,clientWidth:doc.documentElement.clientWidth},truncatedTexts:texts.length>plan.maxTexts,truncatedBlocks:blocks.length>plan.maxBlocks,texts:texts.slice(0,plan.maxTexts).map(n=>({...describe(n),state:input.state??'initial',fontSize:parseFloat(getComputedStyle(n).fontSize),fontWeight:Number(getComputedStyle(n).fontWeight)||400,paint:paint(n)})),blocks:blocks.slice(0,plan.maxBlocks).map(describe)};
 }

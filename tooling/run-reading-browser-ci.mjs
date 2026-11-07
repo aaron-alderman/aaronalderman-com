@@ -33,13 +33,11 @@ try{
   for(const viewport of plan.profiles){
    await send('Emulation.setDeviceMetricsOverride',{width:viewport.width,height:viewport.height,deviceScaleFactor:1,mobile:false});await navigate(route.path);
    if(viewport.spacing)await evaluate('(()=>{const s=document.createElement("style");s.id="reading-spacing-override";s.textContent='+JSON.stringify(plan.spacingCSS)+';document.head.append(s);return true;})()');
-   await observe('prepare-images');await delay(plan.settleMs);const snapshot=await observe('snapshot',{route:route.path,profile:viewport.id,state:'initial'});
+   await delay(plan.settleMs);const snapshot=await observe('snapshot',{route:route.path,profile:viewport.id,state:'initial'});
    const hover=await evaluate('(()=>{const n=document.querySelector('+JSON.stringify(plan.hoverSelector)+');if(!n)return null;const r=n.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()');
    if(hover){await send('Input.dispatchMouseEvent',{type:'mouseMoved',...hover});await delay(plan.settleMs);const hovered=await observe('snapshot',{route:route.path,profile:viewport.id,state:'hover'});snapshot.texts.push(...hovered.texts);}
    capture.snapshots.push(snapshot);
    const image=await send('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,String(capture.snapshots.length).padStart(3,'0')+'.png'),Buffer.from(image.data,'base64'));
-   // Frame screenshots expose below-the-fold image treatment without changing the published page.
-   if(route.requiredImageCount){const frames=await evaluate('Array.from(document.querySelectorAll('+JSON.stringify(plan.images.frameSelector)+')).map(n=>{const r=n.getBoundingClientRect();return {x:r.left+scrollX,y:r.top+scrollY,width:r.width,height:r.height,scale:1};})');for(let i=0;i<frames.length;i++){const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true,clip:frames[i]});fs.writeFileSync(path.join(output,String(capture.snapshots.length).padStart(3,'0')+'-card-'+(i+1)+'.png'),Buffer.from(shot.data,'base64'));}}
   }
   const viewport=plan.profiles[0];await send('Emulation.setDeviceMetricsOverride',{width:viewport.width,height:viewport.height,deviceScaleFactor:1,mobile:false});await navigate(route.path);activeEvents=[];await observe('install-keyboard');
   const keyboardViewport=await evaluate('({width:innerWidth,height:innerHeight})'),focuses=[],skipSelector='a[href='+JSON.stringify(route.skip)+']',foundSkip=await seek(skipSelector,focuses);
