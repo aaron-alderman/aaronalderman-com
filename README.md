@@ -8,6 +8,8 @@ purpose, canonical owner and evidence role, and records the completed historical
 separation, compiler diagnostic correction and artwork provenance verification.
 The [combined website audit](verification/combined-website-audit.rel) records
 the review after common-projection work, the fresh check run and staging archive.
+The [post-migration audit](verification/live-migration-audit.rel) records the
+combined 322-page state and its separate unfiltered full-suite run.
 
 Static content enters as REL. Actual Encounter source is compiled by Encounter,
 hydrated into typed REL, decoded, linked, lowered and admitted by Encounter

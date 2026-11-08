@@ -10,6 +10,8 @@ source-of-truth review. Its [register](verification/retention-register.rel)
 identifies every remaining file's owner and disposition. The 97 historical
 records are now physically separated under `evidence/`; the audit records the
 diagnostic correction, provenance resolution and verification results.
+The [post-migration audit](verification/live-migration-audit.rel) records the
+combined 322-page state and its separate, unfiltered full-suite transcript.
 
 ## Other directories with the same website
 
@@ -25,13 +27,14 @@ checkout and the shared Git history. `git worktree list --porcelain` also lists
 
 Those are separate branch/detached workspaces, not this publication's declared
 source or output directories. Their current users and uncommitted changes have
-not been audited here. This cleanup does not remove them or claim this local
-branch has been merged into `main` or deployed. Do not treat `.build/` alone as
+not been audited here. This audit does not alter them. The canonical release
+and its publication history are recorded in `verification/live-migration-release.md`.
+Do not treat `.build/` alone as
 proof that a directory is disposable: two registered Git worktrees live there.
 
 ## What the completed local website contains
 
-The completed local publication records 310 HTML routes; the selected output
+The completed local publication records 322 HTML routes; the selected output
 and exact receipt are named in `bootstrap/publication.rel` and the route inventory. These
 are local publication results, not a fresh crawl of the deployed domain.
 
@@ -39,8 +42,8 @@ are local publication results, not a fresh crawl of the deployed domain.
 | --- | ---: | --- |
 | `/worlds/` | 178 | The main world and reading corpus, including the Dad Threads reading series |
 | `/places/` | 40 | The atlas's individual places |
-| `/inspection/` | 34 | Source and programme inspection pages |
-| `/assurance/` | 9 | Assurance views and the reading palette guide |
+| `/inspection/` | 35 | Source and programme inspection pages, including the restored Questions image inspector |
+| `/assurance/` | 20 | Assurance views, reading palette, three measured reports and image diagnostics with deliberate negative controls |
 | Root pages | 8 | Homepage, atlas, reading gate, reader, and Christian, software, Dad and author question entrances |
 | `/writing/` | 6 | Writing pages |
 | `/the-field/` | 4 | Field pages |
@@ -64,6 +67,8 @@ publication completes.
 | `retained/` | Earlier HTML comparison originals and passive workshop material | HTML originals are evidence; current retained routes are composed by Encounter. Passive assets remain declared resources. |
 | `bootstrap/` | Publication declaration, pinned foundation, generic native hosts, mechanical ports, test runner and preview server | Test scenarios and assertions belong in Encounter. Native trust and mechanisms are explicit. |
 | `verification/` | Encounter tests in `tests/`, preservation pins, audit receipts and catalogue evidence | `node bootstrap/test.cjs` executes the current tests. Receipts describe the run they name. |
+| `source/assurance/` | Encounter browser plan, assessment and report/image publishers, plus typed observation evidence | `experience.encounter` owns plan and assessment; `publication.encounter` owns the measured reports; `images.encounter` owns diagnostic variants. The general portfolio catalogue links to these reports without generating them. |
+| `source/assurance/browser-capture.rel`, `observations/` | Bound measurement index and its 150 raw layout/keyboard records | Preserve exact hashes and original scope; recapture through the admitted Source plan when dependencies change. Expected image failures are declared fixtures, not stray broken content. |
 | `tooling/` | Retained assurance material | Consult its exact catalogue role and receipt use before removal. |
 | `LICENSES/`, root licenses/covenant, `CNAME`, `.nojekyll`, `.github/` | Attribution, governance, domain/publication configuration | Keep required attribution and configuration. The other chat owns current publishing workflow changes; this audit does not deploy. |
 | `.local-*/` | Generated, local publication outputs or incomplete staging directories | Never edit as source. The declaration names the current output. Other directories require receipt/dependency review before retirement. |
@@ -82,6 +87,27 @@ publication receipt used by the catalogue, not a filename-extension exemption.
 
 The generated HTML under `.local-*/` is the rendered website. The route inventory
 records the exact completed output and route hashes; it includes retained pages.
+
+## Live-content migration outputs
+
+The declaration now selects `.local-common-projection-24`. It contains the 319
+preserved live routes plus the series, article and design guide. All 322 HTML,
+24 CSS, one sitemap and three generated SVG artifacts use the pinned common
+projection owner. The 30 publication phases use four real admission cohorts;
+their original 20,000,000-step limits and shared nested accounting remain.
+
+After the other chat completed publication and live verification, seven
+superseded migration output trees (16–21 and 23) were moved intact to:
+
+```text
+C:/Users/aaron/.codex/visualizations/2026/11/08/01a1b9ac-521c-73f3-b6da-db934a1e8719/website-live-migration-staging/
+```
+
+`inventory.rel` records the 13,891 original relative file paths, sizes and
+SHA-256 values (4,216,844,314 bytes). Historical paths for those trees resolve
+under that archive root. Output 22 did not exist. Output 24, the earlier
+completed projection 15, and prior qualification/visual baselines remain
+intact; they are separate output/evidence roots, never authoring fallbacks.
 
 ## What was cleaned on 8 November 2026
 

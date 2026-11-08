@@ -5,6 +5,11 @@ have a separate physical home under `evidence/`, the compiler diagnostic points
 to the operative Encounter law source, and the series artwork has verified
 original-to-derivative provenance.
 
+The live-content migration has since completed. The current combined site has
+322 routes. Its [post-migration audit](verification/live-migration-audit.rel)
+records a separate unfiltered full-suite run; the earlier cleanup and
+projection receipts below retain their original scope.
+
 `bootstrap/publication.rel` remains the sole canonical publication declaration.
 Its resource `path` fields preserve the existing published/inspection names;
 its `source` fields now select the physical evidence files. Generated current
@@ -31,6 +36,8 @@ second authoring or admission path.
 | Reader, activity and workshop frames | `source/projection/reader.encounter`, `workshop.encounter` and `components.rel` | Former HTML templates are comparison originals under `evidence/projection-components/`; none is a live input. |
 | Retained pages and sandbox fixtures | Selected Encounter publication owners and declared passive resources | The three `retained/` HTML originals are comparison evidence; their routes now use common projection components. |
 | Test scenarios and audit decisions | `verification/tests/*.encounter` | `bootstrap/test.cjs` discovers and runs admitted Source tests; native inventory tools only describe observations or delegate checks. |
+| Assurance plan and assessment | `source/assurance/experience.encounter` | `bootstrap/observe-reading.cjs` only transports browser measurements; the capture index and raw observations are typed evidence. |
+| Measured reports and image fixtures | `source/assurance/publication.encounter`, `images.encounter`, with `source/projection/assurance-pages.encounter` | The general assurance catalogue links to the dedicated reports without writing their pages. Negative image cases have explicit fixture roles. |
 | Artwork provenance | `assets/father/growing-up/provenance.rel` | Original attributed receipts and encoding verification live under `evidence/artwork/`. |
 | Preview and preservation checks | The output selected by `bootstrap/publication.rel` | Neither modification time nor a directory's name selects the current publication. |
 
@@ -164,7 +171,7 @@ Earlier receipts naming those staging paths resolve under this archive root;
 their history is unchanged. Output 15 and prior qualification/visual baselines
 remain intact. The archive is evidence, never a fallback publication input.
 
-The combined audit covers all **90 distinct current checks**: 78 unaffected
+The preceding projection-stage audit covered **90 distinct checks**: 78 unaffected
 checks passed in the full run, and the final affected recheck passed **12/12**.
 The full runs correctly reported source changes during execution; the new
 output-membership check also exposed a duplicate-counting error in its receipt
@@ -173,12 +180,46 @@ preserves the extra-file rejection case. Exact outcomes and transcript hashes
 are retained in the combined receipt, without treating interrupted runs as
 fully passing runs.
 
-Final checks confirm all 310 routes, artwork/evidence identities, unchanged
+That stage's final checks confirmed all 310 routes, artwork/evidence identities, unchanged
 phase limits, zero recorded input drift, unique selected process owners and
 source/output separation. The selected output contains exactly 1,909 recorded
 files, with no additional file. The worktree has zero JSON files and no `.mjs`
 outside root `bootstrap/`. Later live-content migration and publishing work
-remains preserved and outside this completed projection snapshot's scope.
+was preserved and outside that projection snapshot's scope.
+
+## Post-migration retained state
+
+The other chat completed the live-content migration, publication and live
+desktop/phone review before this audit's cleanup. The selected completed build
+is `.local-common-projection-24`. The declaration, pinned source, content,
+artwork, test programmes, observations and selected output are preserved.
+
+Seven unused staging trees (16–21 and 23) were archived outside the worktree,
+with all 13,891 files and 4,216,844,314 bytes preserved. No current Source,
+bootstrap or test file referenced those staging paths. The exact mapping and
+identities live in `website-live-migration-staging/inventory.rel` under the
+external archive root documented in the website catalogue. Current output 24
+and prior qualification/visual evidence remain separate from authoring inputs.
+
+The refreshed catalogue distinguishes the 150 raw browser records, their
+canonical index, the admitted observation/assessment owner and the generic
+measurement transport. Earlier reports and failed runs retain their dates and
+scope. Intentional broken-image and wrong-size cases remain negative fixtures;
+review obligations are not converted into automatic passes.
+
+`verification/live-migration-full-suite.tap` is the single unfiltered run for
+this retained state. Its exact result and identities are recorded in the
+post-migration audit receipt. This audit changes only descriptive inventories,
+documentation and the placement of obsolete outputs.
+
+The full run passed **94/94**, with zero failures, no skips and the final
+source-stability guard passing. No partial runs were combined. All recorded
+input and artifact identities passed, the canonical declaration/foundation/
+projection/receipt hashes stayed unchanged, and the other chat remained idle.
+The exact selected output contains 2,234 files: 2,233 recorded artifacts plus
+the execution receipt. Zero JSON files, zero `.mjs` outside root `bootstrap/`,
+source/output separation, file ownership, historical aliases, artwork provenance
+and the complete 322-route set all passed in that same run.
 
 ```powershell
 node verification/retention-audit.cjs --check
