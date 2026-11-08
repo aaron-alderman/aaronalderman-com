@@ -1,0 +1,9 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process publication.escape:
+  port value.string { value = $input } → publicationEscapeText
+  port text.matches { value = $publicationEscapeText; pattern = "[&<>\"]" } → publicationNeedsEscape
+  let result = $publicationEscapeText
+  when $publicationNeedsEscape:
+    call html.escape

@@ -1,0 +1,74 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process facts.index:
+  assert isArray($input)
+    otherwise "Fact snapshot must be an array"
+  fold $input as fact; index starts { cells = {  }; subjects = {  }; pendingSubject = null; pendingCells = {  } }:
+    let s = at($fact, "s")
+    let p = at($fact, "p")
+    let o = at($fact, "o")
+    let pol = at($fact, "pol")
+    each list($s, $p, $o) as atom:
+      port value.describe { value = $atom } → kind
+      assert eq($kind.type, "string")
+        otherwise "Fact atoms must be strings"
+    port value.describe { value = $pol } → polKind
+    assert if(
+      eq($polKind.type, "undefined"),
+      true,
+      if(eq($pol, null), true, includes(list("is", "is-not"), $pol))
+    )
+      otherwise "Unknown fact polarity"
+    let cells = $index.cells
+    when if(eq($s, $index.pendingSubject), false, true):
+      when if(eq($index.pendingSubject, null), false, true):
+        port record.put { record = $cells; key = $index.pendingSubject; value = $index.pendingCells } → cells
+    let subjectCells = if(
+      eq($s, $index.pendingSubject),
+      $index.pendingCells,
+      if(at($cells, $s), at($cells, $s), {  })
+    )
+    let cell = if(at($subjectCells, $p), at($subjectCells, $p), { order = list(); live = {  } })
+    let order = if(includes($cell.order, $o), $cell.order, append($cell.order, list($o)))
+    port record.put { record = $cell.live; key = $o; value = if(eq($pol, "is-not"), false, true) } → live
+    port record.put { record = $subjectCells; key = $p; value = { order = $order; live = $live } } → subjectCells
+    let predicateSubjects = if(at($index.subjects, $p), at($index.subjects, $p), {  })
+    let history = if(at($predicateSubjects, $o), at($predicateSubjects, $o), list())
+    port record.put { record = $predicateSubjects; key = $o; value = append($history, list($s)) } → predicateSubjects
+    port record.put { record = $index.subjects; key = $p; value = $predicateSubjects } → subjects
+    yield {
+    cells = $cells;
+    subjects = $subjects;
+    pendingSubject = $s;
+    pendingCells = $subjectCells
+  } → index
+  when if(eq($index.pendingSubject, null), false, true):
+    port record.put { record = $index.cells; key = $index.pendingSubject; value = $index.pendingCells } → indexCells
+    port record.put { record = $index; key = "cells"; value = $indexCells } → index
+  port record.entries { value = $index.cells } → subjectEntries
+  fold $subjectEntries as subjectEntry; objects starts list():
+    let subject = at($subjectEntry, 0)
+    port record.entries { value = at($subjectEntry, 1) } → predicateEntries
+    fold $predicateEntries as predicateEntry; predicates starts {  }:
+      let predicate = at($predicateEntry, 0)
+      let cell = at($predicateEntry, 1)
+      let active = fold(
+        $cell.order,
+        "object",
+        "activeObjects",
+        list(),
+        if(at($cell.live, $object), append($activeObjects, list($object)), $activeObjects)
+      )
+      port record.put { record = $predicates; key = $predicate; value = $active } → predicates
+      yield $predicates → predicates
+    yield append($objects, list(list($subject, $predicates))) → objectEntries
+  port record.fromEntries { entries = $objectEntries } → objects
+  port value.freeze {
+    value = {
+      protocol = "temple/fact-index/1";
+      objects = $objects;
+      subjects = $index.subjects;
+      factCount = count($input)
+    }
+  } → result

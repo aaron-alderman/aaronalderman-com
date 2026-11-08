@@ -1,0 +1,30 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.run:
+  let scenario = $eventInput.scenario
+  fold range($scenario.material.periods) as period; simulation starts {
+    phys = $scenario.material.initial;
+    experience = $scenario.experience;
+    agreement = {
+      id = "initial-agreement";
+      signedAt = 0;
+      firstDue = 1;
+      shareA = $scenario.material.initial.shareA;
+      endedAt = null
+    };
+    backlog = 0;
+    history = list();
+    evidence = list()
+  }:
+    port kernel.invoke {
+      query = "household.period";
+      input = {
+        state = $simulation;
+        period = $period;
+        scenario = $scenario;
+        overrides = or($eventInput.overrides, list())
+      }
+    } → hq134
+    yield $hq134 → simulation
+  let result = { id = $scenario.id; history = $simulation.history; evidence = $simulation.evidence }

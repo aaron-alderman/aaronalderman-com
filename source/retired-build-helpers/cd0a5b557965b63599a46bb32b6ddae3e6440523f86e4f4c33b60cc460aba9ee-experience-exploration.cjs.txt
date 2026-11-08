@@ -1,8 +1,0 @@
-const fs=require('fs'),cf='source/assurance/reading-experience.json',config=JSON.parse(fs.readFileSync(cf));
-for(const r of config.plan.routes){r.next=null;const m=r.path.match(/^worlds\/(christian|dad|sourcerer|author)\/index\.html$/);if(m)r.next={selector:'#first-trails',paths:['/worlds/'+m[1]+'/questions.html']};if(r.path==='atlas.html')r.next={selector:'a[data-atlas-id="water"]',paths:['/places/water.html']};}
-fs.writeFileSync(cf,JSON.stringify(config,null,2)+'\n');
-const f='algebra/reading-experience.process.json',p=JSON.parse(fs.readFileSync(f)),q=p.queries,L=(name,value)=>({let:name,value}),eq=(a,b)=>['eq',a,b],and=(...x)=>['and',...x];
-q['experience.keyboard'].splice(2,0,L('routePlan','$eventInput.route'));
-q['experience.keyboard'].splice(-1,0,{when:['not',eq('$routePlan.next',null)],then:[L('rows',['append','$rows',['list',{rule:'keyboard.explore',status:['if',and('$s.exploration.found',eq('$s.exploration.after.origin','$s.origin'),['includes','$routePlan.next.paths','$s.exploration.after.path'],['some','$s.exploration.events','e',and('$e.trusted',eq('$e.key','Tab'))],['some','$s.exploration.events','e',and('$e.trusted',eq('$e.key','Enter'))]),'passed','failed'],path:'$routePlan.next.selector',evidence:'Trusted Tab and Enter must reach and activate the declared Questions or atlas-place destination.'}]]) ]});
-q['experience.report'].find(s=>s.fold==='$input.policy.plan.routes').steps.find(s=>s.when).then[0].value.route='$route';
-fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n');

@@ -1,0 +1,19 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.attempt:
+  let ecSpan = $eventInput.span
+  try:
+    port kernel.invoke { query = $eventInput.query; input = $eventInput.input } → result
+  catch ecLocatedFault:
+    port text.matches { value = $ecLocatedFault.message; pattern = "^EC-DIAGNOSTIC:" } → ecAlreadyLocated
+    when $ecAlreadyLocated:
+      let ecUnreachable = raise($ecLocatedFault.message)
+    port value.encode {
+      value = {
+        protocol = "encounter/source-diagnostic/1";
+        span = $ecSpan;
+        message = $ecLocatedFault.message
+      }
+    } → ecDiagnosticWire
+    let ecUnreachable = raise(concat("EC-DIAGNOSTIC:", $ecDiagnosticWire))

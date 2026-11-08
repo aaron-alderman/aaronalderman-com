@@ -1,0 +1,26 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process language.module:
+  when not(and(eq($state.module, null), eq($state.subject, null), eq(count($state.seen), 0))):
+    let code = "TEMPLE-M002"
+    let summary = "Module declaration must be first and unique."
+    let correction = "Declare exactly one module before any entity."
+    call language.refuse
+  when $state.ok:
+    port static.read { text = at($tokens, 1) } → decoded
+    when not(not(eq($decoded, ""))):
+      let code = "TEMPLE-M002"
+      let summary = "Module name is empty."
+      let correction = "Supply a nonempty module identity."
+      call language.refuse
+    when $state.ok:
+      let state = {
+        module = $decoded;
+        subject = $state.subject;
+        seen = $state.seen;
+        facts = $state.facts;
+        origins = $state.origins;
+        ok = $state.ok;
+        diagnostic = $state.diagnostic
+      }

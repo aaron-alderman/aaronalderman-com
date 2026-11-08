@@ -1,0 +1,208 @@
+process-module "temple/surface-process-module/1"
+
+process test.projection.owner:
+  call check.projection
+  port mechanism.call { target = $projection; method = "render"; args = list({ kind = "stylesheet"; tree = $sheet }) } → css
+  port mechanism.call { target = $projection; method = "render"; args = list({ kind = "markup"; tree = $node }) } → html
+  assert and(eq($css, ".card{padding:2rem;}"), includes($html, "Room to grow &amp; learn"))
+    otherwise "Common projection changed structured output."
+  let name = "expedition.css"
+  let text = $css
+  call check.output
+  assert eq($result, true)
+    otherwise "Issued CSS was refused."
+  let document = { tag = "html"; attrs = { lang = "en" }; children = list({ tag = "head"; attrs = {}; children = list() }, { tag = "body"; attrs = {}; children = list($node) }) }
+  port mechanism.call { target = $projection; method = "render"; args = list({ kind = "markup"; tree = $document }) } → html
+  port text.matches { value = $html; pattern = "^<!doctype html>\n<html" } → valid
+  assert $valid
+    otherwise "Projection must own the document wrapper."
+  let name = "index.html"
+  let text = $html
+  call check.output
+  assert eq($result, true)
+    otherwise "Issued document was refused."
+  let operation = { target = $projection; method = "admitOutput"; args = list({ name = "index.html"; text = concat("<!doctype html>\n", $html); bytes = 100 }) }
+  let pattern = "PROJECTION"
+  call check.refusal
+
+process test.projection.issuance:
+  call check.projection
+  each list(list("index.html", "<p>Raw</p>"), list("expedition.css", "body{margin:1px}"), list("sitemap.xml", "<urlset/>")) as pair:
+    let operation = { target = $projection; method = "admitOutput"; args = list({ name = at($pair, 0); text = at($pair, 1); bytes = 10; issuedProjection = "markup"; receipt = "forged" }) }
+    let pattern = "PROJECTION"
+    call check.refusal
+  port mechanism.call { target = $projection; method = "render"; args = list({ kind = "stylesheet"; tree = $sheet }) } → css
+  port mechanism.call { target = $projection; method = "render"; args = list({ kind = "markup"; tree = $node }) } → html
+  let operation = { target = $projection; method = "admitOutput"; args = list({ name = "index.html"; text = concat($html, "<p>Injected</p>"); bytes = 100 }) }
+  let pattern = "PROJECTION"
+  call check.refusal
+  call check.projection
+  let operation = { target = $projection; method = "admitOutput"; args = list({ name = "index.html"; text = $html; bytes = 100 }) }
+  let pattern = "PROJECTION"
+  call check.refusal
+
+process test.projection.type-contract:
+  call check.projection
+  port mechanism.call { target = $projection; method = "render"; args = list({ kind = "stylesheet"; tree = $sheet }) } → css
+  each list({ kind = "html"; tree = $node }, { kind = "markup"; tree = { tag = "invented-component"; attrs = {}; children = list() } }, { kind = "markup"; tree = { tag = "article"; attrs = { class = "card" }; children = list(); raw = "<b>escape</b>" } }, { kind = "markup"; tree = { tag = "p"; attrs = { onclick = "alert(1)" }; children = list() } }, { kind = "markup"; tree = { tag = "p"; attrs = { class = "outside-palette" }; children = list() } }) as input:
+    let operation = { target = $projection; method = "render"; args = list($input) }
+    let pattern = "PROJECTION"
+    call check.refusal
+
+process test.projection.layout-escapes:
+  call check.projection
+  each list({ kind = "markup"; tree = { tag = "p"; attrs = { style = "padding:3px" }; children = list() } }, { kind = "stylesheet"; tree = { kind = "root"; children = list({ kind = "decl"; property = "color"; value = "red;}body{display:none" }) } }, { kind = "stylesheet"; tree = { kind = "root"; children = list({ kind = "decl"; property = "color"; value = "red;display:none" }) } }, { kind = "stylesheet"; tree = { kind = "rule"; selector = "body"; between = "}html{"; children = list() } }, { kind = "stylesheet"; tree = { kind = "raw"; text = "body{}" } }) as input:
+    let operation = { target = $projection; method = "render"; args = list($input) }
+    let pattern = "PROJECTION"
+    call check.refusal
+
+process test.projection.families-and-kinds:
+  call check.projection
+  port mechanism.call { target = $projection; method = "render"; args = list({ kind = "stylesheet"; tree = $sheet }) } → css
+  port mechanism.call { target = $projection; method = "render"; args = list({ kind = "markup"; tree = $node }) } → html
+  each list({ name = "unregistered/index.html"; text = $html; pattern = "Undeclared page" }, { name = "other.css"; text = $css; pattern = "Undeclared page" }, { name = "index.html"; text = $css; pattern = "PROJECTION" }) as probe:
+    let operation = { target = $projection; method = "admitOutput"; args = list({ name = $probe.name; text = $probe.text; bytes = 100 }) }
+    let pattern = $probe.pattern
+    call check.refusal
+  let operation = { target = $projection; method = "combine"; args = list({ kind = "stylesheet"; parts = list($css, "body{}") }) }
+  let pattern = "Unissued stylesheet"
+  call check.refusal
+
+process test.projection.final-surface:
+  port mechanism.load { module = "markup-observer.cjs" } → observer
+  each list({ text = "<!doctype html><html><head><style>.outside-palette{margin:1px}</style></head><body><main class=\"outside-palette\">Custom</main></body></html>"; pattern = "PROJECTION" }, { text = "<button onclick=\"alert(1)\">Unsafe</button>"; pattern = "Event handlers refused" }) as probe:
+    let operation = { target = $observer; method = "admitMarkup"; args = list($probe.text, { mode = "final" }) }
+    let pattern = $probe.pattern
+    call check.refusal
+
+process test.projection.grants:
+  call check.pure
+  let body = "  port projection.render { kind = \"markup\"; tree = { tag = \"p\"; attrs = {}; children = list() } } → result"
+  call check.candidate
+  port mechanism.call { target = $front; method = "link"; args = list(list($candidate)); keep = true } → linked
+  let operation = { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("example") }) }
+  let pattern = "Undeclared effect"
+  call check.refusal
+
+process fixture.style-write:
+  let result = null
+
+process test.projection.real-style-effect:
+  call check.pure
+  port mechanism.callback { query = "fixture.style-write" } → setter
+  port mechanism.object { value = { localName = "div"; style = { setProperty = $setter } } } → element
+  port mechanism.callback { query = "fixture.value"; bindings = { value = $element } } → queryOne
+  port mechanism.callback { query = "fixture.value"; bindings = { value = list($element) } } → queryAll
+  port mechanism.load { module = "ports/browser-effects.cjs" } → browserModule
+  port mechanism.callback { query = "fixture.null" } → noop
+  port mechanism.call { target = $browserModule; method = "browserEffects"; args = list({ document = { querySelector = $queryOne; querySelectorAll = $queryAll } }, $noop); keep = true } → ports
+  port mechanism.call { target = $frontModule; method = "createFrontDoor"; args = list({ profiles = { pure = list("browser.style") }; ports = $ports; basis = "projection-style-probe" }); keep = true } → front
+  each list("padding", "width") as name:
+    let body = concat("  port browser.style { ref = \"#node\"; name = \"", $name, "\"; value = \"25%\" } → result")
+    call check.candidate
+    port mechanism.call { target = $front; method = "link"; args = list(list($candidate)); keep = true } → linked
+    port mechanism.call { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("example") }); keep = true } → admitted
+    when eq($name, "padding"):
+      let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+      let pattern = "Undeclared dynamic style"
+      call check.refusal
+      port mechanism.trace {} → trace
+      assert eq(count(filter($trace, "t", eq($t.query, "fixture.style-write"))), 0)
+        otherwise "Refused style reached DOM setter."
+    when eq($name, "width"):
+      let options = {}
+      call check.run
+  port mechanism.trace {} → trace
+  assert eq(map(filter($trace, "t", eq($t.query, "fixture.style-write")), "t", $t.args), list(list("width", "25%")))
+    otherwise "Admitted dynamic style did not reach the actual DOM setter."
+
+process test.projection.dynamic-palette:
+  call check.pure
+  each list({ query = "projection.class"; input = { name = "invented-class"; classes = list() }; pattern = "Dynamic class" }, { query = "projection.inline"; input = { value = "margin:1px" }; pattern = "Arbitrary inline" }) as probe:
+    let operation = { target = $policy; method = "compute"; args = list($probe.query, $probe.input) }
+    let pattern = $probe.pattern
+    call check.refusal
+  each list({ query = "projection.class"; input = { name = "card"; classes = list(".card") } }, { query = "projection.inline"; input = { value = "left:25%;top:30%;" } }) as probe:
+    port mechanism.call { target = $policy; method = "compute"; args = list($probe.query, $probe.input) } → actual
+    assert eq($actual.value, true)
+      otherwise "Declared dynamic palette value refused."
+
+process test.projection.css-source-fidelity:
+  call check.pure
+  fold list("source/microsites/projection.encounter", "algebra/fact-index/facts.index.encounter") as file; candidates starts list():
+    port file.read { file = $file } → text
+    port mechanism.call { target = $front; method = "hydrate"; args = list($file, $text); keep = true } → candidate
+    yield append($candidates, list($candidate)) → candidates
+  port mechanism.call { target = $front; method = "hydrate"; args = list("verification/source-fidelity.encounter", "process-module \"temple/surface-process-module/1\"\nprocess probe:\n  let input = \"root\"\n  call source.css\n"); keep = true } → candidate
+  port mechanism.call { target = $front; method = "link"; args = list(append($candidates, list($candidate)), { roots = list("probe", "facts.index") }); keep = true } → linked
+  port mechanism.call { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("probe") }); keep = true } → admitted
+  let source = { root = { kind = "root"; children = list("a", "b") }; a = { kind = "rule"; children = list("x"); syntax = { selector = ".first" } }; b = { kind = "rule"; children = list("y"); syntax = { selector = ".second" } }; x = { kind = "decl"; prop = "color"; syntax = { between = ":"; value = "red"; semicolon = "true" } }; y = { kind = "decl"; prop = "display"; syntax = { between = ":"; value = "block"; semicolon = "true" } } }
+  port record.entries { value = $source } → entries
+  fold $entries as entry; facts starts list():
+    port rel.encode { value = at($entry, 1) } → description
+    yield append($facts, list({ s = at($entry, 0); p = "description"; o = $description })) → facts
+  port mechanism.call { target = $front; method = "index"; args = list($admitted, { facts = $facts }); keep = true } → snapshot
+  port mechanism.call { target = $front; method = "run"; args = list($admitted, "probe", { factSnapshot = $snapshot }) } → actual
+  assert and(eq(map($actual.value.children, "n", $n.selector), list(".first", ".second")), eq(map($actual.value.children, "n", at(at($n.children, 0), "value")), list("red", "block")))
+    otherwise "Captured CSS lost sibling rules or declarations."
+
+process test.projection.css-grammar:
+  call check.projection
+  each list({ kind = "atrule"; name = "import"; params = "url(https://outside.invalid/style.css)" }, { kind = "rule"; selector = "@import url(x)"; children = list() }, { kind = "comment"; left = "*/body{"; text = "x"; right = "" }) as tree:
+    let operation = { target = $projection; method = "render"; args = list({ kind = "stylesheet"; tree = $tree }) }
+    let pattern = "PROJECTION"
+    call check.refusal
+
+process test.projection.mount:
+  call check.pure
+  each list(list("div", "stylesheet"), list("style", "markup"), list("iframe", "stylesheet"), list("div", null)) as pair:
+    let operation = { target = $policy; method = "compute"; args = list("projection.mount", { tag = at($pair, 0); kind = at($pair, 1) }) }
+    let pattern = "matching issued projection kind"
+    call check.refusal
+  each list(list("div", "markup"), list("style", "stylesheet")) as pair:
+    port mechanism.call { target = $policy; method = "compute"; args = list("projection.mount", { tag = at($pair, 0); kind = at($pair, 1) }) } → actual
+    assert eq($actual.value, true)
+      otherwise "Matching projection mount refused."
+
+process test.projection.stylesheet-references:
+  call check.projection
+  each list({ href = "https://outside.invalid/style.css"; mode = "dom"; pattern = "External stylesheets" }, { href = "/other.css"; mode = "dom"; pattern = "Undeclared page" }, { href = "/expedition.css"; mode = "final"; pattern = "not issued" }) as probe:
+    let operation = { target = $policy; method = "compute"; args = list("projection.stylesheetReference", { href = $probe.href; mode = $probe.mode; base = "https://publication.invalid/index.html"; artifacts = {} }) }
+    let pattern = $probe.pattern
+    call check.refusal
+  port mechanism.call { target = $policy; method = "compute"; args = list("projection.stylesheetReference", { href = "/expedition.css"; mode = "final"; base = "https://publication.invalid/index.html"; artifacts = { "expedition.css" = { issuedProjection = "stylesheet" } } }) } → actual
+  assert eq($actual.value, true)
+    otherwise "Issued local stylesheet refused."
+  let operation = { target = $projection; method = "admitOutput"; args = list({ name = "other.xml"; text = "<html xmlns=\"http://www.w3.org/1999/xhtml\"/>"; bytes = 100; sourceAsset = true }) }
+  let pattern = "PROJECTION"
+  call check.refusal
+
+process test.projection.activity-frames:
+  port mechanism.load { module = "markup-observer.cjs" } → observer
+  each list("<iframe src=\"/index.html\"></iframe>", "<iframe data-projection-frame=\"activity\" src=\"/index.html\"></iframe>") as text:
+    let operation = { target = $observer; method = "admitMarkup"; args = list($text, { mode = "dom"; base = "https://publication.invalid/reader.html" }) }
+    let pattern = "Unsandboxed frame"
+    call check.refusal
+  each list("<iframe data-projection-frame=\"activity\" src=\"/retained/activity.html#care\"></iframe>", "<iframe sandbox=\"allow-same-origin\"></iframe>") as text:
+    port mechanism.call { target = $observer; method = "admitMarkup"; args = list($text, { mode = "dom"; base = "https://publication.invalid/reader.html" }) } → actual
+    assert eq($actual, true)
+      otherwise "Registered or sandboxed frame refused."
+
+process test.projection.identity-metadata:
+  call check.pure
+  port mechanism.call { target = $policy; method = "compute"; args = list("surface.attribute", { tag = "meta"; name = "content"; value = "Room to grow"; base = "https://publication.invalid/"; mutation = true; attributes = { name = "description" } }) } → metadata
+  each list({ name = "content"; value = "Room to grow"; attributes = { "http-equiv" = "refresh" } }, { name = "http-equiv"; value = "refresh"; attributes = { name = "description" } }) as probe:
+    let operation = { target = $policy; method = "compute"; args = list("surface.attribute", { tag = "meta"; name = $probe.name; value = $probe.value; base = "https://publication.invalid/"; mutation = true; attributes = $probe.attributes }) }
+    let pattern = "refresh"
+    call check.refusal
+
+process test.projection.progress-slot:
+  call check.pure
+  each list(0, 0.125, 1, "0", "0.125", "1.000") as value:
+    port mechanism.call { target = $policy; method = "compute"; args = list("projection.style", { name = "--p"; value = $value }) } → allowed
+    assert eq($allowed.value, true)
+      otherwise "Bounded progress scalar was refused."
+  each list(-1, 2, "2", "-0.1", "0;display:none", "1e3") as value:
+    let operation = { target = $policy; method = "compute"; args = list("projection.style", { name = "--p"; value = $value }) }
+    let pattern = "Invalid value"
+    call check.refusal

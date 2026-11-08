@@ -1,0 +1,23 @@
+# Lower captured formatting into the common stylesheet tree; this is not an emitter.
+process-module "temple/surface-process-module/1"
+
+process stylesheet.render:
+  let eventInput = { tree = $input }
+  call stylesheet.lower
+  let input = $result
+  call projection.stylesheet
+
+process stylesheet.lower:
+  let node = $eventInput.tree
+  when at($node, "children"):
+    fold $node.children as child; nodes starts list():
+      port kernel.invoke { query = "stylesheet.lower"; input = { tree = $child } } → child
+      yield append($nodes, list($child)) → children
+    port record.put { record = $node; key = "children"; value = $children } → node
+  when and(eq($node.kind, "decl"), eq(at($node, "semicolon"), at({}, "absent"))):
+    port record.put { record = $node; key = "semicolon"; value = "" } → node
+  when and(eq($node.kind, "atrule"), eq(at($node, "afterName"), at({}, "absent"))):
+    port record.put { record = $node; key = "afterName"; value = "" } → node
+  when and(eq($node.kind, "atrule"), eq(at($node, "semicolon"), at({}, "absent"))):
+    port record.put { record = $node; key = "semicolon"; value = "" } → node
+  let result = $node

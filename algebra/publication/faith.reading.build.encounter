@@ -1,0 +1,18 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process faith.reading.build:
+  each $readingRooms as readingRoom:
+    let prefix = "../../"
+    let pageTitle = $readingRoom.essay.title
+    let description = $readingRoom.essay.description
+    let canonical = $readingRoom.essay.canonical
+    let light = $readingRoom.light
+    let body = $readingRoom.essay.body
+    when eq($readingRoom.key, "christian"):
+      let body = { tag = $body.tag; attrs = { class = "faith-essay reading-essay"; "data-reading-room" = "christian" }; children = $body.children }
+    call publication.document
+    let surfaceWritePath = $readingRoom.essay.path
+    call assurance.surface.register
+    port file.write { path = $readingRoom.essay.path; text = $result } → _
+  let prefix = ""

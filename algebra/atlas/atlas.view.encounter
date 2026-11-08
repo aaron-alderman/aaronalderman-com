@@ -1,0 +1,664 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process atlas.view:
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          {
+            tag = "meta";
+            attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+            children = list()
+          },
+          {
+            tag = "title";
+            attrs = {  };
+            children = list(
+              if(
+                $atlasIdentity,
+                concat(one($atlasIdentity, "label"), " / Map — Aaron Alderman"),
+                "The atlas — Aaron Alderman"
+              )
+            )
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "description";
+              content = if(
+                $atlasIdentity,
+                one($atlasIdentity, "mapCopy"),
+                "An illustrated atlas of forty places across science, human experience and responsible power. Find your own way through Aaron Alderman’s world."
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = {
+              rel = "canonical";
+              href = if(
+                $atlasIdentity,
+                concat(one("site", "origin"), one($atlasIdentity, "atlasRoute")),
+                "https://aaronalderman.com/atlas.html"
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = {
+              rel = "stylesheet";
+              href = concat("expedition.css?v=", one("site", "stylesheetVersion"))
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "icon"; href = "assets/personal-mark.svg"; type = "image/svg+xml" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:type"; content = "website" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:title";
+              content = if(
+                $atlasIdentity,
+                one($atlasIdentity, "mapTitle"),
+                "The world keeps opening — Aaron Alderman’s atlas"
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:description";
+              content = if(
+                $atlasIdentity,
+                one($atlasIdentity, "mapCopy"),
+                "Forty places. Three territories. More than one way through."
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:url";
+              content = if(
+                $atlasIdentity,
+                concat(one("site", "origin"), one($atlasIdentity, "atlasRoute")),
+                "https://aaronalderman.com/atlas.html"
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image";
+              content = if(
+                $atlasIdentity,
+                concat(one("site", "origin"), one($atlasIdentity, "atlasImage")),
+                concat(one("site", "origin"), one("atlas", "image"))
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:width";
+              content = if($atlasIdentity, "768", one("atlas", "imageWidth"))
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:height";
+              content = if($atlasIdentity, "432", one("atlas", "imageHeight"))
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:alt";
+              content = if(
+                $atlasIdentity,
+                concat("An illustrated entrance to the ", one($atlasIdentity, "label"), " Map."),
+                "A painted island connects an observatory range, a woodland of lanterns and violet highlands through golden trails."
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:card"; content = "summary_large_image" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:title";
+              content = if(
+                $atlasIdentity,
+                one($atlasIdentity, "mapTitle"),
+                "The world keeps opening — Aaron Alderman’s atlas"
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:description";
+              content = if(
+                $atlasIdentity,
+                one($atlasIdentity, "mapCopy"),
+                "Forty places. Three territories. More than one way through."
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image";
+              content = if(
+                $atlasIdentity,
+                concat(one("site", "origin"), one($atlasIdentity, "atlasImage")),
+                concat(one("site", "origin"), one("atlas", "image"))
+              )
+            };
+            children = list()
+          }
+        )
+      },
+      {
+        tag = "body";
+        attrs = {
+          class = "atlas-page";
+          "data-identity" = if($atlasIdentity, one($atlasIdentity, "key"), null)
+        };
+        children = list(
+          {
+            tag = "a";
+            attrs = { class = "skip"; href = "#main" };
+            children = list("Skip to the atlas")
+          },
+          {
+            tag = "header";
+            attrs = { class = "masthead" };
+            children = list(
+              {
+                tag = "a";
+                attrs = { class = "brand"; href = "index.html"; "aria-label" = "Aaron Alderman" };
+                children = list(
+                  {
+                    tag = "span";
+                    attrs = { class = "brand-name" };
+                    children = list(
+                      "Aaron ",
+                      { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Atlas navigation" };
+                children = list(
+                  { tag = "a"; attrs = { href = "index.html#microsites" }; children = list("The worlds") },
+                  { tag = "a"; attrs = { href = "#map" }; children = list("The map") },
+                  { tag = "a"; attrs = { href = "gate.html" }; children = list("Reading paths ↗") }
+                )
+              }
+            )
+          },
+          {
+            tag = "main";
+            attrs = { id = "main" };
+            children = list(
+              if($atlasIdentity, $identityMapIntro, null),
+              list(
+                {
+                  tag = "section";
+                  attrs = { class = "atlas-heading" };
+                  children = list(
+                    {
+                      tag = "p";
+                      attrs = { class = "eyebrow" };
+                      children = list("Aaron Alderman / An atlas of ideas")
+                    },
+                    {
+                      tag = "h1";
+                      attrs = {  };
+                      children = list(if($atlasIdentity, one($atlasIdentity, "mapTitle"), "The world keeps opening."))
+                    },
+                    {
+                      tag = "p";
+                      attrs = { class = "lead" };
+                      children = list(
+                        if(
+                          $atlasIdentity,
+                          one($atlasIdentity, "mapCopy"),
+                          "Forty places. Three territories. More than one way through. Start with a question, follow a connection, and return with a different view."
+                        )
+                      )
+                    }
+                  )
+                },
+                {
+                  tag = "section";
+                  attrs = { class = "atlas-map"; id = "map"; "aria-label" = "Interactive atlas" };
+                  children = list(
+                    {
+                      tag = "div";
+                      attrs = { class = "atlas-map-intro" };
+                      children = list(
+                        {
+                          tag = "p";
+                          attrs = {  };
+                          children = list(
+                            "Every light is a place. Hover or use Tab to discover it, then click or press Enter to explore."
+                          )
+                        },
+                        {
+                          tag = "p";
+                          attrs = { class = "atlas-mobile-hint" };
+                          children = list("Swipe or scroll sideways to discover more, or use the full list below.")
+                        },
+                        {
+                          tag = "a";
+                          attrs = { href = "#unseen"; class = "atlas-list-link" };
+                          children = list("Browse the places as a list ↓")
+                        }
+                      )
+                    },
+                    {
+                      tag = "div";
+                      attrs = {
+                        class = "atlas-map-scroll";
+                        tabindex = 0;
+                        "aria-label" = "Scrollable map of forty places"
+                      };
+                      children = list(
+                        {
+                          tag = "div";
+                          attrs = { class = "atlas-overview" };
+                          children = list(
+                            {
+                              tag = "img";
+                              attrs = {
+                                src = one("atlas", "image");
+                                alt = "An imagined island links a blue observatory range, a rose woodland and violet highlands with golden trails.";
+                                width = 1942;
+                                height = 809;
+                                fetchpriority = "high";
+                                decoding = "async"
+                              };
+                              children = list()
+                            },
+                            {
+                              tag = "nav";
+                              attrs = { class = "atlas-pins"; "aria-label" = "Explore forty places on the map" };
+                              children = list(
+                                map(
+                                  subjects("isa", "Place"),
+                                  "p",
+                                  {
+                                    tag = "a";
+                                    attrs = {
+                                      class = "atlas-pin";
+                                      href = concat("places/", one($p, "slug"), ".html");
+                                      "data-atlas-id" = one($p, "slug");
+                                      "data-light" = one($p, "light");
+                                      style = concat("left:", one($p, "mapX"), "%;top:", one($p, "mapY"), "%;");
+                                      "aria-label" = concat(or(optional($p, "atlasLabel"), one($p, "region")), ". ", one($p, "title"));
+                                      "data-tip-above" = one($p, "mapTipAbove");
+                                      "data-identity-recommended" = if(
+                                        $atlasIdentity,
+                                        if(includes(objects($atlasIdentity, "recommendedPlace"), $p), "true", "false"),
+                                        null
+                                      )
+                                    };
+                                    children = list(
+                                      {
+                                        tag = "span";
+                                        attrs = { class = "atlas-pin-number"; "aria-hidden" = "true" };
+                                        children = list(one($p, "chapter"))
+                                      },
+                                      {
+                                        tag = "span";
+                                        attrs = { class = "atlas-pin-tip"; "aria-hidden" = "true" };
+                                        children = list(
+                                          {
+                                            tag = "strong";
+                                            attrs = {  };
+                                            children = list(or(optional($p, "atlasLabel"), one($p, "region")))
+                                          },
+                                          { tag = "span"; attrs = {  }; children = list(one($p, "title")) },
+                                          { tag = "small"; attrs = {  }; children = list("Click to explore ↗") }
+                                        )
+                                      }
+                                    )
+                                  }
+                                )
+                              )
+                            }
+                          )
+                        }
+                      )
+                    },
+                    {
+                      tag = "aside";
+                      attrs = { class = "atlas-place-preview"; "aria-label" = "Selected place" };
+                      children = list(
+                        {
+                          tag = "h2";
+                          attrs = { id = "atlas-preview-title" };
+                          children = list("Choose a light on the map.")
+                        },
+                        {
+                          tag = "p";
+                          attrs = { id = "atlas-preview-question" };
+                          children = list("Tap for a preview, then choose Explore to open the place.")
+                        },
+                        {
+                          tag = "a";
+                          attrs = { id = "atlas-preview-link"; href = "#"; hidden = true };
+                          children = list("Explore this place ↗")
+                        }
+                      )
+                    },
+                    {
+                      tag = "div";
+                      attrs = { class = "atlas-memory"; id = "atlas-memory"; hidden = true };
+                      children = list(
+                        {
+                          tag = "div";
+                          attrs = {  };
+                          children = list(
+                            {
+                              tag = "p";
+                              attrs = { id = "atlas-progress"; role = "status"; "aria-live" = "polite" };
+                              children = list("Your journey is beginning.")
+                            },
+                            {
+                              tag = "p";
+                              attrs = { id = "atlas-storage-note" };
+                              children = list("Seen places are remembered only in this browser.")
+                            }
+                          )
+                        },
+                        {
+                          tag = "button";
+                          attrs = { type = "button"; id = "atlas-reset" };
+                          children = list("Reset seen places")
+                        }
+                      )
+                    },
+                    {
+                      tag = "nav";
+                      attrs = { class = "atlas-territory-jumps"; "aria-label" = "Jump to a territory" };
+                      children = list(
+                        {
+                          tag = "div";
+                          attrs = { class = "atlas-beacons" };
+                          children = list(
+                            map(
+                              subjects("isa", "Territory"),
+                              "t",
+                              {
+                                tag = "a";
+                                attrs = {
+                                  class = "atlas-beacon";
+                                  href = concat("#", one($t, "atlasSlug"));
+                                  "data-light" = one($t, "light")
+                                };
+                                children = list(
+                                  { tag = "span"; attrs = {  }; children = list(one($t, "name")) },
+                                  {
+                                    tag = "small";
+                                    attrs = {  };
+                                    children = list(concat(count(objects($t, "place")), " places · Explore ↗"))
+                                  }
+                                )
+                              }
+                            )
+                          )
+                        }
+                      )
+                    },
+                    {
+                      tag = "noscript";
+                      attrs = {  };
+                      children = list(
+                        {
+                          tag = "p";
+                          attrs = {  };
+                          children = list(
+                            "Without JavaScript, each light opens its place directly; visits aren’t remembered."
+                          )
+                        }
+                      )
+                    }
+                  )
+                },
+                {
+                  tag = "div";
+                  attrs = { class = "atlas-map-note" };
+                  children = list(
+                    {
+                      tag = "p";
+                      attrs = {  };
+                      children = list(
+                        "An imagined geography for real questions. The landscape is an illustration; the routes organise themes, not physical locations or scientific equivalences."
+                      )
+                    },
+                    {
+                      tag = "div";
+                      attrs = { class = "atlas-route-key" };
+                      children = list(
+                        { tag = "span"; attrs = {  }; children = list("01 / Choose a territory") },
+                        { tag = "span"; attrs = {  }; children = list("02 / Follow a question") },
+                        { tag = "span"; attrs = {  }; children = list("03 / Leave room to return") }
+                      )
+                    }
+                  )
+                },
+                map(
+                  subjects("isa", "Territory"),
+                  "t",
+                  {
+                    tag = "section";
+                    attrs = {
+                      class = "atlas-territory";
+                      id = one($t, "atlasSlug");
+                      "data-light" = one($t, "light");
+                      "aria-labelledby" = concat("title-", one($t, "atlasSlug"))
+                    };
+                    children = list(
+                      {
+                        tag = "div";
+                        attrs = { class = "atlas-territory-header" };
+                        children = list(
+                          {
+                            tag = "img";
+                            attrs = {
+                              src = one($t, "atlasImage");
+                              alt = "";
+                              loading = "lazy";
+                              decoding = "async";
+                              width = 1600;
+                              height = 800
+                            };
+                            children = list()
+                          },
+                          {
+                            tag = "div";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "p";
+                                attrs = { class = "eyebrow" };
+                                children = list(
+                                  concat(
+                                    "Territory ",
+                                    one($t, "atlasNumber"),
+                                    " / ",
+                                    count(objects($t, "place")),
+                                    " places"
+                                  )
+                                )
+                              },
+                              {
+                                tag = "h2";
+                                attrs = { id = concat("title-", one($t, "atlasSlug")) };
+                                children = list(one($t, "name"))
+                              },
+                              {
+                                tag = "p";
+                                attrs = { class = "atlas-territory-question" };
+                                children = list(one($t, "question"))
+                              },
+                              {
+                                tag = "p";
+                                attrs = { class = "atlas-territory-note" };
+                                children = list(one($t, "note"))
+                              }
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "ul";
+                        attrs = { class = "atlas-places" };
+                        children = list(
+                          map(
+                            objects($t, "place"),
+                            "p",
+                            {
+                              tag = "li";
+                              attrs = {  };
+                              children = list(
+                                {
+                                  tag = "a";
+                                  attrs = {
+                                    class = "atlas-place";
+                                    href = concat("places/", one($p, "slug"), ".html");
+                                    "data-atlas-id" = one($p, "slug");
+                                    "data-identity-recommended" = if(
+                                      $atlasIdentity,
+                                      if(includes(objects($atlasIdentity, "recommendedPlace"), $p), "true", "false"),
+                                      null
+                                    )
+                                  };
+                                  children = list(
+                                    {
+                                      tag = "span";
+                                      attrs = { class = "atlas-place-number"; "aria-hidden" = "true" };
+                                      children = list(one($p, "chapter"))
+                                    },
+                                    {
+                                      tag = "span";
+                                      attrs = {  };
+                                      children = list(
+                                        {
+                                          tag = "strong";
+                                          attrs = {  };
+                                          children = list(or(optional($p, "atlasLabel"), one($p, "region")))
+                                        },
+                                        { tag = "small"; attrs = {  }; children = list(one($p, "title")) }
+                                      )
+                                    },
+                                    {
+                                      tag = "span";
+                                      attrs = { class = "atlas-place-arrow"; "aria-hidden" = "true" };
+                                      children = list("↗")
+                                    }
+                                  )
+                                }
+                              )
+                            }
+                          )
+                        )
+                      }
+                    )
+                  }
+                ),
+                {
+                  tag = "section";
+                  attrs = { class = "atlas-closing" };
+                  children = list(
+                    { tag = "p"; attrs = { class = "eyebrow" }; children = list("Your route is your own") },
+                    { tag = "h2"; attrs = {  }; children = list("A map offers possibilities.") },
+                    {
+                      tag = "p";
+                      attrs = {  };
+                      children = list(
+                        "Some connections became useful. Some broke. Both remain part of this world. There is no required order, and no need to reach every place."
+                      )
+                    },
+                    {
+                      tag = "a";
+                      attrs = { href = "gate.html"; class = "button" };
+                      children = list("Explore the research reading paths ↗")
+                    }
+                  )
+                }
+              )
+            )
+          },
+          {
+            tag = "footer";
+            attrs = {  };
+            children = list(
+              {
+                tag = "div";
+                attrs = { class = "section" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "index.html" };
+                    children = list("← Return to Aaron Alderman")
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("An illustrated entrance to the work. Sources and limits stay with each question.")
+                  }
+                )
+              },
+              $stewardshipLinks,
+              {
+                tag = "p";
+                attrs = {  };
+                children = list({ tag = "a"; attrs = { href = "assurance/" }; children = list("Assurance") })
+              }
+            )
+          },
+          {
+            tag = "script";
+            attrs = { src = "atlas-runtime.js?v=journey-1"; defer = true };
+            children = list()
+          }
+        )
+      }
+    )
+  }
+  let result = $input

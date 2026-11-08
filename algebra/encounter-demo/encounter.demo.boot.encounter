@@ -1,0 +1,59 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process encounter.demo.boot:
+  let spPolicy = $data.presentation.spPolicy
+  let spGrammar = $data.presentation.spGrammar
+  call sp.style
+  port browser.write { ref = "#encounter-source-style"; name = "textContent"; value = $result } → _
+  port kernel.invoke { query = "ec.prepare"; input = $data.inputs } → candidate
+  port state.set { key = "candidate"; value = $candidate } → _
+  port state.set {
+    key = "notice";
+    value = "The story and the row share a title. The web menu has its own wording."
+  } → _
+  port state.set { key = "selection"; value = "meaning" } → _
+  port browser.on {
+    ref = "#encounter-apply";
+    event = "click";
+    query = "encounter.demo.apply";
+    input = {  }
+  } → _
+  port browser.on {
+    ref = "#encounter-reset";
+    event = "click";
+    query = "encounter.demo.reset";
+    input = {  }
+  } → _
+  port browser.on {
+    ref = "#inspect-meaning";
+    event = "click";
+    query = "encounter.demo.select";
+    input = { selection = "meaning" }
+  } → _
+  port browser.on {
+    ref = "#inspect-facts";
+    event = "click";
+    query = "encounter.demo.select";
+    input = { selection = "facts" }
+  } → _
+  port browser.on {
+    ref = "#inspect-contract";
+    event = "click";
+    query = "encounter.demo.select";
+    input = { selection = "contract" }
+  } → _
+  port browser.on {
+    ref = "#inspect-process";
+    event = "click";
+    query = "encounter.demo.select";
+    input = { selection = "process" }
+  } → _
+  port browser.on {
+    ref = "#inspect-inspector";
+    event = "click";
+    query = "encounter.demo.select";
+    input = { selection = "inspector" }
+  } → _
+  port kernel.invoke { query = "encounter.demo.render"; input = {  } } → result
+  port browser.write { ref = "#encounter-loading"; name = "hidden"; value = true } → _

@@ -1,0 +1,79 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.expression:
+  let ecExpr = $eventInput.text
+  let ecExprScope = $eventInput.scope
+  let ecExpression = null
+  let ecExprType = null
+  let ecExprCard = "one"
+  let ecExprExpects = null
+  port text.matches { value = $ecExpr; pattern = "^\"(?:\\\\[\\s\\S]|[^\"\\\\])*\"$" } → ecQuoted
+  when $ecQuoted:
+    port value.describe { value = at($codePlan.literalValues, $ecExpr) } → ecLiteralKind
+    assert eq($ecLiteralKind.type, "string")
+      otherwise "EC-P004: The text literal has no parsed source entry."
+    let ecExpression = list("at", concat(at(" $", 1), "codePlan.literalValues"), $ecExpr)
+    let ecExprType = "string"
+  port text.matches { value = $ecExpr; pattern = "^@[A-Za-z_][A-Za-z0-9_.-]*$" } → ecReference
+  when $ecReference:
+    port text.slice { value = $ecExpr; start = 1 } → ecRefId
+    port kernel.invoke {
+      query = "ec.attempt";
+      input = { query = "ec.referenceType"; input = { id = $ecRefId }; span = $ecSpan }
+    } → ecRefType
+    let ecExpression = $ecRefId
+    let ecExprType = "ref"
+    let ecExprExpects = $ecRefType
+  port text.matches {
+    value = $ecExpr;
+    pattern = "^[A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_.-]*)?$"
+  } → ecName
+  when and($ecName, not($ecExprType)):
+    port text.split {
+      value = $ecExpr;
+      pattern = "^([A-Za-z_][A-Za-z0-9_]*)(?:\\.([A-Za-z_][A-Za-z0-9_.-]*))?$"
+    } → ecExprParts
+    let ecBindingName = at($ecExprParts, 1)
+    let ecFieldName = or(at($ecExprParts, 2), null)
+    let ecBinding = at(filter($ecExprScope, "ecB", eq($ecB.name, $ecBindingName)), 0)
+    assert $ecBinding
+      otherwise "EC-P005: Unknown input name. Declare it with given, or use the view’s explicit source binding."
+    when $ecFieldName:
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = {
+          query = "ec.slot";
+          input = { type = $ecBinding.type; name = $ecFieldName };
+          span = $ecSpan
+        }
+      } → ecExprSlot
+      let ecExpression = list(
+        "at",
+        list("at", list("at", concat(at(" $", 1), "bindings"), $ecBindingName), "values"),
+        $ecExprSlot.name
+      )
+      let ecExprType = $ecExprSlot.kind
+      let ecExprCard = $ecExprSlot.cardinality
+      let ecExprExpects = $ecExprSlot.expects
+    when not($ecFieldName):
+      when at($ecBinding, "expression"):
+        let ecExpression = at($ecBinding, "expression")
+        let ecExprType = $ecBinding.kind
+        let ecExprExpects = $ecBinding.expects
+      when not(at($ecBinding, "expression")):
+        let ecExpression = list(
+          "at",
+          list("at", concat(at(" $", 1), "bindings"), $ecBindingName),
+          if(eq($ecBinding.type, "text"), "value", "id")
+        )
+        let ecExprType = if(eq($ecBinding.type, "text"), "string", "ref")
+        let ecExprExpects = if(eq($ecBinding.type, "text"), null, $ecBinding.type)
+  assert $ecExprType
+    otherwise "EC-P006: Unsupported expression. Use an explicit reference, quoted text or declared input field."
+  let result = {
+    expression = $ecExpression;
+    kind = $ecExprType;
+    cardinality = $ecExprCard;
+    expects = $ecExprExpects
+  }

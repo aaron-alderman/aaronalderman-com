@@ -1,0 +1,45 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process encounter.demo.inspect:
+  port state.get { key = "candidate" } → candidate
+  port state.get { key = "selection" } → selection
+  port kernel.invoke {
+    query = "encounter.demo.source";
+    input = { candidate = $candidate; selection = $selection }
+  } → source
+  let spPolicy = $data.presentation.spPolicy
+  let spGrammar = $data.presentation.spGrammar
+  let lexPolicy = $data.presentation.lexPolicy
+  let lexGrammar = $data.presentation.lexGrammar
+  port kernel.invoke {
+    query = "sp.present";
+    input = {
+      text = $source.text;
+      file = $source.file;
+      language = $source.language;
+      theme = "dark";
+      expectedHash = $source.hash;
+      lineNumbers = true;
+      selectedLine = null;
+      origin = {
+        file = $source.file;
+        sha256 = $source.hash;
+        scope = "current-session-definition; not an execution trace"
+      }
+    }
+  } → presentation
+  port kernel.invoke { query = "encounter.demo.html"; input = { tree = $presentation.tree } } → markup
+  port browser.content { ref = "#encounter-source"; html = $markup } → _
+  port browser.write { ref = "#encounter-source-label"; name = "textContent"; value = $source.label } → _
+  port browser.write {
+    ref = "#encounter-hash";
+    name = "textContent";
+    value = concat($source.file, " · SHA-256 ", $source.hash)
+  } → _
+  each list("meaning", "facts", "contract", "process", "inspector") as part:
+    port browser.attribute {
+      ref = concat("#inspect-", $part);
+      name = "aria-pressed";
+      value = concat(eq($part, $selection))
+    } → _

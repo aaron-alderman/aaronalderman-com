@@ -1,0 +1,64 @@
+# Publication remains ordinary Encounter composition. Native effects stage
+# artifacts; the host admits executable surfaces and identities before success.
+process-module "temple/surface-process-module/1"
+
+process publication.local:
+  call publication.stage
+  call publication.inspect
+  call publication.build
+  port artifact.list {} → artifacts
+  let result = { artifacts = count($artifacts); source = "Encounter and REL"; status = "Projection staged; separate sealing and final artifact admission required" }
+
+process publication.stage:
+  port source.modules {} → modules
+  each $modules as module:
+    port file.copy { path = $module.file } → _
+  port source.resources {} → resources
+  each $resources as resource:
+    port file.copy { path = $resource.path } → _
+  port artifact.list {} → artifacts
+  let result = { artifacts = count($artifacts); source = "Encounter and REL"; status = "Declared inputs staged" }
+
+# Integrity is a structured projection transform. No serialized HTML rewriting.
+process publication.seal:
+  port artifact.list {} → artifacts
+  each $artifacts as artifact:
+    port text.matches { value = $artifact.path; pattern = "\\.html$" } → html
+    port text.matches { value = $artifact.path; pattern = $sealPattern } → selected
+    when and($html, $selected):
+      port projection.tree { path = $artifact.path } → tree
+      let eventInput = { tree = $tree; route = $artifact.path }
+      call projection.base
+      let eventInput = { tree = $tree; route = $result }
+      call projection.integrity
+      let input = $result
+      call projection.serialize
+      port file.write { path = $artifact.path; text = $result } → _
+
+process publication.seal.pages:
+  let sealPattern = "^(?!(?:worlds|places|inspection)/)"
+  call publication.seal
+
+process publication.seal.inspection:
+  let sealPattern = "^inspection/"
+  call publication.seal
+
+process publication.seal.places:
+  let sealPattern = "^places/"
+  call publication.seal
+
+process publication.seal.sourcerer:
+  let sealPattern = "^worlds/sourcerer/"
+  call publication.seal
+
+process publication.seal.author:
+  let sealPattern = "^worlds/author/"
+  call publication.seal
+
+process publication.seal.dad:
+  let sealPattern = "^worlds/dad/"
+  call publication.seal
+
+process publication.seal.christian:
+  let sealPattern = "^worlds/christian/"
+  call publication.seal

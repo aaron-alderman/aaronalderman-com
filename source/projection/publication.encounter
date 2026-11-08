@@ -1,0 +1,71 @@
+process-module "temple/surface-process-module/1"
+
+# Compile palette definitions before any page or browser image can use them.
+process publication.phase.paletteMain:
+  port file.write {
+    path = "assurance/generated-pages.values.rel";
+    text = "(\"rel.document\", \"kind\", \"StaticValue\")\n(\"v0\", \"type\", \"Record\")\n(\"rel.document\", \"root\", \"v0\")\n"
+  } → _
+  call publication.context
+  call projection.palette
+  each list({ key = "main"; path = "expedition.css" }, { key = "activity"; path = "activity.css" }) as sheet:
+    let projection = $sheet.key
+    call publication.styles
+    let surfaceWritePath = $sheet.path
+    call assurance.surface.register
+    port file.write { path = $sheet.path; text = $css } → _
+
+process publication.phase.paletteRetained:
+  call publication.context
+  call stylesheet.build
+
+process publication.phase.paletteSpecialists:
+  call publication.context
+  each list({ key = "encounter"; path = "encounter/encounter.css" }, { key = "claimipedia"; path = "claimipedia/claimipedia.css" }) as sheet:
+    let projection = $sheet.key
+    call publication.styles
+    port file.write { path = $sheet.path; text = $css } → _
+  call microsite.return.styles
+  each subjects("isa", "MicrositeStylesheet") as sheet:
+    let input = one($sheet, "root")
+    call source.css
+    let input = $result
+    call projection.stylesheet
+    let surfaceWritePath = one($sheet, "path")
+    call assurance.surface.register
+    port file.write { path = one($sheet, "path"); text = $result } → _
+
+process publication.journeys.sourcerer:
+  call publication.context
+  let journeySelection = "identity.sourcerer"
+  call identity.journeys.build
+
+process publication.journeys.author:
+  call publication.context
+  let journeySelection = "identity.author"
+  call identity.journeys.build
+
+process publication.journeys.dad:
+  call publication.context
+  let journeySelection = "identity.dad"
+  call identity.journeys.build
+
+process publication.journeys.christian:
+  call publication.context
+  let journeySelection = "identity.christian"
+  call identity.journeys.build
+
+process publication.frontdoors.projects:
+  call publication.context
+  call frontdoors.claimipedia
+  call frontdoors.worldwright
+  call atlas.build
+  call frontdoors.capabilities
+
+process publication.frontdoors.encounter:
+  call publication.context
+  call encounter.build
+
+process publication.frontdoors.hierarchy:
+  call publication.context
+  call hierarchy.build

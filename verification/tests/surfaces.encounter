@@ -1,0 +1,92 @@
+process-module "temple/surface-process-module/1"
+
+process check.markup-accept:
+  port mechanism.call { target = $observer; method = "admitMarkup"; args = list($text, $options) } → actual
+  assert eq($actual, true)
+    otherwise "Expected passive markup to be admitted."
+
+process check.markup-refuse:
+  let operation = { target = $observer; method = "admitMarkup"; args = list($text, $options) }
+  let pattern = "SURFACE"
+  call check.refusal
+
+process test.surface.passive:
+  port mechanism.load { module = "markup-observer.cjs" } → observer
+  let options = {}
+  each list("<!doctype html><main><h1>Read <em>this</em></h1><a href=\"/mission/\">Mission</a><img src=\"/image.webp\"></main>", "<svg xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0 0L20 20\"/><text x=\"4\">Life</text></svg>", "<iframe sandbox=\"allow-same-origin\" srcdoc=\"&lt;p&gt;Preview&lt;/p&gt;\"></iframe>", "<script type=\"application/rel\">(\"s\", \"p\", \"v\")</script>", "<link rel=\"icon\" href=\"data:,\">") as text:
+    call check.markup-accept
+  # Isolate final script/frame checks with explicit projection context. The
+  # projection suite independently tests that the real issuer cannot be forged.
+  let options = { base = "https://publication.invalid/retained/index.html"; mode = "final"; projectionIssued = true; artifacts = { "reader/runtime.js" = { issuedRuntime = true; integrity = "sha256-test" }; "retained/activity.html" = { issuedRuntime = false; issuedProjection = "markup" } } }
+  let text = "<base href=\"../\"><script src=\"reader/runtime.js\" integrity=\"sha256-test\"></script>"
+  call check.markup-accept
+  let options = { base = "https://publication.invalid/"; mode = "final"; projectionIssued = true; artifacts = { "reader/runtime.js" = { issuedRuntime = true; integrity = "sha256-test" }; "retained/activity.html" = { issuedRuntime = false; issuedProjection = "markup" } } }
+  let text = "<script src=\"reader/runtime.js\" integrity=\"wrong\"></script>"
+  call check.markup-refuse
+  # Active frames now require both the registered component and final issued
+  # markup identity; a bare passive document is no longer sufficient.
+  let text = "<iframe data-projection-frame=\"activity\" src=\"/retained/activity.html#care\"></iframe>"
+  call check.markup-accept
+  let options = { base = "https://publication.invalid/"; mode = "final"; projectionIssued = true; artifacts = {} }
+  call check.markup-refuse
+
+process test.surface.alternate-execution:
+  port mechanism.load { module = "markup-observer.cjs" } → observer
+  let options = {}
+  each list("<script>alert(1)</script>", "<script src=\"https://other.invalid/x.js\"></script>", "<img src=x onerror=alert(1)>", "<svg onload=alert(1)></svg>", "<a href=\"jav&#97;script&colon;alert(1)\">x</a>", "<iframe srcdoc=\"&lt;script&gt;alert(1)&lt;/script&gt;\"></iframe>", "<iframe sandbox=\"allow-same-origin allow-scripts\"></iframe>", "<iframe sandbox=\"\" srcdoc=\"&lt;img src=x onerror=alert(1)&gt;\"></iframe>", "<svg><animate attributeName=\"href\" to=\"javascript:alert(1)\"/></svg>", "<svg><script type=\"application/json\">alert(1)</script></svg>", "<object data=\"data:text/html,x\"></object>", "<meta http-equiv=\"REFRESH\" content=\"0;url=https://other.invalid\">", "<?xml-stylesheet href=\"x.xsl\"?><svg/>", "<!DOCTYPE svg SYSTEM \"external.dtd\"><svg/>", "<template><img onerror=alert(1)></template>") as text:
+    call check.markup-refuse
+
+process test.surface.mutations:
+  call check.pure
+  each list(list("meta", "content", "0;url=https://outside.invalid"), list("meta", "http-equiv", "refresh"), list("iframe", "SRCDOC", "<script>x</script>"), list("iframe", "sandbox", "allow-scripts allow-same-origin"), list("iframe", "sandbox", null), list("iframe", "src", "javascript:alert(1)"), list("script", "type", "text/javascript"), list("img", "ONERROR", "alert(1)")) as triple:
+    let operation = { target = $policy; method = "compute"; args = list("surface.attribute", { tag = at($triple, 0); name = at($triple, 1); value = at($triple, 2); mutation = true; attributes = { sandbox = ""; "http-equiv" = "refresh" }; base = "https://publication.invalid/" }) }
+    let pattern = "SURFACE"
+    call check.refusal
+  port mechanism.call { target = $policy; method = "compute"; args = list("surface.attribute", { tag = "img"; name = "src"; value = "image.webp"; mutation = true; attributes = { sandbox = "" }; base = "https://publication.invalid/" }) } → actual
+  assert eq($actual.value, true)
+    otherwise "Passive image mutation refused."
+
+process test.surface.refresh:
+  port mechanism.load { module = "markup-observer.cjs" } → observer
+  let options = {}
+  port mechanism.call { target = " "; method = "repeat"; args = list(100000) } → spaces
+  each list("0;url=/mission/", " 0.5 ; URL = '/mission/' ", "0;url=\"/mission/?a=b;c=d\"", "0;url=", concat("0;url=x", $spaces, "y")) as content:
+    port text.replaceAll { value = $content; search = "\""; replacement = "&quot;" } → escaped
+    let text = concat("<meta http-equiv=\"refresh\" content=\"", $escaped, "\">")
+    call check.markup-accept
+  each list(concat("0;url=x", $spaces, "\ny"), "0.;url=/mission/", ";url=x", "0;ur l=x", "0;url=https://outside.invalid/") as content:
+    let text = concat("<meta http-equiv=\"refresh\" content=\"", $content, "\">")
+    call check.markup-refuse
+
+process test.surface.captured-entry:
+  port process.node { args = list("bootstrap/launch.cjs", "bootstrap/test-data/native-injection.rel") } → actual
+  assert not(eq($actual.status, 0))
+    otherwise "Captured-byte entry accepted active markup."
+  # The common projection boundary now refuses this raw document before the
+  # subsequent surface gate. Both must fail before any artifact is written.
+  port text.matches { value = $actual.stderr; pattern = "SURFACE|PROJECTION" } → boundary
+  assert $boundary
+    otherwise "Injection refused for an unrelated reason."
+  port file.exists { file = ".local-native-surface-test/index.html" } → exists
+  assert eq($exists, false)
+    otherwise "Active markup reached the output filesystem."
+
+process test.surface.private-gate:
+  call check.pure
+  port mechanism.load { module = "markup-ceiling.cjs" } → ceiling
+  port mechanism.call { target = $ceiling; method = "browser"; args = list({ baseURI = "https://publication.invalid/" }); keep = true } → browser
+  let operation = { target = $browser; method = "attribute"; args = list({ localName = "meta"; attributes = list() }, "content", "bad") }
+  let pattern = "Private Encounter policy gate"
+  call check.refusal
+  port mechanism.callback { query = "fixture.authorize"; bindings = { policy = $policy } } → authorize
+  let operation = { target = $browser; method = "attribute"; args = list({ localName = "meta"; attributes = list({ name = "http-equiv"; value = "refresh" }) }, "content", "bad", { authorize = $authorize }) }
+  let pattern = "Meta refresh mutation refused"
+  call check.refusal
+
+process test.surface.xml:
+  port mechanism.load { module = "markup-observer.cjs" } → observer
+  let options = { xml = true }
+  each list("<frameset><frame src=\"https://evil.invalid/active.html\"></frameset>", "<html xmlns=\"http://www.w3.org/1999/xhtml\"><style><script>alert(1)</script></style></html>", "<s:svg xmlns:s=\"http://www.w3.org/2000/svg\"><title><s:script href=\"evil.js\"/></title></s:svg>", "<textarea xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"x\" onerror=\"bad()\"/></textarea>", "<?xml-stylesheet href=\"bad.xsl\"?><root/>", "<!DOCTYPE root [<!ENTITY x \"bad\">]><root/>") as text:
+    call check.markup-refuse
+  let text = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url><loc>https://example.test/?x=1&amp;y=2</loc></url></urlset>"
+  call check.markup-accept

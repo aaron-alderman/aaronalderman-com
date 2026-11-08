@@ -1,0 +1,24 @@
+TAP version 13
+# policy basis c052ad8a86402833d38a11a3d9d3c54892255eab60423ed177e2b754545ee0a0
+# canonical declaration 49df4511577e09199db75e9a1dc4a00e4067a4d11e40515f4bda6a1f933b6cf3
+ok 1 - test.surface.alternate-execution
+ok 2 - test.surface.captured-entry
+ok 3 - test.surface.mutations
+not ok 4 - test.surface.passive
+  ---
+  context: {"expectedPattern":"SURFACE","observed":{"name":"Error","message":"Unknown reference: $artifact.issuedRuntime","code":null,"execution":null},"method":"admitMarkup"}
+  message: Error: Refusal diagnostic changed.
+        at run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\temple-seed.cjs:79:63)
+        at async run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\temple-seed.cjs:80:52)
+        at async run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\temple-seed.cjs:96:11)
+        at async Object.run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\temple-seed.cjs:96:11)
+        at async Object.run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\encounter-source-front.cjs:83:11)
+        at async main (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\test.cjs:27:7)
+  ...
+ok 5 - test.surface.private-gate
+ok 6 - test.surface.refresh
+ok 7 - test.surface.xml
+1..7
+# tests 7
+# pass 6
+# fail 1

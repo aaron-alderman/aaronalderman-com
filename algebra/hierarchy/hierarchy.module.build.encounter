@@ -1,0 +1,7 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.module.build:
+  each $hModuleCatalogue as hModuleSpec:
+    port value.encode { value = $hModuleSpec } → hModulePayload
+    call hierarchy.module.page

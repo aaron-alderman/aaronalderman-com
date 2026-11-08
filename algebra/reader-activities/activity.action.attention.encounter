@@ -1,0 +1,23 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.attention:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port browser.select { selector = "[data-world=\"attention\"]" } → buttons
+  each $buttons as choice:
+    port browser.attribute {
+      ref = $choice.ref;
+      name = "aria-pressed";
+      value = eq($choice.ref.handle, $button.ref.handle)
+    } → _
+  port browser.attribute { ref = ".world-encounter"; name = "data-view"; value = $value } → _
+  port browser.write {
+    ref = ".world-result";
+    name = "textContent";
+    value = if(
+      eq($value, "focus"),
+      "The leaf is emphasized; other details recede in this illustration. This does not measure your attention.",
+      "The broad view keeps several relationships available."
+    )
+  } → _

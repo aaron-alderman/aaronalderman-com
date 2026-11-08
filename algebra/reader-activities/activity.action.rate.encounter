@@ -1,0 +1,40 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.rate:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port number.parse { value = $value } → index
+  let rate = at($data.reportedRates, $index)
+  port browser.select { selector = "[data-world=\"rate\"]" } → buttons
+  each $buttons as choice:
+    port browser.attribute {
+      ref = $choice.ref;
+      name = "aria-pressed";
+      value = eq($choice.ref.handle, $button.ref.handle)
+    } → _
+  port number.calculate { operation = "multiply"; values = list($rate.overlap, 100) } → overlap
+  port number.calculate { operation = "multiply"; values = list($rate.loss, 100) } → loss
+  port number.format { value = $overlap; digits = 2 } → overlapText
+  port number.format { value = $loss; digits = 2 } → lossText
+  port browser.write { ref = "#rate-overlap"; name = "textContent"; value = concat($overlapText, "%") } → _
+  port browser.write { ref = "#rate-loss"; name = "textContent"; value = concat($lossText, "%") } → _
+  port browser.style { ref = "#overlap-bar"; name = "width"; value = concat($overlap, "%") } → _
+  port browser.style { ref = "#loss-bar"; name = "width"; value = concat($loss, "%") } → _
+  port browser.write {
+    ref = ".world-result";
+    name = "textContent";
+    value = if(
+      eq($rate.rate, 8),
+      "Setting 8 gives the largest return in the wanted form among these four tested settings.",
+      concat(
+        "Setting ",
+        $rate.rate,
+        ": return in the wanted form ",
+        $overlapText,
+        "%, loss ",
+        $lossText,
+        "%. The source includes the other measurements too."
+      )
+    )
+  } → _

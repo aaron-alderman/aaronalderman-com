@@ -1,0 +1,383 @@
+process-module "temple/surface-process-module/1"
+
+process check.single:
+  call check.candidate
+  port mechanism.call { target = $front; method = "link"; args = list(list($candidate)); keep = true } → linked
+  port mechanism.call { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("example") }); keep = true } → admitted
+
+process test.audit.regex-isolation-and-recovery:
+  call check.pure
+  port mechanism.ports { groups = list("value") } → nativePorts
+  port mechanism.call { target = $frontModule; method = "createFrontDoor"; args = list({ profiles = { pure = list("text.matches") }; ports = $nativePorts; basis = "local-audit-regex"; limit = 1000 }); keep = true } → front
+  let body = "  try:\n    port text.matches { value = \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!\"; pattern = \"^(a+)+$\" } → result\n  catch fault:\n    let result = \"caught\""
+  call check.single
+  let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+  let pattern = null
+  call check.refusal
+  assert eq($result.code, "TEMPLE-NATIVE-LIMIT")
+    otherwise "Guest catch swallowed the native worker deadline."
+  let body = "  port text.matches { value = \"safe\"; pattern = \"^safe$\" } → result"
+  call check.single
+  let options = {}
+  call check.run
+  assert eq($result, true)
+    otherwise "Regex service failed to recover after terminating a hostile worker."
+  port mechanism.ports { groups = list("value", "computation") } → raw
+  each list("text.matches", "text.replace", "text.match", "text.matchAll") as name:
+    port mechanism.get { target = $raw; key = $name; keep = true } → method
+    let operation = { target = $method; args = list({ value = "safe"; pattern = "x" }) }
+    let pattern = "Isolated regex transport required"
+    call check.refusal
+
+process fixture.dom-write:
+  let result = null
+
+process test.audit.meta-refresh-before-dom:
+  call check.pure
+  port mechanism.callback { query = "fixture.dom-write" } → setter
+  port mechanism.callback { query = "fixture.null" } → noop
+  port mechanism.object { value = { localName = "meta"; attributes = list({ name = "http-equiv"; value = "refresh" }); setAttribute = $setter; removeAttribute = $noop } } → element
+  port mechanism.callback { query = "fixture.value"; bindings = { value = list($element) } } → queryAll
+  port mechanism.object { value = { baseURI = "https://publication.invalid/"; querySelectorAll = $queryAll } } → document
+  port mechanism.load { module = "markup-ceiling.cjs" } → ceiling
+  port mechanism.call { target = $ceiling; method = "browser"; args = list($document); keep = true } → markup
+  port mechanism.set { target = $document; key = "markup"; value = $markup } → ignored
+  port mechanism.load { module = "ports/browser-effects.cjs" } → browserModule
+  port mechanism.call { target = $browserModule; method = "browserEffects"; args = list({ document = $document; markup = $markup }, $noop); keep = true } → ports
+  port mechanism.call { target = $frontModule; method = "createFrontDoor"; args = list({ profiles = { pure = list("browser.attribute") }; ports = $ports; basis = "local-audit-meta" }); keep = true } → front
+  let body = "  port browser.attribute { ref = \"#redirect\"; name = \"content\"; value = \"0;url=https://outside.invalid/\" } → result"
+  call check.single
+  let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+  let pattern = "Meta refresh mutation refused"
+  call check.refusal
+  port mechanism.trace {} → trace
+  assert eq(count(filter($trace, "t", eq($t.query, "fixture.dom-write"))), 0)
+    otherwise "Refused refresh reached a DOM setter."
+
+process test.audit.fact-accessors:
+  call check.pure
+  let body = "  let result = true"
+  call check.single
+  port mechanism.load { module = "Object" } → objectModule
+  port mechanism.callback { query = "fixture.value"; bindings = { value = "s" } } → getter
+  port mechanism.object { value = { p = "p"; o = "o" } } → fact
+  port mechanism.call { target = $objectModule; method = "defineProperty"; args = list($fact, "s", { get = $getter; enumerable = true }); keep = true } → fact
+  let operation = { target = $front; method = "run"; args = list($admitted, "example", { facts = list($fact) }) }
+  let pattern = null
+  call check.refusal
+  port mechanism.trace {} → trace
+  assert eq(count($trace), 0)
+    otherwise "Fact descriptor checks invoked an untrusted accessor."
+
+process test.audit.compiler-boundary:
+  call check.pure
+  each list("bootstrap/encounter-admission.cjs", "bootstrap/encounter-syntax.cjs") as file:
+    port file.read { file = $file } → text
+    port text.matches { value = $text; pattern = "function validateProgramme|function lowerQueries|new RegExp|syntaxMechanisms" } → nativePolicy
+    assert not($nativePolicy)
+      otherwise "Forwarding front door regained native compilation or admission policy."
+  let text = "process-module \"temple/surface-process-module/1\"\nprocess audit:\n  let result = true\n"
+  port digest.sha256 { text = $text } → hash
+  port mechanism.call { target = $policy; method = "compute"; args = list("foundation.compile", { file = "audit/basis.encounter"; text = $text; expectedTextSha256 = $hash; expectedBasis = "forged" }) } → forged
+  assert and(eq($forged.value.ok, false), eq($forged.value.diagnostic.code, "PROC-TEXT-BASIS"))
+    otherwise "Compiler trusted a caller-supplied basis identity."
+  each list(".local-qualified-01", "dist", "verify-build", ".migration-old", "node_modules") as input:
+    let facts = list({ s = "local"; p = "entry"; o = "audit" }, { s = "local"; p = "output"; o = ".local-audit" }, { s = "local"; p = "requireZeroJson"; o = "true" }, { s = "local"; p = "input"; o = $input })
+    let operation = { target = $policy; method = "compute"; args = list("host.declaration", { facts = $facts }) }
+    let pattern = "Generated outputs and retired code"
+    call check.refusal
+  let operation = { target = $policy; method = "compute"; args = list("foundation.sourceIdentity", { file = ".local-qualified-01/source/probe.encounter" }) }
+  let pattern = "source identity"
+  call check.refusal
+
+process test.audit.refresh-linear-time:
+  port mechanism.load { module = "markup-observer.cjs" } → observer
+  port mechanism.load { module = "node:perf_hooks" } → perfModule
+  port mechanism.get { target = $perfModule; key = "performance"; keep = true } → performance
+  port mechanism.call { target = " "; method = "repeat"; args = list(100000) } → spaces
+  port mechanism.call { target = $performance; method = "now" } → began
+  port mechanism.call { target = $observer; method = "admitMarkup"; args = list(concat("<meta http-equiv=\"refresh\" content=\"0;url=x", $spaces, "y\">")) } → accepted
+  assert eq($accepted, true)
+    otherwise "Qualified long refresh refused."
+  let operation = { target = $observer; method = "admitMarkup"; args = list(concat("<meta http-equiv=\"refresh\" content=\"0;url=x", $spaces, "\ny\">")) }
+  let pattern = "Unqualified document refresh"
+  call check.refusal
+  port mechanism.call { target = $performance; method = "now" } → ended
+  port number.calculate { operation = "subtract"; values = list($ended, $began) } → elapsed
+  port number.calculate { operation = "less"; values = list($elapsed, 2000) } → bounded
+  assert $bounded
+    otherwise "Private refresh admission stalled beyond two seconds."
+
+process fixture.runtime-publish:
+  port mechanism.copy { target = at($args, 0) } → file
+  port mechanism.call { target = at($args, 2); method = "authorize"; args = list("host.path", { value = $file }) } → ignored
+  let result = null
+
+process audit.runtime-caller:
+  port mechanism.call { target = $frontModule; method = "createFrontDoor"; args = list({ profiles = { pure = list("runtime.bundle") }; ports = { "runtime.bundle" = $bundle }; basis = "audit-runtime-caller"; limit = $limit }); keep = true } → front
+  let body = "  port runtime.bundle { entry = \"browser.probe\"; mode = \"browser\"; queries = list(\"browser.probe\") } → result"
+  call check.single
+
+process audit.shared:
+  port record.entries { value = $after } → checks
+  fold $checks as pair; steps starts 0:
+    let query = at($pair, 0)
+    let actual = at($pair, 1)
+    let prior = at($before, $query)
+    let prior = if($prior, $prior, { calls = 0; sharedCaller = 0; totalSteps = 0 })
+    port number.calculate { operation = "subtract"; values = list($actual.calls, $prior.calls) } → calls
+    port number.calculate { operation = "subtract"; values = list($actual.sharedCaller, $prior.sharedCaller) } → shared
+    assert eq($calls, $shared)
+      otherwise "Nested runtime policy call did not share the caller counter."
+    port number.calculate { operation = "subtract"; values = list($actual.totalSteps, $prior.totalSteps) } → measured
+    yield add($steps, $measured) → result
+
+process test.audit.runtime-shared-budget:
+  call check.pure
+  let text = "process-module \"temple/surface-process-module/1\"\nprocess browser.probe:\n  let result = 1\n"
+  port digest.sha256 { text = $text } → hash
+  port mechanism.callback { query = "fixture.runtime-publish" } → publish
+  port mechanism.load { module = "hosts/source-runtime.cjs" } → runtimeModule
+  port mechanism.call { target = $runtimeModule; method = "createSourceRuntime"; args = list({ sources = list({ file = "audit/browser.encounter"; text = $text; sha256 = $hash; queries = list("browser.probe") }); facts = list(); profiles = { browser = list() }; basis = "audit-runtime-budget"; publishSource = $publish }); keep = true } → bundle
+  let limit = 200000
+  call audit.runtime-caller
+  port mechanism.get { target = $policy; key = "measurements" } → before
+  let options = {}
+  call check.run
+  let callerSteps = $execution.usage.steps
+  port mechanism.get { target = $policy; key = "measurements" } → after
+  call audit.shared
+  port number.calculate { operation = "greaterEqual"; values = list($callerSteps, $result) } → bounded
+  port number.calculate { operation = "greater"; values = list($result, 2000) } → exercised
+  port mechanism.trace {} → trace
+  let published = count(filter($trace, "t", eq($t.query, "fixture.runtime-publish")))
+  assert and($bounded, $exercised, not(eq($published, 0)))
+    otherwise "Runtime qualification failed to account source publication in the caller budget."
+  let limit = 2000
+  call audit.runtime-caller
+  port mechanism.get { target = $policy; key = "measurements" } → before
+  let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+  let pattern = null
+  call check.refusal
+  assert eq($result.code, "TEMPLE-K001")
+    otherwise "Low-budget runtime qualification must exhaust the caller."
+  port mechanism.get { target = $policy; key = "measurements" } → after
+  port number.calculate { operation = "greater"; values = list(at(at($after, "foundation.admit"), "calls"), at(at($before, "foundation.admit"), "calls")) } → accounted
+  assert $accounted
+    otherwise "Refused qualification was not accounted."
+  call audit.shared
+  port mechanism.trace {} → trace
+  assert eq(count(filter($trace, "t", eq($t.query, "fixture.runtime-publish"))), $published)
+    otherwise "Exhausted qualification published source."
+
+process audit.receipt:
+  call check.manifest
+  port file.list { directory = concat($output, "/receipts"); recursive = true } → files
+  fold $files as file; executions starts list():
+    port text.matches { value = $file; pattern = "/execution\\.rel$" } → execution
+    yield if($execution, append($executions, list($file)), $executions) → executions
+  assert eq(count($executions), 1)
+    otherwise "Selected canonical output must have exactly one completed execution receipt."
+  let receiptFile = concat($output, "/receipts/", at($executions, 0))
+  port file.read { file = $receiptFile } → encoded
+  port rel.decode { text = $encoded } → receipt
+
+process test.publication.source-artifact-identity:
+  call check.pure
+  call audit.receipt
+  port mechanism.get { target = $policy; key = "basis" } → policyBasis
+  assert and(eq($receipt.zeroJsonFiles, 0), eq($receipt.policyBasis, $policyBasis))
+    otherwise "Publication receipt belongs to another policy or contains JSON files."
+  port record.entries { value = $receipt.basisSources } → native
+  port record.entries { value = $receipt.sources } → sources
+  let all = append(append($native, $sources), map($receipt.policySources, "s", list($s.file, $s.sha256)))
+  each $all as identity:
+    port diagnostic.context { value = at($identity, 0) } → ignored
+    port file.digest { file = at($identity, 0) } → digest
+    assert eq($digest, at($identity, 1))
+      otherwise "Captured native basis, policy or publication input drifted."
+  port record.entries { value = $receipt.artifacts } → artifacts
+  each $artifacts as identity:
+    port diagnostic.context { value = at($identity, 0) } → ignored
+    port file.digest { file = concat($output, "/", at($identity, 0)) } → digest
+    assert eq($digest, at($identity, 1))
+      otherwise "Recorded publication artifact drifted."
+
+process test.publication.budgets:
+  call audit.receipt
+  each $receipt.phases as phase:
+    port diagnostic.context { value = $phase.entry } → ignored
+    port number.calculate { operation = "lessEqual"; values = list($phase.usage.steps, 20000000) } → bounded
+    assert and($bounded, eq($phase.usage.limit, 20000000), $phase.policyChecks)
+      otherwise "Publication phase lacks original limits or policy accounting."
+    port record.entries { value = $phase.policyChecks } → checks
+    fold $checks as pair; steps starts 0:
+      let check = at($pair, 1)
+      assert eq($check.calls, $check.sharedCaller)
+        otherwise "Publication phase contains an unshared nested policy call."
+      yield add($steps, $check.steps) → measured
+    port number.calculate { operation = "lessEqual"; values = list($measured, $phase.usage.steps) } → bounded
+    assert $bounded
+      otherwise "Policy work exceeds reported phase usage."
+  port record.entries { value = $receipt.policyChecks } → checks
+  each $checks as pair:
+    let check = at($pair, 1)
+    port number.calculate { operation = "lessEqual"; values = list($check.maxSteps, 20000000) } → bounded
+    assert $bounded
+      otherwise "Policy computation exceeded its original per-call limit."
+
+process test.publication.projection-closure:
+  call audit.receipt
+  assert eq($receipt.projectionProtocol, "aaronalderman/common-projection/1")
+    otherwise "Canonical publication lacks the common projection protocol."
+  port record.entries { value = $receipt.artifacts } → artifacts
+  fold $artifacts as identity; pages starts 0:
+    let name = at($identity, 0)
+    port text.matches { value = $name; pattern = "\\.(?:html|css|xml)$" } → projected
+    port text.matches { value = $name; pattern = "\\.html$" } → page
+    when $projected:
+      port diagnostic.context { value = $name } → ignored
+      let projection = at($receipt.projectedArtifacts, $name)
+      port text.matches { value = $name; pattern = "\\.css$" } → stylesheet
+      assert and($projection, eq($projection.kind, if($stylesheet, "stylesheet", "markup")), eq($projection.sha256, at($identity, 1)), eq($projection.policyBasis, $receipt.policyBasis))
+        otherwise "Artifact lacks its exact common projection identity."
+      port text.matches { value = $projection.treeSha256; pattern = "^[a-f0-9]{64}$" } → treeIdentity
+      assert $treeIdentity
+        otherwise "Projection lacks a structured tree identity."
+    yield add($pages, if($page, 1, 0)) → pages
+  assert not(eq($pages, 0))
+    otherwise "Publication has no canonical HTML routes."
+  each filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "module"))) as module:
+    port file.read { file = $module.o } → source
+    port text.matches { value = $source; pattern = "^process (?:(?:html|publication)\\.serialize|identity\\.journey\\.rebase):"; flags = "m" } → legacy
+    assert not($legacy)
+      otherwise "A legacy HTML emitter remains selected."
+  port record.entries { value = $receipt.sources } → sources
+  each $sources as source:
+    port text.matches { value = at($source, 0); pattern = "\\.html?$"; flags = "i" } → raw
+    assert not($raw)
+      otherwise "Raw HTML remains a publication authoring input."
+
+process test.boundary.files:
+  port file.list { recursive = true; details = true } → files
+  each $files as entry:
+    port diagnostic.context { value = $entry.file } → ignored
+    assert not($entry.link)
+      otherwise "Workspace inventory encountered a symbolic link."
+    port text.lowerCase { value = $entry.file } → lower
+    port text.slice { value = $lower; start = -4 } → suffix4
+    port text.slice { value = $lower; start = -3 } → suffix3
+    port text.slice { value = $lower; start = -5 } → suffix5
+    port text.indexOf { value = $entry.file; search = "bootstrap/" } → bootstrapStart
+    assert or(not(eq($suffix4, ".mjs")), eq($bootstrapStart, 0))
+      otherwise "An mjs file exists outside bootstrap."
+    let native = or(includes(list(".cjs", ".mjs"), $suffix4), eq($suffix3, ".js"))
+    when or($native, eq($suffix4, ".txt"), eq($suffix5, ".json")):
+      port text.matches { value = $entry.file; pattern = "\\.json$|\\.(?:mjs|cjs|js|json)\\.txt$|\\.(?:test|spec)\\.(?:mjs|cjs|js)$"; flags = "i" } → hidden
+      assert not($hidden)
+        otherwise "Native test, JSON file or disguised executable remains in the worktree."
+    port text.indexOf { value = $entry.file; search = ".local-" } → generatedStart
+    port text.indexOf { value = $entry.file; search = "bootstrap/vendor/" } → dependencyStart
+    when and($native, not(eq($generatedStart, 0)), not(eq($dependencyStart, 0))):
+      port file.read { file = $entry.file } → source
+      port text.matches { value = $source; pattern = "(?:require\\s*\\(|from)\\s*['\"](?:node:)?(?:test|assert)(?:/strict)?['\"]" } → nativeTest
+      assert not($nativeTest)
+        otherwise "Native source imports a test framework or assertion library."
+  call check.manifest
+  let ids = map(filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "resource"))), "f", $f.o)
+  each filter($declaration, "f", or(and(eq($f.s, "local"), includes(list("module", "factSource", "input"), $f.p)), and(includes($ids, $f.s), eq($f.p, "source")))) as fact:
+    port file.exists { file = $fact.o } → exists
+    assert $exists
+      otherwise "Declared source target is missing."
+    port text.matches { value = $fact.o; pattern = "^\\.local-" } → generated
+    assert not($generated)
+      otherwise "Generated output selected as a source."
+
+process test.retention.single-process-owners:
+  call application.sources
+  fold $sources as source; names starts list():
+    port record.entries { value = $source.queries } → entries
+    let selected = map($entries, "p", at($p, 0))
+    assert not(some($selected, "n", includes($names, $n)))
+      otherwise "Selected application process has competing owners."
+    yield append($names, $selected) → names
+
+  port rel.read { file = "bootstrap/foundation.rel" } → foundation
+  let selected = map(filter($foundation, "f", and(eq($f.s, "foundation"), eq($f.p, "module"))), "f", $f.o)
+  fold $selected as file; names starts list():
+    port file.read { file = $file } → text
+    port mechanism.call { target = $syntaxModule; method = "parseEncounter"; args = list($text, $file) } → parsed
+    port record.entries { value = $parsed.queries } → entries
+    let selected = map($entries, "p", at($p, 0))
+    assert not(some($selected, "n", includes($names, $n)))
+      otherwise "Selected foundation process has competing owners."
+    yield append($names, $selected) → names
+
+process test.zz.source-stability:
+  each $eventInput.snapshot as identity:
+    port diagnostic.context { value = $identity.file } → ignored
+    port file.digest { file = $identity.file } → actual
+    assert eq($actual, $identity.sha256)
+      otherwise "Test, policy or canonical declaration changed during this run."
+
+process test.retention.file-owners:
+  call check.manifest
+  # The dated register is comparison evidence for existing file purposes. It
+  # grants no authoring or admission authority. New owners are explicit below.
+  port rel.read { file = "verification/retention-register.rel" } → prior
+  port record.fromEntries { entries = map(filter($prior, "f", eq($f.p, "sourceOfTruth")), "f", list($f.s, $f.o)) } → priorOwners
+  port record.fromEntries { entries = map(filter($prior, "f", eq($f.p, "disposition")), "f", list($f.s, $f.o)) } → priorDispositions
+  let selected = map(filter($declaration, "f", and(eq($f.s, "local"), includes(list("module", "factSource"), $f.p))), "f", $f.o)
+  port record.entries { value = $aliases } → resources
+  let selected = append($selected, map($resources, "e", at($e, 1)))
+  port file.list { recursive = true } → files
+  each $files as file:
+    port text.indexOf { value = $file; search = ".local-" } → generated
+    when not(eq($generated, 0)):
+      port diagnostic.context { value = $file } → ignored
+      let owner = at($priorOwners, $file)
+      port text.matches { value = $file; pattern = "^(?:verification/|bootstrap/|assets/|temple/|sourcery/|retained/|LICENSES/|tooling/|source/values/|source/projection/)" } → knownArea
+      when and(not($owner), or($knownArea, includes($selected, $file))):
+        let owner = $file
+      port text.indexOf { value = $file; search = "evidence/projection-components/" } → componentEvidence
+      when eq($componentEvidence, 0):
+        let owner = "source/projection/components.rel"
+      port text.matches { value = $file; pattern = "^source/assurance/(?:browser-capture\\.rel|observations/[a-z0-9-]+\\.rel)$" } → browserEvidence
+      when $browserEvidence:
+        let owner = "source/assurance/publication.encounter"
+      when includes(list(".github/workflows/pages.yml", ".github/workflows/authoring-provenance.yml"), $file):
+        let owner = "bootstrap/publication.rel"
+      port text.indexOf { value = $file; search = "bootstrap/test-data/" } → testData
+      when eq($testData, 0):
+        let owner = "verification/tests/front-door.encounter"
+      assert $owner
+        otherwise "Retained file has no stated owner or classified purpose."
+      port file.exists { file = $owner } → exists
+      assert $exists
+        otherwise "Retained file points at a missing owner."
+      assert not(includes(list("requires-review", "separate-evidence-on-next-manifest-revision", "retire-after-active-reading-work", "review-provenance-after-active-work"), at($priorDispositions, $file)))
+        otherwise "Unresolved separation or provenance disposition remains."
+  each filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "input"))) as inputRoot:
+    port text.indexOf { value = $output; search = concat($inputRoot.o, "/") } → nested
+    assert not(eq($nested, 0))
+      otherwise "Selected output is nested inside an authoring input root."
+
+process check.publication.inventory:
+  let result = every($inventoryFiles, "file", includes($inventoryAllowed, $file))
+
+process test.publication.complete-inventory:
+  call audit.receipt
+  port record.entries { value = $receipt.artifacts } → entries
+  let inventoryAllowed = map($entries, "entry", at($entry, 0))
+  port text.replaceAll { value = at($executions, 0); search = "/execution.rel"; replacement = "" } → executionId
+  let receiptFiles = map(list("admission.rel", "execution.rel", "fact-index.rel"), "file", concat("receipts/", $executionId, "/", $file))
+  let inventoryAllowed = distinct(append($inventoryAllowed, $receiptFiles))
+  port file.list { directory = $output; recursive = true } → inventoryFiles
+  call check.publication.inventory
+  port diagnostic.context { value = { unknown = filter($inventoryFiles, "file", not(includes($inventoryAllowed, $file))); actual = count($inventoryFiles); expected = count($inventoryAllowed); execution = $executionId } } → ignored
+  assert and($result, eq(count($inventoryFiles), count($inventoryAllowed)))
+    otherwise "Canonical output contains an unrecorded or missing file."
+  let inventoryFiles = append($inventoryFiles, list("unissued.css"))
+  call check.publication.inventory
+  assert not($result)
+    otherwise "An unrecorded stylesheet passed the publication inventory gate."

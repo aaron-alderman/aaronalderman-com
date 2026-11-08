@@ -1,0 +1,345 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process readerworkshop.build:
+  port file.copy { path = "source/reader/navigation.values.rel" } → _
+  port file.read { path = "source/reader/navigation.values.rel" } → sourceText
+  port static.read { text = $sourceText } → navigation
+  port file.copy { path = "source/reader/source-receipts.values.rel" } → _
+  port file.read { path = "source/reader/source-receipts.values.rel" } → sourceText
+  port static.read { text = $sourceText } → readerReceipts
+  fold subjects("isa", "SourceNote") as note; notes starts list():
+    port text.slice { value = $note; start = 5 } → sourceKey
+    yield append(
+    $notes,
+    list(
+      {
+        id = $note;
+        title = one($note, "title");
+        kind = one($note, "kind");
+        note = one($note, "note");
+        paragraphs = objects($note, "paragraph");
+        href = optional($note, "href");
+        receipt = or(at($readerReceipts, $sourceKey), null)
+      }
+    )
+  ) → notes
+  port file.copy { path = "source/reader/activities.values.rel" } → _
+  port file.read { path = "source/reader/activities.values.rel" } → sourceText
+  port static.read { text = $sourceText } → activities
+  let input = $activities
+  call stylesheet.activities
+  let activities = $result
+  port file.copy { path = "source/workshop/provenance.values.rel" } → _
+  port file.read { path = "source/workshop/provenance.values.rel" } → sourceText
+  port static.read { text = $sourceText } → provenance
+  port record.fromEntries {
+    entries = map(
+      subjects("isa", "Place"),
+      "place",
+      list(
+        one($place, "slug"),
+        {
+          region = one($place, "region");
+          title = one($place, "title");
+          lead = one($place, "lead");
+          light = one($place, "light");
+          sourceTitle = one(one($place, "source"), "title")
+        }
+      )
+    )
+  } → places
+  let readerData = {
+    ids = map(subjects("isa", "Place"), "place", one($place, "slug"));
+    places = $places;
+    echoes = $activities.echoes;
+    notes = $notes;
+    navigation = $navigation
+  }
+  port runtime.bundle {
+    entry = "reader.boot";
+    mode = "browser";
+    grantProfile = "readerBrowser";
+    queries = list(
+      "reader.boot",
+      "reader.motion.sync",
+      "reader.route",
+      "reader.click",
+      "reader.atlas",
+      "reader.search",
+      "reader.notes",
+      "html.escape",
+      "projection.serialize",
+      "html.observe",
+      "html.inspect",
+      "html.cssText",
+      "reader.hashLink",
+      "reader.skip",
+      "reader.backdrop"
+    );
+    factSubjects = list();
+    data = $readerData;
+    budget = 20000000
+  } → bundle
+  port file.write { path = "reader/runtime.js"; text = $bundle } → _
+  port record.fromEntries { entries = map($notes, "note", list($note.id, $note)) } → sourceNotes
+  port record.put { record = $activities; key = "notes"; value = $sourceNotes } → activities
+  port runtime.bundle {
+    entry = "activity.boot";
+    mode = "browser";
+    grantProfile = "activityBrowser";
+    queries = append(
+      append(
+        list(
+          "reader.model.calibration",
+          "reader.model.pairs",
+          "reader.model.inflate",
+          "reader.model.decode",
+          "reader.model.weights",
+          "reader.model.memory",
+          "reader.model.line",
+          "reader.model.coarse",
+          "activity.boot",
+          "activity.motion",
+          "activity.calculations",
+          "activity.click",
+          "activity.input",
+          "activity.action.reply",
+          "activity.action.door",
+          "activity.action.quiet",
+          "activity.action.cabinet",
+          "activity.action.layer",
+          "activity.action.revision",
+          "activity.action.deck",
+          "activity.action.garden-mode",
+          "activity.garden",
+          "activity.action.gate",
+          "activity.action.hide-memory",
+          "activity.action.couple-memory",
+          "activity.action.origin",
+          "activity.action.enrich",
+          "activity.erasure",
+          "activity.action.attention",
+          "activity.action.inflate",
+          "activity.action.reset-pattern",
+          "activity.action.original-bit",
+          "activity.action.flip-bit",
+          "activity.code",
+          "activity.action.rate",
+          "activity.action.scale",
+          "activity.action.amplitude",
+          "activity.action.phase",
+          "activity.action.loop-reset",
+          "activity.action.loop",
+          "activity.loop.frame",
+          "html.escape",
+          "projection.serialize",
+          "html.observe",
+          "html.inspect",
+          "html.cssText",
+          "activity.source",
+          "activity.source.close",
+          "activity.source.backdrop",
+          "activity.standard.boot",
+          "household.person",
+          "household.evaluate",
+          "household.assents",
+          "household.better",
+          "household.negotiate",
+          "household.patchPerson",
+          "household.patch",
+          "household.override",
+          "household.experiencePatch",
+          "household.feedback"
+        ),
+        list(
+          "household.period",
+          "household.run",
+          "household.scenario",
+          "household.boot",
+          "household.rebuild",
+          "household.sync",
+          "household.change",
+          "household.click",
+          "household.render"
+        )
+      ),
+      list(
+        "household.gog.plan",
+        "household.chart.changes",
+        "household.chart.render",
+        "household.chart.select",
+        "household.chart.resize"
+      )
+    );
+    factSubjects = list();
+    data = $activities;
+    budget = 20000000
+  } → bundle
+  port file.write { path = "reader/activity-runtime.js"; text = $bundle } → _
+  port file.copy { path = "source/encounter/example.values.rel" } → _
+  port file.read { path = "source/encounter/example.values.rel" } → sourceText
+  port static.read { text = $sourceText } → workshopInputs
+  fold list(
+    { query = "ec.resolve"; file = "algebra/encounter-code-runtime/ec.resolve.encounter" },
+    { query = "ec.patch"; file = "algebra/encounter-code-runtime/ec.patch.encounter" },
+    { query = "projection.serialize"; file = "source/projection/composition.encounter" },
+    { query = "lab.edit"; file = "algebra/workshop-lab/lab.edit.encounter" },
+    { query = "ec.run"; file = "algebra/encounter-code-runtime/ec.run.encounter" },
+    { query = "workshop.change"; file = "algebra/workshop-session/workshop.change.encounter" },
+    { query = "workshop.snapshot"; file = "algebra/workshop-session/workshop.snapshot.encounter" }
+  ) as selection; processes starts {}:
+    port file.read { path = $selection.file } → sourceText
+    port encounter.inspect { text = $sourceText; file = $selection.file } → source
+    port record.put { record = $processes; key = $selection.query; value = at($source.queries, $selection.query) } → processes
+    yield $processes → processes
+  port file.copy { path = "source/encounter/presentation.values.rel" } → _
+  port file.read { path = "source/encounter/presentation.values.rel" } → presentationJSON
+  port static.read { text = $presentationJSON } → workshopPresentation
+  port runtime.bundle {
+    entry = "workshop.boot";
+    mode = "browser";
+    grantProfile = "workshopBrowser";
+    queries = append(
+      list(
+        "source.rel",
+        "source.compile",
+        "source.encode",
+        "source.patch",
+        "source.jsonSpan",
+        "facts.index",
+        "lower.scan",
+        "lower.fresh",
+        "lower.template",
+        "lower.expression",
+        "lower.programme",
+        "lower.model",
+        "lower.start",
+        "admit.binding",
+        "admit.expression",
+        "admit.programme",
+        "admit.model",
+        "admit.effects.programme",
+        "admit.effects",
+        "admit.ownership",
+        "html.escape",
+        "projection.serialize",
+        "html.observe",
+        "html.inspect",
+        "html.cssText",
+        "ec.schema",
+        "ec.slot",
+        "ec.scalar",
+        "ec.check",
+        "ec.referenceType",
+        "ec.fact",
+        "ec.reference",
+        "ec.argument",
+        "ec.lex",
+        "ec.header",
+        "ec.expression",
+        "ec.fields",
+        "ec.data",
+        "ec.record",
+        "ec.representation",
+        "ec.view",
+        "ec.edits",
+        "ec.show",
+        "ec.emitView",
+        "ec.emitRepresentation",
+        "ec.compile",
+        "ec.attempt",
+        "ec.complete",
+        "ec.verifyShow",
+        "ec.verify",
+        "ec.oneField",
+        "ec.prepare",
+        "ec.resolve",
+        "ec.safeTree",
+        "ec.events",
+        "ec.run",
+        "ec.patch",
+        "ec.findElement",
+        "language.refuse",
+        "language.line",
+        "language.module",
+        "language.entity",
+        "language.property"
+      ),
+      list(
+        "language.compile",
+        "lab.snapshot",
+        "lab.edit",
+        "workshop.boot",
+        "workshop.snapshot",
+        "workshop.change",
+        "workshop.diff",
+        "workshop.apply",
+        "workshop.selectTab",
+        "workshop.tab",
+        "workshop.key",
+        "workshop.source",
+        "workshop.routeFor",
+        "workshop.route",
+        "workshop.process",
+        "workshop.render",
+        "workshop.open",
+        "sp.role",
+        "sp.scan",
+        "sp.observed",
+        "sp.clip",
+        "sp.line",
+        "sp.render",
+        "sp.present",
+        "sp.expression",
+        "sp.programme",
+        "sp.statement",
+        "sp.listing",
+        "sp.style",
+        "sp.outline",
+        "sp.metadata",
+        "sp.stylePlan",
+        "source.split",
+        "source.lex",
+        "s01.portable",
+        "css.renderPlan",
+        "workshop.busy"
+      )
+    );
+    factSubjects = list();
+    data = {
+      inputs = $workshopInputs;
+      hashes = $provenance.hashes;
+      processes = $processes;
+      presentation = $workshopPresentation
+    };
+    budget = 20000000
+  } → bundle
+  port file.write { path = "workshop/runtime.js"; text = $bundle } → _
+  port file.write { path = "retained/workshop/runtime.js"; text = $bundle } → _
+  let readerBase = "./"
+  call projection.reader
+  let surfaceWritePath = "reader.html"
+  call assurance.surface.register
+  port file.write { path = "reader.html"; text = $result } → _
+  let readerBase = "../"
+  call projection.reader
+  let surfaceWritePath = "retained/index.html"
+  call assurance.surface.register
+  port file.write { path = "retained/index.html"; text = $result } → _
+  call projection.activity
+  let surfaceWritePath = "retained/activity.html"
+  call assurance.surface.register
+  port file.write { path = "retained/activity.html"; text = $result } → _
+  each list({ route = "workshop/index.html"; back = "../reader.html#workshop" }, { route = "retained/workshop/index.html"; back = "../../reader.html#workshop" }) as page:
+    let component = "projection.workshop"
+    let readerReturn = $page.back
+    call projection.registeredComponent
+    let surfaceWritePath = $page.route
+    call assurance.surface.register
+    port file.write { path = $page.route; text = $result } → _
+  port file.copy { path = "source/workshop/README.txt" } → _
+  port file.read { path = "source/workshop/README.txt" } → workshopReadme
+  port file.write { path = "workshop/README.txt"; text = $workshopReadme } → _
+  port file.write { path = "retained/workshop/README.txt"; text = $workshopReadme } → _
+  call household.publication.build

@@ -1,0 +1,38 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.boot:
+  port browser.on {
+    ref = "#household-root";
+    event = "input";
+    delegate = "#hh-period-slider";
+    query = "household.chart.select";
+    input = {  }
+  } → _
+  port browser.on { ref = "window"; event = "resize"; query = "household.chart.resize"; input = {  } } → _
+  port state.set { key = "hh-orientation"; value = "roles" } → hp135
+  port state.set { key = "hh-change"; value = "values" } → hp136
+  port state.set { key = "hh-profile"; value = "constructive" } → hp137
+  port state.set { key = "hh-enabled"; value = true } → hp138
+  port state.set { key = "hh-person"; value = "A" } → hp139
+  port state.set { key = "hh-phase"; value = "initial" } → hp140
+  port state.set { key = "hh-period"; value = 5 } → hp141
+  port state.set { key = "hh-overrides"; value = list() } → hp142
+  port browser.on {
+    ref = "#household-root";
+    event = "change";
+    delegate = "input,select";
+    query = "household.change";
+    input = {  }
+  } → hp143
+  port browser.on {
+    ref = "#household-root";
+    event = "click";
+    delegate = "button";
+    query = "household.click";
+    input = {  }
+  } → hp144
+  port kernel.invoke { query = "household.rebuild"; input = {  } } → hq145
+  port browser.select { selector = "#household-root input,#household-root select,#household-root button" } → controls
+  each $controls as control:
+    port browser.write { ref = $control.ref; name = "disabled"; value = false } → _

@@ -1,0 +1,5 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process atlas.seen.clean:
+  let clean = distinct(filter($candidate, "id", includes($data.ids, $id)))

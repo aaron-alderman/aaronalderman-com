@@ -1,0 +1,115 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.gog.plan:
+  let view = $eventInput.view
+  assert eq($view.frame, "cartesian")
+    otherwise "HH-GOG-001: This projection requires a cartesian frame."
+  let frame = {
+    width = $eventInput.width;
+    height = 244;
+    left = 38;
+    right = 14;
+    top = 20;
+    bottom = 190
+  }
+  port number.calculate { operation = "subtract"; values = list($frame.width, $frame.left) } → hn136
+  port number.calculate { operation = "subtract"; values = list($hn136, $frame.right) } → hn135
+  let xRange = $hn135
+  port number.calculate { operation = "subtract"; values = list($frame.bottom, $frame.top) } → hn137
+  let yRange = $hn137
+  let xMin = at($view.encoding.x.domain, 0)
+  let xMax = at($view.encoding.x.domain, 1)
+  let yMin = at($view.encoding.y.domain, 0)
+  let yMax = at($view.encoding.y.domain, 1)
+  fold $view.facet.values as person; facets starts list():
+    let rows = filter($eventInput.data, "r", eq(at($r, $view.facet.field), $person))
+    let selected = at(filter($rows, "r", eq(at($r, $view.encoding.x.field), $eventInput.period)), 0)
+    fold $rows as r; geometry starts { path = ""; points = list() }:
+      port number.calculate { operation = "subtract"; values = list(at($r, $view.encoding.x.field), $xMin) } → hn142
+      port number.calculate { operation = "subtract"; values = list($xMax, $xMin) } → hn143
+      port number.calculate { operation = "divide"; values = list($hn142, $hn143) } → hn141
+      port number.calculate { operation = "multiply"; values = list($hn141, $xRange) } → hn140
+      port number.calculate { operation = "add"; values = list($frame.left, $hn140) } → hn139
+      port number.format { value = $hn139; digits = 2 } → hp138
+      port number.calculate { operation = "subtract"; values = list(at($r, $view.encoding.y.field), $yMin) } → hn148
+      port number.calculate { operation = "subtract"; values = list($yMax, $yMin) } → hn149
+      port number.calculate { operation = "divide"; values = list($hn148, $hn149) } → hn147
+      port number.calculate { operation = "multiply"; values = list($hn147, $yRange) } → hn146
+      port number.calculate { operation = "subtract"; values = list($frame.bottom, $hn146) } → hn145
+      port number.format { value = $hn145; digits = 2 } → hp144
+      yield {
+      path = concat(
+        $geometry.path,
+        if(eq(count($geometry.points), 0), "M", "L"),
+        $hp138,
+        ",",
+        $hp144,
+        " "
+      );
+      points = append(
+        $geometry.points,
+        list(
+          {
+            x = $hp138;
+            y = $hp144;
+            period = at($r, $view.encoding.x.field);
+            value = at($r, $view.encoding.y.field)
+          }
+        )
+      )
+    } → geometry
+    yield append(
+    $facets,
+    list(
+      {
+        person = $person;
+        color = at($view.palette, $person);
+        dash = at($view.dashes, $person);
+        selected = $selected;
+        line = $geometry.path;
+        points = $geometry.points
+      }
+    )
+  ) → facets
+  fold $view.ticks.y as tick; yTicks starts list():
+    port number.format { value = $tick; digits = 2 } → hp150
+    port number.calculate { operation = "subtract"; values = list($tick, $yMin) } → hn155
+    port number.calculate { operation = "subtract"; values = list($yMax, $yMin) } → hn156
+    port number.calculate { operation = "divide"; values = list($hn155, $hn156) } → hn154
+    port number.calculate { operation = "multiply"; values = list($hn154, $yRange) } → hn153
+    port number.calculate { operation = "subtract"; values = list($frame.bottom, $hn153) } → hn152
+    port number.format { value = $hn152; digits = 2 } → hp151
+    yield append($yTicks, list({ value = $tick; label = $hp150; y = $hp151 })) → yTicks
+  fold $view.ticks.x as tick; xTicks starts list():
+    port number.calculate { operation = "subtract"; values = list($tick, $xMin) } → hn161
+    port number.calculate { operation = "subtract"; values = list($xMax, $xMin) } → hn162
+    port number.calculate { operation = "divide"; values = list($hn161, $hn162) } → hn160
+    port number.calculate { operation = "multiply"; values = list($hn160, $xRange) } → hn159
+    port number.calculate { operation = "add"; values = list($frame.left, $hn159) } → hn158
+    port number.format { value = $hn158; digits = 2 } → hp157
+    yield append($xTicks, list({ value = $tick; x = $hp157 })) → xTicks
+  fold $eventInput.changes as change; changes starts list():
+    port number.calculate { operation = "subtract"; values = list($change, $xMin) } → hn167
+    port number.calculate { operation = "subtract"; values = list($xMax, $xMin) } → hn168
+    port number.calculate { operation = "divide"; values = list($hn167, $hn168) } → hn166
+    port number.calculate { operation = "multiply"; values = list($hn166, $xRange) } → hn165
+    port number.calculate { operation = "add"; values = list($frame.left, $hn165) } → hn164
+    port number.format { value = $hn164; digits = 2 } → hp163
+    yield append($changes, list({ period = $change; x = $hp163 })) → changes
+  port number.calculate { operation = "subtract"; values = list($eventInput.period, $xMin) } → hn173
+  port number.calculate { operation = "subtract"; values = list($xMax, $xMin) } → hn174
+  port number.calculate { operation = "divide"; values = list($hn173, $hn174) } → hn172
+  port number.calculate { operation = "multiply"; values = list($hn172, $xRange) } → hn171
+  port number.calculate { operation = "add"; values = list($frame.left, $hn171) } → hn170
+  port number.format { value = $hn170; digits = 2 } → hp169
+  let result = {
+    frame = $frame;
+    encoding = $view.encoding;
+    layers = $view.layers;
+    facets = $facets;
+    yTicks = $yTicks;
+    xTicks = $xTicks;
+    changes = $changes;
+    selectedX = $hp169
+  }

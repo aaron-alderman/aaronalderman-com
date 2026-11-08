@@ -1,5 +1,0 @@
-const fs=require('fs'),f='algebra/reading-experience.process.json',p=JSON.parse(fs.readFileSync(f)),q=p.queries,L=(name,value)=>({let:name,value});
-const focus=q['experience.keyboard'].find(s=>s.fold==='$s.focuses');focus.steps.push(L('eventInput',{path:'$f.path',text:'$f.text',state:'keyboard-focus',fontSize:'$f.fontSize',fontWeight:'$f.fontWeight',paint:'$f.paint'}),{call:'experience.contrast'},L('focusContrast','$result'));focus.yield[2].push('$focusContrast');
-const routes=q['experience.report'].find(s=>s.fold==='$input.policy.plan.routes'),steps=routes.steps[0].steps.find(s=>s.when).then;steps.splice(1,0,{assert:['eq','$snapshot.url',['concat','$input.capture.origin','/','$route.path']],message:'Browser snapshot URL differs from the declared route.'});
-routes.yield[2][2][3].ratio=['at','$r','ratio'];routes.yield[2][2][3].minimum=['at','$r','minimum'];
-fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n');

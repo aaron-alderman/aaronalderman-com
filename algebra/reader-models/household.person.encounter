@@ -1,0 +1,61 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.person:
+  let p = $eventInput.person
+  let v = $p.values
+  port number.calculate { operation = "multiply"; values = list($eventInput.demand, $eventInput.share) } → hn1
+  let due = $hn1
+  port number.calculate { operation = "subtract"; values = list($p.capacity, $eventInput.reviewHours) } → hn3
+  port number.calculate { operation = "max"; values = list(0, $hn3) } → hn2
+  let available = $hn2
+  port number.calculate { operation = "min"; values = list($due, $available) } → hn4
+  let planned = $hn4
+  port number.calculate { operation = "subtract"; values = list($available, $planned) } → hn5
+  let remaining = $hn5
+  port number.calculate { operation = "subtract"; values = list($remaining, $v.freeHours) } → hn8
+  port number.calculate { operation = "max"; values = list(0, $hn8) } → hn7
+  port number.calculate { operation = "min"; values = list($v.paidHours, $hn7) } → hn6
+  let plannedPaid = $hn6
+  port number.calculate { operation = "multiply"; values = list($planned, $eventInput.delivery) } → hn9
+  let domestic = $hn9
+  port number.calculate { operation = "add"; values = list($plannedPaid, $planned) } → hn12
+  port number.calculate { operation = "subtract"; values = list($hn12, $domestic) } → hn11
+  port number.calculate { operation = "min"; values = list($v.paidHours, $hn11) } → hn10
+  let paid = if(eq($eventInput.delivery, 1), $plannedPaid, $hn10)
+  port number.calculate { operation = "subtract"; values = list($remaining, $plannedPaid) } → hn13
+  port number.calculate { operation = "subtract"; values = list($p.capacity, $eventInput.reviewHours) } → hn16
+  port number.calculate { operation = "subtract"; values = list($hn16, $domestic) } → hn15
+  port number.calculate { operation = "subtract"; values = list($hn15, $paid) } → hn14
+  let free = if(eq($eventInput.delivery, 1), $hn13, $hn14)
+  port number.calculate { operation = "subtract"; values = list($v.paidHours, $paid) } → hn17
+  port number.calculate { operation = "subtract"; values = list($v.freeHours, $free) } → hn19
+  port number.calculate { operation = "max"; values = list(0, $hn19) } → hn18
+  port number.calculate { operation = "greater"; values = list($eventInput.demand, 1e-8) } → hn20
+  port number.calculate { operation = "subtract"; values = list($eventInput.share, $v.domesticShare) } → hn22
+  port number.calculate { operation = "abs"; values = list($hn22) } → hn21
+  let gaps = { paid = $hn17; free = $hn18; role = if($hn20, $hn21, 0) }
+  port number.calculate { operation = "add"; values = list($v.paidTolerance, 1e-8) } → hn24
+  port number.calculate { operation = "lessEqual"; values = list($gaps.paid, $hn24) } → hn23
+  port number.calculate { operation = "lessEqual"; values = list($gaps.free, 1e-8) } → hn25
+  port number.calculate { operation = "add"; values = list($v.shareTolerance, 1e-8) } → hn27
+  port number.calculate { operation = "lessEqual"; values = list($gaps.role, $hn27) } → hn26
+  let within = { paid = $hn23; free = $hn25; role = $hn26 }
+  port number.calculate { operation = "subtract"; values = list($due, $domestic) } → hn28
+  port number.calculate { operation = "multiply"; values = list($paid, $p.wage) } → hn29
+  let result = {
+    id = $p.id;
+    assignedShare = $eventInput.share;
+    domesticDue = $due;
+    domestic = $domestic;
+    plannedDomestic = $planned;
+    paid = $paid;
+    free = $free;
+    reviewHours = $eventInput.reviewHours;
+    unusedAssignment = $hn28;
+    income = $hn29;
+    gaps = $gaps;
+    within = $within;
+    goalsWithinBounds = and($within.paid, $within.free, $within.role);
+    deliveryFraction = $eventInput.delivery
+  }

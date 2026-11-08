@@ -1,0 +1,233 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process frontdoors.worldwright:
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          {
+            tag = "meta";
+            attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+            children = list()
+          },
+          { tag = "title"; attrs = {  }; children = list("Worldwright — A world taking shape") },
+          {
+            tag = "meta";
+            attrs = {
+              name = "description";
+              content = "A storytelling and authoring product in development: compose worlds readers can find their own way through."
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "canonical"; href = "https://aaronalderman.com/worldwright/" };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "stylesheet"; href = "../expedition.css?v=worlds-3" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:type"; content = "website" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:url"; content = "https://aaronalderman.com/worldwright/" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:title"; content = one("sharing.worldwright", "title") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:description"; content = one("sharing.worldwright", "description") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image"; content = one("sharing.worldwright", "image") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:secure_url"; content = one("sharing.worldwright", "image") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:alt"; content = one("sharing.worldwright", "alt") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:width"; content = one("sharing.worldwright", "width") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:height"; content = one("sharing.worldwright", "height") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:type"; content = one("sharing.worldwright", "type") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:title"; content = one("sharing.worldwright", "title") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:description"; content = one("sharing.worldwright", "description") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:image"; content = one("sharing.worldwright", "image") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:image:alt"; content = one("sharing.worldwright", "alt") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:card"; content = "summary_large_image" };
+            children = list()
+          }
+        )
+      },
+      {
+        tag = "body";
+        attrs = {  };
+        children = list(
+          {
+            tag = "a";
+            attrs = { href = "#main"; class = "skip" };
+            children = list("Skip to content")
+          },
+          {
+            tag = "header";
+            attrs = { class = "masthead" };
+            children = list(
+              {
+                tag = "a";
+                attrs = { class = "brand"; href = "../index.html"; "aria-label" = "Aaron Alderman" };
+                children = list(
+                  {
+                    tag = "span";
+                    attrs = { class = "brand-name" };
+                    children = list(
+                      "Aaron ",
+                      { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Worldwright" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "../index.html#microsites" };
+                    children = list("Explore the worlds")
+                  },
+                  { tag = "a"; attrs = { href = "../gate.html" }; children = list("Reading paths") }
+                )
+              }
+            )
+          },
+          {
+            tag = "main";
+            attrs = { id = "main"; class = "worldwright-placeholder" };
+            children = list(
+              {
+                tag = "img";
+                attrs = {
+                  src = "../assets/world-emblems/worldwright-v1.png";
+                  class = "world-emblem";
+                  width = 128;
+                  height = 128;
+                  alt = "";
+                  decoding = "async";
+                  "aria-hidden" = "true"
+                };
+                children = list()
+              },
+              {
+                tag = "p";
+                attrs = { class = "eyebrow" };
+                children = list("Worldwright / In preparation")
+              },
+              { tag = "h1"; attrs = {  }; children = list("A world taking shape.") },
+              {
+                tag = "p";
+                attrs = { class = "lead" };
+                children = list("A storytelling product for worlds with more than one way through.")
+              },
+              {
+                tag = "p";
+                attrs = {  };
+                children = list(
+                  "Worldwright is being developed as an environment for authoring and presenting connected stories. A world holds the people, ideas, events and sources; a composition arranges encounters and passages; a journey is the route a reader actually takes."
+                )
+              },
+              {
+                tag = "p";
+                attrs = {  };
+                children = list(
+                  "Its guiding idea is that an author can shape a meaningful experience while leaving readers room to choose, question and return. This personal expedition is the first composition. The wider authoring product remains in development. This is a placeholder for the Worldwright microsite."
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { class = "worldwright-links" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { class = "button"; href = "../temple/" };
+                    children = list("Temple ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { class = "button"; href = "../sourcery/" };
+                    children = list("Sourcery ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { class = "button"; href = "../claimipedia/" };
+                    children = list("Claimipedia ↗")
+                  }
+                )
+              },
+              {
+                tag = "a";
+                attrs = { href = "../gate.html" };
+                children = list("Follow a thread through the corpus →")
+              }
+            )
+          }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  let surfaceWritePath = "worldwright/index.html"
+  call assurance.surface.register
+  port file.write { path = "worldwright/index.html"; text = $result } → _

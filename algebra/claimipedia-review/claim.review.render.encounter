@@ -1,0 +1,231 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process claim.review.render:
+  port state.get { key = "selected" } → selected
+  port kernel.invoke {
+    query = "claim.review.compare";
+    input = { configuration = $data.configuration; selected = $selected }
+  } → reviews
+  fold $reviews as review; cards starts list():
+    let method = at(filter($data.configuration.methods, "m", eq($m.id, $review.method)), 0)
+    port number.calculate { operation = "divide"; values = list($review.support, 1000000) } → support
+    port number.calculate { operation = "divide"; values = list($review.challenge, 1000000) } → challenge
+    port number.calculate { operation = "multiply"; values = list($support, 50) } → supportWidth
+    port number.calculate { operation = "multiply"; values = list($challenge, 50) } → challengeWidth
+    port number.calculate { operation = "multiply"; values = list($method.threshold, 50) } → thresholdWidth
+    let card = {
+      tag = "article";
+      attrs = { class = "review-card"; "data-verdict" = $review.result };
+      children = list(
+        { tag = "p"; attrs = { class = "claim-eyebrow" }; children = list("Method / 1.0.0") },
+        { tag = "h3"; attrs = {  }; children = list($method.name) },
+        { tag = "p"; attrs = { class = "review-method" }; children = list($method.summary) },
+        { tag = "p"; attrs = { class = "review-verdict" }; children = list($review.result) },
+        { tag = "p"; attrs = { class = "review-reason" }; children = list($review.reason) },
+        {
+          tag = "div";
+          attrs = { class = "review-measures" };
+          children = list(
+            {
+              tag = "div";
+              attrs = { class = "review-measure" };
+              children = list(
+                {
+                  tag = "div";
+                  attrs = { class = "review-measure-label" };
+                  children = list(
+                    { tag = "span"; attrs = {  }; children = list("Support") },
+                    { tag = "b"; attrs = {  }; children = list(concat($support, " points")) }
+                  )
+                },
+                {
+                  tag = "div";
+                  attrs = { class = "review-track"; "aria-hidden" = "true" };
+                  children = list(
+                    {
+                      tag = "span";
+                      attrs = { class = "review-fill support"; style = concat("width:", $supportWidth, "%") };
+                      children = list()
+                    },
+                    {
+                      tag = "i";
+                      attrs = { style = concat("left:", $thresholdWidth, "%") };
+                      children = list()
+                    }
+                  )
+                }
+              )
+            },
+            {
+              tag = "div";
+              attrs = { class = "review-measure" };
+              children = list(
+                {
+                  tag = "div";
+                  attrs = { class = "review-measure-label" };
+                  children = list(
+                    { tag = "span"; attrs = {  }; children = list("Challenge") },
+                    { tag = "b"; attrs = {  }; children = list(concat($challenge, " points")) }
+                  )
+                },
+                {
+                  tag = "div";
+                  attrs = { class = "review-track"; "aria-hidden" = "true" };
+                  children = list(
+                    {
+                      tag = "span";
+                      attrs = { class = "review-fill challenge"; style = concat("width:", $challengeWidth, "%") };
+                      children = list()
+                    },
+                    {
+                      tag = "i";
+                      attrs = { style = concat("left:", $thresholdWidth, "%") };
+                      children = list()
+                    }
+                  )
+                }
+              )
+            }
+          )
+        },
+        {
+          tag = "p";
+          attrs = { class = "review-threshold" };
+          children = list(
+            concat(
+              "Threshold: ",
+              $method.threshold,
+              " points on either side. Independent sources: ",
+              $review.independentSources,
+              " / ",
+              $method.minimum,
+              " required."
+            )
+          )
+        },
+        {
+          tag = "details";
+          attrs = {  };
+          children = list(
+            { tag = "summary"; attrs = {  }; children = list("Read the reasoning") },
+            {
+              tag = "div";
+              attrs = { class = "review-trace" };
+              children = list(
+                map(
+                  $review.rows,
+                  "row",
+                  {
+                    tag = "section";
+                    attrs = { class = "review-trace-item" };
+                    children = list(
+                      { tag = "h4"; attrs = {  }; children = list($row.name) },
+                      {
+                        tag = "p";
+                        attrs = { class = "review-item-status" };
+                        children = list(
+                          if(
+                            $row.admitted,
+                            concat(
+                              "Included · ",
+                              $row.weight,
+                              " points · ",
+                              if(eq($row.direction, "Supports"), "supports", "challenges")
+                            ),
+                            if($row.selected, "Not counted", "Removed from snapshot")
+                          )
+                        )
+                      },
+                      { tag = "p"; attrs = {  }; children = list($row.reason) },
+                      if(
+                        $row.selected,
+                        map(
+                          $row.trials,
+                          "trial",
+                          {
+                            tag = "div";
+                            attrs = { class = "review-rule" };
+                            children = list(
+                              { tag = "p"; attrs = { class = "review-rule-id" }; children = list($trial.id) },
+                              if(
+                                eq(count($trial.checks), 0),
+                                {
+                                  tag = "p";
+                                  attrs = {  };
+                                  children = list("No conditions: this rule accepts every submitted item.")
+                                },
+                                {
+                                  tag = "ul";
+                                  attrs = {  };
+                                  children = list(
+                                    map(
+                                      $trial.checks,
+                                      "check",
+                                      {
+                                        tag = "li";
+                                        attrs = {  };
+                                        children = list(
+                                          concat(
+                                            if($check.passed, "Pass: ", "Fail: "),
+                                            at(
+                                              {
+                                                evidenceType = "Kind of evidence";
+                                                sourceCredentialed = "Credentialed source";
+                                                sourceIndependent = "Independent source";
+                                                peerReviewed = "Peer reviewed";
+                                                retracted = "Retracted"
+                                              },
+                                              $check.field
+                                            ),
+                                            ": ",
+                                            if(
+                                              eq($check.actual, "true"),
+                                              "yes",
+                                              if(eq($check.actual, "false"), "no", $check.actual)
+                                            ),
+                                            "; needs ",
+                                            if(
+                                              eq($check.expected, "true"),
+                                              "yes",
+                                              if(eq($check.expected, "false"), "no", $check.expected)
+                                            )
+                                          )
+                                        )
+                                      }
+                                    )
+                                  )
+                                }
+                              )
+                            )
+                          }
+                        ),
+                        null
+                      )
+                    )
+                  }
+                )
+              )
+            }
+          )
+        }
+      )
+    }
+    yield append($cards, list($card)) → cards
+  port kernel.invoke { query = "claim.review.html"; input = { node = $cards } } → markup
+  port browser.content { ref = "#review-results"; html = $markup } → _
+  port browser.write {
+    ref = "#review-announcement";
+    name = "textContent";
+    value = concat(
+      count($selected),
+      " of 4 evidence items selected. ",
+      at(at($reviews, 0), "result"),
+      ", ",
+      at(at($reviews, 1), "result"),
+      ", ",
+      at(at($reviews, 2), "result"),
+      ". Results updated."
+    )
+  } → _
+  port browser.write { ref = "#review-loading"; name = "hidden"; value = true } → _

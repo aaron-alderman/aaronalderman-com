@@ -1,2 +1,0 @@
-const fs=require('fs');const f='source/questions.rel';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace('("questions.identity.style.1.background", "value", "var(--paper)")','("questions.identity.style.1.background", "value", "var(--q-paper)")'));
-const t='hierarchy.test.mjs';fs.writeFileSync(t,fs.readFileSync(t,'utf8').replace("['key','label','copy','image','questionHref','questionCopy']","['key','label','copy','image','questionsImage','threadsImage','atlasImage','questionHref','questionCopy']"));

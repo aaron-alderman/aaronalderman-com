@@ -1,0 +1,150 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+# Existing composition, partitioned into explicit bounded source phases.
+process publication.build:
+  call publication.phase.prepare
+  call publication.phase.microsites
+  call publication.phase.frontdoors
+  call publication.phase.assets
+  call publication.phase.pages
+  call publication.phase.assurance
+  call publication.phase.journeys
+  call publication.phase.identityAssurance
+  call publication.phase.sitemap
+  call publication.phase.readers
+  call publication.phase.finish
+
+process publication.context:
+  let homeIdentity = "identity.sourcerer"
+  port file.copy { path = "source/hierarchy.values.rel" } → _
+  port file.read { path = "source/hierarchy.values.rel" } → identityText
+  port static.read { text = $identityText } → identityCatalogue
+  call faith.reading.load
+  call reading.rooms.load
+
+process publication.phase.prepare:
+  call projection.palette
+  call publication.context
+  call identity.runtime.build
+  call reading.theme.build
+  assert eq(count(subjects("isa", "Place")), 40)
+    otherwise "Publication must retain all forty places."
+
+process publication.phase.microsites:
+  call publication.context
+  call microsites.build
+
+process publication.phase.frontdoors:
+  call publication.context
+  call frontdoors.claimipedia
+  call frontdoors.worldwright
+  call atlas.build
+  call frontdoors.capabilities
+  call encounter.build
+  call hierarchy.build
+
+process publication.phase.assets:
+  call publication.context
+  each subjects("isa", "PublicationAsset") as asset:
+    port text.matches { value = one($asset, "path"); pattern = "\\.(?:m?js|cjs|css|html)$" } → excludedCapturedAsset
+    when not($excludedCapturedAsset):
+      let surfaceWritePath = one($asset, "path")
+      call assurance.surface.register
+      port file.copy { path = one($asset, "path") } → _
+      when optional($asset, "legacyAlias"):
+        port file.read { path = one($asset, "path") } → legacyBytes
+        let surfaceWritePath = one($asset, "legacyAlias")
+        call assurance.surface.register
+        port file.write { path = one($asset, "legacyAlias"); text = $legacyBytes } → _
+  let input = { tag = "article"; attrs = {}; children = list({ tag = "h2"; attrs = {}; children = list("What happened") }, { tag = "p"; attrs = {}; children = list("The story is long and complicated") }, { tag = "p"; attrs = {}; children = list("It started 150 years ago") }) }
+  call projection.serialize
+  let story = $result
+  each list("retained/workshop/encounter-story.html", "workshop/encounter-story.html") as route:
+    let surfaceWritePath = $route
+    call assurance.surface.register
+    port file.write { path = $route; text = $story } → _
+  call publication.icon
+  let projection = "main"
+  call publication.styles
+  let surfaceWritePath = "expedition.css"
+  call assurance.surface.register
+  port file.write { path = "expedition.css"; text = $css } → _
+  let projection = "activity"
+  call publication.styles
+  let surfaceWritePath = "activity.css"
+  call assurance.surface.register
+  port file.write { path = "activity.css"; text = $css } → _
+
+process publication.phase.pages:
+  call publication.context
+  let prefix = ""
+  let pageTitle = concat("Aaron Alderman — ", one("site", "headline"))
+  let description = one("site", "description")
+  let canonical = one("site", "origin")
+  let light = "home"
+  call publication.home
+  let body = $result
+  call publication.document
+  let surfaceWritePath = "index.html"
+  call assurance.surface.register
+  port file.write { path = "index.html"; text = $result } → _
+  call publication.scroll.pages
+  call faith.reading.build
+  call reading.series.build
+  call publication.mission.page
+  each subjects("isa", "Place") as place:
+    let prefix = "../"
+    let pageTitle = concat(one($place, "title"), " — Aaron Alderman")
+    let description = one($place, "lead")
+    let canonical = concat(one("site", "origin"), one($place, "route"))
+    let light = one($place, "light")
+    call publication.place
+    let body = $result
+    call publication.document
+    let surfaceWritePath = one($place, "route")
+    call assurance.surface.register
+    port file.write { path = one($place, "route"); text = $result } → _
+
+process publication.phase.assurance:
+  call publication.context
+  call gateway.build
+
+process publication.phase.journeys:
+  call publication.context
+  call identity.journeys.build
+
+process publication.phase.identityAssurance:
+  call publication.context
+  call identity.assurance.build
+  call assurance.portfolio.build
+
+process publication.phase.sitemap:
+  call publication.context
+  port file.write {
+    path = "robots.txt";
+    text = concat("User-agent: *\nAllow: /\nSitemap: ", one("site", "origin"), "sitemap.xml\n")
+  } → _
+  let locations = append(list(one("site", "origin"), concat(one("site", "origin"), "gate.html")), append(map(subjects("isa", "Place"), "place", concat(one("site", "origin"), one($place, "route"))), append(map(subjects("isa", "MicrositeDocument"), "document", one($document, "canonical")), map(subjects("isa", "StandalonePage"), "page", one($page, "canonical")))))
+  let input = { tag = "urlset"; attrs = { xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9" }; children = map($locations, "location", { tag = "url"; attrs = {}; children = list({ tag = "loc"; attrs = {}; children = list($location) }) }) }
+  call projection.serialize
+  port file.write { path = "sitemap.xml"; text = $result } → _
+
+process publication.phase.readers:
+  call publication.context
+  call readerworkshop.build
+
+process publication.phase.finish:
+  call publication.context
+  call roadmap.publish
+  call assurance.rendered.publish
+  call microsite.return.all
+  call assurance.surface.build
+  let assurance = {
+    places = count(subjects("isa", "Place"));
+    sourceNotes = count(subjects("isa", "SourceNote"));
+    policy = "Temple process algebra";
+    compatibility = "historical source oracles; algebra-owned reader and workshop";
+    budget = 20000000
+  }
+

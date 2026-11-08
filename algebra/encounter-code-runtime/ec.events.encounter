@@ -1,0 +1,41 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.events:
+  each $eventInput.events as ecEvent:
+    port kernel.invoke {
+      query = "ec.findElement";
+      input = { tree = $eventInput.tree; selector = $ecEvent.selector }
+    } → ecSelectorCount
+    assert eq($ecSelectorCount, 1)
+      otherwise "EC-A005: An action must bind exactly one element inside its own rendered representation."
+    port record.entries { value = $ecEvent } → ecEventFields
+    assert every(
+      $ecEventFields,
+      "ecF",
+      includes(list("selector", "open", "run", "arguments"), at($ecF, 0))
+    )
+      otherwise "EC-A006: This action contains an undeclared field."
+    port text.matches { value = $ecEvent.selector; pattern = "^#[a-z][a-z0-9-]*$" } → ecSelectorSafe
+    assert $ecSelectorSafe
+      otherwise "EC-A001: Events need a local element identity selector."
+    assert or(
+      and(at($ecEvent, "open"), not(at($ecEvent, "run"))),
+      and(at($ecEvent, "run"), not(at($ecEvent, "open")))
+    )
+      otherwise "EC-A002: Choose exactly one explicit action: open a page or run a typed representation."
+    when at($ecEvent, "open"):
+      port kernel.invoke { query = "ec.reference"; input = { id = at($ecEvent, "open"); type = "Page" } } → _
+    when at($ecEvent, "run"):
+      let ecEventRep = at(filter($codePlan.representations, "ecR", eq($ecR.id, at($ecEvent, "run"))), 0)
+      assert $ecEventRep
+        otherwise "EC-A003: The action must name a representation in this admitted module."
+      port record.entries { value = $ecEvent.arguments } → ecEventArgs
+      assert eq(count($ecEventArgs), count($ecEventRep.given))
+        otherwise "EC-A004: The action argument count does not match its typed signature."
+      each $ecEventRep.given as ecGiven:
+        port kernel.invoke {
+          query = "ec.argument";
+          input = { value = at($ecEvent.arguments, $ecGiven.name); type = $ecGiven.type }
+        } → _
+  let result = true

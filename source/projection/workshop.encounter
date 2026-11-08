@@ -1,0 +1,144 @@
+# The workshop shell is an ordinary pure Encounter component. It returns the
+# common tree and cannot emit HTML, CSS, files or DOM effects.
+process-module "temple/surface-process-module/1"
+
+process component.workshop:
+  let tabs = list({ key = "source"; title = "Source" }, { key = "pure"; title = "Pure expressions" }, { key = "process"; title = "Process" }, { key = "html"; title = "HTML" }, { key = "receipt"; title = "Last change" })
+  let processes = list({ key = "navigation"; title = "Generated NavigationItem" }, { key = "web"; title = "Generated WebLink" }, { key = "row"; title = "Generated MainframeRow" }, { key = "resolve"; title = "ec.resolve · contextual resolution" }, { key = "patch"; title = "ec.patch · source edit and forward check" }, { key = "corePatch"; title = "ec.patch · lowered primitive expressions" }, { key = "serialize"; title = "projection.serialize · common projection entry" }, { key = "live"; title = "lab.edit · this example’s entry point" })
+  let result = { tag = "html"; attrs = { lang = "en" }; children = list(
+    { tag = "head"; attrs = {}; children = list(
+      { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+      { tag = "meta"; attrs = { name = "viewport"; content = "width=device-width,initial-scale=1" }; children = list() },
+      { tag = "title"; attrs = {}; children = list("TheStory · a living infographic") },
+      { tag = "link"; attrs = { rel = "icon"; href = "data:," }; children = list() },
+      { tag = "link"; attrs = { rel = "stylesheet"; href = "./style.css" }; children = list() },
+      { tag = "script"; attrs = { defer = true; src = "runtime.js" }; children = list() }
+    ) }, "\n",
+    { tag = "body"; attrs = {}; children = list(
+      { tag = "a"; attrs = { class = "skip"; href = "#source-story" }; children = list("Skip to the story") },
+      { tag = "main"; attrs = {}; children = list("\n",
+        { tag = "header"; attrs = {}; children = list(
+          { tag = "p"; attrs = { class = "tour-back" }; children = list({ tag = "a"; attrs = { href = $readerReturn }; children = list("← Back to the Worldwright trail") }, { tag = "span"; attrs = {}; children = list("THE WORKSHOP · AN ENCOUNTER EXAMPLE") }) },
+          { tag = "p"; attrs = { class = "eyebrow" }; children = list("Encounter ", { tag = "span"; attrs = {}; children = list("/") }, " a living infographic") },
+          { tag = "div"; attrs = { class = "title-row" }; children = list(
+            { tag = "div"; attrs = {}; children = list({ tag = "h1"; attrs = {}; children = list("One story.", { tag = "br"; attrs = {}; children = list() }, "Follow the thread.") }, { tag = "p"; attrs = { class = "hero-note" }; children = list("Change a title → watch the views update → follow the change back.") }) },
+            { tag = "div"; attrs = { class = "intro" }; children = list({ tag = "p"; attrs = {}; children = list("AI can help with the work.", { tag = "br"; attrs = {}; children = list() }, "You decide what is worth making.") }, { tag = "p"; attrs = { class = "quiet" }; children = list("Change a value. Follow its meaning, rules and consequences. The example makes human choices visible and machine work inspectable.") }, { tag = "span"; attrs = { class = "badge"; id = "revision" }; children = list("Connecting…") }) }
+          ) }
+        ) }, "\n",
+        { tag = "details"; attrs = { class = "authorship-note" }; children = list(
+          { tag = "summary"; attrs = {}; children = list("Less unnecessary labour. More room for human authorship.") },
+          { tag = "div"; attrs = {}; children = list(
+            { tag = "p"; attrs = {}; children = list({ tag = "strong"; attrs = {}; children = list("You choose the purpose.") }, " Taste, usefulness, care and responsibility remain human work. A functioning application is a beginning; people decide whether it serves them well.") },
+            { tag = "p"; attrs = {}; children = list({ tag = "strong"; attrs = {}; children = list("You can understand and change the workings.") }, " The wider aim is architecture you can inspect, revise, replace and take with you. Here, two editable values demonstrate explicit source ownership; general programme and contract editing remain future work.") },
+            { tag = "p"; attrs = {}; children = list({ tag = "strong"; attrs = {}; children = list("You can ask what was checked.") }, " Assurance should fit the consequences and retain essential safeguards. This example checks a bounded typed edit and its forward result. That is evidence for this slice, not independent verification or a guarantee of a larger application.") },
+            { tag = "p"; attrs = {}; children = list("Remove unnecessary labour. Preserve human authorship. Make the consequences understandable and the evidence inspectable.") }
+          ) }
+        ) },
+        { tag = "div"; attrs = { class = "live-status" }; children = list({ tag = "span"; attrs = { class = "live-dot"; "aria-hidden" = "true" }; children = list() }, { tag = "p"; attrs = { id = "status"; role = "status"; "aria-live" = "polite" }; children = list("Preparing the checked example…") }, { tag = "a"; attrs = { href = "#return-path" }; children = list("Follow the last edit ↓") }) },
+        { tag = "p"; attrs = { id = "error"; role = "alert"; hidden = true }; children = list() }, "\n",
+        { tag = "section"; attrs = { class = "start-guide"; "aria-labelledby" = "start-heading" }; children = list(
+          { tag = "h2"; attrs = { id = "start-heading" }; children = list("Try this first") },
+          { tag = "ol"; attrs = {}; children = map(list("Change the story title in step 1 and choose “Apply title.” The story page and list row update; the menu keeps its own label.", "Change the menu label in step 3. Only the menu changes.", "Look at the previews in step 4. Open the code sections if you want to see how it works."), "text", { tag = "li"; attrs = {}; children = list($text) }) },
+          { tag = "p"; attrs = {}; children = list("Changes stay in this tab. Reloading starts the example again.") }
+        ) },
+        { tag = "div"; attrs = { class = "flow" }; children = list("\n",
+          { tag = "section"; attrs = { id = "source-story"; class = "stage"; "aria-labelledby" = "meaning-heading" }; children = list(
+            { tag = "div"; attrs = { class = "stage-heading" }; children = list({ tag = "span"; attrs = { class = "step"; "aria-hidden" = "true" }; children = list("1") }, { tag = "div"; attrs = {}; children = list({ tag = "p"; attrs = { class = "eyebrow" }; children = list("Meaning / the source") }, { tag = "h2"; attrs = { id = "meaning-heading" }; children = list("Start with the story") }) }, { tag = "span"; attrs = { class = "kind" }; children = list("Story") }) }, "\n",
+            { tag = "div"; attrs = { class = "source-grid" }; children = list(
+              { tag = "form"; attrs = { id = "title-form"; class = "edit-card story" }; children = list(
+                { tag = "p"; attrs = { class = "object-id" }; children = list("@TheStory") }, { tag = "label"; attrs = { for = "story-title" }; children = list("What is its title?") },
+                { tag = "div"; attrs = { class = "input-row" }; children = list({ tag = "input"; attrs = { id = "story-title"; name = "title"; type = "text"; autocomplete = "off"; "aria-describedby" = "title-route" }; children = list() }, { tag = "button"; attrs = { type = "submit" }; children = list("Apply title ", { tag = "span"; attrs = { "aria-hidden" = "true" }; children = list("↗") }) }) },
+                { tag = "details"; attrs = {}; children = list({ tag = "summary"; attrs = {}; children = list("See how the title is stored") }, { tag = "pre"; attrs = { id = "fact-inline"; class = "compact" }; children = list() }) },
+                { tag = "p"; attrs = { class = "explain" }; children = list("Change this title and the row and story page follow.") },
+                { tag = "button"; attrs = { id = "title-route"; class = "route-link"; type = "button"; "data-route" = "title" }; children = list("Loading route…") },
+                { tag = "details"; attrs = {}; children = list({ tag = "summary"; attrs = {}; children = list("Read the two content entries") }, { tag = "div"; attrs = { id = "content-inline" }; children = list() }) }
+              ) }, "\n",
+              { tag = "aside"; attrs = { class = "type-card" }; children = list(
+                { tag = "p"; attrs = { class = "eyebrow" }; children = list("Rules for this example") }, { tag = "h3"; attrs = {}; children = list("What can you enter?") },
+                { tag = "p"; attrs = {}; children = list("The title must contain some text. The story content is a set of text entries. The example checks these rules before accepting a change.") },
+                { tag = "details"; attrs = {}; children = list(
+                  { tag = "summary"; attrs = {}; children = list("See the technical field names") },
+                  { tag = "dl"; attrs = {}; children = list({ tag = "dt"; attrs = {}; children = list("S.Title") }, { tag = "dd"; attrs = {}; children = list("One nonempty string") }, { tag = "dt"; attrs = {}; children = list("S.Content") }, { tag = "dd"; attrs = {}; children = list("Many strings, with named TextEntry occurrences") }, { tag = "dt"; attrs = {}; children = list("Contract") }, { tag = "dd"; attrs = {}; children = list("Closed: undeclared fields are refused") }) },
+                  { tag = "p"; attrs = { class = "quiet" }; children = list("These are the fixture’s Story contract. The full declarations are inspectable below.") },
+                  { tag = "button"; attrs = { type = "button"; class = "text-link"; "data-source" = "contracts" }; children = list("Read the full rules in code ↗") }
+                ) }
+              ) }
+            ) }
+          ) }, "\n",
+          { tag = "div"; attrs = { class = "connector"; "aria-hidden" = "true" }; children = list({ tag = "span"; attrs = {}; children = list("parse · index · compile · check") }, { tag = "b"; attrs = {}; children = list("↓") }) }, "\n",
+          { tag = "section"; attrs = { class = "stage"; "aria-labelledby" = "projection-heading" }; children = list(
+            { tag = "div"; attrs = { class = "stage-heading" }; children = list({ tag = "span"; attrs = { class = "step"; "aria-hidden" = "true" }; children = list("2") }, { tag = "div"; attrs = {}; children = list({ tag = "p"; attrs = { class = "eyebrow" }; children = list("A menu entry / another way to find the story") }, { tag = "h2"; attrs = { id = "projection-heading" }; children = list("Give the story a way to be found") }) }, { tag = "span"; attrs = { class = "kind" }; children = list("Menu entry") }) }, "\n",
+            { tag = "div"; attrs = { class = "projection-grid" }; children = list(
+              { tag = "article"; attrs = { class = "projection-card" }; children = list(
+                { tag = "p"; attrs = { class = "object-id" }; children = list("@experiment.nav.story") },
+                { tag = "div"; attrs = { class = "mapping" }; children = list({ tag = "span"; attrs = {}; children = list("Story title") }, { tag = "b"; attrs = { "aria-hidden" = "true" }; children = list("→") }, { tag = "div"; attrs = {}; children = list({ tag = "small"; attrs = {}; children = list("Menu label") }, { tag = "strong"; attrs = { id = "base-label" }; children = list() }) }) },
+                { tag = "div"; attrs = { class = "mapping" }; children = list({ tag = "span"; attrs = {}; children = list("source") }, { tag = "b"; attrs = { "aria-hidden" = "true" }; children = list("→") }, { tag = "div"; attrs = {}; children = list({ tag = "small"; attrs = {}; children = list("Opens this story") }, { tag = "strong"; attrs = {}; children = list("@TheStory") }) }) },
+                { tag = "p"; attrs = { class = "explain" }; children = list("A label and a Story reference. The story keeps its identity.") }
+              ) },
+              { tag = "article"; attrs = { class = "page-card" }; children = list({ tag = "p"; attrs = { class = "object-id" }; children = list("@experiment.page.story ", { tag = "span"; attrs = { class = "kind" }; children = list("Page") }) }, { tag = "h3"; attrs = { id = "page-title" }; children = list() }, { tag = "p"; attrs = { class = "mono" }; children = list("P.subject → @TheStory") }, { tag = "p"; attrs = { class = "mono"; id = "page-route" }; children = list() }, { tag = "p"; attrs = { class = "quiet" }; children = list("Its title follows the same source. Its route gives the web link somewhere to go.") }) }
+            ) }, "\n",
+            { tag = "details"; attrs = { class = "algebra-fold" }; children = list({ tag = "summary"; attrs = {}; children = list("See the pure expressions and generated process") }, { tag = "div"; attrs = { id = "inline-pure" }; children = list() }, { tag = "h3"; attrs = {}; children = list("The generated NavigationItem process") }, { tag = "pre"; attrs = { id = "inline-navigation" }; children = list() }, { tag = "p"; attrs = { class = "panel-note" }; children = list("Readable call notation for the stored algebra; ports remain explicit.") }) }
+          ) }, "\n",
+          { tag = "div"; attrs = { class = "fork"; "aria-hidden" = "true" }; children = list({ tag = "svg"; attrs = { viewBox = "0 0 1000 90"; preserveAspectRatio = "none" }; children = list({ tag = "path"; attrs = { d = "M500 0 V35 H250 V82 M500 35 H750 V82" }; children = list() }, { tag = "path"; attrs = { d = "M242 72 L250 82 L258 72 M742 72 L750 82 L758 72" }; children = list() }) }, { tag = "span"; attrs = {}; children = list("one base · two explicit contexts") }) }, "\n",
+          { tag = "section"; attrs = { class = "stage"; "aria-labelledby" = "context-heading" }; children = list(
+            { tag = "div"; attrs = { class = "stage-heading" }; children = list({ tag = "span"; attrs = { class = "step"; "aria-hidden" = "true" }; children = list("3") }, { tag = "div"; attrs = {}; children = list({ tag = "p"; attrs = { class = "eyebrow" }; children = list("Two places to show the story") }, { tag = "h2"; attrs = { id = "context-heading" }; children = list("Two views, with visible differences") }) }) }, "\n",
+            { tag = "div"; attrs = { class = "lanes" }; children = list(
+              { tag = "article"; attrs = { class = "lane web" }; children = list(
+                { tag = "div"; attrs = { class = "lane-header" }; children = list({ tag = "span"; attrs = { class = "lane-mark"; "aria-hidden" = "true" }; children = list("↗") }, { tag = "div"; attrs = {}; children = list({ tag = "p"; attrs = { class = "eyebrow" }; children = list("The web menu") }, { tag = "p"; attrs = { class = "object-id" }; children = list("@experiment.WebMainMenu") }) }) },
+                { tag = "form"; attrs = { id = "web-form"; class = "edit-card" }; children = list(
+                  { tag = "label"; attrs = { for = "web-label" }; children = list("What should the menu say?") },
+                  { tag = "div"; attrs = { class = "input-row" }; children = list({ tag = "input"; attrs = { id = "web-label"; name = "label"; type = "text"; autocomplete = "off"; "aria-describedby" = "web-route" }; children = list() }, { tag = "button"; attrs = { type = "submit" }; children = list("Apply label ", { tag = "span"; attrs = { "aria-hidden" = "true" }; children = list("↗") }) }) },
+                  { tag = "details"; attrs = {}; children = list({ tag = "summary"; attrs = {}; children = list("See how the menu label is stored") }, { tag = "pre"; attrs = { id = "overlay-inline"; class = "compact" }; children = list() }) },
+                  { tag = "p"; attrs = { class = "explain" }; children = list("This menu has its own label. Changing it leaves the story title as it is.") },
+                  { tag = "button"; attrs = { id = "web-route"; class = "route-link"; type = "button"; "data-route" = "web-label" }; children = list("Loading route…") }
+                ) },
+                { tag = "p"; attrs = { class = "lane-law" }; children = list({ tag = "strong"; attrs = {}; children = list("Edit this label") }, " to change the menu only.") }
+              ) }, "\n",
+              { tag = "article"; attrs = { class = "lane row" }; children = list(
+                { tag = "div"; attrs = { class = "lane-header" }; children = list({ tag = "span"; attrs = { class = "lane-mark"; "aria-hidden" = "true" }; children = list("≡") }, { tag = "div"; attrs = {}; children = list({ tag = "p"; attrs = { class = "eyebrow" }; children = list("The list row") }, { tag = "p"; attrs = { class = "object-id" }; children = list("@experiment.MainframeStories") }) }) },
+                { tag = "div"; attrs = { class = "inherited-value" }; children = list({ tag = "small"; attrs = {}; children = list("Label from the story") }, { tag = "strong"; attrs = { id = "row-label" }; children = list() }, { tag = "span"; attrs = { class = "inheritance" }; children = list("↑ follows the story title") }) },
+                { tag = "details"; attrs = {}; children = list({ tag = "summary"; attrs = {}; children = list("See how the row is described") }, { tag = "pre"; attrs = { class = "compact" }; children = list("show as MainframeRow:\n  option: \"01\"\n  open: @experiment.openStory") }) },
+                { tag = "p"; attrs = { class = "explain" }; children = list("This row uses the story title. Change the title in step 1 to update it.") },
+                { tag = "p"; attrs = { class = "lane-law" }; children = list({ tag = "strong"; attrs = {}; children = list("Edit the story title") }, " to change this row.") }
+              ) }
+            ) }, "\n",
+            { tag = "details"; attrs = { class = "algebra-fold" }; children = list({ tag = "summary"; attrs = {}; children = list("How are overlays and edit routes resolved?") }, { tag = "pre"; attrs = { id = "inline-resolve" }; children = list() }, { tag = "p"; attrs = { class = "panel-note" }; children = list("A replaced field loses its inherited route. A local edit route must be declared explicitly.") }) }
+          ) }, "\n",
+          { tag = "div"; attrs = { class = "connector dual"; "aria-hidden" = "true" }; children = list({ tag = "span"; attrs = {}; children = list("check representation · build tree · serialize") }, { tag = "b"; attrs = {}; children = list("↓ ", { tag = "i"; attrs = {}; children = list() }, " ↓") }) }, "\n",
+          { tag = "section"; attrs = { class = "stage"; "aria-labelledby" = "html-heading" }; children = list(
+            { tag = "div"; attrs = { class = "stage-heading" }; children = list({ tag = "span"; attrs = { class = "step"; "aria-hidden" = "true" }; children = list("4") }, { tag = "div"; attrs = {}; children = list({ tag = "p"; attrs = { class = "eyebrow" }; children = list("Preview / what the code makes") }, { tag = "h2"; attrs = { id = "html-heading" }; children = list("Now it is a link and a row") }) }, { tag = "span"; attrs = { class = "kind" }; children = list("HTML") }) },
+            { tag = "p"; attrs = { class = "stage-note" }; children = list("These are the web pages made by the code. HTML is the language used to describe a web page. Open a section below a preview to read its HTML.") },
+            { tag = "div"; attrs = { id = "diagram-outputs"; class = "lanes" }; children = list() },
+            { tag = "details"; attrs = { class = "page-preview" }; children = list({ tag = "summary"; attrs = {}; children = list("The story page follows too ", { tag = "span"; attrs = { id = "page-current" }; children = list() }) }, { tag = "div"; attrs = { id = "diagram-page" }; children = list() }) },
+            { tag = "details"; attrs = { class = "algebra-fold" }; children = list({ tag = "summary"; attrs = {}; children = list("How does the tree become HTML?") }, { tag = "pre"; attrs = { id = "inline-serialize" }; children = list() }, { tag = "p"; attrs = { class = "panel-note" }; children = list("Text and attributes are escaped. Event descriptors are separate from the HTML; the row action is not bound in these previews.") }) }
+          ) }, "\n",
+          { tag = "div"; attrs = { class = "return-connector"; "aria-hidden" = "true" }; children = list({ tag = "span"; attrs = {}; children = list("↶") }, { tag = "p"; attrs = {}; children = list("And when a person changes a value…") }) }, "\n",
+          { tag = "section"; attrs = { id = "return-path"; class = "stage return-stage"; "aria-labelledby" = "return-heading" }; children = list(
+            { tag = "div"; attrs = { class = "stage-heading" }; children = list({ tag = "span"; attrs = { class = "step"; "aria-hidden" = "true" }; children = list("5") }, { tag = "div"; attrs = {}; children = list({ tag = "p"; attrs = { class = "eyebrow" }; children = list("The return path / change the owner") }, { tag = "h2"; attrs = { id = "return-heading" }; children = list("Follow the edit back") }) }) },
+            { tag = "div"; attrs = { class = "return-map" }; children = list({ tag = "div"; attrs = {}; children = list({ tag = "small"; attrs = {}; children = list("Story title") }, { tag = "strong"; attrs = {}; children = list("TheStory / S.Title") }, { tag = "span"; attrs = {}; children = list("story.rel") }) }, { tag = "b"; attrs = { "aria-hidden" = "true" }; children = list("or") }, { tag = "div"; attrs = {}; children = list({ tag = "small"; attrs = {}; children = list("Web label") }, { tag = "strong"; attrs = {}; children = list("WebMainMenu / N.label") }, { tag = "span"; attrs = {}; children = list("story.encounter") }) }) },
+            { tag = "div"; attrs = { class = "check-strip" }; children = list({ tag = "span"; attrs = {}; children = list("one declared route") }, { tag = "b"; attrs = {}; children = list("→") }, { tag = "span"; attrs = {}; children = list("change the source") }, { tag = "b"; attrs = {}; children = list("→") }, { tag = "span"; attrs = {}; children = list("rebuild and check the rules") }, { tag = "b"; attrs = {}; children = list("→") }, { tag = "span"; attrs = {}; children = list("check the result") }) },
+            { tag = "div"; attrs = { id = "diagram-receipt" }; children = list() },
+            { tag = "details"; attrs = { class = "algebra-fold" }; children = list({ tag = "summary"; attrs = {}; children = list("See the checked reverse process") }, { tag = "pre"; attrs = { id = "inline-patch" }; children = list() }) }
+          ) }, "\n"
+        ) }, "\n",
+        { tag = "details"; attrs = { class = "workshop-words" }; children = list({ tag = "summary"; attrs = {}; children = list("Words used in the code sections") }, { tag = "dl"; attrs = {}; children = list({ tag = "dt"; attrs = {}; children = list("Projection") }, { tag = "dd"; attrs = {}; children = list("A view of the story for a particular purpose, such as a menu entry.") }, { tag = "dt"; attrs = {}; children = list("Overlay") }, { tag = "dd"; attrs = {}; children = list("A local replacement, such as the menu’s own label.") }, { tag = "dt"; attrs = {}; children = list("Type contract") }, { tag = "dd"; attrs = {}; children = list("Rules about which fields and values are allowed.") }, { tag = "dt"; attrs = {}; children = list("Serialize") }, { tag = "dd"; attrs = {}; children = list("Turn a structured page description into HTML text.") }, { tag = "dt"; attrs = {}; children = list("Receipt") }, { tag = "dd"; attrs = {}; children = list("A record of what changed and which checks ran.") }) }) },
+        { tag = "section"; attrs = { id = "inspect"; "aria-labelledby" = "inspect-heading" }; children = list({ tag = "details"; attrs = { id = "technical" }; children = list(
+          { tag = "summary"; attrs = {}; children = list({ tag = "span"; attrs = { id = "inspect-heading" }; children = list("Keep following: full source, algebra and receipts") }, { tag = "span"; attrs = { class = "detail-tag" }; children = list("inspect") }) },
+          { tag = "p"; attrs = { class = "panel-note" }; children = list("Every fold above leads into these same source documents and processes.") },
+          { tag = "div"; attrs = { class = "inspector" }; children = list(
+            { tag = "div"; attrs = { class = "tabs"; role = "tablist"; "aria-label" = "Inspect the example" }; children = map($tabs, "tab", { tag = "button"; attrs = { id = concat("tab-", $tab.key); role = "tab"; "aria-controls" = concat("panel-", $tab.key); "aria-selected" = if(eq($tab.key, "source"), "true", "false"); tabindex = if(eq($tab.key, "source"), null, "-1"); "data-tab" = $tab.key }; children = list($tab.title) }) }, "\n",
+            { tag = "div"; attrs = { id = "panel-source"; role = "tabpanel"; "aria-labelledby" = "tab-source"; tabindex = "0" }; children = list(
+              { tag = "div"; attrs = { class = "panel-toolbar" }; children = list({ tag = "label"; attrs = { for = "source-file" }; children = list("Source file") }, { tag = "select"; attrs = { id = "source-file" }; children = list({ tag = "option"; attrs = { value = "facts" }; children = list("story.rel · facts") }, { tag = "option"; attrs = { value = "encounter" }; children = list("story.encounter · projections and overlays") }, { tag = "option"; attrs = { value = "contracts" }; children = list("contracts.rel · type contracts") }) }) },
+              { tag = "p"; attrs = { class = "panel-note" }; children = list("Current candidate source. Edit at the named owner, then regenerate.") }, { tag = "pre"; attrs = { id = "source-code"; class = "source-code" }; children = list() }
+            ) }, "\n",
+            { tag = "div"; attrs = { id = "panel-pure"; role = "tabpanel"; "aria-labelledby" = "tab-pure"; tabindex = "0"; hidden = true }; children = list({ tag = "p"; attrs = { class = "panel-note" }; children = list("Actual expressions from the generated, lowered process.") }, { tag = "div"; attrs = { id = "pure-values" }; children = list() }) }, "\n",
+            { tag = "div"; attrs = { id = "panel-process"; role = "tabpanel"; "aria-labelledby" = "tab-process"; tabindex = "0"; hidden = true }; children = list({ tag = "div"; attrs = { class = "panel-toolbar" }; children = list({ tag = "label"; attrs = { for = "process-file" }; children = list("Process") }, { tag = "select"; attrs = { id = "process-file" }; children = map($processes, "process", { tag = "option"; attrs = { value = $process.key }; children = list($process.title) }) }) }, { tag = "pre"; attrs = { id = "process-code" }; children = list() }) }, "\n",
+            { tag = "div"; attrs = { id = "panel-html"; role = "tabpanel"; "aria-labelledby" = "tab-html"; tabindex = "0"; hidden = true }; children = list({ tag = "p"; attrs = { class = "panel-note" }; children = list("Exact HTML with separate event descriptors.") }, { tag = "div"; attrs = { id = "html-values" }; children = list() }) }, "\n",
+            { tag = "div"; attrs = { id = "panel-receipt"; role = "tabpanel"; "aria-labelledby" = "tab-receipt"; tabindex = "0"; hidden = true }; children = list({ tag = "div"; attrs = { id = "receipt" }; children = list() }) }
+          ) }
+        ) }) }, "\n",
+        { tag = "footer"; attrs = {}; children = list({ tag = "p"; attrs = {}; children = list("The example checks each change before applying it. Changes stay in this tab’s memory; no account, shared record or repository is edited. Reload to begin again.") }, { tag = "details"; attrs = {}; children = list({ tag = "summary"; attrs = {}; children = list("Source identities and boundaries") }, { tag = "p"; attrs = {}; children = list("This is a live explanatory fixture, not the authoring bootstrap or a complete mainframe. Presentation uses the common component and stylesheet definitions; session and interface behaviour are process algebra; the existing algebra owns the language semantics and source patches. The unchanged Temple kernel and existing algebra run locally in a Web Worker. Reloading starts a fresh example. Hashes and source links identify the supplied starting snapshot; candidate edits and their basis revisions appear in the return-path receipt.") }, { tag = "div"; attrs = { id = "hashes" }; children = list() }) }) }, "\n",
+        { tag = "p"; attrs = { "data-temple-errors" = true; role = "alert" }; children = list() }
+      ) }
+    ) }
+  ) }

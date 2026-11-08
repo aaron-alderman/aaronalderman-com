@@ -1,6 +1,0 @@
-const fs=require('fs'); const f='source/expedition.rel';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/"stylesheetVersion", "[^"]+"/,'"stylesheetVersion", "identity-questions-2"'));
-const p='algebra/hierarchy.process.json',h=JSON.parse(fs.readFileSync(p,'utf8'));
-const doc=h.queries['hierarchy.identityQuestions.build'].find(s=>s.each).steps[0].value;
-const body=doc.children.find(x=>x.tag==='body'),header=body.children.find(x=>x.tag==='header');
-const walk=x=>{if(x&&typeof x==='object'){if(x.tag==='a'&&x.attrs?.href==='questions.html'){x.attrs.href=['one','$identityPage','questionHref'];x.children=['list',['concat',['one','$identityPage','questionLabel'],' questions']];}Object.values(x).forEach(walk);}};walk(header);
-fs.writeFileSync(p,JSON.stringify(h,null,2)+'\n');

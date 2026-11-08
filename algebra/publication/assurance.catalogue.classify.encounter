@@ -1,0 +1,116 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.catalogue.classify:
+  let productInput = $eventInput
+  let productGates = $eventInput.obligations
+  port text.trim { value = if($productInput.policy, $productInput.policy, "") } → policyText
+  fold $productInput.sagas as s; profiles starts list():
+    let gates = map(
+      filter($productGates, "g", eq($g.saga, $s.id)),
+      "g",
+      {
+        id = $g.id;
+        saga = $g.saga;
+        level = $g.level;
+        kind = $g.kind;
+        label = if(eq($g.id, "identity.pipeline"), "Catalogue identity binding", $g.label);
+        next = if(
+          eq($g.id, "identity.meaning"),
+          "Review the entry and its catalogue representation; declare internal relationships as invariant, identity-mapped or undecided. Record reviewer, method, source and date.",
+          if(
+            eq($g.id, "access.language"),
+            "Keep a nonempty language marker on the assessed entry route.",
+            if(
+              eq($g.id, "access.skip"),
+              "Keep a recognisable skip link and one matching destination on the assessed entry route.",
+              $g.next
+            )
+          )
+        )
+      }
+    )
+    fold $gates as g; proofs starts list():
+      let available = includes(
+        list(
+          "identity.scope",
+          "identity.pipeline",
+          "access.scope",
+          "access.language",
+          "access.skip",
+          "access.alternatives",
+          "i18n.scope",
+          "i18n.metadata"
+        ),
+        $g.id
+      )
+      let ok = if(
+        eq($g.kind, "declaration"),
+        not(eq($policyText, "")),
+        if(
+          eq($g.id, "identity.pipeline"),
+          $productInput.binding,
+          if(
+            eq($g.id, "access.language"),
+            $productInput.markup.languageMarker,
+            if(
+              eq($g.id, "access.skip"),
+              $productInput.markup.skipTarget,
+              if(
+                eq($g.id, "access.alternatives"),
+                $productInput.markup.altAttributes,
+                and($productInput.markup.languageMarker, $productInput.markup.utf8)
+              )
+            )
+          )
+        )
+      )
+      let proof = {
+        id = $g.id;
+        kind = $g.kind;
+        scope = $productInput.scopeId;
+        ok = $ok;
+        source = if(
+          eq($g.kind, "declaration"),
+          "source/hierarchy.rel",
+          concat("/assurance/catalogue.values.rel#", $productInput.id)
+        );
+        issuer = "Algebra catalogue assessment";
+        method = if(
+          eq($g.kind, "declaration"),
+          "Authored policy: assess the generated catalogue entry route and its homepage identity binding only.",
+          if(
+            eq($g.id, "identity.pipeline"),
+            "Generated entry exists and the matching homepage catalogue identity row is mapped. Internal product identity policy remains unreviewed.",
+            "Selected static opening-tag attribute observation on the generated entry route."
+          )
+        );
+        observedAt = "current build"
+      }
+      yield if($available, append($proofs, list($proof)), $proofs) → proofs
+    let eventInput = {
+      id = $s.id;
+      title = $s.title;
+      scope = $productInput.scopeId;
+      scopeText = concat(
+        $productInput.route,
+        " and its homepage catalogue identity binding; internal routes, runtime states and external services excluded."
+      );
+      obligations = $gates;
+      evidence = $proofs
+    }
+    call assurance.saga.classify
+    port record.put { record = $result; key = "saga"; value = $s.id } → result
+    yield append($profiles, list($result)) → productProfiles
+  let result = {
+    id = $productInput.id;
+    name = $productInput.name;
+    route = $productInput.route;
+    deliveryLabel = $productInput.deliveryLabel;
+    scope = concat("Generated entry only: ", $productInput.route);
+    scopeId = $productInput.scopeId;
+    markup = $productInput.markup;
+    binding = $productInput.binding;
+    profiles = $productProfiles;
+    boundary = "A front-door assessment, not assurance of a complete application. Higher-level human, use and maintenance evidence is absent."
+  }

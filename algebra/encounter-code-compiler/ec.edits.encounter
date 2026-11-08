@@ -1,0 +1,60 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.edits:
+  let ecEditFields = $eventInput.fields
+  let ecEditScope = $eventInput.scope
+  let ecEditType = $eventInput.type
+  fold $eventInput.nodes as ecEditNode; ecEdits starts list():
+    port text.matches { value = $ecEditNode.text; pattern = "^edit (.+) (here|through .+)$" } → ecIsEdit
+    let ecEditsNext = $ecEdits
+    when $ecIsEdit:
+      port text.split { value = $ecEditNode.text; pattern = "^edit (.+) (here|through .+)$" } → ecEditTokens
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = {
+          query = "ec.slot";
+          input = { type = $ecEditType; name = at($ecEditTokens, 1) };
+          span = $ecSpan
+        }
+      } → ecEditSlot
+      let ecEditedField = at(filter($ecEditFields, "ecF", eq($ecF.name, $ecEditSlot.name)), 0)
+      assert $ecEditedField
+        otherwise "EC-E001: An edit route must accompany a value mapping in the same contribution."
+      assert not(some($ecEdits, "ecE", eq($ecE.field, $ecEditSlot.name)))
+        otherwise "EC-E002: A field has two edit routes."
+      let ecEditMode = at($ecEditTokens, 2)
+      let ecEditDestination = null
+      when eq($ecEditMode, "here"):
+        assert eq($ecEditedField.expression.kind, "string")
+          otherwise "EC-E003: This experiment edits only text mappings."
+        port text.matches { value = $ecEditedField.text; pattern = "^\"" } → ecConstantEdit
+        assert $ecConstantEdit
+          otherwise "EC-E004: Edit here requires an authored text literal."
+        let ecEditDestination = { kind = "literal"; node = $ecEditedField.node; token = $ecEditedField.text }
+      when not(eq($ecEditMode, "here")):
+        port text.slice { value = $ecEditMode; start = 8 } → ecEditPath
+        assert eq($ecEditPath, $ecEditedField.text)
+          otherwise "EC-E005: Only an exact direct field mapping has a reverse route in this slice."
+        port text.split { value = $ecEditPath; pattern = "^source\\.(.+)$" } → ecEditPathParts
+        let ecSourceField = at($ecEditPathParts, 1)
+        assert $ecSourceField
+          otherwise "EC-E006: This reverse route must name an explicit source field."
+        let ecSourceBinding = at(filter($ecEditScope, "ecB", eq($ecB.name, "source")), 0)
+        port kernel.invoke {
+          query = "ec.attempt";
+          input = {
+            query = "ec.slot";
+            input = { type = $ecSourceBinding.type; name = $ecSourceField };
+            span = $ecSpan
+          }
+        } → ecSourceEditSlot
+        assert and(eq($ecSourceEditSlot.kind, "string"), eq($ecSourceEditSlot.cardinality, "one"))
+          otherwise "EC-E007: The source edit route must be one text field."
+        let ecEditDestination = { kind = "source"; field = $ecSourceEditSlot.name; node = $ecEditedField.node }
+      let ecEditsNext = append(
+        $ecEdits,
+        list({ field = $ecEditSlot.name; destination = $ecEditDestination; node = $ecEditNode })
+      )
+    yield $ecEditsNext → ecEdits
+  let result = $ecEdits

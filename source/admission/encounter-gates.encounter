@@ -1,0 +1,47 @@
+# Existing view/representation behaviour returns through the actual source
+# compiler. A candidate's supplied model is never executable authority.
+process-module "temple/surface-process-module/1"
+
+process ec.evaluate:
+  let expression = $eventInput.expression
+  let expressionBindings = $eventInput.bindings
+  let spPolicy = { referenceSigil = at(" $", 1) }
+  port kernel.invoke { query = "sp.expression"; input = { value = $expression; depth = 0 } } → expressionSource
+  port encounter.evaluate { text = $expressionSource; bindings = $expressionBindings } → result
+
+process ec.execute:
+  let executionEntry = $eventInput.entry
+  let executionInput = $eventInput.input
+  let text = $ecInputs.codeText
+  let file = "source/experiment/story.encounter"
+  call ec.compile
+  let executionCompilation = $result
+  assert $executionCompilation.ok
+    otherwise "EC-SOURCE: Recompile the actual Encounter source before executing its representation."
+  port record.entries { value = $executionCompilation.module.queries } → emitted
+  fold list("ec.schema", "ec.slot", "ec.scalar", "ec.check", "ec.referenceType", "ec.fact", "ec.reference", "ec.argument") as helper; definitions starts $emitted:
+    port encounter.source { query = $helper } → source
+    when eq($helper, "ec.reference"):
+      port encounter.source { query = "ec.child.reference" } → source
+    yield append($definitions, list(list($helper, $source.programme))) → definitions
+  let spPolicy = { referenceSigil = at(" $", 1) }
+  fold $definitions as definition; sourceText starts "process-module \"temple/surface-process-module/1\"\n":
+    port kernel.invoke { query = "sp.programme"; input = { programme = at($definition, 1); depth = 1 } } → body
+    yield concat($sourceText, "\nprocess ", at($definition, 0), ":\n", $body, "\n") → sourceText
+  port encounter.execute {
+    text = $sourceText;
+    entry = $executionEntry;
+    input = $executionInput;
+    bindings = { codePlan = $executionCompilation.plan }
+  } → result
+
+process ec.child.reference:
+  port kernel.invoke { query = "ec.referenceType"; input = { id = $eventInput.id } } → ecRefType
+  assert eq($ecRefType, $eventInput.type)
+    otherwise "EC-T010: The reference has the wrong type."
+  let ecRefViews = filter($codePlan.views, "ecV", eq($ecV.id, $eventInput.id))
+  when eq(count($ecRefViews), 0):
+    port kernel.invoke { query = "ec.fact"; input = $eventInput } → ecRefResult
+  when eq(count($ecRefViews), 1):
+    port kernel.invoke { query = at(at($ecRefViews, 0), "entry"); input = {} } → ecRefResult
+  let result = $ecRefResult

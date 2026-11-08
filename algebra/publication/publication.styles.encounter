@@ -1,0 +1,87 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process publication.styles:
+  port static.read { text = one("scroll.styles", "plan") } → scrollRules
+  let cssPlan = {
+    imports = list();
+    tokens = list();
+    rules = append(
+      append(
+        append(
+          map(
+            filter(subjects("isa", "StyleRule"), "rule", eq(one($rule, "projection"), $projection)),
+            "rule",
+            {
+              id = $rule;
+              selector = one($rule, "selector");
+              context = optional($rule, "context");
+              declarations = map(
+                objects($rule, "declaration"),
+                "decl",
+                { property = one($decl, "property"); value = one($decl, "value") }
+              )
+            }
+          ),
+          if(
+            eq($projection, "main"),
+            map(
+              subjects("isa", "IdentityTheme"),
+              "theme",
+              {
+                id = concat("questions.palette.", one($theme, "key"));
+                selector = concat(
+                  "html:has(body[data-question-identity=\"",
+                  one($theme, "key"),
+                  "\"]),body[data-question-identity=\"",
+                  one($theme, "key"),
+                  "\"]",
+                  ", .identity-catalogue[data-perspective=\"",
+                  one($theme, "key"),
+                  "\"]"
+                );
+                declarations = map(
+                  objects($theme, "questionColour"),
+                  "decl",
+                  { property = one($decl, "property"); value = one($decl, "value") }
+                );
+                context = null
+              }
+            ),
+            list()
+          )
+        ),
+        if(
+          eq($projection, "main"),
+          map(
+            subjects("isa", "IdentityTheme"),
+            "t",
+            {
+              id = concat("identity.type.", one($t, "key"));
+              selector = concat(
+                "body[data-identity=\"",
+                one($t, "key"),
+                "\"],body[data-question-identity=\"",
+                one($t, "key"),
+                "\"]"
+              );
+              context = null;
+              declarations = list({ property = "--identity-display-font"; value = one($t, "displayFont") })
+            }
+          ),
+          list()
+        )
+      ),
+      if(eq($projection, "main"), $scrollRules, list())
+    )
+  }
+  when eq($projection, "main"):
+    let cssPlan = {
+      imports = $cssPlan.imports;
+      tokens = $cssPlan.tokens;
+      rules = append($cssPlan.rules, $readingStyles)
+    }
+  call css.renderPlan
+  when eq($projection, "main"):
+    call publication.motion
+    port projection.combine { kind = "stylesheet"; parts = list($css, $motionCSS) } → css

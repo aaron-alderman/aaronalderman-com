@@ -1,0 +1,52 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.click:
+  let button = $eventInput.matched
+  let action = or(
+    at($button.attributes, "data-world"),
+    at($button.attributes, "data-encounter"),
+    at($button.attributes, "data-demo")
+  )
+  assert includes(
+    list(
+      "reply",
+      "door",
+      "quiet",
+      "cabinet",
+      "layer",
+      "revision",
+      "deck",
+      "garden-mode",
+      "gate",
+      "hide-memory",
+      "couple-memory",
+      "origin",
+      "enrich",
+      "attention",
+      "inflate",
+      "reset-pattern",
+      "original-bit",
+      "flip-bit",
+      "rate",
+      "scale",
+      "amplitude",
+      "phase",
+      "loop",
+      "loop-reset"
+    ),
+    $action
+  )
+    otherwise "READER-ACTION: Unknown activity action."
+  let value = or(
+    at($button.attributes, "data-value"),
+    at($button.attributes, "data-reply"),
+    at($button.attributes, "data-door"),
+    at($button.attributes, "data-view"),
+    at($button.attributes, "data-layer")
+  )
+  port kernel.invoke {
+    query = concat("activity.action.", $action);
+    input = { button = $button; value = $value }
+  } → result
+  call activity.calculations

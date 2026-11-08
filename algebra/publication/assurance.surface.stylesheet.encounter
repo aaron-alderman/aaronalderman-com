@@ -1,0 +1,17 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.surface.stylesheet:
+  port text.split { value = $eventInput.css; pattern = "/\\*[\\s\\S]*?\\*/" } → surfaceCSSPieces
+  port text.join { values = $surfaceCSSPieces; separator = "" } → surfaceCSS
+  port text.matches {
+    value = $surfaceCSS;
+    pattern = "(?:^|[{}])\\s*body\\s*\\{[^{}]*(?:padding-bottom|margin-bottom)\\s*:\\s*[1-9][0-9]*(?:\\.[0-9]+)?(?:px|rem|em|vh|vw|%)";
+    flags = "i"
+  } → surfaceBodyReserve
+  let result = {
+    route = $eventInput.route;
+    rule = "layout.unconditional-body-reservation";
+    status = if($surfaceBodyReserve, "undecided", "not-observed");
+    evidence = "An unconditional body rule reserves nonzero bottom padding or margin. Its purpose needs a declaration or browser evidence; this is not automatically a defect."
+  }

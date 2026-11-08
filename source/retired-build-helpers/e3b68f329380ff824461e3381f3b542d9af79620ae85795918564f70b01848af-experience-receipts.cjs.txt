@@ -1,8 +1,0 @@
-const fs=require('fs'),f='algebra/reading-experience.process.json',p=JSON.parse(fs.readFileSync(f)),q=p.queries;
-q['experience.report'].at(-1).value.evidence={policySha256:['at','$input','policySha256'],planSha256:'$input.planSha256',observerSha256:'$input.observerSha256',artifactBindings:'$input.bindings',capturedAt:['at',['at','$input','capture'],'capturedAt'],browser:['at',['at','$input','capture'],'browser'],provenance:['at',['at','$input','capture'],'provenance'],rawObservations:'/tooling/assurance/reading-experience-capture.json'};
-q['language.report'].at(-1).value.evidence={policySha256:['at','$input','policySha256'],documents:['map','$input.pages','p',{route:'$p.route',sha256:'$p.sourceSha256',mainFound:'$p.foundMain',blocksObserved:['count','$p.blocks']}],reviewPrompts:'$input.policy.language.reviewPrompts'};
-// Fixture pages may omit projection-only metadata; raw prose evidence is retained separately.
-q['language.report'].at(-1).value.evidence.documents[3].mainFound=['at','$p','foundMain'];
-q['language.report'].at(-1).value.evidence.documents[3].blocksObserved=['count',['or',['at','$p','blocks'],['list']]];
-fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n');
-const pf='algebra/publication.process.json',pub=JSON.parse(fs.readFileSync(pf));pub.queries['assurance.experience.publish'].splice(12,0,{port:'file.copy',args:{path:'tooling/assurance/reading-experience-capture.json'},into:'_'});fs.writeFileSync(pf,JSON.stringify(pub,null,2)+'\n');

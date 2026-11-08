@@ -1,0 +1,14 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.shared:
+  let hRelation = $eventInput.relation
+  let hTarget = $eventInput.target
+  let hMatches = filter(
+    $eventInput.rows,
+    "hMatch",
+    and(eq($hMatch.relation, $hRelation), eq($hMatch.target, $hTarget))
+  )
+  fold $hMatches as hMatch; hPeers starts list():
+    yield if(includes($hPeers, $hMatch.item), $hPeers, append($hPeers, list($hMatch.item))) → hPeers
+  let result = $hPeers

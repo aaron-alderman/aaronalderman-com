@@ -1,0 +1,22 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.slot:
+  port kernel.invoke { query = "ec.schema"; input = { type = $eventInput.type } } → ecSchema
+  let ecRequested = $eventInput.name
+  let ecMatches = filter($ecSchema.slots, "ecS", eq($ecS.name, $ecRequested))
+  when eq(count($ecMatches), 0):
+    port text.matches { value = $ecRequested; pattern = "^[A-Za-z_][A-Za-z0-9_-]*$" } → ecBare
+    when $ecBare:
+      fold $ecSchema.slots as ecSlot; ecMatches starts list():
+        port text.split { value = $ecSlot.name; pattern = "\\." } → ecParts
+        yield if(
+        eq(at($ecParts, add(count($ecParts), -1)), $ecRequested),
+        append($ecMatches, list($ecSlot)),
+        $ecMatches
+      ) → ecMatches
+  assert not(eq(count($ecMatches), 0))
+    otherwise "EC-T003: Unknown field. Use a field declared by the input/output interface."
+  assert eq(count($ecMatches), 1)
+    otherwise "EC-T004: Ambiguous field. Qualify it with its type participation alias."
+  let result = at($ecMatches, 0)

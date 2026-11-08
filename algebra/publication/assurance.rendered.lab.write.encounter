@@ -1,0 +1,38 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.rendered.lab.write:
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          { tag = "title"; attrs = {  }; children = list("Algebra browser evidence workbench") }
+        )
+      },
+      {
+        tag = "body";
+        attrs = {  };
+        children = list(
+          { tag = "h1"; attrs = {  }; children = list("Rendered observation workbench") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Each frame is an actual published route at the declared CSS viewport. No page content is rewritten."
+            )
+          },
+          { tag = "div"; attrs = {  }; children = $labFrames }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  port file.write {
+    path = concat("__assurance_probe__/batch-", $labBatch, ".html");
+    text = $result
+  } → _

@@ -1,0 +1,150 @@
+# Successor to the live 26cc4bd Questions diagnostic. Trees, styles and browser
+# findings all use the common projection definition; no serialized HTML edits.
+process-module "temple/surface-process-module/1"
+
+process images.source:
+  each subjects("isa", "StyleRule") as rule:
+    let selector = one($rule, "selector")
+    port text.matches { value = $selector; pattern = "\\.q-question:(?:nth-child|last-child)" } → positional
+    assert not($positional)
+      otherwise "IMAGE-SOURCE: Card position cannot select image framing."
+    when and(includes($selector, ".q-question"), includes($selector, "img")):
+      each objects($rule, "declaration") as declaration:
+        when eq(one($declaration, "property"), "object-fit"):
+          assert or(and(eq($rule, "questions.style.32"), eq(one($declaration, "value"), "cover")), and(eq($rule, "questions.style.33"), eq(one($declaration, "value"), "contain")))
+            otherwise "IMAGE-SOURCE: Additional fitting override refused."
+  assert and(eq(one("questions.style.32.object-fit", "value"), "cover"), eq(one("questions.style.33.object-fit", "value"), "contain"), eq(one("questions.style.33", "selector"), ".q-question>img[src*=\"/world-emblems/\"]"), eq(one("questions.style.34", "selector"), ".q-question>img[src$=\"/questions/open-workshop-daylight-v2.png\"]"))
+    otherwise "IMAGE-SOURCE: Fitting must follow purpose and focal position must belong to the asset."
+  each subjects("isa", "QuestionImage") as asset:
+    port text.matches { value = one($asset, "path"); pattern = "^assets/(?:atlas|world-emblems|questions)/[a-z0-9-]+\\.png$" } → bounded
+    assert and($bounded, includes(list("illustration", "emblem"), one($asset, "purpose")), eq(one($asset, "fit"), if(eq(one($asset, "purpose"), "emblem"), "contain", "cover")), eq(includes(one($asset, "path"), "/world-emblems/"), eq(one($asset, "purpose"), "emblem")))
+      otherwise "IMAGE-SOURCE: Asset purpose and fitting disagree."
+
+process images.variants:
+  let result = list(
+    { id = "main"; route = "questions.html"; expected = 6 },
+    { id = "christian"; route = "worlds/christian/questions.html"; expected = 6 },
+    { id = "dad"; route = "worlds/dad/questions.html"; expected = 4 },
+    { id = "sourcerer"; route = "worlds/sourcerer/questions.html"; expected = 4 },
+    { id = "author"; route = "worlds/author/questions.html"; expected = 4 },
+    { id = "counterexample-broken"; route = "worlds/sourcerer/questions.html"; expected = 4 },
+    { id = "counterexample-size"; route = "worlds/sourcerer/questions.html"; expected = 4 }
+  )
+
+process publication.phase.images:
+  call publication.context
+  call images.source
+  let input = { kind = "root"; children = list(
+    { kind = "rule"; selector = "#image-assurance-panel"; children = list({ kind = "decl"; property = "margin"; value = "40px auto" }, { kind = "decl"; property = "padding"; value = "24px" }, { kind = "decl"; property = "width"; value = "min(86%,1100px)" }, { kind = "decl"; property = "background"; value = "#fffdf7" }, { kind = "decl"; property = "color"; value = "#193f3b" }, { kind = "decl"; property = "border"; value = "1px solid #8daaa4" }, { kind = "decl"; property = "border-radius"; value = "12px" }, { kind = "decl"; property = "overflow-wrap"; value = "anywhere" }) },
+    { kind = "rule"; selector = "body[data-image-counterexample=\"size\"] .q-question:nth-child(2)>img"; children = list({ kind = "decl"; property = "width"; value = "140px"; important = "!important" }) }
+  ) }
+  call projection.stylesheet
+  let surfaceWritePath = "assets/assurance.css"
+  call assurance.surface.register
+  port file.write { path = "assets/assurance.css"; text = $result } → _
+  port runtime.bundle { entry = "images.boot"; mode = "browser"; grantProfile = "workshopBrowser"; queries = list("images.boot", "images.audit", "projection.serialize"); factSubjects = subjects("isa", "QuestionImage"); budget = 20000000 } → code
+  port file.write { path = "assurance/images/runtime.js"; text = $code } → _
+  call images.variants
+  let imageVariants = $result
+  each $imageVariants as variant:
+    port projection.tree { path = $variant.route } → tree
+    port kernel.invoke { query = "images.tree"; input = { tree = $tree; route = $variant.route; variant = $variant } } → input
+    call projection.serialize
+    let surfaceWritePath = concat("assurance/images/", $variant.id, ".html")
+    call assurance.surface.register
+    port file.write { path = $surfaceWritePath; text = $result } → _
+  port source.read { path = "source/projection/assurance-pages.encounter" } → componentSource
+  port encounter.execute { text = $componentSource; entry = "component.images.index"; bindings = { imageVariants = $imageVariants } } → portfolioPage
+  call assurance.portfolio.document
+
+process images.tree:
+  let node = $eventInput.tree
+  port value.describe { value = $node } → shape
+  let result = $node
+  when $shape.array:
+    fold $node as child; children starts list():
+      port kernel.invoke { query = "images.tree"; input = { tree = $child; route = $eventInput.route; variant = $eventInput.variant } } → child
+      yield append($children, list($child)) → result
+  when and(not($shape.array), eq($shape.type, "object"), not(eq($node, null))):
+    let attrs = or(at($node, "attrs"), {})
+    port record.entries { value = $attrs } → entries
+    fold $entries as attribute; changed starts $attrs:
+      let key = at($attribute, 0)
+      let href = at($attribute, 1)
+      when and(includes(list("href", "src"), $key), not(eq($href, ""))):
+        port text.matches { value = $href; pattern = "^(?:#|[A-Za-z][A-Za-z0-9+.-]*:|//)" } → leave
+        when not($leave):
+          port url.resolve { href = $href; route = $eventInput.route } → resolved
+          let href = concat("/", $resolved.route, if(eq($resolved.fragment, ""), "", concat("#", $resolved.fragment)))
+        port record.put { record = $changed; key = $key; value = $href } → changed
+      yield $changed → attrs
+    when eq($node.tag, "img"):
+      port record.put { record = $attrs; key = "loading"; value = "eager" } → attrs
+      when and(eq($eventInput.variant.id, "counterexample-broken"), includes(at($attrs, "src"), "assets/atlas/unseen-v1.png")):
+        port record.put { record = $attrs; key = "src"; value = "data:image/png;base64,invalid" } → attrs
+    port kernel.invoke { query = "images.tree"; input = { tree = or(at($node, "children"), list()); route = $eventInput.route; variant = $eventInput.variant } } → children
+    when eq($node.tag, "head"):
+      let children = append($children, list({ tag = "meta"; attrs = { name = "robots"; content = "noindex" }; children = list() }, { tag = "link"; attrs = { rel = "stylesheet"; href = "/assets/assurance.css" }; children = list() }))
+    when and(eq($node.tag, "link"), eq(at($attrs, "rel"), "canonical")):
+      port record.put { record = $attrs; key = "href"; value = concat("https://aaronalderman.com/assurance/images/", $eventInput.variant.id, ".html") } → attrs
+    when eq($node.tag, "main"):
+      let children = append($children, list(
+        { tag = "section"; attrs = { id = "image-assurance-panel"; "aria-labelledby" = "image-assurance-heading" }; children = list(
+          { tag = "h2"; attrs = { id = "image-assurance-heading" }; children = list("Questions image assurance") },
+          { tag = "p"; attrs = {}; children = list("Illustrations fill their frames; emblems fit inside them. Loading, image dimensions and card bounds are observed below; fitting is checked at source. This diagnostic copy uses eager loading. Artistic crops remain visual review.") },
+          if(includes($eventInput.variant.id, "counterexample"), { tag = "p"; attrs = {}; children = list("Deliberate counterexample: this page must report a failed check.") }, null),
+          { tag = "p"; attrs = { id = "image-assurance-status"; "aria-live" = "polite" }; children = list("Waiting for browser observations.") },
+          { tag = "ol"; attrs = { id = "image-assurance-observations" }; children = list() },
+          { tag = "p"; attrs = {}; children = list({ tag = "a"; attrs = { href = "/assurance/images/" }; children = list("All image diagnostics") }) }
+        ) }
+      ))
+    when eq($node.tag, "body"):
+      port record.put { record = $attrs; key = "data-image-expected"; value = $eventInput.variant.expected } → attrs
+      port record.put { record = $attrs; key = "data-image-counterexample"; value = if(eq($eventInput.variant.id, "counterexample-size"), "size", if(eq($eventInput.variant.id, "counterexample-broken"), "broken", "none")) } → attrs
+      let children = append($children, list({ tag = "script"; attrs = { src = "/assurance/images/runtime.js"; defer = true }; children = list() }))
+    let result = { tag = $node.tag; attrs = $attrs; children = $children }
+
+process images.boot:
+  port browser.select { selector = ".q-question>img" } → nodes
+  each $nodes as node:
+    port browser.on { ref = $node.ref; event = "load"; query = "images.audit"; input = {} } → _
+    port browser.on { ref = $node.ref; event = "error"; query = "images.audit"; input = {} } → _
+  port browser.on { ref = "window"; event = "load"; query = "images.audit"; input = {} } → _
+  port browser.on { ref = "window"; event = "scroll"; query = "images.audit"; input = {} } → _
+  port browser.on { ref = "window"; event = "resize"; query = "images.audit"; input = {} } → _
+  call images.audit
+
+process images.audit:
+  port browser.select { selector = ".q-question>img" } → nodes
+  port browser.select { selector = ".q-question" } → frames
+  let reference = at($nodes, 0)
+  fold range(count($nodes)) as ordinal; observations starts list():
+    let node = at($nodes, add($ordinal, -1))
+    let frame = at($frames, add($ordinal, -1))
+    port browser.property { ref = $node.ref; name = "complete" } → complete
+    port browser.property { ref = $node.ref; name = "naturalWidth" } → nw
+    port browser.property { ref = $node.ref; name = "naturalHeight" } → nh
+    let assets = filter(subjects("isa", "QuestionImage"), "a", includes($node.attributes.src, one($a, "path")))
+    let broken = eq($node.attributes.src, "data:image/png;base64,invalid")
+    let purpose = if($broken, "illustration", if(eq(count($assets), 1), one(at($assets, 0), "purpose"), "unknown"))
+    let fit = if(eq($purpose, "emblem"), "contain", "cover")
+    let loaded = and($complete, not(eq($nw, 0)), not(eq($nh, 0)))
+    port number.calculate { operation = "subtract"; values = list($node.rect.width, $reference.rect.width) } → dw
+    port number.calculate { operation = "subtract"; values = list($node.rect.height, $reference.rect.height) } → dh
+    port number.calculate { operation = "abs"; values = list($dw) } → dw
+    port number.calculate { operation = "abs"; values = list($dh) } → dh
+    port number.calculate { operation = "lessEqual"; values = list($dw, 1) } → widthOK
+    port number.calculate { operation = "lessEqual"; values = list($dh, 1) } → heightOK
+    port number.calculate { operation = "greaterEqual"; values = list($node.rect.left, add($frame.rect.left, -1)) } → leftOK
+    port number.calculate { operation = "greaterEqual"; values = list($node.rect.top, add($frame.rect.top, -1)) } → topOK
+    port number.calculate { operation = "lessEqual"; values = list($node.rect.right, add($frame.rect.right, 1)) } → rightOK
+    port number.calculate { operation = "lessEqual"; values = list($node.rect.bottom, add($frame.rect.bottom, 1)) } → bottomOK
+    let row = { n = $ordinal; kind = $purpose; fit = $fit; loaded = $loaded; nw = $nw; nh = $nh; w = $node.rect.width; h = $node.rect.height; bounds = and($leftOK, $topOK, $rightOK, $bottomOK); size = and($widthOK, $heightOK); known = includes(list("illustration", "emblem"), $purpose) }
+    yield append($observations, list($row)) → observations
+  let failed = count(filter($observations, "r", not(and($r.loaded, $r.bounds, $r.size, $r.known))))
+  let input = concat(count($observations), " images observed · ", $failed, " failed checks. ", if(eq(count($nodes), count($frames)), "One image per card.", "Card/image count mismatch."))
+  call projection.serialize
+  port browser.content { ref = "#image-assurance-status"; html = $result } → _
+  let input = map($observations, "r", { tag = "li"; attrs = { "data-image-observation" = $r.n; "data-loaded" = if($r.loaded, "true", "false"); "data-size" = if($r.size, "true", "false"); "data-bounds" = if($r.bounds, "true", "false"); "data-known" = if($r.known, "true", "false"); "data-purpose" = $r.kind; "data-fit" = $r.fit }; children = list(concat($r.kind, " / ", $r.fit, " · ", $r.w, " × ", $r.h, " · ", if($r.loaded, "loaded", "FAILED loading"), " · ", if($r.size, "consistent frame", "FAILED frame size"), " · ", if($r.bounds, "inside card", "FAILED card bounds"))) })
+  call projection.serialize
+  port browser.content { ref = "#image-assurance-observations"; html = $result } → _

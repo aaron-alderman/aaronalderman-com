@@ -1,0 +1,48 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process reader.boot:
+  let visited = list()
+  port storage.read { key = "worldwright-aaron-trail-v1" } → saved
+  try:
+    when $saved.value:
+      port static.read { text = $saved.value } → parsed
+      when isArray($parsed):
+        let visited = distinct(filter($parsed, "id", includes($data.ids, $id)))
+  catch error:
+
+  port state.set { key = "visited"; value = $visited } → _
+  port state.set { key = "current"; value = "home" } → _
+  port state.set { key = "previous"; value = "home" } → _
+  port browser.on {
+    ref = "document";
+    event = "click";
+    query = "reader.hashLink";
+    input = {  };
+    delegate = "a[href^=\"#\"]:not(.skip)"
+  } → _
+  port browser.on {
+    ref = ".skip";
+    event = "click";
+    query = "reader.skip";
+    input = {  };
+    preventDefault = true
+  } → _
+  port browser.on { ref = "window"; event = "hashchange"; query = "reader.route"; input = {  } } → _
+  port browser.on {
+    ref = "document";
+    event = "click";
+    query = "reader.click";
+    input = {  };
+    delegate = "[data-reader-action]"
+  } → _
+  port browser.on { ref = "#reader-search"; event = "input"; query = "reader.search"; input = {  } } → _
+  port browser.on {
+    ref = { media = "(prefers-reduced-motion: reduce)" };
+    event = "change";
+    query = "reader.motion.sync";
+    input = {  }
+  } → _
+  call reader.motion.sync
+  call reader.route
+  port browser.on { ref = "#reader-dialog"; event = "click"; query = "reader.backdrop"; input = {  } } → _

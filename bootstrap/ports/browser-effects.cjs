@@ -72,6 +72,9 @@ function computationalPorts(host = {}) {
 
 
   return {
+    // Same retained SHA-256 mechanism, exposed synchronously to compiler bootstrap.
+    // No application effect profile grants this additional mechanical entry.
+    'digest.sha256.sync': ({text}) => sha256HexSync(text),
     'number.calculate': ({operation,values}) => {
       const xs=values.map(Number), [a,b]=xs;
       const operations={add:()=>xs.reduce((x,y)=>x+y,0),subtract:()=>a-b,multiply:()=>xs.reduce((x,y)=>x*y,1),divide:()=>a/b,remainder:()=>a%b,power:()=>a**b,min:()=>Math.min(...xs),max:()=>Math.max(...xs),floor:()=>Math.floor(a),ceil:()=>Math.ceil(a),round:()=>Math.round(a),abs:()=>Math.abs(a),sin:()=>Math.sin(a),cos:()=>Math.cos(a),uint32:()=>a>>>0,less:()=>a<b,lessEqual:()=>a<=b,greater:()=>a>b,greaterEqual:()=>a>=b};
@@ -82,9 +85,9 @@ function computationalPorts(host = {}) {
     'number.parse': ({value,radix}) => {const n=radix===undefined?Number(value):parseInt(value,radix);return Number.isFinite(n)?n:null;},
     'value.sort': ({values,mode}) => mode==='numeric'?[...values].sort((a,b)=>a-b):mode==='locale'?[...values].sort((a,b)=>String(a).localeCompare(String(b))):[...values].sort(),
     'text.upperCase': ({value}) => value.toUpperCase(),
-    'text.replace': ({value,pattern,flags,replacement}) => value.replace(new RegExp(pattern,flags),replacement),
-    'text.match': ({value,pattern,flags}) => {const m=new RegExp(pattern,flags).exec(value);return m?{text:m[0],groups:m.slice(1).map(v=>v??null),index:m.index}:null;},
-    'text.matchAll': ({value,pattern,flags=''}) => [...value.matchAll(new RegExp(pattern,flags.includes('g')?flags:flags+'g'))].map(m=>({text:m[0],groups:m.slice(1).map(v=>v??null),index:m.index})),
+    'text.replace': () => {throw Error('Isolated regex transport required');},
+    'text.match': () => {throw Error('Isolated regex transport required');},
+    'text.matchAll': () => {throw Error('Isolated regex transport required');},
     'text.utf8Length': ({value}) => new TextEncoder().encode(value).length,
     'digest.sha256': async ({text,fallback=false}) => {
       const crypto=host.crypto===undefined?globalThis.crypto:host.crypto;
@@ -101,6 +104,7 @@ function computationalPorts(host = {}) {
 
 function browserEffects(host,dispatch) {
   const doc=host.document, win=host.window??globalThis;
+  const guarded=()=>{if(!host.markup)throw Error('Markup execution ceiling is required');return host.markup;};
   const records=host.effects??(host.effects=new Map());const allocate=()=>{host.effectNext=(host.effectNext??0)+1;return host.effectNext;};
   const nodes=host.effectNodes??(host.effectNodes=new WeakMap());
   const element=ref=>{const spec=typeof ref==='string'?{selector:ref}:ref;if(spec.handle){const value=records.get(spec.handle)?.node;if(!value)throw Error('Expired DOM observation handle');return value;}const list=doc.querySelectorAll(spec.selector);const value=list[spec.index??0];if(!value)throw Error('Missing DOM observation target: '+spec.selector);return value;};
@@ -119,13 +123,13 @@ function browserEffects(host,dispatch) {
     'browser.read': ({ref}) => describe(element(ref)),
     'browser.relative': ({ref,relation,selector}) => {const el=element(ref);const found=relation==='parent'?el.parentElement:relation==='closest'?el.closest(selector):relation==='query'?el.querySelector(selector):null;if(!['parent','closest','query'].includes(relation))throw Error('Unknown DOM relationship');return found?describe(found):null;},
     'browser.property': ({ref,name}) => {const value=element(ref)[name];if(!['string','number','boolean'].includes(typeof value)&&value!==null)throw Error('Nonportable DOM property observation');return value;},
-    'browser.write': ({ref,name,value}) => {const allowed=['value','checked','disabled','hidden','readOnly','tabIndex','textContent','className','open','max','min','title'];if(!allowed.includes(name))throw Error('Undeclared DOM property effect');element(ref)[name]=value;return true;},
-    'browser.attribute': ({ref,name,value}) => {const el=element(ref);if(/^on/i.test(name)||['srcdoc'].includes(name))throw Error('Executable attribute effect refused');if(value===null)el.removeAttribute(name);else el.setAttribute(name,String(value));return true;},
-    'browser.style': ({ref,name,value}) => {const el=element(ref);if(value===null)el.style.removeProperty(name);else el.style.setProperty(name,String(value));return true;},
-    'browser.class': ({ref,name,value}) => {element(ref).classList.toggle(name,Boolean(value));return true;},
-    'browser.content': ({ref,html}) => {element(ref).innerHTML=html;return true;},
-    'browser.insert': ({ref,position,html}) => {if(!['beforebegin','afterbegin','beforeend','afterend'].includes(position))throw Error('Unknown DOM insertion position');element(ref).insertAdjacentHTML(position,html);return true;},
-    'browser.replace': ({ref,html}) => {element(ref).outerHTML=html;return true;},
+    'browser.write': ({ref,name,value},env,gate) => {const el=element(ref);guarded().write(el,gate,name,true,value);el[name]=value;return true;},
+    'browser.attribute': ({ref,name,value},env,gate) => {const el=element(ref);guarded().attribute(el,name,value,gate);if(value===null)el.removeAttribute(name);else el.setAttribute(name,String(value));return true;},
+    'browser.style': ({ref,name,value},env,gate) => {gate.authorize('projection.style',{name,value});const el=element(ref);if(value===null)el.style.removeProperty(name);else el.style.setProperty(name,String(value));return true;},
+    'browser.class': ({ref,name,value},env,gate) => {gate.authorize('projection.class',{name,classes:host.projection?.classes()??[]});element(ref).classList.toggle(name,Boolean(value));return true;},
+    'browser.content': ({ref,html},env,gate) => {guarded().content(element(ref),html,gate);return true;},
+    'browser.insert': ({ref,position,html},env,gate) => {guarded().insert(element(ref),position,html,gate);return true;},
+    'browser.replace': ({ref,html},env,gate) => {guarded().replace(element(ref),html,gate);return true;},
     'browser.remove': ({ref}) => {element(ref).remove();return true;},
     'browser.focus': ({ref,preventScroll}) => {element(ref).focus({preventScroll:Boolean(preventScroll)});return true;},
     'browser.scrollIntoView': ({ref,block,behavior}) => {element(ref).scrollIntoView({block,behavior});return true;},
@@ -149,17 +153,18 @@ function browserEffects(host,dispatch) {
     'browser.title': ({value}) => {doc.title=String(value);return true;},
     'browser.scroll': ({top=0,left=0,behavior='instant'}) => {win.scrollTo({top,left,behavior});return true;},
     'browser.dialog': ({ref,open}) => {const node=element(ref);if(open&&!node.open)node.showModal();if(!open&&node.open)node.close();return true;},
-    'document.fragment': ({html,selector,base,removeSelectors=[],urlAttributes=[],keepFragmentLinks=false}) => {
+    'document.fragmentTree': ({html,selector,base,removeSelectors=[],urlAttributes=[],keepFragmentLinks=false}) => {
       const parsed=new win.DOMParser().parseFromString(html,'text/html');
       for(const removeSelector of removeSelectors)for(const node of parsed.querySelectorAll(removeSelector))node.remove();
       if(base)for(const name of urlAttributes)for(const node of parsed.querySelectorAll('['+name+']')){
         const value=node.getAttribute(name);if(value&&!(keepFragmentLinks&&value.startsWith('#')))node.setAttribute(name,new win.URL(value,base).href);
       }
-      const selected=parsed.querySelector(selector);if(!selected)throw Error('Missing document fragment');return selected.innerHTML;
+      const selected=parsed.querySelector(selector);if(!selected)throw Error('Missing document fragment');return host.markup.observeChildren(selected);
     },
-    'browser.frameContent': ({ref,html,bindings=[],sandbox=[]}) => {
+    'browser.frameContent': ({ref,html,bindings=[],sandbox=[]},env,gate) => {
       // Native capability ceiling: this bridge never permits frame scripts.
-      if(!Array.isArray(sandbox)||sandbox.some(token=>token!=='allow-same-origin'))throw Error('Unsupported frame capability');
+      gate.authorize('surface.attribute',{tag:'iframe',name:'sandbox',value:sandbox.join(' '),base:doc.baseURI,mutation:false,attributes:{}});
+      guarded().frame(html,gate);
       const frame=element(ref);frame.setAttribute('sandbox',sandbox.join(' '));
       frame.onload=()=>{for(const binding of bindings)frame.contentDocument.addEventListener(binding.event,event=>{
         const matched=binding.delegate?event.target.closest?.(binding.delegate):event.target;
@@ -174,15 +179,15 @@ function browserEffects(host,dispatch) {
     },
     'image.rasterize': ({width,height,pixels,rows}) => {const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d'),image=ctx.createImageData(width,height);image.data.set(rows?rows.flat():pixels);ctx.putImageData(image,0,0);return canvas.toDataURL();},
     'media.read': ({ref}) => {const video=element(ref);return {paused:video.paused,muted:video.muted,volume:video.volume,currentTime:video.currentTime,currentSrc:video.currentSrc,readyState:video.readyState,seekable:Array.from({length:video.seekable.length},(_,i)=>[video.seekable.start(i),video.seekable.end(i)])};},
-    'media.write': ({ref,name,value}) => {if(!['muted','volume','currentTime','preload','controls','src'].includes(name))throw Error('Unknown media property');element(ref)[name]=value;return true;},
+    'media.write': ({ref,name,value}) => {const media=element(ref);if(!['video','audio'].includes(String(media.localName).toLowerCase()))throw Error('Media effects require an audio or video element');if(!['muted','volume','currentTime','preload','controls','src'].includes(name))throw Error('Unknown media property');media[name]=value;return true;},
     'media.play': async ({ref}) => {try{await element(ref).play();return {ok:true};}catch(error){return {ok:false,name:error.name};}},
     'media.pause': ({ref}) => {element(ref).pause();return true;},
     'media.load': ({ref}) => {element(ref).load();return true;},
     'browser.once': ({ref,event}) => new Promise(resolve=>target(ref).addEventListener(event,e=>resolve(eventValue(e)),{once:true})),
     'asset.blobURL': async ({url}) => {const response=await (host.fetch??win.fetch)(url);if(!response.ok)throw Error('Asset request failed: '+response.status);return win.URL.createObjectURL(await response.blob());},
-    'asset.json': async ({url,cache}) => {const response=await (host.fetch??win.fetch)(url,{cache});if(!response.ok)throw Error('Asset request failed: '+response.status);return response.json();},
     'asset.text': async ({url,cache}) => {const response=await (host.fetch??win.fetch)(url,{cache});if(!response.ok)throw Error('Asset request failed: '+response.status);return response.text();},
   };
 }
 
 module.exports={computationalPorts,browserEffects};
+

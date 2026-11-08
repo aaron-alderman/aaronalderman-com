@@ -1,0 +1,16 @@
+TAP version 13
+# policy basis 66d95260d7cef0d74c46626f2c86e00062b9d874a98998df1b9fce323edefd43
+# canonical declaration 8800a690a0977d4e5cab4423aba1a760e7bf845d7b0b6d6abe26f9fb91a7a069
+ok 1 - test.boundary.files
+ok 2 - test.preservation.common-style-migration
+not ok 3 - test.preservation.routes-text-assets
+  ---
+  context: "inspection/module-microsite-temple-ui.html"
+  message: Error: Native regular-expression deadline exceeded
+        at fail (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\isolated-regexp.cjs:22:54)
+        at Timeout.<anonymous> (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\isolated-regexp.cjs:27:89)
+        at listOnTimeout (node:internal/timers:685:17)
+        at process.processTimers (node:internal/timers:618:7)
+  ...
+ok 4 - test.publication.budgets
+ok 5 - test.publication.projection-closure

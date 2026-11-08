@@ -1,0 +1,135 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.compile:
+  let ecSpan = { file = $file; line = 1; column = 1; offset = 0; endOffset = 0 }
+  try:
+    call ec.lex
+    let ecNodes = $result.nodes
+    let ecLiterals = $result.literals
+    fold filter($ecNodes, "ecChild", eq($ecChild.parent, 0)) as ecRoot; ecDeclarations starts list():
+      let ecSpan = {
+        file = $file;
+        line = $ecRoot.line;
+        column = add($ecRoot.indent, 1);
+        offset = $ecRoot.offset;
+        endOffset = add($ecRoot.offset, count($ecRoot.raw))
+      }
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = { query = "ec.header"; input = { node = $ecRoot }; span = $ecSpan }
+      } → ecDeclaration
+      yield append($ecDeclarations, list($ecDeclaration)) → ecDeclarations
+    let ecModuleDeclarations = filter($ecDeclarations, "ecD", eq($ecD.kind, "module"))
+    assert eq(count($ecModuleDeclarations), 1)
+      otherwise "EC-P018: Declare exactly one module."
+    let ecModule = at(at($ecModuleDeclarations, 0), "name")
+    let ecViewDeclarations = filter($ecDeclarations, "ecD", eq($ecD.kind, "view"))
+    let ecRepDeclarations = filter($ecDeclarations, "ecD", eq($ecD.kind, "representation"))
+    assert and(not(eq(count($ecViewDeclarations), 0)), not(eq(count($ecRepDeclarations), 0)))
+      otherwise "EC-P019: This profile requires typed views and reusable representations."
+    let ecViewNames = map($ecViewDeclarations, "ecD", $ecD.id)
+    let ecRepNames = map($ecRepDeclarations, "ecD", $ecD.id)
+    assert and(
+      eq(count($ecViewNames), count(distinct($ecViewNames))),
+      eq(count($ecRepNames), count(distinct($ecRepNames)))
+    )
+      otherwise "EC-P020: A definition name is declared twice."
+    assert eq(
+      count(
+        filter(
+          $ecNodes,
+          "ecN",
+          eq($ecN.parent, at(at(at($ecModuleDeclarations, 0), "node"), "id"))
+        )
+      ),
+      0
+    )
+      otherwise "EC-P025: The module name has no nested body; declare views and representations alongside it."
+    assert eq(
+      count(distinct(map($ecViewDeclarations, "ecD", $ecD.id))),
+      count($ecViewDeclarations)
+    )
+      otherwise "EC-P026: A view identity is declared twice; choose one owner."
+    assert eq(count(distinct(map($ecRepDeclarations, "ecD", $ecD.id))), count($ecRepDeclarations))
+      otherwise "EC-P027: A representation name is declared twice; choose one owner."
+    let codePlan = {
+      module = $ecModule;
+      literalValues = $ecLiterals;
+      views = $ecViewDeclarations;
+      representations = list();
+      sourceText = $ecLexText;
+      file = $file;
+      protocol = "encounter/typed-projection-plan/1"
+    }
+    fold $ecRepDeclarations as ecD; ecRepresentations starts list():
+      let ecSpan = {
+        file = $file;
+        line = $ecD.node.line;
+        column = add($ecD.node.indent, 1);
+        offset = $ecD.node.offset;
+        endOffset = add($ecD.node.offset, count($ecD.node.raw))
+      }
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = { query = "ec.representation"; input = { declaration = $ecD }; span = $ecSpan }
+      } → ecRepresentation
+      yield append($ecRepresentations, list($ecRepresentation)) → ecRepresentations
+    port record.put { record = $codePlan; key = "representations"; value = $ecRepresentations } → codePlan
+    fold $ecViewDeclarations as ecD; ecViews starts list():
+      let ecSpan = {
+        file = $file;
+        line = $ecD.node.line;
+        column = add($ecD.node.indent, 1);
+        offset = $ecD.node.offset;
+        endOffset = add($ecD.node.offset, count($ecD.node.raw))
+      }
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = { query = "ec.view"; input = { declaration = $ecD }; span = $ecSpan }
+      } → ecView
+      yield append($ecViews, list($ecView)) → ecViews
+    port record.put { record = $codePlan; key = "views"; value = $ecViews } → codePlan
+    call ec.verify
+    fold $ecViews as ecEmit; ecQueries starts {  }:
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = { query = "ec.emitView"; input = { view = $ecEmit }; span = $ecSpan }
+      } → ecProgramme
+      port record.put { record = $ecQueries; key = $ecEmit.entry; value = $ecProgramme } → ecQueries
+      yield $ecQueries → ecQueries
+    fold $ecRepresentations as ecEmit; ecQueries starts $ecQueries:
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = {
+          query = "ec.emitRepresentation";
+          input = { representation = $ecEmit };
+          span = $ecSpan
+        }
+      } → ecProgramme
+      port record.put { record = $ecQueries; key = $ecEmit.entry; value = $ecProgramme } → ecQueries
+      yield $ecQueries → ecQueries
+    let result = {
+      ok = true;
+      plan = $codePlan;
+      module = { protocol = "temple/surface-process-module/1"; queries = $ecQueries };
+      diagnostic = null
+    }
+  catch ecCompileFault:
+    port text.matches { value = $ecCompileFault.message; pattern = "^EC-DIAGNOSTIC:" } → ecLocated
+    when $ecLocated:
+      port text.slice { value = $ecCompileFault.message; start = 14 } → ecWire
+      port static.read { text = $ecWire } → ecLocatedDiagnostic
+      let ecSpan = $ecLocatedDiagnostic.span
+      let ecCompileFault = { message = $ecLocatedDiagnostic.message }
+    let result = {
+      ok = false;
+      plan = null;
+      module = null;
+      diagnostic = {
+        file = $file;
+        span = $ecSpan;
+        message = $ecCompileFault.message;
+        correction = "Correct the named Encounter declaration or its REL contract. No fallback programme was activated."
+      }
+    }

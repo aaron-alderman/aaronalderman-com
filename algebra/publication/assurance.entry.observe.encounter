@@ -1,0 +1,45 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.entry.observe:
+  fold $eventInput.pages as page; entryEvidence starts list():
+    fold $page.observations as o; scan starts { language = ""; charset = ""; skip = false; main = false; images = {  } }:
+      let language = $scan.language
+      let charset = $scan.charset
+      let skip = $scan.skip
+      let main = $scan.main
+      let images = $scan.images
+      when and(eq($o.tag, "html"), eq($o.sink, "lang")):
+        let language = $o.value
+      when and(eq($o.tag, "meta"), eq($o.sink, "charset")):
+        port text.lowerCase { value = $o.value } → charset
+      when and(eq($o.sink, "href"), eq($o.value, "#main")):
+        let skip = true
+      when and(eq($o.sink, "id"), eq($o.value, "main")):
+        let main = true
+      when eq($o.tag, "img"):
+        let image = or(at($images, $o.ordinal), {  })
+        port record.put { record = $image; key = $o.sink; value = $o.value } → image
+        port record.put { record = $images; key = $o.ordinal; value = $image } → images
+      yield {
+      language = $language;
+      charset = $charset;
+      skip = $skip;
+      main = $main;
+      images = $images
+    } → scan
+    port record.entries { value = $scan.images } → images
+    let missingAlt = filter($images, "i", eq(at(at($i, 1), "alt"), at({  }, "absent")))
+    let pageEvidence = {
+      file = $page.file;
+      language = $scan.language;
+      charset = $scan.charset;
+      languageMarker = not(eq($scan.language, ""));
+      skipTarget = and($scan.skip, $scan.main);
+      images = count($images);
+      missingAlt = map($missingAlt, "i", at($i, 0));
+      altAttributes = eq(count($missingAlt), 0);
+      utf8 = eq($scan.charset, "utf-8")
+    }
+    yield append($entryEvidence, list($pageEvidence)) → entryEvidence
+  let result = $entryEvidence

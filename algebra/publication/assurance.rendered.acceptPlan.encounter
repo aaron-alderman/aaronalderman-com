@@ -1,0 +1,21 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.rendered.acceptPlan:
+  call assurance.rendered.plan
+  let expectedPlan = $result
+  let observedPlan = $eventInput.plan
+  let result = {
+    ok = and(
+      eq(at($observedPlan, "protocol"), at($expectedPlan, "protocol")),
+      eq(at($observedPlan, "profiles"), at($expectedPlan, "profiles")),
+      eq(at($observedPlan, "batchSize"), at($expectedPlan, "batchSize")),
+      eq(at($observedPlan, "textLimit"), at($expectedPlan, "textLimit")),
+      eq(at($observedPlan, "groups"), at($expectedPlan, "groups")),
+      eq(at($observedPlan, "content"), at($expectedPlan, "content")),
+      eq(at($observedPlan, "scope"), at($expectedPlan, "scope"))
+    );
+    invariant = list("protocol", "profiles", "batchSize", "textLimit", "groups", "content", "scope");
+    replayable = list("thresholds");
+    reason = "Observation selectors, bounds and viewports must match. Interpretation thresholds can change through an admitted replay without changing the captured geometry."
+  }

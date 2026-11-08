@@ -1,0 +1,18 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.verify:
+  each $codePlan.representations as ecR:
+    port kernel.invoke { query = "ec.complete"; input = { type = $ecR.type; fields = $ecR.fields } } → _
+  each $codePlan.views as ecV:
+    port kernel.invoke { query = "ec.complete"; input = { type = $ecV.type; fields = $ecV.fields.fields } } → _
+    assert eq(count(filter($codePlan.views, "ecOther", eq($ecOther.id, $ecV.source))), 0)
+      otherwise "EC-C009: View-to-view source dependencies are not supported by this initial profile; use an explicitly typed fact source."
+    when $ecV.show:
+      port kernel.invoke { query = "ec.verifyShow"; input = { show = $ecV.show; type = $ecV.type } } → _
+    each $ecV.contexts as ecC:
+      port kernel.invoke { query = "ec.fact"; input = { id = $ecC.id; type = "Context" } } → ecContextFact
+      assert eq(at($ecContextFact.values, "C.view"), $ecV.id)
+        otherwise "EC-C010: This context does not explicitly contain the requested view."
+      port kernel.invoke { query = "ec.verifyShow"; input = { show = $ecC.show; type = $ecV.type } } → _
+  let result = true

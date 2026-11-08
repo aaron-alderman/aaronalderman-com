@@ -1,0 +1,50 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process atlas.runtime.build:
+  port record.fromEntries {
+    entries = map(
+      subjects("isa", "Place"),
+      "p",
+      list(
+        one($p, "slug"),
+        concat(or(optional($p, "atlasLabel"), one($p, "region")), ". ", one($p, "title"))
+      )
+    )
+  } → atlasLabels
+  port runtime.bundle {
+    entry = "atlas.journey.boot";
+    mode = "browser";
+    grantProfile = "atlasBrowser";
+    queries = list(
+      "atlas.seen.clean",
+      "atlas.seen.load",
+      "atlas.seen.save",
+      "atlas.seen.mark",
+      "atlas.seen.paint",
+      "atlas.seen.refresh",
+      "atlas.seen.reset",
+      "atlas.pin.dismiss",
+      "atlas.pin.reveal",
+      "atlas.journey.boot",
+      "atlas.pin.preview",
+      "atlas.pin.mode",
+      "atlas.journey.resume"
+    );
+    factSubjects = list();
+    data = {
+      ids = map(subjects("isa", "Place"), "p", one($p, "slug"));
+      labels = $atlasLabels;
+      places = map(
+        subjects("isa", "Place"),
+        "p",
+        {
+          id = one($p, "slug");
+          name = or(optional($p, "atlasLabel"), one($p, "region"));
+          question = one($p, "title")
+        }
+      )
+    };
+    budget = 2000000
+  } → atlasRuntime
+  port file.write { path = "atlas-runtime.js"; text = $atlasRuntime } → _

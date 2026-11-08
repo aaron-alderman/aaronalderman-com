@@ -1,0 +1,610 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.field.build:
+  call publication.stewardship.view
+  let stewardshipLinks = $result
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          {
+            tag = "meta";
+            attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "theme-color"; content = "#faf7ef" };
+            children = list()
+          },
+          {
+            tag = "title";
+            attrs = {  };
+            children = list(concat("The Field — What does love require here?", " — Aaron Alderman"))
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "description";
+              content = "Explore a fictional workshop encounter through five choices and their immediate, relational and institutional consequences."
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "canonical"; href = "https://aaronalderman.com/the-field/" };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "stylesheet"; href = "../expedition.css?v=field-households-chart-4" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:title"; content = "The Field — What does love require here?" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:description";
+              content = "Explore a fictional workshop encounter through five choices and their immediate, relational and institutional consequences."
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:type"; content = "website" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:url"; content = "https://aaronalderman.com/the-field/" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image";
+              content = "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:width"; content = "1672" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:height"; content = "941" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:alt";
+              content = "A sunlit workshop opening onto a green field, with two people sharing a repair."
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:card"; content = "summary_large_image" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:title"; content = "The Field — What does love require here?" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:description";
+              content = "Explore a fictional workshop encounter through five choices and their immediate, relational and institutional consequences."
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image";
+              content = "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image:alt";
+              content = "A sunlit workshop opening onto a green field, with two people sharing a repair."
+            };
+            children = list()
+          }
+        )
+      },
+      {
+        tag = "body";
+        attrs = {  };
+        children = list(
+          {
+            tag = "a";
+            attrs = { href = "#main"; class = "skip" };
+            children = list("Skip to content")
+          },
+          {
+            tag = "header";
+            attrs = { class = "masthead" };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "../index.html"; class = "brand"; "aria-label" = "Aaron Alderman" };
+                children = list(
+                  {
+                    tag = "span";
+                    attrs = { class = "brand-name" };
+                    children = list(
+                      "Aaron ",
+                      { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Site" };
+                children = list(
+                  { tag = "a"; attrs = { href = "../questions.html" }; children = list("Questions") },
+                  { tag = "a"; attrs = { href = "../gate.html" }; children = list("Threads") },
+                  { tag = "a"; attrs = { href = "../atlas.html" }; children = list("Atlas / Map") }
+                )
+              }
+            )
+          },
+          {
+            tag = "main";
+            attrs = { id = "main"; class = "field-page"; "data-type" = "simulation" };
+            children = list(
+              {
+                tag = "div";
+                attrs = { class = "field-world" };
+                children = list(
+                  {
+                    tag = "section";
+                    attrs = { class = "field-hero" };
+                    children = list(
+                      {
+                        tag = "div";
+                        attrs = {  };
+                        children = list(
+                          {
+                            tag = "p";
+                            attrs = { class = "eyebrow" };
+                            children = list("The Field / A first encounter")
+                          },
+                          {
+                            tag = "h1";
+                            attrs = {  };
+                            children = list("What does love", { tag = "em"; attrs = {  }; children = list("require here?") })
+                          },
+                          {
+                            tag = "p";
+                            attrs = { class = "q-subtitle" };
+                            children = list("A place to practise attention, choice and responsibility.")
+                          },
+                          {
+                            tag = "p";
+                            attrs = { class = "q-intro" };
+                            children = list(
+                              "I want to understand what my help asks of someone else—and what kind of world my choices make easier to repeat."
+                            )
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "../questions.html"; class = "q-text-link" };
+                            children = list("Return to the questions behind The Field →")
+                          }
+                        )
+                      },
+                      {
+                        tag = "img";
+                        attrs = {
+                          src = "../assets/questions/open-workshop-daylight-v2.png";
+                          alt = "An illustrated workshop opening onto a field, with two people sharing a repair.";
+                          width = 1672;
+                          height = 941
+                        };
+                        children = list()
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = {
+                      class = "q-section field-encounter";
+                      id = "encounter";
+                      "aria-labelledby" = "encounter-heading"
+                    };
+                    children = list(
+                      {
+                        tag = "p";
+                        attrs = { class = "eyebrow" };
+                        children = list("A fictional situation. A real kind of responsibility.")
+                      },
+                      {
+                        tag = "h2";
+                        attrs = { id = "encounter-heading" };
+                        children = list("The shift is still uncovered.")
+                      },
+                      {
+                        tag = "p";
+                        attrs = { class = "field-scenario" };
+                        children = list(
+                          "Mira asks privately for help covering an evening workshop shift. The freezer needs maintenance. The coordinator says there is no budget for cover. You have limits of your own."
+                        )
+                      },
+                      {
+                        tag = "div";
+                        attrs = { class = "field-knowledge" };
+                        children = list(
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("What is known") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "The shift is uncovered, maintenance is overdue, and Mira has asked privately for help."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("What is reported") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "The coordinator says there is no budget. That is a report, rather than the whole explanation."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("What is still unknown") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Why Mira needs to leave, who else can help, and whether the budget claim is complete."
+                                )
+                              }
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = { class = "field-invitation" };
+                        children = list(
+                          "Open a choice to examine possible consequences. Compare them in any order. These branches are authored possibilities, not predictions about real people."
+                        )
+                      },
+                      {
+                        tag = "div";
+                        attrs = { class = "field-choices" };
+                        children = list(
+                          map(
+                            subjects("isa", "FieldChoice"),
+                            "choice",
+                            {
+                              tag = "details";
+                              attrs = { class = "field-choice"; id = concat("choice-", one($choice, "id")) };
+                              children = list(
+                                { tag = "summary"; attrs = {  }; children = list(one($choice, "title")) },
+                                {
+                                  tag = "div";
+                                  attrs = { class = "field-consequences" };
+                                  children = list(
+                                    {
+                                      tag = "article";
+                                      attrs = {  };
+                                      children = list(
+                                        { tag = "h3"; attrs = {  }; children = list("Right now") },
+                                        { tag = "p"; attrs = {  }; children = list(one($choice, "direct")) }
+                                      )
+                                    },
+                                    {
+                                      tag = "article";
+                                      attrs = {  };
+                                      children = list(
+                                        { tag = "h3"; attrs = {  }; children = list("Between people") },
+                                        { tag = "p"; attrs = {  }; children = list(one($choice, "relational")) }
+                                      )
+                                    },
+                                    {
+                                      tag = "article";
+                                      attrs = {  };
+                                      children = list(
+                                        { tag = "h3"; attrs = {  }; children = list("What this could make normal") },
+                                        { tag = "p"; attrs = {  }; children = list(one($choice, "institutional")) }
+                                      )
+                                    },
+                                    {
+                                      tag = "article";
+                                      attrs = {  };
+                                      children = list(
+                                        { tag = "h3"; attrs = {  }; children = list("What remains uncertain") },
+                                        { tag = "p"; attrs = {  }; children = list(one($choice, "unknown")) }
+                                      )
+                                    }
+                                  )
+                                },
+                                if(
+                                  eq(one($choice, "id"), "leave-encounter"),
+                                  {
+                                    tag = "a";
+                                    attrs = { href = "../questions.html"; class = "q-text-link field-exit" };
+                                    children = list("Leave The Field →")
+                                  },
+                                  null
+                                )
+                              )
+                            }
+                          )
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section field-reflection" };
+                    children = list(
+                      { tag = "p"; attrs = { class = "eyebrow" }; children = list("After the choice") },
+                      { tag = "h2"; attrs = {  }; children = list("Keep the reasons open to correction.") },
+                      {
+                        tag = "div";
+                        attrs = { class = "q-practices" };
+                        children = list(
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("Whose choice did I preserve?") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list("Consider Mira, the other workers and your own continuing capacity.")
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("Who absorbed the cost?") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list("Ask whether the cost was freely accepted, quietly shifted or left invisible.")
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("What would repair require?") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Acknowledge a specific harm, change the practice, and allow accountability and time. An apology alone does not erase history."
+                                )
+                              }
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = { class = "q-caption" };
+                        children = list(
+                          "This first encounter supports reflection. It does not assess your standing or certify a morally correct answer. You can disagree with its assumptions or leave."
+                        )
+                      },
+                      {
+                        tag = "nav";
+                        attrs = { "aria-label" = "Leave or inspect this encounter"; class = "q-actions" };
+                        children = list(
+                          {
+                            tag = "a";
+                            attrs = { href = "../questions.html"; class = "q-text-link" };
+                            children = list("Return to Questions →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "../inspection/the-field.html"; class = "q-text-link" };
+                            children = list("Inspect the retained encounter source →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "../relationship-manager/"; class = "q-text-link" };
+                            children = list("Explore rupture and repair →")
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section hh-field-card" };
+                    children = list(
+                      {
+                        tag = "div";
+                        attrs = { class = "field-knowledge" };
+                        children = list(
+                          {
+                            tag = "div";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "p";
+                                attrs = { class = "eyebrow" };
+                                children = list("The Field / A second encounter")
+                              },
+                              { tag = "h2"; attrs = {  }; children = list("What changes when one of us changes?") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Follow a fictional household through changing values, capacity and agreements. See how being heard and keeping commitments shape willingness to ask again."
+                                )
+                              },
+                              {
+                                tag = "a";
+                                attrs = { href = "households/"; class = "q-text-link" };
+                                children = list("Explore the household through time →")
+                              },
+                              {
+                                tag = "p";
+                                attrs = { class = "q-caption" };
+                                children = list("Synthetic example · inspectable assumptions · leave freely")
+                              }
+                            )
+                          },
+                          {
+                            tag = "img";
+                            attrs = {
+                              src = "../assets/questions/open-workshop-daylight-v2.png";
+                              alt = "A daylight workshop beside a green field.";
+                              loading = "lazy";
+                              width = 1672;
+                              height = 941
+                            };
+                            children = list()
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section hh-field-card field-correction-card" };
+                    children = list(
+                      {
+                        tag = "div";
+                        attrs = {  };
+                        children = list(
+                          {
+                            tag = "p";
+                            attrs = { class = "eyebrow" };
+                            children = list("The Field / An inquiry into power")
+                          },
+                          { tag = "h2"; attrs = {  }; children = list("Can power leave room for correction?") },
+                          {
+                            tag = "p";
+                            attrs = {  };
+                            children = list(
+                              "Follow satire and 1 Samuel 8 into a worked model of trust, delegated authority and the resources needed to challenge again."
+                            )
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "correction/"; class = "q-text-link" };
+                            children = list("Read the essay and worked example →")
+                          },
+                          {
+                            tag = "p";
+                            attrs = { class = "hh-field-note" };
+                            children = list("A philosophical proposal · synthetic results · open to correction")
+                          }
+                        )
+                      },
+                      {
+                        tag = "figure";
+                        attrs = {  };
+                        children = list(
+                          {
+                            tag = "img";
+                            attrs = {
+                              src = "../assets/the-field/correction-light-lattice-v1.webp";
+                              alt = "Violet, amber and blue light geometry beside a person in a softly lit room.";
+                              loading = "lazy";
+                              width = "1672";
+                              height = "941"
+                            };
+                            children = list()
+                          }
+                        )
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          },
+          {
+            tag = "footer";
+            attrs = { class = "footer" };
+            children = list(
+              {
+                tag = "div";
+                attrs = {  };
+                children = list(
+                  { tag = "p"; attrs = { class = "signature" }; children = list("Aaron Alderman") },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("A few things I’ve built. A few things I’m still trying to understand.")
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Elsewhere" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "https://github.com/aaron-alderman" };
+                    children = list("GitHub ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "https://www.linkedin.com/in/aaron-alderman/" };
+                    children = list("LinkedIn ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "https://worldwright.io/" };
+                    children = list("Built with Worldwright.io ↗")
+                  }
+                )
+              },
+              $stewardshipLinks
+            )
+          }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  let surfaceWritePath = "the-field/index.html"
+  call assurance.surface.register
+  port file.write { path = "the-field/index.html"; text = $result } → _

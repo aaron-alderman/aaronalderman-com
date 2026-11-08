@@ -1,0 +1,162 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process reader.atlas:
+  port state.get { key = "visited" } → visited
+  port state.get { key = "current" } → current
+  port browser.write { ref = "#reader-search"; name = "hidden"; value = false } → _
+  port browser.write { ref = "#reader-search"; name = "value"; value = "" } → _
+  let input = {
+    tag = "section";
+    attrs = {  };
+    children = list(
+      { tag = "h2"; attrs = {  }; children = list("A world with room to wander.") },
+      {
+        tag = "p";
+        attrs = {  };
+        children = list(
+          concat(
+            count($visited),
+            " of ",
+            count($data.ids),
+            " places discovered. Visited places are not a test score."
+          )
+        )
+      },
+      map(
+        $data.navigation.regions,
+        "region",
+        {
+          tag = "section";
+          attrs = {
+            class = "reader-region";
+            "data-reader-region-search" = concat($region.name, " ", $region.description, " ", $region.question)
+          };
+          children = list(
+            { tag = "h3"; attrs = {  }; children = list($region.name) },
+            { tag = "p"; attrs = {  }; children = list($region.question) },
+            { tag = "p"; attrs = {  }; children = list($region.description) },
+            if(
+              $region.optional,
+              {
+                tag = "p";
+                attrs = { class = "scope-note" };
+                children = list(
+                  "Optional interpretation. Scientific routes remain available without entering this region."
+                )
+              },
+              null
+            ),
+            {
+              tag = "div";
+              attrs = { class = "reader-places" };
+              children = list(
+                map(
+                  $region.scenes,
+                  "id",
+                  {
+                    tag = "a";
+                    attrs = {
+                      href = concat("#", $id);
+                      class = concat("reader-place ", if(includes($visited, $id), "visited", ""));
+                      "data-reader-search" = null;
+                      "aria-current" = if(eq($current, $id), "location", null)
+                    };
+                    children = list(
+                      {
+                        tag = "strong";
+                        attrs = {  };
+                        children = list(
+                          concat(if(includes($visited, $id), "◆ ", "◇ "), at(at($data.places, $id), "region"))
+                        )
+                      },
+                      { tag = "span"; attrs = {  }; children = list(at(at($data.places, $id), "title")) }
+                    )
+                  }
+                )
+              )
+            }
+          )
+        }
+      ),
+      {
+        tag = "details";
+        attrs = { open = true };
+        children = list(
+          { tag = "summary"; attrs = {  }; children = list("All forty places by theme") },
+          map(
+            $data.navigation.territories,
+            "territory",
+            {
+              tag = "section";
+              attrs = { class = "reader-territory" };
+              children = list(
+                { tag = "h3"; attrs = {  }; children = list($territory.name) },
+                { tag = "p"; attrs = {  }; children = list($territory.question) },
+                {
+                  tag = "p";
+                  attrs = {  };
+                  children = list(
+                    concat(
+                      count(filter($territory.scenes, "id", includes($visited, $id))),
+                      " / ",
+                      count($territory.scenes),
+                      " discovered"
+                    )
+                  )
+                },
+                {
+                  tag = "div";
+                  attrs = { class = "reader-places" };
+                  children = list(
+                    map(
+                      $territory.scenes,
+                      "id",
+                      {
+                        tag = "a";
+                        attrs = {
+                          href = concat("#", $id);
+                          class = concat("reader-place ", if(includes($visited, $id), "visited", ""));
+                          "data-reader-search" = concat(
+                            at(at($data.places, $id), "region"),
+                            " ",
+                            at(at($data.places, $id), "title"),
+                            " ",
+                            at(at($data.places, $id), "lead"),
+                            " ",
+                            at(at($data.places, $id), "sourceTitle"),
+                            " ",
+                            at($data.navigation.sceneKeywords, $id)
+                          );
+                          "aria-current" = if(eq($current, $id), "location", null)
+                        };
+                        children = list(
+                          {
+                            tag = "strong";
+                            attrs = {  };
+                            children = list(
+                              concat(if(includes($visited, $id), "◆ ", "◇ "), at(at($data.places, $id), "region"))
+                            )
+                          },
+                          { tag = "span"; attrs = {  }; children = list(at(at($data.places, $id), "title")) }
+                        )
+                      }
+                    )
+                  )
+                }
+              )
+            }
+          )
+        )
+      },
+      {
+        tag = "button";
+        attrs = { "data-reader-action" = "reset" };
+        children = list("Begin a fresh expedition")
+      }
+    )
+  }
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#reader-dialog-content"; html = $markup } → _
+  port browser.write { ref = "#reader-search-result"; name = "textContent"; value = "" } → _

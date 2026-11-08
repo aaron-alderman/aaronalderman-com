@@ -1,0 +1,20 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process reader.model.pairs:
+  port number.parse { value = $eventInput.value } → value
+  port number.calculate { operation = "multiply"; values = list($value, $value) } → square
+  fold range(25) as n; pairs starts list():
+    port number.calculate { operation = "subtract"; values = list($n, 1) } → index
+    port number.calculate { operation = "remainder"; values = list($index, 5) } → x
+    port number.calculate { operation = "divide"; values = list($index, 5) } → row
+    port number.calculate { operation = "floor"; values = list($row) } → y
+    port number.calculate { operation = "add"; values = list($x, $y) } → sum
+    port number.calculate { operation = "multiply"; values = list($x, $y) } → product
+    port number.calculate { operation = "lessEqual"; values = list($sum, $value) } → budget
+    port number.calculate { operation = "greaterEqual"; values = list($product, $square) } → positive
+    yield if(
+    if(eq($eventInput.mode, "positive"), $positive, $budget),
+    append($pairs, list(list($x, $y))),
+    $pairs
+  ) → result

@@ -1,0 +1,75 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.patch:
+  let ecBasis = $eventInput.candidate
+  let ecProjection = $eventInput.projection
+  let ecNewText = $eventInput.value
+  port value.describe { value = $ecNewText } → ecNewKind
+  assert eq($ecNewKind.type, "string")
+    otherwise "EC-E010: A text edit requires text; values are never coerced."
+  let ecRoutes = filter($ecProjection.edits, "ecE", eq($ecE.field, $eventInput.field))
+  assert eq(count($ecRoutes), 1)
+    otherwise "EC-E011: This field has no unique declared reverse route. Edit its source or rule instead."
+  let ecRoute = at($ecRoutes, 0)
+  let ecPatchInputs = $ecBasis.inputs
+  when eq($ecRoute.destination.kind, "source"):
+    let text = $ecBasis.inputs.factText
+    let file = "source/experiment/story.rel"
+    call source.rel
+    let ecSourceDoc = $result
+    let ecOwned = filter(
+      $ecSourceDoc.origins,
+      "ecO",
+      and(
+        eq(at(at($ecSourceDoc.facts, $ecO.index), "s"), $ecProjection.source),
+        eq(at(at($ecSourceDoc.facts, $ecO.index), "p"), $ecRoute.destination.field)
+      )
+    )
+    assert eq(count($ecOwned), 1)
+      otherwise "EC-E012: The source value does not have a single authored location."
+    let ecSpan = at($ecOwned, 0)
+    port value.encode { value = $ecNewText } → ecEncoded
+    port text.slice { value = $ecBasis.inputs.factText; start = 0; end = $ecSpan.span.valueStart } → ecBefore
+    port text.slice { value = $ecBasis.inputs.factText; start = $ecSpan.span.valueEnd } → ecAfter
+    port record.put {
+      record = $ecPatchInputs;
+      key = "factText";
+      value = concat($ecBefore, $ecEncoded, $ecAfter)
+    } → ecPatchInputs
+  when eq($ecRoute.destination.kind, "literal"):
+    let ecNode = $ecRoute.destination.node
+    port text.indexOf { value = $ecNode.raw; search = $ecRoute.destination.token } → ecTokenStart
+    assert not(eq($ecTokenStart, -1))
+      otherwise "EC-E013: The authored literal moved; re-open the current route."
+    let ecStart = add($ecNode.offset, $ecTokenStart)
+    port value.encode { value = $ecNewText } → ecEncoded
+    port text.slice { value = $ecBasis.inputs.codeText; start = 0; end = $ecStart } → ecBefore
+    port text.slice {
+      value = $ecBasis.inputs.codeText;
+      start = add($ecStart, count($ecRoute.destination.token))
+    } → ecAfter
+    port record.put {
+      record = $ecPatchInputs;
+      key = "codeText";
+      value = concat($ecBefore, $ecEncoded, $ecAfter)
+    } → ecPatchInputs
+  port kernel.invoke { query = "ec.prepare"; input = $ecPatchInputs } → ecPatched
+  port kernel.invoke { query = "ec.run"; input = { candidate = $ecPatched } } → ecForward
+  let ecObserved = at(
+    filter(
+      $ecForward,
+      "ecP",
+      and(
+        eq($ecP.view, $ecProjection.view),
+        eq(
+          or(at(at($ecP, "contribution"), "id"), null),
+          or(at(at($ecProjection, "contribution"), "id"), null)
+        )
+      )
+    ),
+    0
+  )
+  assert eq(at($ecObserved.values, $eventInput.field), $ecNewText)
+    otherwise "EC-E014: The proposed inverse does not reproduce this requested value."
+  let result = { candidate = $ecPatched; projections = $ecForward; destination = $ecRoute.destination }

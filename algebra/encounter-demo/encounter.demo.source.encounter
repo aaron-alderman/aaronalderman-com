@@ -1,0 +1,48 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process encounter.demo.source:
+  let spPolicy = $data.presentation.spPolicy
+  let spGrammar = $data.presentation.spGrammar
+  let selection = $eventInput.selection
+  let candidate = $eventInput.candidate
+  let text = $candidate.inputs.codeText
+  let language = "encounter"
+  let file = "story.encounter"
+  let label = "The meaning and its routes"
+  when eq($selection, "facts"):
+    let text = $candidate.inputs.factText
+    let language = "rel"
+    let file = "story.rel"
+    let label = "The current session source"
+  when eq($selection, "contract"):
+    let text = $candidate.inputs.contractText
+    let language = "rel"
+    let file = "contracts.rel"
+    let label = "The closed type contracts"
+  when eq($selection, "process"):
+    port kernel.invoke {
+      query = "sp.listing";
+      input = {
+        programme = at($data.processes, "encounter.demo.change");
+        origin = { file = "algebra/encounter-demo.process.values.rel"; query = "encounter.demo.change" }
+      }
+    } → listing
+    let text = concat("process encounter.demo.change:\n", $listing.text)
+    let language = "process"
+    let file = "encounter-demo.process"
+    let label = "How this change is composed"
+  when eq($selection, "inspector"):
+    port kernel.invoke {
+      query = "sp.listing";
+      input = {
+        programme = at($data.processes, "encounter.demo.inspect");
+        origin = { file = "algebra/encounter-demo.process.values.rel"; query = "encounter.demo.inspect" }
+      }
+    } → listing
+    let text = concat("process encounter.demo.inspect:\n", $listing.text)
+    let language = "process"
+    let file = "encounter-inspector.process"
+    let label = "The inspector’s own definition"
+  port digest.sha256 { text = $text } → hash
+  let result = { text = $text; language = $language; file = $file; label = $label; hash = $hash }

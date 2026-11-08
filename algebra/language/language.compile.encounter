@@ -1,0 +1,57 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process language.compile:
+  port text.split { value = $text; pattern = "\\r?\\n" } → lines
+  let state = {
+    module = null;
+    subject = null;
+    seen = list();
+    facts = list();
+    origins = list();
+    ok = true;
+    diagnostic = null
+  }
+  fold range(count($lines)) as number; state starts $state:
+    let raw = at($lines, add($number, -1))
+    port text.split { value = $raw; pattern = "\\S" } → indent
+    let span = {
+      file = $file;
+      line = $number;
+      column = add(count(at($indent, 0)), 1);
+      endColumn = add(count($raw), 1)
+    }
+    fold list(null) as frame; ignored starts null:
+      when $state.ok:
+        call language.line
+      yield $state → state
+    yield $state → state
+  let span = { file = $file; line = count($lines); column = 1; endColumn = 1 }
+  when $state.ok:
+    when not(not(eq($state.module, null))):
+      let code = "TEMPLE-M002"
+      let summary = "Missing module declaration."
+      let correction = "Start with module \"name\"."
+      call language.refuse
+    when $state.ok:
+      when not(eq($state.subject, null)):
+        let code = "TEMPLE-M008"
+        let summary = "Entity block is not closed."
+        let correction = "Add the closing brace before the end of the source."
+        call language.refuse
+  let rel = ""
+  when $state.ok:
+    fold $state.facts as fact; rel starts "":
+      port value.encode { value = $fact.s } → s
+      port value.encode { value = $fact.p } → predicate
+      port value.encode { value = $fact.o } → o
+      port value.encode { value = $fact.pol } → polarity
+      yield concat($rel, "(", $s, ", ", $predicate, ", ", $o, ", ", $polarity, ")\n") → rel
+  let result = {
+    ok = $state.ok;
+    module = $state.module;
+    facts = if($state.ok, $state.facts, list());
+    origins = if($state.ok, $state.origins, list());
+    rel = if($state.ok, $rel, "");
+    diagnostic = $state.diagnostic
+  }

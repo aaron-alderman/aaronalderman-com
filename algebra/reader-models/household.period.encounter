@@ -1,0 +1,293 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.period:
+  let prior = $eventInput.state
+  let period = $eventInput.period
+  let config = $eventInput.scenario
+  let materialEvents = filter($config.material.events, "e", eq($e.period, $period))
+  let experienceEvents = filter($config.experienceEvents, "e", eq($e.period, $period))
+  fold $materialEvents as event; phys starts $prior.phys:
+    port kernel.invoke { query = "household.patch"; input = { state = $phys; patch = $event.patch } } → hq113
+    yield $hq113 → phys
+  let activeOverrides = filter(
+    or($eventInput.overrides, list()),
+    "edit",
+    or(
+      and(eq($edit.phase, "initial"), eq($period, 1)),
+      and(eq($edit.phase, "after"), eq($period, 5))
+    )
+  )
+  fold $activeOverrides as edit; phys starts $phys:
+    port kernel.invoke { query = "household.override"; input = { state = $phys; change = $edit } } → hq114
+    yield $hq114 → phys
+  fold $experienceEvents as event; experience starts $prior.experience:
+    port kernel.invoke {
+      query = "household.experiencePatch";
+      input = { experience = $experience; change = $event }
+    } → hq115
+    yield $hq115 → experience
+  fold filter($activeOverrides, "edit", eq($edit.scope, "experience")) as edit; experience starts $experience:
+    let change = {
+      person = $edit.person;
+      handling = if(eq($edit.key, "handling"), $edit.value, null);
+      deliveryFraction = if(eq($edit.key, "deliveryFraction"), $edit.value, null)
+    }
+    port kernel.invoke {
+      query = "household.experiencePatch";
+      input = { experience = $experience; change = $change }
+    } → hq116
+    yield $hq116 → experience
+  let opening = {
+    A = at(at($phys.people, 0), "willingness");
+    B = at(at($phys.people, 1), "willingness")
+  }
+  port number.calculate { operation = "add"; values = list($phys.domesticHours, $prior.backlog) } → hn117
+  let demand = $hn117
+  port kernel.invoke {
+    query = "household.negotiate";
+    input = { state = $phys; demand = $demand; policy = $config.material.policy; period = $period }
+  } → review
+  let requester = $review.requester
+  let responder = if(eq($requester, "A"), "B", "A")
+  port number.calculate { operation = "greater"; values = list(or(at($opening, $requester), 0), 0) } → hn118
+  let voiced = and(not(eq($requester, null)), $hn118)
+  when and($voiced, eq(at(at($experience, $responder), "handling"), "dismissive")):
+    let review = {
+      status = "request-dismissed";
+      requester = $requester;
+      shareA = $phys.shareA;
+      reviewHours = 0;
+      candidates = 0;
+      assent = list()
+    }
+  let evidence = list()
+  when $voiced:
+    let handling = at(at($experience, $responder), "handling")
+    let evidence = list(
+      {
+        id = concat("request-", $period);
+        period = $period;
+        observer = $requester;
+        actor = $responder;
+        kind = if(
+          eq($handling, "respectful"),
+          "heard",
+          if(eq($handling, "dismissive"), "dismissed", "unknown")
+        );
+        source = "request-response";
+        claimType = "synthetic-assumption";
+        reviewStatus = $review.status;
+        requestedRemedyGranted = eq($review.status, "revised")
+      }
+    )
+  fold filter($experienceEvents, "e", eq(at($e, "outreach"), "respectful")) as event; evidence starts $evidence:
+    let alreadyHeard = some($evidence, "ev", and(eq($ev.observer, $event.person), eq($ev.kind, "heard")))
+    yield if(
+    $alreadyHeard,
+    $evidence,
+    append(
+      $evidence,
+      list(
+        {
+          id = concat("outreach-", $event.id);
+          period = $period;
+          observer = $event.person;
+          actor = if(eq($event.person, "A"), "B", "A");
+          kind = "outreach";
+          source = "explicit-outreach";
+          claimType = "synthetic-assumption"
+        }
+      )
+    )
+  ) → evidence
+  let agreement = if(
+    eq($review.status, "revised"),
+    {
+      id = concat("agreement-", $period);
+      signedAt = $period;
+      firstDue = $period;
+      shareA = $review.shareA;
+      endedAt = null
+    },
+    $prior.agreement
+  )
+  port kernel.invoke {
+    query = "household.evaluate";
+    input = {
+      people = $phys.people;
+      shareA = $review.shareA;
+      demand = $demand;
+      reviewHours = $review.reviewHours;
+      deliveryA = $experience.A.deliveryFraction;
+      deliveryB = $experience.B.deliveryFraction
+    }
+  } → people
+  fold $people as person; deliveries starts {
+    evidence = $evidence;
+    outcomes = if(
+      eq($review.status, "revised"),
+      list(
+        { agreementId = $prior.agreement.id; owner = "A"; kind = "superseded" },
+        { agreementId = $prior.agreement.id; owner = "B"; kind = "superseded" }
+      ),
+      list()
+    )
+  }:
+    port number.calculate { operation = "add"; values = list($person.plannedDomestic, 1e-8) } → hn120
+    port number.calculate { operation = "less"; values = list($hn120, $person.domesticDue) } → hn119
+    let capacityLimited = $hn119
+    port number.calculate { operation = "add"; values = list($person.domestic, 1e-8) } → hn122
+    port number.calculate { operation = "less"; values = list($hn122, $person.plannedDomestic) } → hn121
+    let implementationLimited = $hn121
+    port number.calculate { operation = "lessEqual"; values = list($person.domesticDue, 1e-8) } → hn123
+    let kind = if(
+      $hn123,
+      "no-task-due",
+      if(
+        and($capacityLimited, $implementationLimited),
+        "mixed-shortfall",
+        if(
+          $capacityLimited,
+          "capacity-shortfall",
+          if($implementationLimited, "implementation-shortfall", "kept")
+        )
+      )
+    )
+    let outcome = {
+      agreementId = $agreement.id;
+      owner = $person.id;
+      kind = $kind;
+      due = $person.domesticDue;
+      achievable = $person.plannedDomestic;
+      delivered = $person.domestic;
+      capacityLimited = $capacityLimited;
+      implementationLimited = $implementationLimited
+    }
+    yield {
+    evidence = append(
+      $deliveries.evidence,
+      list(
+        {
+          id = concat("delivery-", $period, "-", $person.id);
+          period = $period;
+          observer = if(eq($person.id, "A"), "B", "A");
+          actor = $person.id;
+          kind = $kind;
+          source = "agreement-execution";
+          claimType = "synthetic-assumption";
+          agreementId = $agreement.id;
+          due = $person.domesticDue;
+          achievable = $person.plannedDomestic;
+          delivered = $person.domestic;
+          capacityLimited = $capacityLimited;
+          implementationLimited = $implementationLimited
+        }
+      )
+    );
+    outcomes = append($deliveries.outcomes, list($outcome))
+  } → deliveries
+  fold $deliveries.evidence as event; learning starts { A = $opening.A; B = $opening.B; updates = list() }:
+    let before = at($learning, $event.observer)
+    port kernel.invoke {
+      query = "household.feedback";
+      input = {
+        value = $before;
+        kind = $event.kind;
+        person = $event.observer;
+        feedback = $config.feedback;
+        overrides = $eventInput.overrides
+      }
+    } → after
+    port number.calculate { operation = "subtract"; values = list($after, $before) } → hn124
+    yield {
+    A = if(eq($event.observer, "A"), $after, $learning.A);
+    B = if(eq($event.observer, "B"), $after, $learning.B);
+    updates = append(
+      $learning.updates,
+      list(
+        {
+          evidenceId = $event.id;
+          person = $event.observer;
+          kind = $event.kind;
+          before = $before;
+          after = $after;
+          delta = $hn124
+        }
+      )
+    )
+  } → learning
+  port number.calculate {
+    operation = "add";
+    values = list(at(at($people, 0), "income"), at(at($people, 1), "income"))
+  } → hn125
+  let income = $hn125
+  port number.calculate {
+    operation = "add";
+    values = list(at(at($people, 0), "domestic"), at(at($people, 1), "domestic"))
+  } → hn126
+  let completed = $hn126
+  port number.calculate { operation = "subtract"; values = list($demand, $completed) } → hn128
+  port number.calculate { operation = "max"; values = list(0, $hn128) } → hn127
+  let backlog = $hn127
+  port number.calculate { operation = "add"; values = list($phys.reserve, $income) } → hn130
+  port number.calculate { operation = "min"; values = list($phys.expenses, $hn130) } → hn129
+  let spent = $hn129
+  port number.calculate { operation = "add"; values = list($phys.reserve, $income) } → hn132
+  port number.calculate { operation = "subtract"; values = list($hn132, $spent) } → hn131
+  let reserve = $hn131
+  let nextPeople = map(
+    $phys.people,
+    "person",
+    {
+      id = $person.id;
+      capacity = $person.capacity;
+      wage = $person.wage;
+      willingness = at($learning, $person.id);
+      values = $person.values
+    }
+  )
+  port number.calculate { operation = "subtract"; values = list($phys.expenses, $spent) } → hn133
+  let row = {
+    period = $period;
+    appliedEvents = map($materialEvents, "event", $event.id);
+    appliedExperienceEvents = map($experienceEvents, "event", $event.id);
+    assumptions = $phys.people;
+    experience = $experience;
+    recurringDemand = $phys.domesticHours;
+    priorBacklog = $prior.backlog;
+    demand = $demand;
+    completed = $completed;
+    backlog = $backlog;
+    previousShareA = $phys.shareA;
+    shareA = $review.shareA;
+    review = $review;
+    people = $people;
+    openingReserve = $phys.reserve;
+    income = $income;
+    expensesDue = $phys.expenses;
+    spent = $spent;
+    unmetExpenses = $hn133;
+    reserve = $reserve;
+    willingnessOpening = $opening;
+    willingnessClosing = { A = $learning.A; B = $learning.B };
+    willingnessUpdates = $learning.updates;
+    evidence = $deliveries.evidence;
+    commitmentOutcomes = $deliveries.outcomes;
+    standing = { A = "unchanged"; B = "unchanged" };
+    trust = { AtoB = null; BtoA = null }
+  }
+  let result = {
+    phys = {
+      people = $nextPeople;
+      shareA = $review.shareA;
+      domesticHours = $phys.domesticHours;
+      expenses = $phys.expenses;
+      reserve = $reserve
+    };
+    experience = $experience;
+    agreement = $agreement;
+    backlog = $backlog;
+    history = append($prior.history, list($row));
+    evidence = append($prior.evidence, $deliveries.evidence)
+  }

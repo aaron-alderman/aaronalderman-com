@@ -1,0 +1,177 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process roadmap.refresh:
+  port state.get { key = "roadmap" } → todoReport
+  port browser.read { ref = "#todo-product" } → productChoice
+  port browser.read { ref = "#todo-horizon" } → horizonChoice
+  port browser.read { ref = "#todo-stage" } → stageChoice
+  let visibleItems = filter(
+    $todoReport.items,
+    "i",
+    and(
+      or(eq($productChoice.value, "all"), eq($i.product, $productChoice.value)),
+      or(eq($horizonChoice.value, "all"), eq($i.horizon, $horizonChoice.value)),
+      or(eq($stageChoice.value, "all"), eq($i.stage, $stageChoice.value))
+    )
+  )
+  let input = {
+    tag = "div";
+    attrs = {  };
+    children = list(
+      {
+        tag = "p";
+        attrs = {  };
+        children = list(
+          concat(
+            count($visibleItems),
+            " shown · ",
+            $todoReport.total,
+            " work items · ",
+            $todoReport.active,
+            " currently sourced · ",
+            count($todoReport.workflowIssues),
+            " workflow declaration issues."
+          )
+        )
+      },
+      { tag = "p"; attrs = {  }; children = list($todoReport.boundary) },
+      {
+        tag = "div";
+        attrs = {  };
+        children = map(
+          $visibleItems,
+          "item",
+          {
+            tag = "article";
+            attrs = { class = "assurance-boundary projection-wrap" };
+            children = list(
+              {
+                tag = "details";
+                attrs = {  };
+                children = list(
+                  {
+                    tag = "summary";
+                    attrs = {  };
+                    children = list(
+                      { tag = "strong"; attrs = {  }; children = list($item.priority, " · ", $item.stage) },
+                      " · ",
+                      $item.title
+                    )
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(
+                      "Product: ",
+                      $item.productName,
+                      " · Topic: ",
+                      $item.topic,
+                      " · Owner: ",
+                      $item.owner
+                    )
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("Scope: ", { tag = "code"; attrs = {  }; children = list($item.scope) })
+                  },
+                  { tag = "p"; attrs = {  }; children = list($item.nextAction) },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(
+                      { tag = "strong"; attrs = {  }; children = list("Completion criteria: ") },
+                      $item.doneWhen
+                    )
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(
+                      $item.occurrences,
+                      " current observations · ",
+                      count($item.routes),
+                      " affected routes · retained history: ",
+                      if($item.active, "no", "yes")
+                    )
+                  },
+                  { tag = "p"; attrs = {  }; children = list($item.example) },
+                  if(
+                    or($item.workflowIssue, $item.decisionReason),
+                    {
+                      tag = "p";
+                      attrs = {  };
+                      children = list("Workflow note: ", $item.workflowIssue, " ", $item.decisionReason)
+                    },
+                    ""
+                  ),
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("Earlier evidence prerequisites: ", count($item.dependsOn))
+                  },
+                  {
+                    tag = "ul";
+                    attrs = {  };
+                    children = map(
+                      $item.evidence,
+                      "e",
+                      {
+                        tag = "li";
+                        attrs = {  };
+                        children = list({ tag = "a"; attrs = { href = $e.href }; children = list($e.label) })
+                      }
+                    )
+                  },
+                  {
+                    tag = "details";
+                    attrs = {  };
+                    children = list(
+                      { tag = "summary"; attrs = {  }; children = list("Affected routes") },
+                      {
+                        tag = "ul";
+                        attrs = {  };
+                        children = map(
+                          $item.routes,
+                          "route",
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list({ tag = "a"; attrs = { href = concat("/", $route) }; children = list($route) })
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "details";
+                    attrs = {  };
+                    children = list(
+                      { tag = "summary"; attrs = {  }; children = list("Corpus record and verification key") },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list("Stable item ID: ", { tag = "code"; attrs = {  }; children = list($item.id) })
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "Verification key: ",
+                          { tag = "code"; attrs = {  }; children = list($item.verificationKey) }
+                        )
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  port browser.content { ref = "#todo-results"; html = $result } → _
+  port browser.attribute { ref = "#todo-results"; name = "data-ready"; value = "true" } → _

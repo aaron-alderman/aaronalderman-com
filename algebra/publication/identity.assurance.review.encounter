@@ -1,0 +1,580 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.assurance.review:
+  port file.read { path = "expedition.css" } → reviewCss
+  let decisionIds = list(
+    "nav.routes",
+    "metadata",
+    "section.headings",
+    "cards.style",
+    "typography",
+    "aesthetics",
+    "footer",
+    "questions.article"
+  )
+  let reviewWriters = map(
+    objects("identity.assurance.metadata", "writer"),
+    "s",
+    {
+      port = one($s, "port");
+      ref = one($s, "ref");
+      name = one($s, "name");
+      field = one($s, "field");
+      read = one($s, "read")
+    }
+  )
+  let metadataWritersBound = and(
+    eq(count($reviewWriters), 16),
+    every(
+      $reviewWriters,
+      "w",
+      and(
+        eq(
+          count(
+            filter(
+              $change,
+              "s",
+              and(
+                eq(at($s, "port"), $w.port),
+                eq(at(at($s, "args"), "ref"), $w.ref),
+                eq(at(at($s, "args"), "name"), $w.name),
+                eq(at(at($s, "args"), "value"), $w.read)
+              )
+            )
+          ),
+          1
+        ),
+        eq(at(at($themeFields, $w.field), 0), "one"),
+        eq(at(at($themeFields, $w.field), 1), one("identity.assurance.scope", "subjectRead")),
+        eq(at(at($themeFields, $w.field), 2), $w.field)
+      )
+    )
+  )
+  port record.entries { value = $catalogue.cardTypes } → typeEntries
+  let typeChecks = map(
+    $typeEntries,
+    "e",
+    let(
+      "type",
+      at($e, 0),
+      let(
+        "selector",
+        concat("#microsites.identity-catalogue .hierarchy-card[data-type=\"", $type, "\"]"),
+        let(
+          "rule",
+          at(filter(subjects("isa", "StyleRule"), "r", eq(one($r, "selector"), $selector)), 0),
+          let(
+            "decl",
+            at(
+              filter(objects($rule, "declaration"), "d", eq(one($d, "property"), "--card-light")),
+              0
+            ),
+            concat($selector, "{--card-light:", one($decl, "value"), ";")
+          )
+        )
+      )
+    )
+  )
+  fold subjects("isa", "IdentityTheme") as reviewWorld; reviewWorlds starts list():
+    let key = one($reviewWorld, "key")
+    let root = concat("worlds/", $key, "/")
+    let journeyForWorld = at(filter($journeyEvidence.worlds, "w", eq($w.identity, $key)), 0)
+    let sharedToolRoutesBound = and(
+      eq(count($journeyForWorld.readings), 40),
+      every($journeyForWorld.readings, "r", $r.ok)
+    )
+    port file.read { path = concat($root, "index.html") } → home
+    port file.read { path = concat($root, "threads.html") } → threads
+    port file.read { path = concat($root, "atlas.html") } → map
+    port file.read { path = concat($root, "questions.html") } → article
+    port file.read { path = concat($root, "places/observation.html") } → reading
+    port text.split { value = $home; pattern = "(<head[\\s\\S]*?</head>)" } → parts
+    let homeHead = or(at($parts, 1), "")
+    port text.split { value = $threads; pattern = "(<head[\\s\\S]*?</head>)" } → parts
+    let threadHead = or(at($parts, 1), "")
+    port text.split { value = $map; pattern = "(<head[\\s\\S]*?</head>)" } → parts
+    let mapHead = or(at($parts, 1), "")
+    port text.split { value = $article; pattern = "(<head[\\s\\S]*?</head>)" } → parts
+    let articleHead = or(at($parts, 1), "")
+    port text.split {
+      value = $reviewCss;
+      pattern = concat(
+        "(html:has\\(body\\[data-question-identity=\"",
+        $key,
+        "\"\\]\\)[^{}]*\\{[^}]*\\})"
+      )
+    } → parts
+    let paletteCss = or(at($parts, 1), "")
+    let paletteChecks = map(
+      objects($reviewWorld, "questionColour"),
+      "d",
+      concat(one($d, "property"), ":", one($d, "value"), ";")
+    )
+    let fontRule = concat(
+      "body[data-identity=\"",
+      $key,
+      "\"],body[data-question-identity=\"",
+      $key,
+      "\"]{--identity-display-font:",
+      one($reviewWorld, "displayFont"),
+      ";"
+    )
+    let worldMarker = concat("data-identity=\"", $key, "\"")
+    let reflections = if(
+      eq($key, "christian"),
+      subjects("isa", "LivedQuestion"),
+      objects($reviewWorld, "question")
+    )
+    let articleStrings = if(
+      eq($key, "christian"),
+      list(one("questions", "subtitle"), one("questions", "intro")),
+      list(
+        one($reviewWorld, "questionTitle"),
+        one($reviewWorld, "questionEm"),
+        one($reviewWorld, "questionSubtitle"),
+        one($reviewWorld, "questionIntro"),
+        one($reviewWorld, "questionHeading"),
+        one($reviewWorld, "questionBody")
+      )
+    )
+    fold $reflections as r; reflectionChecks starts list():
+      let href = one($r, "href")
+      port text.matches { value = $href; pattern = "^places/" } → isPlace
+      port text.matches { value = $href; pattern = "^https?://" } → external
+      let href = if(
+        $isPlace,
+        concat("/worlds/", $key, "/", $href),
+        if($external, $href, concat("/", $href))
+      )
+      let input = one($r, "title")
+      call html.escape
+      let reflectionTitle = $result
+      yield append($reflectionChecks, list(concat("href=\"", $href, "\""), $reflectionTitle)) → reflectionChecks
+    fold $articleStrings as s; articleChecks starts $reflectionChecks:
+      let input = $s
+      call html.escape
+      yield append($articleChecks, list($result)) → articleChecks
+    let footerChecks = list(
+      "Aaron Alderman",
+      "A few things I’ve built. A few things I’m still trying to understand.",
+      "href=\"https://github.com/aaron-alderman\"",
+      "href=\"https://www.linkedin.com/in/aaron-alderman/\"",
+      "href=\"https://worldwright.io/\"",
+      "CHRISTIAN_STEWARDSHIP_COVENANT.md",
+      "LICENSE.md",
+      "href=\"/assurance/\""
+    )
+    fold list(
+      { file = "home"; html = $home },
+      { file = "threads"; html = $threads },
+      { file = "questions"; html = $article },
+      { file = "map"; html = $map }
+    ) as p; footers starts list():
+      port text.split { value = $p.html; pattern = "(<footer[\\s\\S]*?</footer>)" } → parts
+      yield append(
+      $footers,
+      list(
+        {
+          file = concat($p.file, " footer");
+          html = or(at($parts, 1), "");
+          expected = if(
+            eq($p.file, "map"),
+            list(
+              "Return to Aaron Alderman",
+              "An illustrated entrance to the work. Sources and limits stay with each question.",
+              "CHRISTIAN_STEWARDSHIP_COVENANT.md",
+              "LICENSE.md",
+              "href=\"/assurance/\""
+            ),
+            $footerChecks
+          )
+        }
+      )
+    ) → footers
+    let cases = list(
+      {
+        id = "nav.routes";
+        value = "The mission, thoughts and personal expedition are shared; perspective changes retain explicit identity URLs and reading pages retain the interactive reader exit.";
+        global = $sharedToolRoutesBound;
+        checks = list(
+          {
+            file = "home";
+            html = $home;
+            expected = list(
+              "href=\"/mission/\"",
+              "The mission",
+              "href=\"/writing/\"",
+              "Thoughts",
+              "href=\"/\"",
+              "My Mind"
+            )
+          },
+          {
+            file = "threads";
+            html = $threads;
+            expected = list(
+              "href=\"/mission/\"",
+              "The mission",
+              "href=\"/writing/\"",
+              "Thoughts",
+              "href=\"/\"",
+              "My Mind"
+            )
+          },
+          {
+            file = "reading";
+            html = $reading;
+            expected = list("href=\"/reader.html#observation\"", "Open the shared interactive reader ↗")
+          }
+        )
+      },
+      {
+        id = "metadata";
+        value = one($reviewWorld, "homeTitle");
+        global = $metadataWritersBound;
+        checks = list(
+          {
+            file = "home head";
+            html = $homeHead;
+            expected = list(
+              concat("<title>", one($reviewWorld, "homeTitle"), "</title>"),
+              concat("name=\"", "description", "\" content=\"", one($reviewWorld, "copy"), "\""),
+              concat("rel=\"canonical\" href=\"", one($reviewWorld, "homeCanonical"), "\""),
+              concat(
+                "property=\"",
+                "og:url",
+                "\" content=\"",
+                one($reviewWorld, "homeCanonical"),
+                "\""
+              ),
+              concat("property=\"", "og:title", "\" content=\"", one($reviewWorld, "homeTitle"), "\""),
+              concat(
+                "property=\"",
+                "og:image",
+                "\" content=\"",
+                one($reviewWorld, "homeShareImage"),
+                "\""
+              ),
+              concat(
+                "name=\"",
+                "twitter:image",
+                "\" content=\"",
+                one($reviewWorld, "homeShareImage"),
+                "\""
+              )
+            )
+          },
+          {
+            file = "Threads head";
+            html = $threadHead;
+            expected = list(
+              concat(
+                "rel=\"canonical\" href=\"",
+                concat(one("site", "origin"), one($reviewWorld, "threadsRoute")),
+                "\""
+              ),
+              concat(
+                "property=\"",
+                "og:url",
+                "\" content=\"",
+                concat(one("site", "origin"), one($reviewWorld, "threadsRoute")),
+                "\""
+              ),
+              concat(
+                "property=\"",
+                "og:title",
+                "\" content=\"",
+                one($reviewWorld, "threadsTitle"),
+                "\""
+              ),
+              concat(
+                "name=\"",
+                "description",
+                "\" content=\"",
+                one($reviewWorld, "threadsCopy"),
+                "\""
+              ),
+              concat(
+                "property=\"",
+                "og:image",
+                "\" content=\"",
+                concat(one("site", "origin"), one($reviewWorld, "threadsImage")),
+                "\""
+              ),
+              concat(
+                "name=\"",
+                "twitter:image",
+                "\" content=\"",
+                concat(one("site", "origin"), one($reviewWorld, "threadsImage")),
+                "\""
+              )
+            )
+          },
+          {
+            file = "Map head";
+            html = $mapHead;
+            expected = list(
+              concat(
+                "rel=\"canonical\" href=\"",
+                concat(one("site", "origin"), one($reviewWorld, "atlasRoute")),
+                "\""
+              ),
+              concat(
+                "property=\"",
+                "og:url",
+                "\" content=\"",
+                concat(one("site", "origin"), one($reviewWorld, "atlasRoute")),
+                "\""
+              ),
+              concat("property=\"", "og:title", "\" content=\"", one($reviewWorld, "mapTitle"), "\""),
+              concat("name=\"", "description", "\" content=\"", one($reviewWorld, "mapCopy"), "\""),
+              concat(
+                "property=\"",
+                "og:image",
+                "\" content=\"",
+                concat(one("site", "origin"), one($reviewWorld, "atlasImage")),
+                "\""
+              ),
+              concat(
+                "name=\"",
+                "twitter:image",
+                "\" content=\"",
+                concat(one("site", "origin"), one($reviewWorld, "atlasImage")),
+                "\""
+              )
+            )
+          },
+          {
+            file = "Questions head";
+            html = $articleHead;
+            expected = list(
+              concat(
+                "rel=\"canonical\" href=\"",
+                concat(one("site", "origin"), one($reviewWorld, "questionWorldRoute")),
+                "\""
+              ),
+              concat(
+                "property=\"",
+                "og:url",
+                "\" content=\"",
+                concat(one("site", "origin"), one($reviewWorld, "questionWorldRoute")),
+                "\""
+              ),
+              concat(
+                "property=\"",
+                "og:image",
+                "\" content=\"",
+                concat(one("site", "origin"), one($reviewWorld, "questionHero")),
+                "\""
+              ),
+              concat(
+                "name=\"",
+                "twitter:image",
+                "\" content=\"",
+                concat(one("site", "origin"), one($reviewWorld, "questionHero")),
+                "\""
+              ),
+              concat(
+                "name=\"",
+                "description",
+                "\" content=\"",
+                if(
+                  eq($key, "christian"),
+                  one("questions", "description"),
+                  one($reviewWorld, "questionIntro")
+                ),
+                "\""
+              )
+            )
+          },
+          {
+            file = "permalink";
+            html = $home;
+            expected = list(
+              "id=\"identity-permalink\"",
+              concat("href=\"", one($reviewWorld, "homeHref"), "\""),
+              "Link to this world ↗"
+            )
+          }
+        )
+      },
+      {
+        id = "section.headings";
+        value = "Stable four-section taxonomy and complete-project directory.";
+        global = true;
+        checks = list(
+          {
+            file = "home";
+            html = $home;
+            expected = list(
+              "Foundation &amp; platform",
+              "Applications &amp; programmes",
+              "Taking shape",
+              "Tools &amp; workbenches",
+              "All projects · the complete catalogue"
+            )
+          }
+        )
+      },
+      {
+        id = "cards.style";
+        value = "Purpose pigments, fine braid, slow hover/focus glisten and accessible motion rules.";
+        global = true;
+        checks = list(
+          {
+            file = "stylesheet";
+            html = $reviewCss;
+            expected = append(
+              $typeChecks,
+              list(
+                ".hierarchy-card[data-type]::before",
+                "mask-composite:exclude",
+                "var(--card-light)",
+                "identity-braid-glisten 4.5s",
+                "prefers-reduced-motion: no-preference",
+                "prefers-reduced-motion: reduce",
+                "forced-colors: active",
+                "@keyframes identity-braid-glisten"
+              )
+            )
+          },
+          {
+            file = "home";
+            html = $home;
+            expected = list("data-type=\"execution\"", "data-type=\"platform\"")
+          }
+        )
+      },
+      {
+        id = "typography";
+        value = one($reviewWorld, "displayFont");
+        global = true;
+        checks = list(
+          {
+            file = "stylesheet";
+            html = $reviewCss;
+            expected = list($fontRule, "font-family:var(--identity-display-font);")
+          },
+          { file = "home"; html = $home; expected = list($worldMarker) },
+          { file = "Threads"; html = $threads; expected = list($worldMarker) },
+          { file = "Map"; html = $map; expected = list($worldMarker) },
+          { file = "Questions"; html = $article; expected = list($worldMarker) }
+        )
+      },
+      {
+        id = "aesthetics";
+        value = concat(one($reviewWorld, "paletteFamily"), ". ", one($reviewWorld, "aestheticBrief"));
+        global = true;
+        checks = list(
+          {
+            file = "home";
+            html = $home;
+            expected = list($worldMarker, concat("src=\"/", one($reviewWorld, "image"), "\""))
+          },
+          {
+            file = "Threads";
+            html = $threads;
+            expected = list($worldMarker, concat("src=\"/", one($reviewWorld, "threadsImage"), "\""))
+          },
+          {
+            file = "Map";
+            html = $map;
+            expected = list($worldMarker, concat("src=\"/", one($reviewWorld, "atlasImage"), "\""))
+          },
+          {
+            file = "Questions";
+            html = $article;
+            expected = list($worldMarker, concat("src=\"/", one($reviewWorld, "questionHero"), "\""))
+          },
+          { file = "scoped palette"; html = $paletteCss; expected = $paletteChecks },
+          {
+            file = "daylight contrast consumer";
+            html = $reviewCss;
+            expected = list("body[data-question-identity] main .eyebrow{color:var(--q-accent);}")
+          }
+        )
+      },
+      {
+        id = "footer";
+        value = "Common owner, personal statement, utility links and stewardship; Map keeps its compact layout.";
+        global = true;
+        checks = $footers
+      },
+      {
+        id = "questions.article";
+        value = concat(one($reviewWorld, "questionCopy"), " · ", count($reflections), " reflections");
+        global = true;
+        checks = list(
+          {
+            file = "Questions article";
+            html = $article;
+            expected = append(
+              $articleChecks,
+              append(
+                list(
+                  concat("src=\"/", one($reviewWorld, "questionHero"), "\""),
+                  concat("data-question-identity=\"", $key, "\"")
+                ),
+                map(
+                  subjects("isa", "IdentityTheme"),
+                  "other",
+                  concat("href=\"", one($other, "questionWorldHref"), "\"")
+                )
+              )
+            )
+          },
+          {
+            file = "Questions theme colour and stylesheet";
+            html = $articleHead;
+            expected = list(
+              concat(
+                "name=\"theme-color\" content=\"",
+                one(concat("questions.palette.", $key, ".paper"), "value"),
+                "\""
+              ),
+              concat("href=\"/expedition.css?v=", one("site", "stylesheetVersion"), "\"")
+            )
+          },
+          { file = "scoped palette"; html = $paletteCss; expected = $paletteChecks }
+        )
+      }
+    )
+    fold $cases as c; worldCases starts list():
+      fold $c.checks as check; outputs starts list():
+        let eventInput = { html = $check.html; expected = $check.expected }
+        call identity.journey.check
+        yield append(
+        $outputs,
+        list({ file = $check.file; ok = $result.ok; missing = $result.missing })
+      ) → outputs
+      yield append(
+      $worldCases,
+      list(
+        {
+          id = $c.id;
+          identity = $key;
+          value = $c.value;
+          ok = and($c.global, every($outputs, "o", $o.ok));
+          outputs = $outputs
+        }
+      )
+    ) → worldCases
+    yield append($reviewWorlds, $worldCases) → reviewWorlds
+  fold $decisionIds as id; reviewEvidence starts {  }:
+    let worlds = filter($reviewWorlds, "w", eq($w.id, $id))
+    let proof = {
+      id = $id;
+      intent = one(concat("identity.decision.", $id), "intent");
+      ok = and(eq(count($worlds), 4), every($worlds, "w", $w.ok));
+      scope = one(concat("identity.decision.", $id), "scope");
+      humanReview = one(concat("identity.decision.", $id), "humanReview");
+      boundary = "Generated HTML, scoped CSS and declared source bindings are checked. Human semantic and visual judgments are not inferred from passing structural checks.";
+      worlds = $worlds
+    }
+    port record.put { record = $reviewEvidence; key = $id; value = $proof } → reviewEvidence
+    yield $reviewEvidence → reviewEvidence
+  port value.encode {
+    value = { protocol = "worldwright/identity-decisions/1"; decisions = $reviewEvidence }
+  } → reviewJson
+  port file.write { path = "assurance/identity-decisions.values.rel"; text = $reviewJson } → _

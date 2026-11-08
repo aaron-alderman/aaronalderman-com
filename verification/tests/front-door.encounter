@@ -1,0 +1,310 @@
+process-module "temple/surface-process-module/1"
+
+process test.front.hydration:
+  call check.pure
+  let body = "  let result = map(list(1, 2, 3), \"n\", add($n, 1))"
+  call check.admit
+  port mechanism.copy { target = $candidate } → observed
+  port rel.decode { text = $observed.rel; kind = "EncounterHydration" } → hydration
+  assert eq(at(at($hydration.queries.example, 0), "let"), "result")
+    otherwise "Hydration must expose typed REL."
+  let options = {}
+  call check.run
+  assert eq($result, list(2, 3, 4))
+    otherwise "Retained kernel semantics changed."
+  port mechanism.copy { target = $admitted } → receipt
+  port rel.decode { text = $receipt.receipt; kind = "AdmissionReceipt" } → receipt
+  assert eq(at(at($receipt.sources, 0), "sha256"), $observed.sourceSha256)
+    otherwise "Admission must bind the actual hydrated source."
+
+process test.front.forged:
+  call check.pure
+  let body = "  let result = 1"
+  call check.candidate
+  port mechanism.copy { target = $candidate } → copied
+  let localFront = $front
+  call check.pure
+  let body = "  let result = 2"
+  call check.candidate
+  let foreign = $candidate
+  let front = $localFront
+  each list({ queries = {} }, $copied, { rel = $copied.rel }, $foreign) as fake:
+    let operation = { target = $front; method = "link"; args = list(list($fake)) }
+    let pattern = "Foreign or forged"
+    call check.refusal
+  let operation = { target = $front; method = "admit"; args = list({ queries = { example = list() } }, { profile = "pure"; entries = list("example") }) }
+  let pattern = "Compiler-owned"
+  call check.refusal
+  let operation = { target = $front; method = "run"; args = list({ receipt = "claimed admitted" }, "example") }
+  let pattern = "admitted entry"
+  call check.refusal
+
+process test.front.no-caller-interpreter:
+  call check.pure
+  port mechanism.callback { query = "fixture.null" } → suppliedFunction
+  port mechanism.object { value = { evaluate = $suppliedFunction } } → supplied
+  port mechanism.load { module = "Object" } → objectModule
+  port mechanism.call { target = $objectModule; method = "defineProperty"; args = list($supplied, "usage", { get = $suppliedFunction }); keep = true } → supplied
+  let text = "process-module \"temple/surface-process-module/1\"\nprocess example:\n  let result = 1\n"
+  port mechanism.call { target = $front; method = "hydrate"; args = list("actual.encounter", $text, $supplied); keep = true } → candidate
+  port mechanism.call { target = $front; method = "link"; args = list(list($candidate)); keep = true } → linked
+  port mechanism.call { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("example") }); keep = true } → admitted
+  let options = {}
+  call check.run
+  assert eq($result, 1)
+    otherwise "Supplied interpreter changed execution."
+  port mechanism.trace {} → trace
+  assert eq(count($trace), 0)
+    otherwise "Caller interpreter must never execute."
+
+process test.front.source-only:
+  call check.pure
+  let operation = { target = $front; method = "hydrate"; args = list("candidate.rel", "process-module \"temple/surface-process-module/1\"\nprocess example:\n  let result = 1\n") }
+  let pattern = "source identity"
+  call check.refusal
+  port rel.encode { value = { queries = { example = list() } } } → encoded
+  each list($encoded, "{\"queries\":{\"example\":[]}}") as text:
+    let operation = { target = $front; method = "hydrate"; args = list("candidate.encounter", $text) }
+    let pattern = "Encounter compilation refused"
+    call check.refusal
+
+process test.front.undeclared:
+  call check.pure
+  each list("  when false:\n    port file.write { path = \"owned\"; text = \"x\" } → result", "  let result = 1\nprocess hidden:\n  port file.write { path = \"owned\"; text = \"x\" } → result") as body:
+    call check.candidate
+    port mechanism.call { target = $front; method = "link"; args = list(list($candidate)); keep = true } → linked
+    let operation = { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("example") }) }
+    let pattern = "Undeclared"
+    call check.refusal
+
+process test.front.forbidden-grants:
+  call check.pure
+  port mechanism.callback { query = "fixture.null" } → noop
+  each list("kernel.execute", "kernel.evaluate", "json.parse", "json.stringify") as name:
+    port record.fromEntries { entries = list(list($name, $noop)) } → badPorts
+    let operation = { target = $frontModule; method = "createFrontDoor"; args = list({ profiles = { bad = list($name) }; ports = $badPorts; basis = "test" }) }
+    let pattern = "forbidden"
+    call check.refusal
+
+process test.front.bad-programmes:
+  call check.pure
+  each list("  call missing", "  let model = {}", "  let __rel_0 = 1", "  let result = add(1)", "  let result = mystery(1)", "  let result = $eventInput.constructor", "  let result = map(list(1), \"n\", $__rel_0)") as body:
+    let refused = false
+    try:
+      call check.admit
+    catch fault:
+      let refused = true
+    assert $refused
+      otherwise "Invalid programme was admitted."
+  let body = "  let result = 1"
+  call check.candidate
+  let operation = { target = $front; method = "link"; args = list(list($candidate, $candidate)) }
+  let pattern = "Duplicate"
+  call check.refusal
+
+process test.front.freeze-and-entries:
+  call check.pure
+  let body = "  let result = 3"
+  call check.admit
+  port mechanism.load { module = "Reflect" } → reflectModule
+  port mechanism.call { target = $reflectModule; method = "set"; args = list($candidate, "rel", "changed") } → changed
+  assert eq($changed, false)
+    otherwise "Candidate is mutable."
+  let operation = { target = $front; method = "run"; args = list($admitted, "hidden") }
+  let pattern = "admitted entry"
+  call check.refusal
+  let options = {}
+  call check.run
+  assert eq($result, 3)
+    otherwise "Candidate changed."
+
+process test.front.phase-closure:
+  call check.pure
+  let body = "  call helper\nprocess helper:\n  let result = 7\nprocess browserOnly:\n  port unavailable.browser { } → result"
+  call check.candidate
+  port mechanism.call { target = $front; method = "link"; args = list(list($candidate)); keep = true } → linked
+  let operation = { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("example") }) }
+  let pattern = "Undeclared"
+  call check.refusal
+  port mechanism.call { target = $front; method = "link"; args = list(list($candidate), { roots = list("example") }); keep = true } → linked
+  port mechanism.call { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("example") }); keep = true } → admitted
+  let options = {}
+  call check.run
+  assert eq($result, 7)
+    otherwise "Root closure omitted its helper."
+  let operation = { target = $front; method = "run"; args = list($admitted, "browserOnly") }
+  let pattern = "admitted entry"
+  call check.refusal
+
+process test.front.nested-invoke:
+  call check.pure
+  let body = "  port kernel.invoke { query = \"child\"; input = { n = 6 } } → result\nprocess child:\n  let result = add($eventInput.n, 1)"
+  call check.admit
+  let options = {}
+  call check.run
+  port number.calculate { operation = "greater"; values = list($execution.usage.steps, 5) } → enough
+  assert and(eq($result, 7), $enough)
+    otherwise "Nested invocation must share the kernel."
+  let body = "  port kernel.invoke { query = \"unknown\"; input = {} } → result"
+  call check.admit
+  let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+  let pattern = "Unknown admitted"
+  call check.refusal
+
+process test.front.expression:
+  call check.pure
+  let body = "  port encounter.evaluate { text = \"add(2, 3)\"; bindings = {} } → result"
+  call check.admit
+  let options = {}
+  call check.run
+  assert and(eq($result, 5), eq(count($execution.admissions), 1))
+    otherwise "Expression execution requires a child admission."
+  let body = "  port encounter.evaluate { expression = list(\"add\", 2, 3); bindings = {} } → result"
+  call check.admit
+  let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+  let pattern = "Raw models"
+  call check.refusal
+
+process test.front.children:
+  port mechanism.callback { query = "fixture.null" } → write
+  let extra = { "file.write" = $write }
+  call check.setup
+  let child = "process-module \"temple/surface-process-module/1\"\nprocess example:\n  let result = add($eventInput.n, 1)\n"
+  port scalar.quote { value = $child } → quoted
+  let body = concat("  port encounter.execute { text = ", $quoted, "; entry = \"example\"; input = { n = 6 } } → result")
+  call check.admit
+  let options = {}
+  call check.run
+  assert and(eq($result, 7), eq(count($execution.admissions), 1))
+    otherwise "Child source must be admitted."
+  each list({ body = "  port kernel.invoke { query = \"privileged\"; input = {} } → result"; pattern = "Unknown admitted" }, { body = "  port file.write { path = \"owned\"; text = \"x\" } → result"; pattern = "Undeclared effect" }) as probe:
+    port scalar.quote { value = concat("process-module \"temple/surface-process-module/1\"\nprocess example:\n", $probe.body, "\n") } → quoted
+    let body = concat("  port encounter.execute { text = ", $quoted, "; entry = \"example\" } → result\nprocess privileged:\n  port file.write { path = \"owned\"; text = \"x\" } → result")
+    call check.admit
+    let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+    let pattern = $probe.pattern
+    call check.refusal
+  port mechanism.trace {} → trace
+  assert eq(count(filter($trace, "t", eq($t.query, "fixture.null"))), 0)
+    otherwise "Child reached privileged native capability."
+  let body = "  port encounter.execute { model = {}; entry = \"example\" } → result"
+  call check.admit
+  let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+  let pattern = "Raw models"
+  call check.refusal
+
+process test.front.reflection:
+  call check.pure
+  let body = "  port encounter.source { query = \"example\" } → result"
+  call check.admit
+  let options = {}
+  call check.run
+  assert eq(at(at($result.programme, 0), "port"), "encounter.source")
+    otherwise "Source reflection changed."
+  port mechanism.call { target = $front; method = "run"; args = list($admitted, "example"); keep = true } → nativeExecution
+  port mechanism.get { target = $nativeExecution; key = "value"; keep = true } → nativeReflection
+  port mechanism.get { target = $nativeReflection; key = "programme"; keep = true } → nativeProgramme
+  port mechanism.call { target = $objectModule; method = "isFrozen"; args = list($nativeProgramme) } → frozen
+  assert $frozen
+    otherwise "Reflected source must remain immutable."
+  let operation = { target = $front; method = "link"; args = list(list($result)) }
+  let pattern = "Foreign or forged"
+  call check.refusal
+
+process test.front.child-expression-shape:
+  call check.pure
+  let expression = "1\nprocess hidden:\n  let result = 2"
+  port scalar.quote { value = concat("process-module \"temple/surface-process-module/1\"\nprocess expression:\n  let result = ", $expression, "\n") } → child
+  port scalar.quote { value = $expression } → quoted
+  let body = concat("  port encounter.execute { text = ", $child, "; entry = \"expression\" } → _\n  port encounter.evaluate { text = ", $quoted, " } → result")
+  call check.admit
+  let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+  let pattern = "One Encounter expression"
+  call check.refusal
+
+process test.front.child-bindings:
+  port mechanism.callback { query = "fixture.leaked-effect" } → replacement
+  port mechanism.object { value = { replaceAll = $replacement } } → capability
+  port mechanism.callback { query = "fixture.value"; bindings = { value = $capability } } → obtain
+  let extra = { "capability.obtain" = $obtain }
+  call check.setup
+  port scalar.quote { value = "process-module \"temple/surface-process-module/1\"\nprocess example:\n  port text.replaceAll { value = $leaked; search = \"x\"; replacement = \"y\" } → result\n" } → child
+  let body = concat("  port capability.obtain {} → leaked\n  port encounter.execute { text = ", $child, "; entry = \"example\" } → result")
+  call check.admit
+  let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+  let pattern = "Unknown reference"
+  call check.refusal
+  port mechanism.trace {} → trace
+  assert eq(count(filter($trace, "t", eq($t.query, "fixture.leaked-effect"))), 0)
+    otherwise "Child inherited the parent's native callback."
+  let operation = { target = $frontModule; method = "createFrontDoor"; args = list({ profiles = { bad = list("toString") }; ports = {}; basis = "test" }) }
+  let pattern = "Unavailable"
+  call check.refusal
+
+process fixture.leaked-effect:
+  let result = "escaped"
+
+process test.front.facts:
+  call check.pure
+  let body = "  let result = { first = one(\"thing\", \"name\"); absent = optional(\"missing\", \"name\"); subjects = subjects(\"name\", \"Ada\"); values = objects(\"thing\", \"name\"); filtered = filter(list(1, 2), \"n\", eq($n, 2)); yes = every(list(2, 2), \"n\", eq($n, 2)); any = some(list(1, 2), \"n\", eq($n, 2)); scoped = let(\"n\", 4, add($n, 1)) }"
+  call check.admit
+  let options = { facts = list({ s = "thing"; p = "name"; o = "Ada" }) }
+  call check.run
+  assert eq($result, { first = "Ada"; absent = null; subjects = list("thing"); values = list("Ada"); filtered = list(2); yes = true; any = true; scoped = 5 })
+    otherwise "Derived fact and lexical semantics changed."
+  let body = "  let result = { values = objects(\"s\", \"p\"); history = subjects(\"p\", \"a\") }"
+  call check.admit
+  let options = { facts = list({ s = "s"; p = "p"; o = "a" }, { s = "s"; p = "p"; o = "b" }, { s = "s"; p = "p"; o = "a"; pol = "is-not" }, { s = "s"; p = "p"; o = "b"; pol = "is-not" }, { s = "s"; p = "p"; o = "a" }) }
+  call check.run
+  assert eq($result, { values = list("a"); history = list("s", "s", "s") })
+    otherwise "Retraction and reassertion history changed."
+
+process test.front.fact-snapshots:
+  call check.pure
+  let body = "  let result = objects(\"s\", \"p\")"
+  call check.admit
+  port mechanism.call { target = $front; method = "index"; args = list($admitted, { facts = list({ s = "s"; p = "p"; o = "one" }, { s = "s"; p = "p"; o = "two" }, { s = "s"; p = "p"; o = "one"; pol = "is-not" }) }); keep = true } → snapshot
+  port mechanism.copy { target = $snapshot } → receipt
+  port rel.decode { text = $receipt.receipt; kind = "FactIndexReceipt" } → receipt
+  assert eq($receipt.factCount, 3)
+    otherwise "Snapshot receipt lost input count."
+  let options = { factSnapshot = $snapshot }
+  call check.run
+  assert eq($result, list("two"))
+    otherwise "Indexed retraction changed."
+  port mechanism.copy { target = $snapshot } → copied
+  each list($copied, { objects = { s = { p = list("forged") } } }, $snapshot) as fake:
+    call check.admit
+    let operation = { target = $front; method = "run"; args = list($admitted, "example", { factSnapshot = $fake }) }
+    let pattern = "Compiler-owned fact snapshot"
+    call check.refusal
+  let operation = { target = $front; method = "run"; args = list($admitted, "example", { factSnapshot = $snapshot; facts = list({ s = "s"; p = "p"; o = "extra" }) }) }
+  let pattern = "Compiler-owned fact snapshot"
+  call check.refusal
+  call check.pure
+  call check.admit
+  let operation = { target = $front; method = "run"; args = list($admitted, "example", { factSnapshot = $snapshot }) }
+  let pattern = "Compiler-owned fact snapshot"
+  call check.refusal
+
+process test.front.exhaustion:
+  call check.pure
+  port mechanism.call { target = $frontModule; method = "createFrontDoor"; args = list({ profiles = { pure = list() }; ports = {}; basis = "budget-test"; limit = 1000 }); keep = true } → front
+  let body = "  try:\n    fold range(1000) as n; total starts 0:\n      yield add($total, $n) → result\n  catch fault:\n    let result = \"caught\""
+  call check.candidate
+  port mechanism.call { target = $front; method = "link"; args = list(list($candidate)); keep = true } → linked
+  port mechanism.call { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("example") }); keep = true } → admitted
+  let operation = { target = $front; method = "run"; args = list($admitted, "example") }
+  let pattern = null
+  call check.refusal
+  assert and(eq($result.code, "TEMPLE-K001"), eq($result.execution.entry, "example"), eq($result.execution.usage.steps, 1001))
+    otherwise "Exhaustion was caught or budget accounting changed."
+
+process test.front.local-host:
+  each list("bootstrap/site.json", "bootstrap/.. /migration.rel", "bootstrap/.GIT/migration.rel", "bootstrap/CON.rel", "bootstrap/test-data/missing-zero-gate.rel") as input:
+    port process.node { args = list("bootstrap/launch.cjs", $input) } → actual
+    assert not(eq($actual.status, 0))
+      otherwise "Local host accepted an invalid declaration."
+    port text.matches { value = $actual.stderr; pattern = if(eq($input, "bootstrap/test-data/missing-zero-gate.rel"), "Zero JSON gate is mandatory", "Only REL|HOST: Unsafe local path|HOST: Path alias") } → matched
+    assert $matched
+      otherwise "Host refused for an unexpected reason."

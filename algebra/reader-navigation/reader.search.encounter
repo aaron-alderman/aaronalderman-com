@@ -1,0 +1,25 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process reader.search:
+  port text.trim { value = $eventInput.event.target.value } → term
+  port text.lowerCase { value = $term } → term
+  port browser.select { selector = "[data-reader-search]" } → places
+  fold $places as place; matches starts 0:
+    port text.lowerCase { value = at($place.attributes, "data-reader-search") } → search
+    let match = or(eq($term, ""), includes($search, $term))
+    port browser.write { ref = $place.ref; name = "hidden"; value = not($match) } → _
+    yield add($matches, if($match, 1, 0)) → matches
+  port browser.write {
+    ref = "#reader-search-result";
+    name = "textContent";
+    value = if(eq($term, ""), "", concat($matches, " matching places."))
+  } → _
+  port browser.select { selector = "[data-reader-region-search]" } → regions
+  each $regions as region:
+    port text.lowerCase { value = at($region.attributes, "data-reader-region-search") } → search
+    port browser.write {
+      ref = $region.ref;
+      name = "hidden";
+      value = not(or(eq($term, ""), includes($search, $term)))
+    } → _

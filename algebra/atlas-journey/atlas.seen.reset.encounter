@@ -1,0 +1,9 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process atlas.seen.reset:
+  port storage.remove { key = "worldwright.atlas.seen.v1" } → removed
+  port state.set { key = "seen"; value = list() } → _
+  port state.set { key = "saved"; value = $removed.ok } → _
+  call atlas.seen.paint
+  port dom.text { selector = "#atlas-progress"; text = "Your map is clear. 0 of 40 places seen." } → _

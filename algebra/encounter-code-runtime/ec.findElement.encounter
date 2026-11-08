@@ -1,0 +1,14 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.findElement:
+  let ecTree = $eventInput.tree
+  port value.describe { value = $ecTree } → ecKind
+  let result = 0
+  when eq($ecKind.type, "object"):
+    fold or(at($ecTree, "children"), list()) as ecChild; ecMatches starts if(eq(concat("#", at(at($ecTree, "attrs"), "id")), $eventInput.selector), 1, 0):
+      port kernel.invoke {
+        query = "ec.findElement";
+        input = { tree = $ecChild; selector = $eventInput.selector }
+      } → ecFound
+      yield add($ecMatches, $ecFound) → result

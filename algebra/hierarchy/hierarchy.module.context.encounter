@@ -1,0 +1,28 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.module.context:
+  let selectedModule = {
+    sourceModule = $data.sourceModule;
+    sourceText = or(at($data, "sourceText"), "");
+    authorText = or(at($data, "authorText"), "");
+    sourceOrigins = or(at($data, "sourceOrigins"), list());
+    sourceFile = "source/encounter/source-algebra.encounter";
+    moduleFile = "algebra/encounter-source.process.values.rel"
+  }
+  when at($data, "moduleCatalogue"):
+    port browser.property { ref = "#module-data"; name = "value" } → modulePayload
+    port static.read { text = $modulePayload } → selectedModule
+    let declaredModules = filter(
+      $data.moduleCatalogue,
+      "declaration",
+      and(
+        eq($declaration.moduleFile, $selectedModule.moduleFile),
+        eq($declaration.sourceFile, $selectedModule.sourceFile)
+      )
+    )
+    assert eq(count($declaredModules), 1)
+      otherwise "INSPECT-OWNER: Exactly one declared Encounter owner is required."
+    port digest.sha256 { text = $selectedModule.authorText } → observedAuthorHash
+    assert eq($observedAuthorHash, at(at($declaredModules, 0), "sourceHash"))
+      otherwise "INSPECT-SOURCE: Authored source hash differs from the selected build owner."

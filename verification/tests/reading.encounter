@@ -1,0 +1,559 @@
+process-module "temple/surface-process-module/1"
+
+process reading.setup:
+  call check.manifest
+  let series = "worlds/dad/threads/growing-up-in-the-way-of-jesus/"
+  let article = concat($series, "room-to-grow/")
+  port file.read { file = concat($output, "/expedition.css") } → css
+
+process page.catalogue:
+  call check.page
+  let pageTree = $tree
+  call tree.all
+  fold $result as node; nodes starts list():
+    let tree = $node
+    call tree.attrs
+    let attributes = $result
+    call tree.text
+    yield append($nodes, list({ node = $node; tag = $node.tag; attrs = $attributes; text = $result })) → nodes
+  let tree = $pageTree
+
+process page.component:
+  let tree = $pageTree
+  call tree.find
+  assert not(eq($result, null))
+    otherwise "Required shared component missing."
+
+process tree.shell:
+  let saved = $tree
+  call tree.attrs
+  let attributes = $result
+  fold $saved.attrs as a; attrs starts list():
+    let include = not(and(eq($a.name, "href"), eq(at($attributes, "id"), "identity-home-link")))
+    let value = $a.value
+    when and($include, eq($a.name, "href")):
+      port url.observe { value = $a.value; base = concat("https://qa.invalid/", $page) } → url
+      let value = $url.href
+    yield if($include, append($attrs, list({ name = $a.name; value = $value })), $attrs) → normalizedAttrs
+  fold $saved.children as child; children starts list():
+    let tree = $child
+    call tree.shell
+    yield append($children, list($result)) → normalizedChildren
+  let result = { tag = $saved.tag; text = $saved.text; attrs = $normalizedAttrs; children = $normalizedChildren }
+
+process colour.luminance:
+  fold list(1, 3, 5) as start; channels starts list():
+    port text.slice { value = $colour; start = $start; end = add($start, 2) } → hex
+    port number.parse { value = $hex; radix = 16 } → channel
+    port number.calculate { operation = "divide"; values = list($channel, 255) } → channel
+    port number.calculate { operation = "lessEqual"; values = list($channel, 0.04045) } → small
+    when $small:
+      port number.calculate { operation = "divide"; values = list($channel, 12.92) } → channel
+    when not($small):
+      port number.calculate { operation = "divide"; values = list(add($channel, 0.055), 1.055) } → channel
+      port number.calculate { operation = "power"; values = list($channel, 2.4) } → channel
+    yield append($channels, list($channel)) → channels
+  port number.calculate { operation = "multiply"; values = list(at($channels, 0), 0.2126) } → red
+  port number.calculate { operation = "multiply"; values = list(at($channels, 1), 0.7152) } → green
+  port number.calculate { operation = "multiply"; values = list(at($channels, 2), 0.0722) } → blue
+  let result = add(add($red, $green), $blue)
+
+process colour.ratio:
+  let colour = $foreground
+  call colour.luminance
+  let first = $result
+  let colour = $background
+  call colour.luminance
+  port number.calculate { operation = "max"; values = list($first, $result) } → light
+  port number.calculate { operation = "min"; values = list($first, $result) } → dark
+  port number.calculate { operation = "divide"; values = list(add($light, 0.05), add($dark, 0.05)) } → result
+
+process reading.cell:
+  let found = filter($properties, "f", and(eq($f.s, $subject), eq($f.p, $predicate)))
+  assert eq(count($found), 1)
+    otherwise "Exactly one style cell required."
+  let result = at(at($found, 0), "o")
+
+process reading.declarations:
+  let predicate = "declaration"
+  let declarations = map(filter($properties, "f", and(eq($f.s, $subject), eq($f.p, $predicate))), "f", $f.o)
+  fold $declarations as id; entries starts list():
+    let subject = $id
+    let predicate = "property"
+    call reading.cell
+    let key = $result
+    let predicate = "value"
+    call reading.cell
+    yield append($entries, list(list($key, $result))) → entries
+  port record.fromEntries { entries = $entries } → result
+
+process test.reading.source-owners:
+  call reading.setup
+  each list("source/reading-palette/composition.encounter", "algebra/publication/reading.series.build.encounter") as file:
+    assert some($declaration, "f", and(eq($f.s, "local"), eq($f.p, "module"), eq($f.o, $file)))
+      otherwise "Canonical reading composition owner not selected."
+  assert not(some($declaration, "f", and(eq($f.s, "local"), eq($f.p, "module"), eq($f.o, "source/reading-palette/projection.encounter"))))
+    otherwise "Alternate reading projection selected."
+  port file.read { file = "algebra/publication/publication.build.encounter" } → source
+  assert includes($source, "call reading.series.build")
+    otherwise "Main publisher omitted series composition."
+  port file.read { file = "algebra/publication/reading.series.build.encounter" } → source
+  assert includes($source, "call publication.document")
+    otherwise "Series bypassed shared document owner."
+
+process test.reading.threads:
+  call reading.setup
+  let page = "worlds/dad/threads.html"
+  call page.catalogue
+  each list(concat("/", $series, "index.html"), concat("/", $article, "index.html"), "/writing/being-here-as-dad/") as href:
+    assert some($nodes, "n", and(eq($n.tag, "a"), eq(at($n.attrs, "href"), $href)))
+      otherwise "Dad Threads lost an existing or requested reading link."
+  each list("Be here before solving it", "Make room to grow", "Return after getting it wrong") as title:
+    assert includes(at(at($nodes, 0), "text"), $title)
+      otherwise "Existing Dad thread disappeared."
+
+process test.reading.article-shell:
+  call reading.setup
+  let page = "worlds/dad/threads.html"
+  call page.catalogue
+  let parentTree = $pageTree
+  let page = concat($article, "index.html")
+  call page.catalogue
+  let articleNodes = $nodes
+  let articleTree = $pageTree
+  each list(list("header", "masthead"), list("footer", "footer")) as component:
+    let tag = at($component, 0)
+    let class = at($component, 1)
+    let tree = $parentTree
+    call tree.find
+    let tree = $result
+    call tree.text
+    let parentText = $result
+    let tree = $articleTree
+    call tree.find
+    let tree = $result
+    call tree.text
+    assert eq($result, $parentText)
+      otherwise "Article diverged from the shared header/footer text."
+    when eq($tag, "footer"):
+      assert not(includes($result, "palette"))
+        otherwise "Implementation guide leaked into reader footer."
+  let pageTree = $articleTree
+  let tag = "article"
+  let class = "reading-essay"
+  call page.component
+  let tag = "nav"
+  let class = "faith-essay-contents"
+  call page.component
+  assert eq(count(filter($articleNodes, "n", includes(if(at($n.attrs, "class"), at($n.attrs, "class"), ""), "faith-section-number"))), 5)
+    otherwise "Article section navigation changed."
+  assert some($articleNodes, "n", and(eq($n.tag, "details"), includes($n.text, "Luke 2:41–52")))
+    otherwise "Article lost source disclosure."
+  port rel.read { file = "source/expedition.rel" } → facts
+  let version = at(at(filter($facts, "f", and(eq($f.s, "site"), eq($f.p, "stylesheetVersion"))), 0), "o")
+  assert some($articleNodes, "n", and(eq($n.tag, "link"), eq(at($n.attrs, "rel"), "stylesheet"), includes(at($n.attrs, "href"), concat("expedition.css?v=", $version))))
+    otherwise "Article is not using the versioned shared stylesheet."
+  assert not(some($articleNodes, "n", includes(list("form", "input", "textarea"), $n.tag)))
+    otherwise "Article acquired an input surface."
+  assert eq(map(filter($articleNodes, "n", eq($n.tag, "script")), "n", at($n.attrs, "src")), list("/reading-theme-runtime.js?v=palette-theme-5"))
+    otherwise "Article executable surface changed."
+  assert some($articleNodes, "n", and(eq($n.tag, "meta"), eq(at($n.attrs, "property"), "og:type"), eq(at($n.attrs, "content"), "article")))
+    otherwise "Article social metadata changed."
+  let ids = map(filter($articleNodes, "n", at($n.attrs, "id")), "n", at($n.attrs, "id"))
+  assert eq(count($ids), count(distinct($ids)))
+    otherwise "Duplicate article IDs."
+  each filter($articleNodes, "n", and(eq($n.tag, "a"), eq(at(if(at($n.attrs, "href"), at($n.attrs, "href"), ""), 0), "#"))) as link:
+    port text.slice { value = at($link.attrs, "href"); start = 1 } → target
+    assert includes($ids, $target)
+      otherwise "Article contents contains a dead fragment."
+
+process test.reading.planned-cards:
+  call reading.setup
+  let page = concat($series, "index.html")
+  call page.catalogue
+  let cards = filter($nodes, "n", eq(at($n.attrs, "class"), "identity-thread"))
+  assert eq(count($cards), 8)
+    otherwise "Series card count changed."
+  fold $cards as card; linked starts 0:
+    let tree = $card.node
+    call tree.all
+    yield add($linked, if(some($result, "n", eq($n.tag, "a")), 1, 0)) → linked
+  assert and(eq($linked, 1), eq(count(filter($cards, "n", includes($n.text, "planned"))), 7))
+    otherwise "Unwritten articles must remain unlinked planned cards."
+  assert some($nodes, "n", and(eq($n.tag, "meta"), eq(at($n.attrs, "property"), "og:type"), eq(at($n.attrs, "content"), "website")))
+    otherwise "Series social metadata changed."
+
+process test.reading.sitemap-and-art:
+  call reading.setup
+  port file.read { file = concat($output, "/sitemap.xml") } → sitemap
+  each list($series, $article, "assurance/reading-palette/") as route:
+    assert includes($sitemap, concat("https://aaronalderman.com/", $route))
+      otherwise "New reading route absent from main sitemap."
+  let page = "assurance/reading-palette/index.html"
+  call page.catalogue
+  assert includes(at(at($nodes, 0), "text"), "Style guide")
+    otherwise "Main publication omitted style guide."
+  let image = "assets/father/growing-up/room-to-grow-v1.png"
+  port file.digest { file = $image } → expected
+  port file.digest { file = concat($output, "/", $image) } → actual
+  assert eq($actual, $expected)
+    otherwise "Published artwork differs from canonical source."
+  assert and(includes($css, ".reading-source summary{"), includes($css, "--reading-bg:#fff6ec"))
+    otherwise "Shared reading styles missing."
+
+process test.reading.cover-geometry:
+  call reading.setup
+  let page = concat($series, "index.html")
+  call page.catalogue
+  let tag = "section"
+  let class = "faith-feature"
+  call page.component
+  let tree = $result
+  call tree.all
+  let tree = at(filter($result, "n", eq($n.tag, "img")), 0)
+  call tree.attrs
+  let cover = $result
+  let tag = "article"
+  let class = "identity-thread"
+  call page.component
+  let tree = $result
+  call tree.all
+  let tree = at(filter($result, "n", eq($n.tag, "img")), 0)
+  call tree.attrs
+  let opening = $result
+  assert and(not(eq($cover.src, $opening.src)), eq($cover.fetchpriority, "high"), eq($opening.loading, "lazy"))
+    otherwise "Cover and opening imagery lost distinct loading roles."
+  each list($cover, $opening) as image:
+    port number.calculate { operation = "greater"; values = list(count($image.alt), 20) } → alt
+    port number.calculate { operation = "greater"; values = list($image.width, 0) } → width
+    port number.calculate { operation = "greater"; values = list($image.height, 0) } → height
+    assert and($alt, $width, $height)
+      otherwise "Artwork needs descriptive alt text and stable geometry."
+    port file.stat { file = concat($output, $image.src) } → stat
+    port number.calculate { operation = "less"; values = list($stat.size, 600000) } → bounded
+    assert $bounded
+      otherwise "Served artwork exceeds 600 KB."
+  assert some($nodes, "n", eq(at($n.attrs, "id"), "series-readings"))
+    otherwise "Series reading anchor missing."
+
+process test.reading.contrast:
+  call reading.setup
+  port rel.read { file = "source/reading-palette/chrome.rel" } → rows
+  port rel.read { file = "source/presentation.rel" } → base
+  let properties = append($rows, $base)
+  each map(filter($rows, "f", and(eq($f.p, "isa"), eq($f.o, "StyleRule"))), "f", $f.s) as subject:
+    let predicate = "selector"
+    call reading.cell
+    assert and(includes($result, ".reading-essay"), includes($result, ".reading-room"), includes($css, concat($result, "{")))
+      otherwise "Contrast rules must stay reading-scoped and appear in shared CSS."
+  each list({ subject = "reading.contrast.header"; property = "background"; expected = "var(--reading-bg)" }, { subject = "reading.contrast.headerLinks"; property = "color"; expected = "var(--reading-text)" }, { subject = "reading.contrast.footer"; property = "background"; owner = "style.062.background" }, { subject = "reading.contrast.footer"; property = "color"; owner = "style.001.--muted" }, { subject = "reading.contrast.signature"; property = "color"; owner = "style.001.--paper" }, { subject = "reading.contrast.footerLinks"; property = "color"; owner = "style.001.--muted" }) as check:
+    let subject = $check.subject
+    call reading.declarations
+    let actual = at($result, $check.property)
+    let expected = at($check, "expected")
+    when at($check, "owner"):
+      let subject = at($check, "owner")
+      let predicate = "value"
+      call reading.cell
+      let expected = $result
+    assert eq($actual, $expected)
+      otherwise "Reading chrome diverged from canonical light header or dark footer."
+  each list({ subject = "reading.contrast.footer"; forbidden = "font-size" }, { subject = "reading.contrast.footerLinks"; forbidden = "display" }) as check:
+    let subject = $check.subject
+    call reading.declarations
+    port record.entries { value = $result } → entries
+    assert not(includes(map($entries, "e", at($e, 0)), $check.forbidden))
+      otherwise "Reading chrome overrode shared footer geometry."
+  let background = "#090e17"
+  each list("#bac1cb", "#f3eddf", "#e6bc79") as foreground:
+    call colour.ratio
+    port number.calculate { operation = "greaterEqual"; values = list($result, 4.5) } → passes
+    assert $passes
+      otherwise "Canonical footer fails AA contrast."
+  port file.read { file = "source/reading/rooms.values.rel" } → rooms
+  port rel.decode { text = $rooms } → rooms
+  each $rooms.rooms as room:
+    each list(list("text", "bg"), list("muted", "wash"), list("text", "wash"), list("action", "wash"), list("action", "bg"), list("accent", "bg")) as pair:
+      let foreground = at($room.palette, at($pair, 0))
+      let background = at($room.palette, at($pair, 1))
+      call colour.ratio
+      port number.calculate { operation = "greaterEqual"; values = list($result, 4.5) } → passes
+      assert $passes
+        otherwise "Reading room token pair fails AA contrast."
+    let foreground = $room.palette.action
+    let background = $room.palette.bg
+    call colour.ratio
+    port number.calculate { operation = "greaterEqual"; values = list($result, 3) } → passes
+    assert $passes
+      otherwise "Reading focus indicator contrast fails."
+  let dad = at(filter($rooms.rooms, "r", eq($r.key, "dad")), 0)
+  let foreground = $dad.palette.text
+  let background = "#0c111b"
+  call colour.ratio
+  port number.calculate { operation = "less"; values = list($result, 4.5) } → reproduces
+  assert $reproduces
+    otherwise "Original dark header contrast failure no longer reproduced."
+
+process test.reading.accessibility-and-links:
+  call reading.setup
+  port text.matches { value = $css; pattern = "@media\\s*\\(max-width:\\s*700px\\)" } → responsive
+  assert and($responsive, includes($css, "min-height:44px"), includes($css, "outline:3px solid var(--reading-action)"))
+    otherwise "Reading responsive or focus fallback missing."
+  each list(concat($series, "index.html"), concat($article, "index.html"), "assurance/reading-palette/index.html") as page:
+    call page.catalogue
+    let ids = map(filter($nodes, "n", at($n.attrs, "id")), "n", at($n.attrs, "id"))
+    assert and(eq(count(filter($nodes, "n", eq($n.tag, "h1"))), 1), eq(count($ids), count(distinct($ids))), some($nodes, "n", and(eq($n.tag, "a"), eq(at($n.attrs, "href"), "#main"))))
+      otherwise "Reading page heading, IDs or skip link failed."
+    each filter($nodes, "n", includes(list("a", "img", "link"), $n.tag)) as node:
+      let target = if(at($node.attrs, "href"), at($node.attrs, "href"), at($node.attrs, "src"))
+      port text.matches { value = if($target, $target, ""); pattern = "^https?:" } → external
+      when and($target, not($external)):
+        port url.observe { value = $target; base = concat("https://qa.invalid/", $page) } → url
+        port text.slice { value = $url.pathname; start = 1 } → pathname
+        port uri.decode { value = $pathname } → pathname
+        port file.exists { file = concat($output, "/", $pathname) } → exists
+        assert $exists
+          otherwise "Reading page has a broken local resource."
+        when and($url.hash, eq($pathname, $page)):
+          port text.slice { value = $url.hash; start = 1 } → hash
+          port uri.decode { value = $hash } → hash
+          assert includes($ids, $hash)
+            otherwise "Reading page has a broken local fragment."
+        when eq($node.tag, "img"):
+          port record.entries { value = $node.attrs } → entries
+          assert includes(map($entries, "e", at($e, 0)), "alt")
+            otherwise "Image lacks alt attribute."
+        when eq($node.tag, "a"):
+          port text.trim { value = $node.text } → label
+          assert or($label, at($node.attrs, "aria-label"))
+            otherwise "Link lacks an accessible name."
+
+process test.reading.shared-shell-and-components:
+  call reading.setup
+  let pages = list("worlds/dad/threads.html", "writing/being-here-as-dad/index.html", concat($series, "index.html"), concat($article, "index.html"), "assurance/reading-palette/index.html")
+  let page = at($pages, 0)
+  call page.catalogue
+  let reference = $pageTree
+  port rel.read { file = "source/expedition.rel" } → facts
+  let version = at(at(filter($facts, "f", and(eq($f.s, "site"), eq($f.p, "stylesheetVersion"))), 0), "o")
+  each $pages as page:
+    call page.catalogue
+    let current = $pageTree
+    let links = filter($nodes, "n", and(eq($n.tag, "link"), eq(at($n.attrs, "rel"), "stylesheet")))
+    fold $links as link; hrefs starts list():
+      port url.observe { value = at($link.attrs, "href"); base = concat("https://qa.invalid/", $page) } → url
+      yield append($hrefs, list(concat($url.pathname, $url.search))) → hrefs
+    assert and(eq($hrefs, list(concat("/expedition.css?v=", $version), "/assets/projection.css")), eq(count(filter($nodes, "n", eq(at($n.attrs, "data-reading-room"), "dad"))), 1), not(some($nodes, "n", or(eq($n.tag, "style"), at($n.attrs, "style")))))
+      otherwise "Dad comparison page diverged from shared palette or stylesheet."
+    each list(list("header", "masthead"), list("footer", "footer")) as component:
+      let tag = at($component, 0)
+      let class = at($component, 1)
+      let tree = $current
+      call tree.find
+      let tree = $result
+      call tree.shell
+      let normalized = $result
+      let currentPage = $page
+      let page = at($pages, 0)
+      let tree = $reference
+      call tree.find
+      let tree = $result
+      call tree.shell
+      assert eq($normalized, $result)
+        otherwise "Shared header/footer markup diverged."
+      let page = $currentPage
+  let page = concat($series, "index.html")
+  call page.catalogue
+  each list(list("section", "gate-hero"), list("section", "faith-feature"), list("div", "identity-thread-grid"), list("img", "faith-thread-art")) as component:
+    let tag = at($component, 0)
+    let class = at($component, 1)
+    call page.component
+  assert not(some($nodes, "n", includes(if(at($n.attrs, "class"), at($n.attrs, "class"), ""), "growing-series")))
+    otherwise "Bespoke series visual system returned."
+  port file.read { file = "source/reading-palette/components.rel" } → source
+  assert and(not(includes($source, "grow.series.style")), not(includes($css, ".growing-series")))
+    otherwise "Bespoke series style owner returned."
+
+process test.reading.palette-ownership:
+  call reading.setup
+  port file.read { file = "source/reading-palette/styles.values.rel" } → encoded
+  port rel.decode { text = $encoded } → styles
+  assert eq(count($styles), 81)
+    otherwise "Established shared style library changed."
+  # The frozen predecessor digest uses the JSON byte codec as an observation,
+  # never as an authoring input, programme loader or publication path.
+  port mechanism.load { module = "rel-values.cjs" } → relModule
+  port mechanism.call { target = $relModule; method = "decode"; args = list($encoded); keep = true } → stylesNative
+  port value.encode-observation { value = $stylesNative } → serialized
+  port digest.sha256 { text = $serialized } → digest
+  assert eq($digest, "9abe257e01c0ca206100efbace9bf5aef58f267753388fa36d6088da7ba76ee1")
+    otherwise "Established 81 style rules changed."
+  port file.read { file = "source/reading/rooms.values.rel" } → rooms
+  port rel.decode { text = $rooms } → rooms
+  port record.entries { value = $rooms } → entries
+  assert not(includes(map($entries, "e", at($e, 0)), "styles"))
+    otherwise "Shared rules duplicated under reading rooms."
+  each list("source/father/growing-up/style.rel", "source/reading/contrast.rel") as old:
+    port file.exists { file = $old } → exists
+    assert not($exists)
+      otherwise "Retired style owner returned."
+  each list("source/reading-palette/components.rel", "source/reading-palette/chrome.rel", "source/reading-palette/publication.rel") as owner:
+    assert some($declaration, "f", and(eq($f.s, "local"), eq($f.p, "factSource"), eq($f.o, $owner)))
+      otherwise "Canonical palette owner not selected."
+  assert some($declaration, "f", and(eq($f.s, "local"), eq($f.p, "module"), eq($f.o, "source/reading-palette/guide.encounter")))
+    otherwise "Guide composition not selected."
+
+process test.reading.guide-specimens:
+  call reading.setup
+  let page = "assurance/reading-palette/index.html"
+  call page.catalogue
+  let guide = $pageTree
+  let guideNodes = $nodes
+  each list({ page = concat($series, "index.html"); components = list(list("section", "faith-feature"), list("div", "identity-thread-grid")) }, { page = concat($article, "index.html"); components = list(list("details", "reading-source"), list("aside", "reading-pause"), list("aside", "reading-examples"), list("p", "reading-question"), list("ul", "reading-sayings")) }) as comparison:
+    let page = $comparison.page
+    call check.page
+    let real = $tree
+    each $comparison.components as component:
+      let tag = at($component, 0)
+      let class = at($component, 1)
+      let tree = $guide
+      call tree.find
+      let specimen = $result
+      let tree = $real
+      call tree.find
+      assert and(not(eq($specimen, null)), eq($specimen, $result))
+        otherwise "Guide specimen differs from the real shared component."
+  port file.read { file = "source/reading/rooms.values.rel" } → rooms
+  port rel.decode { text = $rooms } → rooms
+  let dad = at(filter($rooms.rooms, "r", eq($r.key, "dad")), 0)
+  port record.entries { value = $dad.palette } → palette
+  assert eq(map(filter($guideNodes, "n", eq(at($n.attrs, "class"), "palette-swatch")), "n", at($n.attrs, "data-token")), map($palette, "p", at($p, 0)))
+    otherwise "Guide token swatches differ from Dad palette."
+  let guideText = at(at($guideNodes, 0), "text")
+  each map($palette, "p", at($p, 1)) as value:
+    assert includes($guideText, $value)
+      otherwise "Guide omitted a palette value."
+  assert and(eq(count(filter($guideNodes, "n", eq($n.tag, "details"))), 10), not(some($guideNodes, "n", includes(list("form", "textarea"), $n.tag))), eq(map(filter($guideNodes, "n", eq($n.tag, "script")), "n", at($n.attrs, "src")), list("/reading-theme-runtime.js?v=palette-theme-5")))
+    otherwise "Guide disclosure or executable surface changed."
+  let example = at(filter($guideNodes, "n", and(eq($n.tag, "label"), includes($n.text, "Component name"))), 0)
+  assert $example
+    otherwise "Guide omitted the labelled component example."
+  let tree = $example.node
+  call tree.all
+  let tree = at(filter($result, "n", eq($n.tag, "input")), 0)
+  call tree.attrs
+  assert eq(at($result, "readonly"), "")
+    otherwise "Guide component example must remain read-only."
+  each list("Page patterns", "Typography and prose", "Reading components", "Colour tokens", "Component index", "Style guide", "Try the styles", "Shift+Tab", "200%") as label:
+    assert includes($guideText, $label)
+      otherwise "Guide omitted required reference or keyboard guidance."
+  each list("/worlds/dad/threads.html", "/writing/being-here-as-dad/", concat("/", $series, "index.html"), concat("/", $article, "index.html")) as href:
+    assert some($guideNodes, "n", and(eq($n.tag, "a"), eq(at($n.attrs, "href"), $href)))
+      otherwise "Guide lost a real comparison-page link."
+
+process test.reading.canonical-css:
+  call reading.setup
+  port file.read { file = "source/reading-palette/styles.values.rel" } → rules
+  port rel.decode { text = $rules } → rules
+  each $rules as rule:
+    port text.join { values = map($rule.declarations, "d", concat($d.property, ":", $d.value, ";")); separator = "" } → declarationsText
+    let body = concat($rule.selector, "{", $declarationsText, "}")
+    let body = if($rule.context, concat("@media", $rule.context, "{", $body, "}"), $body)
+    assert includes($css, $body)
+      otherwise "Canonical reading rule or responsive context missing from emitted stylesheet."
+  port file.read { file = "source/reading/rooms.values.rel" } → rooms
+  port rel.decode { text = $rooms } → rooms
+  let dad = at(filter($rooms.rooms, "r", eq($r.key, "dad")), 0)
+  let rule = at(filter($rules, "r", eq($r.id, "reading.palette.dad")), 0)
+  port record.fromEntries { entries = map($rule.declarations, "d", list($d.property, $d.value)) } → declared
+  port record.entries { value = $dad.palette } → tokens
+  each $tokens as token:
+    assert eq(at($declared, concat("--reading-", at($token, 0))), at($token, 1))
+      otherwise "Emitted Dad palette differs from room token owner."
+
+process test.reading.content-style-boundary:
+  call reading.setup
+  each filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "factSource"))) as fact:
+    port text.matches { value = $fact.o; pattern = "^source/father/growing-up/" } → content
+    when $content:
+      port rel.read { file = $fact.o } → rows
+      assert not(some($rows, "f", and(eq($f.p, "isa"), eq($f.o, "StyleRule"))))
+        otherwise "Article content introduced another style owner."
+  port rel.read { file = "source/reading-palette/components.rel" } → rows
+  let rules = filter($rows, "f", and(eq($f.p, "isa"), eq($f.o, "StyleRule")))
+  fold $rules as rule; scoped starts 0:
+    port text.matches { value = $rule.s; pattern = "^palette\\.style\\." } → palette
+    when $palette:
+      let selectors = filter($rows, "f", and(eq($f.s, $rule.s), eq($f.p, "selector")))
+      assert eq(count($selectors), 1)
+        otherwise "Palette guide rule requires one selector."
+      port text.split { value = at(at($selectors, 0), "o"); pattern = "," } → selectors
+      each $selectors as selector:
+        port text.trim { value = $selector } → selector
+        port text.matches { value = $selector; pattern = "^\\.reading-palette " } → scopedSelector
+        assert $scopedSelector
+          otherwise "Guide addition escaped the palette page."
+    yield add($scoped, if($palette, 1, 0)) → scoped
+  assert not(eq($scoped, 0))
+    otherwise "No palette guide additions were checked."
+
+process test.reading.theme-runtime:
+  call reading.setup
+  port file.read { file = "source/reading/rooms.values.rel" } → rooms
+  port rel.decode { text = $rooms } → rooms
+  port file.read { file = "source/faith/reading.values.rel" } → faith
+  port rel.decode { text = $faith } → faith
+  fold $rooms.rooms as room; pages starts list("worlds/christian/threads.html", $faith.path):
+    yield append($pages, list(concat("worlds/", $room.key, "/threads.html"), $room.essay.path)) → pages
+  let pages = append($pages, list(concat($series, "index.html"), concat($article, "index.html"), "assurance/reading-palette/index.html"))
+  assert eq(count($pages), 11)
+    otherwise "Reading room coverage changed."
+  each $pages as page:
+    call page.catalogue
+    let buttons = filter($nodes, "n", eq(at($n.attrs, "id"), "reading-theme-switch"))
+    assert eq(count($buttons), 1)
+      otherwise "Exactly one shared theme cross required."
+    let button = at($buttons, 0)
+    assert and(includes(at($button.attrs, "class"), "identity-switch"), eq(at($button.attrs, "type"), "button"), includes(at($button.attrs, "aria-label"), "theme"))
+      otherwise "Shared theme control lost accessible button semantics."
+    let tree = $button.node
+    let tag = "span"
+    let class = "identity-cross"
+    call tree.find
+    assert not(eq($result, null))
+      otherwise "Theme control lost shared cross."
+    assert and(eq(count(filter($nodes, "n", and(eq(at($n.attrs, "id"), "reading-theme-status"), eq(at($n.attrs, "aria-live"), "polite")))), 1), eq(count(filter($nodes, "n", and(eq($n.tag, "script"), eq(at($n.attrs, "src"), "/reading-theme-runtime.js?v=palette-theme-5")))), 1))
+      otherwise "Theme live region or admitted runtime missing."
+  port file.stat { file = concat($output, "/reading-theme-runtime.js") } → stat
+  assert not(eq($stat.size, 0))
+    otherwise "Theme runtime is empty."
+
+process test.reading.persistent-cross:
+  call reading.setup
+  each list(concat($series, "index.html"), concat($article, "index.html"), "assurance/reading-palette/index.html") as page:
+    call page.catalogue
+    let current = $pageTree
+    each list(list("header", "masthead"), list("footer", "footer")) as component:
+      let tag = at($component, 0)
+      let class = at($component, 1)
+      let tree = $current
+      call tree.find
+      let tree = $result
+      call tree.all
+      each $result as node:
+        let tree = $node
+        call tree.attrs
+        assert not(eq(at($result, "id"), "reading-theme-switch"))
+          otherwise "Persistent cross moved inside page chrome."
+    let status = at(filter($nodes, "n", eq(at($n.attrs, "id"), "reading-theme-status")), 0)
+    assert and(includes(at($status.attrs, "class"), "sr-only"), eq(at($status.attrs, "aria-live"), "polite"))
+      otherwise "Theme live status must use the real hiding utility."
+  port text.match { value = $css; pattern = "#identity-status,\\.sr-only\\{([^}]+)\\}" } → utility
+  assert $utility
+    otherwise "Referenced hiding utility was not published."
+  each list("position:absolute;", "width:1px;", "height:1px;", "overflow:hidden;", "clip:rect(0,0,0,0);") as declaration:
+    assert includes(at($utility.groups, 0), $declaration)
+      otherwise "Hiding utility is incomplete."
+  port text.match { value = $css; pattern = "\\.identity-switch\\.reading-theme-switch\\{([^}]+)\\}" } → floating
+  assert and($floating, includes(at($floating.groups, 0), "position:fixed;"))
+    otherwise "Theme cross must remain fixed while reading."

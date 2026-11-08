@@ -1,0 +1,43 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.assents:
+  port number.calculate { operation = "add"; values = list(at(at($eventInput.before, "gaps"), "paid"), 1e-8) } → hn32
+  port number.calculate {
+    operation = "lessEqual";
+    values = list(at(at($eventInput.after, "gaps"), "paid"), $hn32)
+  } → hn31
+  port number.calculate { operation = "add"; values = list(at(at($eventInput.before, "gaps"), "free"), 1e-8) } → hn34
+  port number.calculate {
+    operation = "lessEqual";
+    values = list(at(at($eventInput.after, "gaps"), "free"), $hn34)
+  } → hn33
+  port number.calculate { operation = "add"; values = list(at(at($eventInput.before, "gaps"), "role"), 1e-8) } → hn36
+  port number.calculate {
+    operation = "lessEqual";
+    values = list(at(at($eventInput.after, "gaps"), "role"), $hn36)
+  } → hn35
+  port number.calculate {
+    operation = "subtract";
+    values = list(at(at($eventInput.before, "gaps"), "paid"), 1e-8)
+  } → hn38
+  port number.calculate { operation = "less"; values = list(at(at($eventInput.after, "gaps"), "paid"), $hn38) } → hn37
+  port number.calculate {
+    operation = "subtract";
+    values = list(at(at($eventInput.before, "gaps"), "free"), 1e-8)
+  } → hn40
+  port number.calculate { operation = "less"; values = list(at(at($eventInput.after, "gaps"), "free"), $hn40) } → hn39
+  port number.calculate {
+    operation = "subtract";
+    values = list(at(at($eventInput.before, "gaps"), "role"), 1e-8)
+  } → hn42
+  port number.calculate { operation = "less"; values = list(at(at($eventInput.after, "gaps"), "role"), $hn42) } → hn41
+  let result = or(
+    $eventInput.after.goalsWithinBounds,
+    and(
+      or(at($eventInput.after.within, "paid"), $hn31),
+      or(at($eventInput.after.within, "free"), $hn33),
+      or(at($eventInput.after.within, "role"), $hn35),
+      or($hn37, $hn39, $hn41)
+    )
+  )

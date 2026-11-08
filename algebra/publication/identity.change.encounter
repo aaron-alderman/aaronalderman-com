@@ -1,0 +1,116 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.change:
+  port state.get { key = "identity" } → current
+  let choices = filter($data.themes, "theme", not(eq($theme.key, $current)))
+  port random.values { count = 1 } → random
+  port number.calculate { operation = "multiply"; values = list(at($random, 0), count($choices)) } → scaled
+  port number.calculate { operation = "floor"; values = list($scaled) } → index
+  let chosen = at($choices, $index)
+  port browser.attribute { ref = "body"; name = "data-identity"; value = $chosen.key } → _
+  port browser.attribute { ref = "#identity-background"; name = "src"; value = concat("/", $chosen.image) } → _
+  port browser.attribute {
+    ref = "#identity-card-questions";
+    name = "src";
+    value = concat("/", $chosen.questionsImage)
+  } → _
+  port browser.attribute {
+    ref = "#identity-card-threads";
+    name = "src";
+    value = concat("/", $chosen.threadsImage)
+  } → _
+  port browser.attribute { ref = "#identity-card-atlas"; name = "src"; value = concat("/", $chosen.atlasImage) } → _
+  port browser.write { ref = "#identity-word"; name = "textContent"; value = concat($chosen.label, ".") } → _
+  port browser.write { ref = "#identity-copy"; name = "textContent"; value = $chosen.copy } → _
+  let input = $chosen.catalogueTree
+  call projection.serialize
+  port browser.content { ref = "#microsites"; html = $result } → _
+  port browser.attribute { ref = "#microsites"; name = "data-perspective"; value = $chosen.key } → _
+  port browser.attribute { ref = "#microsites"; name = "aria-label"; value = $chosen.catalogueIntro } → _
+  port browser.write {
+    ref = "#identity-status";
+    name = "textContent";
+    value = concat(
+      "Now viewing Aaron as ",
+      $chosen.label,
+      ". Project selections and descriptions updated. Press again to discover another side."
+    )
+  } → _
+  port browser.attribute { ref = "#first-trails"; name = "href"; value = $chosen.questionWorldHref } → _
+  port browser.attribute { ref = "#first-trails"; name = "aria-label"; value = $chosen.questionCopy } → _
+  port browser.write { ref = "#identity-question-copy"; name = "textContent"; value = $chosen.questionCopy } → _
+  port browser.attribute { ref = "#threads"; name = "href"; value = $chosen.threadsHref } → _
+  port browser.attribute { ref = "#atlas"; name = "href"; value = $chosen.atlasHref } → _
+  port browser.attribute { ref = "#identity-home-link"; name = "href"; value = $chosen.homeHref } → _
+  port browser.write {
+    ref = "#identity-threads-copy";
+    name = "textContent";
+    value = $chosen.threadsCardCopy
+  } → _
+  port browser.write { ref = "#identity-atlas-copy"; name = "textContent"; value = $chosen.atlasCardCopy } → _
+  port browser.write { ref = "head title"; name = "textContent"; value = $chosen.homeTitle } → _
+  port browser.attribute { ref = "head link[rel=\"canonical\"]"; name = "href"; value = $chosen.homeCanonical } → _
+  port browser.attribute { ref = "head meta[name=\"description\"]"; name = "content"; value = $chosen.copy } → _
+  port browser.attribute {
+    ref = "head meta[property=\"og:title\"]";
+    name = "content";
+    value = $chosen.homeTitle
+  } → _
+  port browser.attribute {
+    ref = "head meta[name=\"twitter:title\"]";
+    name = "content";
+    value = $chosen.homeTitle
+  } → _
+  port browser.attribute {
+    ref = "head meta[property=\"og:description\"]";
+    name = "content";
+    value = $chosen.copy
+  } → _
+  port browser.attribute {
+    ref = "head meta[name=\"twitter:description\"]";
+    name = "content";
+    value = $chosen.copy
+  } → _
+  port browser.attribute {
+    ref = "head meta[property=\"og:url\"]";
+    name = "content";
+    value = $chosen.homeCanonical
+  } → _
+  port browser.attribute {
+    ref = "head meta[property=\"og:image\"]";
+    name = "content";
+    value = $chosen.homeShareImage
+  } → _
+  port browser.attribute {
+    ref = "head meta[property=\"og:image:secure_url\"]";
+    name = "content";
+    value = $chosen.homeShareImage
+  } → _
+  port browser.attribute {
+    ref = "head meta[property=\"og:image:type\"]";
+    name = "content";
+    value = $chosen.homeShareType
+  } → _
+  port browser.attribute {
+    ref = "head meta[name=\"twitter:image\"]";
+    name = "content";
+    value = $chosen.homeShareImage
+  } → _
+  port browser.attribute {
+    ref = "head meta[property=\"og:image:alt\"]";
+    name = "content";
+    value = $chosen.homeShareAlt
+  } → _
+  port browser.attribute {
+    ref = "head meta[name=\"twitter:image:alt\"]";
+    name = "content";
+    value = $chosen.homeShareAlt
+  } → _
+  port browser.attribute {
+    ref = "head meta[name=\"theme-color\"]";
+    name = "content";
+    value = $chosen.homeThemeColor
+  } → _
+  port browser.attribute { ref = "#identity-permalink"; name = "href"; value = $chosen.homeHref } → _
+  port state.set { key = "identity"; value = $chosen.key } → _

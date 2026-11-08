@@ -1,0 +1,12 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.referenceType:
+  let ecRef = $eventInput.id
+  let ecViews = filter($codePlan.views, "ecV", eq($ecV.id, $ecRef))
+  let ecMemberships = objects($ecRef, "isa")
+  assert or(eq(count($ecViews), 1), eq(count($ecMemberships), 1))
+    otherwise "EC-T016: A reference must resolve uniquely in the explicit programme/fact scope."
+  assert not(and(eq(count($ecViews), 1), not(eq(count($ecMemberships), 0))))
+    otherwise "EC-T017: A generated view identity collides with an authored fact identity."
+  let result = if(eq(count($ecViews), 1), at(at($ecViews, 0), "type"), at($ecMemberships, 0))

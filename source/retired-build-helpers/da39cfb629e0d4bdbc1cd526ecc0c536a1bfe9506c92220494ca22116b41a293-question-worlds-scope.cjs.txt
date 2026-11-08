@@ -1,1 +1,0 @@
-const fs=require('fs');const p='algebra/publication.process.json',v=JSON.parse(fs.readFileSync(p));const themeKey=['one','$theme','key'];v.queries['publication.styles'][0].value.rules[2][2][3].selector=['concat','html:has(body[data-question-identity="',themeKey,'"]),body[data-question-identity="',themeKey,'"]'];fs.writeFileSync(p,JSON.stringify(v,null,2)+'\n');

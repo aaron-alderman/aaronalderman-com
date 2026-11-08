@@ -1,0 +1,34 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.experiencePatch:
+  port record.get { record = $eventInput.change; key = "handling" } → hp103
+  port record.get { record = $eventInput.change; key = "deliveryFraction" } → hp104
+  port record.get { record = $eventInput.change; key = "handling" } → hp105
+  port record.get { record = $eventInput.change; key = "deliveryFraction" } → hp106
+  let result = {
+    A = {
+      handling = if(
+        and(eq($eventInput.change.person, "A"), not(eq($hp103, null))),
+        $hp103,
+        at(at($eventInput.experience, "A"), "handling")
+      );
+      deliveryFraction = if(
+        and(eq($eventInput.change.person, "A"), not(eq($hp104, null))),
+        $hp104,
+        at(at($eventInput.experience, "A"), "deliveryFraction")
+      )
+    };
+    B = {
+      handling = if(
+        and(eq($eventInput.change.person, "B"), not(eq($hp105, null))),
+        $hp105,
+        at(at($eventInput.experience, "B"), "handling")
+      );
+      deliveryFraction = if(
+        and(eq($eventInput.change.person, "B"), not(eq($hp106, null))),
+        $hp106,
+        at(at($eventInput.experience, "B"), "deliveryFraction")
+      )
+    }
+  }

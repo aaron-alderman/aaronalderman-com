@@ -1,0 +1,81 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.emitRepresentation:
+  let ecEmitRep = $eventInput.representation
+  fold $ecEmitRep.given as ecEmitGiven; ecStatements starts list({ let = "bindings"; value = {  } }):
+    let ecArgSteps = list(
+      {
+        port = "kernel.invoke";
+        args = {
+          query = "ec.argument";
+          input = {
+            type = $ecEmitGiven.type;
+            value = list("at", concat(at(" $", 1), "eventInput"), $ecEmitGiven.name)
+          }
+        };
+        into = "ecGivenValue"
+      },
+      {
+        port = "record.put";
+        args = {
+          record = concat(at(" $", 1), "bindings");
+          key = $ecEmitGiven.name;
+          value = concat(at(" $", 1), "ecGivenValue")
+        };
+        into = "bindings"
+      }
+    )
+    yield append($ecStatements, $ecArgSteps) → ecStatements
+  fold $ecEmitRep.guards as ecEmitGuard; ecStatements starts $ecStatements:
+    yield append(
+    $ecStatements,
+    list(
+      {
+        assert = $ecEmitGuard.expression;
+        message = "EC-R001: Representation requirement failed. Check the configured page, target and source mapping."
+      }
+    )
+  ) → ecStatements
+  let ecStatements = append(
+    $ecStatements,
+    list(
+      { let = "ecOutputValues"; value = $ecEmitRep.values },
+      {
+        port = "kernel.invoke";
+        args = {
+          query = "ec.check";
+          input = { type = $ecEmitRep.type; values = concat(at(" $", 1), "ecOutputValues") }
+        };
+        into = "ecChecked"
+      },
+      {
+        let = "ecOutputCarrier";
+        value = {
+          id = "representation";
+          type = $ecEmitRep.type;
+          values = concat(at(" $", 1), "ecOutputValues")
+        }
+      },
+      {
+        port = "record.put";
+        args = {
+          record = concat(at(" $", 1), "bindings");
+          key = "result";
+          value = concat(at(" $", 1), "ecOutputCarrier")
+        };
+        into = "bindings"
+      },
+      {
+        let = "result";
+        value = {
+          id = "representation";
+          type = $ecEmitRep.type;
+          values = concat(at(" $", 1), "ecOutputValues");
+          tree = $ecEmitRep.render;
+          events = $ecEmitRep.events
+        }
+      }
+    )
+  )
+  let result = $ecStatements

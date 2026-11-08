@@ -1,0 +1,25 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.quiet:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port state.get { key = "quiet" } → quiet
+  port state.set { key = "quiet"; value = not($quiet) } → _
+  let quiet = not($quiet)
+  port browser.attribute { ref = $button.ref; name = "aria-pressed"; value = $quiet } → _
+  port browser.class { ref = ".art-panel"; name = "looking-closer"; value = $quiet } → _
+  port state.get { key = "activity" } → activity
+  port browser.write {
+    ref = "#quiet-words";
+    name = "textContent";
+    value = if(
+      eq($activity.id, "water"),
+      if(
+        $quiet,
+        "Perhaps the water was never the difficult part.",
+        "Even the guide has a reflection."
+      ),
+      if($quiet, "Who else needs room in this clearing?", "There is nothing to finish here.")
+    )
+  } → _

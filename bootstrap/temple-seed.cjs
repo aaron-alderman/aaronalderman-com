@@ -100,7 +100,7 @@ function createKernel(ports = {}, limit = 2000000) {
         case 'try':
           try { await run(step.try, env); }
           catch (error) {
-            if (error === exhausted) throw error;
+            if (error === exhausted || error.code === 'TEMPLE-NATIVE-LIMIT') throw error;
             env[name(step.error)] = {name: error.name, message: error.message};
             await run(step.catch, env);
           }

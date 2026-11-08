@@ -1,0 +1,30 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process atlas.journey.boot:
+  port state.set { key = "seen"; value = list() } → _
+  call atlas.journey.resume
+  when $onAtlas:
+    port dom.on { selector = "#atlas-reset"; event = "click"; query = "atlas.seen.reset" } → _
+    port browser.on {
+      ref = "document";
+      event = "keydown";
+      delegate = ".atlas-pin";
+      query = "atlas.pin.dismiss"
+    } → _
+    port browser.on {
+      ref = "document";
+      event = "focusin";
+      delegate = ".atlas-pin";
+      query = "atlas.pin.reveal"
+    } → _
+    port browser.on {
+      ref = "document";
+      event = "pointerover";
+      delegate = ".atlas-pin";
+      query = "atlas.pin.reveal"
+    } → _
+    port browser.on { ref = "window"; event = "storage"; query = "atlas.seen.refresh" } → _
+    call atlas.pin.mode
+    port browser.on { ref = { media = "(max-width: 760px)" }; event = "change"; query = "atlas.pin.mode" } → _
+  port browser.on { ref = "window"; event = "pageshow"; query = "atlas.journey.resume" } → _
