@@ -314,49 +314,48 @@ process test.retention.single-process-owners:
     yield append($names, $selected) → names
 
 process test.zz.source-stability:
-  each $eventInput.snapshot as identity:
-    port diagnostic.context { value = $identity.file } → ignored
-    port file.digest { file = $identity.file } → actual
-    assert eq($actual, $identity.sha256)
-      otherwise "Test, policy or canonical declaration changed during this run."
+  let expected = $eventInput.snapshot
+  port file.identities { files = map($expected, "identity", $identity.file) } → observed
+  call check.run.same-identities
+  when not($result):
+    port diagnostic.context { value = { expectedFiles = count($expected); observedFiles = count($observed) } } → ignored
+  assert $result
+    otherwise "A declared input, loaded test mechanism or selected output changed during this run."
+  call audit.run.input-files
+  port value.sort { values = $result } → currentInputs
+  port value.sort { values = $eventInput.inputFiles } → initialInputs
+  assert eq($currentInputs, $initialInputs)
+    otherwise "Declared input file membership changed during this run."
+  port file.exists { file = $eventInput.output } → exists
+  assert eq($exists, $eventInput.publicationExists)
+    otherwise "The selected output appeared or disappeared during this run."
+  when $exists:
+    port file.list { directory = $eventInput.output; recursive = true } → current
+    port value.sort { values = $current } → current
+    port value.sort { values = $eventInput.publicationFiles } → initial
+    assert eq($current, $initial)
+      otherwise "The selected output's file membership changed during this run."
+  call test.retention.file-owners
 
 process test.retention.file-owners:
   call check.manifest
-  # The dated register is comparison evidence for existing file purposes. It
-  # grants no authoring or admission authority. New owners are explicit below.
+  # Explicit purpose/owner records are evidence interpreted by this Source
+  # rule. A directory name or a file's existence cannot grant it ownership.
   port rel.read { file = "verification/retention-register.rel" } → prior
   port record.fromEntries { entries = map(filter($prior, "f", eq($f.p, "sourceOfTruth")), "f", list($f.s, $f.o)) } → priorOwners
+  port record.fromEntries { entries = map(filter($prior, "f", eq($f.p, "purpose")), "f", list($f.s, $f.o)) } → priorPurposes
   port record.fromEntries { entries = map(filter($prior, "f", eq($f.p, "disposition")), "f", list($f.s, $f.o)) } → priorDispositions
-  let selected = map(filter($declaration, "f", and(eq($f.s, "local"), includes(list("module", "factSource"), $f.p))), "f", $f.o)
-  port record.entries { value = $aliases } → resources
-  let selected = append($selected, map($resources, "e", at($e, 1)))
   port file.list { recursive = true } → files
   each $files as file:
-    port text.indexOf { value = $file; search = ".local-" } → generated
-    when not(eq($generated, 0)):
+    call check.retention.generated-output
+    when not($result):
       port diagnostic.context { value = $file } → ignored
-      let owner = at($priorOwners, $file)
-      port text.matches { value = $file; pattern = "^(?:verification/|bootstrap/|assets/|temple/|sourcery/|retained/|LICENSES/|tooling/|source/values/|source/projection/)" } → knownArea
-      when and(not($owner), or($knownArea, includes($selected, $file))):
-        let owner = $file
-      port text.indexOf { value = $file; search = "evidence/projection-components/" } → componentEvidence
-      when eq($componentEvidence, 0):
-        let owner = "source/projection/components.rel"
-      port text.matches { value = $file; pattern = "^source/assurance/(?:browser-capture\\.rel|observations/[a-z0-9-]+\\.rel)$" } → browserEvidence
-      when $browserEvidence:
-        let owner = "source/assurance/publication.encounter"
-      when includes(list(".github/workflows/pages.yml", ".github/workflows/authoring-provenance.yml"), $file):
-        let owner = "bootstrap/publication.rel"
-      port text.indexOf { value = $file; search = "bootstrap/test-data/" } → testData
-      when eq($testData, 0):
-        let owner = "verification/tests/front-door.encounter"
-      assert $owner
-        otherwise "Retained file has no stated owner or classified purpose."
-      port file.exists { file = $owner } → exists
+      call check.retention.registration
+      assert $result.approved
+        otherwise "Retained file requires an explicit purpose, owner and approved disposition."
+      port file.exists { file = $result.owner } → exists
       assert $exists
         otherwise "Retained file points at a missing owner."
-      assert not(includes(list("requires-review", "separate-evidence-on-next-manifest-revision", "retire-after-active-reading-work", "review-provenance-after-active-work"), at($priorDispositions, $file)))
-        otherwise "Unresolved separation or provenance disposition remains."
   each filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "input"))) as inputRoot:
     port text.indexOf { value = $output; search = concat($inputRoot.o, "/") } → nested
     assert not(eq($nested, 0))

@@ -1,0 +1,129 @@
+process-module "temple/surface-process-module/1"
+
+# Native supplies bytes and digests. Source owns capture scope and all criteria.
+process check.run.same-identities:
+  let result = eq(map($expected, "identity", list($identity.file, $identity.sha256)), map($observed, "identity", list($identity.file, $identity.sha256)))
+
+process audit.run.input-files:
+  call check.manifest
+  let roots = map(filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "input"))), "f", $f.o)
+  fold $roots as inputRoot; files starts list():
+    port file.stat { file = $inputRoot } → info
+    let inputFiles = list($inputRoot)
+    when $info.directory:
+      port file.list { directory = $inputRoot; recursive = true } → members
+      let inputFiles = map($members, "file", concat($inputRoot, "/", $file))
+    yield append($files, $inputFiles) → files
+  let declared = map(filter($declaration, "f", and(eq($f.s, "local"), includes(list("module", "factSource"), $f.p))), "f", $f.o)
+  port record.entries { value = $aliases } → aliasesList
+  let result = distinct(append(append($files, $declared), map($aliasesList, "alias", at($alias, 1))))
+
+process audit.run.snapshot:
+  let loaded = $eventInput.snapshot
+  let expected = $loaded
+  port file.identities { files = map($loaded, "identity", $identity.file) } → observed
+  call check.run.same-identities
+  assert $result
+    otherwise "Loaded test, policy or runner bytes changed before snapshot capture."
+  call audit.run.input-files
+  let inputFiles = $result
+  let files = $inputFiles
+  port file.exists { file = $output } → publicationExists
+  let publicationFiles = list()
+  when $publicationExists:
+    port file.list { directory = $output; recursive = true } → publicationFiles
+    let files = append($files, map($publicationFiles, "file", concat($output, "/", $file)))
+  let loadedFiles = map($loaded, "identity", $identity.file)
+  let files = filter(distinct($files), "file", not(includes($loadedFiles, $file)))
+  port file.identities { files = $files } → additional
+  let result = { snapshot = append($loaded, $additional); inputFiles = $inputFiles; output = $output; publicationExists = $publicationExists; publicationFiles = $publicationFiles }
+
+process check.retention.registration:
+  let owner = ""
+  when at($priorOwners, $file):
+    port text.trim { value = at($priorOwners, $file) } → owner
+  let purpose = ""
+  when at($priorPurposes, $file):
+    port text.trim { value = at($priorPurposes, $file) } → purpose
+  let disposition = at($priorDispositions, $file)
+  let approved = and(not(eq($owner, "")), not(eq($purpose, "")), includes(list("retain", "retain-separated-evidence"), $disposition))
+  let result = { owner = $owner; purpose = $purpose; disposition = $disposition; approved = $approved }
+
+process check.retention.generated-output:
+  port text.indexOf { value = $file; search = ".local-" } → outputPrefix
+  port text.indexOf { value = $file; search = "/" } → directorySeparator
+  let result = and(eq($outputPrefix, 0), not(eq($directorySeparator, -1)))
+
+process test.validation.explicit-retention-purpose:
+  let file = ".local-validation-unowned-probe.txt"
+  call check.retention.generated-output
+  assert not($result)
+    otherwise "A root filename masqueraded as a generated output directory."
+  port file.exists { file = $file } → occupied
+  assert not($occupied)
+    otherwise "Regression probe path already exists; refuse to overwrite it."
+  port mechanism.load { module = "node:fs" } → filesystem
+  port mechanism.call { target = $filesystem; method = "writeFileSync"; args = list($file, "Inert ownership regression fixture.\n") } → ignored
+  port rel.read { file = "verification/retention-register.rel" } → registry
+  port record.fromEntries { entries = map(filter($registry, "f", eq($f.p, "sourceOfTruth")), "f", list($f.s, $f.o)) } → priorOwners
+  port record.fromEntries { entries = map(filter($registry, "f", eq($f.p, "purpose")), "f", list($f.s, $f.o)) } → priorPurposes
+  port record.fromEntries { entries = map(filter($registry, "f", eq($f.p, "disposition")), "f", list($f.s, $f.o)) } → priorDispositions
+  call check.retention.registration
+  let unregistered = $result.approved
+  port record.put { record = {}; key = $file; value = $file } → priorOwners
+  port record.put { record = {}; key = $file; value = "retain" } → priorDispositions
+  call check.retention.registration
+  let ownerOnly = $result.approved
+  port record.put { record = {}; key = $file; value = "   " } → priorPurposes
+  call check.retention.registration
+  let blankPurpose = $result.approved
+  port record.put { record = {}; key = $file; value = "Bound inert ownership regression fixture" } → priorPurposes
+  call check.retention.registration
+  let registered = $result.approved
+  port record.put { record = {}; key = $file; value = "requires-review" } → priorDispositions
+  call check.retention.registration
+  let unreviewed = $result.approved
+  port mechanism.call { target = $filesystem; method = "unlinkSync"; args = list($file) } → ignored
+  assert and(not($unregistered), not($ownerOnly), not($blankPurpose), $registered, not($unreviewed))
+    otherwise "A file's existence or directory bypassed explicit retention metadata."
+  let file = "retained/unregistered-content.txt"
+  call check.retention.generated-output
+  assert not($result)
+    otherwise "Unregistered retained content was exempted as generated output."
+  let file = ".local-fixture-output/index.html"
+  call check.retention.generated-output
+  assert $result
+    otherwise "A real output-directory path lost its separate inventory scope."
+
+process test.validation.snapshot-coverage:
+  let snapshotPaths = distinct(map($eventInput.snapshot, "identity", $identity.file))
+  call audit.receipt
+  port record.entries { value = $receipt.sources } → inputs
+  port record.entries { value = $receipt.basisSources } → native
+  let required = append(map(append($inputs, $native), "identity", at($identity, 0)), list("bootstrap/test.cjs", "bootstrap/test-mechanisms.cjs", "verification/retention-register.rel"))
+  let combined = distinct(append($snapshotPaths, $required))
+  port diagnostic.context { value = { snapshotFiles = count($snapshotPaths); requiredFiles = count($required); combinedFiles = count($combined) } } → ignored
+  assert eq(count($combined), count($snapshotPaths))
+    otherwise "The run snapshot omitted a native, programme, content or test-evidence input."
+
+process test.validation.snapshot-mutation:
+  let file = "verification/validation-stability-probe.txt"
+  port file.exists { file = $file } → occupied
+  assert not($occupied)
+    otherwise "Regression probe path already exists; refuse to overwrite it."
+  port mechanism.load { module = "node:fs" } → filesystem
+  port mechanism.call { target = $filesystem; method = "writeFileSync"; args = list($file, "Before mutation.\n") } → ignored
+  port file.identities { files = list($file) } → expected
+  port file.identities { files = list($file) } → observed
+  call check.run.same-identities
+  let unchanged = $result
+  port mechanism.call { target = $filesystem; method = "writeFileSync"; args = list($file, "After mutation.\n") } → ignored
+  port file.identities { files = list($file) } → observed
+  call check.run.same-identities
+  let changed = $result
+  let observed = list()
+  call check.run.same-identities
+  let missing = $result
+  port mechanism.call { target = $filesystem; method = "unlinkSync"; args = list($file) } → ignored
+  assert and($unchanged, not($changed), not($missing))
+    otherwise "The final guard accepted changed or missing bytes."

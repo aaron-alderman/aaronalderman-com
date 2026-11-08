@@ -30,7 +30,7 @@ function catalogue(){
   const foundation=new Set(rel.parse(read('bootstrap/foundation.rel').toString('utf8')).filter(f=>f.s==='foundation'&&f.p==='module').map(f=>f.o));
   const resourceSubjects=new Set(selected('resource'));
   const resources=new Set(facts.filter(f=>f.p==='source'&&resourceSubjects.has(f.s)).map(f=>f.o));
-  const all=walk(root),files=all.filter(f=>!f.startsWith('.local-'));
+  const all=walk(root),files=all.filter(f=>!dirs.some(dir=>f.startsWith(dir+'/')));
   const role=f=>{
     if(f==='verification/site-catalogue.rel')return 'catalogue-snapshot';
     if(f.startsWith('source/authoring-predecessors/'))return 'retired-native-generator';
