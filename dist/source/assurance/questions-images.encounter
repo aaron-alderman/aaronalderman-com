@@ -48,11 +48,18 @@ process images.publish:
     port json.stringify { value = { expected = $variant.expected; assets = $runtimeAssets; route = $variant.route } } → configurationText
     let runtimePath = "workshop/runtime.js?v=questions-images-1"
     port file.read { path = $variant.route } → originalPage
-    port text.replaceAll { value = $originalPage; search = "<head>"; replacement = concat("<head><base href=\"", $variant.base, "\"><meta name=\"robots\" content=\"noindex\">") } → auditPage
+    port text.replaceAll { value = $originalPage; search = "<head>"; replacement = "<head><meta name=\"robots\" content=\"noindex\">" } → auditPage
+    # Root-relative resources preserve the original destinations without a base
+    # element changing native fragment links in the diagnostic copy.
+    fold list("expedition.css", "assets/", "the-field/", "places/", "assurance/") as relativePrefix; rootedPage starts $auditPage:
+      port text.replaceAll { value = $rootedPage; search = concat("href=\"", $relativePrefix); replacement = concat("href=\"/", $relativePrefix) } → rootedPage
+      port text.replaceAll { value = $rootedPage; search = concat("src=\"", $relativePrefix); replacement = concat("src=\"/", $relativePrefix) } → rootedPage
+      yield $rootedPage → auditPage
     let diagnosticPath = concat("assurance/images/", $variant.id, ".html")
+    # The existing browser event port observes this nonvisual CSS event after
+    # the spacing stylesheet enters the document, even without scroll anchoring.
+    port text.replaceAll { value = $auditPage; search = "</head>"; replacement = "<style>#image-assurance-spacing-trigger{position:fixed;width:0;height:0;overflow:hidden;pointer-events:none}html:has(#reading-spacing-override) #image-assurance-spacing-trigger{animation:imageSpacingReady 1ms linear 1!important}@keyframes imageSpacingReady{from{opacity:0}to{opacity:1}}</style></head>" } → auditPage
     port text.replaceAll { value = $auditPage; search = concat("https://aaronalderman.com/", $variant.route); replacement = concat("https://aaronalderman.com/", $diagnosticPath) } → auditPage
-    port text.replaceAll { value = $auditPage; search = "href=\"#main\""; replacement = concat("href=\"/", $diagnosticPath, "#main\"") } → auditPage
-    port text.replaceAll { value = $auditPage; search = "href=\"#lived-questions\""; replacement = concat("href=\"/", $diagnosticPath, "#lived-questions\"") } → auditPage
     when eq($variant.id, "counterexample-broken"):
       fold list("../../", "/", "") as imagePrefix; mutatedPage starts $auditPage:
         port text.replaceAll { value = $mutatedPage; search = concat("src=\"", $imagePrefix, "assets/atlas/unseen-v1.png\""); replacement = "src=\"data:image/png;base64,invalid\"" } → changedPage
@@ -61,6 +68,7 @@ process images.publish:
       port text.replaceAll { value = $auditPage; search = "</head>"; replacement = "<style>.q-question:nth-child(2)>img{width:140px!important}</style></head>" } → auditPage
     let auditPanel = concat(
       "<section aria-labelledby=\"image-assurance-heading\" style=\"margin:40px auto;padding:24px;width:86%;background:#fff;color:#193f3b;border:1px solid #8daaa4;border-radius:12px\">",
+      "<span id=\"image-assurance-spacing-trigger\" aria-hidden=\"true\"></span>",
       "<h2 id=\"image-assurance-heading\">Questions image assurance</h2>",
       "<p>Illustrations fill their frames; emblems fit inside them. Loading, image dimensions and card bounds are observed below; fitting is checked at source. This diagnostic copy uses eager loading. Artistic crops remain visual review.</p>",
       "<p id=\"image-assurance-status\" style=\"overflow-wrap:anywhere\">Waiting for browser observations.</p><ol id=\"image-assurance-observations\"></ol></section>",
@@ -117,6 +125,7 @@ process images.boot:
   port browser.on { ref = "window"; event = "load"; query = "images.audit"; input = { } } → _
   port browser.on { ref = "window"; event = "scroll"; query = "images.audit"; input = { } } → _
   port browser.on { ref = "window"; event = "resize"; query = "images.audit"; input = { } } → _
+  port browser.on { ref = "#image-assurance-spacing-trigger"; event = "animationend"; query = "images.audit"; input = { } } → _
   port kernel.invoke { query = "images.audit"; input = { } } → _
 
 process images.audit:
