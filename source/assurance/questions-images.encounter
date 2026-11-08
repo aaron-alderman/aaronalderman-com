@@ -1,0 +1,176 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/assurance/questions-images/1"
+
+# These are real Questions projections copied for diagnostic observation only.
+# Browser mechanisms are unchanged. Source fitting and rendered geometry are
+# reported separately; this programme does not certify artistic crop quality.
+process images.publish:
+  each subjects("isa", "StyleRule") as styleRule:
+    let selector = one($styleRule, "selector")
+    port text.matches { value = $selector; pattern = "\\.q-question:(?:nth-child|last-child)" } → positional
+    assert not($positional)
+      otherwise "IMAGE-SOURCE: Card position cannot select image framing."
+    when and(includes($selector, ".q-question"), includes($selector, "img")):
+      each objects($styleRule, "declaration") as declaration:
+        when eq(one($declaration, "property"), "object-fit"):
+          assert or(and(eq($styleRule, "questions.style.32"), eq(one($declaration, "value"), "cover")), and(eq($styleRule, "questions.style.33"), eq(one($declaration, "value"), "contain")))
+            otherwise "IMAGE-SOURCE: An additional rule overrides the declared purpose fitting."
+  assert eq(one("questions.style.32.object-fit", "value"), "cover")
+    otherwise "IMAGE-SOURCE: Illustration framing changed."
+  assert eq(one("questions.style.33.object-fit", "value"), "contain")
+    otherwise "IMAGE-SOURCE: Emblem framing changed."
+  assert eq(one("questions.style.33", "selector"), ".q-question>img[src*=\"/world-emblems/\"]")
+    otherwise "IMAGE-SOURCE: Emblem framing must select the declared asset purpose, never a card position."
+  assert eq(one("questions.style.34", "selector"), ".q-question>img[src$=\"/questions/open-workshop-daylight-v2.png\"]")
+    otherwise "IMAGE-SOURCE: Focal position must belong to its illustration."
+  let imageAssets = map(subjects("isa", "QuestionImage"), "asset", {
+    path = one($asset, "path"); purpose = one($asset, "purpose"); fit = one($asset, "fit")
+  })
+  each $imageAssets as asset:
+    port text.matches { value = $asset.path; pattern = "^assets/(?:atlas|world-emblems|questions)/[a-z0-9-]+\\.png$" } → boundedAsset
+    assert $boundedAsset
+      otherwise "IMAGE-SOURCE: Image configuration must contain a bounded raster asset path."
+    assert and(includes(list("illustration", "emblem"), $asset.purpose), eq($asset.fit, if(eq($asset.purpose, "emblem"), "contain", "cover")), eq(includes($asset.path, "/world-emblems/"), eq($asset.purpose, "emblem")))
+      otherwise "IMAGE-SOURCE: Asset purpose and source fitting disagree."
+  let imageVariants = list(
+    { id = "main"; route = "questions.html"; base = "/"; expected = 6 },
+    { id = "christian"; route = "worlds/christian/questions.html"; base = "/worlds/christian/"; expected = 6 },
+    { id = "dad"; route = "worlds/dad/questions.html"; base = "/worlds/dad/"; expected = 4 },
+    { id = "sourcerer"; route = "worlds/sourcerer/questions.html"; base = "/worlds/sourcerer/"; expected = 4 },
+    { id = "author"; route = "worlds/author/questions.html"; base = "/worlds/author/"; expected = 4 },
+    { id = "counterexample-broken"; route = "worlds/sourcerer/questions.html"; base = "/worlds/sourcerer/"; expected = 4 },
+    { id = "counterexample-size"; route = "worlds/sourcerer/questions.html"; base = "/worlds/sourcerer/"; expected = 4 }
+  )
+  each $imageVariants as variant:
+    let runtimeAssets = $imageAssets
+    when eq($variant.id, "counterexample-broken"):
+      let runtimeAssets = append($imageAssets, list({ path = "data:image/png;base64,invalid"; purpose = "illustration"; fit = "cover" }))
+    port json.stringify { value = { expected = $variant.expected; assets = $runtimeAssets; route = $variant.route } } → configurationText
+    let runtimePath = "workshop/runtime.js?v=questions-images-1"
+    port file.read { path = $variant.route } → originalPage
+    port text.replaceAll { value = $originalPage; search = "<head>"; replacement = concat("<head><base href=\"", $variant.base, "\"><meta name=\"robots\" content=\"noindex\">") } → auditPage
+    let diagnosticPath = concat("assurance/images/", $variant.id, ".html")
+    port text.replaceAll { value = $auditPage; search = concat("https://aaronalderman.com/", $variant.route); replacement = concat("https://aaronalderman.com/", $diagnosticPath) } → auditPage
+    port text.replaceAll { value = $auditPage; search = "href=\"#main\""; replacement = concat("href=\"/", $diagnosticPath, "#main\"") } → auditPage
+    port text.replaceAll { value = $auditPage; search = "href=\"#lived-questions\""; replacement = concat("href=\"/", $diagnosticPath, "#lived-questions\"") } → auditPage
+    when eq($variant.id, "counterexample-broken"):
+      fold list("../../", "/", "") as imagePrefix; mutatedPage starts $auditPage:
+        port text.replaceAll { value = $mutatedPage; search = concat("src=\"", $imagePrefix, "assets/atlas/unseen-v1.png\""); replacement = "src=\"data:image/png;base64,invalid\"" } → changedPage
+        yield $changedPage → auditPage
+    when eq($variant.id, "counterexample-size"):
+      port text.replaceAll { value = $auditPage; search = "</head>"; replacement = "<style>.q-question:nth-child(2)>img{width:140px!important}</style></head>" } → auditPage
+    let auditPanel = concat(
+      "<section aria-labelledby=\"image-assurance-heading\" style=\"margin:40px auto;padding:24px;width:86%;background:#fff;color:#193f3b;border:1px solid #8daaa4;border-radius:12px\">",
+      "<h2 id=\"image-assurance-heading\">Questions image assurance</h2>",
+      "<p>Illustrations fill their frames; emblems fit inside them. Loading, image dimensions and card bounds are observed below; fitting is checked at source. This diagnostic copy uses eager loading. Artistic crops remain visual review.</p>",
+      "<p id=\"image-assurance-status\" style=\"overflow-wrap:anywhere\">Waiting for browser observations.</p><ol id=\"image-assurance-observations\"></ol></section>",
+      "<script type=\"application/json\" id=\"image-assurance-config\">", $configurationText, "</script><script src=\"/", $runtimePath, "\"></script></body>"
+    )
+    port text.replaceAll { value = $auditPage; search = "</body>"; replacement = $auditPanel } → auditPage
+    let surfaceWritePath = $diagnosticPath
+    port file.write { path = $surfaceWritePath; text = $auditPage } → _
+  port file.copy { path = "tooling/assurance/image-evidence.json" } → _
+  port file.read { path = "tooling/assurance/image-evidence.json" } → imageEvidence
+  port file.write { path = "assurance/images.json"; text = $imageEvidence } → _
+  let surfaceWritePath = "assurance/images/index.html"
+  port file.write {
+    path = $surfaceWritePath;
+    text = concat(
+      "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Questions image assurance — Aaron Alderman</title><link rel=\"canonical\" href=\"https://aaronalderman.com/assurance/images/\"><link rel=\"stylesheet\" href=\"/expedition.css?v=", one("site", "stylesheetVersion"), "\"></head>",
+      "<body data-question-identity=\"sourcerer\" style=\"background:#fbf8ef;color:#193f3b\"><a class=\"skip\" href=\"#main\">Skip to content</a><header class=\"masthead\" style=\"background:#fff\"><a class=\"brand\" href=\"/\" aria-label=\"Aaron Alderman\">Aaron Alderman</a><nav><a href=\"/assurance/\">All assurance</a></nav></header><main id=\"main\" class=\"section\"><p class=\"eyebrow\" style=\"color:#285f75\">Assurance / Questions imagery</p><h1>Does each image belong in its frame?</h1>",
+      "<p>Portrait illustrations fill their frames. Transparent emblems fit inside them. The choice belongs to the image’s purpose, rather than its position in a row.</p><p>The source checks fitting rules and refuses positional overrides. The admitted browser programme measures loading, natural dimensions, card bounds and consistent frame sizes at four declared widths. Deliberately broken images and a wrong-size card must fail their checks.</p>",
+      "<p>These diagnostic copies use eager image loading. They do not establish scrolling-triggered lazy loading, arbitrary computed CSS, or artistic crop quality.</p><p><a href=\"/assurance/images.json\">Read the current measured report →</a></p><h2>Explore the diagnostic copies</h2><ul>",
+      "<li><a href=\"main.html\">Main Questions</a></li><li><a href=\"christian.html\">Christian</a></li><li><a href=\"dad.html\">Dad</a></li><li><a href=\"sourcerer.html\">Sourcerer</a></li><li><a href=\"author.html\">Author</a></li></ul><details><summary>Deliberate counterexamples</summary><p>These copies intentionally contain an invalid image or a mismatched frame. They must be rejected by assurance.</p><ul><li><a href=\"counterexample-broken.html\">Broken image</a></li><li><a href=\"counterexample-size.html\">Wrong frame size</a></li></ul></details></main><footer class=\"footer\"><p>Aaron Alderman</p><nav><a href=\"https://github.com/aaron-alderman/aaronalderman-com/blob/main/LICENSE.md\">Licence ↗</a><a href=\"https://github.com/aaron-alderman/aaronalderman-com/blob/main/CHRISTIAN_STEWARDSHIP_COVENANT.md\">Christian stewardship covenant ↗</a></nav></footer></body></html>"
+    )
+  } → _
+  port file.read { path = "assurance/generated-pages.json" } → registryText
+  port json.parse { text = $registryText } → registry
+  fold append(map($imageVariants, "variant", concat("assurance/images/", $variant.id, ".html")), list("assurance/images/index.html")) as imagePath; registered starts $registry:
+    port record.put { record = $registered; key = $imagePath; value = true } → updated
+    yield $updated → registry
+  port json.stringify { value = $registry } → registryText
+  port file.write { path = "assurance/generated-pages.json"; text = $registryText } → _
+  port file.read { path = "assurance/reading-experience/index.html" } → readingExperiencePage
+  port text.replaceAll {
+    value = $readingExperiencePage; search = "</main>";
+    replacement = "<section class=\"assurance-boundary\"><h2>Does each image belong in its frame?</h2><p>Questions illustrations fill their frames; transparent emblems fit inside them. A separate track checks the source rules, real image loading and card geometry, including deliberate failure cases.</p><p><a href=\"../images/\">Explore Questions image assurance →</a></p></section></main>"
+  } → readingExperiencePage
+  port file.write { path = "assurance/reading-experience/index.html"; text = $readingExperiencePage } → _
+
+process images.shared.start:
+  port browser.select { selector = "#image-assurance-status" } → imagePanel
+  when eq(count($imagePanel), 0):
+    port kernel.invoke { query = "workshop.boot"; input = { } } → _
+  when not(eq(count($imagePanel), 0)):
+    port kernel.invoke { query = "images.boot"; input = { } } → _
+
+process images.boot:
+  port browser.property { ref = "#image-assurance-config"; name = "textContent" } → configurationText
+  port json.parse { text = $configurationText } → imageConfiguration
+  port state.set { key = "image.assurance.configuration"; value = $imageConfiguration } → _
+  port state.set { key = "image.assurance.scrolled"; value = false } → _
+  port browser.select { selector = ".q-question>img" } → imageNodes
+  each $imageNodes as imageNode:
+    port browser.on { ref = $imageNode.ref; event = "load"; query = "images.audit"; input = { } } → _
+    port browser.on { ref = $imageNode.ref; event = "error"; query = "images.audit"; input = { } } → _
+    port browser.attribute { ref = $imageNode.ref; name = "loading"; value = "eager" } → _
+  port browser.on { ref = "window"; event = "load"; query = "images.audit"; input = { } } → _
+  port browser.on { ref = "window"; event = "scroll"; query = "images.audit"; input = { } } → _
+  port browser.on { ref = "window"; event = "resize"; query = "images.audit"; input = { } } → _
+  port kernel.invoke { query = "images.audit"; input = { } } → _
+
+process images.audit:
+  port state.get { key = "image.assurance.configuration" } → imageConfiguration
+  port browser.select { selector = ".q-question>img" } → imageNodes
+  port browser.select { selector = ".q-question" } → imageFrames
+  assert eq(count($imageFrames), count($imageNodes))
+    otherwise "IMAGE-BROWSER: Each card must contain exactly one declared image."
+  let reference = at($imageNodes, 0)
+  fold range(count($imageNodes)) as ordinal; observations starts list():
+    let imageNode = at($imageNodes, add($ordinal, -1))
+    port browser.property { ref = $imageNode.ref; name = "complete" } → complete
+    port browser.property { ref = $imageNode.ref; name = "naturalWidth" } → naturalWidth
+    port browser.property { ref = $imageNode.ref; name = "naturalHeight" } → naturalHeight
+    let frame = at($imageFrames, add($ordinal, -1))
+    let assets = filter($imageConfiguration.assets, "asset", includes($imageNode.attributes.src, $asset.path))
+    let purpose = if(eq(count($assets), 1), at($assets, 0), { purpose = "unknown"; fit = "unknown" })
+    port number.calculate { operation = "greater"; values = list($naturalWidth, 0) } → hasWidth
+    port number.calculate { operation = "greater"; values = list($naturalHeight, 0) } → hasHeight
+    port number.calculate { operation = "subtract"; values = list($frame.rect.left, 1) } → leftEdge
+    port number.calculate { operation = "subtract"; values = list($frame.rect.top, 1) } → topEdge
+    port number.calculate { operation = "add"; values = list($frame.rect.right, 1) } → rightEdge
+    port number.calculate { operation = "add"; values = list($frame.rect.bottom, 1) } → bottomEdge
+    port number.calculate { operation = "greaterEqual"; values = list($imageNode.rect.left, $leftEdge) } → leftOK
+    port number.calculate { operation = "greaterEqual"; values = list($imageNode.rect.top, $topEdge) } → topOK
+    port number.calculate { operation = "lessEqual"; values = list($imageNode.rect.right, $rightEdge) } → rightOK
+    port number.calculate { operation = "lessEqual"; values = list($imageNode.rect.bottom, $bottomEdge) } → bottomOK
+    port number.calculate { operation = "subtract"; values = list($imageNode.rect.width, $reference.rect.width) } → widthDelta
+    port number.calculate { operation = "subtract"; values = list($imageNode.rect.height, $reference.rect.height) } → heightDelta
+    port number.calculate { operation = "abs"; values = list($widthDelta) } → widthError
+    port number.calculate { operation = "abs"; values = list($heightDelta) } → heightError
+    port number.calculate { operation = "lessEqual"; values = list($widthError, 1) } → widthOK
+    port number.calculate { operation = "lessEqual"; values = list($heightError, 1) } → heightOK
+    let loaded = and($complete, $hasWidth, $hasHeight)
+    let bounds = and($leftOK, $topOK, $rightOK, $bottomOK)
+    let size = and($widthOK, $heightOK)
+    let known = and(eq(count($assets), 1), includes(list("cover", "contain"), $purpose.fit))
+    let row = { n = $ordinal; kind = $purpose.purpose; fit = $purpose.fit; loaded = $loaded; nw = $naturalWidth; nh = $naturalHeight; w = $imageNode.rect.width; h = $imageNode.rect.height; bounds = $bounds; size = $size; known = $known }
+    port json.stringify { value = $row } → rowText
+    assert includes(list("illustration", "emblem"), $purpose.purpose)
+      otherwise "IMAGE-BROWSER: Unclassified image source."
+    yield append($observations, list({ row = $row; text = $rowText; passed = and($loaded, $bounds, $size, $known) })) → observations
+  let failures = count(filter($observations, "observation", not($observation.passed)))
+  port browser.property { ref = "html"; name = "clientWidth" } → viewportWidth
+  port browser.property { ref = "html"; name = "clientHeight" } → viewportHeight
+  port browser.select { selector = "#reading-spacing-override" } → spacingSheets
+  let spacingProfile = and(includes(list(305, 320), $viewportWidth), eq($viewportHeight, 800))
+  let spacingReady = or(not($spacingProfile), eq(count($spacingSheets), 1))
+  let summary = { protocol = "images/1"; observed = count($observations); expected = $imageConfiguration.expected; failed = $failures; complete = and(eq(count($observations), $imageConfiguration.expected), $spacingReady) }
+  port json.stringify { value = $summary } → summaryText
+  port browser.content { ref = "#image-assurance-status"; html = $summaryText } → _
+  port text.join { values = map($observations, "observation", concat("<li data-image-observation=\"\" style=\"font:12px/1.6 monospace;overflow-wrap:anywhere\">", $observation.text, "</li>")); separator = "" } → rowMarkup
+  port browser.content { ref = "#image-assurance-observations"; html = $rowMarkup } → _
+  port state.get { key = "image.assurance.scrolled" } → alreadyScrolled
+  when not($alreadyScrolled):
+    port state.set { key = "image.assurance.scrolled"; value = true } → _
+    port browser.scrollIntoView { ref = $reference.ref; block = "start"; behavior = "instant" } → _

@@ -66,7 +66,9 @@
     "source/stylesheets/reader-inline.json",
     "source/the-field/correction-article.json",
     "source/stylesheets/field-correction.json",
-    "source/the-field/correction-results.json"
+    "source/the-field/correction-results.json",
+    "source/assurance/questions-images.encounter",
+    "source/assurance/reading-experience.json"
   ],
   "grants": [
     "digest.sha256",
@@ -184,7 +186,8 @@
       "source/microsites/publication.encounter",
       "source/microsites/return.encounter",
       "algebra/stylesheet.process.json",
-      "algebra/reading-experience.process.json"
+      "algebra/reading-experience.process.json",
+      "source/assurance/questions-images.encounter"
     ],
     "authoringPolicy": [
       "algebra/authoring.process.json",
@@ -250,6 +253,10 @@
     "algebra/microsite-return.process.json": {
       "source": "source/microsites/return.encounter",
       "frontend": "bootstrap/frontends/microsite-return.json"
+    },
+    "algebra/questions-images.process.json": {
+      "source": "source/assurance/questions-images.encounter",
+      "frontend": "bootstrap/frontends/questions-images.json"
     }
   },
   "processSources": [
@@ -281,7 +288,8 @@
       "bootstrap/frontends/microsite-media.json",
       "bootstrap/frontends/microsite-projection.json",
       "bootstrap/frontends/microsites.json",
-      "bootstrap/frontends/microsite-return.json"
+      "bootstrap/frontends/microsite-return.json",
+      "bootstrap/frontends/questions-images.json"
     ],
     "archiveRoot": "source/process-authoring/history"
   },
