@@ -359,13 +359,59 @@
             "args": {
               "value": "$originalPage",
               "search": "<head>",
-              "replacement": [
-                "concat",
-                "<head><base href=\"",
-                "$variant.base",
-                "\"><meta name=\"robots\" content=\"noindex\">"
-              ]
+              "replacement": "<head><meta name=\"robots\" content=\"noindex\">"
             },
+            "into": "auditPage"
+          },
+          {
+            "fold": [
+              "list",
+              "expedition.css",
+              "assets/",
+              "the-field/",
+              "places/",
+              "assurance/"
+            ],
+            "as": "relativePrefix",
+            "accumulator": "rootedPage",
+            "initial": "$auditPage",
+            "steps": [
+              {
+                "port": "text.replaceAll",
+                "args": {
+                  "value": "$rootedPage",
+                  "search": [
+                    "concat",
+                    "href=\"",
+                    "$relativePrefix"
+                  ],
+                  "replacement": [
+                    "concat",
+                    "href=\"/",
+                    "$relativePrefix"
+                  ]
+                },
+                "into": "rootedPage"
+              },
+              {
+                "port": "text.replaceAll",
+                "args": {
+                  "value": "$rootedPage",
+                  "search": [
+                    "concat",
+                    "src=\"",
+                    "$relativePrefix"
+                  ],
+                  "replacement": [
+                    "concat",
+                    "src=\"/",
+                    "$relativePrefix"
+                  ]
+                },
+                "into": "rootedPage"
+              }
+            ],
+            "yield": "$rootedPage",
             "into": "auditPage"
           },
           {
@@ -381,6 +427,15 @@
             "port": "text.replaceAll",
             "args": {
               "value": "$auditPage",
+              "search": "</head>",
+              "replacement": "<style>#image-assurance-spacing-trigger{position:fixed;width:0;height:0;overflow:hidden;pointer-events:none}html:has(#reading-spacing-override) #image-assurance-spacing-trigger{animation:imageSpacingReady 1ms linear 1!important}@keyframes imageSpacingReady{from{opacity:0}to{opacity:1}}</style></head>"
+            },
+            "into": "auditPage"
+          },
+          {
+            "port": "text.replaceAll",
+            "args": {
+              "value": "$auditPage",
               "search": [
                 "concat",
                 "https://aaronalderman.com/",
@@ -390,34 +445,6 @@
                 "concat",
                 "https://aaronalderman.com/",
                 "$diagnosticPath"
-              ]
-            },
-            "into": "auditPage"
-          },
-          {
-            "port": "text.replaceAll",
-            "args": {
-              "value": "$auditPage",
-              "search": "href=\"#main\"",
-              "replacement": [
-                "concat",
-                "href=\"/",
-                "$diagnosticPath",
-                "#main\""
-              ]
-            },
-            "into": "auditPage"
-          },
-          {
-            "port": "text.replaceAll",
-            "args": {
-              "value": "$auditPage",
-              "search": "href=\"#lived-questions\"",
-              "replacement": [
-                "concat",
-                "href=\"/",
-                "$diagnosticPath",
-                "#lived-questions\""
               ]
             },
             "into": "auditPage"
@@ -483,6 +510,7 @@
             "value": [
               "concat",
               "<section aria-labelledby=\"image-assurance-heading\" style=\"margin:40px auto;padding:24px;width:86%;background:#fff;color:#193f3b;border:1px solid #8daaa4;border-radius:12px\">",
+              "<span id=\"image-assurance-spacing-trigger\" aria-hidden=\"true\"></span>",
               "<h2 id=\"image-assurance-heading\">Questions image assurance</h2>",
               "<p>Illustrations fill their frames; emblems fit inside them. Loading, image dimensions and card bounds are observed below; fitting is checked at source. This diagnostic copy uses eager loading. Artistic crops remain visual review.</p>",
               "<p id=\"image-assurance-status\" style=\"overflow-wrap:anywhere\">Waiting for browser observations.</p><ol id=\"image-assurance-observations\"></ol></section>",
@@ -804,6 +832,16 @@
         "args": {
           "ref": "window",
           "event": "resize",
+          "query": "images.audit",
+          "input": {}
+        },
+        "into": "_"
+      },
+      {
+        "port": "browser.on",
+        "args": {
+          "ref": "#image-assurance-spacing-trigger",
+          "event": "animationend",
           "query": "images.audit",
           "input": {}
         },
