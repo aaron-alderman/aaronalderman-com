@@ -60,7 +60,8 @@ The pre-migration [projection-path audit](PROJECTION-PATH-AUDIT.md) and its REL
 counterexample remain historical evidence. Final migration and visual receipts
 must identify the completed output and their precise coverage.
 
-The current [closure receipt](common-projection-closure.rel) records the selected
-output, exact execution identity, tests, content amendments and browser evidence.
+The earlier [closure receipt](common-projection-closure.rel) retains its 310-page
+scope. The [preserved-live release record](live-migration-release.md) describes
+the 322-page successor, browser corrections and publication control transition.
 Declared SVG source assets are opaque graphics: their bytes and safe image
 structure are checked separately; they cannot issue markup or DOM capabilities.

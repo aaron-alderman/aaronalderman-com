@@ -472,7 +472,9 @@ process assurance.portfolio.build:
     )
   }
   call assurance.portfolio.document
-  each filter($portfolioReport.topics, "topic", not(eq($topic.id, "identity"))) as topic:
+  # These routes have dedicated admitted publishers; the catalogue may link
+  # them, but must not overwrite their documents with the generic template.
+  each filter($portfolioReport.topics, "topic", not(includes(list("identity", "contrast", "reading-experience", "plain-language"), $topic.id))) as topic:
     let portfolioPage = {
       route = concat("assurance/", $topic.id, "/index.html");
       prefix = "../../";

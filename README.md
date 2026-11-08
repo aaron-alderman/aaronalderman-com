@@ -139,7 +139,9 @@ hashed from the exact bytes compiled, then rechecked before the receipt.
 See the [complete ownership and trust boundary](verification/compiler-policy-boundary.md)
 and [reproducible audit](verification/source-policy-audit.cjs). Self-correspondence
 and passing tests are not independent verification or a universal proof of no
-backdoors. Fresh rendered browser/mobile qualification is not claimed.
+backdoors. The [preserved-live release record](verification/live-migration-release.md)
+records the fresh browser scope, corrections, remaining qualification and
+repository-control transition; earlier records keep their historical scope.
 
 Browser runtimes fetch the exact Encounter compiler/policy and application
 sources, verify identities, hydrate actual REL and admit their closures before

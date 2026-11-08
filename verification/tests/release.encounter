@@ -27,6 +27,10 @@ process test.release.newer-live-routes:
   port value.sort { values = distinct($routes) } → expected
   assert and(eq(count($actual), 322), eq($actual, $expected))
     otherwise "A newer live route was lost or an unreviewed route was added."
+  each list({ route = "contrast"; heading = "Light behind the words." }, { route = "reading-experience"; heading = "Can you read it, enlarge it, and find your way?" }, { route = "plain-language"; heading = "Can someone else understand what I mean?" }) as page:
+    port file.read { file = concat($output, "/assurance/", $page.route, "/index.html") } → html
+    assert and(includes($html, $page.heading), includes($html, concat("../", $page.route, ".rel")), not(includes($html, "Ready for other languages and locales?")))
+      otherwise "The generic assurance template overwrote a dedicated measured report."
 
 process test.release.browser-evidence:
   call release.capture

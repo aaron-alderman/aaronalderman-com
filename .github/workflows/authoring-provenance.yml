@@ -1,4 +1,4 @@
-name: Authoring provenance
+name: Canonical publication admission
 on:
   pull_request:
     branches: [main]
@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   provenance:
-    name: Authoring provenance
+    name: Canonical publication admission
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
