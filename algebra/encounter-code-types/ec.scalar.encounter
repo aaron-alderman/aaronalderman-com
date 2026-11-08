@@ -1,0 +1,26 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.scalar:
+  let ecSlot = $eventInput.slot
+  let ecValue = $eventInput.value
+  port value.describe { value = $ecValue } → ecKind
+  assert includes(list("string", "ref"), $ecSlot.kind)
+    otherwise "EC-T005: Unsupported value kind in this experiment; it cannot be treated as assured."
+  assert eq($ecKind.type, "string")
+    otherwise "EC-T006: This field requires text or an explicit reference; no implicit coercion is permitted."
+  when $ecSlot.nonempty:
+    assert not(eq($ecValue, ""))
+      otherwise "EC-T007: Give this field a non-empty value."
+  when $ecSlot.pattern:
+    port text.matches { value = $ecValue; pattern = $ecSlot.pattern } → ecPattern
+    assert $ecPattern
+      otherwise "EC-T008: This value does not satisfy the declared format. Correct the source value."
+  when not(eq(count($ecSlot.allowed), 0)):
+    assert includes($ecSlot.allowed, $ecValue)
+      otherwise "EC-T009: This value is outside the declared allowed choices."
+  when eq($ecSlot.kind, "ref"):
+    port kernel.invoke { query = "ec.referenceType"; input = { id = $ecValue } } → ecTargetType
+    assert eq($ecTargetType, $ecSlot.expects)
+      otherwise "EC-T010: The reference exists but its target does not satisfy the expected type."
+  let result = true

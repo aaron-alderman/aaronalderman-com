@@ -1,0 +1,28 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.couple-memory:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port state.get { key = "coupled" } → coupled
+  port state.set { key = "coupled"; value = if(eq($coupled, null), false, not($coupled)) } → _
+  let coupled = if(eq($coupled, null), false, not($coupled))
+  port browser.attribute { ref = ".world-encounter"; name = "data-coupled"; value = $coupled } → _
+  port browser.attribute { ref = $button.ref; name = "aria-pressed"; value = not($coupled) } → _
+  port kernel.invoke { query = "reader.model.memory"; input = { coupled = $coupled } } → trace
+  port kernel.invoke { query = "reader.model.line"; input = { samples = $trace; coordinate = "x" } } → path
+  port browser.attribute { ref = "#memory-visible"; name = "d"; value = $path } → _
+  port kernel.invoke { query = "reader.model.line"; input = { samples = $trace; coordinate = "h" } } → path
+  port browser.attribute { ref = "#memory-hidden"; name = "d"; value = $path } → _
+  let input = list("x′ = −x + c·h   h′ = −0.8h + c·x", { tag = "br"; attrs = {}; children = list() }, concat("x(0) = 1, h(0) = 1.2; c = ", if($coupled, "0.6", "0"), ". Euler step = 0.02."))
+  call projection.serialize
+  port browser.content { ref = ".equation-note"; html = $result } → _
+  port browser.write {
+    ref = ".world-result";
+    name = "textContent";
+    value = if(
+      $coupled,
+      "The two parts affect each other again. Notice how the solid line changes.",
+      "The two parts no longer affect each other. This changes the calculation; hiding a line only changes the picture."
+    )
+  } → _

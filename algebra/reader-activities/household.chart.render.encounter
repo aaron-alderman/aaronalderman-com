@@ -1,0 +1,297 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.chart.render:
+  port state.get { key = "hh-run" } → run
+  port state.get { key = "hh-period" } → period
+  port browser.environment {  } → environment
+  port browser.read { ref = "#hh-timeline" } → target
+  port number.calculate { operation = "greater"; values = list($environment.width, 900) } → hn176
+  port number.calculate { operation = "subtract"; values = list($target.rect.width, 24) } → hn178
+  port number.calculate { operation = "divide"; values = list($hn178, 2) } → hn177
+  port number.calculate { operation = "floor"; values = list(if($hn176, $hn177, $target.rect.width)) } → hn175
+  let width = $hn175
+  fold $run.history as r; longData starts list():
+    yield append(
+    $longData,
+    list(
+      {
+        person = "A";
+        period = $r.period;
+        closing = $r.willingnessClosing.A;
+        opening = $r.willingnessOpening.A
+      },
+      {
+        person = "B";
+        period = $r.period;
+        closing = $r.willingnessClosing.B;
+        opening = $r.willingnessOpening.B
+      }
+    )
+  ) → longData
+  port state.get { key = "hh-overrides" } → overrides
+  port kernel.invoke {
+    query = "household.chart.changes";
+    input = { history = $run.history; overrides = $overrides }
+  } → changes
+  port kernel.invoke {
+    query = "household.gog.plan";
+    input = {
+      view = $data.household.chart;
+      data = $longData;
+      width = $width;
+      period = $period;
+      changes = $changes
+    }
+  } → plan
+  fold $plan.facets as facet; figures starts list():
+    port number.format { value = $facet.selected.closing; digits = 3 } → hp179
+    port number.calculate {
+      operation = "subtract";
+      values = list($facet.selected.closing, $facet.selected.opening)
+    } → hn180
+    let delta = $hn180
+    port number.format { value = $delta; digits = 3 } → hp181
+    fold $plan.yTicks as tick; grid starts list():
+      port number.calculate { operation = "subtract"; values = list($plan.frame.width, $plan.frame.right) } → hn182
+      port number.calculate { operation = "add"; values = list($tick.y, 4) } → hn183
+      yield append(
+      $grid,
+      list(
+        {
+          tag = "line";
+          attrs = {
+            x1 = $plan.frame.left;
+            x2 = $hn182;
+            y1 = $tick.y;
+            y2 = $tick.y;
+            stroke = "#e1e7e3";
+            "stroke-width" = 1
+          };
+          children = list()
+        },
+        {
+          tag = "text";
+          attrs = { x = 30; y = $hn183; "text-anchor" = "end"; fill = "#526255"; "font-size" = 12 };
+          children = list($tick.label)
+        }
+      )
+    ) → grid
+    fold $plan.xTicks as tick; xticks starts list():
+      yield append(
+      $xticks,
+      list(
+        {
+          tag = "text";
+          attrs = { x = $tick.x; y = 211; "text-anchor" = "middle"; fill = "#526255"; "font-size" = 12 };
+          children = list($tick.value)
+        }
+      )
+    ) → xticks
+    fold $plan.changes as change; changeRules starts list():
+      yield append(
+      $changeRules,
+      list(
+        {
+          tag = "line";
+          attrs = {
+            x1 = $change.x;
+            x2 = $change.x;
+            y1 = 20;
+            y2 = 190;
+            stroke = "#b5c2ba";
+            "stroke-width" = 1;
+            "stroke-dasharray" = "3 4"
+          };
+          children = list(
+            {
+              tag = "title";
+              attrs = {  };
+              children = list(concat("Authored input changes at period ", $change.period))
+            }
+          )
+        }
+      )
+    ) → changeRules
+    fold $facet.points as point; dots starts list():
+      port number.format { value = $point.value; digits = 3 } → hp184
+      yield append(
+      $dots,
+      list(
+        {
+          tag = "circle";
+          attrs = {
+            cx = $point.x;
+            cy = $point.y;
+            r = if(eq($point.period, $period), 6, 3);
+            fill = if(eq($point.period, $period), $facet.color, "#fff");
+            stroke = $facet.color;
+            "stroke-width" = 2
+          };
+          children = list(
+            {
+              tag = "title";
+              attrs = {  };
+              children = list(concat("Person ", $facet.person, " · period ", $point.period, ": ", $hp184))
+            }
+          )
+        }
+      )
+    ) → dots
+    port number.calculate { operation = "greaterEqual"; values = list($delta, 0) } → hn185
+    port number.calculate { operation = "divide"; values = list($plan.frame.width, 2) } → hn186
+    yield append(
+    $figures,
+    list(
+      {
+        tag = "figure";
+        attrs = { class = concat("hh-chart-facet hh-chart-person-", $facet.person) };
+        children = list(
+          {
+            tag = "figcaption";
+            attrs = { class = "hh-facet-heading" };
+            children = list(
+              {
+                tag = "div";
+                attrs = {  };
+                children = list(
+                  { tag = "h4"; attrs = {  }; children = list(concat("Person ", $facet.person)) },
+                  { tag = "p"; attrs = {  }; children = list(concat("End of period ", $period)) }
+                )
+              },
+              {
+                tag = "div";
+                attrs = { class = "hh-facet-value" };
+                children = list(
+                  { tag = "strong"; attrs = {  }; children = list($hp179) },
+                  {
+                    tag = "span";
+                    attrs = {  };
+                    children = list(concat(if($hn185, "+", ""), $hp181, " this period"))
+                  }
+                )
+              }
+            )
+          },
+          {
+            tag = "svg";
+            attrs = {
+              viewBox = concat("0 0 ", $plan.frame.width, " 244");
+              role = "img";
+              "aria-label" = concat(
+                "Person ",
+                $facet.person,
+                ": willingness to review over periods 1 to 12. Selected period ",
+                $period
+              );
+              "data-gog-facet" = $facet.person
+            };
+            children = list(
+              $grid,
+              if(
+                some($plan.layers, "layer", eq($layer.name, "authored-changes")),
+                $changeRules,
+                list()
+              ),
+              if(
+                some($plan.layers, "layer", eq($layer.name, "selected-period")),
+                {
+                  tag = "line";
+                  attrs = {
+                    x1 = $plan.selectedX;
+                    x2 = $plan.selectedX;
+                    y1 = 14;
+                    y2 = 194;
+                    stroke = "#64736a";
+                    "stroke-width" = 1.5
+                  };
+                  children = list()
+                },
+                null
+              ),
+              if(
+                some($plan.layers, "layer", and(eq($layer.name, "trajectory"), eq($layer.mark, "line"))),
+                {
+                  tag = "path";
+                  attrs = {
+                    d = $facet.line;
+                    stroke = $facet.color;
+                    "stroke-width" = 3;
+                    fill = "none";
+                    "stroke-linejoin" = "round";
+                    "stroke-linecap" = "round";
+                    "stroke-dasharray" = $facet.dash;
+                    "data-gog-layer" = "trajectory"
+                  };
+                  children = list()
+                },
+                null
+              ),
+              if(some($plan.layers, "layer", eq($layer.mark, "point")), $dots, list()),
+              $xticks,
+              {
+                tag = "text";
+                attrs = { x = $hn186; y = 236; "text-anchor" = "middle"; fill = "#526255"; "font-size" = 12 };
+                children = list("Period")
+              }
+            )
+          }
+        )
+      }
+    )
+  ) → figures
+  let input = { tag = "div"; attrs = { class = "hh-chart-facets" }; children = list($figures) }
+  call projection.serialize
+  port browser.content { ref = "#hh-timeline"; html = $result } → hp187
+  fold $run.history as r; rows starts list():
+    port number.format { value = $r.willingnessClosing.A; digits = 3 } → hp188
+    port number.format { value = $r.willingnessClosing.B; digits = 3 } → hp189
+    yield append(
+    $rows,
+    list(
+      {
+        tag = "tr";
+        attrs = { "aria-current" = if(eq($r.period, $period), "true", "false") };
+        children = list(
+          { tag = "th"; attrs = { scope = "row" }; children = list($r.period) },
+          { tag = "td"; attrs = {  }; children = list($hp188) },
+          { tag = "td"; attrs = {  }; children = list($hp189) }
+        )
+      }
+    )
+  ) → rows
+  let input = {
+    tag = "table";
+    attrs = { class = "hh-chart-values" };
+    children = list(
+      {
+        tag = "caption";
+        attrs = {  };
+        children = list("End-of-period willingness, on the model’s 0–1 scale")
+      },
+      {
+        tag = "thead";
+        attrs = {  };
+        children = list(
+          {
+            tag = "tr";
+            attrs = {  };
+            children = list(
+              { tag = "th"; attrs = { scope = "col" }; children = list("Period") },
+              { tag = "th"; attrs = { scope = "col" }; children = list("Person A") },
+              { tag = "th"; attrs = { scope = "col" }; children = list("Person B") }
+            )
+          }
+        )
+      },
+      { tag = "tbody"; attrs = {  }; children = list($rows) }
+    )
+  }
+  call projection.serialize
+  port browser.content { ref = "#hh-chart-values"; html = $result } → hp190
+  port browser.write { ref = "#hh-period-slider"; name = "value"; value = $period } → hp191
+  port browser.attribute {
+    ref = "#hh-period-slider";
+    name = "aria-valuetext";
+    value = concat("Period ", $period, " of 12")
+  } → hp192

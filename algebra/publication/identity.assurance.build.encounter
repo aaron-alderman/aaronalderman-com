@@ -1,0 +1,685 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.assurance.build:
+  port file.read { path = "assurance/identity-journeys.values.rel" } → journeyText
+  port static.read { text = $journeyText } → journeyEvidence
+  let readingBound = every(
+    $journeyEvidence.worlds,
+    "w",
+    and(
+      $w.home.ok,
+      $w.questions.ok,
+      eq(count($w.readings), 40),
+      every($w.readings, "r", $r.ok)
+    )
+  )
+  let journeyChecks = {
+    "threads.context" = and(
+      $readingBound,
+      eq(count($journeyEvidence.worlds), 4),
+      every($journeyEvidence.worlds, "w", $w.threads.ok)
+    );
+    "atlas.context" = and(
+      $readingBound,
+      eq(count($journeyEvidence.worlds), 4),
+      every($journeyEvidence.worlds, "w", $w.map.ok)
+    )
+  }
+  port file.read { path = "algebra/publication/identity.runtime.build.encounter" } → assuranceSource
+  port encounter.inspect { text = $assuranceSource; file = "algebra/publication/identity.runtime.build.encounter" } → assuranceModule
+  let runtimeSteps = or(at($assuranceModule.queries, "identity.runtime.build"), list())
+  port file.read { path = "algebra/publication/identity.change.encounter" } → assuranceSource
+  port encounter.inspect { text = $assuranceSource; file = "algebra/publication/identity.change.encounter" } → assuranceModule
+  let change = or(at($assuranceModule.queries, "identity.change"), list())
+  let runtime = at(filter($runtimeSteps, "s", eq(at($s, "port"), "runtime.bundle")), 0)
+  let themeFold = at(filter($runtimeSteps, "s", eq(at($s, "into"), "identityThemes")), 0)
+  let themeFields = at(at(at($themeFold, "yield"), 2), 1)
+  let catalogueBound = and(
+    eq(
+      at(at(at($runtime, "args"), "data"), "themes"),
+      one("identity.assurance.scope", "runtimeThemes")
+    ),
+    eq(
+      at($themeFields, "catalogueTree"),
+      one("identity.assurance.scope", "catalogueResult")
+    ),
+    some(
+      or(at($themeFold, "steps"), list()),
+      "s",
+      eq(at($s, "call"), "identity.catalogue.view")
+    ),
+    some(or(at($themeFold, "steps"), list()), "s", eq(at($s, "call"), "projection.identity")),
+    some($change, "s", and(eq(at($s, "let"), "input"), eq(at($s, "value"), one("identity.assurance.scope", "catalogueRead")))),
+    some($change, "s", eq(at($s, "call"), "projection.serialize"))
+  )
+  let policies = map(
+    subjects("isa", "IdentityAssuranceMapping"),
+    "m",
+    {
+      id = one($m, "id");
+      area = one($m, "area");
+      label = one($m, "label");
+      intent = one($m, "intent");
+      resolver = one($m, "resolver");
+      field = one($m, "field");
+      target = one($m, "target");
+      sink = one($m, "sink");
+      reason = one($m, "reason");
+      next = one($m, "next");
+      slot = one($m, "slot");
+      item = one($m, "item");
+      read = one($m, "read");
+      subjectRead = one($m, "subjectRead");
+      source = one($m, "source");
+      collectionField = one($m, "collectionField")
+    }
+  )
+  port file.read { path = "source/hierarchy.values.rel" } → catalogueText
+  port static.read { text = $catalogueText } → catalogue
+  let policies = append(
+    $policies,
+    map(
+      $catalogue.items,
+      "item",
+      {
+        id = concat("app.", $item.id);
+        area = "Application relevance";
+        label = concat($item.name, " — curated relevance and introduction");
+        intent = "identity";
+        resolver = "app";
+        field = "catalogueTree";
+        target = "#microsites";
+        sink = "innerHTML";
+        read = one("identity.assurance.scope", "catalogueRead");
+        subjectRead = "";
+        slot = "";
+        collectionField = "";
+        item = $item.id;
+        reason = "Curated membership and identity notes come from IdentityCollection and identity.card facts. Unselected apps remain in the shared full directory.";
+        next = "Restore a selected app note, collection declaration or catalogue projection.";
+        source = concat("source/hierarchy.values.rel + source/hierarchy.rel · ", $item.id)
+      }
+    )
+  )
+  call identity.assurance.review
+  let worlds = map(
+    subjects("isa", "IdentityTheme"),
+    "t",
+    { key = one($t, "key"); label = one($t, "label"); subject = $t; values = {  } }
+  )
+  fold $worlds as w; resolved starts list():
+    fold $policies as p; worldValues starts {  }:
+      let slots = list("foundation", "application", "progress", "tool")
+      let collections = map($slots, "slot", concat("identity.collection.", $w.key, ".", $slot))
+      let selection = fold($collections, "c", "ids", list(), append($ids, objects($c, "item")))
+      let hasCollections = every($collections, "c", has($c, "isa", "IdentityCollection"))
+      let value = if(
+        eq($p.resolver, "theme"),
+        optional($w.subject, $p.field),
+        if(
+          eq($p.resolver, "style"),
+          optional(concat("identity.style.", $w.key, ".", $p.field), "value"),
+          if(
+            eq($p.resolver, "catalogue"),
+            if($hasCollections, concat("Curated: ", $selection), null),
+            if(
+              eq($p.resolver, "collection"),
+              if(
+                eq($p.collectionField, "item"),
+                if(
+                  not(eq(count(objects(concat("identity.collection.", $w.key, ".", $p.slot), "item")), 0)),
+                  concat(
+                    "Selected: ",
+                    objects(concat("identity.collection.", $w.key, ".", $p.slot), "item")
+                  ),
+                  null
+                ),
+                optional(concat("identity.collection.", $w.key, ".", $p.slot), $p.collectionField)
+              ),
+              if(
+                eq($p.resolver, "app"),
+                if(
+                  not($hasCollections),
+                  null,
+                  if(
+                    includes($selection, $p.item),
+                    optional(concat("identity.card.", $w.key, ".", $p.item), "note"),
+                    "Not curated; available in the shared full directory."
+                  )
+                ),
+                null
+              )
+            )
+          )
+        )
+      )
+      port record.put { record = $worldValues; key = $p.id; value = $value } → worldValues
+      yield $worldValues → worldValues
+    port record.put { record = $w; key = "values"; value = $worldValues } → world
+    yield append($resolved, list($world)) → resolved
+  let eventInput = {
+    policies = $policies;
+    worlds = $resolved;
+    identities = objects("identity.assurance.scope", "identity");
+    catalogueBound = $catalogueBound;
+    bindings = map(
+      filter(
+        $change,
+        "s",
+        includes(list("browser.attribute", "browser.write", "browser.content"), at($s, "port"))
+      ),
+      "s",
+      {
+        port = $s.port;
+        args = {
+          ref = $s.args.ref;
+          name = if(eq($s.port, "browser.content"), "innerHTML", $s.args.name);
+          value = if(eq($s.port, "browser.content"), $s.args.html, $s.args.value)
+        }
+      }
+    );
+    themeFields = $themeFields;
+    journeyChecks = $journeyChecks;
+    reviewEvidence = $reviewEvidence;
+    reviewWriters = $reviewWriters
+  }
+  call identity.assurance.classify
+  let assuranceRows = $result
+  call identity.discovery.build
+  let assuranceRows = append($assuranceRows, $discoveryRows)
+  let statuses = list("intentionally-invariant", "identity-mapped", "missing", "undecided")
+  let statusLabels = {
+    "intentionally-invariant" = "Intentionally invariant";
+    "identity-mapped" = "Identity mapped";
+    missing = "Missing";
+    undecided = "Undecided"
+  }
+  let summary = map(
+    $statuses,
+    "s",
+    { status = $s; count = count(filter($assuranceRows, "r", eq($r.status, $s))) }
+  )
+  let report = {
+    protocol = "worldwright/identity-assurance/1";
+    scope = "Homepage, identity Threads and Maps, forty readings per identity, identity Questions return links, curated application collections, appearance, interaction and footer.";
+    policy = "Equal output never implies intentional invariance. Missing and undecided relationships remain open work.";
+    boundary = "Declared inventory plus automatic generated-output discovery across the entire root homepage and all four identity homepages. Undeclared text and attributes become undecided groups with located evidence; exact declarations do not cover descendants. Nested catalogue output is scanned. External dependencies and inline code bodies stay opaque. This is not exhaustive corpus, DOM, transitive dependency, runtime-state, visual or semantic verification. Existing Threads, Map, reading and eight-decision evidence retain their stated scopes.";
+    identities = map($resolved, "w", $w.key);
+    summary = $summary;
+    rows = $assuranceRows;
+    journeys = $journeyEvidence;
+    decisions = $reviewEvidence;
+    discovery = {
+      protocol = "worldwright/identity-discovery/1";
+      artifact = "identity-discovery.values.rel";
+      pages = map(
+        $discoveryPages,
+        "p",
+        {
+          identity = $p.identity;
+          file = $p.file;
+          relationships = $p.relationships;
+          undecided = $p.undecided
+        }
+      );
+      observed = $discoveryReport.observed;
+      undecided = $discoveryReport.undecided;
+      groups = $discoveryReport.groups;
+      boundary = $discoveryReport.boundary
+    }
+  }
+  port value.encode { value = $report } → assuranceJson
+  port file.write { path = "assurance/identity-mappings.values.rel"; text = $assuranceJson } → _
+  let body = list(
+    {
+      tag = "section";
+      attrs = { class = "assurance-intro" };
+      children = list(
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            {
+              tag = "a";
+              attrs = { href = "/assurance/" };
+              children = list("← All assurance topics")
+            }
+          )
+        },
+        {
+          tag = "p";
+          attrs = { class = "eyebrow" };
+          children = list("ASSURANCE / IDENTITY MAPPINGS")
+        },
+        { tag = "h1"; attrs = {  }; children = list("Where does each world reach?") },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "The cross promises a world. This report shows what is deliberately shared, what is connected to identity, and where that promise remains unfinished."
+          )
+        },
+        { tag = "p"; attrs = {  }; children = list($report.policy) },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            {
+              tag = "a";
+              attrs = { href = "../identity-mappings.values.rel" };
+              children = list("Download the machine-readable report ↗")
+            }
+          )
+        }
+      )
+    },
+    {
+      tag = "nav";
+      attrs = { class = "assurance-counts"; "aria-label" = "Mapping status counts" };
+      children = list(
+        map(
+          $summary,
+          "s",
+          {
+            tag = "a";
+            attrs = { href = concat("#status-", $s.status) };
+            children = list(
+              { tag = "strong"; attrs = {  }; children = list($s.count) },
+              { tag = "span"; attrs = {  }; children = list(at($statusLabels, $s.status)) }
+            )
+          }
+        )
+      )
+    },
+    {
+      tag = "section";
+      attrs = { class = "assurance-boundary" };
+      children = list(
+        { tag = "h2"; attrs = {  }; children = list("Discovered beyond the inventory") },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "The algebra scans the entire generated homepage and each identity homepage. New text, links, images, metadata, appearance and behaviour attributes can reopen undecided work without adding an inventory row first."
+          )
+        },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            $discoveryReport.observed,
+            " observed relationships · ",
+            $discoveryReport.undecided,
+            " undeclared observations in ",
+            $discoveryReport.groups,
+            " review groups."
+          )
+        },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "Equal output never supplies intent. An exact declaration for a container does not classify its children. The complete evidence retains file, token ordinal, element, property and value for every observation."
+          )
+        },
+        {
+          tag = "ul";
+          attrs = {  };
+          children = list(
+            map(
+              $discoveryPages,
+              "p",
+              {
+                tag = "li";
+                attrs = {  };
+                children = list($p.file, " · ", $p.relationships, " observations · ", $p.undecided, " undeclared")
+              }
+            )
+          )
+        },
+        {
+          tag = "p";
+          attrs = { class = "assurance-limit" };
+          children = list($discoveryReport.boundary)
+        },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            {
+              tag = "a";
+              attrs = { href = "../identity-discovery.values.rel" };
+              children = list("Download all discovered relationships ↗")
+            }
+          )
+        }
+      )
+    },
+    {
+      tag = "section";
+      attrs = { class = "assurance-boundary" };
+      children = list(
+        { tag = "h2"; attrs = {  }; children = list("The eight decisions") },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "Intent is declared separately from verification. These decisions do not turn structural evidence into a judgment of semantic or visual quality."
+          )
+        },
+        map(
+          list(
+            "nav.routes",
+            "metadata",
+            "section.headings",
+            "cards.style",
+            "typography",
+            "aesthetics",
+            "footer",
+            "questions.article"
+          ),
+          "id",
+          {
+            tag = "details";
+            attrs = { class = "assurance-row" };
+            children = list(
+              {
+                tag = "summary";
+                attrs = {  };
+                children = list(
+                  one(concat("identity.decision.", $id), "label"),
+                  " · ",
+                  if(
+                    eq(one(concat("identity.decision.", $id), "intent"), "invariant"),
+                    "Intentionally invariant",
+                    "Identity mapped"
+                  )
+                )
+              },
+              {
+                tag = "div";
+                attrs = { class = "assurance-detail" };
+                children = list(
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(one(concat("identity.decision.", $id), "reason"))
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("Scope: ", one(concat("identity.decision.", $id), "scope"))
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("Verification: ", if(at(at($reviewEvidence, $id), "ok"), "passed", "missing"))
+                  },
+                  {
+                    tag = "p";
+                    attrs = { class = "assurance-limit" };
+                    children = list(one(concat("identity.decision.", $id), "humanReview"))
+                  }
+                )
+              }
+            )
+          }
+        ),
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            {
+              tag = "a";
+              attrs = { href = "../identity-decisions.values.rel" };
+              children = list("Download the decision evidence ↗")
+            }
+          )
+        }
+      )
+    },
+    {
+      tag = "section";
+      attrs = { class = "assurance-boundary" };
+      children = list(
+        { tag = "h2"; attrs = {  }; children = list("What these statuses establish") },
+        {
+          tag = "dl";
+          attrs = {  };
+          children = list(
+            { tag = "dt"; attrs = {  }; children = list("Intentionally invariant") },
+            {
+              tag = "dd";
+              attrs = {  };
+              children = list(
+                "An explicit scoped policy and reason. A declaration is not a proof over all page descendants."
+              )
+            },
+            { tag = "dt"; attrs = {  }; children = list("Identity mapped") },
+            {
+              tag = "dd";
+              attrs = {  };
+              children = list(
+                "All four world values, the runtime data projection and the corresponding cross writer are present."
+              )
+            },
+            { tag = "dt"; attrs = {  }; children = list("Missing") },
+            {
+              tag = "dd";
+              attrs = {  };
+              children = list(
+                "Identity variation is expected, but a value or connection is absent. An invariant declaration can also conflict with a cross writer."
+              )
+            },
+            { tag = "dt"; attrs = {  }; children = list("Undecided") },
+            {
+              tag = "dd";
+              attrs = {  };
+              children = list(
+                "The intended relationship has not been established. Equal outputs do not resolve it."
+              )
+            }
+          )
+        },
+        { tag = "p"; attrs = {  }; children = list($report.scope) },
+        { tag = "p"; attrs = {  }; children = list($report.boundary) }
+      )
+    },
+    map(
+      $statuses,
+      "status",
+      {
+        tag = "section";
+        attrs = { id = concat("status-", $status); class = "assurance-section" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list(at($statusLabels, $status)) },
+          map(
+            filter($assuranceRows, "r", eq($r.status, $status)),
+            "r",
+            {
+              tag = "details";
+              attrs = { class = "assurance-row"; "data-status" = $r.status };
+              children = list(
+                { tag = "summary"; attrs = {  }; children = list(concat($r.area, " · ", $r.label)) },
+                {
+                  tag = "div";
+                  attrs = { class = "assurance-detail" };
+                  children = list(
+                    { tag = "p"; attrs = {  }; children = list($r.reason) },
+                    { tag = "p"; attrs = { class = "assurance-next" }; children = list("Next: ", $r.next) },
+                    {
+                      tag = "p";
+                      attrs = {  };
+                      children = list({ tag = "code"; attrs = {  }; children = list($r.source) })
+                    },
+                    if(
+                      not(eq($r.target, "")),
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "Target: ",
+                          { tag = "code"; attrs = {  }; children = list(concat($r.target, " · ", $r.sink)) }
+                        )
+                      },
+                      null
+                    ),
+                    if(
+                      eq($r.intent, "identity"),
+                      {
+                        tag = "p";
+                        attrs = { class = "assurance-worlds" };
+                        children = list(
+                          fold(
+                            $r.values,
+                            "worldValue",
+                            "worldText",
+                            "",
+                            concat(
+                              $worldText,
+                              $worldValue.identity,
+                              ": ",
+                              if(
+                                or(eq($worldValue.value, null), eq($worldValue.value, "")),
+                                "No declared value",
+                                $worldValue.value
+                              ),
+                              "; "
+                            )
+                          )
+                        )
+                      },
+                      null
+                    ),
+                    if(
+                      eq($r.intent, "identity"),
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          if(
+                            at($r, "review"),
+                            concat("Generated-output verification: ", if($r.review.ok, "verified", "missing")),
+                            concat(
+                              "Runtime field: ",
+                              if($r.dataBound, "present", "missing"),
+                              " · Cross writer: ",
+                              if($r.writerBound, "present", "missing"),
+                              if(
+                                includes(list("threads.context", "atlas.context"), $r.id),
+                                concat(
+                                  " · Destination and return links: ",
+                                  if($r.destinationBound, "verified", "missing")
+                                ),
+                                null
+                              )
+                            )
+                          )
+                        )
+                      },
+                      null
+                    ),
+                    { tag = "p"; attrs = { class = "assurance-limit" }; children = list($r.boundary) },
+                    if(
+                      at($r, "review"),
+                      {
+                        tag = "div";
+                        attrs = {  };
+                        children = list(
+                          { tag = "p"; attrs = {  }; children = list("Scope: ", $r.review.scope) },
+                          {
+                            tag = "p";
+                            attrs = { class = "assurance-limit" };
+                            children = list($r.review.humanReview)
+                          }
+                        )
+                      },
+                      null
+                    ),
+                    if(
+                      at($r, "discovery"),
+                      {
+                        tag = "div";
+                        attrs = {  };
+                        children = list(
+                          map(
+                            $r.discovery,
+                            "e",
+                            {
+                              tag = "div";
+                              attrs = {  };
+                              children = list(
+                                {
+                                  tag = "p";
+                                  attrs = {  };
+                                  children = list(
+                                    { tag = "strong"; attrs = {  }; children = list($e.file) },
+                                    " · ",
+                                    $e.count,
+                                    " undeclared observations"
+                                  )
+                                },
+                                {
+                                  tag = "ul";
+                                  attrs = {  };
+                                  children = list(
+                                    map(
+                                      $e.examples,
+                                      "o",
+                                      {
+                                        tag = "li";
+                                        attrs = {  };
+                                        children = list(
+                                          "Token ",
+                                          $o.ordinal,
+                                          " · ",
+                                          $o.tag,
+                                          " · ",
+                                          $o.sink,
+                                          " = ",
+                                          { tag = "code"; attrs = {  }; children = list($o.value) }
+                                        )
+                                      }
+                                    )
+                                  )
+                                }
+                              )
+                            }
+                          ),
+                          {
+                            tag = "p";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "a";
+                                attrs = { href = "../identity-discovery.values.rel" };
+                                children = list("Inspect every located observation ↗")
+                              }
+                            )
+                          }
+                        )
+                      },
+                      null
+                    )
+                  )
+                }
+              )
+            }
+          )
+        )
+      }
+    )
+  )
+  let prefix = "../../"
+  let pageTitle = "Identity mapping assurance — Aaron Alderman"
+  let description = "An algebra-generated account of invariant, identity-mapped, missing and undecided homepage relationships."
+  let canonical = "https://aaronalderman.com/assurance/identities/"
+  let light = "assurance"
+  call publication.document
+  let surfaceWritePath = "assurance/identities/index.html"
+  call assurance.surface.register
+  port file.write {
+    path = "assurance/identities/index.html";
+    text = $result
+  } → _

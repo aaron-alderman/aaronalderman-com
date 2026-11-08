@@ -1,0 +1,19 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.phase:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port browser.attribute { ref = "#hidden-phase"; name = "opacity"; value = "1" } → _
+  port browser.select { selector = "[data-demo=\"amplitude\"],[data-demo=\"phase\"]" } → buttons
+  each $buttons as choice:
+    port browser.attribute {
+      ref = $choice.ref;
+      name = "aria-pressed";
+      value = eq($choice.ref.handle, $button.ref.handle)
+    } → _
+  port browser.write {
+    ref = "#detector-readout";
+    name = "textContent";
+    value = "The timing reference lets you tell the signals apart."
+  } → _

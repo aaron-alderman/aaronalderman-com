@@ -1,0 +1,163 @@
+process-module "temple/surface-process-module/1"
+
+process release.capture:
+  call check.manifest
+  port file.read { file = "source/assurance/browser-capture.rel" } → text
+  port rel.decode { text = $text } → capture
+  port file.read { file = concat($output, "/assurance/reading-experience-plan.rel") } → planText
+  port rel.decode { text = $planText } → plan
+
+process test.release.newer-live-routes:
+  call check.manifest
+  port process.git { args = list("ls-tree", "-r", "--name-only", "26cc4bdd9753068e54cb6708ad2ce37fc5193ec9", "dist") } → live
+  port text.trim { value = $live } → live
+  port text.split { value = $live; pattern = "\r?\n" } → live
+  fold $live as file; routes starts list():
+    port text.matches { value = $file; pattern = "\\.html$" } → html
+    port text.slice { value = $file; start = 5 } → route
+    yield if($html, append($routes, list($route)), $routes) → routes
+  assert eq(count($routes), 319)
+    otherwise "The pinned newer live source route inventory changed."
+  let routes = append($routes, list("worlds/dad/threads/growing-up-in-the-way-of-jesus/index.html", "worlds/dad/threads/growing-up-in-the-way-of-jesus/room-to-grow/index.html", "assurance/reading-palette/index.html"))
+  port file.list { directory = $output; recursive = true } → files
+  fold $files as file; actual starts list():
+    port text.matches { value = $file; pattern = "\\.html$" } → html
+    yield if($html, append($actual, list($file)), $actual) → actual
+  port value.sort { values = $actual } → actual
+  port value.sort { values = distinct($routes) } → expected
+  assert and(eq(count($actual), 322), eq($actual, $expected))
+    otherwise "A newer live route was lost or an unreviewed route was added."
+
+process test.release.browser-evidence:
+  call release.capture
+  assert and(eq($capture.protocol, "aaronalderman/reading-experience-observations/2"), eq(count($plan.routes), 30), eq(count($plan.profiles), 4), eq(count($capture.snapshots), 120), eq(count($capture.journeys), 30), eq(count($capture.language), 322))
+    otherwise "The declared browser and language observation scope is incomplete."
+  port digest.sha256 { text = $planText } → digest
+  assert eq($capture.planSha256, $digest)
+    otherwise "Browser observations use a stale plan."
+  port file.digest { file = "bootstrap/observe-reading.cjs" } → digest
+  assert eq($capture.observerSha256, $digest)
+    otherwise "Browser observer identity changed after capture."
+  port file.digest { file = "source/assurance/experience.encounter" } → digest
+  assert eq($capture.policySourceSha256, $digest)
+    otherwise "The source-owned browser plan or assessment policy changed after capture."
+  port rel.decode { text = $capture.planAdmission; kind = "AdmissionReceipt" } → planAdmission
+  assert and(eq($planAdmission.entries, list("experience.plan")), eq(count($planAdmission.sources), 1), eq(at(at($planAdmission.sources, 0), "sha256"), $digest), eq($capture.planUsage.limit, 20000000))
+    otherwise "Browser plan did not originate in the real Encounter admission path."
+  port record.entries { value = $capture.bindings } → dependencies
+  each $dependencies as dependency:
+    let file = at($dependency, 0)
+    port diagnostic.context { value = $file } → ignored
+    port file.digest { file = concat($output, "/", $file) } → digest
+    assert eq($digest, at($dependency, 1))
+      otherwise "A browser-observed artifact or dependency changed after capture."
+  each $plan.routes as route:
+    assert at($capture.bindings, $route.path)
+      otherwise "A reader route lacks an exact artifact binding."
+    each $plan.profiles as profile:
+      let matches = filter($capture.snapshots, "s", and(eq($s.route, $route.path), eq($s.profile, $profile.id)))
+      assert eq(count($matches), 1)
+        otherwise "A route/profile lacks one unique browser observation."
+  each append($capture.snapshots, $capture.journeys) as reference:
+    port file.digest { file = $reference.path } → digest
+    assert eq($digest, $reference.sha256)
+      otherwise "Raw browser observation identity changed."
+  each $capture.snapshots as reference:
+    port file.read { file = $reference.path } → text
+    port rel.decode { text = $text } → snapshot
+    port diagnostic.context { value = { route = $snapshot.route; profile = $snapshot.profile; errors = $snapshot.errors; width = $snapshot.document } } → ignored
+    assert and(eq($snapshot.route, $reference.route), eq($snapshot.profile, $reference.profile), eq($snapshot.readyState, "complete"), eq($snapshot.fontStatus, "loaded"), every($snapshot.errorSink, "s", eq($s, "")))
+      otherwise "Browser capture readiness, route or admitted runtime failed."
+    when not(includes($snapshot.route, "counterexample-broken")):
+      assert eq(count($snapshot.errors), 0)
+        otherwise "Browser errors remain on a positive route."
+    when and(includes(list("temple/index.html", "claimipedia/index.html"), $snapshot.route), eq($snapshot.profile, "text-spacing")):
+      port number.calculate { operation = "lessEqual"; values = list($snapshot.document.scrollWidth, add($snapshot.document.clientWidth, 1)) } → fits
+      assert $fits
+        otherwise "Required live Temple/Claimipedia spacing regression returned."
+  port file.read { file = concat($output, "/assurance/reading-experience.rel") } → text
+  port rel.decode { text = $text } → report
+  assert and(eq($report.status, "browser-observed"), eq($report.counts.missing, 0))
+    otherwise "The published browser report is still missing evidence."
+  assert eq($report.counts.failed, 0)
+    otherwise "A measured reading, contrast or keyboard failure remains unresolved."
+
+process test.release.image-diagnostics:
+  call release.capture
+  let references = filter($capture.snapshots, "s", includes($s.route, "assurance/images/"))
+  assert eq(count($references), 28)
+    otherwise "Image assurance lost a positive or deliberate negative case."
+  each $references as reference:
+    port file.read { file = $reference.path } → text
+    port rel.decode { text = $text } → snapshot
+    let broken = includes($snapshot.route, "counterexample-broken")
+    let wrongSize = includes($snapshot.route, "counterexample-size")
+    let expected = if(or(includes($snapshot.route, "/main.html"), includes($snapshot.route, "/christian.html")), 6, 4)
+    port diagnostic.context { value = { route = $snapshot.route; profile = $snapshot.profile; status = $snapshot.imageStatus; rows = $snapshot.imageRows } } → ignored
+    assert and(eq(count($snapshot.images), $expected), eq(count($snapshot.imageRows), $expected))
+      otherwise "Diagnostic browser programme did not observe each declared image."
+    assert not($snapshot.truncatedBlocks)
+      otherwise "Image diagnostic exceeded its declared observation scope."
+    when not(or($broken, $wrongSize)):
+      assert every($snapshot.imageRows, "r", and(eq($r.loaded, "true"), eq($r.size, "true"), eq($r.bounds, "true"), eq($r.known, "true")))
+        otherwise "A positive Questions image diagnostic failed."
+      each $snapshot.images as image:
+        assert and($image.complete, not(eq($image.naturalWidth, 0)), not(eq($image.naturalHeight, 0)), eq($image.fit, if(includes($image.src, "/world-emblems/"), "contain", "cover")))
+          otherwise "Loaded image or actual browser purpose fitting disagrees with source."
+        let width = if(eq($snapshot.profile, "desktop"), 92, 65)
+        let height = if(eq($snapshot.profile, "desktop"), 130, 96)
+        port number.calculate { operation = "subtract"; values = list($image.rect.width, $width) } → dw
+        port number.calculate { operation = "subtract"; values = list($image.rect.height, $height) } → dh
+        port number.calculate { operation = "abs"; values = list($dw) } → dw
+        port number.calculate { operation = "abs"; values = list($dh) } → dh
+        port number.calculate { operation = "lessEqual"; values = list($dw, 1) } → widthOK
+        port number.calculate { operation = "lessEqual"; values = list($dh, 1) } → heightOK
+        assert and($widthOK, $heightOK)
+          otherwise "Questions image frame dimensions changed at a declared profile."
+    when $broken:
+      assert some($snapshot.imageRows, "r", eq($r.loaded, "false"))
+        otherwise "The deliberately broken image was incorrectly accepted."
+    when $wrongSize:
+      assert some($snapshot.imageRows, "r", eq($r.size, "false"))
+        otherwise "The deliberate wrong-size frame was incorrectly accepted."
+  port file.read { file = concat($output, "/assurance/images.rel") } → text
+  port rel.decode { text = $text } → report
+  assert and(eq($report.status, "browser-observed"), eq($report.positivePassed, 20), eq($report.negativeDetected, 8))
+    otherwise "The separate image report lost its positive or negative assurance cases."
+
+process test.release.phase-admission-ownership:
+  call audit.receipt
+  let declaredEntries = map(filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "entry"))), "f", $f.o)
+  assert eq(fold($receipt.phaseAdmissions, "cohort", "all", list(), append($all, $cohort.entries)), $declaredEntries)
+    otherwise "Admission cohorts lost or duplicated a declared phase."
+  each $receipt.phaseAdmissions as cohort:
+    port rel.decode { text = $cohort.admission; kind = "AdmissionReceipt" } → admission
+    port rel.decode { text = $cohort.factIndex; kind = "FactIndexReceipt" } → index
+    port digest.sha256 { text = $cohort.admission } → admissionHash
+    port number.calculate { operation = "lessEqual"; values = list(count($cohort.entries), 8) } → boundedCohort
+    port number.calculate { operation = "lessEqual"; values = list($index.usage.steps, 20000000) } → boundedIndex
+    assert and($boundedCohort, $boundedIndex, eq($admission.entries, $cohort.entries), eq($index.admissionSha256, $admissionHash), eq($index.usage.limit, 20000000), eq($admission.policyBasis, $receipt.policyBasis), eq($index.policyBasis, $receipt.policyBasis), includes($admission.queries, "facts.index"))
+      otherwise "A cohort bypassed real admission or reused another admission's fact snapshot."
+
+# An observation proposal only. This process cannot change the admitted
+# preservation scope or its frozen baselines. The release test checks the
+# separately reviewed, finite amendments against this exact prior chain.
+process release.preservation-observation:
+  call check.manifest
+  port rel.read { file = "verification/site-preservation-baseline.rel" } → baseline
+  port rel.read { file = "verification/reading-qa-preservation-amendments.rel" } → reading
+  port rel.read { file = "verification/common-projection-preservation-amendments.rel" } → projection
+  let rows = filter($baseline, "f", includes(list("readingTextSha256", "passiveSha256"), $f.p))
+  fold $rows as row; changed starts list():
+    let prior = filter($reading, "f", and(eq($f.s, $row.s), eq($f.p, $row.p)))
+    let prior = if(count($prior), at(at($prior, 0), "o"), $row.o)
+    let latest = filter($projection, "f", and(eq($f.s, $row.s), eq($f.p, $row.p)))
+    let prior = if(count($latest), at(at($latest, 0), "o"), $prior)
+    when eq($row.p, "readingTextSha256"):
+      port file.read { file = concat($output, "/", $row.s) } → html
+      call check.reading
+      port digest.sha256 { text = $result } → actual
+    when eq($row.p, "passiveSha256"):
+      port file.digest { file = concat($output, "/", $row.s) } → actual
+    yield if(eq($prior, $actual), $changed, append($changed, list({ s = $row.s; p = "previousSha256"; o = $prior }, { s = $row.s; p = $row.p; o = $actual }))) → changed
+  let result = $changed

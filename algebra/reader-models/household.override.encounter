@@ -1,0 +1,117 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.override:
+  fold $eventInput.state.people as person; people starts list():
+    yield append(
+    $people,
+    list(
+      {
+        id = if(
+          and(
+            eq($eventInput.change.scope, "person"),
+            eq($person.id, $eventInput.change.person),
+            eq($eventInput.change.key, "id")
+          ),
+          $eventInput.change.value,
+          at($person, "id")
+        );
+        capacity = if(
+          and(
+            eq($eventInput.change.scope, "person"),
+            eq($person.id, $eventInput.change.person),
+            eq($eventInput.change.key, "capacity")
+          ),
+          $eventInput.change.value,
+          at($person, "capacity")
+        );
+        wage = if(
+          and(
+            eq($eventInput.change.scope, "person"),
+            eq($person.id, $eventInput.change.person),
+            eq($eventInput.change.key, "wage")
+          ),
+          $eventInput.change.value,
+          at($person, "wage")
+        );
+        willingness = if(
+          and(
+            eq($eventInput.change.scope, "person"),
+            eq($person.id, $eventInput.change.person),
+            eq($eventInput.change.key, "willingness")
+          ),
+          $eventInput.change.value,
+          at($person, "willingness")
+        );
+        values = {
+          paidHours = if(
+            and(
+              eq($eventInput.change.scope, "person"),
+              eq($person.id, $eventInput.change.person),
+              eq($eventInput.change.key, "paidHours")
+            ),
+            $eventInput.change.value,
+            at($person.values, "paidHours")
+          );
+          freeHours = if(
+            and(
+              eq($eventInput.change.scope, "person"),
+              eq($person.id, $eventInput.change.person),
+              eq($eventInput.change.key, "freeHours")
+            ),
+            $eventInput.change.value,
+            at($person.values, "freeHours")
+          );
+          domesticShare = if(
+            and(
+              eq($eventInput.change.scope, "person"),
+              eq($person.id, $eventInput.change.person),
+              eq($eventInput.change.key, "domesticShare")
+            ),
+            $eventInput.change.value,
+            at($person.values, "domesticShare")
+          );
+          shareTolerance = if(
+            and(
+              eq($eventInput.change.scope, "person"),
+              eq($person.id, $eventInput.change.person),
+              eq($eventInput.change.key, "shareTolerance")
+            ),
+            $eventInput.change.value,
+            at($person.values, "shareTolerance")
+          );
+          paidTolerance = if(
+            and(
+              eq($eventInput.change.scope, "person"),
+              eq($person.id, $eventInput.change.person),
+              eq($eventInput.change.key, "paidTolerance")
+            ),
+            $eventInput.change.value,
+            at($person.values, "paidTolerance")
+          )
+        }
+      }
+    )
+  ) → people
+  let result = {
+    people = $people;
+    shareA = $eventInput.state.shareA;
+    reserve = if(
+      and(eq($eventInput.change.scope, "resource"), eq($eventInput.change.key, "reserve")),
+      $eventInput.change.value,
+      at($eventInput.state, "reserve")
+    );
+    domesticHours = if(
+      and(
+        eq($eventInput.change.scope, "resource"),
+        eq($eventInput.change.key, "domesticHours")
+      ),
+      $eventInput.change.value,
+      at($eventInput.state, "domesticHours")
+    );
+    expenses = if(
+      and(eq($eventInput.change.scope, "resource"), eq($eventInput.change.key, "expenses")),
+      $eventInput.change.value,
+      at($eventInput.state, "expenses")
+    )
+  }

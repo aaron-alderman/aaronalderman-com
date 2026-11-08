@@ -1,0 +1,261 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process publication.home:
+  call frontdoors.home
+  let micrositeNav = $result
+  let result = list(
+    {
+      tag = "section";
+      attrs = { class = "hero home-entrance-fold"; "aria-labelledby" = "hero-title" };
+      children = list(
+        {
+          tag = "img";
+          attrs = {
+            class = "hero-image";
+            src = one($homeIdentity, "image");
+            alt = "";
+            "aria-hidden" = "true";
+            width = "1672";
+            height = "941";
+            fetchpriority = "high";
+            id = "identity-background"
+          };
+          children = list()
+        },
+        {
+          tag = "div";
+          attrs = { class = "hero-content" };
+          children = list(
+            {
+              tag = "p";
+              attrs = { class = "eyebrow" };
+              children = list("Aaron Alderman / A personal expedition")
+            },
+            {
+              tag = "h1";
+              attrs = { id = "hero-title" };
+              children = list(
+                { tag = "span"; attrs = {  }; children = list("Inside the mind of a") },
+                {
+                  tag = "span";
+                  attrs = { class = "identity-line" };
+                  children = list(
+                    "modern-day ",
+                    {
+                      tag = "span";
+                      attrs = { class = "identity-choice" };
+                      children = list(
+                        {
+                          tag = "em";
+                          attrs = { id = "identity-word" };
+                          children = list(concat(one($homeIdentity, "label"), "."))
+                        },
+                        {
+                          tag = "button";
+                          attrs = {
+                            type = "button";
+                            id = "identity-switch";
+                            class = "identity-switch";
+                            disabled = true;
+                            "aria-label" = "Discover another side of Aaron: change the perspective and projects";
+                            "aria-describedby" = "identity-status";
+                            title = "A different side. Press to discover.";
+                            "aria-controls" = "microsites"
+                          };
+                          children = list(
+                            {
+                              tag = "span";
+                              attrs = { class = "identity-cross"; "aria-hidden" = "true" };
+                              children = list()
+                            },
+                            {
+                              tag = "span";
+                              attrs = { class = "identity-hint"; "aria-hidden" = "true" };
+                              children = list("Another side")
+                            }
+                          )
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            },
+            {
+              tag = "p";
+              attrs = { class = "hero-copy"; id = "identity-copy" };
+              children = list(one($homeIdentity, "copy"))
+            },
+            {
+              tag = "a";
+              attrs = {
+                class = "identity-permalink";
+                id = "identity-permalink";
+                href = one($homeIdentity, "homeHref")
+              };
+              children = list("Link to this world ↗")
+            },
+            {
+              tag = "nav";
+              attrs = { class = "begin-with"; "aria-labelledby" = "begin-with-title" };
+              children = list(
+                {
+                  tag = "p";
+                  attrs = { class = "eyebrow"; id = "begin-with-title" };
+                  children = list("Begin with")
+                },
+                {
+                  tag = "div";
+                  attrs = { class = "begin-with-grid" };
+                  children = list(
+                    {
+                      tag = "a";
+                      attrs = {
+                        id = "first-trails";
+                        class = "begin-door";
+                        href = one($homeIdentity, "questionWorldHref");
+                        "aria-label" = one($homeIdentity, "questionCopy")
+                      };
+                      children = list(
+                        {
+                          tag = "img";
+                          attrs = {
+                            src = one($homeIdentity, "questionsImage");
+                            alt = "";
+                            width = 768;
+                            height = 384;
+                            decoding = "async";
+                            id = "identity-card-questions"
+                          };
+                          children = list()
+                        },
+                        {
+                          tag = "div";
+                          attrs = { class = "begin-door-copy" };
+                          children = list(
+                            { tag = "h2"; attrs = {  }; children = list("Questions") },
+                            {
+                              tag = "p";
+                              attrs = { id = "identity-question-copy" };
+                              children = list(one($homeIdentity, "questionCopy"))
+                            },
+                            { tag = "span"; attrs = { "aria-hidden" = "true" }; children = list("↗") }
+                          )
+                        }
+                      )
+                    },
+                    {
+                      tag = "a";
+                      attrs = { id = "threads"; class = "begin-door"; href = one($homeIdentity, "threadsHref") };
+                      children = list(
+                        {
+                          tag = "img";
+                          attrs = {
+                            src = one($homeIdentity, "threadsImage");
+                            alt = "";
+                            width = 768;
+                            height = 384;
+                            decoding = "async";
+                            id = "identity-card-threads"
+                          };
+                          children = list()
+                        },
+                        {
+                          tag = "div";
+                          attrs = { class = "begin-door-copy" };
+                          children = list(
+                            { tag = "h2"; attrs = {  }; children = list("Threads") },
+                            {
+                              tag = "p";
+                              attrs = { id = "identity-threads-copy" };
+                              children = list(one($homeIdentity, "threadsCardCopy"))
+                            },
+                            { tag = "span"; attrs = { "aria-hidden" = "true" }; children = list("↗") }
+                          )
+                        }
+                      )
+                    },
+                    {
+                      tag = "a";
+                      attrs = { id = "atlas"; class = "begin-door"; href = one($homeIdentity, "atlasHref") };
+                      children = list(
+                        {
+                          tag = "img";
+                          attrs = {
+                            src = one($homeIdentity, "atlasImage");
+                            alt = "";
+                            width = 768;
+                            height = 320;
+                            decoding = "async";
+                            id = "identity-card-atlas"
+                          };
+                          children = list()
+                        },
+                        {
+                          tag = "div";
+                          attrs = { class = "begin-door-copy" };
+                          children = list(
+                            { tag = "h2"; attrs = {  }; children = list("Atlas / Map") },
+                            {
+                              tag = "p";
+                              attrs = { id = "identity-atlas-copy" };
+                              children = list(one($homeIdentity, "atlasCardCopy"))
+                            },
+                            { tag = "span"; attrs = { "aria-hidden" = "true" }; children = list("↗") }
+                          )
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            },
+            {
+              tag = "a";
+              attrs = {
+                class = "scroll-invitation";
+                href = "#microsites";
+                "aria-label" = "Scroll to explore the systems, applications and tools"
+              };
+              children = list(
+                {
+                  tag = "span";
+                  attrs = {  };
+                  children = list(
+                    { tag = "strong"; attrs = {  }; children = list("There’s more beneath the surface.") },
+                    {
+                      tag = "small";
+                      attrs = {  };
+                      children = list("Explore the systems, applications and tools")
+                    }
+                  )
+                },
+                {
+                  tag = "span";
+                  attrs = { class = "scroll-chevron"; "aria-hidden" = "true" };
+                  children = list("↓")
+                }
+              )
+            }
+          )
+        }
+      )
+    },
+    $micrositeNav,
+    {
+      tag = "p";
+      attrs = {
+        id = "identity-status";
+        class = "sr-only";
+        "aria-live" = "polite";
+        "aria-atomic" = "true"
+      };
+      children = list(concat("Current theme: ", one($homeIdentity, "label"), "."))
+    },
+    {
+      tag = "script";
+      attrs = { src = "identity-runtime.js?v=simulation-usewords-1"; defer = true };
+      children = list()
+    }
+  )

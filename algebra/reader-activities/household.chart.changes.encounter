@@ -1,0 +1,17 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.chart.changes:
+  fold $eventInput.history as row; periods starts list():
+    let preset = not(eq(add(count($row.appliedEvents), count($row.appliedExperienceEvents)), 0))
+    let custom = some(
+      $eventInput.overrides,
+      "edit",
+      and(
+        not(eq($edit.scope, "rate")),
+        includes(list("initial", "after"), $edit.phase),
+        eq($row.period, if(eq($edit.phase, "after"), 5, 1))
+      )
+    )
+    yield if(or($preset, $custom), append($periods, list($row.period)), $periods) → periods
+  let result = $periods

@@ -1,0 +1,14 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process atlas.build:
+  call publication.stewardship.view
+  let stewardshipLinks = $result
+  call atlas.runtime.build
+  let atlasIdentity = null
+  call atlas.view
+  let input = $result
+  call projection.serialize
+  let surfaceWritePath = "atlas.html"
+  call assurance.surface.register
+  port file.write { path = "atlas.html"; text = $result } → _

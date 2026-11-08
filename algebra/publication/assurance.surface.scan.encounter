@@ -1,0 +1,61 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.surface.scan:
+  let result = $eventInput.html
+  let returnDocument = $eventInput.route
+  call microsite.return.inspectHome
+  port text.split {
+    value = $eventInput.html;
+    pattern = "<!--[\\s\\S]*?-->|<(?:[sS][cC][rR][iI][pP][tT]|[tT][eE][mM][pP][lL][aA][tT][eE]|[tT][eE][xX][tT][aA][rR][eE][aA])\\b(?:[^\"'<>]|\"[^\"]*\"|'[^']*')*>[\\s\\S]*?<\\/(?:[sS][cC][rR][iI][pP][tT]|[tT][eE][mM][pP][lL][aA][tT][eE]|[tT][eE][xX][tT][aA][rR][eE][aA])\\s*>|(<(?:[aA]|[lL][iI][nN][kK]|[bB][oO][dD][yY])\\b(?:[^\"'<>]|\"[^\"]*\"|'[^']*')*>)|<(?:[^\"'<>]|\"[^\"]*\"|'[^']*')*>|[^<]+|<"
+  } → surfacePieces
+  port text.join { values = $surfacePieces; separator = "" } → surfaceHTML
+  port text.matches {
+    value = $surfaceHTML;
+    pattern = "<a\\b(?:[^\"'<>]|\"[^\"]*\"|'[^']*')*?\\s+id\\s*=\\s*[\"']microsite-return[\"']";
+    flags = "i"
+  } → surfaceWidget
+  port text.matches {
+    value = $surfaceHTML;
+    pattern = "<link\\b(?:[^\"'<>]|\"[^\"]*\"|'[^']*')*?\\s+href\\s*=\\s*[\"'][^\"']*assets/microsite-return\\.css(?:[?][^\"']*)?[\"']";
+    flags = "i"
+  } → surfaceReturnStyle
+  port text.matches {
+    value = $surfaceHTML;
+    pattern = "<body\\b(?:[^\"'<>]|\"[^\"]*\"|'[^']*')*?\\s+style\\s*=\\s*[\"'][^\"']*(?:padding-bottom|margin-bottom)\\s*:\\s*(?!0(?:px|em|rem|%)?\\s*(?:;|[\"']))[0-9]";
+    flags = "i"
+  } → surfaceInlineReserve
+  let result = {
+    route = $eventInput.route;
+    headerHome = $returnHasHome;
+    returnWidget = $surfaceWidget;
+    returnStylesheet = $surfaceReturnStyle;
+    findings = filter(
+      list(
+        {
+          rule = "navigation.redundant-home-return";
+          status = if(and($returnHasHome, $surfaceWidget), "failed", "passed");
+          selector = "header a[aria-label=\"Aaron Alderman\"] + #microsite-return";
+          evidence = "Named personal home navigation and a floating return control serve the same return journey."
+        },
+        {
+          rule = "layout.orphan-return-reservation";
+          status = if(and($surfaceReturnStyle, not($surfaceWidget)), "failed", "passed");
+          selector = "link[href*=\"assets/microsite-return.css\"]";
+          evidence = "A return stylesheet is loaded without its control. Inspect its space reservation and remove the orphan dependency."
+        },
+        {
+          rule = "layout.inline-bottom-reservation";
+          status = if($surfaceInlineReserve, "undecided", "not-observed");
+          selector = "body[style]";
+          evidence = "Explicit nonzero bottom padding or margin needs a purpose; source presence alone does not prove wasted space."
+        }
+      ),
+      "f",
+      not(includes(list("passed", "not-observed"), $f.status))
+    );
+    geometry = {
+      status = "needs-browser-evidence";
+      evidence = "No browser geometry receipt: footer gap, viewport, responsive layout and runtime states remain unmeasured."
+    }
+  }

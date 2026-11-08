@@ -1,0 +1,47 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.garden:
+  port state.get { key = "mode" } → mode
+  let mode = or($mode, "budget")
+  port number.parse { value = $value } → value
+  port kernel.invoke { query = "reader.model.pairs"; input = { value = $value; mode = $mode } } → allowed
+  port browser.select { selector = ".possibility-seed" } → seeds
+  each $seeds as seed:
+    port number.parse { value = at($seed.attributes, "data-x") } → x
+    port number.parse { value = at($seed.attributes, "data-y") } → y
+    port browser.class {
+      ref = $seed.ref;
+      name = "admitted";
+      value = some($allowed, "pair", eq($pair, list($x, $y)))
+    } → _
+  port browser.write { ref = "#garden-value"; name = "textContent"; value = $value } → _
+  port browser.attribute {
+    ref = ".possibility-grid";
+    name = "aria-label";
+    value = concat(
+      "Twenty-five nonnegative integer pairs. ",
+      count($allowed),
+      " satisfy ",
+      if(
+        eq($mode, "positive"),
+        "x times y no less than c squared",
+        "x plus y no greater than the budget"
+      ),
+      "."
+    )
+  } → _
+  port browser.write {
+    ref = ".world-result";
+    name = "textContent";
+    value = concat(
+      count($allowed),
+      " of 25 represented pairs satisfy ",
+      if(
+        eq($mode, "positive"),
+        "the rule for these two linked quantities",
+        "the shared-limit rule"
+      ),
+      "."
+    )
+  } → _

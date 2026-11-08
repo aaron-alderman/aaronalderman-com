@@ -1,0 +1,37 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.loop.frame:
+  port state.get { key = "loopRunning" } → loopRunning
+  when $loopRunning:
+    port state.get { key = "motion" } → motion
+    port state.get { key = "loopStart" } → loopStart
+    port browser.environment {  } → environment
+    port number.calculate { operation = "subtract"; values = list($eventInput.time, $loopStart) } → elapsed
+    port number.calculate { operation = "divide"; values = list($elapsed, 1800) } → elapsed
+    port number.calculate { operation = "min"; values = list(1, $elapsed) } → t
+    let t = if(and($motion, not($environment.reduced)), $t, 1)
+    port number.calculate { operation = "multiply"; values = list($t, 6.283185307179586) } → angle
+    port number.calculate { operation = "sin"; values = list($angle) } → sine
+    port number.calculate { operation = "cos"; values = list($angle) } → cosine
+    port number.calculate { operation = "multiply"; values = list(150, $sine) } → x
+    port number.calculate { operation = "add"; values = list(250, $x) } → x
+    port number.calculate { operation = "multiply"; values = list(115, $cosine) } → y
+    port number.calculate { operation = "subtract"; values = list(180, $y) } → y
+    port number.calculate { operation = "multiply"; values = list(90, $t) } → rotation
+    port browser.attribute {
+      ref = "#return-frame";
+      name = "transform";
+      value = concat("translate(", $x, ",", $y, ") rotate(", $rotation, ")")
+    } → _
+    when not(eq($t, 1)):
+      port browser.frame { query = "activity.loop.frame"; input = {  } } → _
+    when eq($t, 1):
+      port state.set { key = "loopRunning"; value = false } → _
+      port browser.write { ref = "[data-demo=\"loop\"]"; name = "disabled"; value = false } → _
+      port browser.write { ref = "[data-demo=\"loop-reset\"]"; name = "disabled"; value = false } → _
+      port browser.write {
+        ref = "#loop-readout";
+        name = "textContent";
+        value = "Back at the start. The arrow now points a quarter-turn away."
+      } → _

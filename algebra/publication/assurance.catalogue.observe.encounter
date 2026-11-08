@@ -1,0 +1,60 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.catalogue.observe:
+  port text.matches { value = $eventInput.html; pattern = "<template\\b"; flags = "i" } → hasTemplate
+  port text.split {
+    value = $eventInput.html;
+    pattern = "(<[sS][cC][rR][iI][pP][tT]\\b[^>]*>[\\s\\S]*?</[sS][cC][rR][iI][pP][tT]\\s*>|<[sS][tT][yY][lL][eE]\\b[^>]*>[\\s\\S]*?</[sS][tT][yY][lL][eE]\\s*>|<[tT][eE][xX][tT][aA][rR][eE][aA]\\b[^>]*>[\\s\\S]*?</[tT][eE][xX][tT][aA][rR][eE][aA]\\s*>|<[tT][eE][mM][pP][lL][aA][tT][eE]\\b[^>]*>[\\s\\S]*?</[tT][eE][mM][pP][lL][aA][tT][eE]\\s*>|<!--[\\s\\S]*?-->|<(?:[^>\"']|\"[^\"]*\"|'[^']*')*>)"
+  } → tokens
+  fold $tokens as token; selected starts "":
+    port text.matches {
+      value = or($token, "");
+      pattern = "^<(?:html|img|meta)\\b|^<(?!script\\b|style\\b|textarea\\b|template\\b)[A-Za-z][^>]*\\s(?:id|class)\\s*=";
+      flags = "i"
+    } → relevant
+    yield if($relevant, concat($selected, $token), $selected) → selected
+  let eventInput = { html = $selected }
+  call assurance.catalogue.scan
+  let observations = $result
+  let anchors = filter($observations, "o", and(eq($o.tag, "a"), eq($o.sink, "class")))
+  fold $anchors as a; targets starts list():
+    port text.matches { value = $a.value; pattern = "(?:^|\\s)(?:skip|skip-link|claim-skip)(?:\\s|$)" } → isSkip
+    let hrefs = filter($observations, "o", and(eq($o.ordinal, $a.ordinal), eq($o.sink, "href")))
+    let href = if(eq(count($hrefs), 1), at($hrefs, 0), { value = "" })
+    port text.matches { value = $href.value; pattern = "^#[^\\s#]+$" } → fragment
+    port text.slice { value = $href.value; start = 1 } → target
+    let bound = and(
+      $isSkip,
+      $fragment,
+      eq(count(filter($observations, "o", and(eq($o.sink, "id"), eq($o.value, $target)))), 1)
+    )
+    yield if($bound, append($targets, list($target)), $targets) → targets
+  let eventInput = { pages = list({ file = "entry"; observations = $observations }) }
+  call assurance.entry.observe
+  let markup = at($result, 0)
+  port text.trim { value = $markup.language } → language
+  let result = {
+    language = $language;
+    charset = $markup.charset;
+    languageMarker = and(
+      not($hasTemplate),
+      not(eq($language, "")),
+      eq(count(filter($observations, "o", and(eq($o.tag, "html"), eq($o.sink, "lang")))), 1)
+    );
+    utf8 = and(
+      not($hasTemplate),
+      $markup.utf8,
+      eq(
+        count(filter($observations, "o", and(eq($o.tag, "meta"), eq($o.sink, "charset")))),
+        1
+      )
+    );
+    images = $markup.images;
+    missingAlt = $markup.missingAlt;
+    altAttributes = and(not($hasTemplate), $markup.altAttributes);
+    skipTarget = and(not($hasTemplate), not(eq(count($targets), 0)));
+    skipTargets = $targets;
+    inertMarkupUnassessed = $hasTemplate;
+    boundary = "Selected static opening-tag attributes only. Script, style, comment and textarea bodies are opaque. Any template markup blocks automatic promotion pending inert-content evaluation. Lexical presence does not prove browser behaviour, alternative-text quality or conformance; no transitive or runtime coverage."
+  }

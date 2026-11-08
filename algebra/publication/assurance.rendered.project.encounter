@@ -1,0 +1,16 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.rendered.project:
+  fold $eventInput.snapshots as snapshot; projected starts list():
+    fold $snapshot.regions as region; regions starts list():
+      let bottoms = distinct(map($region.contentRects, "rect", $rect.bottom))
+      port record.put {
+        record = $region;
+        key = "contentRects";
+        value = map($bottoms, "bottom", { bottom = $bottom })
+      } → projectedRegion
+      yield append($regions, list($projectedRegion)) → projectedRegions
+    port record.put { record = $snapshot; key = "regions"; value = $projectedRegions } → projectedSnapshot
+    yield append($projected, list($projectedSnapshot)) → projected
+  let result = $projected

@@ -1,0 +1,247 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.rendered.classify:
+  call assurance.rendered.plan
+  let renderedPlan = $result
+  let s = $eventInput
+  let limits = $renderedPlan.thresholds
+  port number.calculate { operation = "multiply"; values = list($s.document.clientWidth, 0.55) } → wideMinimum
+  port number.calculate { operation = "subtract"; values = list($s.document.clientWidth, $limits.inset) } → rightInsetMaximum
+  fold $s.headings as h; headings starts list():
+    port number.calculate { operation = "greater"; values = list($h.rect.width, 0) } → hasWidth
+    port number.calculate { operation = "greater"; values = list($h.rect.height, 0) } → hasHeight
+    port number.calculate { operation = "lessEqual"; values = list($h.rect.left, $limits.edge) } → atEdge
+    port number.calculate {
+      operation = "greaterEqual";
+      values = list($h.rect.right, add($s.document.clientWidth, -8))
+    } → atRightEdge
+    port number.calculate { operation = "greaterEqual"; values = list($h.rect.left, $limits.inset) } → leftInset
+    port number.calculate { operation = "lessEqual"; values = list($h.rect.right, $rightInsetMaximum) } → rightInset
+    port number.calculate { operation = "greaterEqual"; values = list($h.rect.width, $wideMinimum) } → wide
+    yield append(
+    $headings,
+    list(
+      {
+        node = $h;
+        visible = and($hasWidth, $hasHeight, not(eq($h.visibility, "hidden")));
+        edge = and($atEdge, $atRightEdge);
+        inset = and($leftInset, $rightInset, $wide)
+      }
+    )
+  ) → headings
+  let headings = filter($headings, "h", $h.visible)
+  fold $headings as entry; scan starts { findings = list(); previousRank = 0; seenRegions = list() }:
+    let h = $entry.node
+    let nextFindings = $scan.findings
+    let peers = filter(
+      $headings,
+      "peer",
+      and($peer.inset, eq($peer.node.rank, $h.rank), eq($peer.node.scope, $h.scope))
+    )
+    port number.calculate { operation = "greaterEqual"; values = list(count($peers), $limits.minimumPeers) } → enoughPeers
+    when and($entry.edge, $enoughPeers):
+      let railReference = at($peers, 0)
+      port number.calculate { operation = "round"; values = list($h.rect.left) } → headingX
+      port number.calculate { operation = "round"; values = list($railReference.node.rect.left) } → peerX
+      let nextFindings = append(
+        $nextFindings,
+        list(
+          {
+            rule = "structure.heading-content-rail";
+            status = "review";
+            node = $h.path;
+            text = $h.text;
+            evidence = concat(
+              "A viewport-wide heading sits outside the inset rail shared by peer headings: left ",
+              $headingX,
+              "px versus ",
+              $peerX,
+              "px. Inspect section containment; geometry does not establish layout intent."
+            );
+            metrics = { heading = $h.rect; parent = $h.parent; reference = at($peers, 0) }
+          }
+        )
+      )
+    let headingOnly = and(
+      not(eq(count($h.parent.childTags), 0)),
+      every(
+        $h.parent.childTags,
+        "tag",
+        includes(list("H1", "H2", "H3", "H4", "H5", "H6"), $tag)
+      )
+    )
+    when and($headingOnly, not(includes($scan.seenRegions, $h.parent.path))):
+      let nextFindings = append(
+        $nextFindings,
+        list(
+          {
+            rule = "structure.heading-only-region";
+            status = "review";
+            node = $h.parent.path;
+            text = $h.text;
+            evidence = "The region contains heading elements but no result content or explicit empty-state message. Its purpose and nesting need review.";
+            metrics = { region = $h.parent; heading = $h.rect }
+          }
+        )
+      )
+    port number.calculate { operation = "greater"; values = list($h.rank, add($scan.previousRank, 1)) } → skipsRank
+    when and(not(eq($scan.previousRank, 0)), $skipsRank):
+      let nextFindings = append(
+        $nextFindings,
+        list(
+          {
+            rule = "structure.heading-rank-gap";
+            status = "review";
+            node = $h.path;
+            text = $h.text;
+            evidence = "The visible heading outline skips a level. Check the intended section hierarchy.";
+            metrics = { previousRank = $scan.previousRank; rank = $h.rank }
+          }
+        )
+      )
+    when and(
+      $h.next,
+      eq($h.parent.display, "block"),
+      includes(list("static", "relative"), $h.position)
+    ):
+      port number.calculate { operation = "greater"; values = list($h.rect.bottom, add($h.next.rect.top, 4)) } → overlapY
+      port number.calculate { operation = "greater"; values = list($h.next.rect.height, 0) } → nextVisible
+      port number.calculate { operation = "greater"; values = list($h.rect.right, $h.next.rect.left) } → overlapX1
+      port number.calculate { operation = "greater"; values = list($h.next.rect.right, $h.rect.left) } → overlapX2
+      when and(
+        $overlapY,
+        $nextVisible,
+        $overlapX1,
+        $overlapX2,
+        includes(list("static", "relative"), $h.next.position)
+      ):
+        let nextFindings = append(
+          $nextFindings,
+          list(
+            {
+              rule = "layout.heading-overlap";
+              status = "review";
+              node = $h.path;
+              text = $h.text;
+              evidence = "The heading rectangle overlaps its following block sibling. Inspect text wrapping, negative margins and containment.";
+              metrics = { heading = $h.rect; next = $h.next }
+            }
+          )
+        )
+    yield {
+    findings = $nextFindings;
+    previousRank = $h.rank;
+    seenRegions = append($scan.seenRegions, list($h.parent.path))
+  } → headingScan
+  fold $s.regions as region; regionFindings starts $headingScan.findings:
+    let nextFindings = $regionFindings
+    port number.calculate {
+      operation = "max";
+      values = append(list($region.rect.top), map($region.contentRects, "rect", $rect.bottom))
+    } → contentEnd
+    port number.calculate { operation = "subtract"; values = list($region.rect.bottom, $contentEnd) } → tailSpace
+    port number.calculate { operation = "greater"; values = list($tailSpace, $limits.tailSpace) } → largeTail
+    port number.calculate { operation = "round"; values = list($tailSpace) } → tailLabel
+    port number.calculate { operation = "greater"; values = list($region.rect.width, 0) } → regionVisible
+    when and(
+      $largeTail,
+      $regionVisible,
+      not(eq(count($region.contentRects), 0)),
+      not(includes(list("auto", "scroll"), $region.overflowY))
+    ):
+      let nextFindings = append(
+        $nextFindings,
+        list(
+          {
+            rule = "layout.region-tail-space";
+            status = "review";
+            node = $region.path;
+            text = $region.text;
+            evidence = concat(
+              "The region continues ",
+              $tailLabel,
+              "px below its last measured content edge. Whether this space is unnecessary still needs intent or human evidence."
+            );
+            metrics = { region = $region.rect; contentEnd = $contentEnd; pixels = $tailSpace }
+          }
+        )
+      )
+    yield $nextFindings → findings
+  port number.calculate {
+    operation = "subtract";
+    values = list($s.document.scrollWidth, $s.document.clientWidth)
+  } → overflowPixels
+  port number.calculate { operation = "greater"; values = list($overflowPixels, $limits.overflow) } → hasOverflow
+  when $hasOverflow:
+    let findings = append(
+      $findings,
+      list(
+        {
+          rule = "layout.document-horizontal-overflow";
+          status = "observed";
+          node = "html";
+          text = "Horizontal document overflow";
+          evidence = concat(
+            "The document exceeds the viewport by ",
+            $overflowPixels,
+            "px. Inspect the measured blocks and intentional horizontal surfaces."
+          );
+          metrics = {
+            pixels = $overflowPixels;
+            documentWidth = $s.document.scrollWidth;
+            viewportWidth = $s.document.clientWidth;
+            outerViewportWidth = $s.viewport.width
+          }
+        }
+      )
+    )
+  when $s.footer:
+    port number.calculate {
+      operation = "subtract";
+      values = list($s.document.scrollHeight, $s.footer.rect.bottom)
+    } → trailingPixels
+    port number.calculate { operation = "greater"; values = list($trailingPixels, $limits.trailingSpace) } → hasTrailing
+    port number.calculate { operation = "round"; values = list($trailingPixels) } → trailingLabel
+    port number.calculate { operation = "lessEqual"; values = list($trailingPixels, 96) } → withinReturnReserve
+    when and($hasTrailing, not(and($s.returnWidget, $withinReturnReserve))):
+      let findings = append(
+        $findings,
+        list(
+          {
+            rule = "layout.document-trailing-space";
+            status = "review";
+            node = $s.footer.path;
+            text = "Space after the footer";
+            evidence = concat(
+              "The document extends ",
+              $trailingLabel,
+              "px beyond its final footer. Check reservations, min-height and runtime state before deciding the space is unnecessary."
+            );
+            metrics = {
+              pixels = $trailingPixels;
+              footer = $s.footer.rect;
+              documentHeight = $s.document.scrollHeight
+            }
+          }
+        )
+      )
+  let result = {
+    route = $s.route;
+    profile = $s.profile;
+    viewport = $s.viewport;
+    status = if(
+      and(
+        eq($s.readyState, "complete"),
+        eq($s.fontStatus, "loaded"),
+        eq($s.location.path, concat("/", $s.route))
+      ),
+      "measured",
+      "incomplete"
+    );
+    readyState = $s.readyState;
+    fontStatus = $s.fontStatus;
+    capturedAt = $s.capturedAt;
+    findings = $findings;
+    document = $s.document
+  }

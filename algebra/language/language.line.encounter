@@ -1,0 +1,62 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process language.line:
+  port text.trim { value = $raw } → line
+  port text.matches { value = $line; pattern = "^(?:#.*)?$" } → skip
+  let matched = false
+  port text.matches {
+    value = $line;
+    pattern = "^module (\"(?:\\\\[\"\\\\/bfnrt]|\\\\u[0-9a-fA-F]{4}|[^\"\\\\\\x00-\\x1f])*\")$"
+  } → moduleMatch
+  when and($state.ok, not($skip), not($matched), $moduleMatch):
+    let matched = true
+    port text.split {
+      value = $line;
+      pattern = "^module (\"(?:\\\\[\"\\\\/bfnrt]|\\\\u[0-9a-fA-F]{4}|[^\"\\\\\\x00-\\x1f])*\")$"
+    } → tokens
+    call language.module
+  port text.matches {
+    value = $line;
+    pattern = "^entity (\"(?:\\\\[\"\\\\/bfnrt]|\\\\u[0-9a-fA-F]{4}|[^\"\\\\\\x00-\\x1f])*\") \\{$"
+  } → entityMatch
+  when and($state.ok, not($skip), not($matched), $entityMatch):
+    let matched = true
+    port text.split {
+      value = $line;
+      pattern = "^entity (\"(?:\\\\[\"\\\\/bfnrt]|\\\\u[0-9a-fA-F]{4}|[^\"\\\\\\x00-\\x1f])*\") \\{$"
+    } → tokens
+    call language.entity
+  port text.matches {
+    value = $line;
+    pattern = "^(!?)([A-Za-z_][A-Za-z0-9_.-]*) (\"(?:\\\\[\"\\\\/bfnrt]|\\\\u[0-9a-fA-F]{4}|[^\"\\\\\\x00-\\x1f])*\")$"
+  } → propertyMatch
+  when and($state.ok, not($skip), not($matched), $propertyMatch):
+    let matched = true
+    port text.split {
+      value = $line;
+      pattern = "^(!?)([A-Za-z_][A-Za-z0-9_.-]*) (\"(?:\\\\[\"\\\\/bfnrt]|\\\\u[0-9a-fA-F]{4}|[^\"\\\\\\x00-\\x1f])*\")$"
+    } → tokens
+    call language.property
+  when and($state.ok, not($skip), not($matched), eq($line, "}")):
+    let matched = true
+    when not($state.subject):
+      let code = "TEMPLE-M004"
+      let summary = "Closing brace has no entity."
+      let correction = "Open an entity block before closing it."
+      call language.refuse
+    when $state.ok:
+      let state = {
+        module = $state.module;
+        subject = null;
+        seen = $state.seen;
+        facts = $state.facts;
+        origins = $state.origins;
+        ok = $state.ok;
+        diagnostic = $state.diagnostic
+      }
+  when and($state.ok, not($skip), not($matched)):
+    let code = "TEMPLE-M001"
+    let summary = "Unrecognized language statement."
+    let correction = "Use module \"name\", entity \"id\" {, predicate \"JSON string\", or }. Put each statement on its own line."
+    call language.refuse

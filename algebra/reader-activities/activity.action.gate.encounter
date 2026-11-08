@@ -1,0 +1,20 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.gate:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port state.get { key = "gate" } → gate
+  port state.set { key = "gate"; value = not($gate) } → _
+  let gate = not($gate)
+  port browser.attribute { ref = $button.ref; name = "aria-pressed"; value = $gate } → _
+  port browser.class { ref = ".world-encounter"; name = "gate-connected"; value = $gate } → _
+  port browser.write {
+    ref = ".world-result";
+    name = "textContent";
+    value = if(
+      $gate,
+      "You can now go from A through B to C.",
+      "There is no route from A to C in this example."
+    )
+  } → _

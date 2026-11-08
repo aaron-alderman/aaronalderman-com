@@ -1,0 +1,48 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.catalogue.scan:
+  port text.split { value = $eventInput.html; pattern = "(<(?:[^>\"']|\"[^\"]*\"|'[^']*')*>)" } → pieces
+  fold $pieces as piece; scan starts { ordinal = 0; observed = list() }:
+    let found = list()
+    let ordinal = add($scan.ordinal, 1)
+    port text.matches { value = $piece; pattern = "^<[A-Za-z]" } → opening
+    when $opening:
+      port text.split { value = $piece; pattern = "^<([A-Za-z][A-Za-z0-9:-]*)" } → head
+      port text.lowerCase { value = at($head, 1) } → tag
+      port text.split { value = at($head, 2); pattern = "^((?:[^>\"']|\"[^\"]*\"|'[^']*')*)>" } → tail
+      port text.split {
+        value = at($tail, 1);
+        pattern = "(?:\\s+([^\\s=<>/]+(?:\\s*=\\s*(?:\"[^\"]*\"|'[^']*'|[^\\s>]+))?))|(?:\\s*/?\\s*$)"
+      } → attributes
+      fold $attributes as ap; entries starts list():
+        port text.matches {
+          value = or($ap, "");
+          pattern = "^(?:id|class|href|alt|lang|charset)(?:\\s*=|$)";
+          flags = "i"
+        } → wanted
+        let entry = list()
+        when $wanted:
+          port text.split {
+            value = $ap;
+            pattern = "^([^=\\s]+)(?:\\s*=\\s*(?:\"([\\s\\S]*)\"|'([\\s\\S]*)'|([^\\s>]+)))?$"
+          } → parts
+          port text.lowerCase { value = at($parts, 1) } → name
+          let attributeValue = if(
+            not(eq(at($parts, 2), at({  }, "absent"))),
+            at($parts, 2),
+            if(
+              not(eq(at($parts, 3), at({  }, "absent"))),
+              at($parts, 3),
+              if(not(eq(at($parts, 4), at({  }, "absent"))), at($parts, 4), "")
+            )
+          )
+          let entry = list({ ordinal = $ordinal; tag = $tag; sink = $name; value = $attributeValue })
+        yield append($entries, $entry) → found
+      when eq($tag, "img"):
+        let found = append(
+          $found,
+          list({ ordinal = $ordinal; tag = "img"; sink = "element"; value = true })
+        )
+    yield { ordinal = $ordinal; observed = append($scan.observed, $found) } → scan
+  let result = $scan.observed

@@ -1,0 +1,34 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.scenario:
+  let catalogue = $data.household.material
+  let adaptive = $data.household.adaptive
+  let orientation = at(filter($catalogue.orientations, "item", eq($item.id, $eventInput.orientation)), 0)
+  let change = at(filter($catalogue.changes, "item", eq($item.id, $eventInput.change)), 0)
+  let profile = at(filter($adaptive.profiles, "item", eq($item.id, $eventInput.profile)), 0)
+  assert and($orientation, $change, $profile)
+    otherwise "HOUSEHOLD-001: Unknown scenario selection."
+  port kernel.invoke {
+    query = "household.patch";
+    input = { state = $catalogue.base.initial; patch = $orientation.patch }
+  } → initial
+  let result = {
+    id = concat($orientation.id, "/", $change.id, "/", $profile.id);
+    material = {
+      id = concat($orientation.id, "/", $change.id);
+      periods = 12;
+      policy = $catalogue.base.policy;
+      events = append($orientation.events, $change.events);
+      initial = {
+        people = $initial.people;
+        shareA = $orientation.shareA;
+        domesticHours = $initial.domesticHours;
+        expenses = $initial.expenses;
+        reserve = $initial.reserve
+      }
+    };
+    feedback = { enabled = $eventInput.enabled; A = $adaptive.feedback.A; B = $adaptive.feedback.B };
+    experience = $adaptive.experience;
+    experienceEvents = $profile.events
+  }

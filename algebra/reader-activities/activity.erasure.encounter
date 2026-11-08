@@ -1,0 +1,34 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.erasure:
+  port state.get { key = "origin" } → origin
+  let origin = or($origin, "a")
+  port state.get { key = "enriched" } → enriched
+  let first = if(eq($origin, "a"), 1, 2)
+  port number.calculate { operation = "subtract"; values = list(4, $first) } → second
+  port browser.attribute { ref = ".world-encounter"; name = "data-origin"; value = $origin } → _
+  port browser.attribute { ref = ".world-encounter"; name = "data-enriched"; value = or($enriched, false) } → _
+  port browser.write { ref = "#extra-record"; name = "hidden"; value = not($enriched) } → _
+  port browser.write {
+    ref = "#extra-record";
+    name = "textContent";
+    value = concat("FIRST NUMBER: ", $first)
+  } → _
+  port browser.write {
+    ref = ".world-result";
+    name = "textContent";
+    value = if(
+      $enriched,
+      concat(
+        "Keeping the first number, ",
+        $first,
+        ", and the sum, 4, tells these two pairs apart: this pair is (",
+        $first,
+        ", ",
+        $second,
+        ")."
+      ),
+      "Both pairs add up to 4. The sum alone cannot tell them apart."
+    )
+  } → _

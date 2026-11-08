@@ -1,0 +1,22 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process publication.stewardship.view:
+  let result = {
+    tag = "nav";
+    attrs = { class = "footer-stewardship"; "aria-label" = "Licensing and stewardship" };
+    children = list(
+      {
+        tag = "a";
+        attrs = { href = "https://github.com/aaron-alderman/aaronalderman-com/blob/main/LICENSE.md" };
+        children = list("Licence ↗")
+      },
+      {
+        tag = "a";
+        attrs = {
+          href = "https://github.com/aaron-alderman/aaronalderman-com/blob/main/CHRISTIAN_STEWARDSHIP_COVENANT.md"
+        };
+        children = list("Christian stewardship covenant ↗")
+      }
+    )
+  }

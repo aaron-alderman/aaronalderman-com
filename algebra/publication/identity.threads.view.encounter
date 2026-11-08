@@ -1,0 +1,153 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.threads.view:
+  let activeReading = at(filter($readingRooms, "room", eq($room.key, one($journeyIdentity, "key"))), 0)
+  assert $activeReading
+    otherwise "READING-ROOM-001: Every identity must have an authored opening essay."
+  let journeyKind = "threads"
+  call identity.journey.intro
+  let journeyIntro = $result
+  let result = list(
+    {
+      tag = "section";
+      attrs = { class = "gate-hero" };
+      children = list(
+        {
+          tag = "p";
+          attrs = { class = "eyebrow" };
+          children = list("THREADS / ", one($journeyIdentity, "label"))
+        },
+        { tag = "h1"; attrs = {  }; children = list(one($journeyIdentity, "threadsTitle")) }
+      )
+    },
+    $journeyIntro,
+    map(
+      filter(subjects("isa", "ReadingSeries"), "series", eq(one($series, "parent"), concat("/", one($journeyIdentity, "threadsRoute")))),
+      "series",
+      {
+        tag = "section";
+        attrs = { class = "faith-feature"; "aria-label" = one($series, "title") };
+        children = list(
+          { tag = "div"; children = list(
+            { tag = "p"; attrs = { class = "eyebrow" }; children = list("A SERIES FOR TEENAGERS") },
+            { tag = "h2"; children = list({ tag = "a"; attrs = { href = concat("/", one($series, "route")) }; children = list(one($series, "title")) }) },
+            { tag = "p"; children = list(one($series, "description")) },
+            { tag = "div"; attrs = { class = "faith-feature-actions" }; children = list(
+              { tag = "a"; attrs = { class = "faith-button"; href = concat("/", one($series, "route")) }; children = list("Explore the series →") },
+              { tag = "a"; attrs = { class = "faith-secondary"; href = concat("/", one(one(at(objects($series, "entry"), 0), "article"), "route")) }; children = list("Begin with Room to Grow →") }
+            ) },
+            { tag = "p"; attrs = { class = "faith-meta" }; children = list("Opening article · Draft for review") }
+          ) },
+          { tag = "img"; attrs = {
+            src = one(one(one(at(objects($series, "entry"), 0), "article"), "image"), "src");
+            alt = one(one(one(at(objects($series, "entry"), 0), "article"), "image"), "alt");
+            width = 1536; height = 1024; loading = "lazy"; decoding = "async"
+          } }
+        )
+      }
+    ),
+    $activeReading.teaser,
+    {
+      tag = "div";
+      attrs = {  };
+      children = list(
+        {
+          tag = "p";
+          attrs = { class = "eyebrow" };
+          children = list("FOLLOW A THREAD INTO LIFE")
+        },
+        {
+          tag = "h2";
+          attrs = { class = "faith-paths-heading" };
+          children = list("Three ways to keep reading.")
+        },
+        {
+          tag = "p";
+          attrs = { class = "faith-paths-note" };
+          children = list($activeReading.pathNote)
+        }
+      )
+    },
+    {
+      tag = "section";
+      attrs = { class = "identity-thread-grid"; "aria-label" = "Identity reading threads" };
+      children = list(
+        map(
+          objects($journeyIdentity, "thread"),
+          "t",
+          {
+            tag = "article";
+            attrs = { class = "identity-thread" };
+            children = list(
+              {
+                tag = "img";
+                attrs = {
+                  class = "faith-thread-art";
+                  src = one($t, "image");
+                  alt = "";
+                  width = 768;
+                  height = 432;
+                  loading = "lazy";
+                  decoding = "async"
+                };
+                children = list()
+              },
+              {
+                tag = "p";
+                attrs = { class = "faith-thread-kicker" };
+                children = list(one($t, "kicker"))
+              },
+              { tag = "h2"; attrs = {  }; children = list(one($t, "title")) },
+              { tag = "p"; attrs = {  }; children = list(one($t, "note")) },
+              {
+                tag = "ol";
+                attrs = { role = "list" };
+                children = list(
+                  map(
+                    objects($t, "place"),
+                    "p",
+                    {
+                      tag = "li";
+                      attrs = {  };
+                      children = list(
+                        { tag = "a"; attrs = { href = one($p, "route") }; children = list(one($p, "title")) },
+                        { tag = "p"; attrs = {  }; children = list(one($p, "lead")) }
+                      )
+                    }
+                  )
+                )
+              }
+            )
+          }
+        )
+      )
+    },
+    {
+      tag = "section";
+      attrs = { class = "identity-shared-exit" };
+      children = list(
+        { tag = "h2"; attrs = {  }; children = list("The wider corpus remains open.") },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "These are editorial connections. The readings retain their sources, disagreements and limits."
+          )
+        },
+        {
+          tag = "a";
+          attrs = { href = concat(one("site", "origin"), "gate.html"); "data-shared-exit" = "true" };
+          children = list("Leave this identity lens: browse all shared reading paths ↗")
+        }
+      )
+    }
+  )
+  let result = {
+    tag = "div";
+    attrs = {
+      class = if(eq($journeyIdentity, "identity.christian"), "faith-threads", "reading-room");
+      "data-reading-room" = $activeReading.key
+    };
+    children = list($result)
+  }

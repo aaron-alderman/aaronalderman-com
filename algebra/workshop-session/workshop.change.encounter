@@ -1,0 +1,43 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process workshop.change:
+  assert eq($eventInput.request.revision, $eventInput.snapshot.revision)
+    otherwise "LAB-STALE: This view is out of date. Reload the current state before editing."
+  let before = $eventInput.snapshot
+  let request = $eventInput.request
+  port kernel.invoke {
+    query = "lab.edit";
+    input = { candidate = $before.candidate; kind = $request.kind; value = $request.value }
+  } → changed
+  port kernel.invoke {
+    query = "workshop.diff";
+    input = { before = $before.sources.facts; after = $changed.candidate.inputs.factText }
+  } → factDiff
+  port kernel.invoke {
+    query = "workshop.diff";
+    input = { before = $before.sources.encounter; after = $changed.candidate.inputs.codeText }
+  } → codeDiff
+  let receipt = {
+    kind = $request.kind;
+    value = $request.value;
+    basis = $before.revision;
+    destination = $changed.destination;
+    factDiff = $factDiff;
+    codeDiff = $codeDiff;
+    reason = "Change one visible value at its declared semantic owner.";
+    target = if(
+      eq($request.kind, "title"),
+      "TheStory / S.Title",
+      "experiment.nav.story / experiment.WebMainMenu / N.label"
+    );
+    goal = "Reproduce the requested value through the existing checked projection."
+  }
+  port kernel.invoke {
+    query = "workshop.snapshot";
+    input = {
+      candidate = $changed.candidate;
+      revision = add($before.revision, 1);
+      receipt = $receipt
+    }
+  } → result

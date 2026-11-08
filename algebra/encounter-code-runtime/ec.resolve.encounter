@@ -1,0 +1,69 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.resolve:
+  let ecView = at(filter($codePlan.views, "ecV", eq($ecV.id, $eventInput.view)), 0)
+  assert $ecView
+    otherwise "EC-C011: This view is not declared in the current module."
+  port kernel.invoke { query = "ec.reference"; input = { id = $ecView.id; type = $ecView.type } } → ecBase
+  port kernel.invoke { query = "ec.fact"; input = { id = $ecView.source; type = $ecView.sourceType } } → ecSource
+  let bindings = { source = $ecSource }
+  let ecEffective = $ecBase.values
+  let ecEffectiveEdits = $ecView.edits
+  let ecEffectiveShow = $ecView.show
+  let ecContribution = null
+  when $eventInput.context:
+    let ecContributions = filter($ecView.contexts, "ecO", eq($ecO.id, $eventInput.context))
+    assert eq(count($ecContributions), 1)
+      otherwise "EC-C012: A context must have exactly one explicit contribution; there is no hidden precedence."
+    let ecContribution = at($ecContributions, 0)
+    fold $ecContribution.fields.fields as ecField; ecEffective starts $ecEffective:
+      port kernel.invoke {
+        query = "ec.evaluate";
+        input = { expression = $ecField.expression.expression; bindings = { bindings = $bindings; codePlan = $codePlan } }
+      } → ecOverlayValue
+      port record.put { record = $ecEffective; key = $ecField.name; value = $ecOverlayValue } → ecEffective
+      yield $ecEffective → ecEffective
+    let ecEffectiveEdits = append(
+      filter(
+        $ecEffectiveEdits,
+        "ecE",
+        not(some($ecContribution.fields.fields, "ecF", eq($ecF.name, $ecE.field)))
+      ),
+      $ecContribution.edits
+    )
+    let ecEffectiveShow = $ecContribution.show
+  port kernel.invoke { query = "ec.check"; input = { type = $ecView.type; values = $ecEffective } } → _
+  assert $ecEffectiveShow
+    otherwise "EC-C013: Select a representation for this view/context."
+  let ecRepresentation = at(
+    filter($codePlan.representations, "ecR", eq($ecR.id, $ecEffectiveShow.representation)),
+    0
+  )
+  let ecArguments = {  }
+  port record.put {
+    record = $ecArguments;
+    key = at(at($ecRepresentation.given, 0), "name");
+    value = { id = $ecView.id; type = $ecView.type; values = $ecEffective }
+  } → ecArguments
+  fold $ecEffectiveShow.parameters as ecParameter; ecArguments starts $ecArguments:
+    port kernel.invoke {
+      query = "ec.evaluate";
+      input = { expression = $ecParameter.expression.expression; bindings = { bindings = $bindings; codePlan = $codePlan } }
+    } → ecParameterValue
+    port record.put { record = $ecArguments; key = $ecParameter.name; value = $ecParameterValue } → ecArguments
+    yield $ecArguments → ecArguments
+  port kernel.invoke { query = "ec.execute"; input = { entry = $ecRepresentation.entry; input = $ecArguments } } → ecOutput
+  port kernel.invoke { query = "ec.safeTree"; input = { tree = $ecOutput.tree } } → _
+  port kernel.invoke { query = "ec.events"; input = { events = $ecOutput.events; tree = $ecOutput.tree } } → _
+  let result = {
+    view = $ecView.id;
+    source = $ecView.source;
+    type = $ecView.type;
+    values = $ecEffective;
+    base = $ecBase.values;
+    edits = $ecEffectiveEdits;
+    show = $ecEffectiveShow;
+    contribution = $ecContribution;
+    output = $ecOutput
+  }

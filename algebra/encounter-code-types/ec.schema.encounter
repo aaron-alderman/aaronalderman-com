@@ -1,0 +1,31 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.schema:
+  let ecType = $eventInput.type
+  let ecInterfaces = filter(subjects("isa", "Interface"), "ecI", eq(optional($ecI, "type"), $ecType))
+  assert eq(count($ecInterfaces), 1)
+    otherwise "EC-T001: A type must resolve to exactly one declared interface in this contract profile."
+  let ecInterface = at($ecInterfaces, 0)
+  assert eq(one($ecInterface, "mode"), "closed")
+    otherwise "EC-T002: This experiment requires an explicitly closed interface."
+  let result = {
+    type = $ecType;
+    slots = map(
+      objects($ecInterface, "slot"),
+      "ecS",
+      {
+        id = $ecS;
+        name = one($ecS, "predicate");
+        kind = one($ecS, "valueType");
+        cardinality = one($ecS, "cardinality");
+        expects = or(optional($ecS, "expects"), null);
+        allowed = objects($ecS, "allowed");
+        storage = or(optional($ecS, "storage"), null);
+        entryType = or(optional($ecS, "entryType"), null);
+        entryField = or(optional($ecS, "entryField"), null);
+        nonempty = eq(optional($ecS, "nonempty"), "true");
+        pattern = or(optional($ecS, "pattern"), null)
+      }
+    )
+  }

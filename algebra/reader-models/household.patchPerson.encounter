@@ -1,0 +1,27 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.patchPerson:
+  port record.get { record = $eventInput.patch; key = "id" } → hp92
+  port record.get { record = $eventInput.patch; key = "capacity" } → hp93
+  port record.get { record = $eventInput.patch; key = "wage" } → hp94
+  port record.get { record = $eventInput.patch; key = "willingness" } → hp95
+  let patchValues = or(at($eventInput.patch, "values"), {  })
+  port record.get { record = $patchValues; key = "paidHours" } → hp96
+  port record.get { record = $patchValues; key = "freeHours" } → hp97
+  port record.get { record = $patchValues; key = "domesticShare" } → hp98
+  port record.get { record = $patchValues; key = "shareTolerance" } → hp99
+  port record.get { record = $patchValues; key = "paidTolerance" } → hp100
+  let result = {
+    id = if(eq($hp92, null), at($eventInput.person, "id"), $hp92);
+    capacity = if(eq($hp93, null), at($eventInput.person, "capacity"), $hp93);
+    wage = if(eq($hp94, null), at($eventInput.person, "wage"), $hp94);
+    willingness = if(eq($hp95, null), at($eventInput.person, "willingness"), $hp95);
+    values = {
+      paidHours = if(eq($hp96, null), at($eventInput.person.values, "paidHours"), $hp96);
+      freeHours = if(eq($hp97, null), at($eventInput.person.values, "freeHours"), $hp97);
+      domesticShare = if(eq($hp98, null), at($eventInput.person.values, "domesticShare"), $hp98);
+      shareTolerance = if(eq($hp99, null), at($eventInput.person.values, "shareTolerance"), $hp99);
+      paidTolerance = if(eq($hp100, null), at($eventInput.person.values, "paidTolerance"), $hp100)
+    }
+  }

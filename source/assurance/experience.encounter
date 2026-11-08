@@ -1,0 +1,176 @@
+# Reading-experience successor to the live 26cc4bd policy. Browser tools provide
+# observations; these admitted definitions own plans, thresholds and decisions.
+process-module "temple/surface-process-module/1"
+
+process experience.plan:
+  let routes = append(map(list("writing/faith-with-open-hands/index.html", "writing/being-here-as-dad/index.html", "writing/make-the-magic-answerable/index.html", "writing/a-world-someone-else-can-enter/index.html", "worlds/christian/index.html", "worlds/christian/questions.html", "worlds/christian/threads.html", "worlds/dad/index.html", "worlds/dad/questions.html", "worlds/dad/threads.html", "worlds/sourcerer/index.html", "worlds/sourcerer/questions.html", "worlds/sourcerer/threads.html", "worlds/author/index.html", "worlds/author/questions.html", "worlds/author/threads.html", "atlas.html", "temple/index.html", "sourcery/index.html", "claimipedia/index.html", "assurance/images/main.html", "assurance/images/christian.html", "assurance/images/dad.html", "assurance/images/sourcerer.html", "assurance/images/author.html", "assurance/images/counterexample-broken.html", "assurance/images/counterexample-size.html", "worlds/dad/threads/growing-up-in-the-way-of-jesus/index.html", "worlds/dad/threads/growing-up-in-the-way-of-jesus/room-to-grow/index.html", "assurance/reading-palette/index.html"), "path", { path = $path; skip = if(eq($path, "temple/index.html"), "#gate", "#main") }), list())
+  let result = {
+    protocol = "aaronalderman/reading-experience-plan/2";
+    routes = $routes;
+    profiles = list({ id = "desktop"; width = 1280; height = 800; spacing = false }, { id = "zoom-200-equivalent"; width = 640; height = 400; spacing = false }, { id = "zoom-400-equivalent"; width = 320; height = 200; spacing = false }, { id = "text-spacing"; width = 320; height = 800; spacing = true });
+    textSelectors = "h1,.masthead nav a,.footer a,.faith-essay-kicker,.faith-essay-standfirst";
+    blockSelectors = "h1,h2,h3,p,li,a,button,input,select,textarea,summary";
+    maxBlocks = 500; maxTexts = 60; maxTabs = 120;
+    hoverSelector = ".masthead nav a";
+    imageSelector = ".q-question>img";
+    imageObservationSelector = "[data-image-observation]";
+    imageStatusSelector = "#image-assurance-status";
+    reducedMotion = "reduce";
+    pointerRest = { x = 0; y = 0 };
+    focusSelector = "a[href],button,input,select,textarea,summary,iframe,[tabindex]";
+    focusPoints = list(list(0.5, 0.5), list(0.15, 0.15), list(0.85, 0.15), list(0.15, 0.85), list(0.85, 0.85));
+    languageSelectors = "p,li,h1,h2,h3,blockquote";
+    languageExclude = "pre,code";
+    languageMaxBlocks = 12; languageMaxLinks = 40;
+    languageSentencePattern = "(?<=[.!?])\\s+";
+    returnSelector = "#microsite-return,header a[aria-label=\"Aaron Alderman\"]";
+    homePaths = list("/", "/index.html", "/worlds/christian/index.html", "/worlds/dad/index.html", "/worlds/sourcerer/index.html", "/worlds/author/index.html");
+    spacingCSS = "*{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}p{margin-block-end:2em!important}";
+    timeoutMs = 90000; settleMs = 300;
+    boundary = "Chromium at four declared CSS reflow widths and increased text spacing. Equivalent widths do not record browser-toolbar zoom. Artistic crops, complex painting, screen-reader use and comprehension require separate review."
+  }
+  fold $routes as route; planned starts list():
+    port text.replaceAll { value = $route.path; search = "/index.html"; replacement = "/questions.html" } → question
+    yield append($planned, list({ path = $route.path; skip = $route.skip; next = if(includes(list("worlds/christian/index.html", "worlds/dad/index.html", "worlds/sourcerer/index.html", "worlds/author/index.html"), $route.path), { selector = "#first-trails"; paths = list(concat("/", $question)) }, if(eq($route.path, "atlas.html"), { selector = "a[data-atlas-id=\"water\"]"; paths = list("/places/water.html") }, null)) })) → planned
+  port record.put { record = $result; key = "routes"; value = $planned } → result
+
+process experience.luminance:
+  fold $eventInput.rgb as v; channels starts list():
+    port number.calculate { operation = "divide"; values = list($v, 255) } → channel
+    port number.calculate { operation = "lessEqual"; values = list($channel, 0.04045) } → low
+    when $low:
+      port number.calculate { operation = "divide"; values = list($channel, 12.92) } → linear
+    when not($low):
+      port number.calculate { operation = "add"; values = list($channel, 0.055) } → shifted
+      port number.calculate { operation = "divide"; values = list($shifted, 1.055) } → scaled
+      port number.calculate { operation = "power"; values = list($scaled, 2.4) } → linear
+    yield append($channels, list($linear)) → channels
+  port number.calculate { operation = "multiply"; values = list(at($channels, 0), 0.2126) } → r
+  port number.calculate { operation = "multiply"; values = list(at($channels, 1), 0.7152) } → g
+  port number.calculate { operation = "multiply"; values = list(at($channels, 2), 0.0722) } → b
+  port number.calculate { operation = "add"; values = list($r, $g, $b) } → result
+
+process experience.contrast:
+  let observed = $eventInput
+  fold $observed.paint.layers as layer; surface starts { rgb = null; ambiguous = false }:
+    let next = $surface
+    when eq($surface.rgb, null):
+      let opaque = and(not(eq($layer.rgba, null)), eq(at($layer.rgba, 3), 1))
+      let transparent = and(not(eq($layer.rgba, null)), eq(at($layer.rgba, 3), 0))
+      let next = { rgb = if($opaque, list(at($layer.rgba, 0), at($layer.rgba, 1), at($layer.rgba, 2)), null); ambiguous = or($surface.ambiguous, not(eq($layer.image, "none")), not(eq($layer.opacity, 1)), not(eq($layer.filter, "none")), not(eq($layer.blend, "normal")), not(or($opaque, $transparent))) }
+    yield $next → surface
+  let known = and(not(eq($surface.rgb, null)), not($surface.ambiguous), not(eq($observed.paint.foreground, null)), eq(at($observed.paint.foreground, 3), 1), every($observed.paint.layers, "l", and(eq($l.opacity, 1), eq($l.filter, "none"), eq($l.blend, "normal"))), not(includes(list("VIDEO", "AUDIO", "IMG", "CANVAS", "INPUT", "SELECT", "TEXTAREA", "SVG"), $observed.tag)), not(eq($observed.text, "")))
+  let result = { rule = "contrast.rendered-pair"; status = "needs-review"; state = or(at($observed, "state"), "default"); path = $observed.path; text = $observed.text; ratio = null; minimum = null; evidence = "Transparency, imagery, complex paint or native controls require visual review." }
+  when $known:
+    let eventInput = { rgb = list(at($observed.paint.foreground, 0), at($observed.paint.foreground, 1), at($observed.paint.foreground, 2)) }
+    call experience.luminance
+    let fg = $result
+    let eventInput = { rgb = $surface.rgb }
+    call experience.luminance
+    let bg = $result
+    port number.calculate { operation = "max"; values = list($fg, $bg) } → lighter
+    port number.calculate { operation = "min"; values = list($fg, $bg) } → darker
+    port number.calculate { operation = "divide"; values = list(add($lighter, 0.05), add($darker, 0.05)) } → ratio
+    port number.calculate { operation = "greaterEqual"; values = list($observed.fontSize, 24) } → large
+    port number.calculate { operation = "greaterEqual"; values = list($observed.fontSize, 18.666666666666668) } → boldSize
+    port number.calculate { operation = "greaterEqual"; values = list($observed.fontWeight, 700) } → boldWeight
+    let minimum = if(or($large, and($boldSize, $boldWeight)), 3, 4.5)
+    port number.calculate { operation = "greaterEqual"; values = list($ratio, $minimum) } → passed
+    let result = { rule = "contrast.rendered-pair"; status = if($passed, "passed", "failed"); state = or(at($observed, "state"), "default"); path = $observed.path; text = $observed.text; ratio = $ratio; minimum = $minimum; evidence = "Opaque sRGB text against its first supported opaque ancestor; unrounded threshold comparison." }
+
+process experience.snapshot:
+  let snapshot = $eventInput
+  port number.calculate { operation = "lessEqual"; values = list($snapshot.document.scrollWidth, add($snapshot.document.clientWidth, 1)) } → fits
+  let rows = list({ rule = "zoom.document-overflow"; status = if($fits, "passed", "failed"); path = "html"; text = ""; evidence = "Document width at the declared reflow condition." })
+  when and(at($snapshot, "hoverObservation"), $snapshot.hoverObservation.matched, not($snapshot.hoverObservation.observed)):
+    let rows = append($rows, list({ rule = "coverage.hover-target"; status = "needs-review"; path = ".masthead nav a"; text = ""; evidence = "The declared hover target was hidden or unavailable in this responsive state; no hover contrast claim is made." }))
+  when not(some($snapshot.texts, "t", eq($t.tag, "H1"))):
+    let rows = append($rows, list({ rule = "coverage.rendered-title"; status = "needs-review"; path = "h1"; text = ""; evidence = "No visible H1 was observed within the declared selector scope." }))
+  fold $snapshot.texts as text; findings starts $rows:
+    let eventInput = $text
+    call experience.contrast
+    yield append($findings, list($result)) → rows
+  fold $snapshot.blocks as block; findings starts $rows:
+    port number.calculate { operation = "greater"; values = list($block.scrollWidth, add($block.clientWidth, 1)) } → wide
+    port number.calculate { operation = "greater"; values = list($block.scrollHeight, add($block.clientHeight, 1)) } → tall
+    let clipped = or(and($wide, includes(list("hidden", "clip"), $block.overflowX)), and($tall, includes(list("hidden", "clip"), $block.overflowY)))
+    let rows = if($clipped, list({ rule = "zoom.clipped-content"; status = "needs-review"; path = $block.path; text = $block.text; evidence = "Concealed overflow is measured; review whether it intentionally hides content." }), list())
+    when and($snapshot.spacingApplied, includes(list("H1", "H2", "H3", "P", "LI", "A", "BUTTON", "SUMMARY"), $block.tag)):
+      port number.calculate { operation = "divide"; values = list(add($block.lineHeight, 0.02), $block.fontSize) } → line
+      port number.calculate { operation = "divide"; values = list(add($block.letterSpacing, 0.02), $block.fontSize) } → letter
+      port number.calculate { operation = "divide"; values = list(add($block.wordSpacing, 0.02), $block.fontSize) } → word
+      port number.calculate { operation = "divide"; values = list(add($block.paragraphGap, 0.02), $block.fontSize) } → gap
+      port number.calculate { operation = "greaterEqual"; values = list($line, 1.5) } → lineOK
+      port number.calculate { operation = "greaterEqual"; values = list($letter, 0.12) } → letterOK
+      port number.calculate { operation = "greaterEqual"; values = list($word, 0.16) } → wordOK
+      port number.calculate { operation = "greaterEqual"; values = list($gap, 2) } → gapOK
+      let spacingOK = and($lineOK, $letterOK, $wordOK, or(not(eq($block.tag, "P")), $gapOK))
+      let rows = append($rows, list({ rule = "zoom.spacing-override"; status = if($spacingOK, "passed", "needs-review"); path = $block.path; text = $block.text; evidence = "Computed line, letter, word and paragraph spacing under the requested override." }))
+    yield append($findings, $rows) → rows
+  when or($snapshot.truncatedTexts, $snapshot.truncatedBlocks):
+    let rows = append($rows, list({ rule = "coverage.observer-limit"; status = "needs-review"; path = "html"; text = ""; evidence = "A bounded selector limit was reached; this does not establish complete coverage." }))
+  let result = $rows
+
+process experience.journey:
+  let journey = $eventInput
+  let trusted = and(some($journey.events, "e", and($e.trusted, eq($e.key, "Tab"))), some($journey.events, "e", and($e.trusted, eq($e.key, "Enter"))))
+  let result = list(
+    { rule = "keyboard.trusted-journey"; status = if(and($trusted, $journey.foundSkip, $journey.skipTargetExists, eq($journey.afterSkip.hash, $journey.skip)), "passed", "failed"); path = $journey.skip; text = ""; evidence = "Trusted Tab and Enter must reach and activate the native skip link." },
+    { rule = "keyboard.return-home"; status = if(and($trusted, $journey.foundReturn, eq($journey.afterReturn.origin, $journey.origin), includes($journey.homePaths, $journey.afterReturn.path)), "passed", "failed"); path = $journey.returnSelector; text = ""; evidence = "Trusted keyboard input must activate a local home-return destination." }
+  )
+  let rows = $result
+  fold filter($journey.focuses, "f", $f.component) as focus; findings starts $rows:
+    let visible = some($focus.points, "p", $p.ownsHit)
+    port number.calculate { operation = "greater"; values = list($focus.outlineWidth, 0) } → outlined
+    let indicator = or(and($outlined, not(eq($focus.outlineStyle, "none"))), not(eq($focus.boxShadow, "none")), not(eq($focus.beforePaint, $focus.afterPaint)))
+    port number.calculate { operation = "lessEqual"; values = list($focus.rect.width, 2) } → tinyWidth
+    port number.calculate { operation = "lessEqual"; values = list($focus.rect.height, 2) } → tinyHeight
+    let hiddenNative = and(eq($focus.tag, "INPUT"), or(eq(at(at($focus.paint.layers, 0), "opacity"), 0), $tinyWidth, $tinyHeight))
+    let eventInput = $focus
+    call experience.contrast
+    yield append($findings, list({ rule = "keyboard.focus-obscured"; status = if($visible, "passed", if($hiddenNative, "needs-review", "failed")); path = $focus.path; text = $focus.text; evidence = "At least one sampled point of the focused component must own its browser hit test. Hidden native proxies require review." }, { rule = "keyboard.focus-indicator"; status = if(and(not($hiddenNative), $focus.focusVisible, $indicator), "passed", "needs-review"); path = $focus.path; text = $focus.text; evidence = "Outline, shadow or changed paint observed; visual adequacy remains review work." }, $result)) → rows
+  when not(eq($journey.next, null)):
+    let rows = append($rows, list({ rule = "keyboard.explore"; status = if(and($journey.exploration.found, eq($journey.exploration.after.origin, $journey.origin), includes($journey.next.paths, $journey.exploration.after.path), some($journey.exploration.events, "e", and($e.trusted, eq($e.key, "Enter"))), some($journey.exploration.events, "e", and($e.trusted, eq($e.key, "Tab")))), "passed", "failed"); path = $journey.next.selector; text = ""; evidence = "Trusted Tab and Enter must activate the declared exploration destination." }))
+  when some($journey.focuses, "f", not($f.component)):
+    let rows = append($rows, list({ rule = "coverage.keyboard-transition"; status = "needs-review"; path = "browser/document focus"; text = ""; evidence = "Tab transitions without a focused DOM component are retained in the raw journey. They are not interpreted as obscured page controls." }))
+  let result = $rows
+
+process experience.language:
+  let page = $eventInput
+  let terms = list({ term = "kenotic"; pattern = "\\bkenotic\\b"; prompt = "Explain what self-emptying love means in this situation." }, { term = "process algebra"; pattern = "\\bprocess\\s+algebra\\b"; prompt = "Explain the rules for composing changes with an example." }, { term = "invariant"; pattern = "\\binvariant\\b"; prompt = "Say what remains unchanged and under which changes." }, { term = "symmetry"; pattern = "\\bsymmetry\\b"; prompt = "Name the transformation and what it preserves." }, { term = "admission"; pattern = "\\badmission\\b"; prompt = "Explain what is accepted and which checks decide." }, { term = "ontology"; pattern = "\\bontology\\b"; prompt = "Explain the represented things and relationships." }, { term = "epistemic"; pattern = "\\bepistemic\\b"; prompt = "Say how this affects what we know." }, { term = "corpus"; pattern = "\\bcorpus\\b"; prompt = "Identify the collection of source material." }, { term = "provenance"; pattern = "\\bprovenance\\b"; prompt = "Explain where the statement or result came from." })
+  fold $terms as term; rows starts list():
+    port text.matches { value = $page.text; pattern = $term.pattern; flags = "i" } → found
+    yield if($found, append($rows, list({ rule = "language.term-explanation"; status = "needs-human-review"; path = "main"; text = $term.term; evidence = $term.prompt })), $rows) → rows
+  fold $page.sentences as sentence; findings starts $rows:
+    port text.split { value = $sentence; pattern = "\\s+" } → words
+    port number.calculate { operation = "greater"; values = list(count($words), 35) } → long
+    yield if($long, append($findings, list({ rule = "language.long-sentence"; status = "needs-human-review"; path = "main"; text = $sentence; evidence = "More than 35 words is a prompt for review; length does not determine clarity." })), $findings) → rows
+  fold $page.links as label; findings starts $rows:
+    port text.matches { value = $label; pattern = "^(click here|here|more|read more|learn more)$"; flags = "i" } → vague
+    yield if($vague, append($findings, list({ rule = "language.vague-link"; status = "needs-human-review"; path = "main a"; text = $label; evidence = "Review whether this label communicates its destination in context." })), $findings) → rows
+  let result = append($rows, list({ rule = "language.reader-understanding"; status = "needs-human-review"; path = "main"; text = ""; evidence = "A dated reader paraphrase, reviewer, method and current document hash are required. Automated prompts never establish comprehension." }))
+
+process experience.images:
+  let snapshot = $eventInput
+  let broken = includes($snapshot.route, "counterexample-broken")
+  let wrongSize = includes($snapshot.route, "counterexample-size")
+  let expected = if(or(includes($snapshot.route, "/main.html"), includes($snapshot.route, "/christian.html")), 6, 4)
+  let width = if(eq($snapshot.profile, "desktop"), 92, 65)
+  let height = if(eq($snapshot.profile, "desktop"), 130, 96)
+  fold $snapshot.images as image; rows starts list():
+    port number.calculate { operation = "subtract"; values = list($image.rect.width, $width) } → dw
+    port number.calculate { operation = "subtract"; values = list($image.rect.height, $height) } → dh
+    port number.calculate { operation = "abs"; values = list($dw) } → dw
+    port number.calculate { operation = "abs"; values = list($dh) } → dh
+    port number.calculate { operation = "lessEqual"; values = list($dw, 1) } → widthOK
+    port number.calculate { operation = "lessEqual"; values = list($dh, 1) } → heightOK
+    port number.calculate { operation = "greaterEqual"; values = list($image.rect.left, add($image.frame.left, -1)) } → leftOK
+    port number.calculate { operation = "greaterEqual"; values = list($image.rect.top, add($image.frame.top, -1)) } → topOK
+    port number.calculate { operation = "lessEqual"; values = list($image.rect.right, add($image.frame.right, 1)) } → rightOK
+    port number.calculate { operation = "lessEqual"; values = list($image.rect.bottom, add($image.frame.bottom, 1)) } → bottomOK
+    let loaded = and($image.complete, not(eq($image.naturalWidth, 0)), not(eq($image.naturalHeight, 0)))
+    let dimensions = and($widthOK, $heightOK)
+    let bounds = and($leftOK, $topOK, $rightOK, $bottomOK)
+    let fit = eq($image.fit, if(includes($image.src, "/world-emblems/"), "contain", "cover"))
+    yield append($rows, list({ src = $image.src; loaded = $loaded; dimensions = $dimensions; bounds = $bounds; fit = $fit; width = $image.rect.width; height = $image.rect.height; passed = and($loaded, $dimensions, $bounds, $fit) })) → rows
+  let result = { route = $snapshot.route; profile = $snapshot.profile; negative = if(or($broken, $wrongSize), true, false); passed = and(eq(count($rows), $expected), every($rows, "r", $r.passed)); expectedFailureDetected = and(eq(count($rows), $expected), or(and($broken, some($rows, "r", not($r.loaded))), and($wrongSize, some($rows, "r", not($r.dimensions))))); images = $rows }

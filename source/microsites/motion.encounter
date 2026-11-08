@@ -1,7 +1,5 @@
-# Readable process source; authority is selected explicitly by the build manifest.
-# The migration is gated by author.run correspondence and publication validation.
 process-module "temple/surface-process-module/1"
-profile "encounter/module-batch/microsite-motion/1"
+profile "encounter/reconstituted-source/1"
 
 process motion.sourcery.init:
   port browser.class { ref = "html"; name = "no-js"; value = false } → _
@@ -255,7 +253,7 @@ process motion.flood.init:
         "broom",
         {
           tag = "g";
-          attrs = { style = "display: none;" };
+          attrs = { hidden = true };
           children = list(
             {
               tag = "g";
@@ -458,10 +456,10 @@ process motion.flood.render:
   when not(eq($shown, $n)):
     each range(40) as position:
       port number.calculate { operation = "lessEqual"; values = list($position, $n) } → visible
-      port browser.style {
+      port browser.write {
         ref = at(at($elements, add($position, -1)), "ref");
-        name = "display";
-        value = if($visible, "", "none")
+        name = "hidden";
+        value = not($visible)
       } → _
     port state.set { key = "floodShown"; value = $n } → _
     port browser.write { ref = "[data-count=\"brooms\"]"; name = "textContent"; value = $n } → _
@@ -552,4 +550,3 @@ process motion.autoplay.intersection:
       port media.play { ref = at($entry, "ref") } → _
     when not(at($entry, "isIntersecting")):
       port media.pause { ref = at($entry, "ref") } → _
-

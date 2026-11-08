@@ -1,0 +1,59 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.scale:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port number.parse { value = $value } → block
+  port kernel.invoke { query = "reader.model.coarse"; input = { block = $block } } → cells
+  port browser.select { selector = "[data-world=\"scale\"]" } → buttons
+  each $buttons as choice:
+    port browser.attribute {
+      ref = $choice.ref;
+      name = "aria-pressed";
+      value = eq($choice.ref.handle, $button.ref.handle)
+    } → _
+  port number.calculate { operation = "divide"; values = list(4, $block) } → side
+  port browser.style {
+    ref = "#scale-grid";
+    name = "grid-template-columns";
+    value = concat("repeat(", $side, ", 1fr)")
+  } → _
+  let input = map(
+    $cells,
+    "cell",
+    {
+      tag = "span";
+      attrs = { style = concat("--cell:", $cell.mean) };
+      children = list($cell.total)
+    }
+  )
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#scale-grid"; html = $markup } → _
+  port browser.attribute {
+    ref = "#scale-grid";
+    name = "aria-label";
+    value = concat(
+      count($cells),
+      " ",
+      if(eq(count($cells), 1), "block", "blocks"),
+      ", retained total eight. Within-block arrangements are ",
+      if(eq($block, 1), "visible", "not retained by this view"),
+      "."
+    )
+  } → _
+  port browser.write {
+    ref = ".world-result";
+    name = "textContent";
+    value = if(
+      eq($block, 1),
+      "The total is 8. The fine view also preserves where the eight filled cells are.",
+      concat(
+        count($cells),
+        " ",
+        if(eq(count($cells), 1), "block retains", "blocks retain"),
+        " total 8. The view no longer identifies the arrangement inside each block. The underlying pattern has not changed."
+      )
+    )
+  } → _

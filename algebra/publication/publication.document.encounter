@@ -1,0 +1,412 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process publication.document:
+  let documentWorld = at(
+    filter(
+      subjects("isa", "IdentityTheme"),
+      "t",
+      includes(
+        list(
+          concat(one("site", "origin"), one($t, "homeRoute")),
+          concat(one("site", "origin"), one($t, "threadsRoute"))
+        ),
+        $canonical
+      )
+    ),
+    0
+  )
+  let documentIsThread = if(
+    $documentWorld,
+    eq($canonical, concat(one("site", "origin"), one($documentWorld, "threadsRoute"))),
+    false
+  )
+  let documentReading = at(filter($readingRooms, "room", eq($room.essay.canonical, $canonical)), 0)
+  let documentThreadReading = if(
+    and($documentWorld, $documentIsThread),
+    at(filter($readingRooms, "room", eq($room.key, one($documentWorld, "key"))), 0),
+    null
+  )
+  call publication.stewardship.view
+  let stewardshipLinks = $result
+  let documentPalette = or($documentReading, $documentThreadReading)
+  let readingThemeControl = null
+  when $documentPalette:
+    port kernel.invoke { query = "reading.theme.control"; input = { key = $documentPalette.key } } → readingThemeControl
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          {
+            tag = "meta";
+            attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "theme-color";
+              content = if(
+                $documentReading,
+                $documentReading.palette.bg,
+                if(
+                  $documentThreadReading,
+                  $documentThreadReading.palette.bg,
+                  if($documentWorld, one($documentWorld, "homeThemeColor"), "#0c111b")
+                )
+              )
+            };
+            children = list()
+          },
+          { tag = "title"; attrs = {  }; children = list($pageTitle) },
+          {
+            tag = "meta";
+            attrs = { name = "description"; content = $description };
+            children = list()
+          },
+          { tag = "link"; attrs = { rel = "canonical"; href = $canonical }; children = list() },
+          {
+            tag = "meta";
+            attrs = { property = "og:type"; content = if(and($documentReading, not(includes(list("series", "palette"), at($documentReading.essay, "readingKind")))), "article", "website") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:site_name"; content = "Aaron Alderman" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:title";
+              content = if(eq($canonical, one("site", "origin")), one("sharing.home", "title"), $pageTitle)
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:description";
+              content = if(
+                eq($canonical, one("site", "origin")),
+                one("sharing.home", "description"),
+                $description
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:url"; content = $canonical };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image";
+              content = if(
+                $documentReading,
+                concat("https://aaronalderman.com/", $documentReading.essay.image),
+                if(
+                  $documentWorld,
+                  concat(
+                    one("site", "origin"),
+                    one($documentWorld, if($documentIsThread, "threadsImage", "image"))
+                  ),
+                  if(
+                    eq($canonical, one("site", "origin")),
+                    one("sharing.home", "image"),
+                    concat(one("site", "origin"), one("site", "image"))
+                  )
+                )
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:alt";
+              content = if(
+                $documentReading,
+                $documentReading.essay.imageAlt,
+                if(
+                  $documentWorld,
+                  one($documentWorld, "homeShareAlt"),
+                  if(
+                    eq($canonical, one("site", "origin")),
+                    one("sharing.home", "alt"),
+                    one("site", "imageAlt")
+                  )
+                )
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:card"; content = "summary_large_image" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:title";
+              content = if(eq($canonical, one("site", "origin")), one("sharing.home", "title"), $pageTitle)
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:description";
+              content = if(
+                eq($canonical, one("site", "origin")),
+                one("sharing.home", "description"),
+                $description
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image";
+              content = if(
+                $documentReading,
+                concat("https://aaronalderman.com/", $documentReading.essay.image),
+                if(
+                  $documentWorld,
+                  concat(
+                    one("site", "origin"),
+                    one($documentWorld, if($documentIsThread, "threadsImage", "image"))
+                  ),
+                  if(
+                    eq($canonical, one("site", "origin")),
+                    one("sharing.home", "image"),
+                    concat(one("site", "origin"), one("site", "image"))
+                  )
+                )
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image:alt";
+              content = if(
+                $documentReading,
+                $documentReading.essay.imageAlt,
+                if(
+                  $documentWorld,
+                  one($documentWorld, "homeShareAlt"),
+                  if(
+                    eq($canonical, one("site", "origin")),
+                    one("sharing.home", "alt"),
+                    one("site", "imageAlt")
+                  )
+                )
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = {
+              rel = "icon";
+              type = "image/svg+xml";
+              href = concat($prefix, "assets/personal-mark.svg")
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = {
+              rel = "stylesheet";
+              href = concat($prefix, "expedition.css?v=", one("site", "stylesheetVersion"))
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:width";
+              content = if(
+                $documentIsThread,
+                "768",
+                if($documentReading, or(at($documentReading.essay, "imageWidth"), "1672"), if(eq($canonical, one("site", "origin")), one("sharing.home", "width"), "1672"))
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:height";
+              content = if(
+                $documentIsThread,
+                "432",
+                if($documentReading, or(at($documentReading.essay, "imageHeight"), "941"), if(eq($canonical, one("site", "origin")), one("sharing.home", "height"), "941"))
+              )
+            };
+            children = list()
+          },
+          if(
+            or(eq($canonical, one("site", "origin")), $documentWorld),
+            {
+              tag = "meta";
+              attrs = {
+                property = "og:image:secure_url";
+                content = if(
+                  $documentWorld,
+                  concat(
+                    one("site", "origin"),
+                    one($documentWorld, if($documentIsThread, "threadsImage", "image"))
+                  ),
+                  one("sharing.home", "image")
+                )
+              };
+              children = list()
+            },
+            null
+          ),
+          if(
+            or(eq($canonical, one("site", "origin")), $documentWorld),
+            {
+              tag = "meta";
+              attrs = {
+                property = "og:image:type";
+                content = if($documentWorld, one($documentWorld, "homeShareType"), one("sharing.home", "type"))
+              };
+              children = list()
+            },
+            null
+          )
+        )
+      },
+      {
+        tag = "body";
+        attrs = { "data-light" = $light };
+        children = list(
+          {
+            tag = "a";
+            attrs = { href = "#main"; class = "skip" };
+            children = list("Skip to the story")
+          },
+          {
+            tag = "header";
+            attrs = { class = "masthead" };
+            children = list(
+              {
+                tag = "a";
+                attrs = {
+                  href = if(
+                    eq($canonical, one("site", "origin")),
+                    one("identity.sourcerer", "homeHref"),
+                    concat($prefix, "index.html")
+                  );
+                  class = "brand";
+                  "aria-label" = "Aaron Alderman";
+                  id = "identity-home-link"
+                };
+                children = list(
+                  {
+                    tag = "span";
+                    attrs = {  };
+                    children = list(
+                      {
+                        tag = "span";
+                        attrs = { class = "monogram"; "aria-hidden" = "true" };
+                        children = list("A")
+                      },
+                      {
+                        tag = "span";
+                        attrs = { class = "brand-name" };
+                        children = list(
+                          "Aaron ",
+                          { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                        )
+                      }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Main navigation" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "/mission/"; class = "mission-nav" };
+                    children = list("The mission")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "/writing/"; class = "nav-thoughts" };
+                    children = list("Thoughts")
+                  },
+                  { tag = "a"; attrs = { href = "/"; class = "nav-mind" }; children = list("My Mind") }
+                )
+              }
+            )
+          },
+          { tag = "main"; attrs = { id = "main" }; children = list($body) },
+          {
+            tag = "footer";
+            attrs = { class = "footer" };
+            children = list(
+              {
+                tag = "div";
+                attrs = {  };
+                children = list(
+                  { tag = "p"; attrs = { class = "signature" }; children = list("Aaron Alderman") },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("A few things I’ve built. A few things I’m still trying to understand.")
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Elsewhere" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "https://github.com/aaron-alderman" };
+                    children = list("GitHub ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "https://www.linkedin.com/in/aaron-alderman/" };
+                    children = list("LinkedIn ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "https://worldwright.io/" };
+                    children = list("Built with Worldwright.io ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = concat($prefix, "assurance/") };
+                    children = list("Assurance")
+                  }
+                )
+              },
+              $stewardshipLinks
+            )
+          },
+          $readingThemeControl,
+          if($documentPalette, { tag = "p"; attrs = { id = "reading-theme-status"; class = "sr-only"; "aria-live" = "polite"; "aria-atomic" = "true" }; children = list() }, null),
+          if($documentPalette, { tag = "script"; attrs = { src = "/reading-theme-runtime.js?v=palette-theme-5"; defer = true }; children = list() }, null)
+        )
+      }
+    )
+  }
+  call projection.serialize

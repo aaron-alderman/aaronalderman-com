@@ -1,0 +1,149 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.viewer.build:
+  port file.copy { path = "algebra/hierarchy.process.values.rel" } → _
+  port file.read { path = "algebra/hierarchy.process.values.rel" } → hProcessText
+  port static.read { text = $hProcessText } → hProcesses
+  port file.copy { path = "source/hierarchy.rel" } → _
+  port file.copy { path = "source/encounter/presentation.values.rel" } → _
+  port file.read { path = "source/encounter/presentation.values.rel" } → hText
+  port static.read { text = $hText } → hPresentationData
+  port file.copy { path = "algebra/encounter-source.process.values.rel" } → _
+  port file.read { path = "algebra/encounter-source.process.values.rel" } → hSourceModuleText
+  port static.read { text = $hSourceModuleText } → hSourceModule
+  port file.read { path = "algebra/encounter-source.process.values.rel.map.values.rel" } → hAuthorMapText
+  port static.read { text = $hAuthorMapText } → hAuthorMap
+  port file.read { path = "source/encounter/source-algebra.encounter" } → hAuthorText
+  port file.copy { path = "bootstrap/site.values.rel" } → _
+  port file.read { path = "bootstrap/site.values.rel" } → hManifestText
+  port static.read { text = $hManifestText } → hManifest
+  fold $hManifest.processModules as hSelection; hModules starts list():
+    port file.read { path = $hSelection.output } → hModuleText
+    port static.read { text = $hModuleText } → hModuleValue
+    port file.read { path = concat($hSelection.output, ".map.values.rel") } → hModuleMapText
+    port static.read { text = $hModuleMapText } → hModuleMap
+    port file.read { path = $hSelection.file } → hModuleAuthorText
+    port text.replaceAll { value = $hSelection.output; search = "algebra/"; replacement = "" } → hModuleSlug
+    port text.replaceAll { value = $hModuleSlug; search = ".process.values.rel"; replacement = "" } → hModuleSlug
+    let hShared = eq($hSelection.output, "algebra/encounter-source.process.values.rel")
+    let hSpec = {
+      moduleFile = $hSelection.output;
+      sourceFile = $hSelection.file;
+      sourceHash = $hModuleMap.sourceHash;
+      page = if($hShared, "source-algebra.html", concat("module-", $hModuleSlug, ".html"));
+      title = if(
+        $hShared,
+        "Shared Markdown, lexer and formatting algebra",
+        concat("Process / ", $hModuleSlug)
+      );
+      heading = if($hShared, "Markdown, lexer & formatting", concat("Process / ", $hModuleSlug));
+      description = "Read the actual authored Encounter definitions selected by this publication.";
+      query = "";
+      sourceModule = $hModuleValue;
+      sourceText = $hModuleText;
+      authorText = $hModuleAuthorText;
+      sourceOrigins = $hModuleMap.origins
+    }
+    port record.entries { value = $hModuleValue.queries } → hSpecEntries
+    port record.put {
+      record = $hSpec;
+      key = "query";
+      value = if($hShared, "md.preview", at(at($hSpecEntries, 0), 0))
+    } → hSpec
+    yield append($hModules, list($hSpec)) → hModuleCatalogue
+  let hModuleMetadata = map(
+    $hModuleCatalogue,
+    "published",
+    {
+      moduleFile = $published.moduleFile;
+      sourceFile = $published.sourceFile;
+      sourceHash = $published.sourceHash;
+      page = $published.page;
+      title = $published.title
+    }
+  )
+  port runtime.bundle {
+    entry = "hierarchy.viewer.boot";
+    mode = "browser";
+    grantProfile = "encounterBrowser";
+    queries = append(
+      list(
+        "sp.role",
+        "sp.scan",
+        "sp.observed",
+        "sp.clip",
+        "sp.line",
+        "sp.render",
+        "sp.present",
+        "sp.expression",
+        "sp.programme",
+        "sp.statement",
+        "sp.listing",
+        "sp.style",
+        "sp.outline",
+        "sp.metadata",
+        "sp.stylePlan",
+        "source.split",
+        "source.lex",
+        "s01.portable",
+        "source.rel",
+        "source.compile",
+        "source.encode",
+        "source.patch",
+        "source.jsonSpan",
+        "html.escape",
+        "projection.serialize",
+        "html.observe",
+        "html.inspect",
+        "html.cssText",
+        "facts.index",
+        "lower.scan",
+        "lower.fresh",
+        "lower.template",
+        "lower.expression",
+        "lower.programme",
+        "lower.model",
+        "lower.start",
+        "admit.binding",
+        "admit.expression",
+        "admit.programme",
+        "admit.model",
+        "admit.effects.programme",
+        "admit.effects",
+        "admit.ownership",
+        "css.render",
+        "css.plan",
+        "css.renderPlan",
+        "language.refuse",
+        "language.line",
+        "language.module",
+        "language.entity"
+      ),
+      list(
+        "language.property",
+        "language.compile",
+        "hierarchy.viewer.boot",
+        "md.inline",
+        "md.block",
+        "md.preview",
+        "sp.structure",
+        "sp.moduleView",
+        "hierarchy.module.boot",
+        "hierarchy.module.select",
+        "hierarchy.module.context"
+      )
+    );
+    factSubjects = list();
+    data = {
+      presentation = $hPresentationData;
+      processes = { "hierarchy.shared" = at($hProcesses.queries, "hierarchy.shared") };
+      sourceModule = $hSourceModule;
+      sourceText = $hSourceModuleText;
+      authorText = $hAuthorText;
+      sourceOrigins = $hAuthorMap.origins;
+      moduleCatalogue = $hModuleMetadata
+    };
+    budget = 20000000
+  } → hRuntime
+  port file.write { path = "inspection/runtime.js"; text = $hRuntime } → _

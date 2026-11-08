@@ -1,38 +1,26 @@
 name: Authoring provenance
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request:
+    branches: [main]
 permissions:
   contents: read
+concurrency:
+  group: provenance-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 jobs:
   provenance:
     name: Authoring provenance
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: '22'
-      - name: Replay using trusted base policy
-        env:
-          AUTHORING_BASE: ${{ github.event.pull_request.base.sha }}
-          AUTHORING_HEAD: ${{ github.event.pull_request.head.sha }}
-        shell: bash
-        run: |
-          git fetch --no-tags origin "$AUTHORING_HEAD"
-          mkdir -p .build/provenance/candidate
-          git archive "$AUTHORING_HEAD" | tar -x -C .build/provenance/candidate
-          git -c core.quotepath=true diff --raw --no-abbrev --no-renames --no-ext-diff "$AUTHORING_BASE" "$AUTHORING_HEAD" > .build/provenance/changes.raw
-          node tooling/author.mjs source/authoring/requests/provenance-selftest.request
-          node tooling/author.mjs source/authoring/requests/provenance-gate.request > .build/provenance/replay.json
-      - name: Retain replay evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: authoring-provenance-${{ github.run_id }}-${{ github.run_attempt }}
-          path: .build/provenance/replay.json
-          if-no-files-found: warn
+          node-version: '24'
+      - name: Compile and admit the declared source closure
+        run: node bootstrap/launch.cjs bootstrap/publication.rel
+      - name: Verify exact sources, output inventory and refusal boundaries
+        run: node bootstrap/test.cjs

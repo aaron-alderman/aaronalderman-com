@@ -1,0 +1,132 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.rendered.publish:
+  port file.copy { path = one("assurance.rendered.capture", "path") } → _
+  port file.read { path = one("assurance.rendered.capture", "path") } → renderedSourceJSON
+  port static.read { text = $renderedSourceJSON } → renderedReceipt
+  port value.encode {
+    value = {
+      protocol = $renderedReceipt.protocol;
+      capturedAt = $renderedReceipt.capturedAt;
+      bindings = $renderedReceipt.bindings;
+      policySha256 = or(at($renderedReceipt, "policySha256"), "unmeasured");
+      observerSha256 = or(at($renderedReceipt, "observerSha256"), "unmeasured");
+      observerHashMethod = "sha256-utf8-lf";
+      observationPlan = or(at($renderedReceipt, "observationPlan"), {  });
+      observationContract = or(at($renderedReceipt, "observationContract"), "No browser observations yet.");
+      report = $renderedReceipt.report;
+      rawObservations = "rendered-observations.values.rel"
+    }
+  } → renderedJSON
+  port file.write { path = "assurance/rendered-layout.values.rel"; text = $renderedJSON } → _
+  port value.encode { value = $renderedReceipt.snapshots } → renderedRawJSON
+  port file.write { path = "assurance/rendered-observations.values.rel"; text = $renderedRawJSON } → _
+  port runtime.bundle {
+    entry = "assurance.rendered.boot";
+    mode = "browser";
+    grantProfile = "readerBrowser";
+    queries = list("assurance.rendered.boot", "projection.serialize", "html.escape", "html.cssText");
+    factSubjects = list();
+    budget = 20000000
+  } → renderedRuntime
+  port file.write { path = "assurance/rendered-runtime.js"; text = $renderedRuntime } → _
+  let portfolioPage = {
+    route = "assurance/rendered-layout/index.html";
+    prefix = "../../";
+    canonical = "https://aaronalderman.com/assurance/rendered-layout/";
+    title = "Rendered layout assurance — Aaron Alderman";
+    description = "Desktop and mobile browser observations, algebra-owned layout rules and visible review candidates.";
+    body = list(
+      {
+        tag = "section";
+        attrs = { class = "assurance-intro" };
+        children = list(
+          {
+            tag = "p";
+            attrs = { class = "eyebrow" };
+            children = list("ASSURANCE / RENDERED LAYOUT")
+          },
+          { tag = "h1"; attrs = {  }; children = list("Measured, still discerned.") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "The algebra compares real browser rectangles, heading relationships and document dimensions at desktop and mobile widths. Aberrations are preserved for review."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              { tag = "a"; attrs = { href = "../" }; children = list("All assurance topics") },
+              " · ",
+              {
+                tag = "a";
+                attrs = { href = "../navigation-layout/" };
+                children = list("Navigation source checks")
+              },
+              " · ",
+              {
+                tag = "a";
+                attrs = { href = "../rendered-layout.values.rel" };
+                children = list("Raw observations and findings")
+              }
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("Evidence and its limits") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Historical capture. Desktop: 1280 × 800; mobile width: 390 × 844. These observations retain their original artifact bindings and date. The common projection migration changes dependencies and requires recapture before this older track can describe the current build. Fresh scoped browser observations appear under Reading experience. This does not certify other engines, physical devices, interactive states or the purpose of whitespace."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "A difference in alignment or a large gap is observable. Whether it is unnecessary remains a review decision. The audit never repairs a page automatically."
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("Browser findings") },
+          {
+            tag = "details";
+            attrs = {  };
+            children = list(
+              {
+                tag = "summary";
+                attrs = {  };
+                children = list("Inspect desktop and mobile findings")
+              },
+              {
+                tag = "div";
+                attrs = { id = "rendered-results" };
+                children = list(
+                  { tag = "p"; attrs = {  }; children = list("Loading the recorded browser evidence…") }
+                )
+              }
+            )
+          }
+        )
+      },
+      {
+        tag = "script";
+        attrs = { src = "../rendered-runtime.js"; defer = true };
+        children = list()
+      }
+    )
+  }
+  call assurance.portfolio.document

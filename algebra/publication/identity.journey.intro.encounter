@@ -1,0 +1,60 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.journey.intro:
+  call identity.journey.nav
+  let journeyNav = $result
+  let result = {
+    tag = "section";
+    attrs = {
+      class = "identity-journey-intro";
+      "data-journey-identity" = one($journeyIdentity, "key")
+    };
+    children = list(
+      {
+        tag = "img";
+        attrs = {
+          src = one($journeyIdentity, if(eq($journeyKind, "threads"), "threadsImage", "atlasImage"));
+          alt = "";
+          width = 768;
+          height = 432;
+          decoding = "async"
+        };
+        children = list()
+      },
+      {
+        tag = "div";
+        attrs = {  };
+        children = list(
+          {
+            tag = "p";
+            attrs = { class = "eyebrow" };
+            children = list(concat("AARON ALDERMAN / ", one($journeyIdentity, "label")))
+          },
+          {
+            tag = "h2";
+            attrs = {  };
+            children = list(
+              if(
+                eq($journeyKind, "threads"),
+                $activeReading.introHeading,
+                "A perspective on shared terrain."
+              )
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              if(
+                eq($journeyKind, "threads"),
+                one($journeyIdentity, "threadsCopy"),
+                one($journeyIdentity, "mapCopy")
+              )
+            )
+          },
+          $journeyNav
+        )
+      }
+    )
+  }

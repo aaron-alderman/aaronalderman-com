@@ -1,0 +1,28 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process atlas.seen.paint:
+  port state.get { key = "seen" } → seen
+  port browser.select { selector = "[data-atlas-id]" } → links
+  each $links as link:
+    let id = at($link.attributes, "data-atlas-id")
+    let isSeen = includes($seen, $id)
+    port browser.attribute { ref = $link.ref; name = "data-seen"; value = if($isSeen, "true", "false") } → _
+    port browser.attribute {
+      ref = $link.ref;
+      name = "aria-label";
+      value = concat(at($data.labels, $id), if($isSeen, " — seen", ""))
+    } → _
+  port dom.exists { selector = "#atlas-memory" } → onAtlas
+  when $onAtlas:
+    port dom.hidden { selector = "#atlas-memory"; value = false } → _
+    port dom.text { selector = "#atlas-progress"; text = concat(count($seen), " of 40 places seen") } → _
+    port state.get { key = "saved" } → saved
+    port dom.text {
+      selector = "#atlas-storage-note";
+      text = if(
+        $saved,
+        "Remembered only in this browser. Pale green lights mark places you’ve opened.",
+        "Browser storage is unavailable. Seen places are kept only while this page stays open."
+      )
+    } → _

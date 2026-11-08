@@ -1,0 +1,15 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.motion:
+  port browser.environment {  } → environment
+  port state.get { key = "motion" } → motion
+  let motion = and(not($environment.reduced), not($motion))
+  port state.set { key = "motion"; value = $motion } → _
+  port storage.write { key = "worldwright-motion"; value = if($motion, "on", "paused") } → _
+  port browser.attribute { ref = "body"; name = "data-motion"; value = if($motion, "on", "paused") } → _
+  port browser.write {
+    ref = "#motion-toggle";
+    name = "textContent";
+    value = if($motion, "Motion on", "Motion paused")
+  } → _

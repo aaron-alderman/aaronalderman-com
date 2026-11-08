@@ -1,0 +1,46 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.parse:
+  port text.split { value = $eventInput.text; pattern = "\\r?\\n" } → hExactLines
+  let text = $eventInput.text
+  let file = $eventInput.binding.file
+  call source.rel
+  let hParsed = $result
+  assert $hParsed.ok
+    otherwise "HIERARCHY-001: Source declarations must parse through source.rel."
+  let hBinding = $eventInput.binding
+  fold $hParsed.facts as hFact; hScan starts { rows = list(); index = 0 }:
+    assert includes(list("dependsOn", "pack"), $hFact.p)
+      otherwise "HIERARCHY-002: Unsupported capability relation."
+    let hOrigin = at($hParsed.origins, $hScan.index)
+    let hSnapshotLine = $hOrigin.span.line
+    let hOriginalLine = at($hBinding.lineMap, add($hSnapshotLine, -1))
+    port value.string { value = $hOriginalLine } → hLineText
+    port text.matches { value = $hLineText; pattern = "^[1-9][0-9]*$" } → hLineValid
+    assert $hLineValid
+      otherwise "HIERARCHY-003: Missing or invalid source line binding."
+    assert eq(
+      at($hExactLines, add($hSnapshotLine, -1)),
+      at($hBinding.lines, add($hSnapshotLine, -1))
+    )
+      otherwise "HIERARCHY-004: Snapshot and original line receipt disagree."
+    yield {
+    rows = append(
+      $hScan.rows,
+      list(
+        {
+          item = $hBinding.item;
+          binding = $hBinding.id;
+          subject = $hFact.s;
+          relation = $hFact.p;
+          target = $hFact.o;
+          line = $hOriginalLine;
+          snapshotLine = $hSnapshotLine;
+          text = at($hBinding.lines, add($hSnapshotLine, -1))
+        }
+      )
+    );
+    index = add($hScan.index, 1)
+  } → hScan
+  let result = $hScan.rows

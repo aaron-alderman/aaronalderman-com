@@ -1,0 +1,1575 @@
+process-module "temple/surface-process-module/1"
+
+process household.publication.build.part1:
+  call publication.stewardship.view
+  let stewardshipLinks = $result
+  let snapshots = list()
+  port file.copy { path = "algebra/reader-models.process.values.rel" } → _
+  port file.read { path = "algebra/reader-models.process.values.rel" } → sourceText
+  let snapshots = append(
+    $snapshots,
+    list(
+      {
+        tag = "details";
+        attrs = { class = "hh-source" };
+        children = list(
+          {
+            tag = "summary";
+            attrs = {  };
+            children = list("algebra/reader-models.process.values.rel")
+          },
+          {
+            tag = "p";
+            attrs = { class = "hh-small" };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "../../../build-receipt.values.rel" };
+                children = list("Build receipt and exact source hashes")
+              }
+            )
+          },
+          {
+            tag = "pre";
+            attrs = {  };
+            children = list({ tag = "code"; attrs = {  }; children = list($sourceText) })
+          }
+        )
+      }
+    )
+  )
+  port file.copy { path = "algebra/reader-activities.process.values.rel" } → _
+  port file.read { path = "algebra/reader-activities.process.values.rel" } → sourceText
+  let snapshots = append(
+    $snapshots,
+    list(
+      {
+        tag = "details";
+        attrs = { class = "hh-source" };
+        children = list(
+          {
+            tag = "summary";
+            attrs = {  };
+            children = list("algebra/reader-activities.process.values.rel")
+          },
+          {
+            tag = "p";
+            attrs = { class = "hh-small" };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "../../../build-receipt.values.rel" };
+                children = list("Build receipt and exact source hashes")
+              }
+            )
+          },
+          {
+            tag = "pre";
+            attrs = {  };
+            children = list({ tag = "code"; attrs = {  }; children = list($sourceText) })
+          }
+        )
+      }
+    )
+  )
+  port file.copy { path = "source/reader/activities.values.rel" } → _
+  port file.read { path = "source/reader/activities.values.rel" } → sourceText
+  let snapshots = append(
+    $snapshots,
+    list(
+      {
+        tag = "details";
+        attrs = { class = "hh-source" };
+        children = list(
+          {
+            tag = "summary";
+            attrs = {  };
+            children = list("source/reader/activities.values.rel")
+          },
+          {
+            tag = "p";
+            attrs = { class = "hh-small" };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "../../../build-receipt.values.rel" };
+                children = list("Build receipt and exact source hashes")
+              }
+            )
+          },
+          {
+            tag = "pre";
+            attrs = {  };
+            children = list({ tag = "code"; attrs = {  }; children = list($sourceText) })
+          }
+        )
+      }
+    )
+  )
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          {
+            tag = "meta";
+            attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "theme-color"; content = "#faf7ef" };
+            children = list()
+          },
+          {
+            tag = "title";
+            attrs = {  };
+            children = list("What changes when one of us changes? — The Field — Aaron Alderman")
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "description";
+              content = "A synthetic household example separating values, outcomes and the ability to renegotiate over time."
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "canonical"; href = "https://aaronalderman.com/the-field/households/" };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "stylesheet"; href = "../../expedition.css?v=field-households-chart-4" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:title"; content = "What changes when one of us changes? — The Field" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:description";
+              content = "A synthetic household example separating values, outcomes and the ability to renegotiate over time."
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:type"; content = "website" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:url"; content = "https://aaronalderman.com/the-field/households/" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image";
+              content = "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:width"; content = "1672" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:height"; content = "941" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:alt";
+              content = "A sunlit workshop opening onto a green field, with two people sharing a repair."
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:card"; content = "summary_large_image" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:title"; content = "What changes when one of us changes? — The Field" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:description";
+              content = "A synthetic household example separating values, outcomes and the ability to renegotiate over time."
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image";
+              content = "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image:alt";
+              content = "A sunlit workshop opening onto a green field, with two people sharing a repair."
+            };
+            children = list()
+          },
+          {
+            tag = "script";
+            attrs = { defer = true; src = "../../reader/activity-runtime.js?v=field-households-chart-4" };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "stylesheet"; href = "../../reader/reader.css?v=field-households-chart-4" };
+            children = list()
+          }
+        )
+      },
+      {
+        tag = "body";
+        attrs = {  };
+        children = list(
+          {
+            tag = "a";
+            attrs = { href = "#main"; class = "skip" };
+            children = list("Skip to content")
+          },
+          {
+            tag = "header";
+            attrs = { class = "masthead" };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "../../index.html"; class = "brand"; "aria-label" = "Aaron Alderman" };
+                children = list(
+                  {
+                    tag = "span";
+                    attrs = { class = "brand-name" };
+                    children = list(
+                      "Aaron ",
+                      { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Site" };
+                children = list(
+                  { tag = "a"; attrs = { href = "../../questions.html" }; children = list("Questions") },
+                  { tag = "a"; attrs = { href = "../../gate.html" }; children = list("Threads") },
+                  { tag = "a"; attrs = { href = "../../atlas.html" }; children = list("Atlas / Map") }
+                )
+              }
+            )
+          },
+          {
+            tag = "main";
+            attrs = { id = "main"; class = "field-page hh-page"; "data-type" = "simulation" };
+            children = list(
+              {
+                tag = "div";
+                attrs = { class = "field-world" };
+                children = list(
+                  {
+                    tag = "section";
+                    attrs = { class = "field-hero" };
+                    children = list(
+                      {
+                        tag = "div";
+                        attrs = {  };
+                        children = list(
+                          {
+                            tag = "p";
+                            attrs = { class = "eyebrow" };
+                            children = list("The Field / A household through time")
+                          },
+                          { tag = "h1"; attrs = {  }; children = list("What changes when one of us changes?") },
+                          {
+                            tag = "p";
+                            attrs = {  };
+                            children = list(
+                              "Two people can welcome an arrangement today and need something different tomorrow. What happens to the work, the resources, and their willingness to ask again?"
+                            )
+                          },
+                          {
+                            tag = "p";
+                            attrs = { class = "q-caption" };
+                            children = list(
+                              "Synthetic worked case · fictional participants A and B · no calibrated behavioral predictions"
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "img";
+                        attrs = {
+                          src = "../../assets/questions/open-workshop-daylight-v2.png";
+                          alt = "A sunlit workshop opening onto a green field, with two people sharing a repair.";
+                          width = 1672;
+                          height = 941
+                        };
+                        children = list()
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = {
+                      class = "q-section hh-introduction hh-section hh-chapter hh-chapter-soft";
+                      id = "hh-question";
+                      "aria-labelledby" = "hh-question-heading"
+                    };
+                    children = list(
+                      { tag = "p"; attrs = { class = "eyebrow" }; children = list("A question to stay with") },
+                      {
+                        tag = "h2";
+                        attrs = { id = "hh-question-heading" };
+                        children = list("When a request returns, it brings a history.")
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "A respectful refusal can leave a concern heard. A promise can create expectations that only later work fulfills. A capacity limit can leave work unfinished without showing unwillingness. This small household makes those distinctions visible over time."
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "Compare four orientations under the same kinds of change. Adjust values, capacity and the history of responses, then inspect what the assumed rules produce. No orientation wins by definition."
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "div";
+                    attrs = { id = "household-root" };
+                    children = list(
+                      {
+                        tag = "section";
+                        attrs = {
+                          class = "q-section hh-section hh-chapter";
+                          id = "hh-arrangement";
+                          "aria-labelledby" = "hh-arrangement-heading"
+                        };
+                        children = list(
+                          { tag = "p"; attrs = { class = "eyebrow" }; children = list("Set up the household") },
+                          {
+                            tag = "h2";
+                            attrs = { id = "hh-arrangement-heading" };
+                            children = list("Begin with an arrangement, then introduce change.")
+                          },
+                          {
+                            tag = "p";
+                            attrs = {  };
+                            children = list(
+                              "A and B are fictional partners. Their labels do not assign sex, authority or moral standing. Keep their stated values, the material outcomes and the possibility of review separate."
+                            )
+                          },
+                          {
+                            tag = "div";
+                            attrs = { class = "hh-form-grid" };
+                            children = list(
+                              {
+                                tag = "label";
+                                attrs = { class = "hh-control"; for = "hh-orientation" };
+                                children = list(
+                                  { tag = "span"; attrs = {  }; children = list("Household orientation") },
+                                  {
+                                    tag = "select";
+                                    attrs = { id = "hh-orientation"; disabled = true };
+                                    children = list(
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "roles" };
+                                        children = list("Role-based specialization")
+                                      },
+                                      { tag = "option"; attrs = { value = "equal" }; children = list("Equal sharing") },
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "capacity" };
+                                        children = list("Capacity-based specialization")
+                                      },
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "alternating" };
+                                        children = list("Alternating priorities")
+                                      }
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "label";
+                                attrs = { class = "hh-control"; for = "hh-change" };
+                                children = list(
+                                  { tag = "span"; attrs = {  }; children = list("Change from period 5") },
+                                  {
+                                    tag = "select";
+                                    attrs = { id = "hh-change"; disabled = true };
+                                    children = list(
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "none" };
+                                        children = list("No circumstance change")
+                                      },
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "values" };
+                                        children = list("One person’s values change")
+                                      },
+                                      { tag = "option"; attrs = { value = "capacity" }; children = list("Capacity changes") },
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "demands" };
+                                        children = list("Household demands change")
+                                      },
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "combined" };
+                                        children = list("Values and circumstances change")
+                                      }
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "label";
+                                attrs = { class = "hh-control"; for = "hh-profile" };
+                                children = list(
+                                  { tag = "span"; attrs = {  }; children = list("Experience pattern") },
+                                  {
+                                    tag = "select";
+                                    attrs = { id = "hh-profile"; disabled = true };
+                                    children = list(
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "constructive" };
+                                        children = list("Constructive responses")
+                                      },
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "dismissal" };
+                                        children = list("Dismissed requests")
+                                      },
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "unkept" };
+                                        children = list("Incomplete implementation")
+                                      },
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "repair" };
+                                        children = list("Changed practice after rupture")
+                                      },
+                                      {
+                                        tag = "option";
+                                        attrs = { value = "unknown" };
+                                        children = list("Unknown response quality")
+                                      }
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "label";
+                                attrs = { class = "hh-check" };
+                                children = list(
+                                  {
+                                    tag = "input";
+                                    attrs = { id = "hh-enabled"; type = "checkbox"; checked = true; disabled = true };
+                                    children = list()
+                                  },
+                                  "Let willingness learn from experience"
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "details";
+                            attrs = { class = "hh-details" };
+                            children = list(
+                              { tag = "summary"; attrs = {  }; children = list("Edit each person’s assumptions") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Choose whose inputs to edit and when they apply. “After change” applies from period 5; later authored events remain visible. Rates apply throughout the run. These controls express assumptions, not a diagnosis."
+                                )
+                              },
+                              {
+                                tag = "div";
+                                attrs = { class = "hh-form-grid" };
+                                children = list(
+                                  {
+                                    tag = "label";
+                                    attrs = { class = "hh-control"; for = "hh-person" };
+                                    children = list(
+                                      { tag = "span"; attrs = {  }; children = list("Person") },
+                                      {
+                                        tag = "select";
+                                        attrs = { id = "hh-person"; disabled = true };
+                                        children = list(
+                                          { tag = "option"; attrs = { value = "A" }; children = list("A") },
+                                          { tag = "option"; attrs = { value = "B" }; children = list("B") }
+                                        )
+                                      }
+                                    )
+                                  },
+                                  {
+                                    tag = "label";
+                                    attrs = { class = "hh-control"; for = "hh-phase" };
+                                    children = list(
+                                      { tag = "span"; attrs = {  }; children = list("When these inputs apply") },
+                                      {
+                                        tag = "select";
+                                        attrs = { id = "hh-phase"; disabled = true };
+                                        children = list(
+                                          { tag = "option"; attrs = { value = "initial" }; children = list("Initially") },
+                                          {
+                                            tag = "option";
+                                            attrs = { value = "after" };
+                                            children = list("After change (period 5)")
+                                          }
+                                        )
+                                      }
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "fieldset";
+                                attrs = {  };
+                                children = list(
+                                  { tag = "legend"; attrs = {  }; children = list("Values and capacity") },
+                                  {
+                                    tag = "div";
+                                    attrs = { class = "hh-form-grid" };
+                                    children = list(
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-capacity" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Usable capacity") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-capacity";
+                                              type = "number";
+                                              min = 0;
+                                              max = 168;
+                                              step = 1;
+                                              "data-hh-scope" = "person";
+                                              "data-hh-key" = "capacity";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("hours / period") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-willingness" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Willingness to review") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-willingness";
+                                              type = "number";
+                                              min = 0;
+                                              max = 1;
+                                              step = 0.05;
+                                              "data-hh-scope" = "person";
+                                              "data-hh-key" = "willingness";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("0–1; opening value") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-paidHours" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Desired paid work") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-paidHours";
+                                              type = "number";
+                                              min = 0;
+                                              max = 168;
+                                              step = 1;
+                                              "data-hh-scope" = "person";
+                                              "data-hh-key" = "paidHours";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("hours / period") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-freeHours" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Desired unallocated time") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-freeHours";
+                                              type = "number";
+                                              min = 0;
+                                              max = 168;
+                                              step = 1;
+                                              "data-hh-scope" = "person";
+                                              "data-hh-key" = "freeHours";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("hours / period") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-domesticShare" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Desired domestic share") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-domesticShare";
+                                              type = "number";
+                                              min = 0;
+                                              max = 1;
+                                              step = 0.05;
+                                              "data-hh-scope" = "person";
+                                              "data-hh-key" = "domesticShare";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("fraction of unpaid work") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-shareTolerance" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Domestic-share tolerance") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-shareTolerance";
+                                              type = "number";
+                                              min = 0;
+                                              max = 1;
+                                              step = 0.05;
+                                              "data-hh-scope" = "person";
+                                              "data-hh-key" = "shareTolerance";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("fraction either side of target") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-paidTolerance" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Paid-work tolerance") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-paidTolerance";
+                                              type = "number";
+                                              min = 0;
+                                              max = 168;
+                                              step = 1;
+                                              "data-hh-scope" = "person";
+                                              "data-hh-key" = "paidTolerance";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("hours below paid-work target") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-wage" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Wage") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-wage";
+                                              type = "number";
+                                              min = 0;
+                                              max = 200;
+                                              step = 1;
+                                              "data-hh-scope" = "person";
+                                              "data-hh-key" = "wage";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("money units / paid hour") }
+                                        )
+                                      }
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "fieldset";
+                                attrs = {  };
+                                children = list(
+                                  { tag = "legend"; attrs = {  }; children = list("Recorded experience") },
+                                  {
+                                    tag = "div";
+                                    attrs = { class = "hh-form-grid" };
+                                    children = list(
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-handling" };
+                                        children = list(
+                                          {
+                                            tag = "span";
+                                            attrs = {  };
+                                            children = list("How this person handles the other’s requests")
+                                          },
+                                          {
+                                            tag = "select";
+                                            attrs = {
+                                              id = "hh-param-handling";
+                                              disabled = true;
+                                              "data-hh-scope" = "experience";
+                                              "data-hh-key" = "handling"
+                                            };
+                                            children = list(
+                                              {
+                                                tag = "option";
+                                                attrs = { value = "respectful" };
+                                                children = list("Respectful, including considered refusal")
+                                              },
+                                              { tag = "option"; attrs = { value = "dismissive" }; children = list("Dismissive") },
+                                              { tag = "option"; attrs = { value = "unknown" }; children = list("Unknown") }
+                                            )
+                                          }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-deliveryFraction" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Agreement implementation") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-deliveryFraction";
+                                              type = "number";
+                                              min = 0;
+                                              max = 1;
+                                              step = 0.05;
+                                              "data-hh-scope" = "experience";
+                                              "data-hh-key" = "deliveryFraction";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("fraction of achievable assigned work") }
+                                        )
+                                      }
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "details";
+                                attrs = {  };
+                                children = list(
+                                  { tag = "summary"; attrs = {  }; children = list("Observer-specific learning rates") },
+                                  {
+                                    tag = "p";
+                                    attrs = {  };
+                                    children = list(
+                                      "Defaults are 0.10 heard, 0.25 dismissed, 0.04 kept, 0.20 missed and 0.00 capacity loss. They are authored choices without empirical calibration."
+                                    )
+                                  },
+                                  {
+                                    tag = "div";
+                                    attrs = { class = "hh-form-grid" };
+                                    children = list(
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-heardGain" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Gain after being heard") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-heardGain";
+                                              type = "number";
+                                              min = 0;
+                                              max = 1;
+                                              step = 0.01;
+                                              "data-hh-scope" = "rate";
+                                              "data-hh-key" = "heardGain";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("0–1; whole-run assumption") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-dismissedLoss" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Loss after dismissal") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-dismissedLoss";
+                                              type = "number";
+                                              min = 0;
+                                              max = 1;
+                                              step = 0.01;
+                                              "data-hh-scope" = "rate";
+                                              "data-hh-key" = "dismissedLoss";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("0–1; whole-run assumption") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-keptGain" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Gain after a kept agreement") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-keptGain";
+                                              type = "number";
+                                              min = 0;
+                                              max = 1;
+                                              step = 0.01;
+                                              "data-hh-scope" = "rate";
+                                              "data-hh-key" = "keptGain";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("0–1; whole-run assumption") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-missedLoss" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Loss after implementation shortfall") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-missedLoss";
+                                              type = "number";
+                                              min = 0;
+                                              max = 1;
+                                              step = 0.01;
+                                              "data-hh-scope" = "rate";
+                                              "data-hh-key" = "missedLoss";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("0–1; whole-run assumption") }
+                                        )
+                                      },
+                                      {
+                                        tag = "label";
+                                        attrs = { class = "hh-control"; for = "hh-param-capacityLoss" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("Loss after capacity shortfall") },
+                                          {
+                                            tag = "input";
+                                            attrs = {
+                                              id = "hh-param-capacityLoss";
+                                              type = "number";
+                                              min = 0;
+                                              max = 1;
+                                              step = 0.01;
+                                              "data-hh-scope" = "rate";
+                                              "data-hh-key" = "capacityLoss";
+                                              disabled = true
+                                            };
+                                            children = list()
+                                          },
+                                          { tag = "small"; attrs = {  }; children = list("0–1; whole-run assumption") }
+                                        )
+                                      }
+                                    )
+                                  }
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "details";
+                            attrs = { class = "hh-details" };
+                            children = list(
+                              { tag = "summary"; attrs = {  }; children = list("Edit shared resources") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "These are opening resource assumptions. Unfinished domestic work and money carry forward between periods."
+                                )
+                              },
+                              {
+                                tag = "div";
+                                attrs = { class = "hh-form-grid" };
+                                children = list(
+                                  {
+                                    tag = "label";
+                                    attrs = { class = "hh-control"; for = "hh-resource-domesticHours" };
+                                    children = list(
+                                      { tag = "span"; attrs = {  }; children = list("New domestic demand") },
+                                      {
+                                        tag = "input";
+                                        attrs = {
+                                          id = "hh-resource-domesticHours";
+                                          type = "number";
+                                          min = 0;
+                                          max = 168;
+                                          step = 1;
+                                          "data-hh-scope" = "resource";
+                                          "data-hh-key" = "domesticHours";
+                                          disabled = true
+                                        };
+                                        children = list()
+                                      },
+                                      { tag = "small"; attrs = {  }; children = list("unpaid hours / period") }
+                                    )
+                                  },
+                                  {
+                                    tag = "label";
+                                    attrs = { class = "hh-control"; for = "hh-resource-expenses" };
+                                    children = list(
+                                      { tag = "span"; attrs = {  }; children = list("Essential expenses") },
+                                      {
+                                        tag = "input";
+                                        attrs = {
+                                          id = "hh-resource-expenses";
+                                          type = "number";
+                                          min = 0;
+                                          max = 10000;
+                                          step = 10;
+                                          "data-hh-scope" = "resource";
+                                          "data-hh-key" = "expenses";
+                                          disabled = true
+                                        };
+                                        children = list()
+                                      },
+                                      { tag = "small"; attrs = {  }; children = list("money units / period") }
+                                    )
+                                  },
+                                  {
+                                    tag = "label";
+                                    attrs = { class = "hh-control"; for = "hh-resource-reserve" };
+                                    children = list(
+                                      { tag = "span"; attrs = {  }; children = list("Opening reserve") },
+                                      {
+                                        tag = "input";
+                                        attrs = {
+                                          id = "hh-resource-reserve";
+                                          type = "number";
+                                          min = 0;
+                                          max = 50000;
+                                          step = 10;
+                                          "data-hh-scope" = "resource";
+                                          "data-hh-key" = "reserve";
+                                          disabled = true
+                                        };
+                                        children = list()
+                                      },
+                                      { tag = "small"; attrs = {  }; children = list("money units initially") }
+                                    )
+                                  }
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "button";
+                            attrs = { id = "hh-reset"; type = "button"; disabled = true };
+                            children = list("Restore the authored example")
+                          }
+                        )
+                      },
+                      {
+                        tag = "section";
+                        attrs = {
+                          class = "q-section hh-section hh-chapter hh-chapter-soft";
+                          id = "hh-evolution";
+                          "aria-labelledby" = "hh-evolution-heading"
+                        };
+                        children = list(
+                          { tag = "p"; attrs = { class = "eyebrow" }; children = list("Through time") },
+                          {
+                            tag = "h2";
+                            attrs = { id = "hh-evolution-heading" };
+                            children = list("Follow the household, one period at a time.")
+                          },
+                          {
+                            tag = "section";
+                            attrs = { class = "hh-chart-panel"; "aria-labelledby" = "hh-chart-heading" };
+                            children = list(
+                              {
+                                tag = "header";
+                                attrs = { class = "hh-chart-header" };
+                                children = list(
+                                  {
+                                    tag = "p";
+                                    attrs = { class = "eyebrow" };
+                                    children = list("The household over twelve periods")
+                                  },
+                                  {
+                                    tag = "h3";
+                                    attrs = { id = "hh-chart-heading" };
+                                    children = list("Willingness to review")
+                                  },
+                                  {
+                                    tag = "p";
+                                    attrs = {  };
+                                    children = list(
+                                      "Compare both people on the same fixed scale. Move through time to inspect what each period changed."
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "div";
+                                attrs = {
+                                  id = "hh-timeline";
+                                  class = "hh-timeline";
+                                  "aria-label" = "Willingness over twelve periods"
+                                };
+                                children = list(
+                                  {
+                                    tag = "p";
+                                    attrs = {  };
+                                    children = list(
+                                      "The timeline will show each person separately. Closing willingness affects the following period."
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "p";
+                                attrs = { class = "hh-chart-guide" };
+                                children = list(
+                                  "Dashed vertical lines mark authored input changes. The solid marker follows your selected period."
+                                )
+                              },
+                              {
+                                tag = "div";
+                                attrs = { class = "hh-chart-navigation" };
+                                children = list(
+                                  {
+                                    tag = "div";
+                                    attrs = { class = "hh-period-nav hh-chart-controls" };
+                                    children = list(
+                                      {
+                                        tag = "button";
+                                        attrs = {
+                                          id = "hh-prev";
+                                          type = "button";
+                                          disabled = true;
+                                          "aria-label" = "Previous period";
+                                          title = "Previous period"
+                                        };
+                                        children = list("←")
+                                      },
+                                      {
+                                        tag = "h3";
+                                        attrs = { id = "hh-period-label" };
+                                        children = list("Twelve periods; change begins at period 5")
+                                      },
+                                      {
+                                        tag = "button";
+                                        attrs = {
+                                          id = "hh-next";
+                                          type = "button";
+                                          disabled = true;
+                                          "aria-label" = "Next period";
+                                          title = "Next period"
+                                        };
+                                        children = list("→")
+                                      }
+                                    )
+                                  },
+                                  {
+                                    tag = "div";
+                                    attrs = { class = "hh-chart-scrubber" };
+                                    children = list(
+                                      {
+                                        tag = "label";
+                                        attrs = { for = "hh-period-slider" };
+                                        children = list("Choose a period to inspect")
+                                      },
+                                      {
+                                        tag = "input";
+                                        attrs = {
+                                          id = "hh-period-slider";
+                                          type = "range";
+                                          min = 1;
+                                          max = 12;
+                                          step = 1;
+                                          value = 5;
+                                          disabled = true;
+                                          "aria-label" = "Period to inspect";
+                                          "aria-controls" = "hh-timeline hh-people hh-events hh-budget"
+                                        };
+                                        children = list()
+                                      },
+                                      {
+                                        tag = "div";
+                                        attrs = { class = "hh-scrubber-ends"; "aria-hidden" = "true" };
+                                        children = list(
+                                          { tag = "span"; attrs = {  }; children = list("1 · beginning") },
+                                          { tag = "span"; attrs = {  }; children = list("12 · end") }
+                                        )
+                                      }
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "details";
+                                attrs = { class = "hh-chart-table" };
+                                children = list(
+                                  {
+                                    tag = "summary";
+                                    attrs = {  };
+                                    children = list("Read exact values for all 12 periods")
+                                  },
+                                  {
+                                    tag = "div";
+                                    attrs = { id = "hh-chart-values" };
+                                    children = list("The values appear when the model is ready.")
+                                  }
+                                )
+                              },
+                              {
+                                tag = "p";
+                                attrs = { class = "hh-chart-limit" };
+                                children = list(
+                                  "An authored 0–1 index, not a probability or a measure of consent, happiness or trust. Closing values affect the following period."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "p";
+                            attrs = { id = "hh-status"; role = "status"; "aria-live" = "polite" };
+                            children = list("The interactive example is loading. The notebook remains readable without it.")
+                          },
+                          {
+                            tag = "details";
+                            attrs = { class = "hh-period-detail" };
+                            children = list(
+                              {
+                                tag = "summary";
+                                attrs = {  };
+                                children = list("Inspect this period’s work, responses and resources")
+                              },
+                              {
+                                tag = "div";
+                                attrs = { id = "hh-people"; class = "hh-people" };
+                                children = list(
+                                  {
+                                    tag = "article";
+                                    attrs = {  };
+                                    children = list(
+                                      { tag = "h3"; attrs = {  }; children = list("Person A") },
+                                      {
+                                        tag = "p";
+                                        attrs = {  };
+                                        children = list("Values, achieved work, capacity and willingness will appear here.")
+                                      }
+                                    )
+                                  },
+                                  {
+                                    tag = "article";
+                                    attrs = {  };
+                                    children = list(
+                                      { tag = "h3"; attrs = {  }; children = list("Person B") },
+                                      {
+                                        tag = "p";
+                                        attrs = {  };
+                                        children = list(
+                                          "Each account remains distinct; a household average cannot stand in for either person."
+                                        )
+                                      }
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "h3";
+                                attrs = {  };
+                                children = list("What happened, and what evidence changed willingness?")
+                              },
+                              {
+                                tag = "ol";
+                                attrs = { id = "hh-events"; class = "hh-events" };
+                                children = list(
+                                  {
+                                    tag = "li";
+                                    attrs = {  };
+                                    children = list("Choose a period to inspect its request, agreement and delivery history.")
+                                  }
+                                )
+                              },
+                              { tag = "h3"; attrs = {  }; children = list("Three orders of consequence") },
+                              {
+                                tag = "div";
+                                attrs = { id = "hh-budget"; class = "field-consequences" };
+                                children = list(
+                                  {
+                                    tag = "article";
+                                    attrs = {  };
+                                    children = list(
+                                      { tag = "h3"; attrs = {  }; children = list("Right now") },
+                                      {
+                                        tag = "p";
+                                        attrs = {  };
+                                        children = list("Work delivered, unpaid backlog, paid work, expenses and reserve.")
+                                      }
+                                    )
+                                  },
+                                  {
+                                    tag = "article";
+                                    attrs = {  };
+                                    children = list(
+                                      { tag = "h3"; attrs = {  }; children = list("Between the partners") },
+                                      {
+                                        tag = "p";
+                                        attrs = {  };
+                                        children = list("Whose request was heard; which agreement was kept; what remains unknown.")
+                                      }
+                                    )
+                                  },
+                                  {
+                                    tag = "article";
+                                    attrs = {  };
+                                    children = list(
+                                      { tag = "h3"; attrs = {  }; children = list("What can happen next") },
+                                      {
+                                        tag = "p";
+                                        attrs = {  };
+                                        children = list("Closing willingness and unfinished work carry into the next period.")
+                                      }
+                                    )
+                                  }
+                                )
+                              }
+                            )
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "noscript";
+                    attrs = {  };
+                    children = list(
+                      {
+                        tag = "section";
+                        attrs = { class = "q-section" };
+                        children = list(
+                          { tag = "h2"; attrs = {  }; children = list("Read the example without interaction") },
+                          {
+                            tag = "p";
+                            attrs = {  };
+                            children = list(
+                              "Interactive controls require the site’s algebra runtime. The assumptions and all 66 attributed claims are available in the inspection notebook."
+                            )
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "inspect/"; class = "q-text-link" };
+                            children = list("Open the household notebook →")
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = {
+                      class = "q-section hh-section hh-chapter";
+                      id = "hh-consequences";
+                      "aria-labelledby" = "hh-consequences-heading"
+                    };
+                    children = list(
+                      { tag = "p"; attrs = { class = "eyebrow" }; children = list("Read the consequences") },
+                      {
+                        tag = "h2";
+                        attrs = { id = "hh-consequences-heading" };
+                        children = list("An allocation is one question. Correction is another.")
+                      },
+                      {
+                        tag = "div";
+                        attrs = { class = "q-practices" };
+                        children = list(
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("Values") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "What does each person want, and which compromises do they welcome? Distinct values need not prevent practical cooperation."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("Outcomes") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Can the work and essential expenses be covered? A desirable division on paper can exceed available capacity."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("Renegotiation") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Can either person raise a concern, refuse a proposal or reopen a decision? Being heard is different from getting the requested remedy."
+                                )
+                              }
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "This model does not compute happiness, consent, love, dignity or the moral legitimacy of an arrangement. Its commitment to retaining a route for correction is a declared normative proposal. You can reject it or leave without assessment."
+                        )
+                      },
+                      {
+                        tag = "nav";
+                        attrs = { "aria-label" = "Inspect or leave this example"; class = "q-actions" };
+                        children = list(
+                          {
+                            tag = "a";
+                            attrs = { href = "inspect/"; class = "q-text-link" };
+                            children = list("Inspect assumptions, claims and sources →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "../"; class = "q-text-link" };
+                            children = list("Return to The Field →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "../../questions.html"; class = "q-text-link" };
+                            children = list("Leave for Questions →")
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = {
+                      class = "q-section hh-section hh-related";
+                      id = "hh-related";
+                      "aria-labelledby" = "hh-related-heading"
+                    };
+                    children = list(
+                      { tag = "p"; attrs = { class = "eyebrow" }; children = list("Related questions") },
+                      {
+                        tag = "h2";
+                        attrs = { id = "hh-related-heading" };
+                        children = list("A household is also a relationship.")
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "The Field holds this experiment because choices change what can happen next. These questions place the model beside the rest of the corpus:"
+                        )
+                      },
+                      {
+                        tag = "ul";
+                        attrs = { class = "hh-related-links" };
+                        children = list(
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              { tag = "a"; attrs = { href = "../../places/care.html" }; children = list("Care") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list("what remains owed when an arrangement becomes difficult?")
+                              }
+                            )
+                          },
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "a";
+                                attrs = { href = "../../places/revision.html" };
+                                children = list("Revision")
+                              },
+                              { tag = "p"; attrs = {  }; children = list("what can be reopened, and who can ask?") }
+                            )
+                          },
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "a";
+                                attrs = { href = "../../places/permission.html" };
+                                children = list("Permission")
+                              },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list("who authorizes a choice on someone else’s behalf?")
+                              }
+                            )
+                          },
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "a";
+                                attrs = { href = "../../relationship-manager/" };
+                                children = list("Rupture and repair")
+                              },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list("how might a relationship find contact again?")
+                              }
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = { class = "hh-small" };
+                        children = list(
+                          "These relationships locate the example; they do not provide empirical validation for its authored rules."
+                        )
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          },
+          {
+            tag = "footer";
+            attrs = { class = "footer" };
+            children = list(
+              {
+                tag = "div";
+                attrs = {  };
+                children = list(
+                  { tag = "p"; attrs = { class = "signature" }; children = list("Aaron Alderman") },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("A few things I’ve built. A few things I’m still trying to understand.")
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Elsewhere" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "https://github.com/aaron-alderman" };
+                    children = list("GitHub ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "https://www.linkedin.com/in/aaron-alderman/" };
+                    children = list("LinkedIn ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "https://worldwright.io/" };
+                    children = list("Built with Worldwright.io ↗")
+                  }
+                )
+              },
+              $stewardshipLinks
+            )
+          }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  let surfaceWritePath = "the-field/households/index.html"
+  call assurance.surface.register
+  port file.write {
+    path = "the-field/households/index.html";
+    text = $result
+  } → _

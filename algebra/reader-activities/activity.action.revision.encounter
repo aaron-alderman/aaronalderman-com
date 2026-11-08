@@ -1,0 +1,17 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.revision:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port state.get { key = "revisionOpen" } → revisionOpen
+  port state.set { key = "revisionOpen"; value = not($revisionOpen) } → _
+  let revisionOpen = not($revisionOpen)
+  port browser.attribute { ref = $button.ref; name = "aria-expanded"; value = $revisionOpen } → _
+  port browser.write { ref = "#revision-after"; name = "hidden"; value = not($revisionOpen) } → _
+  port browser.write {
+    ref = $button.ref;
+    name = "textContent";
+    value = if($revisionOpen, "Keep the seam visible", "Open the correction")
+  } → _
+  port browser.class { ref = ".art-panel"; name = "seam-open"; value = $revisionOpen } → _

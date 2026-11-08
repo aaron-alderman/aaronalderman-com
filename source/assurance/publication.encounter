@@ -1,0 +1,98 @@
+process-module "temple/surface-process-module/1"
+
+process publication.phase.experience:
+  call publication.context
+  port source.read { path = "source/assurance/experience.encounter" } → experienceSource
+  port encounter.execute { text = $experienceSource; entry = "experience.plan"; input = {}; bindings = {} } → result
+  let experiencePlan = $result
+  port rel.encode { value = $experiencePlan } → planText
+  port file.write { path = "assurance/reading-experience-plan.rel"; text = $planText } → _
+  port source.read { path = "source/assurance/browser-capture.rel" } → captureText
+  port rel.decode { text = $captureText } → capture
+  port file.write { path = "assurance/reading-experience-capture.rel"; text = $captureText } → _
+  fold $experiencePlan.routes as route; assessments starts list():
+    fold $experiencePlan.profiles as profile; cases starts list():
+      let matches = filter($capture.snapshots, "s", and(eq($s.route, $route.path), eq($s.profile, $profile.id)))
+      let rows = list({ rule = "coverage.browser-snapshot"; status = "needs-browser-evidence"; path = "html"; text = ""; evidence = "No unique bound browser snapshot exists for this route and profile." })
+      when eq(count($matches), 1):
+        let observation = at($matches, 0)
+        call experience.observation
+        let snapshot = $result
+        assert and(eq($snapshot.readyState, "complete"), eq($snapshot.fontStatus, "loaded"), eq($snapshot.viewport.width, $profile.width), eq($snapshot.viewport.height, $profile.height), eq($snapshot.spacingApplied, $profile.spacing))
+          otherwise "Browser evidence did not meet its declared capture condition."
+        let eventInput = $snapshot
+        port encounter.execute { text = $experienceSource; entry = "experience.snapshot"; input = $eventInput; bindings = {} } → result
+        let rows = $result
+        port rel.encode { value = $rows } → rowsText
+        port file.write { path = concat("assurance/assessments/", $profile.id, "-", $observation.sha256, ".rel"); text = $rowsText } → _
+      yield append($cases, map($rows, "r", { route = $route.path; profile = $profile.id; state = or(at($r, "state"), "default"); rule = $r.rule; status = $r.status; path = $r.path; text = $r.text; ratio = or(at($r, "ratio"), null); minimum = or(at($r, "minimum"), null); evidence = $r.evidence })) → cases
+    let matches = filter($capture.journeys, "j", eq($j.route, $route.path))
+    let rows = list({ rule = "coverage.keyboard-journey"; status = "needs-browser-evidence"; path = "html"; text = ""; evidence = "No unique keyboard journey exists for this route." })
+    when eq(count($matches), 1):
+      let observation = at($matches, 0)
+      call experience.observation
+      let eventInput = $result
+      port encounter.execute { text = $experienceSource; entry = "experience.journey"; input = $eventInput; bindings = {} } → result
+      let rows = $result
+      port rel.encode { value = $rows } → rowsText
+      port file.write { path = concat("assurance/assessments/keyboard-", $observation.sha256, ".rel"); text = $rowsText } → _
+    yield append($assessments, append($cases, map($rows, "r", { route = $route.path; profile = "keyboard"; state = or(at($r, "state"), "keyboard-focus"); rule = $r.rule; status = $r.status; path = $r.path; text = $r.text; ratio = or(at($r, "ratio"), null); minimum = or(at($r, "minimum"), null); evidence = $r.evidence }))) → assessments
+  let contrastRows = filter($assessments, "r", eq($r.rule, "contrast.rendered-pair"))
+  let caseIndex = append(map($capture.snapshots, "s", { route = $s.route; profile = $s.profile; observations = concat("/", $s.path); sha256 = $s.sha256; assessments = concat("/assurance/assessments/", $s.profile, "-", $s.sha256, ".rel") }), map($capture.journeys, "s", { route = $s.route; profile = "keyboard"; observations = concat("/", $s.path); sha256 = $s.sha256; assessments = concat("/assurance/assessments/keyboard-", $s.sha256, ".rel") }))
+  let experienceReport = { protocol = "aaronalderman/reading-experience-report/2"; status = if(count($capture.snapshots), "browser-observed", "needs-browser-evidence"); boundary = $experiencePlan.boundary; assessments = distinct(filter($assessments, "r", not(eq($r.status, "passed")))); evidence = { capturedAt = $capture.capturedAt; browser = $capture.browser; bindings = $capture.bindings; planSha256 = $capture.planSha256; observerSha256 = $capture.observerSha256; cases = $caseIndex }; counts = { routes = count($experiencePlan.routes); passed = count(filter($assessments, "r", eq($r.status, "passed"))); failed = count(filter($assessments, "r", eq($r.status, "failed"))); review = count(filter($assessments, "r", eq($r.status, "needs-review"))); missing = count(filter($assessments, "r", eq($r.status, "needs-browser-evidence"))) } }
+  port rel.encode { value = $experienceReport } → reportText
+  port file.write { path = "assurance/reading-experience.rel"; text = $reportText } → _
+  let report = $experienceReport
+  let reportRoute = "reading-experience"
+  let reportTitle = "Can you read it, enlarge it, and find your way?"
+  let reportIntro = list("Browser observations check text contrast, narrow reading layouts, increased text spacing, and real Tab and Enter journeys. The original twenty reader routes and seven image diagnostics remain in scope; the new series, article and design guide join them.", "Contrast pairs actual computed text colour with the first supported opaque surface. Images, transparency and complex painting remain review work.", "Zoom checks use CSS widths equivalent to 200% and 400% zoom from a 1280px viewport. A separate profile applies increased text spacing. These are reflow checks, not a recording of browser-toolbar zoom.", "Keyboard journeys enter the main content, return home, and follow the declared Questions and atlas-place links. Focus visibility and obstruction are recorded along the way.")
+  call experience.page
+  fold $capture.language as page; assessments starts list():
+    let eventInput = $page
+    port encounter.execute { text = $experienceSource; entry = "experience.language"; input = $eventInput; bindings = {} } → result
+    yield append($assessments, map($result, "r", { route = $page.route; profile = "opening prose"; rule = $r.rule; status = $r.status; path = $r.path; text = $r.text; evidence = $r.evidence })) → assessments
+  let languageReport = { protocol = "aaronalderman/plain-language-report/2"; status = "human-review-track"; boundary = "Opening twelve non-code prose blocks and forty main-content link labels on every generated HTML route. English lexical prompts are review candidates, not claims that prose is bad or misunderstood. Preserve voice and technical precision. Zero prompts never establishes comprehension. Self-referential report pages retain the pre-report document hash; this snapshot is not a comprehension approval."; assessments = distinct($assessments); evidence = { capturedAt = $capture.capturedAt; bindings = $capture.bindings }; counts = { routes = count($capture.language); passed = 0; failed = 0; review = count($assessments); missing = 0 } }
+  port rel.encode { value = $languageReport } → text
+  port file.write { path = "assurance/plain-language.rel"; text = $text } → _
+  let report = $languageReport
+  let reportRoute = "plain-language"
+  let reportTitle = "Can someone else understand what I mean?"
+  let reportIntro = list("Clarity deserves its own review track. Automatic prompts help locate difficult passages; a reader’s account of what they understood supplies a different kind of evidence.", "The opening twelve prose blocks of each page are checked for selected specialist terms, long sentences and vague link labels. These are reasons to look more closely, not automatic judgments about the writing.", "Ask a reader to explain the page in their own words, identify what the work is for, and describe a next step. Record confusing terms and passages, the method and date, and the exact document reviewed. An empty automatic queue never establishes understanding.")
+  call experience.page
+  let report = $experienceReport
+  port record.put { record = $report; key = "assessments"; value = $contrastRows } → report
+  port record.put { record = $report; key = "counts"; value = { routes = count(distinct(map($contrastRows, "r", $r.route))); passed = count(filter($contrastRows, "r", eq($r.status, "passed"))); failed = count(filter($contrastRows, "r", eq($r.status, "failed"))); review = count(filter($contrastRows, "r", eq($r.status, "needs-review"))); missing = $experienceReport.counts.missing } } → report
+  port rel.encode { value = $report } → text
+  port file.write { path = "assurance/contrast.rel"; text = $text } → _
+  let reportRoute = "contrast"
+  let reportTitle = "Light behind the words."
+  let reportIntro = list("A reading theme changed the text to dark ink while three essays retained dark masthead and footer surfaces. The common reading palette now owns the foreground and background pairs across Christian, Dad, Sourcerer and Author reading pages.", "Headers, essay titles and footer links are checked against the actual supported opaque browser surface. Normal text needs 4.5:1 contrast; large text needs 3:1. Comparisons use the WCAG sRGB formula without rounding at the threshold.", "The canonical dark footer keeps its own light text. This successor records the current browser pairs; earlier before-and-after evidence retains its original date and artifact bindings in Git history.", "Gradients, interaction states, native controls, transparency and arbitrary CSS painting need visual review. This bounded report does not certify accessibility.")
+  call experience.page
+  fold filter($capture.snapshots, "s", includes($s.route, "assurance/images/")) as reference; imageCases starts list():
+    let observation = $reference
+    call experience.observation
+    port encounter.execute { text = $experienceSource; entry = "experience.images"; input = $result; bindings = {} } → imageCase
+    yield append($imageCases, list($imageCase)) → imageCases
+  let imageReport = { protocol = "aaronalderman/image-assurance-report/2"; status = if(eq(count($imageCases), 28), "browser-observed", "needs-browser-evidence"); boundary = "Five positive Questions projections and two deliberate counterexamples, at four declared browser profiles. Source fitting follows image purpose. Loading, actual computed fit, card bounds and frame dimensions are observed; artistic crop quality remains visual review."; cases = $imageCases; positivePassed = count(filter($imageCases, "c", and(not($c.negative), $c.passed))); negativeDetected = count(filter($imageCases, "c", and($c.negative, $c.expectedFailureDetected))); evidence = { capturedAt = $capture.capturedAt; bindings = $capture.bindings; observations = filter($capture.snapshots, "s", includes($s.route, "assurance/images/")) } }
+  port rel.encode { value = $imageReport } → text
+  port file.write { path = "assurance/images.rel"; text = $text } → _
+  port source.read { path = "source/assurance/images.encounter" } → source
+  port source.read { path = "source/projection/assurance-pages.encounter" } → componentSource
+  port encounter.execute { text = $componentSource; entry = "component.images.inspector"; bindings = { source = $source } } → portfolioPage
+  call assurance.portfolio.document
+
+process experience.observation:
+  port text.matches { value = $observation.path; pattern = "^source/assurance/observations/[a-z0-9-]+\\.rel$" } → bounded
+  assert $bounded
+    otherwise "Browser observation reference is outside its evidence family."
+  port source.read { path = $observation.path } → text
+  port digest.sha256 { text = $text } → hash
+  assert eq($hash, $observation.sha256)
+    otherwise "Browser observation identity changed."
+  port file.write { path = $observation.path; text = $text } → _
+  port rel.decode { text = $text } → result
+
+process experience.page:
+  port source.read { path = "source/projection/assurance-pages.encounter" } → componentSource
+  port encounter.execute { text = $componentSource; entry = "component.experience.page"; bindings = { report = $report; reportRoute = $reportRoute; reportTitle = $reportTitle; reportIntro = $reportIntro } } → portfolioPage
+  call assurance.portfolio.document

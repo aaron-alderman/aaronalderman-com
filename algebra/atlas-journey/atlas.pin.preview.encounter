@@ -1,0 +1,11 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process atlas.pin.preview:
+  let id = at($eventInput.matched.attributes, "data-atlas-id")
+  when includes($data.ids, $id):
+    let place = at(filter($data.places, "p", eq($p.id, $id)), 0)
+    port dom.text { selector = "#atlas-preview-title"; text = $place.name } → _
+    port dom.text { selector = "#atlas-preview-question"; text = $place.question } → _
+    port browser.attribute { ref = "#atlas-preview-link"; name = "href"; value = concat("places/", $id, ".html") } → _
+    port dom.hidden { selector = "#atlas-preview-link"; value = false } → _

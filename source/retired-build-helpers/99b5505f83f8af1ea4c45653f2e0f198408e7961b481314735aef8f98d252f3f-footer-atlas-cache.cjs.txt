@@ -1,1 +1,0 @@
-const fs=require('fs');const p='algebra/atlas.process.json';let s=fs.readFileSync(p,'utf8');s=s.replace('"href": "expedition.css?v=atlas-journey-1"','"href": ["concat", "expedition.css?v=", ["one", "site", "stylesheetVersion"]]');fs.writeFileSync(p,JSON.stringify(JSON.parse(s),null,2)+'\n');

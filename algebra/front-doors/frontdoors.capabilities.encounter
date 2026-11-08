@@ -1,0 +1,157 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process frontdoors.capabilities:
+  each subjects("isa", "CapabilitySet") as capability:
+    when not(eq(one($capability, "slug"), "encounter")):
+      port static.read { text = one($capability, "icon") } → capabilityIcon
+      port static.read { text = one($capability, "paragraphs") } → paragraphs
+      port static.read { text = one($capability, "links") } → links
+      let input = {
+        tag = "html";
+        attrs = { lang = "en" };
+        children = list(
+          {
+            tag = "head";
+            attrs = {  };
+            children = list(
+              { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+              {
+                tag = "meta";
+                attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+                children = list()
+              },
+              {
+                tag = "title";
+                attrs = {  };
+                children = list(concat(one($capability, "name"), " — Aaron Alderman"))
+              },
+              {
+                tag = "meta";
+                attrs = { name = "description"; content = one($capability, "description") };
+                children = list()
+              },
+              {
+                tag = "link";
+                attrs = {
+                  rel = "canonical";
+                  href = concat("https://aaronalderman.com/", one($capability, "href"))
+                };
+                children = list()
+              },
+              {
+                tag = "link";
+                attrs = { rel = "stylesheet"; href = "../expedition.css?v=capabilities-2" };
+                children = list()
+              },
+              {
+                tag = "meta";
+                attrs = { property = "og:title"; content = one($capability, "name") };
+                children = list()
+              },
+              {
+                tag = "meta";
+                attrs = { property = "og:description"; content = one($capability, "description") };
+                children = list()
+              },
+              {
+                tag = "meta";
+                attrs = {
+                  property = "og:url";
+                  content = concat("https://aaronalderman.com/", one($capability, "href"))
+                };
+                children = list()
+              }
+            )
+          },
+          {
+            tag = "body";
+            attrs = {  };
+            children = list(
+              {
+                tag = "a";
+                attrs = { class = "skip"; href = "#main" };
+                children = list("Skip to content")
+              },
+              {
+                tag = "header";
+                attrs = { class = "masthead" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { class = "brand"; href = "../index.html"; "aria-label" = "Aaron Alderman" };
+                    children = list(
+                      {
+                        tag = "span";
+                        attrs = { class = "brand-name" };
+                        children = list(
+                          "Aaron ",
+                          { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "nav";
+                    attrs = { "aria-label" = "Site" };
+                    children = list(
+                      {
+                        tag = "a";
+                        attrs = { href = "../index.html#capabilities" };
+                        children = list("Capabilities")
+                      },
+                      {
+                        tag = "a";
+                        attrs = { href = "../index.html#microsites" };
+                        children = list("Explore the worlds")
+                      }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "main";
+                attrs = { id = "main"; class = "capability-page" };
+                children = list(
+                  $capabilityIcon,
+                  {
+                    tag = "p";
+                    attrs = { class = "eyebrow" };
+                    children = list("A connected set of capabilities")
+                  },
+                  { tag = "h1"; attrs = {  }; children = list(one($capability, "name")) },
+                  { tag = "p"; attrs = { class = "lead" }; children = list(one($capability, "lead")) },
+                  $paragraphs,
+                  {
+                    tag = "nav";
+                    attrs = { class = "capability-page-links"; "aria-label" = "Explore this capability" };
+                    children = list($links)
+                  },
+                  {
+                    tag = "nav";
+                    attrs = { class = "capability-siblings"; "aria-label" = "Other capabilities" };
+                    children = list(
+                      { tag = "a"; attrs = { href = "../encounter/" }; children = list("Encounter") },
+                      { tag = "a"; attrs = { href = "../kingdom/" }; children = list("Kingdom") },
+                      {
+                        tag = "a";
+                        attrs = { href = "../world-modelling/" };
+                        children = list("World Modelling")
+                      },
+                      { tag = "a"; attrs = { href = "../creativity/" }; children = list("Creativity") },
+                      { tag = "a"; attrs = { href = "../the-field/" }; children = list("The Field") }
+                    )
+                  }
+                )
+              }
+            )
+          }
+        )
+      }
+      call projection.serialize
+      let surfaceWritePath = concat(one($capability, "href"), "index.html")
+      call assurance.surface.register
+      port file.write {
+        path = concat(one($capability, "href"), "index.html");
+        text = $result
+      } → _

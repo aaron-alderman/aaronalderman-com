@@ -1,0 +1,238 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process roadmap.collect:
+  let inputReports = $eventInput
+  let caseRows = list()
+  fold $inputReports.rendered.report.findings as f; cases starts list():
+    let case = {
+      origin = "rendered";
+      topic = "rendered-layout";
+      rule = $f.finding.rule;
+      node = $f.finding.node;
+      route = $f.route;
+      profile = $f.profile;
+      status = $f.finding.status;
+      reason = $f.finding.evidence;
+      version = concat($inputReports.rendered.capturedAt, ":", $inputReports.rendered.policySha256)
+    }
+    port value.encode { value = list("rendered", $case.rule, $case.node) } → caseKey
+    yield append($cases, list({ key = $caseKey; value = $case })) → caseRows
+  fold $inputReports.source.pages as page; cases starts $caseRows:
+    let pageCases = map(
+      $page.findings,
+      "f",
+      {
+        key = concat("source:", $f.rule, ":", $f.selector);
+        value = {
+          origin = "source";
+          topic = "navigation-layout";
+          rule = $f.rule;
+          node = $f.selector;
+          route = $page.route;
+          profile = "source";
+          status = $f.status;
+          reason = $f.evidence;
+          version = "current source audit"
+        }
+      }
+    )
+    yield append($cases, $pageCases) → caseRows
+  let caseRows = append(
+    $caseRows,
+    map(
+      $inputReports.source.stylesheetFindings,
+      "f",
+      {
+        key = concat("source:", $f.rule, ":", $f.route);
+        value = {
+          origin = "source";
+          topic = "navigation-layout";
+          rule = $f.rule;
+          node = $f.route;
+          route = $f.route;
+          profile = "source";
+          status = $f.status;
+          reason = $f.evidence;
+          version = "current stylesheet audit"
+        }
+      }
+    )
+  )
+  fold distinct(map($caseRows, "c", $c.key)) as key; items starts list():
+    let cases = map(filter($caseRows, "c", eq($c.key, $key)), "c", $c.value)
+    let first = at($cases, 0)
+    let rule = at(filter($inputReports.workflow.rules, "r", eq($r.id, $first.rule)), 0)
+    let item = {
+      id = concat("observation:", $key);
+      title = if(at($rule, "title"), at($rule, "title"), $first.rule);
+      origin = $first.origin;
+      kind = "discernment";
+      product = "aaronalderman";
+      topic = $first.topic;
+      scope = $first.node;
+      priority = if(at($rule, "priority"), at($rule, "priority"), "P2");
+      horizon = "now";
+      defaultStage = "triage";
+      targetLevel = 0;
+      nextAction = if(
+        at($rule, "action"),
+        at($rule, "action"),
+        "Inspect the located observations and record whether a change or an explicit acceptance is appropriate."
+      );
+      doneWhen = if(
+        at($rule, "done"),
+        at($rule, "done"),
+        "Fresh scoped evidence verifies the chosen correction or acceptance."
+      );
+      evidence = list(
+        {
+          href = if(
+            eq($first.origin, "rendered"),
+            "/assurance/rendered-layout/",
+            "/assurance/navigation-layout/"
+          );
+          label = "Assurance observations"
+        }
+      );
+      routes = distinct(map($cases, "c", $c.route));
+      profiles = distinct(map($cases, "c", $c.profile));
+      occurrences = count($cases);
+      sourceState = $first.status;
+      sourceVersion = $first.version;
+      example = $first.reason
+    }
+    yield append($items, list($item)) → observedItems
+  fold $inputReports.topics.roadmap as g; items starts $observedItems:
+    port value.encode { value = list("gate", $g.product, $g.id) } → gateKey
+    let item = {
+      id = concat("gate:", $gateKey);
+      title = $g.label;
+      origin = "maturity";
+      kind = "evidence";
+      product = $g.product;
+      topic = $g.saga;
+      scope = if(at($g, "scope"), at($g, "scope"), "homepage entry routes");
+      priority = if(eq($g.horizon, "next"), "P2", "P3");
+      horizon = if(eq($g.horizon, "next"), "next", "later");
+      defaultStage = "todo";
+      targetLevel = $g.targetLevel;
+      nextAction = $g.action;
+      doneWhen = concat(
+        "The ",
+        $g.label,
+        " obligation is supported in its declared scope; a matching verification receipt records the evidence and review."
+      );
+      evidence = list({ href = "/assurance/maturity/"; label = "Product evidence gates" });
+      routes = list();
+      profiles = list();
+      occurrences = 1;
+      sourceState = $g.state;
+      sourceVersion = concat($g.product, ":", $g.saga, ":", $g.targetLevel, ":", $g.state);
+      example = "Assurance maturity is scoped per product and topic; completing this task does not by itself promote a maturity level."
+    }
+    yield append($items, list($item)) → observedItems
+  fold filter(
+    $inputReports.identity.rows,
+    "r",
+    not(includes(list("identity-mapped", "intentionally-invariant"), $r.status))
+  ) as r; items starts $observedItems:
+    let item = {
+      id = concat("identity:", $r.id);
+      title = $r.label;
+      origin = "identity";
+      kind = "discernment";
+      product = "aaronalderman";
+      topic = "identity";
+      scope = if(eq($r.target, ""), $r.sink, $r.target);
+      priority = if(eq($r.status, "missing"), "P1", "P2");
+      horizon = "now";
+      defaultStage = "triage";
+      targetLevel = 0;
+      nextAction = $r.next;
+      doneWhen = "Exact selector/property relationships have declared intent and supporting evidence. A whole subtree is not waived by completing this grouped work item.";
+      evidence = list({ href = "/assurance/identities/"; label = "Identity relationship evidence" });
+      routes = map(if(at($r, "discovery"), at($r, "discovery"), list()), "d", $d.file);
+      profiles = list();
+      occurrences = fold(
+        if(at($r, "discovery"), at($r, "discovery"), list()),
+        "d",
+        "n",
+        0,
+        add($n, $d.count)
+      );
+      sourceState = $r.status;
+      sourceVersion = concat($r.id, ":", $r.status);
+      example = $r.reason
+    }
+    yield append($items, list($item)) → observedItems
+  fold filter($inputReports.source.pages, "page", not(eq($page.geometry.status, "measured"))) as page; items starts $observedItems:
+    let item = {
+      id = concat("browser-coverage:", $page.route);
+      title = "Obtain current desktop/mobile browser evidence";
+      origin = "coverage";
+      kind = "verification";
+      product = "aaronalderman";
+      topic = "rendered-layout";
+      scope = $page.route;
+      priority = "P1";
+      horizon = "now";
+      defaultStage = "todo";
+      targetLevel = 0;
+      nextAction = "Measure the route at both declared widths and bind the observations to the current artifacts.";
+      doneWhen = "Both declared profiles have current, complete readings; retain a verification receipt before closing this item.";
+      evidence = list({ href = "/assurance/navigation-layout.values.rel"; label = "Coverage evidence" });
+      routes = list($page.route);
+      profiles = list("desktop", "mobile");
+      occurrences = 1;
+      sourceState = $page.geometry.status;
+      sourceVersion = $page.geometry.status;
+      example = "Missing evidence is work, not a passing layout result."
+    }
+    yield append($items, list($item)) → observedItems
+  fold if(at($inputReports.workflow, "work"), at($inputReports.workflow, "work"), list()) as w; items starts $observedItems:
+    assert and(
+      if(at($w, "id"), at($w, "id"), ""),
+      if(at($w, "title"), at($w, "title"), ""),
+      if(at($w, "product"), at($w, "product"), ""),
+      if(at($w, "revision"), at($w, "revision"), ""),
+      if(at($w, "nextAction"), at($w, "nextAction"), ""),
+      if(at($w, "doneWhen"), at($w, "doneWhen"), "")
+    )
+      otherwise "ROADMAP-PLAN: A declared plan needs id, title, product, revision, nextAction and doneWhen."
+    assert and(
+      includes(list("P1", "P2", "P3"), if(at($w, "priority"), at($w, "priority"), "P2")),
+      includes(list("now", "next", "later"), if(at($w, "horizon"), at($w, "horizon"), "next"))
+    )
+      otherwise "ROADMAP-PLAN: Priority and horizon must use declared roadmap values."
+    let plannedId = concat("planned:", $w.id)
+    assert not(includes(map($items, "i", $i.id), $plannedId))
+      otherwise "ROADMAP-PLAN: Declared work IDs must be unique."
+    let item = {
+      id = $plannedId;
+      title = $w.title;
+      origin = "planning";
+      kind = "plan";
+      product = $w.product;
+      topic = if(at($w, "topic"), at($w, "topic"), "product-development");
+      scope = if(at($w, "scope"), at($w, "scope"), "declared product plan");
+      priority = if(at($w, "priority"), at($w, "priority"), "P2");
+      horizon = if(at($w, "horizon"), at($w, "horizon"), "next");
+      defaultStage = "todo";
+      targetLevel = 0;
+      nextAction = $w.nextAction;
+      doneWhen = $w.doneWhen;
+      evidence = if(
+        at($w, "evidence"),
+        at($w, "evidence"),
+        list({ href = "/roadmap/workflow.values.rel"; label = "Declared product plan" })
+      );
+      routes = if(at($w, "routes"), at($w, "routes"), list());
+      profiles = list();
+      occurrences = 1;
+      sourceState = "declared";
+      sourceVersion = $w.revision;
+      example = "A declared plan is authored intent. Its completion requires scoped verification; it is not an assurance finding."
+    }
+    yield append($items, list($item)) → observedItems
+  let result = $observedItems

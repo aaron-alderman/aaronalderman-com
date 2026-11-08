@@ -1,0 +1,62 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.oneField:
+  let ecSpan = {
+    file = $file;
+    line = $ecFieldNode.line;
+    column = add($ecFieldNode.indent, 1);
+    offset = $ecFieldNode.offset;
+    endOffset = add($ecFieldNode.offset, count($ecFieldNode.raw))
+  }
+  assert eq(count(filter($ecNodes, "ecN", eq($ecN.parent, $ecFieldNode.id))), 0)
+    otherwise "EC-P024: A value mapping cannot hide nested statements. Put each statement at its declared level."
+  port text.split { value = $ecFieldNode.text; pattern = "^([A-Za-z_][A-Za-z0-9_.-]*): (.+)$" } → ecFieldTokens
+  assert eq(count($ecFieldTokens), 4)
+    otherwise "EC-P007: Write a field as name: expression."
+  port kernel.invoke {
+    query = "ec.attempt";
+    input = {
+      query = "ec.slot";
+      input = { type = $ecFieldsType; name = at($ecFieldTokens, 1) };
+      span = $ecSpan
+    }
+  } → ecOutputSlot
+  assert not(some($ecFieldState.fields, "ecF", eq($ecF.name, $ecOutputSlot.name)))
+    otherwise "EC-P008: A field has two authors in the same contribution. Write it once."
+  port kernel.invoke {
+    query = "ec.attempt";
+    input = {
+      query = "ec.expression";
+      input = { text = at($ecFieldTokens, 2); scope = $ecFieldsScope };
+      span = $ecSpan
+    }
+  } → ecFieldExpr
+  assert and(
+    eq($ecFieldExpr.kind, $ecOutputSlot.kind),
+    eq($ecFieldExpr.cardinality, $ecOutputSlot.cardinality)
+  )
+    otherwise "EC-T023: The expression’s value kind or collection shape does not match this field."
+  when eq($ecOutputSlot.kind, "ref"):
+    assert eq($ecFieldExpr.expects, $ecOutputSlot.expects)
+      otherwise "EC-T024: This reference expression targets a different type than the field requires."
+  port record.put {
+    record = $ecFieldState.values;
+    key = $ecOutputSlot.name;
+    value = $ecFieldExpr.expression
+  } → ecOutputValues
+  let ecFieldState = {
+    values = $ecOutputValues;
+    fields = append(
+      $ecFieldState.fields,
+      list(
+        {
+          name = $ecOutputSlot.name;
+          node = $ecFieldNode;
+          expression = $ecFieldExpr;
+          text = at($ecFieldTokens, 2)
+        }
+      )
+    )
+  }
+  let result = $ecFieldState

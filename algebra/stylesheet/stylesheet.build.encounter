@@ -1,0 +1,19 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process stylesheet.build:
+  call stylesheet.catalog
+  let cssOwnership = $result
+  each $cssOwnership.stylesheets as sheet:
+    port file.copy { path = $sheet.source } → _
+    port file.read { path = $sheet.source } → cssSource
+    port static.read { text = $cssSource } → cssSource
+    assert eq($cssSource.protocol, "worldwright/stylesheet-tree/1")
+      otherwise "CSS-002: Unsupported stylesheet source."
+    let input = $cssSource.root
+    call stylesheet.render
+    let stylesheetText = $result
+    each $sheet.outputs as cssOutput:
+      let surfaceWritePath = $cssOutput
+      call assurance.surface.register
+      port file.write { path = $cssOutput; text = $stylesheetText } → _

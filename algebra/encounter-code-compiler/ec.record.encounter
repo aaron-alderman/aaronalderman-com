@@ -1,0 +1,34 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.record:
+  let ecRecordNodes = $eventInput.nodes
+  let ecRecordScope = $eventInput.scope
+  fold $ecRecordNodes as ecRecordNode; ecRecord starts {  }:
+    let ecSpan = {
+      file = $file;
+      line = $ecRecordNode.line;
+      column = add($ecRecordNode.indent, 1);
+      offset = $ecRecordNode.offset;
+      endOffset = add($ecRecordNode.offset, count($ecRecordNode.raw))
+    }
+    port text.split { value = $ecRecordNode.text; pattern = "^([A-Za-z_][A-Za-z0-9_.-]*):(?: (.*))?$" } → ecRecordTokens
+    assert eq(count($ecRecordTokens), 4)
+      otherwise "EC-P009: Expected a named data field."
+    let ecRecordKey = at($ecRecordTokens, 1)
+    assert not(includes(list("__proto__", "prototype", "constructor"), $ecRecordKey))
+      otherwise "EC-P010: This field name is reserved by the execution boundary."
+    port record.entries { value = $ecRecord } → ecExistingRecordFields
+    assert not(some($ecExistingRecordFields, "ecF", eq(at($ecF, 0), $ecRecordKey)))
+      otherwise "EC-P008: A data field appears twice."
+    port kernel.invoke {
+      query = "ec.attempt";
+      input = {
+        query = "ec.data";
+        input = { node = $ecRecordNode; text = or(at($ecRecordTokens, 2), ""); scope = $ecRecordScope };
+        span = $ecSpan
+      }
+    } → ecRecordValue
+    port record.put { record = $ecRecord; key = $ecRecordKey; value = $ecRecordValue } → ecRecord
+    yield $ecRecord → ecRecord
+  let result = $ecRecord

@@ -1,0 +1,11 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.enrich:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port state.get { key = "enriched" } → enriched
+  port state.set { key = "enriched"; value = not($enriched) } → _
+  let enriched = not($enriched)
+  port browser.attribute { ref = $button.ref; name = "aria-pressed"; value = $enriched } → _
+  call activity.erasure

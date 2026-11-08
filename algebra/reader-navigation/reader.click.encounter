@@ -1,0 +1,57 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process reader.click:
+  let action = at($eventInput.matched.attributes, "data-reader-action")
+  when eq($action, "close"):
+    port browser.dialog { ref = "#reader-dialog"; open = false } → _
+  when eq($action, "atlas"):
+    call reader.atlas
+    port browser.dialog { ref = "#reader-dialog"; open = true } → _
+  when eq($action, "notes"):
+    call reader.notes
+    port browser.dialog { ref = "#reader-dialog"; open = true } → _
+  when eq($action, "about"):
+    let input = {
+      tag = "section";
+      attrs = {  };
+      children = list(
+        { tag = "h2"; attrs = {  }; children = list("A person behind the questions.") },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "I’m Aaron Alderman. My work moves through experimental physics, software, faith, and questions about how people understand and act together."
+          )
+        },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "Some trails lead to a calculation or an instrument. Some lead to a correction. Some remain personal and unfinished. The research results retain their stated scope."
+          )
+        },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "Your visited places stay in this browser. No analytics or account is used by this story."
+          )
+        }
+      )
+    }
+    call projection.serialize
+    let markup = $result
+    port browser.content { ref = "#reader-dialog-content"; html = $markup } → _
+    port browser.write { ref = "#reader-search"; name = "hidden"; value = true } → _
+    port browser.dialog { ref = "#reader-dialog"; open = true } → _
+  when eq($action, "reset"):
+    port state.set { key = "visited"; value = list() } → _
+    port storage.remove { key = "worldwright-aaron-trail-v1" } → _
+    port browser.dialog { ref = "#reader-dialog"; open = false } → _
+    port browser.navigate { hash = "home" } → _
+    call reader.route
+  when eq($action, "motion"):
+    port state.get { key = "motion" } → motion
+    port storage.write { key = "worldwright-motion"; value = if($motion, "paused", "on") } → _
+    call reader.motion.sync

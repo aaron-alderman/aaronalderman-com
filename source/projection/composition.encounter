@@ -1,0 +1,39 @@
+# Application facade for the single pinned projection definition.
+process-module "temple/surface-process-module/1"
+
+process projection.serialize:
+  port projection.render { kind = "markup"; tree = $input } → result
+
+process projection.stylesheet:
+  port projection.render { kind = "stylesheet"; tree = $input } → result
+
+process projection.fields:
+  let subject = $eventInput.subject
+  let fields = map($eventInput.names, "name", list($name, one($subject, $name)))
+  port record.fromEntries { entries = $fields } → result
+
+process projection.palette:
+  let input = { kind = "root"; children = map(list("projection.layout.controls", "projection.layout.field", "projection.layout.input", "projection.layout.wrap", "projection.layout.frame", "projection.layout.hidden", "projection.layout.grid", "projection.layout.panel"), "rule", { kind = "rule"; selector = one($rule, "selector"); children = map(objects($rule, "declaration"), "decl", { kind = "decl"; property = one($decl, "property"); value = one($decl, "value") }) }) }
+  # The normal main stylesheet remains the full palette. The universally loaded
+  # primitive sheet contains only common projection components.
+  port record.put { record = $input; key = "children"; value = filter($input.children, "rule", includes(list(".projection-controls", ".projection-field", ".projection-input", ".projection-wrap", ".projection-frame", ".projection-hidden", ".projection-grid-one", ".projection-panel"), $rule.selector)) } → input
+  call projection.stylesheet
+  let surfaceWritePath = "assets/projection.css"
+  call assurance.surface.register
+  port file.write { path = "assets/projection.css"; text = $result } → _
+
+# Pure component construction is hydrated and admitted through the same compiler.
+# Its nested execution shares the caller's budget; it cannot publish artifacts.
+process projection.reader:
+  port source.read { path = "source/projection/reader.encounter" } → source
+  port encounter.execute { text = $source; entry = "component.reader"; bindings = { readerBase = $readerBase } } → input
+  call projection.serialize
+
+process projection.activity:
+  port source.read { path = "source/projection/reader.encounter" } → source
+  port encounter.execute { text = $source; entry = "component.activity"; bindings = {} } → input
+  call projection.serialize
+
+process projection.encounterFont:
+  let input = { kind = "root"; children = list({ kind = "atrule"; name = "font-face"; afterName = ""; params = ""; children = list({ kind = "decl"; property = "font-family"; value = "Fraunces" }, { kind = "decl"; property = "src"; value = "url('../sourcery/assets/fonts/fraunces-latin-full-normal.woff2') format('woff2')" }, { kind = "decl"; property = "font-display"; value = "swap" }, { kind = "decl"; property = "font-weight"; value = "100 900" }) }) }
+  call projection.stylesheet

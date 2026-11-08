@@ -1,0 +1,59 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process claim.review.item:
+  let e = $eventInput.evidence
+  let m = $eventInput.method
+  let selected = includes($eventInput.selected, $e.id)
+  fold $m.rules as rule; trials starts list():
+    fold $rule.conditions as condition; checks starts list():
+      yield append(
+      $checks,
+      list(
+        {
+          field = $condition.field;
+          expected = $condition.expected;
+          actual = at($e, $condition.field);
+          passed = eq(at($e, $condition.field), $condition.expected)
+        }
+      )
+    ) → checks
+    fold $checks as check; passed starts true:
+      yield and($passed, $check.passed) → passed
+    yield append(
+    $trials,
+    list(
+      {
+        id = $rule.id;
+        weight = $rule.weight;
+        units = $rule.units;
+        reason = $rule.reason;
+        matched = $passed;
+        checks = $checks
+      }
+    )
+  ) → trials
+  fold $trials as trial; chosen starts null:
+    yield if(and(not($chosen), $trial.matched), $trial, $chosen) → chosen
+  let admitted = and($selected, not(eq($chosen, null)))
+  let result = {
+    id = $e.id;
+    name = $e.name;
+    direction = $e.direction;
+    source = $e.sourceActor;
+    independent = eq($e.sourceIndependent, "true");
+    selected = $selected;
+    admitted = $admitted;
+    weight = if($admitted, at($chosen, "weight"), 0);
+    units = if($admitted, at($chosen, "units"), 0);
+    reason = if(
+      not($selected),
+      "Removed from this sandbox snapshot.",
+      if(
+        $chosen,
+        at($chosen, "reason"),
+        "No rule matched. This method does not count this item."
+      )
+    );
+    trials = $trials
+  }

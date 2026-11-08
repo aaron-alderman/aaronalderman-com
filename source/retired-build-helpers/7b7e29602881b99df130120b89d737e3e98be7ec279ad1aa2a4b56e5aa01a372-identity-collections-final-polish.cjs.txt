@@ -1,4 +1,0 @@
-const fs=require('fs');let f='source/hierarchy.rel',s=fs.readFileSync(f,'utf8');const row='("identity.collections.style.102", "declaration", "identity.collections.style.102.gap")\n("identity.collections.style.102.gap", "property", "gap")\n("identity.collections.style.102.gap", "value", "0")\n';s+='\n'+row;fs.writeFileSync(f,s);
-f='source/expedition.rel';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/"stylesheetVersion", "[^"]+"/,'"stylesheetVersion", "identity-collections-1"'));
-f='algebra/publication.process.json';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace('Discover another side of Aaron: change the theme','Discover another side of Aaron: change the perspective and projects'));
-f='atlas-journey.test.mjs';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace('Discover another side of Aaron: change the theme','Discover another side of Aaron: change the perspective and projects'));

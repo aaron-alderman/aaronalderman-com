@@ -1,0 +1,191 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.negotiate:
+  port kernel.invoke {
+    query = "household.evaluate";
+    input = {
+      people = $eventInput.state.people;
+      shareA = $eventInput.state.shareA;
+      demand = $eventInput.demand;
+      reviewHours = 0;
+      deliveryA = 1;
+      deliveryB = 1
+    }
+  } → baseline
+  port number.calculate { operation = "remainder"; values = list($eventInput.period, 2) } → hn57
+  let first = if(eq($hn57, 0), 1, 0)
+  port number.calculate { operation = "subtract"; values = list(1, $first) } → hn58
+  let second = $hn58
+  let requesterIndex = if(
+    not(at(at($baseline, $first), "goalsWithinBounds")),
+    $first,
+    if(not(at(at($baseline, $second), "goalsWithinBounds")), $second, -1)
+  )
+  let result = {
+    status = "no-request";
+    requester = null;
+    shareA = $eventInput.state.shareA;
+    reviewHours = 0;
+    candidates = 0
+  }
+  port number.calculate { operation = "greaterEqual"; values = list($requesterIndex, 0) } → hn59
+  when $hn59:
+    let who = at(at($eventInput.state.people, $requesterIndex), "id")
+    let blockers = map(filter($eventInput.state.people, "per", eq($per.willingness, 0)), "per", $per.id)
+    let result = {
+      status = "review-not-open";
+      requester = $who;
+      shareA = $eventInput.state.shareA;
+      reviewHours = 0;
+      candidates = 0;
+      blockers = $blockers
+    }
+    when eq(count($blockers), 0):
+      port number.calculate {
+        operation = "add";
+        values = list(at(at($eventInput.state.people, 0), "capacity"), 1e-8)
+      } → hn61
+      port number.calculate { operation = "less"; values = list($hn61, $eventInput.policy.reviewHours) } → hn60
+      port number.calculate {
+        operation = "add";
+        values = list(at(at($eventInput.state.people, 1), "capacity"), 1e-8)
+      } → hn63
+      port number.calculate { operation = "less"; values = list($hn63, $eventInput.policy.reviewHours) } → hn62
+      let tooLittle = or($hn60, $hn62)
+      let result = {
+        status = "review-time-unavailable";
+        requester = $who;
+        shareA = $eventInput.state.shareA;
+        reviewHours = 0;
+        candidates = 0
+      }
+      when not($tooLittle):
+        port kernel.invoke {
+          query = "household.evaluate";
+          input = {
+            people = $eventInput.state.people;
+            shareA = $eventInput.state.shareA;
+            demand = $eventInput.demand;
+            reviewHours = $eventInput.policy.reviewHours;
+            deliveryA = 1;
+            deliveryB = 1
+          }
+        } → before
+        port number.calculate {
+          operation = "min";
+          values = list(
+            at(at($eventInput.state.people, 0), "willingness"),
+            at(at($eventInput.state.people, 1), "willingness")
+          )
+        } → hn65
+        port number.calculate {
+          operation = "multiply";
+          values = list($eventInput.policy.maxReallocationHours, $hn65)
+        } → hn64
+        let limit = $hn64
+        port number.calculate { operation = "add"; values = list($eventInput.policy.gridSteps, 1) } → hn66
+        fold range($hn66) as n; grid starts list():
+          port number.calculate { operation = "subtract"; values = list($n, 1) } → hn68
+          port number.calculate { operation = "divide"; values = list($hn68, $eventInput.policy.gridSteps) } → hn67
+          yield append($grid, list($hn67)) → grid
+        port number.calculate {
+          operation = "subtract";
+          values = list(1, at(at(at($eventInput.state.people, 1), "values"), "domesticShare"))
+        } → hn69
+        let seeds = list(
+          $eventInput.state.shareA,
+          at(at(at($eventInput.state.people, 0), "values"), "domesticShare"),
+          $hn69
+        )
+        port number.calculate { operation = "greater"; values = list($eventInput.demand, 1e-8) } → hn70
+        port number.calculate { operation = "max"; values = list($eventInput.demand, 1e-8) } → hn74
+        port number.calculate { operation = "divide"; values = list($limit, $hn74) } → hn73
+        port number.calculate { operation = "subtract"; values = list($eventInput.state.shareA, $hn73) } → hn72
+        port number.calculate { operation = "max"; values = list(0, $hn72) } → hn71
+        port number.calculate { operation = "max"; values = list($eventInput.demand, 1e-8) } → hn78
+        port number.calculate { operation = "divide"; values = list($limit, $hn78) } → hn77
+        port number.calculate { operation = "add"; values = list($eventInput.state.shareA, $hn77) } → hn76
+        port number.calculate { operation = "min"; values = list(1, $hn76) } → hn75
+        let endpoints = if($hn70, list($hn71, $hn75), list())
+        let options = distinct(append(append($seeds, $grid), $endpoints))
+        fold $options as share; scan starts { best = null; count = 0 }:
+          port number.calculate { operation = "subtract"; values = list($share, $eventInput.state.shareA) } → hn80
+          port number.calculate { operation = "abs"; values = list($hn80) } → hn79
+          let distance = $hn79
+          let nextScan = $scan
+          port number.calculate { operation = "greater"; values = list($distance, 1e-8) } → hn81
+          port number.calculate { operation = "multiply"; values = list($distance, $eventInput.demand) } → hn83
+          port number.calculate { operation = "add"; values = list($limit, 1e-8) } → hn84
+          port number.calculate { operation = "lessEqual"; values = list($hn83, $hn84) } → hn82
+          when and($hn81, $hn82):
+            port kernel.invoke {
+              query = "household.evaluate";
+              input = {
+                people = $eventInput.state.people;
+                shareA = $share;
+                demand = $eventInput.demand;
+                reviewHours = $eventInput.policy.reviewHours;
+                deliveryA = 1;
+                deliveryB = 1
+              }
+            } → candidate
+            port kernel.invoke {
+              query = "household.assents";
+              input = { before = at($before, 0); after = at($candidate, 0) }
+            } → yesA
+            port kernel.invoke {
+              query = "household.assents";
+              input = { before = at($before, 1); after = at($candidate, 1) }
+            } → yesB
+            let candidateRequester = at($candidate, $requesterIndex)
+            let previousRequester = at($before, $requesterIndex)
+            port number.calculate {
+              operation = "subtract";
+              values = list(at(at($previousRequester, "gaps"), "paid"), 1e-8)
+            } → hn86
+            port number.calculate {
+              operation = "less";
+              values = list(at(at($candidateRequester, "gaps"), "paid"), $hn86)
+            } → hn85
+            port number.calculate {
+              operation = "subtract";
+              values = list(at(at($previousRequester, "gaps"), "free"), 1e-8)
+            } → hn88
+            port number.calculate {
+              operation = "less";
+              values = list(at(at($candidateRequester, "gaps"), "free"), $hn88)
+            } → hn87
+            port number.calculate {
+              operation = "subtract";
+              values = list(at(at($previousRequester, "gaps"), "role"), 1e-8)
+            } → hn90
+            port number.calculate {
+              operation = "less";
+              values = list(at(at($candidateRequester, "gaps"), "role"), $hn90)
+            } → hn89
+            let gain = or($hn85, $hn87, $hn89)
+            let option = { share = $share; distance = $distance; score = $candidateRequester.gaps }
+            let best = $scan.best
+            when and($yesA, $yesB, $gain):
+              port kernel.invoke { query = "household.better"; input = { option = $option; best = $scan.best } } → better
+              let best = if($better, $option, $scan.best)
+            port number.calculate { operation = "add"; values = list($scan.count, 1) } → hn91
+            let nextScan = { best = $best; count = $hn91 }
+          yield $nextScan → scan
+        let result = {
+          status = "no-joint-proposal-on-grid";
+          requester = $who;
+          shareA = $eventInput.state.shareA;
+          reviewHours = $eventInput.policy.reviewHours;
+          candidates = $scan.count
+        }
+        when not(eq($scan.best, null)):
+          let result = {
+            status = "revised";
+            requester = $who;
+            shareA = $scan.best.share;
+            reviewHours = $eventInput.policy.reviewHours;
+            candidates = $scan.count;
+            assent = list("A", "B")
+          }

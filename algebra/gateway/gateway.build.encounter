@@ -1,0 +1,17 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process gateway.build:
+  assert eq(count(subjects("isa", "CorpusDoor")), 7)
+    otherwise "The gateway must preserve all seven requested names."
+  let prefix = ""
+  let pageTitle = "Reading paths — Aaron Alderman"
+  let description = one("gateway", "description")
+  let canonical = concat(one("site", "origin"), one("gateway", "route"))
+  let light = "home"
+  call gateway.view
+  let body = $result
+  call publication.document
+  let surfaceWritePath = one("gateway", "route")
+  call assurance.surface.register
+  port file.write { path = one("gateway", "route"); text = $result } → _

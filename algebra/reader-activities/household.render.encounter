@@ -1,0 +1,240 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.render:
+  port state.get { key = "hh-run" } → run
+  port state.get { key = "hh-period" } → period
+  port state.get { key = "hh-overrides" } → overrides
+  port number.calculate { operation = "subtract"; values = list($period, 1) } → hn181
+  let row = at($run.history, $hn181)
+  let reviewText = at($data.household.reviewLabels, $row.review.status)
+  port browser.write {
+    ref = "#hh-period-label";
+    name = "textContent";
+    value = concat("Period ", $period, " of 12")
+  } → hp182
+  port browser.write {
+    ref = "#hh-status";
+    name = "textContent";
+    value = concat(
+      if(
+        eq($row.review.requester, null),
+        "No request is triggered.",
+        concat($row.review.requester, " requests review: ", $reviewText, ".")
+      ),
+      " End-of-period evidence changes willingness for the next period."
+    )
+  } → hp183
+  port browser.write { ref = "#hh-prev"; name = "disabled"; value = eq($period, 1) } → hp184
+  port browser.write { ref = "#hh-next"; name = "disabled"; value = eq($period, 12) } → hp185
+  fold $row.people as per; cards starts list():
+    let assumption = at($row.assumptions, if(eq($per.id, "A"), 0, 1))
+    port number.format { value = $per.paid; digits = 1 } → hp186
+    port number.format { value = $per.free; digits = 1 } → hp187
+    port number.format { value = $per.domestic; digits = 1 } → hp188
+    port number.format { value = $assumption.capacity; digits = 1 } → hp189
+    port number.format { value = at($row.willingnessOpening, $per.id); digits = 3 } → hp190
+    port number.format { value = at($row.willingnessClosing, $per.id); digits = 3 } → hp191
+    port number.format { value = $assumption.values.paidHours; digits = 1 } → hp192
+    port number.format { value = $per.domesticDue; digits = 1 } → hp193
+    port number.format { value = $assumption.values.freeHours; digits = 1 } → hp194
+    port number.calculate { operation = "multiply"; values = list($assumption.values.domesticShare, 100) } → hn196
+    port number.format { value = $hn196; digits = 0 } → hp195
+    yield append(
+    $cards,
+    list(
+      {
+        tag = "article";
+        attrs = { class = concat("hh-person hh-person-", $per.id) };
+        children = list(
+          {
+            tag = "p";
+            attrs = { class = "field-eyebrow" };
+            children = list(concat("Person ", $per.id))
+          },
+          {
+            tag = "h3";
+            attrs = {  };
+            children = list(if($per.goalsWithinBounds, "Within stated bounds", "Some stated bounds unmet"))
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(concat("Capacity ", $hp189, "h · desired paid work ", $hp192, "h."))
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              concat("Desired unallocated time ", $hp194, "h · preferred unpaid share ", $hp195, "%.")
+            )
+          },
+          {
+            tag = "dl";
+            attrs = { class = "hh-metrics" };
+            children = list(
+              { tag = "dt"; attrs = {  }; children = list("Paid work") },
+              { tag = "dd"; attrs = {  }; children = list(concat($hp186, "h")) },
+              { tag = "dt"; attrs = {  }; children = list("Unpaid work delivered / due") },
+              { tag = "dd"; attrs = {  }; children = list(concat($hp188, " / ", $hp193, "h")) },
+              { tag = "dt"; attrs = {  }; children = list("Unallocated time") },
+              { tag = "dd"; attrs = {  }; children = list(concat($hp187, "h")) },
+              { tag = "dt"; attrs = {  }; children = list("Willingness: opening → next") },
+              { tag = "dd"; attrs = {  }; children = list(concat($hp190, " → ", $hp191)) }
+            )
+          },
+          {
+            tag = "p";
+            attrs = { class = "hh-small" };
+            children = list(
+              "Bounds are this person’s authored values. No household happiness or human worth is scored."
+            )
+          }
+        )
+      }
+    )
+  ) → cards
+  let input = $cards
+  call projection.serialize
+  port browser.content { ref = "#hh-people"; html = $result } → hp197
+  port kernel.invoke { query = "household.chart.render"; input = {  } } → _
+  fold $row.willingnessUpdates as ev; items starts list():
+    let cause = at(filter($row.evidence, "e", eq($e.id, $ev.evidenceId)), 0)
+    port number.format { value = $ev.before; digits = 3 } → hp209
+    port number.format { value = $ev.after; digits = 3 } → hp210
+    yield append(
+    $items,
+    list(
+      {
+        tag = "li";
+        attrs = {  };
+        children = list(
+          {
+            tag = "strong";
+            attrs = {  };
+            children = list(
+              concat(
+                $ev.person,
+                " observed ",
+                $cause.actor,
+                ": ",
+                at($data.household.evidenceLabels, $ev.kind)
+              )
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(concat($hp209, " → ", $hp210, " · evidence ", $ev.evidenceId))
+          },
+          {
+            tag = "span";
+            attrs = { class = "hh-small" };
+            children = list(
+              if(
+                eq($ev.kind, "capacity-shortfall"),
+                "A capacity constraint is distinct from non-implementation.",
+                if(
+                  eq($ev.kind, "heard"),
+                  "Being heard does not imply that the requested remedy was granted.",
+                  "Authored evidence updates the observer’s willingness."
+                )
+              )
+            )
+          }
+        )
+      }
+    )
+  ) → items
+  let input = $items
+  call projection.serialize
+  port browser.content { ref = "#hh-events"; html = $result } → hp211
+  port number.format { value = $row.income; digits = 1 } → hp212
+  port number.format { value = $row.spent; digits = 1 } → hp213
+  port number.format { value = $row.reserve; digits = 1 } → hp214
+  port number.format { value = $row.backlog; digits = 1 } → hp215
+  port number.format { value = $row.unmetExpenses; digits = 1 } → hp216
+  port number.calculate { operation = "multiply"; values = list($row.shareA, 100) } → hn218
+  port number.format { value = $hn218; digits = 1 } → hp217
+  let input = list(
+    {
+      tag = "article";
+      attrs = {  };
+      children = list(
+        { tag = "h3"; attrs = {  }; children = list("Immediate work & resources") },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            concat(
+              "Income ",
+              $hp212,
+              " · essentials paid ",
+              $hp213,
+              " · unpaid essentials ",
+              $hp216,
+              "."
+            )
+          )
+        },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(concat("Domestic backlog ", $hp215, " hours; reserve ", $hp214, " money units."))
+        }
+      )
+    },
+    {
+      tag = "article";
+      attrs = {  };
+      children = list(
+        { tag = "h3"; attrs = {  }; children = list("Relational consequences") },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            concat(
+              "Current allocation: A carries ",
+              $hp217,
+              "% of unpaid demand. Review: ",
+              $reviewText,
+              "."
+            )
+          )
+        },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "Willingness responds to directed evidence; trust is unknown and standing is unchanged."
+          )
+        }
+      )
+    },
+    {
+      tag = "article";
+      attrs = {  };
+      children = list(
+        { tag = "h3"; attrs = {  }; children = list("What carries forward") },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "Unfinished work, remaining resources, the allocation, and each person’s changed willingness enter the next period. A changed preference is an input, never a breach."
+          )
+        },
+        {
+          tag = "p";
+          attrs = { class = "hh-small" };
+          children = list(
+            concat(
+              count($overrides),
+              " explicit parameter overrides. Preset changes clear these; Reset clears overrides."
+            )
+          )
+        }
+      )
+    }
+  )
+  call projection.serialize
+  port browser.content { ref = "#hh-budget"; html = $result } → hp219

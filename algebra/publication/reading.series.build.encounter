@@ -1,0 +1,52 @@
+process-module "temple/surface-process-module/1"
+
+# Publish typed reading content through the existing shared document, HTML,
+# stylesheet, assurance and sitemap owners. No separate page renderer.
+process reading.series.build:
+  call reading.check
+  let baseRooms = $readingRooms
+  let dadRoom = at(filter($baseRooms, "room", eq($room.key, "dad")), 0)
+  each filter(subjects("isa", "StandalonePage"), "page", optional($page, "readingKind")) as page:
+    let kind = one($page, "readingKind")
+    let subject = optional($page, "readingSubject")
+    let image = one("grow.room", "image")
+    let pageTitle = "Reading palette and style guide"
+    let description = one("reading.palette", "description")
+    when eq($kind, "article"):
+      assert eq(one($subject, "isa"), "ReadingArticle")
+        otherwise "READING-PUBLICATION: Article binding has the wrong subject type."
+      assert eq(one($page, "path"), one($subject, "route"))
+        otherwise "READING-PUBLICATION: Article route and publication binding disagree."
+      port kernel.invoke { query = "reading.article"; input = { subject = $subject } } → result
+      let pageTitle = one($subject, "title")
+      let description = one($subject, "deck")
+      let image = one($subject, "image")
+    when eq($kind, "series"):
+      assert eq(one($subject, "isa"), "ReadingSeries")
+        otherwise "READING-PUBLICATION: Series binding has the wrong subject type."
+      assert eq(one($page, "path"), one($subject, "route"))
+        otherwise "READING-PUBLICATION: Series route and publication binding disagree."
+      port kernel.invoke { query = "reading.series"; input = { subject = $subject } } → result
+      let pageTitle = one($subject, "title")
+      let description = one($subject, "description")
+      let image = one($subject, "image")
+    when eq($kind, "palette"):
+      call reading.palette
+    assert includes(list("article", "series", "palette"), $kind)
+      otherwise "READING-PUBLICATION: Unknown reading page kind."
+    let body = $result
+    let canonical = one($page, "canonical")
+    let prefix = one($page, "prefix")
+    let light = $dadRoom.light
+    port text.slice { value = one($image, "src"); start = 1 } → shareImage
+    let readingRooms = append($baseRooms, list({
+      key = "dad";
+      palette = $dadRoom.palette;
+      essay = { canonical = $canonical; image = $shareImage; imageAlt = one($image, "alt"); imageWidth = one($image, "width"); imageHeight = one($image, "height"); readingKind = $kind }
+    }))
+    let pageTitle = concat($pageTitle, " — Aaron Alderman")
+    call publication.document
+    let surfaceWritePath = one($page, "path")
+    call assurance.surface.register
+    port file.write { path = $surfaceWritePath; text = $result } → _
+  let readingRooms = $baseRooms

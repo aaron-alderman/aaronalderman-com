@@ -1,0 +1,74 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process claim.review.method:
+  let m = $eventInput.method
+  fold $eventInput.evidence as e; total starts { support = 0; challenge = 0; sources = list(); rows = list() }:
+    port kernel.invoke {
+      query = "claim.review.item";
+      input = { evidence = $e; method = $m; selected = $eventInput.selected }
+    } → row
+    port number.calculate {
+      operation = "add";
+      values = list(
+        $total.support,
+        if(and($row.admitted, eq($row.direction, "Supports")), $row.units, 0)
+      )
+    } → support
+    port number.calculate {
+      operation = "add";
+      values = list(
+        $total.challenge,
+        if(and($row.admitted, eq($row.direction, "Challenges")), $row.units, 0)
+      )
+    } → challenge
+    let sources = if(
+      and($row.admitted, $row.independent, not(includes($total.sources, $row.source))),
+      append($total.sources, list($row.source)),
+      $total.sources
+    )
+    yield {
+    support = $support;
+    challenge = $challenge;
+    sources = $sources;
+    rows = append($total.rows, list($row))
+  } → total
+  let sourceCount = count($total.sources)
+  port number.calculate { operation = "greaterEqual"; values = list($sourceCount, $m.minimum) } → enough
+  port number.calculate { operation = "greaterEqual"; values = list($total.support, $m.thresholdUnits) } → supportCrossed
+  port number.calculate { operation = "greaterEqual"; values = list($total.challenge, $m.thresholdUnits) } → challengeCrossed
+  let verdict = if(
+    not($enough),
+    "Undecided",
+    if(
+      and($supportCrossed, $challengeCrossed),
+      "Conflicted",
+      if($supportCrossed, "Accepted", if($challengeCrossed, "Rejected", "Undecided"))
+    )
+  )
+  let reason = if(
+    not($enough),
+    "Too few independent sources were admitted.",
+    if(
+      eq($verdict, "Conflicted"),
+      "Both the support and challenge thresholds were reached.",
+      if(
+        eq($verdict, "Accepted"),
+        "Support reached the threshold; challenge did not.",
+        if(
+          eq($verdict, "Rejected"),
+          "Challenge reached the threshold; support did not.",
+          "Neither side reached the threshold."
+        )
+      )
+    )
+  )
+  let result = {
+    method = $m.id;
+    result = $verdict;
+    reason = $reason;
+    support = $total.support;
+    challenge = $total.challenge;
+    independentSources = $sourceCount;
+    rows = $total.rows
+  }

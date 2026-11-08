@@ -1,0 +1,21 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.fields:
+  let ecFieldsType = $eventInput.type
+  let ecFieldsScope = $eventInput.scope
+  let ecFieldNodes = $eventInput.nodes
+  fold $ecFieldNodes as ecFieldNode; ecFieldState starts { values = {  }; fields = list() }:
+    let ecSpan = {
+      file = $file;
+      line = $ecFieldNode.line;
+      column = add($ecFieldNode.indent, 1);
+      offset = $ecFieldNode.offset;
+      endOffset = add($ecFieldNode.offset, count($ecFieldNode.raw))
+    }
+    port kernel.invoke {
+      query = "ec.attempt";
+      input = { query = "ec.oneField"; input = {  }; span = $ecSpan }
+    } → ecFieldState
+    yield $ecFieldState → ecFieldState
+  let result = $ecFieldState

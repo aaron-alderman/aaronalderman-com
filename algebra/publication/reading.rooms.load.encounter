@@ -1,0 +1,45 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process reading.rooms.load:
+  port file.copy { path = "source/reading/rooms.values.rel" } → _
+  port file.read { path = "source/reading/rooms.values.rel" } → readingRoomText
+  port static.read { text = $readingRoomText } → readingData
+  port file.copy { path = "source/reading-palette/styles.values.rel" } → _
+  port file.read { path = "source/reading-palette/styles.values.rel" } → readingStyleText
+  port static.read { text = $readingStyleText } → readingStyles
+  let readingRooms = append(
+    list(
+      {
+        key = "christian";
+        label = "Christian";
+        introHeading = "A faith I can live, and a reading I can question.";
+        pathNote = "Move from interpretation into power, hope and the people close at hand. Each path has three short readings.";
+        light = "faith-reading";
+        palette = {
+          bg = "#f8f5ec";
+          text = "#293d32";
+          muted = "#5a695e";
+          accent = "#76551e";
+          action = "#35573f";
+          hover = "#25452f";
+          surface = "#fffdf7";
+          wash = "#edf1e3";
+          line = "#d6ddc9";
+          edge = "#ad8d48";
+          glow = "#e7dfbf66"
+        };
+        teaser = $faithReading.teaser;
+        essay = {
+          title = $faithReading.title;
+          description = $faithReading.description;
+          canonical = $faithReading.canonical;
+          path = $faithReading.path;
+          body = $faithReading.body;
+          image = "assets/identities/optimized/christian-questions-v2.webp";
+          imageAlt = "An imagined open Bible beneath an olive tree in warm morning light."
+        }
+      }
+    ),
+    $readingData.rooms
+  )

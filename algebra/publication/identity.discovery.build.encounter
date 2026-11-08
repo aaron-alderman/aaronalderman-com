@@ -1,0 +1,103 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.discovery.build:
+  let discoveryReferences = append(
+    filter(
+      map($policies, "p", { id = $p.id; target = $p.target; sink = $p.sink }),
+      "r",
+      if(if(true, not(eq($r.target, "")), false), not(eq($r.sink, "")), false)
+    ),
+    map($reviewWriters, "w", { id = "metadata"; target = $w.ref; sink = $w.name })
+  )
+  let discoveryDocuments = append(
+    list({ identity = "root"; file = "index.html" }),
+    map(
+      subjects("isa", "IdentityTheme"),
+      "s",
+      { identity = one($s, "key"); file = one($s, "homeRoute") }
+    )
+  )
+  fold $discoveryDocuments as document; discoveryPages starts list():
+    port file.read { path = $document.file } → discoveryHTML
+    let eventInput = { html = $discoveryHTML }
+    call identity.discovery.scan
+    let discoveryObserved = $result
+    let eventInput = { observed = $discoveryObserved; references = $discoveryReferences }
+    call identity.discovery.reconcile
+    let pageResult = $result
+    let page = {
+      identity = $document.identity;
+      file = $document.file;
+      relationships = count($pageResult.observations);
+      undecided = $pageResult.unknown;
+      observations = $pageResult.observations;
+      groups = $pageResult.groups
+    }
+    yield append($discoveryPages, list($page)) → discoveryPages
+  let discoveredSinks = list("text", "navigation", "media", "appearance", "attributes", "opaque")
+  fold $discoveredSinks as sink; discoveryRows starts list():
+    let evidence = map(
+      $discoveryPages,
+      "page",
+      {
+        identity = $page.identity;
+        file = $page.file;
+        observations = or(at($page.groups, $sink), list())
+      }
+    )
+    let evidence = filter($evidence, "e", not(eq(count($e.observations), 0)))
+    fold $evidence as e; samples starts list():
+      let examples = filter(list(at($e.observations, 0)), "o", $o)
+      yield append(
+      $samples,
+      list(
+        {
+          identity = $e.identity;
+          file = $e.file;
+          count = count($e.observations);
+          examples = $examples
+        }
+      )
+    ) → samples
+    let discoveredRow = {
+      id = concat("discovered:", $sink);
+      area = "Discovered page relationships";
+      label = concat("Undeclared ", $sink, " relationships");
+      intent = "undecided";
+      status = "undecided";
+      reason = "Generated page output contains relationships without an exact element-and-property assurance declaration. Equal values and declared ancestor containers do not establish their intended identity relationship.";
+      next = "Inspect the located observations, discern their scope and intent, and add a precise declaration with evidence. Do not suppress a whole subtree.";
+      source = "assurance/identity-discovery.values.rel · generated homepage scan";
+      target = "";
+      sink = $sink;
+      field = "";
+      values = list();
+      dataBound = false;
+      writerBound = false;
+      boundary = "Discovery observes generated HTML bytes. Declared-reference means an exact selector/property has an inventory reference, not proof of correctness or descendant coverage. External CSS/scripts and inline bodies are opaque dependencies; link destinations are not crawled.";
+      discovery = $samples
+    }
+    yield append($discoveryRows, list($discoveredRow)) → discoveryRows
+  let discoveryReport = {
+    protocol = "worldwright/identity-discovery/1";
+    scope = "Entire generated index.html and every IdentityTheme homeRoute, including head metadata, navigation, text, images, attributes, catalogue output and footer.";
+    method = "Algebra-owned lexical HTML scan with quote-aware tags and attributes; nonempty text and every attribute, including id are observed. Only exact element selector and property references are reconciled. No equality-based intent inference or ancestor/subtree coverage.";
+    boundary = "This scans the five generated homepage documents, not every corpus destination or live DOM state. Comments, doctype and formatting whitespace are excluded. Inline script/style bodies and external script/stylesheet dependencies are opaque and remain undecided unless precisely declared. CSS internals, runtime-only states, shadow DOM, frames and semantic/visual fitness are not certified. Token ordinals are byte-rendering evidence addresses, not stable DOM paths.";
+    pages = map(
+      $discoveryPages,
+      "p",
+      {
+        identity = $p.identity;
+        file = $p.file;
+        relationships = $p.relationships;
+        undecided = $p.undecided;
+        observations = $p.observations
+      }
+    );
+    groups = count($discoveryRows);
+    observed = fold($discoveryPages, "p", "n", 0, add($n, $p.relationships));
+    undecided = fold($discoveryPages, "p", "n", 0, add($n, $p.undecided))
+  }
+  port value.encode { value = $discoveryReport } → discoveryJson
+  port file.write { path = "assurance/identity-discovery.values.rel"; text = $discoveryJson } → _

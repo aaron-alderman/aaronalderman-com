@@ -1,0 +1,626 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.questions.build:
+  call hierarchy.field.build
+  call publication.stewardship.view
+  let stewardshipLinks = $result
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          {
+            tag = "meta";
+            attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "theme-color";
+              content = one(concat("questions.palette.", "christian", ".paper"), "value")
+            };
+            children = list()
+          },
+          {
+            tag = "title";
+            attrs = {  };
+            children = list(concat(one("questions", "title"), " — Aaron Alderman"))
+          },
+          {
+            tag = "meta";
+            attrs = { name = "description"; content = one("questions", "description") };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "canonical"; href = "https://aaronalderman.com/questions.html" };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = {
+              rel = "stylesheet";
+              href = concat("expedition.css?v=", one("site", "stylesheetVersion"))
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:title"; content = one("questions", "title") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:description"; content = one("questions", "description") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:type"; content = "website" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:url"; content = "https://aaronalderman.com/questions.html" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image";
+              content = concat(
+                "https://aaronalderman.com/",
+                one(concat("identity.", "christian"), "questionHero")
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:width";
+              content = one(concat("identity.", "christian"), "questionHeroWidth")
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:height";
+              content = one(concat("identity.", "christian"), "questionHeroHeight")
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:alt";
+              content = one(concat("identity.", "christian"), "questionHeroAlt")
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:card"; content = "summary_large_image" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:title"; content = one("questions", "title") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:description"; content = one("questions", "description") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image";
+              content = concat(
+                "https://aaronalderman.com/",
+                one(concat("identity.", "christian"), "questionHero")
+              )
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image:alt";
+              content = one(concat("identity.", "christian"), "questionHeroAlt")
+            };
+            children = list()
+          }
+        )
+      },
+      {
+        tag = "body";
+        attrs = { "data-question-identity" = "christian" };
+        children = list(
+          {
+            tag = "a";
+            attrs = { href = "#main"; class = "skip" };
+            children = list("Skip to content")
+          },
+          {
+            tag = "header";
+            attrs = { class = "masthead" };
+            children = list(
+              {
+                tag = "a";
+                attrs = {
+                  href = one("identity.christian", "homeHref");
+                  class = "brand";
+                  "aria-label" = "Aaron Alderman"
+                };
+                children = list(
+                  {
+                    tag = "span";
+                    attrs = { class = "brand-name" };
+                    children = list(
+                      "Aaron ",
+                      { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Site" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = one("identity.christian", "questionWorldHref") };
+                    children = list("Questions")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = one("identity.christian", "threadsHref") };
+                    children = list("Threads")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = one("identity.christian", "atlasHref") };
+                    children = list("Atlas / Map")
+                  }
+                )
+              }
+            )
+          },
+          {
+            tag = "main";
+            attrs = { id = "main"; class = "q-page"; "data-question-identity" = "christian" };
+            children = list(
+              {
+                tag = "div";
+                attrs = { class = "q-world" };
+                children = list(
+                  {
+                    tag = "section";
+                    attrs = { class = "q-hero"; "aria-labelledby" = "q-heading" };
+                    children = list(
+                      {
+                        tag = "img";
+                        attrs = {
+                          class = "q-hero-art";
+                          src = one(concat("identity.", "christian"), "questionHero");
+                          alt = "";
+                          "aria-hidden" = "true";
+                          width = one(concat("identity.", "christian"), "questionHeroWidth");
+                          height = one(concat("identity.", "christian"), "questionHeroHeight");
+                          fetchpriority = "high"
+                        };
+                        children = list()
+                      },
+                      {
+                        tag = "div";
+                        attrs = { class = "q-hero-copy" };
+                        children = list(
+                          { tag = "p"; attrs = { class = "eyebrow" }; children = list("Questions / Christian") },
+                          {
+                            tag = "h1";
+                            attrs = { id = "q-heading" };
+                            children = list(
+                              "How do I actually ",
+                              { tag = "em"; attrs = {  }; children = list("live like Jesus?") }
+                            )
+                          },
+                          {
+                            tag = "p";
+                            attrs = { class = "q-subtitle" };
+                            children = list(one("questions", "subtitle"))
+                          },
+                          { tag = "p"; attrs = { class = "q-intro" }; children = list(one("questions", "intro")) },
+                          {
+                            tag = "div";
+                            attrs = { class = "q-actions" };
+                            children = list(
+                              {
+                                tag = "a";
+                                attrs = { href = "the-field/#encounter"; class = "button q-primary" };
+                                children = list("Explore a situation in The Field →")
+                              },
+                              {
+                                tag = "a";
+                                attrs = { href = "#lived-questions"; class = "q-text-link" };
+                                children = list("Follow the questions ↓")
+                              }
+                            )
+                          },
+                          {
+                            tag = "p";
+                            attrs = { class = "q-hero-note" };
+                            children = list("The question becomes real in what I do next.")
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section q-posture"; "aria-labelledby" = "q-posture-heading" };
+                    children = list(
+                      {
+                        tag = "div";
+                        attrs = { class = "q-section-intro" };
+                        children = list(
+                          {
+                            tag = "p";
+                            attrs = { class = "eyebrow" };
+                            children = list("An open hand. A real responsibility.")
+                          },
+                          {
+                            tag = "h2";
+                            attrs = { id = "q-posture-heading" };
+                            children = list("Faith has to meet the person in front of me.")
+                          },
+                          {
+                            tag = "p";
+                            attrs = {  };
+                            children = list(
+                              "I want following Christ to become visible in how I pay attention, share power and remain answerable. Sometimes that means helping. Sometimes it means a boundary that protects someone else."
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "div";
+                        attrs = { class = "q-practices" };
+                        children = list(
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "p"; attrs = { class = "eyebrow" }; children = list("01 / Attend") },
+                              { tag = "h3"; attrs = {  }; children = list("See the person.") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Listen before I turn someone’s situation into my explanation. Separate what I know from what I am assuming."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "p"; attrs = { class = "eyebrow" }; children = list("02 / Make room") },
+                              { tag = "h3"; attrs = {  }; children = list("Keep a choice open.") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Offer help without making submission its price. Accept a cost freely, and ask who else is being asked to carry it."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "p"; attrs = { class = "eyebrow" }; children = list("03 / Answer for it") },
+                              { tag = "h3"; attrs = {  }; children = list("Stay open to repair.") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Give reasons. Hear an objection. Protect people from harm, and change course when the consequences call for it."
+                                )
+                              }
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = { class = "q-scripture" };
+                        children = list("A Christian starting point: Philippians 2:3–8 · John 13:1–17 · Luke 10:25–37")
+                      },
+                      {
+                        tag = "a";
+                        attrs = { href = "places/kenosis.html"; class = "q-text-link" };
+                        children = list("Explore power, service and restraint →")
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = {
+                      class = "q-section q-questions";
+                      id = "lived-questions";
+                      "aria-labelledby" = "q-questions-heading"
+                    };
+                    children = list(
+                      {
+                        tag = "div";
+                        attrs = { class = "q-section-intro" };
+                        children = list(
+                          {
+                            tag = "p";
+                            attrs = { class = "eyebrow" };
+                            children = list("Faith / physics / software / the work of care")
+                          },
+                          {
+                            tag = "h2";
+                            attrs = { id = "q-questions-heading" };
+                            children = list("Questions I have to answer.")
+                          },
+                          {
+                            tag = "p";
+                            attrs = {  };
+                            children = list(
+                              "If my tools, explanations and beliefs ask for trust, I owe people ways to question them. These are some of the places where that responsibility becomes concrete."
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "div";
+                        attrs = { class = "q-question-grid" };
+                        children = list(
+                          map(
+                            subjects("isa", "LivedQuestion"),
+                            "q",
+                            {
+                              tag = "a";
+                              attrs = {
+                                class = "q-question";
+                                href = one($q, "href");
+                                "aria-label" = one($q, "title");
+                                "data-light" = one($q, "light")
+                              };
+                              children = list(
+                                {
+                                  tag = "img";
+                                  attrs = {
+                                    src = one($q, "image");
+                                    alt = "";
+                                    width = 112;
+                                    height = 140;
+                                    loading = "lazy";
+                                    decoding = "async"
+                                  };
+                                  children = list()
+                                },
+                                {
+                                  tag = "div";
+                                  attrs = { class = "q-question-copy" };
+                                  children = list(
+                                    { tag = "p"; attrs = { class = "eyebrow" }; children = list(one($q, "label")) },
+                                    { tag = "h3"; attrs = {  }; children = list(one($q, "title")) },
+                                    { tag = "p"; attrs = {  }; children = list(one($q, "note")) },
+                                    {
+                                      tag = "span";
+                                      attrs = { class = "q-card-link"; "aria-hidden" = "true" };
+                                      children = list(concat(one($q, "cta"), " →"))
+                                    }
+                                  )
+                                }
+                              )
+                            }
+                          )
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section q-field"; id = "the-field"; "aria-labelledby" = "q-field-heading" };
+                    children = list(
+                      {
+                        tag = "figure";
+                        attrs = { class = "q-field-art" };
+                        children = list(
+                          {
+                            tag = "img";
+                            attrs = {
+                              src = one("questions", "hero");
+                              alt = "An illustrated workshop with an open door and a chair offered beside a shared repair.";
+                              width = 1672;
+                              height = 941;
+                              loading = "lazy"
+                            };
+                            children = list()
+                          },
+                          { tag = "figcaption"; attrs = {  }; children = list("THE FIELD / A PLACE TO PRACTISE") }
+                        )
+                      },
+                      {
+                        tag = "div";
+                        attrs = { class = "q-field-copy" };
+                        children = list(
+                          {
+                            tag = "p";
+                            attrs = { class = "eyebrow" };
+                            children = list("Where the question meets a situation")
+                          },
+                          {
+                            tag = "h2";
+                            attrs = { id = "q-field-heading" };
+                            children = list("Someone asks for help. What do I owe them?")
+                          },
+                          {
+                            tag = "p";
+                            attrs = { class = "q-field-lede" };
+                            children = list(
+                              "The Field begins with a workshop shift that needs covering. A private request. An uncertain reason. A problem that will still exist tomorrow."
+                            )
+                          },
+                          {
+                            tag = "p";
+                            attrs = {  };
+                            children = list(
+                              "I want to examine what a choice does now, what it teaches a relationship, and what it makes normal over time. You can bring a different judgment—and ask what the scenario leaves out."
+                            )
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "the-field/#encounter"; class = "button q-primary" };
+                            children = list("Enter the workshop encounter →")
+                          },
+                          {
+                            tag = "p";
+                            attrs = { class = "q-caption" };
+                            children = list("One fictional encounter. Five choices. Room to disagree.")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "the-field/households/"; class = "button q-secondary" };
+                            children = list("Explore a household over time →")
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section q-closing" };
+                    children = list(
+                      {
+                        tag = "p";
+                        attrs = { class = "eyebrow" };
+                        children = list("Urgency without taking over")
+                      },
+                      { tag = "h2"; attrs = {  }; children = list("What is mine to do next?") },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "I cannot wait until every explanation is complete to practise care. I can act with reasons, acknowledge what I don’t know, and remain responsible for repair."
+                        )
+                      },
+                      {
+                        tag = "nav";
+                        attrs = { "aria-label" = "Continue exploring"; class = "q-actions" };
+                        children = list(
+                          {
+                            tag = "a";
+                            attrs = { href = "places/personal.html"; class = "q-text-link" };
+                            children = list("Read why this is personal →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = one("identity.christian", "threadsHref"); class = "q-text-link" };
+                            children = list("Follow a thread →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = one("identity.christian", "atlasHref"); class = "q-text-link" };
+                            children = list("Explore the atlas →")
+                          }
+                        )
+                      },
+                      {
+                        tag = "nav";
+                        attrs = { "aria-label" = "Questions from another side"; class = "q-actions" };
+                        children = list(
+                          {
+                            tag = "a";
+                            attrs = { href = one("identity.sourcerer", "questionWorldHref"); class = "q-text-link" };
+                            children = list("Sourcerer →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = one("identity.author", "questionWorldHref"); class = "q-text-link" };
+                            children = list("Author →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = one("identity.dad", "questionWorldHref"); class = "q-text-link" };
+                            children = list("Dad →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = one("identity.christian", "questionWorldHref"); class = "q-text-link" };
+                            children = list("Christian →")
+                          }
+                        )
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          },
+          {
+            tag = "footer";
+            attrs = { class = "footer" };
+            children = list(
+              {
+                tag = "div";
+                attrs = {  };
+                children = list(
+                  { tag = "p"; attrs = { class = "signature" }; children = list("Aaron Alderman") },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("A few things I’ve built. A few things I’m still trying to understand.")
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Elsewhere" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "https://github.com/aaron-alderman" };
+                    children = list("GitHub ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "https://www.linkedin.com/in/aaron-alderman/" };
+                    children = list("LinkedIn ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "https://worldwright.io/" };
+                    children = list("Built with Worldwright.io ↗")
+                  },
+                  { tag = "a"; attrs = { href = "assurance/" }; children = list("Assurance") }
+                )
+              },
+              $stewardshipLinks
+            )
+          }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  let surfaceWritePath = "questions.html"
+  call assurance.surface.register
+  port file.write { path = "questions.html"; text = $result } → _
+  call hierarchy.identityQuestions.build
+  call hierarchy.correctionArticle.build

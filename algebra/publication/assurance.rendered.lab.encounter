@@ -1,0 +1,62 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.rendered.lab:
+  call assurance.rendered.plan
+  let labPlan = $result
+  let labFrames = list()
+  let labIndex = 0
+  let labBatch = 0
+  fold $eventInput.routes as route; lab starts { index = 0; batch = 0; frames = list(); paths = list() }:
+    let labFrames = append(
+      $lab.frames,
+      map(
+        $labPlan.profiles,
+        "profile",
+        {
+          tag = "section";
+          attrs = {  };
+          children = list(
+            { tag = "h2"; attrs = {  }; children = list(concat($route, " · ", $profile.id)) },
+            {
+              tag = "iframe";
+              attrs = {
+                src = concat("/", $route);
+                width = $profile.width;
+                height = $profile.height;
+                "data-route" = $route;
+                "data-profile" = $profile.id;
+                title = concat($route, " · ", $profile.id);
+                class = "projection-frame"
+              };
+              children = list()
+            }
+          )
+        }
+      )
+    )
+    let labIndex = add($lab.index, 1)
+    let labBatch = $lab.batch
+    let labPaths = $lab.paths
+    when eq($labIndex, $labPlan.batchSize):
+      call assurance.rendered.lab.write
+      let labPaths = append($labPaths, list(concat("__assurance_probe__/batch-", $labBatch, ".html")))
+      let labBatch = add($labBatch, 1)
+      let labIndex = 0
+      let labFrames = list()
+    yield { index = $labIndex; batch = $labBatch; frames = $labFrames; paths = $labPaths } → lab
+  when not(eq($lab.index, 0)):
+    let labFrames = $lab.frames
+    let labBatch = $lab.batch
+    call assurance.rendered.lab.write
+  let result = {
+    plan = $labPlan;
+    paths = append(
+      $lab.paths,
+      if(
+        not(eq($lab.index, 0)),
+        list(concat("__assurance_probe__/batch-", $lab.batch, ".html")),
+        list()
+      )
+    )
+  }

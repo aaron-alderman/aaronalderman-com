@@ -1,0 +1,57 @@
+process-module "temple/surface-process-module/1"
+
+process component.reader:
+  let input = { tag = "html"; attrs = { lang = "en" }; children = list(
+    { tag = "head"; attrs = {}; children = list(
+      { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+      { tag = "base"; attrs = { href = $readerBase }; children = list() },
+      { tag = "meta"; attrs = { name = "viewport"; content = "width=device-width,initial-scale=1" }; children = list() },
+      { tag = "meta"; attrs = { name = "robots"; content = "noindex" }; children = list() },
+      { tag = "title"; attrs = {}; children = list("Aaron Alderman — Follow a question") },
+      { tag = "link"; attrs = { rel = "stylesheet"; href = "expedition.css" }; children = list() },
+      { tag = "link"; attrs = { rel = "stylesheet"; href = "reader/reader.css" }; children = list() },
+      { tag = "script"; attrs = { defer = true; src = "reader/runtime.js" }; children = list() }
+    ) },
+    { tag = "body"; attrs = { class = "place-page"; "data-light" = "unseen" }; children = list(
+      { tag = "a"; attrs = { class = "skip"; href = "#reader-content" }; children = list("Skip to the reading") },
+      { tag = "header"; attrs = { class = "reader-header" }; children = list(
+        { tag = "a"; attrs = { href = "index.html" }; children = list("Aaron Alderman") },
+        { tag = "nav"; attrs = { "aria-label" = "Reader" }; children = list(
+          { tag = "a"; attrs = { id = "reader-back"; href = "#home" }; children = list("← Back to the trail") },
+          { tag = "button"; attrs = { "data-reader-action" = "atlas" }; children = list("Explore the map") },
+          { tag = "button"; attrs = { "data-reader-action" = "notes" }; children = list("Sources and notes") },
+          { tag = "button"; attrs = { "data-reader-action" = "about" }; children = list("About") },
+          { tag = "button"; attrs = { id = "reader-motion"; "data-reader-action" = "motion" }; children = list("Motion on") }
+        ) },
+        { tag = "span"; attrs = { id = "reader-count" }; children = list() }
+      ) },
+      { tag = "main"; attrs = { id = "reader-content"; class = "place-main"; tabindex = "-1" }; children = list() },
+      { tag = "section"; attrs = { id = "reader-echo"; class = "place-main" }; children = list() },
+      { tag = "p"; attrs = { id = "reader-announcement"; class = "reader-sr"; "aria-live" = "polite" }; children = list() },
+      { tag = "p"; attrs = { "data-temple-errors" = true; role = "alert" }; children = list() },
+      { tag = "dialog"; attrs = { id = "reader-dialog"; "aria-label" = "Reader map and notes" }; children = list(
+        { tag = "button"; attrs = { "data-reader-action" = "close"; "aria-label" = "Close dialog" }; children = list("Close ×") },
+        { tag = "label"; attrs = {}; children = list("Find a place", { tag = "input"; attrs = { id = "reader-search"; type = "search"; autocomplete = "off" }; children = list() }) },
+        { tag = "p"; attrs = { id = "reader-search-result"; role = "status" }; children = list() },
+        { tag = "div"; attrs = { id = "reader-dialog-content" }; children = list() }
+      ) }
+    ) }
+  ) }
+  let result = $input
+
+process component.activity:
+  let input = { tag = "html"; attrs = { lang = "en" }; children = list(
+    { tag = "head"; attrs = {}; children = append(list(
+      { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+      { tag = "meta"; attrs = { name = "viewport"; content = "width=device-width,initial-scale=1" }; children = list() },
+      { tag = "meta"; attrs = { name = "robots"; content = "noindex" }; children = list() },
+      { tag = "title"; attrs = {}; children = list("An activity — Aaron Alderman") }
+    ), append(map(list("style.css", "enchantment.css", "territories.css", "wider-world.css", "reading.css", "../activity.css?v=layout-2", "../reader/reader.css"), "href", { tag = "link"; attrs = { rel = "stylesheet"; href = $href }; children = list() }), list({ tag = "script"; attrs = { defer = true; src = "../reader/activity-runtime.js" }; children = list() }))) },
+    { tag = "body"; attrs = {}; children = list(
+      { tag = "main"; attrs = {}; children = list({ tag = "article"; attrs = { class = "scene" }; children = list({ tag = "div"; attrs = { class = "scene-body" }; children = list({ tag = "aside"; attrs = { class = "art-panel" }; children = list({ tag = "div"; attrs = { id = "activity-help" }; children = list() }, { tag = "div"; attrs = { id = "activity" }; children = list() }) }) }) }) },
+      { tag = "button"; attrs = { id = "motion-toggle"; class = "motion-toggle"; type = "button" }; children = list("Motion on") },
+      { tag = "p"; attrs = { "data-temple-errors" = true; role = "alert" }; children = list() },
+      { tag = "dialog"; attrs = { id = "activity-source"; "aria-label" = "Source note" }; children = list({ tag = "button"; attrs = { id = "activity-source-close" }; children = list("Close ×") }, { tag = "div"; attrs = { id = "activity-source-content" }; children = list() }) }
+    ) }
+  ) }
+  let result = $input

@@ -1,0 +1,738 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.catalogue.view:
+  assert every(
+    list("foundation", "application", "progress", "tool"),
+    "slot",
+    every(
+      objects(concat("identity.collection.", $identityKey, ".", $slot), "item"),
+      "selectedId",
+      some($identityCatalogue.items, "candidate", eq($candidate.id, $selectedId))
+    )
+  )
+    otherwise "IDENTITY-CATALOGUE-001: Every curated project must exist in the source catalogue."
+  let result = list(
+    {
+      tag = "div";
+      attrs = { class = "identity-catalogue-intro" };
+      children = list(
+        {
+          tag = "p";
+          attrs = { class = "eyebrow" };
+          children = list(one(concat("identity.", $identityKey), "catalogueIntro"))
+        },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(one(concat("identity.", $identityKey), "catalogueNote"))
+        },
+        {
+          tag = "a";
+          attrs = { href = "#all-projects"; class = "identity-directory-link" };
+          children = list("See all projects ↓")
+        }
+      )
+    },
+    {
+      tag = "section";
+      attrs = {
+        class = "hierarchy-section home-fold home-fold-foundation";
+        id = "foundation";
+        "aria-labelledby" = "foundation-heading";
+        "data-collection" = "foundation"
+      };
+      children = list(
+        {
+          tag = "div";
+          attrs = { class = "hierarchy-section-heading identity-section-heading" };
+          children = list(
+            {
+              tag = "div";
+              attrs = { class = "identity-section-copy" };
+              children = list(
+                { tag = "p"; attrs = { class = "eyebrow" }; children = list("Foundation & platform") },
+                {
+                  tag = "h2";
+                  attrs = { id = "foundation-heading" };
+                  children = list(one(concat("identity.collection.", $identityKey, ".foundation"), "title"))
+                },
+                {
+                  tag = "p";
+                  attrs = { class = "identity-section-note" };
+                  children = list(one(concat("identity.collection.", $identityKey, ".foundation"), "note"))
+                }
+              )
+            },
+            {
+              tag = "img";
+              attrs = {
+                class = "identity-section-art";
+                src = one(concat("identity.collection.", $identityKey, ".foundation"), "image");
+                alt = "";
+                width = 640;
+                height = 360;
+                loading = "lazy";
+                decoding = "async";
+                "aria-hidden" = "true"
+              };
+              children = list()
+            }
+          )
+        },
+        {
+          tag = "div";
+          attrs = { class = "hierarchy-grid hierarchy-foundation" };
+          children = list(
+            map(
+              objects(concat("identity.collection.", $identityKey, ".foundation"), "item"),
+              "selectedId",
+              let(
+                "hItem",
+                at(filter($identityCatalogue.items, "candidate", eq($candidate.id, $selectedId)), 0),
+                {
+                  tag = "article";
+                  attrs = {
+                    class = "hierarchy-card";
+                    "data-item" = $hItem.id;
+                    "data-type" = $hItem.type;
+                    "data-perspective" = $identityKey
+                  };
+                  children = list(
+                    { tag = "div"; attrs = { class = "hierarchy-emblem" }; children = list($hItem.icon) },
+                    {
+                      tag = "div";
+                      attrs = { class = "hierarchy-card-content" };
+                      children = list(
+                        {
+                          tag = "p";
+                          attrs = { class = "hierarchy-status" };
+                          children = list(
+                            { tag = "span"; attrs = { class = "card-type" }; children = list($hItem.typeLabel) },
+                            { tag = "span"; attrs = { class = "card-stage" }; children = list($hItem.status) }
+                          )
+                        },
+                        { tag = "h3"; attrs = {  }; children = list($hItem.name) },
+                        {
+                          tag = "p";
+                          attrs = { class = "hierarchy-description" };
+                          children = list($hItem.description)
+                        },
+                        {
+                          tag = "p";
+                          attrs = { class = "identity-card-note" };
+                          children = list(one(concat("identity.card.", $identityKey, ".", $hItem.id), "note"))
+                        },
+                        if(
+                          eq($hItem.id, "relational-geometry"),
+                          {
+                            tag = "p";
+                            attrs = { class = "hierarchy-usecase" };
+                            children = list(
+                              "First use case: ",
+                              {
+                                tag = "a";
+                                attrs = { href = "https://aaron-alderman.github.io/spin23-relational-geometry/" };
+                                children = list("Relational Geometry Programme")
+                              }
+                            )
+                          },
+                          null
+                        ),
+                        if(
+                          eq($hItem.id, "relational-geometry"),
+                          {
+                            tag = "p";
+                            attrs = { class = "science-mission-note" };
+                            children = list(
+                              "Agent-assisted research with ",
+                              { tag = "a"; attrs = { href = "mission-control/" }; children = list("Mission Control") },
+                              " →"
+                            )
+                          },
+                          null
+                        ),
+                        {
+                          tag = "div";
+                          attrs = { class = "hierarchy-actions" };
+                          children = list(
+                            {
+                              tag = "a";
+                              attrs = { href = $hItem.href; "aria-label" = concat("Explore ", $hItem.name) };
+                              children = list(
+                                "Explore ",
+                                {
+                                  tag = "span";
+                                  attrs = { class = "action-arrow"; "aria-hidden" = "true" };
+                                  children = list("↗")
+                                }
+                              )
+                            },
+                            {
+                              tag = "a";
+                              attrs = {
+                                class = "hierarchy-inspect";
+                                href = concat("inspection/", $hItem.id, ".html");
+                                "aria-label" = concat("Inspect ", $hItem.name)
+                              };
+                              children = list("Inspect")
+                            }
+                          )
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            )
+          )
+        }
+      )
+    },
+    {
+      tag = "section";
+      attrs = {
+        class = "hierarchy-section home-fold home-fold-applications";
+        id = "applications";
+        "aria-labelledby" = "applications-heading";
+        "data-collection" = "application"
+      };
+      children = list(
+        {
+          tag = "div";
+          attrs = { class = "hierarchy-section-heading identity-section-heading" };
+          children = list(
+            {
+              tag = "div";
+              attrs = { class = "identity-section-copy" };
+              children = list(
+                {
+                  tag = "p";
+                  attrs = { class = "eyebrow" };
+                  children = list("Applications & programmes")
+                },
+                {
+                  tag = "h2";
+                  attrs = { id = "applications-heading" };
+                  children = list(one(concat("identity.collection.", $identityKey, ".application"), "title"))
+                },
+                {
+                  tag = "p";
+                  attrs = { class = "identity-section-note" };
+                  children = list(one(concat("identity.collection.", $identityKey, ".application"), "note"))
+                }
+              )
+            },
+            {
+              tag = "img";
+              attrs = {
+                class = "identity-section-art";
+                src = one(concat("identity.collection.", $identityKey, ".application"), "image");
+                alt = "";
+                width = 640;
+                height = 360;
+                loading = "lazy";
+                decoding = "async";
+                "aria-hidden" = "true"
+              };
+              children = list()
+            }
+          )
+        },
+        {
+          tag = "div";
+          attrs = { class = "hierarchy-grid hierarchy-applications" };
+          children = list(
+            map(
+              objects(concat("identity.collection.", $identityKey, ".application"), "item"),
+              "selectedId",
+              let(
+                "hItem",
+                at(filter($identityCatalogue.items, "candidate", eq($candidate.id, $selectedId)), 0),
+                {
+                  tag = "article";
+                  attrs = {
+                    class = "hierarchy-card";
+                    "data-item" = $hItem.id;
+                    "data-type" = $hItem.type;
+                    "data-perspective" = $identityKey
+                  };
+                  children = list(
+                    {
+                      tag = "img";
+                      attrs = {
+                        class = "identity-app-art";
+                        src = one(concat("identity.projectart.", $hItem.id), "image");
+                        alt = "";
+                        width = 800;
+                        height = 400;
+                        loading = "lazy";
+                        decoding = "async";
+                        "aria-hidden" = "true"
+                      };
+                      children = list()
+                    },
+                    {
+                      tag = "div";
+                      attrs = { class = "identity-app-top" };
+                      children = list(
+                        {
+                          tag = "p";
+                          attrs = { class = "hierarchy-status" };
+                          children = list(
+                            { tag = "span"; attrs = { class = "card-type" }; children = list($hItem.typeLabel) },
+                            { tag = "span"; attrs = { class = "card-stage" }; children = list($hItem.status) }
+                          )
+                        }
+                      )
+                    },
+                    {
+                      tag = "div";
+                      attrs = { class = "hierarchy-card-content" };
+                      children = list(
+                        { tag = "h3"; attrs = {  }; children = list($hItem.name) },
+                        {
+                          tag = "p";
+                          attrs = { class = "hierarchy-description" };
+                          children = list($hItem.description)
+                        },
+                        {
+                          tag = "p";
+                          attrs = { class = "identity-card-note" };
+                          children = list(one(concat("identity.card.", $identityKey, ".", $hItem.id), "note"))
+                        },
+                        if(
+                          eq($hItem.id, "relational-geometry"),
+                          {
+                            tag = "p";
+                            attrs = { class = "hierarchy-usecase" };
+                            children = list(
+                              "First use case: ",
+                              {
+                                tag = "a";
+                                attrs = { href = "https://aaron-alderman.github.io/spin23-relational-geometry/" };
+                                children = list("Relational Geometry Programme")
+                              }
+                            )
+                          },
+                          null
+                        ),
+                        if(
+                          eq($hItem.id, "relational-geometry"),
+                          {
+                            tag = "p";
+                            attrs = { class = "science-mission-note" };
+                            children = list(
+                              "Agent-assisted research with ",
+                              { tag = "a"; attrs = { href = "mission-control/" }; children = list("Mission Control") },
+                              " →"
+                            )
+                          },
+                          null
+                        ),
+                        {
+                          tag = "div";
+                          attrs = { class = "hierarchy-actions" };
+                          children = list(
+                            {
+                              tag = "a";
+                              attrs = { href = $hItem.href; "aria-label" = concat("Explore ", $hItem.name) };
+                              children = list(
+                                "Explore ",
+                                {
+                                  tag = "span";
+                                  attrs = { class = "action-arrow"; "aria-hidden" = "true" };
+                                  children = list("↗")
+                                }
+                              )
+                            },
+                            {
+                              tag = "a";
+                              attrs = {
+                                class = "hierarchy-inspect";
+                                href = concat("inspection/", $hItem.id, ".html");
+                                "aria-label" = concat("Inspect ", $hItem.name)
+                              };
+                              children = list("Inspect")
+                            }
+                          )
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            )
+          )
+        }
+      )
+    },
+    {
+      tag = "section";
+      attrs = {
+        class = "hierarchy-section home-fold home-fold-progress";
+        id = "taking-shape";
+        "aria-labelledby" = "taking-shape-heading";
+        "data-collection" = "progress"
+      };
+      children = list(
+        {
+          tag = "div";
+          attrs = { class = "hierarchy-section-heading identity-section-heading" };
+          children = list(
+            {
+              tag = "div";
+              attrs = { class = "identity-section-copy" };
+              children = list(
+                { tag = "p"; attrs = { class = "eyebrow" }; children = list("Taking shape") },
+                {
+                  tag = "h2";
+                  attrs = { id = "taking-shape-heading" };
+                  children = list(one(concat("identity.collection.", $identityKey, ".progress"), "title"))
+                },
+                {
+                  tag = "p";
+                  attrs = { class = "identity-section-note" };
+                  children = list(one(concat("identity.collection.", $identityKey, ".progress"), "note"))
+                }
+              )
+            },
+            {
+              tag = "img";
+              attrs = {
+                class = "identity-section-art";
+                src = one(concat("identity.collection.", $identityKey, ".progress"), "image");
+                alt = "";
+                width = 640;
+                height = 360;
+                loading = "lazy";
+                decoding = "async";
+                "aria-hidden" = "true"
+              };
+              children = list()
+            }
+          )
+        },
+        {
+          tag = "div";
+          attrs = { class = "hierarchy-grid hierarchy-progress" };
+          children = list(
+            map(
+              objects(concat("identity.collection.", $identityKey, ".progress"), "item"),
+              "selectedId",
+              let(
+                "hItem",
+                at(filter($identityCatalogue.items, "candidate", eq($candidate.id, $selectedId)), 0),
+                {
+                  tag = "article";
+                  attrs = {
+                    class = "hierarchy-card";
+                    "data-item" = $hItem.id;
+                    "data-type" = $hItem.type;
+                    "data-perspective" = $identityKey
+                  };
+                  children = list(
+                    {
+                      tag = "div";
+                      attrs = { class = "progress-card-top" };
+                      children = list(
+                        { tag = "div"; attrs = { class = "hierarchy-emblem" }; children = list($hItem.icon) },
+                        {
+                          tag = "p";
+                          attrs = { class = "hierarchy-status" };
+                          children = list(
+                            { tag = "span"; attrs = { class = "card-type" }; children = list($hItem.typeLabel) },
+                            { tag = "span"; attrs = { class = "card-stage" }; children = list($hItem.status) }
+                          )
+                        }
+                      )
+                    },
+                    {
+                      tag = "div";
+                      attrs = { class = "hierarchy-card-content" };
+                      children = list(
+                        { tag = "h3"; attrs = {  }; children = list($hItem.name) },
+                        {
+                          tag = "p";
+                          attrs = { class = "hierarchy-description" };
+                          children = list($hItem.description)
+                        },
+                        {
+                          tag = "p";
+                          attrs = { class = "identity-card-note" };
+                          children = list(one(concat("identity.card.", $identityKey, ".", $hItem.id), "note"))
+                        },
+                        if(
+                          eq($hItem.id, "relational-geometry"),
+                          {
+                            tag = "p";
+                            attrs = { class = "hierarchy-usecase" };
+                            children = list(
+                              "First use case: ",
+                              {
+                                tag = "a";
+                                attrs = { href = "https://aaron-alderman.github.io/spin23-relational-geometry/" };
+                                children = list("Relational Geometry Programme")
+                              }
+                            )
+                          },
+                          null
+                        ),
+                        if(
+                          eq($hItem.id, "relational-geometry"),
+                          {
+                            tag = "p";
+                            attrs = { class = "science-mission-note" };
+                            children = list(
+                              "Agent-assisted research with ",
+                              { tag = "a"; attrs = { href = "mission-control/" }; children = list("Mission Control") },
+                              " →"
+                            )
+                          },
+                          null
+                        ),
+                        {
+                          tag = "div";
+                          attrs = { class = "hierarchy-actions" };
+                          children = list(
+                            {
+                              tag = "a";
+                              attrs = { href = $hItem.href; "aria-label" = concat("Explore ", $hItem.name) };
+                              children = list(
+                                "Explore ",
+                                {
+                                  tag = "span";
+                                  attrs = { class = "action-arrow"; "aria-hidden" = "true" };
+                                  children = list("↗")
+                                }
+                              )
+                            },
+                            {
+                              tag = "a";
+                              attrs = {
+                                class = "hierarchy-inspect";
+                                href = concat("inspection/", $hItem.id, ".html");
+                                "aria-label" = concat("Inspect ", $hItem.name)
+                              };
+                              children = list("Inspect")
+                            },
+                            if(
+                              eq($hItem.id, "simulation"),
+                              { tag = "a"; attrs = { href = "world-modelling/" }; children = list("World Modelling") },
+                              null
+                            ),
+                            if(
+                              eq($hItem.id, "simulation"),
+                              { tag = "a"; attrs = { href = "foundry/" }; children = list("Foundry") },
+                              null
+                            )
+                          )
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            )
+          )
+        }
+      )
+    },
+    {
+      tag = "section";
+      attrs = {
+        class = "hierarchy-section home-fold home-fold-tooling";
+        id = "tooling";
+        "aria-labelledby" = "tooling-heading";
+        "data-collection" = "tool"
+      };
+      children = list(
+        {
+          tag = "div";
+          attrs = { class = "hierarchy-section-heading identity-section-heading" };
+          children = list(
+            {
+              tag = "div";
+              attrs = { class = "identity-section-copy" };
+              children = list(
+                { tag = "p"; attrs = { class = "eyebrow" }; children = list("Tools & workbenches") },
+                {
+                  tag = "h2";
+                  attrs = { id = "tooling-heading" };
+                  children = list(one(concat("identity.collection.", $identityKey, ".tool"), "title"))
+                },
+                {
+                  tag = "p";
+                  attrs = { class = "identity-section-note" };
+                  children = list(one(concat("identity.collection.", $identityKey, ".tool"), "note"))
+                }
+              )
+            },
+            {
+              tag = "img";
+              attrs = {
+                class = "identity-section-art";
+                src = one(concat("identity.collection.", $identityKey, ".tool"), "image");
+                alt = "";
+                width = 640;
+                height = 360;
+                loading = "lazy";
+                decoding = "async";
+                "aria-hidden" = "true"
+              };
+              children = list()
+            }
+          )
+        },
+        {
+          tag = "div";
+          attrs = { class = "hierarchy-grid hierarchy-tools" };
+          children = list(
+            map(
+              objects(concat("identity.collection.", $identityKey, ".tool"), "item"),
+              "selectedId",
+              let(
+                "hItem",
+                at(filter($identityCatalogue.items, "candidate", eq($candidate.id, $selectedId)), 0),
+                {
+                  tag = "article";
+                  attrs = {
+                    class = "hierarchy-card";
+                    "data-item" = $hItem.id;
+                    "data-type" = $hItem.type;
+                    "data-perspective" = $identityKey
+                  };
+                  children = list(
+                    {
+                      tag = "div";
+                      attrs = { class = "tool-card-top" };
+                      children = list(
+                        { tag = "div"; attrs = { class = "hierarchy-emblem" }; children = list($hItem.icon) },
+                        {
+                          tag = "p";
+                          attrs = { class = "hierarchy-status" };
+                          children = list(
+                            { tag = "span"; attrs = { class = "card-type" }; children = list($hItem.typeLabel) },
+                            { tag = "span"; attrs = { class = "card-stage" }; children = list($hItem.status) }
+                          )
+                        }
+                      )
+                    },
+                    {
+                      tag = "div";
+                      attrs = { class = "hierarchy-card-content" };
+                      children = list(
+                        { tag = "h3"; attrs = {  }; children = list($hItem.name) },
+                        {
+                          tag = "p";
+                          attrs = { class = "hierarchy-description" };
+                          children = list($hItem.description)
+                        },
+                        {
+                          tag = "p";
+                          attrs = { class = "identity-card-note" };
+                          children = list(one(concat("identity.card.", $identityKey, ".", $hItem.id), "note"))
+                        },
+                        if(
+                          eq($hItem.id, "relational-geometry"),
+                          {
+                            tag = "p";
+                            attrs = { class = "hierarchy-usecase" };
+                            children = list(
+                              "First use case: ",
+                              {
+                                tag = "a";
+                                attrs = { href = "https://aaron-alderman.github.io/spin23-relational-geometry/" };
+                                children = list("Relational Geometry Programme")
+                              }
+                            )
+                          },
+                          null
+                        ),
+                        if(
+                          eq($hItem.id, "relational-geometry"),
+                          {
+                            tag = "p";
+                            attrs = { class = "science-mission-note" };
+                            children = list(
+                              "Agent-assisted research with ",
+                              { tag = "a"; attrs = { href = "mission-control/" }; children = list("Mission Control") },
+                              " →"
+                            )
+                          },
+                          null
+                        ),
+                        {
+                          tag = "div";
+                          attrs = { class = "hierarchy-actions" };
+                          children = list(
+                            {
+                              tag = "a";
+                              attrs = { href = $hItem.href; "aria-label" = concat("Explore ", $hItem.name) };
+                              children = list(
+                                "Explore ",
+                                {
+                                  tag = "span";
+                                  attrs = { class = "action-arrow"; "aria-hidden" = "true" };
+                                  children = list("↗")
+                                }
+                              )
+                            },
+                            {
+                              tag = "a";
+                              attrs = {
+                                class = "hierarchy-inspect";
+                                href = concat("inspection/", $hItem.id, ".html");
+                                "aria-label" = concat("Inspect ", $hItem.name)
+                              };
+                              children = list("Inspect")
+                            }
+                          )
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            )
+          )
+        }
+      )
+    },
+    {
+      tag = "details";
+      attrs = { class = "identity-directory"; id = "all-projects" };
+      children = list(
+        {
+          tag = "summary";
+          attrs = {  };
+          children = list("All projects · the complete catalogue")
+        },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "This perspective is one way into the work. Every project remains available here, with its original purpose and development status."
+          )
+        },
+        {
+          tag = "nav";
+          attrs = { "aria-label" = "Complete project catalogue"; class = "identity-directory-grid" };
+          children = list(
+            map(
+              $identityCatalogue.items,
+              "project",
+              {
+                tag = "a";
+                attrs = { href = $project.href };
+                children = list(
+                  { tag = "strong"; attrs = {  }; children = list($project.name) },
+                  { tag = "span"; attrs = {  }; children = list($project.status) }
+                )
+              }
+            )
+          )
+        }
+      )
+    }
+  )

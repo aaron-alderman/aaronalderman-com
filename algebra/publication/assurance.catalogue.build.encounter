@@ -1,0 +1,73 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.catalogue.build:
+  fold $identityCatalogue.items as item; products starts list():
+    let route = concat($item.href, "index.html")
+    port file.read { path = $route } → productHTML
+    let eventInput = { html = $productHTML }
+    call assurance.catalogue.observe
+    let productMarkup = $result
+    let bindingRows = filter($identityTopicReport.rows, "r", eq($r.id, concat("app.", $item.id)))
+    let binding = and(
+      eq(count($bindingRows), 1),
+      eq(at(at($bindingRows, 0), "status"), "identity-mapped")
+    )
+    let eventInput = {
+      id = $item.id;
+      name = $item.name;
+      deliveryLabel = $item.status;
+      route = $route;
+      scopeId = concat("catalogue-entry/", $item.id, "/1");
+      policy = one("assurance.catalogue.policy", "scope");
+      markup = $productMarkup;
+      binding = $binding;
+      obligations = $obligations;
+      sagas = map($sagaProfiles, "s", { id = $s.id; title = $s.title })
+    }
+    call assurance.catalogue.classify
+    yield append($products, list($result)) → catalogueProducts
+  let catalogueRoadmap = fold(
+    $catalogueProducts,
+    "product",
+    "items",
+    list(),
+    append(
+      $items,
+      fold(
+        $product.profiles,
+        "s",
+        "rows",
+        list(),
+        append(
+          $rows,
+          map(
+            filter($s.gates, "g", not(eq($g.status, "supported"))),
+            "g",
+            {
+              id = concat($product.id, ":", $g.id);
+              obligation = $g.id;
+              product = $product.id;
+              saga = $s.id;
+              label = $g.label;
+              scope = $product.scopeId;
+              targetLevel = $g.level;
+              state = $g.status;
+              horizon = if(eq($g.level, $s.nextLevel), "next", "later");
+              action = $g.next;
+              owner = "Unassigned"
+            }
+          )
+        )
+      )
+    )
+  )
+  port value.encode {
+    value = {
+      protocol = "worldwright/catalogue-assurance/1";
+      products = $catalogueProducts;
+      roadmap = $catalogueRoadmap;
+      boundary = "Generated catalogue entry routes. No remote services, authenticated application flows, nested pages or runtime states assessed. Human review, audience use and maintenance evidence remain open. The build receipt binds the generated route bytes."
+    }
+  } → catalogueJSON
+  port file.write { path = "assurance/catalogue.values.rel"; text = $catalogueJSON } → _

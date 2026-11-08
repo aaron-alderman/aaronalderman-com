@@ -1,0 +1,48 @@
+# Inert component-source observation lowers into the SAME closed tree. This
+# adapter does not emit HTML and conveys no output capability.
+process-module "temple/surface-process-module/1"
+
+process projection.observed:
+  let node = $eventInput.node
+  fold $node.children as child; children starts list():
+    port kernel.invoke { query = "projection.observed"; input = { node = $child; styles = $eventInput.styles; substitutions = $eventInput.substitutions } } → child
+    yield append($children, list($child)) → children
+  let result = $children
+  when eq($node.kind, "#text"):
+    let result = $node.text
+  when includes(list("#comment", "#documentType"), $node.kind):
+    let result = null
+  when not(eq($node.tag, "")):
+    port record.fromEntries { entries = map($node.attrs, "attribute", list($attribute.name, $attribute.value)) } → attrs
+    port record.entries { value = $attrs } → entries
+    fold $entries as entry; updated starts list():
+      let key = at($entry, 0)
+      let value = at($entry, 1)
+      when at($eventInput.substitutions, $value):
+        let value = at($eventInput.substitutions, $value)
+      yield if(and(eq($key, "style"), at($eventInput.styles, $value)), $updated, append($updated, list(list($key, $value)))) → updated
+    port record.fromEntries { entries = $updated } → updated
+    when at($eventInput.styles, at($attrs, "style")):
+      port record.put { record = $updated; key = "class"; value = concat(or(at($attrs, "class"), ""), " ", at($eventInput.styles, $attrs.style)) } → updated
+    when at($node, "content"):
+      port kernel.invoke { query = "projection.observed"; input = { node = $node.content; styles = $eventInput.styles; substitutions = $eventInput.substitutions } } → children
+    let result = { tag = $node.tag; attrs = $updated; children = if(isArray($children), $children, list($children)) }
+
+process projection.compileComponent:
+  # Static component definitions are REL values. Parsed observations are
+  # hydrated into REL before conversion and never confer publication authority.
+  port markup.observe { text = $componentText; fragment = $componentFragment } → observed
+  port rel.encode { value = $observed } → hydrated
+  port rel.decode { text = $hydrated } → observed
+  let eventInput = { node = $observed; styles = $componentStyles; substitutions = $componentSubstitutions }
+  call projection.observed
+
+process projection.registeredComponent:
+  assert has($component, "isa", "ProjectionComponent")
+    otherwise "PROJECTION: Unknown named component."
+  port source.read { path = one($component, "source") } → componentText
+  port digest.sha256 { text = $componentText } → identity
+  assert eq($identity, one($component, "sha256"))
+    otherwise "PROJECTION: Component source differs from its registered definition."
+  port encounter.execute { text = $componentText; entry = one($component, "entry"); bindings = { readerReturn = $readerReturn } } → input
+  call projection.serialize

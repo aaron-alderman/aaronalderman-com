@@ -1,0 +1,29 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.rendered.plan:
+  let result = {
+    protocol = "worldwright/browser-observation-plan/1";
+    profiles = list(
+      { id = "desktop"; width = 1280; height = 800 },
+      { id = "mobile"; width = 390; height = 844 }
+    );
+    batchSize = 6;
+    textLimit = 140;
+    groups = {
+      headings = "h1,h2,h3,h4,h5,h6,[role=\"heading\"]";
+      regions = "main,section,article,[role=\"main\"],[role=\"region\"]";
+      blocks = "main > *,main p,main li,main pre,main img,main video,main canvas,main iframe,main table,main button,main input"
+    };
+    content = "h1,h2,h3,h4,h5,h6,p,li,pre,img,video,canvas,iframe,table,button,input,summary,svg,*:not(:has(*)):not(:empty)";
+    scope = "main,[role=\"main\"]";
+    thresholds = {
+      edge = 8;
+      inset = 12;
+      minimumPeers = 2;
+      tailSpace = 160;
+      trailingSpace = 48;
+      overflow = 2;
+      overlap = 4
+    }
+  }

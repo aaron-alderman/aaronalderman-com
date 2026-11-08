@@ -1,0 +1,10 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.load:
+  port file.copy { path = "source/hierarchy.values.rel" } → _
+  port file.read { path = "source/hierarchy.values.rel" } → hText
+  port static.read { text = $hText } → hCatalogue
+  port file.copy { path = "source/hierarchy-evidence.values.rel" } → _
+  port file.read { path = "source/hierarchy-evidence.values.rel" } → hText
+  port static.read { text = $hText } → hEvidence

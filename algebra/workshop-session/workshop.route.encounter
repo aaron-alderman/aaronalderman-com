@@ -1,0 +1,28 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process workshop.route:
+  port state.get { key = "workshop" } → snapshot
+  let routeKind = at($eventInput.matched.attributes, "data-route")
+  let file = at($eventInput.matched.attributes, "data-source")
+  when $routeKind:
+    port kernel.invoke { query = "workshop.routeFor"; input = { snapshot = $snapshot; kind = $routeKind } } → route
+    let file = if(eq($route.kind, "source"), "facts", "encounter")
+    let line = 1
+    when eq($route.kind, "source"):
+      port text.split { value = $snapshot.sources.facts; pattern = "\\r?\\n" } → lines
+      fold $lines as sourceLine; index starts { n = 1; line = 1 }:
+        port text.indexOf { value = $sourceLine; search = concat("(\"TheStory\", \"", $route.field, "\",") } → match
+        yield { n = add($index.n, 1); line = if(eq($match, 0), $index.n, $index.line) } → index
+      let line = $index.line
+    when not(eq($route.kind, "source")):
+      let line = $route.node.line
+    port state.set { key = "sourceHighlight"; value = { file = $file; line = $line } } → _
+  when not($routeKind):
+    port state.set { key = "sourceHighlight"; value = null } → _
+  port browser.write { ref = "#source-file"; name = "value"; value = $file } → _
+  port browser.write { ref = "#technical"; name = "open"; value = true } → _
+  port kernel.invoke { query = "workshop.selectTab"; input = { tab = "source"; focus = false } } → result
+  call workshop.source
+  port browser.scrollIntoView { ref = "#source-code"; behavior = "smooth"; block = "center" } → _
+  port browser.focus { ref = "#panel-source"; preventScroll = true } → _

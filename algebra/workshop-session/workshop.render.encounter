@@ -1,0 +1,285 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process workshop.render:
+  port browser.select { selector = "[data-workshop-details][open]" } → openDetails
+  let openKeys = map($openDetails, "detail", at($detail.attributes, "data-workshop-details"))
+  port state.get { key = "workshop" } → snapshot
+  let page = at(filter($snapshot.panels, "p", eq($p.projection.output.type, "Page")), 0)
+  let web = at(filter($snapshot.panels, "p", eq($p.projection.output.type, "WebLink")), 0)
+  let row = at(filter($snapshot.panels, "p", eq($p.projection.output.type, "MainframeRow")), 0)
+  port browser.write {
+    ref = "#revision";
+    name = "textContent";
+    value = concat("CHANGES APPLIED: ", $snapshot.revision)
+  } → _
+  port browser.write { ref = "#story-title"; name = "value"; value = $snapshot.title } → _
+  port browser.write { ref = "#web-label"; name = "value"; value = $snapshot.webLabel } → _
+  port browser.write {
+    ref = "#base-label";
+    name = "textContent";
+    value = at($web.projection.base, "N.label")
+  } → _
+  port browser.write {
+    ref = "#row-label";
+    name = "textContent";
+    value = at($row.projection.output.values, "R.label")
+  } → _
+  port browser.write { ref = "#page-title"; name = "textContent"; value = $snapshot.title } → _
+  port browser.write { ref = "#page-current"; name = "textContent"; value = $snapshot.title } → _
+  port browser.write {
+    ref = "#page-route";
+    name = "textContent";
+    value = concat("P.route → ", at($page.projection.output.values, "P.route"))
+  } → _
+  port browser.write { ref = "#title-route"; name = "textContent"; value = "Where this title is changed ↗" } → _
+  port browser.write {
+    ref = "#web-route";
+    name = "textContent";
+    value = "Where this menu label is changed ↗"
+  } → _
+  port text.split { value = $snapshot.sources.facts; pattern = "\\r?\\n" } → lines
+  fold $lines as line; found starts "":
+    port text.indexOf { value = $line; search = "(\"TheStory\", \"S.Title\"," } → position
+    yield if(eq($position, 0), $line, $found) → found
+  port browser.write { ref = "#fact-inline"; name = "textContent"; value = $found } → _
+  let input = map(
+    at($page.projection.output.values, "P.paragraphs"),
+    "paragraph",
+    { tag = "p"; attrs = {  }; children = list($paragraph) }
+  )
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#content-inline"; html = $markup } → _
+  port browser.write { ref = "#overlay-inline"; name = "textContent"; value = $snapshot.sources.encounter } → _
+  let input = list(
+    {
+      tag = "article";
+      attrs = { class = "output web-output" };
+      children = list(
+        { tag = "h3"; attrs = {  }; children = list("Menu link") },
+        {
+          tag = "iframe";
+          attrs = { id = "workshop-web"; sandbox = "allow-same-origin"; title = "Menu link preview" };
+          children = list()
+        },
+        {
+          tag = "details";
+          attrs = {
+            "data-workshop-details" = "output web-output-html";
+            open = includes($openKeys, "output web-output-html")
+          };
+          children = list(
+            { tag = "summary"; attrs = {  }; children = list("Read the generated HTML") },
+            { tag = "pre"; attrs = {  }; children = list($web.html) }
+          )
+        }
+      )
+    },
+    {
+      tag = "article";
+      attrs = { class = "output row-output" };
+      children = list(
+        { tag = "h3"; attrs = {  }; children = list("List row") },
+        {
+          tag = "iframe";
+          attrs = { id = "workshop-row"; sandbox = "allow-same-origin"; title = "List row preview" };
+          children = list()
+        },
+        {
+          tag = "details";
+          attrs = {
+            "data-workshop-details" = "output row-output-html";
+            open = includes($openKeys, "output row-output-html")
+          };
+          children = list(
+            { tag = "summary"; attrs = {  }; children = list("Read the generated HTML") },
+            { tag = "pre"; attrs = {  }; children = list($row.html) }
+          )
+        }
+      )
+    }
+  )
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#diagram-outputs"; html = $markup } → _
+  let input = {
+    tag = "article";
+    attrs = { class = "output page-output" };
+    children = list(
+      { tag = "h3"; attrs = {  }; children = list("Story page") },
+      {
+        tag = "iframe";
+        attrs = { id = "workshop-page"; sandbox = "allow-same-origin"; title = "Story page preview" };
+        children = list()
+      },
+      {
+        tag = "details";
+        attrs = {
+          "data-workshop-details" = "output page-output-html";
+          open = includes($openKeys, "output page-output-html")
+        };
+        children = list(
+          { tag = "summary"; attrs = {  }; children = list("Read the generated HTML") },
+          { tag = "pre"; attrs = {  }; children = list($page.html) }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#diagram-page"; html = $markup } → _
+  port browser.frameContent {
+    ref = "#workshop-web";
+    html = $web.html;
+    bindings = map(
+      filter($web.projection.output.events, "descriptor", or(at($descriptor, "open"), false)),
+      "descriptor",
+      {
+        event = "click";
+        delegate = $descriptor.selector;
+        preventDefault = true;
+        query = "workshop.open";
+        input = { type = "WebLink" }
+      }
+    );
+    sandbox = list("allow-same-origin")
+  } → _
+  port browser.frameContent { ref = "#workshop-row"; html = $row.html; sandbox = list("allow-same-origin") } → _
+  port browser.frameContent { ref = "#workshop-page"; html = $page.html; sandbox = list("allow-same-origin") } → _
+  let input = map(
+    $snapshot.panels,
+    "panel",
+    {
+      tag = "section";
+      attrs = {  };
+      children = list(
+        {
+          tag = "div";
+          attrs = { class = "inspection-item" };
+          children = list(
+            { tag = "h3"; attrs = {  }; children = list($panel.projection.output.type) },
+            { tag = "pre"; attrs = {  }; children = list($panel.html) }
+          )
+        }
+      )
+    }
+  )
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#html-values"; html = $markup } → _
+  port value.encode {
+    value = at($snapshot.candidate.model.queries, "code.story.view.experiment.nav.story");
+    space = 2
+  } → navigation
+  let input = {
+    tag = "div";
+    attrs = { class = "inspection-item" };
+    children = list(
+      {
+        tag = "h3";
+        attrs = {  };
+        children = list("Current generated navigation expressions")
+      },
+      { tag = "pre"; attrs = {  }; children = list($navigation) }
+    )
+  }
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#pure-values"; html = $markup } → _
+  let input = {
+    tag = "div";
+    attrs = { class = "inspection-item" };
+    children = list(
+      {
+        tag = "h3";
+        attrs = {  };
+        children = list("Current generated navigation expressions")
+      },
+      { tag = "pre"; attrs = {  }; children = list($navigation) }
+    )
+  }
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#inline-pure"; html = $markup } → _
+  let input = map(
+    $data.hashes,
+    "source",
+    {
+      tag = "p";
+      attrs = {  };
+      children = list(
+        $source.file,
+        "\nSHA-256 ",
+        $source.hash,
+        {
+          tag = "a";
+          attrs = { href = concat("sources/", $source.file); target = "_blank"; rel = "noopener" };
+          children = list("Read this source ↗")
+        }
+      )
+    }
+  )
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#hashes"; html = $markup } → _
+  call workshop.source
+  call workshop.process
+  let input = {
+    tag = "section";
+    attrs = {  };
+    children = list(
+      {
+        tag = "h3";
+        attrs = {  };
+        children = list(
+          if(
+            $snapshot.receipt,
+            concat("Revision ", at($snapshot.receipt, "basis"), " → ", $snapshot.revision),
+            "Nothing has changed yet."
+          )
+        )
+      },
+      if(
+        $snapshot.receipt,
+        list(
+          { tag = "p"; attrs = {  }; children = list(at($snapshot.receipt, "reason")) },
+          { tag = "p"; attrs = {  }; children = list(at($snapshot.receipt, "target")) },
+          { tag = "p"; attrs = {  }; children = list(at($snapshot.receipt, "goal")) },
+          {
+            tag = "div";
+            attrs = { class = "inspection-item" };
+            children = list(
+              { tag = "h3"; attrs = {  }; children = list("story.rel") },
+              { tag = "pre"; attrs = {  }; children = list(at($snapshot.receipt, "factDiff")) }
+            )
+          },
+          {
+            tag = "div";
+            attrs = { class = "inspection-item" };
+            children = list(
+              { tag = "h3"; attrs = {  }; children = list("story.encounter") },
+              { tag = "pre"; attrs = {  }; children = list(at($snapshot.receipt, "codeDiff")) }
+            )
+          }
+        ),
+        {
+          tag = "p";
+          attrs = {  };
+          children = list("Apply either value to see the exact source diff and the checked route back.")
+        }
+      )
+    )
+  }
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#receipt"; html = $markup } → _
+  port browser.content { ref = "#diagram-receipt"; html = $markup } → _
+  port value.encode { value = at($data.processes, "ec.run"); space = 2 } → processText
+  port browser.write { ref = "#inline-navigation"; name = "textContent"; value = $processText } → _
+  port value.encode { value = at($data.processes, "ec.resolve"); space = 2 } → processText
+  port browser.write { ref = "#inline-resolve"; name = "textContent"; value = $processText } → _
+  port value.encode { value = at($data.processes, "projection.serialize"); space = 2 } → processText
+  port browser.write { ref = "#inline-serialize"; name = "textContent"; value = $processText } → _
+  port value.encode { value = at($data.processes, "ec.patch"); space = 2 } → processText
+  port browser.write { ref = "#inline-patch"; name = "textContent"; value = $processText } → _

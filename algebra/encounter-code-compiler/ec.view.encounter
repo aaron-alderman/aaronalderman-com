@@ -1,0 +1,125 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.view:
+  let ecView = $eventInput.declaration
+  let ecViewNodes = filter($ecNodes, "ecChild", eq($ecChild.parent, $ecView.node.id))
+  port kernel.invoke {
+    query = "ec.attempt";
+    input = { query = "ec.referenceType"; input = { id = $ecView.source }; span = $ecSpan }
+  } → ecSourceType
+  let ecViewScope = list({ name = "source"; type = $ecSourceType })
+  fold $ecViewNodes as ecViewNode; ecBaseFieldNodes starts list():
+    port text.matches { value = $ecViewNode.text; pattern = "^[A-Za-z_][A-Za-z0-9_.-]*: " } → ecIsField
+    yield if($ecIsField, append($ecBaseFieldNodes, list($ecViewNode)), $ecBaseFieldNodes) → ecBaseFieldNodes
+  port kernel.invoke {
+    query = "ec.attempt";
+    input = {
+      query = "ec.fields";
+      input = { type = $ecView.type; scope = $ecViewScope; nodes = $ecBaseFieldNodes };
+      span = $ecSpan
+    }
+  } → ecBaseFields
+  port kernel.invoke {
+    query = "ec.attempt";
+    input = {
+      query = "ec.edits";
+      input = {
+        nodes = $ecViewNodes;
+        fields = $ecBaseFields.fields;
+        scope = $ecViewScope;
+        type = $ecView.type
+      };
+      span = $ecSpan
+    }
+  } → ecBaseEdits
+  port kernel.invoke {
+    query = "ec.attempt";
+    input = {
+      query = "ec.show";
+      input = { nodes = $ecViewNodes; scope = $ecViewScope };
+      span = $ecSpan
+    }
+  } → ecBaseShow
+  fold $ecViewNodes as ecContextNode; ecContexts starts list():
+    port text.matches { value = $ecContextNode.text; pattern = "^in @[A-Za-z_][A-Za-z0-9_.-]*:$" } → ecIsContext
+    let ecContextsNext = $ecContexts
+    when $ecIsContext:
+      port text.split { value = $ecContextNode.text; pattern = "^in @([A-Za-z_][A-Za-z0-9_.-]*):$" } → ecContextTokens
+      let ecContextId = at($ecContextTokens, 1)
+      assert not(some($ecContexts, "ecC", eq($ecC.id, $ecContextId)))
+        otherwise "EC-C001: A context has two contributions for this view. Resolve the conflict explicitly."
+      let ecContextChildren = filter($ecNodes, "ecChild", eq($ecChild.parent, $ecContextNode.id))
+      fold $ecContextChildren as ecContextField; ecContextFields starts list():
+        port text.matches { value = $ecContextField.text; pattern = "^[A-Za-z_][A-Za-z0-9_.-]*: " } → ecIsContextField
+        yield if($ecIsContextField, append($ecContextFields, list($ecContextField)), $ecContextFields) → ecContextFields
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = {
+          query = "ec.fields";
+          input = { type = $ecView.type; scope = $ecViewScope; nodes = $ecContextFields };
+          span = $ecSpan
+        }
+      } → ecOverlayFields
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = {
+          query = "ec.edits";
+          input = {
+            nodes = $ecContextChildren;
+            fields = $ecOverlayFields.fields;
+            scope = $ecViewScope;
+            type = $ecView.type
+          };
+          span = $ecSpan
+        }
+      } → ecOverlayEdits
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = {
+          query = "ec.show";
+          input = { nodes = $ecContextChildren; scope = $ecViewScope };
+          span = $ecSpan
+        }
+      } → ecContextShow
+      assert $ecContextShow
+        otherwise "EC-C002: A contextual appearance requires an explicit named representation."
+      let ecContextsNext = append(
+        $ecContexts,
+        list(
+          {
+            id = $ecContextId;
+            fields = $ecOverlayFields;
+            edits = $ecOverlayEdits;
+            show = $ecContextShow;
+            node = $ecContextNode
+          }
+        )
+      )
+      each $ecContextChildren as ecContextLine:
+        port text.matches {
+          value = $ecContextLine.text;
+          pattern = "^(?:[A-Za-z_][A-Za-z0-9_.-]*: .+|edit .+ (?:here|through .+)|show as [A-Za-z_][A-Za-z0-9_.-]*:?)$"
+        } → ecContextKnown
+        assert $ecContextKnown
+          otherwise "EC-P022: Unsupported contextual statement. Nothing is silently ignored."
+    yield $ecContextsNext → ecContexts
+  each $ecViewNodes as ecViewNode:
+    port text.matches {
+      value = $ecViewNode.text;
+      pattern = "^(?:[A-Za-z_][A-Za-z0-9_.-]*: .+|edit .+ (?:here|through .+)|in @.+:|show as [A-Za-z_][A-Za-z0-9_.-]*:?)$"
+    } → ecViewKnown
+    assert $ecViewKnown
+      otherwise "EC-P016: Unsupported view statement. Use a typed field, edit route, context or representation."
+  let result = {
+    id = $ecView.id;
+    source = $ecView.source;
+    sourceType = $ecSourceType;
+    type = $ecView.type;
+    fields = $ecBaseFields;
+    edits = $ecBaseEdits;
+    show = $ecBaseShow;
+    contexts = $ecContexts;
+    node = $ecView.node;
+    entry = concat("code.", $ecModule, ".view.", $ecView.id)
+  }

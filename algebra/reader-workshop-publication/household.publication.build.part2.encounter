@@ -1,0 +1,1905 @@
+process-module "temple/surface-process-module/1"
+
+process household.publication.build.part2:
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          {
+            tag = "meta";
+            attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "theme-color"; content = "#faf7ef" };
+            children = list()
+          },
+          {
+            tag = "title";
+            attrs = {  };
+            children = list("Household notebook — The Field — Aaron Alderman")
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "description";
+              content = "A synthetic household example separating values, outcomes and the ability to renegotiate over time."
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "canonical"; href = "https://aaronalderman.com/the-field/households/inspect/" };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "stylesheet"; href = "../../../expedition.css?v=field-households-chart-4" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:title"; content = "Household notebook — The Field" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:description";
+              content = "A synthetic household example separating values, outcomes and the ability to renegotiate over time."
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:type"; content = "website" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:url";
+              content = "https://aaronalderman.com/the-field/households/inspect/"
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image";
+              content = "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:width"; content = "1672" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:image:height"; content = "941" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:image:alt";
+              content = "A sunlit workshop opening onto a green field, with two people sharing a repair."
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:card"; content = "summary_large_image" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { name = "twitter:title"; content = "Household notebook — The Field" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:description";
+              content = "A synthetic household example separating values, outcomes and the ability to renegotiate over time."
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image";
+              content = "https://aaronalderman.com/assets/questions/open-workshop-daylight-v2.png"
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "twitter:image:alt";
+              content = "A sunlit workshop opening onto a green field, with two people sharing a repair."
+            };
+            children = list()
+          }
+        )
+      },
+      {
+        tag = "body";
+        attrs = {  };
+        children = list(
+          {
+            tag = "a";
+            attrs = { href = "#main"; class = "skip" };
+            children = list("Skip to content")
+          },
+          {
+            tag = "header";
+            attrs = { class = "masthead" };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "../../../index.html"; class = "brand"; "aria-label" = "Aaron Alderman" };
+                children = list(
+                  {
+                    tag = "span";
+                    attrs = { class = "brand-name" };
+                    children = list(
+                      "Aaron ",
+                      { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Site" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "../../../questions.html" };
+                    children = list("Questions")
+                  },
+                  { tag = "a"; attrs = { href = "../../../gate.html" }; children = list("Threads") },
+                  { tag = "a"; attrs = { href = "../../../atlas.html" }; children = list("Atlas / Map") }
+                )
+              }
+            )
+          },
+          {
+            tag = "main";
+            attrs = { id = "main"; class = "field-page hh-page hh-inspect"; "data-type" = "inspection" };
+            children = list(
+              {
+                tag = "div";
+                attrs = { class = "field-world" };
+                children = list(
+                  {
+                    tag = "section";
+                    attrs = { class = "field-hero" };
+                    children = list(
+                      {
+                        tag = "div";
+                        attrs = {  };
+                        children = list(
+                          {
+                            tag = "p";
+                            attrs = { class = "eyebrow" };
+                            children = list("The Field / Household notebook")
+                          },
+                          {
+                            tag = "h1";
+                            attrs = {  };
+                            children = list("The assumptions are part of the example.")
+                          },
+                          {
+                            tag = "p";
+                            attrs = {  };
+                            children = list("Read the rules, the source claims and the limits of this constructed example.")
+                          },
+                          {
+                            tag = "p";
+                            attrs = { class = "q-caption" };
+                            children = list(
+                              "Synthetic worked case · fictional participants A and B · no calibrated behavioral predictions"
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "img";
+                        attrs = {
+                          src = "../../../assets/questions/open-workshop-daylight-v2.png";
+                          alt = "A sunlit workshop opening onto a green field, with two people sharing a repair.";
+                          width = 1672;
+                          height = 941
+                        };
+                        children = list()
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section hh-section" };
+                    children = list(
+                      { tag = "h2"; attrs = {  }; children = list("What this notebook can establish") },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "This is an executable synthetic example with uncalibrated parameters. It calculates consequences of declared assumptions; it does not establish how actual households behave or adjudicate the tweet’s empirical predictions."
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "Values, reported satisfaction, material feasibility and the practical ability to renegotiate are distinct. No calculated willingness value stands in for consent, happiness or trust. Standing is unchanged by work, refusal, withdrawal or leaving."
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section hh-section" };
+                    children = list(
+                      {
+                        tag = "h2";
+                        attrs = {  };
+                        children = list("Four orientations; four sets of tradeoffs.")
+                      },
+                      {
+                        tag = "div";
+                        attrs = { class = "hh-orientations" };
+                        children = list(
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("Role-based specialization") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "A primarily provides income; B primarily manages the home. They value continuity, distinct responsibilities and an inherited account of family life."
+                                )
+                              },
+                              { tag = "h4"; attrs = {  }; children = list("How it could work") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Both welcome their roles, the work is feasible, and each contribution is recognized. Exceptions can be understood as care within a continuing commitment."
+                                )
+                              },
+                              { tag = "h4"; attrs = {  }; children = list("How it could fail") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "The partners attach different meanings to the same roles, or an assigned responsibility exceeds the person's capacity while the label conceals that mismatch."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("Equal sharing") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Both pursue paid work and share domestic responsibility. They value reciprocity, participation and equal standing."
+                                )
+                              },
+                              { tag = "h4"; attrs = {  }; children = list("How it could work") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "They agree what equality means, include planning and coordination as work, and accept practical exceptions."
+                                )
+                              },
+                              { tag = "h4"; attrs = {  }; children = list("How it could fail") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "A task count looks equal while effort, responsibility or rest differs; alternatively, enforcing exact symmetry becomes an unwanted burden for both."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("Capacity-based specialization") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Tasks follow current skill, available time and preference rather than fixed identities. They value practicality and complementary strengths."
+                                )
+                              },
+                              { tag = "h4"; attrs = {  }; children = list("How it could work") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "The allocation fits present capacities, and either partner can acquire skills or request a different allocation."
+                                )
+                              },
+                              { tag = "h4"; attrs = {  }; children = list("How it could fail") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "The same person repeatedly absorbs work because they are already better at it; the arrangement protects present efficiency while leaving the other without practice or alternatives."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "article";
+                            attrs = {  };
+                            children = list(
+                              { tag = "h3"; attrs = {  }; children = list("Alternating priorities") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "One partner's career, study or caregiving project receives priority for a defined period, with a later change of emphasis. They value shared projects and reciprocity across time."
+                                )
+                              },
+                              { tag = "h4"; attrs = {  }; children = list("How it could work") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "The initial sacrifice is welcome, resources suffice, and the later opportunity remains meaningful and feasible."
+                                )
+                              },
+                              { tag = "h4"; attrs = {  }; children = list("How it could fail") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Future reciprocity is vague, the priority period continually extends, or the promised later opportunity disappears."
+                                )
+                              }
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "These arrangements can overlap. Equal standing does not require identical task shares. Specialization does not require unilateral authority. A and B’s sex does not select a role."
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section hh-section" };
+                    children = list(
+                      { tag = "h2"; attrs = {  }; children = list("The rules, in readable form") },
+                      {
+                        tag = "ol";
+                        attrs = { class = "hh-rule-list" };
+                        children = list(
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "h3";
+                                attrs = {  };
+                                children = list("Carry a household through twelve periods")
+                              },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "At each opening, apply authored changes to values, capacity or demand. Period 5 introduces the selected change. Some experience patterns change again at period 9. Carry allocation, backlog, money and each person’s closing willingness into the next period."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "h3";
+                                attrs = {  };
+                                children = list("Separate a request from a successful revision")
+                              },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Opening willingness determines whether a request is voiced and bounds review and task movement. A respectful hearing can occur without an acceptable proposal. Dismissive handling blocks the joint proposal. Unknown handling supplies no positive or negative request evidence."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "h3";
+                                attrs = {  };
+                                children = list("A signed agreement is followed by execution")
+                              },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "A passing revision supersedes the previous allocation. Each assignment covers its share of the current domestic task pool, including backlog. Capacity determines achievable work; the authored delivery fraction determines how much of that achievable work is done. Unfinished work remains visible."
+                                )
+                              },
+                              {
+                                tag = "pre";
+                                attrs = {  };
+                                children = list(
+                                  {
+                                    tag = "code";
+                                    attrs = {  };
+                                    children = list(
+                                      "delivered domestic work = achievable domestic work × delivery fraction\nnext backlog = current domestic task pool − total domestic work delivered\nnext reserve = opening reserve + paid income − covered expenses"
+                                    )
+                                  }
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "h3";
+                                attrs = {  };
+                                children = list("Update willingness from directed evidence")
+                              },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list("For observer willingness w and rate g or l:")
+                              },
+                              {
+                                tag = "pre";
+                                attrs = {  };
+                                children = list(
+                                  {
+                                    tag = "code";
+                                    attrs = {  };
+                                    children = list(
+                                      "positive evidence: w′ = w + g × (1 − w)\nnegative evidence: w′ = w × (1 − l)\nneutral or learning disabled: w′ = w"
+                                    )
+                                  }
+                                )
+                              },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "The requester receives heard or dismissed evidence. Each person receives evidence about the other’s executed commitment. Capacity-only shortfall defaults to neutral; implementation-only shortfall may reduce willingness. Mixed attribution, unknown quality, empty obligations and superseded allocations have no automatic effect."
+                                )
+                              }
+                            )
+                          },
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "h3";
+                                attrs = {  };
+                                children = list("Keep the feedback delayed and attributable")
+                              },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list(
+                                  "Record response evidence, explicit outreach and delivery evidence in order. Closing willingness becomes available next period; it cannot change the current review retrospectively. An invitation and a hearing about the same interaction do not manufacture two hearing gains. No request is inferred from silence."
+                                )
+                              }
+                            )
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section hh-section" };
+                    children = list(
+                      { tag = "h2"; attrs = {  }; children = list("A limit is different from a refusal") },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "Capacity-limited delivery and incomplete implementation are different accounting outcomes. Neither alone diagnoses intention or bad faith. The delivery fraction is an authored input; the model does not infer its cause. Higher income can coexist with an unfulfilled task commitment."
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "Explicit respectful outreach can support reopening from zero willingness. Changed practice does not erase earlier events, restore the former value automatically or establish forgiveness."
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section hh-section" };
+                    children = list(
+                      {
+                        tag = "h2";
+                        attrs = {  };
+                        children = list("What symmetry does and does not establish")
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "The local rules use participant-neutral labels. Swapping A and B is a useful test of hidden role assumptions. The retained audit found local exchange symmetry but 28 order-sensitive trajectories in the 100-case design. Whole-run exchange invariance is therefore not established: agenda order and ties can affect later history."
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "This boundary prevents a symmetric-looking interface from claiming a stronger fairness result than the arithmetic supports. No score ranks the worth of either participant."
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section hh-section" };
+                    children = list(
+                      { tag = "h2"; attrs = {  }; children = list("The motivating statement, disassembled") },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "The primary source is Noah Revoy’s post of 6 November 2026. Direct retrieval failed; the text and its quoted post were retrieved through FxTwitter that day. This is one mediated evidence family, without an immutable source snapshot. Later edits require checking the decomposition again. The quoted image is outside the case."
+                        )
+                      },
+                      {
+                        tag = "nav";
+                        attrs = { class = "q-actions"; "aria-label" = "Primary attributed sources" };
+                        children = list(
+                          {
+                            tag = "a";
+                            attrs = { href = "https://x.com/NoahRevoy/status/2118655295572369444"; class = "q-text-link" };
+                            children = list("Noah Revoy’s post ↗")
+                          },
+                          {
+                            tag = "a";
+                            attrs = {
+                              href = "https://x.com/IterIntellectus/status/2118631778105561377";
+                              class = "q-text-link"
+                            };
+                            children = list("Quoted IterIntellectus post ↗")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "https://api.fxtwitter.com/status/2118655295572369444"; class = "q-text-link" };
+                            children = list("Text mirror used for retrieval ↗")
+                          }
+                        )
+                      },
+                      {
+                        tag = "details";
+                        attrs = { class = "hh-details" };
+                        children = list(
+                          {
+                            tag = "summary";
+                            attrs = {  };
+                            children = list("Read all 66 attributed atomic claims")
+                          },
+                          {
+                            tag = "p";
+                            attrs = {  };
+                            children = list(
+                              "Claims 1–62 paraphrase Noah Revoy’s assertions. Claims 63–66 paraphrase the quoted IterIntellectus post. These are attributed propositions, not endorsed findings. Classification names the evidence or argument needed; it does not supply that evidence."
+                            )
+                          },
+                          {
+                            tag = "ol";
+                            attrs = { class = "hh-claims" };
+                            children = append(
+                              list(
+                                {
+                                  tag = "li";
+                                  attrs = { value = 1; id = "hh-claim-1" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Increasing a husband's domestic work worsens his marital relationship.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Empirical causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 2; id = "hh-claim-2" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Increasing a husband's domestic work decreases his wife's happiness.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Empirical causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 3; id = "hh-claim-3" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Increasing a husband's domestic work decreases his earnings.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Empirical causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 4; id = "hh-claim-4" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Increasing a husband's domestic work increases divorce probability.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Empirical causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 5; id = "hh-claim-5" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Increasing a husband's domestic work decreases the couple's sexual frequency.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Empirical causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 6; id = "hh-claim-6" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list(
+                                        "Increasing a husband's domestic work decreases their eventual number of children."
+                                      )
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Empirical causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 7; id = "hh-claim-7" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Increasing a wife's earnings does not improve her marriage.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Empirical generalization · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 8; id = "hh-claim-8" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Modern women have not received adequate preparation for being wives.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Population generalization · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 9; id = "hh-claim-9" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Modern women have not received adequate preparation for motherhood.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Population generalization · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 10; id = "hh-claim-10" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Inadequate preparation causes domestic inefficiency.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 11; id = "hh-claim-11" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Inadequate preparation causes domestic incompetence.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 12; id = "hh-claim-12" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Modern women dislike hearing this assessment.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Psychological generalization · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 13; id = "hh-claim-13" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Their great-grandmothers would endorse the assessment.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Historical counterfactual · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 14; id = "hh-claim-14" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("The author's great-grandmother repeatedly expressed the assessment.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Personal testimony · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 15; id = "hh-claim-15" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list(
+                                        "Greater competence would let women complete twice the domestic output in half the time."
+                                      )
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Quantitative causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 16; id = "hh-claim-16" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Greater competence increases task enjoyment.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 17; id = "hh-claim-17" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Insufficient skill causes difficulty performing a task.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 18; id = "hh-claim-18" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list(
+                                        "Repeated difficulty attributable to insufficient skill produces resentment toward the task."
+                                      )
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 19; id = "hh-claim-19" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("A husband taking over his wife's domestic work does not improve her competence.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 20; id = "hh-claim-20" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Taking over that work prevents her from developing competence.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 21; id = "hh-claim-21" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list(
+                                        "Improving competence is the appropriate remedy for the domestic difficulty described."
+                                      )
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Practical prescription · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 22; id = "hh-claim-22" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("An inefficient employee should receive help improving skills.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Prescription · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 23; id = "hh-claim-23" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("An inefficient employee should receive help improving systems.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Prescription · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 24; id = "hh-claim-24" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("An inefficient employee should receive help improving efficiency.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Prescription · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 25; id = "hh-claim-25" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list(
+                                        "The person responsible for assisting that employee should not abandon their own responsibilities to perform the employee's job."
+                                      )
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Prescription · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 26; id = "hh-claim-26" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Taking over the employee's job causes neglect of that person's own work.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 27; id = "hh-claim-27" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Some of that work can be performed only by that person.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Exclusivity claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 28; id = "hh-claim-28" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Neglecting that work endangers the enterprise.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 29; id = "hh-claim-29" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("The business principle transfers appropriately to family organization.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Analogy requiring a bridge · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 30; id = "hh-claim-30" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("A sole-breadwinner husband has a responsibility to earn income.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Normative role claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 31; id = "hh-claim-31" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("He has a responsibility to provide for the family.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Normative role claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 32; id = "hh-claim-32" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("He has a responsibility to protect the family.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Normative role claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 33; id = "hh-claim-33" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("He has a responsibility to lead the family.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Normative role claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 34; id = "hh-claim-34" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Domestic chores divide attention available for his primary work.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 35; id = "hh-claim-35" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("That divided attention reduces his capacity to excel at his primary work.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 36; id = "hh-claim-36" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("A wife should become competent at managing the home.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Normative role claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 37; id = "hh-claim-37" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("A husband should become competent at providing for the home.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Normative role claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 38; id = "hh-claim-38" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Taking over a wife's responsibilities does not make her a better wife.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Evaluative causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 39; id = "hh-claim-39" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list(
+                                        "Asking a wife to take over a husband's responsibilities does not make him a better husband."
+                                      )
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Evaluative causal claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 40; id = "hh-claim-40" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Excellence within these respective roles produces a thriving family.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Causal claim dependent on a definition of thriving · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 41; id = "hh-claim-41" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Wives tell husbands that additional domestic help would make them happier.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Behavioral generalization · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 42; id = "hh-claim-42" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Husbands should give those requests less weight.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Prescription · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 43; id = "hh-claim-43" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("What a person requests can differ from what benefits that person.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Possibility claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 44; id = "hh-claim-44" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("The wife described needs greater competence.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Diagnosis · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 45; id = "hh-claim-45" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("The wife described does not need reduced responsibility.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Diagnosis · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 46; id = "hh-claim-46" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Husbands should develop the ability to refuse requests.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Prescription · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 47; id = "hh-claim-47" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Wives will sometimes request things their husbands cannot provide.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Prediction · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 48; id = "hh-claim-48" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Children will sometimes request things their mothers cannot provide.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Prediction · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 49; id = "hh-claim-49" };
+                                  children = list(
+                                    { tag = "p"; attrs = {  }; children = list("Human wants are unlimited.") },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Generalization · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 50; id = "hh-claim-50" };
+                                  children = list(
+                                    { tag = "p"; attrs = {  }; children = list("Time is limited.") },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Resource claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 51; id = "hh-claim-51" };
+                                  children = list(
+                                    { tag = "p"; attrs = {  }; children = list("Energy is limited.") },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Resource claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 52; id = "hh-claim-52" };
+                                  children = list(
+                                    { tag = "p"; attrs = {  }; children = list("Material resources are limited.") },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Resource claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 53; id = "hh-claim-53" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("A good husband cannot agree to every request.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Normative feasibility claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 54; id = "hh-claim-54" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("A good father cannot agree to every request.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Normative feasibility claim · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 55; id = "hh-claim-55" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("The author cares for his wife when she is ill.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Personal testimony · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 56; id = "hh-claim-56" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("He cares for the children during her illness.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Personal testimony · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 57; id = "hh-claim-57" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("He performs domestic chores during her illness.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Personal testimony · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 58; id = "hh-claim-58" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("He regards that work as temporarily fulfilling her responsibilities.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Reported role interpretation · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 59; id = "hh-claim-59" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("His wife resumes managing the home when the household is healthy.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Personal testimony · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 60; id = "hh-claim-60" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("He resumes his usual responsibilities when the household is healthy.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Personal testimony · Noah Revoy")
+                                    }
+                                  )
+                                }
+                              ),
+                              list(
+                                {
+                                  tag = "li";
+                                  attrs = { value = 61; id = "hh-claim-61" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list(
+                                        "Temporary domestic assistance during illness is compatible with the recommended arrangement."
+                                      )
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Qualification of the prescription · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 62; id = "hh-claim-62" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list(
+                                        "Both spouses becoming highly competent in their assigned roles should be the household's objective."
+                                      )
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Value judgment · Noah Revoy")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 63; id = "hh-claim-63" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Men's housework has increased across Western societies over recent decades.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Historical aggregate claim · IterIntellectus (quoted post)")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 64; id = "hh-claim-64" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Men's childcare has increased across Western societies over recent decades.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Historical aggregate claim · IterIntellectus (quoted post)")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 65; id = "hh-claim-65" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Fertility has declined across Western societies during that period.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Historical aggregate claim · IterIntellectus (quoted post)")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = { value = 66; id = "hh-claim-66" };
+                                  children = list(
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Insufficient male domestic work may not explain declining fertility.")
+                                    },
+                                    {
+                                      tag = "p";
+                                      attrs = { class = "q-caption" };
+                                      children = list("Tentative explanatory claim · IterIntellectus (quoted post)")
+                                    }
+                                  )
+                                }
+                              )
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "Population claims need specified measures, comparisons and time horizons. Simultaneous aggregate trends do not identify individual causal effects. Personal testimony does not supply the other spouse’s account. Prescriptions require normative arguments; an analogy between a business and a marriage requires a bridge."
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section hh-section" };
+                    children = list(
+                      { tag = "h2"; attrs = {  }; children = list("Retained sources and executable rules") },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "The source listings below preserve the model’s assumptions and derivation for inspection. They belong to one local synthetic evidence family, rather than independent observations of people."
+                        )
+                      },
+                      {
+                        tag = "div";
+                        attrs = { id = "hh-source-snapshots" };
+                        children = list(
+                          { tag = "h2"; attrs = {  }; children = list("The executable sources") },
+                          $snapshots
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = { class = "q-section hh-section" };
+                    children = list(
+                      { tag = "h2"; attrs = {  }; children = list("Keep the interpretation open") },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "The Field proposes retaining agency and correction. That is a contestable commitment, not a deduction from the calculations. Flexibility has costs; stable roles can be welcome; disagreement does not automatically imply dismissal. People affected by household decisions, including dependants, may have interests this two-person model does not represent."
+                        )
+                      },
+                      {
+                        tag = "nav";
+                        attrs = { "aria-label" = "Inspect or leave this example"; class = "q-actions" };
+                        children = list(
+                          {
+                            tag = "a";
+                            attrs = { href = "../"; class = "q-text-link" };
+                            children = list("Return to the household example →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "../../"; class = "q-text-link" };
+                            children = list("Return to The Field →")
+                          },
+                          {
+                            tag = "a";
+                            attrs = { href = "../../../questions.html"; class = "q-text-link" };
+                            children = list("Leave for Questions →")
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "section";
+                    attrs = {
+                      class = "q-section hh-section hh-related";
+                      id = "hh-related";
+                      "aria-labelledby" = "hh-related-heading"
+                    };
+                    children = list(
+                      { tag = "p"; attrs = { class = "eyebrow" }; children = list("Related questions") },
+                      {
+                        tag = "h2";
+                        attrs = { id = "hh-related-heading" };
+                        children = list("A household is also a relationship.")
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "The Field holds this experiment because choices change what can happen next. These questions place the model beside the rest of the corpus:"
+                        )
+                      },
+                      {
+                        tag = "ul";
+                        attrs = { class = "hh-related-links" };
+                        children = list(
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              { tag = "a"; attrs = { href = "../../../places/care.html" }; children = list("Care") },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list("what remains owed when an arrangement becomes difficult?")
+                              }
+                            )
+                          },
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "a";
+                                attrs = { href = "../../../places/revision.html" };
+                                children = list("Revision")
+                              },
+                              { tag = "p"; attrs = {  }; children = list("what can be reopened, and who can ask?") }
+                            )
+                          },
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "a";
+                                attrs = { href = "../../../places/permission.html" };
+                                children = list("Permission")
+                              },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list("who authorizes a choice on someone else’s behalf?")
+                              }
+                            )
+                          },
+                          {
+                            tag = "li";
+                            attrs = {  };
+                            children = list(
+                              {
+                                tag = "a";
+                                attrs = { href = "../../../relationship-manager/" };
+                                children = list("Rupture and repair")
+                              },
+                              {
+                                tag = "p";
+                                attrs = {  };
+                                children = list("how might a relationship find contact again?")
+                              }
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = { class = "hh-small" };
+                        children = list(
+                          "These relationships locate the example; they do not provide empirical validation for its authored rules."
+                        )
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          },
+          {
+            tag = "footer";
+            attrs = { class = "footer" };
+            children = list(
+              {
+                tag = "div";
+                attrs = {  };
+                children = list(
+                  { tag = "p"; attrs = { class = "signature" }; children = list("Aaron Alderman") },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("A few things I’ve built. A few things I’m still trying to understand.")
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Elsewhere" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "https://github.com/aaron-alderman" };
+                    children = list("GitHub ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "https://www.linkedin.com/in/aaron-alderman/" };
+                    children = list("LinkedIn ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "https://worldwright.io/" };
+                    children = list("Built with Worldwright.io ↗")
+                  }
+                )
+              },
+              $stewardshipLinks
+            )
+          }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  let surfaceWritePath = "the-field/households/inspect/index.html"
+  call assurance.surface.register
+  port file.write {
+    path = "the-field/households/inspect/index.html";
+    text = $result
+  } → _

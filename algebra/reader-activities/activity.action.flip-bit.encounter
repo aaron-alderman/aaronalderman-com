@@ -1,0 +1,18 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.flip-bit:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port state.get { key = "bits" } → bits
+  let bits = or($bits, list(0, 0, 0))
+  port number.parse { value = $value } → index
+  fold $bits as bit; position starts 0:
+    yield add($position, 1) → ignored
+  let bits = map(
+    range(3),
+    "n",
+    if(eq(add($n, -1), $index), if(eq(at($bits, $index), 0), 1, 0), at($bits, add($n, -1)))
+  )
+  port state.set { key = "bits"; value = $bits } → _
+  call activity.code

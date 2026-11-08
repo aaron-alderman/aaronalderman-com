@@ -1,0 +1,68 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.change:
+  let target = $eventInput.matched
+  let id = at($target.attributes, "id")
+  when eq($id, "hh-period-slider"):
+    port kernel.invoke { query = "household.chart.select"; input = { matched = $target } } → _
+  let preset = includes(list("hh-orientation", "hh-change", "hh-profile", "hh-enabled"), $id)
+  when $preset:
+    when eq($id, "hh-orientation"):
+      port state.set { key = "hh-orientation"; value = $target.value } → hp159
+    when eq($id, "hh-change"):
+      port state.set { key = "hh-change"; value = $target.value } → hp160
+    when eq($id, "hh-profile"):
+      port state.set { key = "hh-profile"; value = $target.value } → hp161
+    when eq($id, "hh-enabled"):
+      port state.set { key = "hh-enabled"; value = $target.checked } → hp162
+    port state.set { key = "hh-overrides"; value = list() } → hp163
+    port kernel.invoke { query = "household.rebuild"; input = {  } } → hq164
+  when includes(list("hh-person", "hh-phase", "hh-period-slider"), $id):
+    when eq($id, "hh-person"):
+      port state.set { key = "hh-person"; value = $target.value } → hp165
+    when eq($id, "hh-phase"):
+      port state.set { key = "hh-phase"; value = $target.value } → hp166
+    port kernel.invoke { query = "household.sync"; input = {  } } → hq167
+  when and(not($preset), not(includes(list("hh-person", "hh-phase", "hh-period-slider"), $id))):
+    port state.get { key = "hh-person" } → person
+    port state.get { key = "hh-phase" } → phase
+    port state.get { key = "hh-overrides" } → overrides
+    let key = at($target.attributes, "data-hh-key")
+    let scope = at($target.attributes, "data-hh-scope")
+    let def = at(
+      filter($data.household.controls, "d", and(eq($d.key, $key), eq($d.scope, $scope))),
+      0
+    )
+    when $def:
+      let value = $target.value
+      when not(eq($key, "handling")):
+        port number.parse { value = $target.value } → numeric
+        port number.calculate { operation = "max"; values = list($def.min, or($numeric, 0)) } → hn169
+        port number.calculate { operation = "min"; values = list($def.max, $hn169) } → hn168
+        let value = $hn168
+      let phaseKey = if(eq($scope, "rate"), "run", if(eq($scope, "resource"), "initial", $phase))
+      let editId = concat(
+        $scope,
+        "-",
+        if(eq($scope, "resource"), "household", $person),
+        "-",
+        $phaseKey,
+        "-",
+        $key
+      )
+      let overrides = append(
+        filter($overrides, "e", not(eq($e.id, $editId))),
+        list(
+          {
+            id = $editId;
+            scope = $scope;
+            person = $person;
+            phase = $phaseKey;
+            key = $key;
+            value = $value
+          }
+        )
+      )
+      port state.set { key = "hh-overrides"; value = $overrides } → hp170
+      port kernel.invoke { query = "household.rebuild"; input = {  } } → hq171

@@ -1,0 +1,109 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.data:
+  let ecDataNode = $eventInput.node
+  let ecDataScope = $eventInput.scope
+  let ecDataChildren = filter($ecNodes, "ecChild", eq($ecChild.parent, $ecDataNode.id))
+  let ecDataExpression = null
+  when eq(count($ecDataChildren), 0):
+    port kernel.invoke {
+      query = "ec.attempt";
+      input = {
+        query = "ec.expression";
+        input = { text = $eventInput.text; scope = $ecDataScope };
+        span = $ecSpan
+      }
+    } → ecDataValue
+    let ecDataExpression = $ecDataValue.expression
+  when not(eq(count($ecDataChildren), 0)):
+    port text.matches { value = at(at($ecDataChildren, 0), "text"); pattern = "^- " } → ecDataList
+    when $ecDataList:
+      fold $ecDataChildren as ecDataEntry; ecDataItems starts list("list"):
+        port text.matches { value = $ecDataEntry.text; pattern = "^- each [A-Za-z_][A-Za-z0-9_]* in .+:$" } → ecEachEntry
+        port text.slice { value = $ecDataEntry.text; start = 2 } → ecEntryText
+        port text.matches { value = $ecEntryText; pattern = "^[A-Za-z_][A-Za-z0-9_.-]*:" } → ecEntryRecord
+        when and(not($ecEachEntry), $ecEntryRecord):
+          port kernel.invoke {
+            query = "ec.attempt";
+            input = {
+              query = "ec.record";
+              input = {
+                nodes = append(
+                  list(
+                    {
+                      id = concat("inline:", $ecDataEntry.id);
+                      parent = $ecDataEntry.parent;
+                      line = $ecDataEntry.line;
+                      offset = $ecDataEntry.offset;
+                      raw = $ecDataEntry.raw;
+                      indent = $ecDataEntry.indent;
+                      text = $ecEntryText
+                    }
+                  ),
+                  filter($ecNodes, "ecChild", eq($ecChild.parent, $ecDataEntry.id))
+                );
+                scope = $ecDataScope
+              };
+              span = $ecSpan
+            }
+          } → ecDataItem
+        when and(not($ecEachEntry), not($ecEntryRecord)):
+          port kernel.invoke {
+            query = "ec.attempt";
+            input = {
+              query = "ec.expression";
+              input = { text = $ecEntryText; scope = $ecDataScope };
+              span = $ecSpan
+            }
+          } → ecDataAtom
+          let ecDataItem = $ecDataAtom.expression
+        when $ecEachEntry:
+          port text.split { value = $ecDataEntry.text; pattern = "^- each ([A-Za-z_][A-Za-z0-9_]*) in (.+):$" } → ecEachTokens
+          port kernel.invoke {
+            query = "ec.attempt";
+            input = {
+              query = "ec.expression";
+              input = { text = at($ecEachTokens, 2); scope = $ecDataScope };
+              span = $ecSpan
+            }
+          } → ecEachCollection
+          assert eq($ecEachCollection.cardinality, "many")
+            otherwise "EC-P021: Each needs an ordered collection."
+          let ecIteratorName = concat("ecItem", $ecDataEntry.line)
+          let ecIteratorRef = concat(at(" $", 1), $ecIteratorName)
+          port kernel.invoke {
+            query = "ec.attempt";
+            input = {
+              query = "ec.record";
+              input = {
+                nodes = filter($ecNodes, "ecChild", eq($ecChild.parent, $ecDataEntry.id));
+                scope = append(
+                  $ecDataScope,
+                  list(
+                    {
+                      name = at($ecEachTokens, 1);
+                      type = "text";
+                      expression = $ecIteratorRef;
+                      kind = $ecEachCollection.kind;
+                      expects = $ecEachCollection.expects
+                    }
+                  )
+                )
+              };
+              span = $ecSpan
+            }
+          } → ecEachBody
+          let ecDataItem = list("map", $ecEachCollection.expression, $ecIteratorName, $ecEachBody)
+        yield list("append", $ecDataItems, if($ecEachEntry, $ecDataItem, list("list", $ecDataItem))) → ecDataItems
+      let ecDataExpression = $ecDataItems
+    when not($ecDataList):
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = {
+          query = "ec.record";
+          input = { nodes = $ecDataChildren; scope = $ecDataScope };
+          span = $ecSpan
+        }
+      } → ecDataExpression
+  let result = $ecDataExpression

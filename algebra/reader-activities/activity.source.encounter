@@ -1,0 +1,54 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.source:
+  let key = concat("note.", at($eventInput.matched.attributes, "data-source"))
+  port record.get { record = $data.notes; key = $key } → note
+  assert $note
+    otherwise "READER-SOURCE: Unknown source note."
+  let input = {
+    tag = "section";
+    attrs = {  };
+    children = list(
+      { tag = "h2"; attrs = {  }; children = list($note.title) },
+      map(
+        $note.paragraphs,
+        "paragraph",
+        { tag = "p"; attrs = {  }; children = list($paragraph) }
+      ),
+      { tag = "p"; attrs = {  }; children = list($note.note) },
+      { tag = "p"; attrs = {  }; children = list($note.kind) },
+      {
+        tag = "a";
+        attrs = { href = concat("../", $note.href); target = "_blank"; rel = "noopener" };
+        children = list("Read the original source ↗")
+      },
+      if(
+        $note.receipt,
+        {
+          tag = "details";
+          attrs = {  };
+          children = list(
+            { tag = "summary"; attrs = {  }; children = list("Source file and technical details") },
+            { tag = "code"; attrs = {  }; children = list(at($note.receipt, "path")) },
+            {
+              tag = "p";
+              attrs = {  };
+              children = list("SHA-256: a digital fingerprint used to check that this is the same file.")
+            },
+            { tag = "code"; attrs = {  }; children = list(at($note.receipt, "sha256")) },
+            {
+              tag = "p";
+              attrs = {  };
+              children = list(concat("File size: ", at($note.receipt, "bytes"), " bytes."))
+            }
+          )
+        },
+        null
+      )
+    )
+  }
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#activity-source-content"; html = $markup } → _
+  port browser.dialog { ref = "#activity-source"; open = true } → _

@@ -1,0 +1,131 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.representation:
+  let ecRep = $eventInput.declaration
+  let ecRepNodes = filter($ecNodes, "ecChild", eq($ecChild.parent, $ecRep.node.id))
+  let ecRepScope = list()
+  fold $ecRepNodes as ecRepNode; ecGiven starts list():
+    port text.matches {
+      value = $ecRepNode.text;
+      pattern = "^given [A-Za-z_][A-Za-z0-9_.-]* as [A-Za-z_][A-Za-z0-9_.-]*$"
+    } → ecGivenLine
+    let ecGivenNext = $ecGiven
+    when $ecGivenLine:
+      port text.split {
+        value = $ecRepNode.text;
+        pattern = "^given ([A-Za-z_][A-Za-z0-9_.-]*) as ([A-Za-z_][A-Za-z0-9_.-]*)$"
+      } → ecGivenTokens
+      let ecGivenName = at($ecGivenTokens, 1)
+      assert not(includes(list("result", "model"), $ecGivenName))
+        otherwise "EC-P023: This input name is reserved by the language boundary."
+      assert not(some($ecGiven, "ecB", eq($ecB.name, $ecGivenName)))
+        otherwise "EC-P011: An input name is declared twice."
+      let ecGivenNext = append(
+        $ecGiven,
+        list({ name = $ecGivenName; type = at($ecGivenTokens, 2); node = $ecRepNode })
+      )
+    yield $ecGivenNext → ecGiven
+  let ecReturnNodes = filter($ecRepNodes, "ecN", includes($ecN.text, "return "))
+  assert eq(count($ecReturnNodes), 1)
+    otherwise "EC-P012: A representation requires one typed return block."
+  let ecReturnNode = at($ecReturnNodes, 0)
+  port text.split { value = $ecReturnNode.text; pattern = "^return ([A-Za-z_][A-Za-z0-9_.-]*):$" } → ecReturnTokens
+  let ecReturnType = at($ecReturnTokens, 1)
+  assert $ecReturnType
+    otherwise "EC-P013: Declare the type returned by this representation."
+  port kernel.invoke {
+    query = "ec.attempt";
+    input = {
+      query = "ec.fields";
+      input = {
+        type = $ecReturnType;
+        scope = $ecGiven;
+        nodes = filter($ecNodes, "ecChild", eq($ecChild.parent, $ecReturnNode.id))
+      };
+      span = $ecSpan
+    }
+  } → ecReturnFields
+  let ecRepScope = append($ecGiven, list({ name = "result"; type = $ecReturnType }))
+  let ecRenderNodes = filter($ecRepNodes, "ecN", eq($ecN.text, "render:"))
+  assert eq(count($ecRenderNodes), 1)
+    otherwise "EC-P014: A representation requires one explicit render block."
+  port kernel.invoke {
+    query = "ec.attempt";
+    input = {
+      query = "ec.record";
+      input = {
+        nodes = filter($ecNodes, "ecChild", eq($ecChild.parent, at(at($ecRenderNodes, 0), "id")));
+        scope = $ecRepScope
+      };
+      span = $ecSpan
+    }
+  } → ecRenderExpression
+  let ecEventNodes = filter($ecRepNodes, "ecN", eq($ecN.text, "events:"))
+  assert includes(list(0, 1), count($ecEventNodes))
+    otherwise "EC-P028: Events has two authors. Declare one event list."
+  let ecEventsExpression = list()
+  when eq(count($ecEventNodes), 1):
+    port kernel.invoke {
+      query = "ec.attempt";
+      input = {
+        query = "ec.data";
+        input = { node = at($ecEventNodes, 0); text = ""; scope = $ecRepScope };
+        span = $ecSpan
+      }
+    } → ecEventsExpression
+  fold $ecRepNodes as ecRequireNode; ecGuards starts list():
+    port text.matches { value = $ecRequireNode.text; pattern = "^require (.+) equals (.+)$" } → ecIsGuard
+    let ecGuardsNext = $ecGuards
+    when $ecIsGuard:
+      port text.split { value = $ecRequireNode.text; pattern = "^require (.+) equals (.+)$" } → ecGuardTokens
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = {
+          query = "ec.expression";
+          input = { text = at($ecGuardTokens, 1); scope = $ecGiven };
+          span = $ecSpan
+        }
+      } → ecGuardLeft
+      port kernel.invoke {
+        query = "ec.attempt";
+        input = {
+          query = "ec.expression";
+          input = { text = at($ecGuardTokens, 2); scope = $ecGiven };
+          span = $ecSpan
+        }
+      } → ecGuardRight
+      assert and(
+        eq($ecGuardLeft.kind, $ecGuardRight.kind),
+        eq($ecGuardLeft.cardinality, $ecGuardRight.cardinality)
+      )
+        otherwise "EC-T025: Equality operands have incompatible kinds."
+      let ecGuardsNext = append(
+        $ecGuards,
+        list(
+          {
+            expression = list("eq", $ecGuardLeft.expression, $ecGuardRight.expression);
+            node = $ecRequireNode
+          }
+        )
+      )
+    yield $ecGuardsNext → ecGuards
+  each $ecRepNodes as ecRepNode:
+    port text.matches {
+      value = $ecRepNode.text;
+      pattern = "^(given .+ as .+|require .+ equals .+|return .+:|render:|events:)$"
+    } → ecKnownLine
+    assert $ecKnownLine
+      otherwise "EC-P015: Unsupported representation statement; no host-code escape is available."
+  let result = {
+    id = $ecRep.id;
+    type = $ecReturnType;
+    given = $ecGiven;
+    fields = $ecReturnFields.fields;
+    values = $ecReturnFields.values;
+    render = $ecRenderExpression;
+    events = $ecEventsExpression;
+    guards = $ecGuards;
+    node = $ecRep.node;
+    entry = concat("code.", $ecModule, ".representation.", $ecRep.id)
+  }

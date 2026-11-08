@@ -1,0 +1,150 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.discovery.scan:
+  port text.split {
+    value = $eventInput.html;
+    pattern = "(<script\\b[^>]*>[\\s\\S]*?</script\\s*>|<style\\b[^>]*>[\\s\\S]*?</style\\s*>|<!--[\\s\\S]*?-->|<(?:[^>\"']|\"[^\"]*\"|'[^']*')*>)"
+  } → pieces
+  let current = {  }
+  let ordinal = 0
+  fold $pieces as piece; scanState starts { ordinal = 0; current = {  }; inHead = false; observed = list() }:
+    let current = $scanState.current
+    let inHead = $scanState.inHead
+    let ordinal = add($scanState.ordinal, 1)
+    port text.trim { value = $piece } → piece
+    let found = list()
+    when not(eq($piece, "")):
+      port text.matches { value = $piece; pattern = "^<[A-Za-z]" } → opening
+      when $opening:
+        port text.split { value = $piece; pattern = "^<([A-Za-z][A-Za-z0-9:-]*)" } → head
+        let tag = at($head, 1)
+        port text.lowerCase { value = $tag } → tag
+        when eq($tag, "head"):
+          let inHead = true
+        port text.split { value = at($head, 2); pattern = "^((?:[^>\"']|\"[^\"]*\"|'[^']*')*)>" } → tail
+        port text.slice { value = at($tail, 1); start = 0 } → rawAttrs
+        port text.split {
+          value = $rawAttrs;
+          pattern = "(?:\\s+([^\\s=<>/]+(?:\\s*=\\s*(?:\"[^\"]*\"|'[^']*'|[^\\s>]+))?))|(?:\\s*/?\\s*$)"
+        } → attributePieces
+        fold $attributePieces as ap; attributeState starts { values = {  }; entries = list() }:
+          let attributes = $attributeState.values
+          let attributeEntries = $attributeState.entries
+          when $ap:
+            port text.split {
+              value = $ap;
+              pattern = "^([^=\\s]+)(?:\\s*=\\s*(?:\"([\\s\\S]*)\"|'([\\s\\S]*)'|([^\\s>]+)))?$"
+            } → attributeParts
+            let attributeName = at($attributeParts, 1)
+            let attributeValue = if(
+              not(eq(at($attributeParts, 2), at({  }, "undefined"))),
+              at($attributeParts, 2),
+              if(
+                not(eq(at($attributeParts, 3), at({  }, "undefined"))),
+                at($attributeParts, 3),
+                if(not(eq(at($attributeParts, 4), at({  }, "undefined"))), at($attributeParts, 4), true)
+              )
+            )
+            port record.put { record = $attributes; key = $attributeName; value = $attributeValue } → attributes
+            let attributeEntries = append($attributeEntries, list(list($attributeName, $attributeValue)))
+          yield { values = $attributes; entries = $attributeEntries } → attributeState
+        let attributes = $attributeState.values
+        let attributeEntries = $attributeState.entries
+        let selector = if(
+          at($attributes, "id"),
+          concat("#", at($attributes, "id")),
+          if(
+            if(if(true, $inHead, false), eq($tag, "title"), false),
+            "head title",
+            if(
+              if(
+                if(if(true, $inHead, false), eq($tag, "link"), false),
+                eq(at($attributes, "rel"), "canonical"),
+                false
+              ),
+              "head link[rel=\"canonical\"]",
+              if(
+                if(if(true, $inHead, false), eq($tag, "meta"), false),
+                if(
+                  at($attributes, "property"),
+                  concat("head meta[property=\"", at($attributes, "property"), " \"]"),
+                  concat("head meta[name=\"", or(at($attributes, "name"), ""), " \"]")
+                ),
+                if(includes(list("body", "html"), $tag), $tag, "")
+              )
+            )
+          )
+        )
+        port text.replaceAll { value = $selector; search = " \"]"; replacement = "\"]" } → selector
+        let current = if(
+          includes(
+            list(
+              "area",
+              "base",
+              "br",
+              "col",
+              "embed",
+              "hr",
+              "img",
+              "input",
+              "link",
+              "meta",
+              "source",
+              "track",
+              "wbr"
+            ),
+            $tag
+          ),
+          {  },
+          { selector = $selector; tag = $tag; ordinal = $ordinal }
+        )
+        let found = map(
+          $attributeEntries,
+          "a",
+          {
+            ordinal = $ordinal;
+            tag = $tag;
+            selector = $selector;
+            sink = at($a, 0);
+            value = at($a, 1)
+          }
+        )
+        when includes(list("script", "style"), $tag):
+          let found = append(
+            $found,
+            list(
+              {
+                ordinal = $ordinal;
+                tag = $tag;
+                selector = $selector;
+                sink = "opaque-content";
+                value = "Inline executable/style body is an opaque dependency; its internal relationships are not certified."
+              }
+            )
+          )
+          let current = {  }
+      when not($opening):
+        port text.matches { value = $piece; pattern = "^<" } → markup
+        when not($markup):
+          let found = list(
+            {
+              ordinal = $ordinal;
+              tag = or(at($current, "tag"), "unknown");
+              selector = if(at($current, "selector"), $current.selector, "");
+              sink = "textContent";
+              value = $piece
+            }
+          )
+        when $markup:
+          let current = {  }
+          port text.matches { value = $piece; pattern = "^</head\\s*>" } → headClosed
+          when $headClosed:
+            let inHead = false
+    yield {
+    ordinal = $ordinal;
+    current = $current;
+    inHead = $inHead;
+    observed = append($scanState.observed, $found)
+  } → scanState
+  let result = $scanState.observed

@@ -1,0 +1,33 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.reset-pattern:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port state.get { key = "step" } → step
+  let step = or($step, 0)
+  port number.calculate { operation = "add"; values = list($step, 1) } → nextStep
+  port number.calculate { operation = "min"; values = list(5, $nextStep) } → nextStep
+  port state.set { key = "step"; value = if(eq("reset-pattern", "reset-pattern"), 0, $nextStep) } → _
+  let step = if(eq("reset-pattern", "reset-pattern"), 0, $nextStep)
+  port kernel.invoke { query = "reader.model.inflate"; input = { step = $step } } → pair
+  port browser.write { ref = "#count-a"; name = "textContent"; value = at($pair, 0) } → _
+  port browser.write { ref = "#count-b"; name = "textContent"; value = at($pair, 1) } → _
+  port browser.attribute { ref = ".world-encounter"; name = "data-step"; value = $step } → _
+  port browser.write { ref = "[data-world=\"inflate\"]"; name = "disabled"; value = eq($step, 5) } → _
+  port number.calculate { operation = "multiply"; values = list($step, 18) } → turn
+  port browser.style { ref = ".rosette"; name = "--turn"; value = concat($turn, "deg") } → _
+  port browser.write {
+    ref = ".world-result";
+    name = "textContent";
+    value = concat(
+      "Step ",
+      $step,
+      ". The exact count pair is (",
+      at($pair, 0),
+      ", ",
+      at($pair, 1),
+      ").",
+      if(eq($step, 5), " This bounded example ends here; reset to inspect it again.", "")
+    )
+  } → _

@@ -1,0 +1,106 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.module.select:
+  call hierarchy.module.context
+  let spPolicy = $data.presentation.spPolicy
+  let spGrammar = $data.presentation.spGrammar
+  let lexPolicy = $data.presentation.lexPolicy
+  let lexGrammar = $data.presentation.lexGrammar
+  port browser.property { ref = "#module-query"; name = "value" } → selectedQuery
+  port kernel.invoke {
+    query = "sp.moduleView";
+    input = { module = $selectedModule.sourceModule; name = $selectedQuery }
+  } → selectedView
+  let selectedText = $selectedView.text
+  let selectedFile = $selectedModule.moduleFile
+  when at($selectedModule, "authorText"):
+    let sourceRanges = filter(
+      $selectedModule.sourceOrigins,
+      "sourceRange",
+      and(
+        eq($sourceRange.kind, "process-definition"),
+        eq($sourceRange.pointer, $selectedView.pointer)
+      )
+    )
+    assert eq(count($sourceRanges), 1)
+      otherwise "SOURCE-RANGE: Exactly one authored process range is required."
+    let sourceRange = at($sourceRanges, 0)
+    port text.slice {
+      value = $selectedModule.authorText;
+      start = $sourceRange.start;
+      end = $sourceRange.end
+    } → selectedText
+    let selectedFile = $selectedModule.sourceFile
+  port digest.sha256 { text = $selectedText } → selectedHash
+  port kernel.invoke {
+    query = "sp.present";
+    input = {
+      text = $selectedText;
+      file = "selected-query.process";
+      language = "process";
+      theme = "dark";
+      expectedHash = $selectedHash;
+      lineNumbers = true;
+      selectedLine = null;
+      origin = {
+        file = $selectedFile;
+        pointer = $selectedView.pointer;
+        scope = "authored source slice; not an execution trace"
+      }
+    }
+  } → selectedPresentation
+  let input = $selectedPresentation.tree
+  call projection.serialize
+  port browser.content { ref = "#module-readable"; html = $result } → _
+  port browser.write { ref = "#module-title"; name = "textContent"; value = $selectedQuery } → _
+  port browser.write {
+    ref = "#module-pointer";
+    name = "textContent";
+    value = concat($selectedFile, " · ", $selectedView.pointer)
+  } → _
+  let input = {
+    tag = "ul";
+    attrs = {  };
+    children = map(
+      $selectedView.forms,
+      "selectedForm",
+      {
+        tag = "li";
+        attrs = {  };
+        children = list(
+          { tag = "code"; attrs = {  }; children = list($selectedForm) },
+          " · ",
+          count(
+            filter(
+              $selectedView.statements,
+              "selectedStatement",
+              eq($selectedStatement.form, $selectedForm)
+            )
+          ),
+          " statements"
+        )
+      }
+    )
+  }
+  call projection.serialize
+  port browser.content { ref = "#module-forms"; html = $result } → _
+  let input = {
+    tag = "ol";
+    attrs = {  };
+    children = map(
+      $selectedView.statements,
+      "selectedStatement",
+      {
+        tag = "li";
+        attrs = {  };
+        children = list(
+          { tag = "code"; attrs = {  }; children = list($selectedStatement.form) },
+          " · ",
+          { tag = "code"; attrs = {  }; children = list($selectedStatement.pointer) }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  port browser.content { ref = "#module-coordinates"; html = $result } → _

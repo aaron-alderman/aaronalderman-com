@@ -1,0 +1,31 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.safeTree:
+  let ecTree = $eventInput.tree
+  port value.describe { value = $ecTree } → ecTreeKind
+  when eq($ecTreeKind.type, "object"):
+    port record.entries { value = $ecTree } → ecTreeFields
+    assert every($ecTreeFields, "ecF", includes(list("tag", "attrs", "children"), at($ecF, 0)))
+      otherwise "EC-D006: This element contains an undeclared presentation field."
+    assert and($ecTreeKind.plain, not($ecTreeKind.array))
+      otherwise "EC-D001: A rendered element must be a plain record."
+    assert includes(
+      list("a", "article", "h2", "p", "table", "tbody", "tr", "td", "button"),
+      $ecTree.tag
+    )
+      otherwise "EC-D002: This experiment does not grant that HTML element."
+    port record.entries { value = or(at($ecTree, "attrs"), {  }) } → ecAttrs
+    each $ecAttrs as ecAttr:
+      assert includes(list("id", "href", "class", "type"), at($ecAttr, 0))
+        otherwise "EC-D003: This HTML attribute is not granted."
+      when eq(at($ecAttr, 0), "href"):
+        port text.matches { value = at($ecAttr, 1); pattern = "^encounter-[a-z0-9-]+\\.html$" } → ecHrefSafe
+        assert $ecHrefSafe
+          otherwise "EC-D004: Link to an explicit local experimental page route."
+    each or(at($ecTree, "children"), list()) as ecChild:
+      port kernel.invoke { query = "ec.safeTree"; input = { tree = $ecChild } } → _
+  when not(eq($ecTreeKind.type, "object")):
+    assert eq($ecTreeKind.type, "string")
+      otherwise "EC-D005: Rendered text must be text."
+  let result = true

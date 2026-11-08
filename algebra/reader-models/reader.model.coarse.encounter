@@ -1,0 +1,28 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process reader.model.coarse:
+  port number.parse { value = $eventInput.block } → block
+  assert includes(list(1, 2, 4), $block)
+    otherwise "READER-CELL: Choose block size 1, 2 or 4."
+  port number.calculate { operation = "divide"; values = list(4, $block) } → side
+  port number.calculate { operation = "multiply"; values = list($side, $side) } → blocks
+  port number.calculate { operation = "multiply"; values = list($block, $block) } → area
+  fold range($blocks) as blockIndex; cells starts list():
+    port number.calculate { operation = "subtract"; values = list($blockIndex, 1) } → bi
+    port number.calculate { operation = "divide"; values = list($bi, $side) } → row
+    port number.calculate { operation = "floor"; values = list($row) } → row
+    port number.calculate { operation = "multiply"; values = list($row, $block) } → row
+    port number.calculate { operation = "remainder"; values = list($bi, $side) } → col
+    port number.calculate { operation = "multiply"; values = list($col, $block) } → col
+    fold range($area) as pixel; sum starts 0:
+      port number.calculate { operation = "subtract"; values = list($pixel, 1) } → index
+      port number.calculate { operation = "divide"; values = list($index, $block) } → y
+      port number.calculate { operation = "floor"; values = list($y) } → y
+      port number.calculate { operation = "remainder"; values = list($index, $block) } → x
+      port number.calculate { operation = "add"; values = list($row, $y) } → y
+      port number.calculate { operation = "multiply"; values = list($y, 4) } → offset
+      port number.calculate { operation = "add"; values = list($offset, $col, $x) } → offset
+      yield add($sum, at($data.cellPattern, $offset)) → sum
+    port number.calculate { operation = "divide"; values = list($sum, $area) } → mean
+    yield append($cells, list({ mean = $mean; total = $sum })) → result

@@ -1,0 +1,21 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process workshop.open:
+  port state.get { key = "workshop" } → snapshot
+  let origin = at(
+    filter($snapshot.panels, "panel", eq($panel.projection.output.type, $eventInput.type)),
+    0
+  )
+  let matches = filter(
+    $origin.projection.output.events,
+    "descriptor",
+    or(at($descriptor, "open"), false)
+  )
+  assert eq(count($matches), 1)
+    otherwise "LAB-OPEN: The checked preview needs exactly one declared page-open descriptor."
+  let descriptor = at($matches, 0)
+  let target = at(filter($snapshot.panels, "panel", eq($panel.projection.view, $descriptor.open)), 0)
+  assert $target
+    otherwise "LAB-OPEN: This declared page has no current projection."
+  port browser.frameContent { ref = $eventInput.frame; html = $target.html; sandbox = list("allow-same-origin") } → _

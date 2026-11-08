@@ -1,0 +1,54 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.input:
+  let input = $eventInput.matched
+  let value = $input.value
+  when eq(at($input.attributes, "id"), "lens-angle"):
+    port number.parse { value = $value } → angle
+    port kernel.invoke { query = "reader.model.calibration"; input = { angle = $angle } } → reading
+    port number.calculate { operation = "multiply"; values = list(-1, $angle) } → rotation
+    port browser.attribute {
+      ref = "#lens-axis";
+      name = "transform";
+      value = concat("rotate(", $rotation, " 200 165)")
+    } → _
+    port browser.write { ref = "#angle-value"; name = "textContent"; value = concat($angle, "°") } → _
+    port number.format { value = $reading; digits = 2 } → reading
+    port browser.write { ref = "#lens-value"; name = "textContent"; value = $reading } → _
+    port browser.write {
+      ref = "#lens-caption";
+      name = "textContent";
+      value = if(
+        eq($angle, 0),
+        "At this angle, two different points share one reading.",
+        if(
+          eq($angle, 90),
+          "The line now shows the full difference between the points.",
+          "Turning the line makes part of the difference visible."
+        )
+      )
+    } → _
+  when eq(at($input.attributes, "data-world-input"), "garden"):
+    call activity.garden
+  when eq(at($input.attributes, "data-world-input"), "weights"):
+    port kernel.invoke { query = "reader.model.weights"; input = { percent = $value } } → scores
+    port number.format { value = $scores.a; digits = 2 } → scoreA
+    port number.format { value = $scores.b; digits = 2 } → scoreB
+    port browser.write { ref = "#score-a"; name = "textContent"; value = $scoreA } → _
+    port browser.write { ref = "#score-b"; name = "textContent"; value = $scoreB } → _
+    port browser.write { ref = "#weight-label"; name = "textContent"; value = concat($value, "%") } → _
+    port number.calculate { operation = "greater"; values = list($scores.a, $scores.b) } → preferA
+    port browser.write {
+      ref = ".world-result";
+      name = "textContent";
+      value = if(
+        eq($scores.a, $scores.b),
+        "The two plans have the same score with these priorities.",
+        concat(
+          "Option ",
+          if($preferA, "A", "B"),
+          " ranks higher under these declared weights. The plans’ speed and thoroughness scores have not changed."
+        )
+      )
+    } → _

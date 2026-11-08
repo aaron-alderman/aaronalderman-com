@@ -1,0 +1,26 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.evaluate:
+  port kernel.invoke {
+    query = "household.person";
+    input = {
+      person = at($eventInput.people, 0);
+      share = $eventInput.shareA;
+      demand = $eventInput.demand;
+      reviewHours = $eventInput.reviewHours;
+      delivery = $eventInput.deliveryA
+    }
+  } → a
+  port number.calculate { operation = "subtract"; values = list(1, $eventInput.shareA) } → hn30
+  port kernel.invoke {
+    query = "household.person";
+    input = {
+      person = at($eventInput.people, 1);
+      share = $hn30;
+      demand = $eventInput.demand;
+      reviewHours = $eventInput.reviewHours;
+      delivery = $eventInput.deliveryB
+    }
+  } → b
+  let result = list($a, $b)

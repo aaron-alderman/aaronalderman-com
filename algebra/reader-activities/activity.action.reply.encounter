@@ -1,0 +1,30 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.reply:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port number.parse { value = $value } → index
+  let reply = at($data.conversation.replies, $index)
+  port browser.select { selector = "[data-encounter=\"reply\"]" } → buttons
+  each $buttons as choice:
+    port browser.attribute {
+      ref = $choice.ref;
+      name = "aria-pressed";
+      value = eq($choice.ref.handle, $button.ref.handle)
+    } → _
+  let input = list(
+    {
+      tag = "p";
+      attrs = { class = "conversation-line answer" };
+      children = list($reply.answer)
+    },
+    {
+      tag = "p";
+      attrs = { class = "conversation-reflection" };
+      children = list($reply.question)
+    }
+  )
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#conversation-answer"; html = $markup } → _

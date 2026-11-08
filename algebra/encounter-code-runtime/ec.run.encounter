@@ -1,0 +1,18 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.run:
+  let ecInputs = $eventInput.candidate.inputs
+  let codePlan = $eventInput.candidate.plan
+  let codeModel = $eventInput.candidate.model
+  let factIndex = $eventInput.candidate.factIndex
+  fold $codePlan.views as ecV; ecResults starts list():
+    port kernel.invoke { query = "ec.reference"; input = { id = $ecV.id; type = $ecV.type } } → _
+    when $ecV.show:
+      port kernel.invoke { query = "ec.resolve"; input = { view = $ecV.id; context = null } } → ecResolved
+      let ecResults = append($ecResults, list($ecResolved))
+    fold $ecV.contexts as ecContext; ecResults starts $ecResults:
+      port kernel.invoke { query = "ec.resolve"; input = { view = $ecV.id; context = $ecContext.id } } → ecResolved
+      yield append($ecResults, list($ecResolved)) → ecResults
+    yield $ecResults → ecResults
+  let result = $ecResults

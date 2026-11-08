@@ -1,0 +1,17 @@
+# Lower the existing token/rule plan into the common stylesheet tree.
+process-module "temple/surface-process-module/1"
+
+process css.renderPlan:
+  assert eq(count($cssPlan.imports), 0)
+    otherwise "PROJECTION: Fonts use typed font-face definitions; stylesheet imports are refused."
+  let imports = list()
+  let tokens = { kind = "rule"; selector = ":root"; children = map($cssPlan.tokens, "token", { kind = "decl"; property = concat("--", $token.name); value = $token.value }) }
+  fold $cssPlan.rules as rule; rules starts list():
+    let declarations = map($rule.declarations, "decl", { kind = "decl"; property = $decl.property; value = $decl.value })
+    let node = if(eq($rule.selector, "@font-face"), { kind = "atrule"; name = "font-face"; afterName = ""; params = ""; children = $declarations }, { kind = "rule"; selector = $rule.selector; children = $declarations })
+    yield append($rules, list(if($rule.context, { kind = "atrule"; name = "media"; afterName = ""; params = $rule.context; children = list($node) }, $node))) → rules
+  let input = { kind = "root"; children = append(append($imports, list($tokens)), $rules) }
+  call projection.stylesheet
+  let css = $result
+  assert includes($css, ":focus-visible")
+    otherwise "Visible focus rule missing"

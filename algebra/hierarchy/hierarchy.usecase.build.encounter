@@ -1,0 +1,98 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.usecase.build:
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          {
+            tag = "meta";
+            attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+            children = list()
+          },
+          {
+            tag = "title";
+            attrs = {  };
+            children = list("Relational Geometry Programme — Claimipedia Science")
+          },
+          {
+            tag = "meta";
+            attrs = {
+              name = "description";
+              content = "Explore relational structure, physical models and the tests that could distinguish them."
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "canonical"; href = "https://aaronalderman.com/relational-geometry/" };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "stylesheet"; href = "../expedition.css?v=triple-braid-1" };
+            children = list()
+          }
+        )
+      },
+      {
+        tag = "body";
+        attrs = {  };
+        children = list(
+          {
+            tag = "main";
+            attrs = { class = "hierarchy-page" };
+            children = list(
+              {
+                tag = "p";
+                attrs = { class = "eyebrow" };
+                children = list("Claimipedia Science / First use case")
+              },
+              { tag = "h1"; attrs = {  }; children = list("Relational Geometry Programme") },
+              {
+                tag = "p";
+                attrs = { class = "lead" };
+                children = list(
+                  "Explore relational structure, physical models and the tests that could distinguish them."
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { class = "hierarchy-page-links" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = {
+                      class = "button";
+                      href = "https://aaron-alderman.github.io/spin23-relational-geometry/"
+                    };
+                    children = list("Explore the programme ↗")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "../claimipedia-science/" };
+                    children = list("Claimipedia Science →")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "../inspection/relational-geometry.html" };
+                    children = list("Inspect the source bindings →")
+                  }
+                )
+              }
+            )
+          }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  let surfaceWritePath = "relational-geometry/index.html"
+  call assurance.surface.register
+  port file.write { path = "relational-geometry/index.html"; text = $result } → _

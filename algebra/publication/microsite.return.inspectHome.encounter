@@ -1,0 +1,85 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process microsite.return.inspectHome:
+  let returnHasHome = false
+  port text.split {
+    value = $result;
+    pattern = "<!--[\\s\\S]*?-->|<[sS][cC][rR][iI][pP][tT]\\b[^>]*>[\\s\\S]*?</[sS][cC][rR][iI][pP][tT]\\s*>|<[sS][tT][yY][lL][eE]\\b[^>]*>[\\s\\S]*?</[sS][tT][yY][lL][eE]\\s*>|<[tT][eE][xX][tT][aA][rR][eE][aA]\\b[^>]*>[\\s\\S]*?</[tT][eE][xX][tT][aA][rR][eE][aA]\\s*>|<[tT][eE][mM][pP][lL][aA][tT][eE]\\b[^>]*>[\\s\\S]*?</[tT][eE][mM][pP][lL][aA][tT][eE]\\s*>"
+  } → returnVisiblePieces
+  port text.join { values = $returnVisiblePieces; separator = "" } → returnVisibleMarkup
+  port text.split {
+    value = $returnVisibleMarkup;
+    pattern = "<[hH][eE][aA][dD][eE][rR]\\b(?:[^>\"']|\"[^\"]*\"|'[^']*')*>([\\s\\S]*?)</[hH][eE][aA][dD][eE][rR]\\s*>"
+  } → returnHeaders
+  when not(eq(count($returnHeaders), 1)):
+    port text.split {
+      value = at($returnHeaders, 1);
+      pattern = "<[aA]\\b((?:[^>\"']|\"[^\"]*\"|'[^']*')*)>"
+    } → returnAnchors
+    when not(eq(count($returnAnchors), 1)):
+      port text.split {
+        value = at($returnAnchors, 1);
+        pattern = "(?:\\s+([^\\s=<>/]+(?:\\s*=\\s*(?:\"[^\"]*\"|'[^']*'|[^\\s>]+))?))|(?:\\s*/?\\s*$)"
+      } → returnAttributePieces
+      fold $returnAttributePieces as returnAttribute; attributes starts { label = ""; href = ""; labels = 0; hrefs = 0 }:
+        let next = $attributes
+        port text.matches {
+          value = if($returnAttribute, $returnAttribute, " ");
+          pattern = "^(?:aria-label|href)\\s*=";
+          flags = "i"
+        } → returnWanted
+        when $returnWanted:
+          port text.split {
+            value = $returnAttribute;
+            pattern = "^([^=\\s]+)\\s*=\\s*(?:\"([\\s\\S]*)\"|'([\\s\\S]*)'|([^\\s>]+))$"
+          } → returnAttributeParts
+          port text.lowerCase { value = at($returnAttributeParts, 1) } → returnAttributeName
+          let returnAttributeValue = if(
+            not(eq(at($returnAttributeParts, 2), at({  }, "absent"))),
+            at($returnAttributeParts, 2),
+            if(
+              not(eq(at($returnAttributeParts, 3), at({  }, "absent"))),
+              at($returnAttributeParts, 3),
+              at($returnAttributeParts, 4)
+            )
+          )
+          when eq($returnAttributeName, "aria-label"):
+            let next = {
+              label = $returnAttributeValue;
+              href = $attributes.href;
+              labels = add($attributes.labels, 1);
+              hrefs = $attributes.hrefs
+            }
+          when eq($returnAttributeName, "href"):
+            let next = {
+              label = $attributes.label;
+              href = $returnAttributeValue;
+              labels = $attributes.labels;
+              hrefs = add($attributes.hrefs, 1)
+            }
+        yield $next → returnHomeAttributes
+      when and(
+        eq($returnHomeAttributes.label, "Aaron Alderman"),
+        eq($returnHomeAttributes.labels, 1),
+        eq($returnHomeAttributes.hrefs, 1)
+      ):
+        port text.indexOf { value = $returnHomeAttributes.href; search = one("site", "origin") } → returnOriginAt
+        let returnHomeHref = $returnHomeAttributes.href
+        when eq($returnOriginAt, 0):
+          port text.slice { value = $returnHomeHref; start = count(one("site", "origin")) } → returnHomeSuffix
+          let returnHomeHref = concat("/", $returnHomeSuffix)
+        try:
+          port url.resolve { href = $returnHomeHref; route = $returnDocument } → returnHomeTarget
+          let returnHasHome = and(
+            not($returnHomeTarget.external),
+            includes(
+              append(
+                list("", "index.html"),
+                map(subjects("isa", "IdentityTheme"), "theme", one($theme, "homeRoute"))
+              ),
+              $returnHomeTarget.route
+            )
+          )
+        catch returnHomeError:
+          let returnHasHome = false

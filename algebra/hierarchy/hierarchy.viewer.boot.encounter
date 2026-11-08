@@ -1,0 +1,67 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.viewer.boot:
+  let spPolicy = $data.presentation.spPolicy
+  let spGrammar = $data.presentation.spGrammar
+  let lexPolicy = $data.presentation.lexPolicy
+  let lexGrammar = $data.presentation.lexGrammar
+  call sp.style
+  port browser.write { ref = "#hierarchy-source-style"; name = "textContent"; value = $result } → _
+  port browser.property { ref = "#hierarchy-language"; name = "value" } → hLanguage
+  when eq($hLanguage, "process-module"):
+    call hierarchy.module.boot
+  when not(eq($hLanguage, "process-module")):
+    port browser.property { ref = "#hierarchy-source"; name = "textContent" } → hSource
+    when eq($hLanguage, "markdown"):
+      port kernel.invoke { query = "md.preview"; input = { text = $hSource } } → hPreview
+      let input = $hPreview
+      call projection.serialize
+      port browser.content { ref = "#hierarchy-preview"; html = $result } → _
+    port digest.sha256 { text = $hSource } → hDigest
+    port kernel.invoke {
+      query = "sp.present";
+      input = {
+        text = $hSource;
+        file = "selected-source-bindings";
+        language = $hLanguage;
+        theme = "dark";
+        expectedHash = $hDigest;
+        lineNumbers = true;
+        selectedLine = null;
+        origin = { scope = "source-snapshot; not an execution trace" }
+      }
+    } → hPresentation
+    let input = $hPresentation.tree
+    call projection.serialize
+    port browser.content { ref = "#hierarchy-source"; html = $result } → _
+    port browser.write {
+      ref = "#hierarchy-source-hash";
+      name = "textContent";
+      value = concat("Displayed source SHA-256 ", $hDigest)
+    } → _
+    port kernel.invoke {
+      query = "sp.listing";
+      input = {
+        programme = at($data.processes, "hierarchy.shared");
+        origin = { file = "algebra/hierarchy.process.values.rel"; query = "hierarchy.shared" }
+      }
+    } → hDefinition
+    let hDefinitionText = concat("process hierarchy.shared:\n", $hDefinition.text)
+    port digest.sha256 { text = $hDefinitionText } → hDefinitionDigest
+    port kernel.invoke {
+      query = "sp.present";
+      input = {
+        text = $hDefinitionText;
+        file = "hierarchy-shared.process";
+        language = "process";
+        theme = "dark";
+        lineNumbers = true;
+        selectedLine = null;
+        origin = { file = "algebra/hierarchy.process.values.rel"; query = "hierarchy.shared" };
+        expectedHash = $hDefinitionDigest
+      }
+    } → hDefinitionView
+    let input = $hDefinitionView.tree
+    call projection.serialize
+    port browser.content { ref = "#hierarchy-process"; html = $result } → _

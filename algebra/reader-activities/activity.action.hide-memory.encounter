@@ -1,0 +1,21 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.hide-memory:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port state.get { key = "memoryHidden" } → memoryHidden
+  port state.set { key = "memoryHidden"; value = not($memoryHidden) } → _
+  let memoryHidden = not($memoryHidden)
+  port browser.attribute { ref = ".world-encounter"; name = "data-hidden"; value = $memoryHidden } → _
+  port browser.attribute { ref = $button.ref; name = "aria-pressed"; value = $memoryHidden } → _
+  port browser.class { ref = "#memory-hidden"; name = "trace-hidden"; value = $memoryHidden } → _
+  port browser.write {
+    ref = ".world-result";
+    name = "textContent";
+    value = if(
+      $memoryHidden,
+      "The dashed line is hidden. The calculation and solid line have not changed.",
+      "Both lines are shown. The other button changes whether the two parts affect each other."
+    )
+  } → _

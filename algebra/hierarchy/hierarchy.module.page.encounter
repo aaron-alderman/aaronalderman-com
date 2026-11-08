@@ -1,0 +1,306 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.module.page:
+  port record.entries { value = $hModuleSpec.sourceModule.queries } → hModuleEntries
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          {
+            tag = "meta";
+            attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+            children = list()
+          },
+          { tag = "title"; attrs = {  }; children = list($hModuleSpec.title) },
+          {
+            tag = "meta";
+            attrs = { name = "description"; content = $hModuleSpec.description };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = {
+              rel = "canonical";
+              href = concat("https://aaronalderman.com/inspection/", $hModuleSpec.page)
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "stylesheet"; href = "../expedition.css?v=triple-braid-1" };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:title"; content = $hModuleSpec.title };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:description"; content = $hModuleSpec.description };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:url";
+              content = concat("https://aaronalderman.com/inspection/", $hModuleSpec.page)
+            };
+            children = list()
+          }
+        )
+      },
+      {
+        tag = "body";
+        attrs = {  };
+        children = list(
+          {
+            tag = "a";
+            attrs = { href = "#main"; class = "skip" };
+            children = list("Skip to content")
+          },
+          {
+            tag = "header";
+            attrs = { class = "masthead" };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "../index.html"; class = "brand"; "aria-label" = "Aaron Alderman" };
+                children = list(
+                  {
+                    tag = "span";
+                    attrs = { class = "brand-name" };
+                    children = list(
+                      "Aaron ",
+                      { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Return to the work" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "worldwright.html" };
+                    children = list("Worldwright Inspect")
+                  },
+                  { tag = "a"; attrs = { href = "../encounter/" }; children = list("Encounter") }
+                )
+              }
+            )
+          },
+          {
+            tag = "main";
+            attrs = { id = "main"; class = "hierarchy-page hierarchy-inspector module-page" };
+            children = list(
+              {
+                tag = "textarea";
+                attrs = { id = "module-data"; hidden = true; "aria-hidden" = "true"; readonly = true };
+                children = list($hModulePayload)
+              },
+              {
+                tag = "p";
+                attrs = { class = "eyebrow" };
+                children = list("Inspect / the shared machinery")
+              },
+              { tag = "h1"; attrs = {  }; children = list($hModuleSpec.heading) },
+              { tag = "p"; attrs = { class = "lead" }; children = list($hModuleSpec.description) },
+              {
+                tag = "p";
+                attrs = { class = "module-status" };
+                children = list(
+                  concat(
+                    count($hModuleEntries),
+                    " named queries · one existing process algebra · read-only inspection"
+                  )
+                )
+              },
+              {
+                tag = "input";
+                attrs = { id = "hierarchy-language"; type = "hidden"; value = "process-module" };
+                children = list()
+              },
+              { tag = "style"; attrs = { id = "hierarchy-source-style" }; children = list() },
+              {
+                tag = "section";
+                attrs = { class = "module-reader" };
+                children = list(
+                  {
+                    tag = "label";
+                    attrs = { class = "module-selector" };
+                    children = list(
+                      "Choose an actual query",
+                      {
+                        tag = "select";
+                        attrs = { id = "module-query" };
+                        children = map(
+                          $hModuleEntries,
+                          "hModuleEntry",
+                          {
+                            tag = "option";
+                            attrs = {
+                              value = at($hModuleEntry, 0);
+                              selected = if(eq(at($hModuleEntry, 0), $hModuleSpec.query), true, null)
+                            };
+                            children = list(at($hModuleEntry, 0))
+                          }
+                        )
+                      }
+                    )
+                  },
+                  { tag = "h2"; attrs = { id = "module-title" }; children = list($hModuleSpec.query) },
+                  {
+                    tag = "p";
+                    attrs = { id = "module-pointer"; class = "hierarchy-source-digest" };
+                    children = list(concat($hModuleSpec.sourceFile, " · /queries/", $hModuleSpec.query))
+                  },
+                  {
+                    tag = "p";
+                    attrs = { class = "md-note" };
+                    children = list(
+                      "This is the exact authored Encounter definition, selected using compiler source coordinates. Inspecting it does not execute the selected process."
+                    )
+                  },
+                  {
+                    tag = "pre";
+                    attrs = {
+                      id = "module-readable";
+                      class = "hierarchy-source";
+                      tabindex = "0";
+                      "aria-label" = "Readable process definition"
+                    };
+                    children = list("Readable definition loads through the shared algebra.")
+                  },
+                  {
+                    tag = "details";
+                    attrs = { class = "module-disclosure" };
+                    children = list(
+                      { tag = "summary"; attrs = {  }; children = list("Statement forms in this query") },
+                      {
+                        tag = "div";
+                        attrs = { id = "module-forms" };
+                        children = list("Inspecting actual statement forms…")
+                      }
+                    )
+                  },
+                  {
+                    tag = "details";
+                    attrs = { class = "module-disclosure" };
+                    children = list(
+                      { tag = "summary"; attrs = {  }; children = list("Exact statement coordinates") },
+                      {
+                        tag = "div";
+                        attrs = { id = "module-coordinates" };
+                        children = list("JSON pointers load from the actual query structure.")
+                      }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "section";
+                attrs = {  };
+                children = list(
+                  { tag = "h2"; attrs = {  }; children = list("Authored in Encounter") },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(
+                      "Readable Encounter source is authoritative. The existing process frontend compiles these definitions into generated JSON for the normal lowerer and kernel."
+                    )
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(
+                      "The selected frontend declares its statement forms and operators. These definitions use the existing lowerer and kernel; the execution budget is unchanged."
+                    )
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(
+                      "Ownership is selected by the build manifest after correspondence passes. The authored source, generated module and compiler coordinates remain available for inspection."
+                    )
+                  },
+                  {
+                    tag = "p";
+                    attrs = { class = "module-status" };
+                    children = list("Readable Encounter source is authoritative")
+                  }
+                )
+              },
+              {
+                tag = "section";
+                attrs = {  };
+                children = list(
+                  { tag = "h2"; attrs = {  }; children = list("Source binding") },
+                  { tag = "p"; attrs = {  }; children = list($hModuleSpec.moduleFile) },
+                  {
+                    tag = "p";
+                    attrs = { id = "module-hash"; class = "hierarchy-source-digest" };
+                    children = list("Generated module hash loads through the shared kernel.")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = concat("../", $hModuleSpec.moduleFile) };
+                    children = list("Download generated JSON")
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(
+                      "Definitions above are exact slices of the authoritative Encounter file. The generated JSON and its source map remain inspectable. The selector and page composition belong to algebra/hierarchy.process.values.rel."
+                    )
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = "../algebra/hierarchy.process.values.rel" };
+                    children = list("Inspect the page composition source")
+                  }
+                )
+              },
+              {
+                tag = "section";
+                attrs = {  };
+                children = list(
+                  { tag = "h2"; attrs = {  }; children = list("Authoritative source") },
+                  {
+                    tag = "a";
+                    attrs = { href = concat("../", $hModuleSpec.sourceFile) };
+                    children = list("Read the complete Encounter source")
+                  },
+                  {
+                    tag = "p";
+                    attrs = { id = "module-author-hash"; class = "hierarchy-source-digest" };
+                    children = list("Checking the authoritative source hash…")
+                  },
+                  {
+                    tag = "a";
+                    attrs = { href = concat("../", $hModuleSpec.moduleFile, ".map.values.rel") };
+                    children = list("Inspect compiler source coordinates")
+                  }
+                )
+              },
+              { tag = "script"; attrs = { src = "runtime.js"; defer = true }; children = list() }
+            )
+          }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  let surfaceWritePath = concat("inspection/", $hModuleSpec.page)
+  call assurance.surface.register
+  port file.write {
+    path = concat("inspection/", $hModuleSpec.page);
+    text = $result
+  } → _

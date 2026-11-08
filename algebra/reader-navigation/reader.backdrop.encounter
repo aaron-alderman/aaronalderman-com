@@ -1,0 +1,12 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process reader.backdrop:
+  port browser.read { ref = "#reader-dialog" } → dialog
+  when eq($eventInput.event.target.ref.handle, $dialog.ref.handle):
+    port number.calculate { operation = "less"; values = list($eventInput.event.clientX, $dialog.rect.left) } → left
+    port number.calculate { operation = "greater"; values = list($eventInput.event.clientX, $dialog.rect.right) } → right
+    port number.calculate { operation = "less"; values = list($eventInput.event.clientY, $dialog.rect.top) } → above
+    port number.calculate { operation = "greater"; values = list($eventInput.event.clientY, $dialog.rect.bottom) } → below
+    when or($left, $right, $above, $below):
+      port browser.dialog { ref = "#reader-dialog"; open = false } → _

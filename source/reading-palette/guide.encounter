@@ -1,0 +1,87 @@
+process-module "temple/surface-process-module/1"
+
+# The guide calls the same component owners as the article and series.
+process reading.palette.heading:
+  let subject = $eventInput.subject
+  port kernel.invoke { query = "reading.fields"; input = { subject = $subject; names = list("title", "note") } } → heading
+  let result = list(
+    { tag = "h2"; attrs = { class = "faith-paths-heading" }; children = list($heading.title) },
+    { tag = "p"; attrs = { class = "faith-paths-note" }; children = list($heading.note) }
+  )
+
+process reading.palette:
+  call reading.check
+  port kernel.invoke { query = "reading.fields"; input = { subject = "reading.palette"; names = list("title", "description") } } → palette
+  let article = at(subjects("isa", "ReadingArticle"), 0)
+  let series = one($article, "series")
+  port kernel.invoke { query = "reading.series.feature"; input = { subject = $series } } → feature
+  port kernel.invoke { query = "reading.series.cards"; input = { subject = $series } } → cards
+  port kernel.invoke { query = "reading.section"; input = { subject = at(objects($article, "section"), 1); number = 2 } } → prose
+  port kernel.invoke { query = "reading.article.extras"; input = { subject = $article } } → extras
+  let room = at(filter($readingRooms, "room", eq($room.key, "dad")), 0)
+  port record.entries { value = $room.palette } → tokens
+  fold objects("reading.palette", "component") as component; catalogue starts list():
+    port kernel.invoke { query = "reading.fields"; input = { subject = $component; names = list("title", "contentType", "purpose", "rule") } } → componentData
+    yield append($catalogue, list({ tag = "details"; attrs = { class = "reading-series-card reading-source" }; children = list(
+      { tag = "summary"; children = list($componentData.title) },
+      { tag = "p"; attrs = { class = "eyebrow" }; children = list($componentData.contentType) },
+      { tag = "p"; children = list($componentData.purpose) },
+      { tag = "p"; children = list($componentData.rule) }
+    ) })) → catalogue
+  fold objects("reading.palette", "guide") as rule; rules starts list():
+    port kernel.invoke { query = "reading.fields"; input = { subject = $rule; names = list("title", "text") } } → ruleData
+    yield append($rules, list({ tag = "section"; children = list(
+      { tag = "h3"; children = list($ruleData.title) },
+      { tag = "p"; children = list($ruleData.text) }
+    ) })) → rules
+  fold objects("reading.palette", "demo") as demo; sections starts list():
+    port kernel.invoke { query = "reading.palette.heading"; input = { subject = $demo } } → heading
+    let body = list()
+    when eq($demo, "palette.demo.patterns"):
+      let body = list($feature, $cards)
+    when eq($demo, "palette.demo.prose"):
+      let body = list({ tag = "div"; attrs = { class = "faith-essay-body" }; children = list($prose) })
+    when eq($demo, "palette.demo.components"):
+      let body = list({ tag = "div"; attrs = { class = "faith-essay-body" }; children = list($extras.source, $extras.pause, $extras.examples, $extras.reflection, $extras.practice) })
+    when eq($demo, "palette.demo.colour"):
+      let body = list({ tag = "div"; attrs = { class = "reading-series-grid" }; children = map($tokens, "token", {
+        tag = "div"; attrs = { class = "reading-series-card" }; children = list(
+          { tag = "span"; attrs = { class = "palette-swatch"; "data-token" = at($token, 0); "aria-hidden" = "true" }; children = list() },
+          { tag = "p"; children = list({ tag = "code"; children = list("--reading-", at($token, 0)) }) },
+          { tag = "p"; attrs = { class = "faith-meta"; "data-token-value" = at($token, 0) }; children = list(at($token, 1)) }
+        )
+      }) })
+    when eq($demo, "palette.demo.catalogue"):
+      let body = list({ tag = "div"; attrs = { class = "reading-series-grid" }; children = $catalogue })
+    when eq($demo, "palette.demo.rules"):
+      let body = list({ tag = "div"; attrs = { class = "reading-guide" }; children = $rules })
+    when eq($demo, "palette.demo.projection"):
+      let body = list(
+        { tag = "div"; attrs = { class = "reading-guide" }; children = list(
+          { tag = "section"; children = list({ tag = "h3"; children = list("A shared contract") }, { tag = "p"; children = list("Components lower to declared elements, attributes and children. Styles lower to declared stylesheet nodes. Unknown classes, inline layout overrides and direct HTML or CSS output are refused. A serialized receipt cannot grant permission to render.") }) },
+          { tag = "section"; children = list({ tag = "h3"; children = list("Shared layout primitives") }, { tag = "p"; children = list("These are the actual field, input and wrapping control components used by the specialist pages. The example is read-only; use Tab to inspect its focus state.") }, { tag = "div"; attrs = { class = "projection-controls" }; children = list({ tag = "label"; attrs = { class = "projection-field" }; children = list("Component name", { tag = "input"; attrs = { class = "projection-input"; value = "Reading section"; readonly = true }; children = list() }) }) }) },
+          { tag = "section"; children = list({ tag = "h3"; children = list("Compare the page families") }, { tag = "p"; children = list("The common definition preserves reading, navigation, interactive and source-inspection components. Follow these examples to compare their typography, spacing, controls and responsive behaviour.") }, { tag = "nav"; attrs = { class = "faith-feature-actions"; "aria-label" = "Common projection examples" }; children = map(list({ title = "Dad Threads"; href = "/worlds/dad/threads.html" }, { title = "Map"; href = "/atlas.html" }, { title = "Interactive reader"; href = "/reader.html" }, { title = "Workshop"; href = "/workshop/" }, { title = "Source inspection"; href = "/inspection/module-source.html" }), "page", { tag = "a"; attrs = { class = "faith-secondary"; href = $page.href }; children = list($page.title, " →") }) }) }
+        ) }
+      )
+    when eq($demo, "palette.demo.checks"):
+      let body = list(
+        { tag = "ol"; attrs = { class = "reading-guide" }; children = map(objects("reading.palette", "check"), "check", { tag = "li"; children = list({ tag = "p"; children = list($check) }) }) },
+        { tag = "nav"; attrs = { class = "faith-feature-actions"; "aria-label" = "Compare the real pages" }; children = list(
+          { tag = "a"; attrs = { class = "faith-button"; href = concat("/", one($article, "route")) }; children = list("Room to Grow →") },
+          { tag = "a"; attrs = { class = "faith-secondary"; href = concat("/", one($series, "route")) }; children = list("Series page →") },
+          { tag = "a"; attrs = { class = "faith-secondary"; href = "/worlds/dad/threads.html" }; children = list("Dad Threads →") },
+          { tag = "a"; attrs = { class = "faith-secondary"; href = "/writing/being-here-as-dad/" }; children = list("Existing Dad essay →") }
+        ) }
+      )
+    yield append($sections, list({ tag = "section"; attrs = { id = $demo; class = "palette-specimen" }; children = append($heading, $body) })) → sections
+  let result = { tag = "div"; attrs = { class = "reading-room reading-palette"; "data-reading-room" = "dad" }; children = append(list(
+    { tag = "header"; attrs = { class = "gate-hero" }; children = list(
+      { tag = "p"; attrs = { class = "eyebrow" }; children = list("PALETTE / DESIGN GUIDE") },
+      { tag = "h1"; children = list($palette.title) },
+      { tag = "p"; children = list($palette.description) }
+    ) },
+    { tag = "nav"; attrs = { class = "faith-essay-contents"; "aria-label" = "Design guide sections" }; children = list(
+      { tag = "p"; attrs = { class = "eyebrow" }; children = list("SEE / COMPARE / TRY") },
+      { tag = "ol"; children = map(objects("reading.palette", "demo"), "demo", { tag = "li"; children = list({ tag = "a"; attrs = { href = concat("#", $demo) }; children = list(one($demo, "title")) }) }) }
+    ) }
+  ), $sections) }

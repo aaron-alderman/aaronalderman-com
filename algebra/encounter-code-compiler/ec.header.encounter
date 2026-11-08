@@ -1,0 +1,33 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.header:
+  let ecNode = $eventInput.node
+  let ecHeaderResult = null
+  port text.matches { value = $ecNode.text; pattern = "^module [A-Za-z_][A-Za-z0-9_.-]*$" } → ecModuleHeader
+  when $ecModuleHeader:
+    port text.split { value = $ecNode.text; pattern = "^module ([A-Za-z_][A-Za-z0-9_.-]*)$" } → ecTokens
+    let ecHeaderResult = { kind = "module"; name = at($ecTokens, 1); node = $ecNode }
+  port text.matches {
+    value = $ecNode.text;
+    pattern = "^view [A-Za-z_][A-Za-z0-9_.-]* of @[A-Za-z_][A-Za-z0-9_.-]* isa [A-Za-z_][A-Za-z0-9_.-]*:$"
+  } → ecViewHeader
+  when $ecViewHeader:
+    port text.split {
+      value = $ecNode.text;
+      pattern = "^view ([A-Za-z_][A-Za-z0-9_.-]*) of @([A-Za-z_][A-Za-z0-9_.-]*) isa ([A-Za-z_][A-Za-z0-9_.-]*):$"
+    } → ecTokens
+    let ecHeaderResult = {
+      kind = "view";
+      id = at($ecTokens, 1);
+      source = at($ecTokens, 2);
+      type = at($ecTokens, 3);
+      node = $ecNode
+    }
+  port text.matches { value = $ecNode.text; pattern = "^representation [A-Za-z_][A-Za-z0-9_.-]*:$" } → ecRepresentationHeader
+  when $ecRepresentationHeader:
+    port text.split { value = $ecNode.text; pattern = "^representation ([A-Za-z_][A-Za-z0-9_.-]*):$" } → ecTokens
+    let ecHeaderResult = { kind = "representation"; id = at($ecTokens, 1); node = $ecNode }
+  assert $ecHeaderResult
+    otherwise "EC-P003: Expected a module, typed view or named representation declaration."
+  let result = $ecHeaderResult
