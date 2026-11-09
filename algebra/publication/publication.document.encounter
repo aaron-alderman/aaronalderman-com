@@ -33,6 +33,8 @@ process publication.document:
   let readingThemeControl = null
   when $documentPalette:
     port kernel.invoke { query = "reading.theme.control"; input = { key = $documentPalette.key } } → readingThemeControl
+  call pwa.share
+  let qrControl = $result
   let input = {
     tag = "html";
     attrs = { lang = "en" };
@@ -42,6 +44,9 @@ process publication.document:
         attrs = {  };
         children = list(
           { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          { tag = "link"; attrs = { rel = "manifest"; href = "/site.webmanifest" }; children = list() },
+          { tag = "link"; attrs = { rel = "apple-touch-icon"; href = "/assets/pwa/icon-180.png" }; children = list() },
+          { tag = "link"; attrs = { rel = "stylesheet"; href = "/assets/pwa.css" }; children = list() },
           {
             tag = "meta";
             attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
@@ -403,6 +408,8 @@ process publication.document:
             )
           },
           $readingThemeControl,
+          $qrControl,
+          { tag = "script"; attrs = { src = "/pwa-register.js"; defer = true }; children = list() },
           if($documentPalette, { tag = "p"; attrs = { id = "reading-theme-status"; class = "sr-only"; "aria-live" = "polite"; "aria-atomic" = "true" }; children = list() }, null),
           if($documentPalette, { tag = "script"; attrs = { src = "/reading-theme-runtime.js?v=palette-theme-5"; defer = true }; children = list() }, null)
         )

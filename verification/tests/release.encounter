@@ -165,3 +165,23 @@ process release.preservation-observation:
       port file.digest { file = concat($output, "/", $row.s) } → actual
     yield if(eq($prior, $actual), $changed, append($changed, list({ s = $row.s; p = "previousSha256"; o = $prior }, { s = $row.s; p = $row.p; o = $actual }))) → changed
   let result = $changed
+
+process test.release.pwa-shell:
+  call check.manifest
+  each list("index.html", "writing/being-here-as-dad/index.html") as page:
+    port diagnostic.context { value = $page } → ignored
+    call page.catalogue
+    assert some($nodes, "node", and(eq($node.tag, "link"), eq(at($node.attrs, "rel"), "manifest"), eq(at($node.attrs, "href"), "/site.webmanifest")))
+      otherwise "Shared page lacks the app manifest link."
+    assert some($nodes, "node", and(eq($node.tag, "script"), eq(at($node.attrs, "src"), "/pwa-register.js"), at($node.attrs, "integrity")))
+      otherwise "Shared page lacks the sealed service worker registration script."
+    assert some($nodes, "node", and(eq($node.tag, "button"), eq(at($node.attrs, "id"), "site-qr-open"), eq(at($node.attrs, "popovertarget"), "site-qr-panel")))
+      otherwise "Mobile QR control is missing its popover target."
+    assert some($nodes, "node", and(eq(at($node.attrs, "id"), "site-qr-panel"), eq(at($node.attrs, "popover"), "auto")))
+      otherwise "Mobile QR popover is missing."
+    assert some($nodes, "node", and(eq($node.tag, "img"), eq(at($node.attrs, "src"), "/assets/pwa/site-qr.png")))
+      otherwise "Mobile QR popover lacks its local image."
+  each list("site.webmanifest", "service-worker.js", "assets/pwa/site-qr.png", "assets/pwa/icon-180.png", "assets/pwa/icon-192.png", "assets/pwa/icon-512.png") as path:
+    port file.exists { file = concat($output, "/", $path) } → exists
+    assert $exists
+      otherwise "Required PWA artifact missing."

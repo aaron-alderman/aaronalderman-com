@@ -62,9 +62,60 @@ async function startSourceRuntime(packet){
   if(packet.facts.length)factSnapshot=await front.index(handle,{facts:packet.facts});
   await dispatch(packet.entry,null);
 }
+// Fixed adapters for browser APIs outside the document Encounter runtime.
+function registerServiceWorker(){
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/service-worker.js').catch(error=>console.warn('Offline setup failed',error));
+  }
+}
+function startServiceWorker({cacheName,cachePrefix,shell,home,start,offlineMessage}){
+  const urls=new Set(shell.map(path=>new URL(path,self.location.origin).href));
+  const cached=async request=>(await caches.open(cacheName)).match(request);
+  self.addEventListener('install',event=>{
+    event.waitUntil(caches.open(cacheName).then(cache=>
+      cache.addAll(shell.map(path=>new Request(path,{cache:'reload'})))));
+  });
+  self.addEventListener('activate',event=>{
+    event.waitUntil((async()=>{
+      const keys=await caches.keys();
+      await Promise.all(keys.filter(key=>key.startsWith(cachePrefix)&&key!==cacheName).map(key=>caches.delete(key)));
+      await self.clients.claim();
+    })());
+  });
+  self.addEventListener('fetch',event=>{
+    const {request}=event;
+    const url=new URL(request.url);
+    if(request.method!=='GET'||url.origin!==self.location.origin)return;
+    if(request.mode==='navigate'){
+      event.respondWith(fetch(request).catch(async()=>{
+        if(url.pathname===start||url.pathname===home){
+          const page=await cached(home);
+          if(page)return page;
+        }
+        return new Response(offlineMessage,{status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
+      }));
+    }else if(urls.has(url.href)){
+      event.respondWith(fetch(request).catch(async()=>await cached(request)??Response.error()));
+    }
+  });
+}
+function packagePwa(plan,issue){
+  if(plan.kind==='client'){
+    const script='('+registerServiceWorker.toString()+')();\n';
+    issue(script);
+    return {script,manifest:JSON.stringify(plan.manifest,null,2)+'\n'};
+  }
+  const adapter=startServiceWorker.toString(),cachePrefix='aaronalderman-shell-';
+  const adapterRevision=crypto.createHash('sha256').update(adapter).digest('hex');
+  const cacheName=cachePrefix+plan.revision+'-'+adapterRevision;
+  const script='('+adapter+')('+JSON.stringify({...plan,cacheName,cachePrefix})+');\n';
+  issue(script);
+  return {script};
+}
 function createSourceRuntime({sources,facts,profiles,basis,resources={},issue,publishSource,projection}){
   const policy=getSourcePolicyMachine(),descriptor=loadSourcePolicyDescriptor();
   return async function bundle({entry,mode,queries,factSubjects=[],data=null,budget=2000000,grantProfile},env,gate){
+    if(mode==='pwa')return packagePwa(gate.authorize('host.pwaRuntime',data),issue);
     const input={mode,budget,grantProfile:grantProfile??null,profiles,queries,entry,facts,factSubjects};
     const plan=gate?gate.authorize('host.runtime',input):policy.compute('host.runtime',input).value,profile=plan.profile;
     const mechanics={...valuePorts(),...computationalPorts({}),...browserPorts({},()=>{}),...browserEffects({document:{}},()=>{})};
