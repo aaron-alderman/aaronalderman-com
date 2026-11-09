@@ -1,0 +1,13 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.reference:
+  port kernel.invoke { query = "ec.referenceType"; input = { id = $eventInput.id } } → ecRefType
+  assert eq($ecRefType, $eventInput.type)
+    otherwise "EC-T010: The reference has the wrong type."
+  let ecRefViews = filter($codePlan.views, "ecV", eq($ecV.id, $eventInput.id))
+  when eq(count($ecRefViews), 0):
+    port kernel.invoke { query = "ec.fact"; input = $eventInput } → ecRefResult
+  when eq(count($ecRefViews), 1):
+    port kernel.invoke { query = "ec.execute"; input = { entry = at(at($ecRefViews, 0), "entry"); input = {} } } → ecRefResult
+  let result = $ecRefResult

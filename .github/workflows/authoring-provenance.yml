@@ -1,0 +1,26 @@
+name: Canonical publication admission
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: provenance-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  provenance:
+    name: Canonical publication admission
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Compile and admit the declared source closure
+        run: node bootstrap/launch.cjs bootstrap/publication.rel
+      - name: Verify exact sources, output inventory and refusal boundaries
+        run: node bootstrap/test.cjs

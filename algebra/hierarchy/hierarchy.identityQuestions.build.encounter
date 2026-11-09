@@ -1,0 +1,472 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.identityQuestions.build:
+  call publication.stewardship.view
+  let stewardshipLinks = $result
+  each subjects("isa", "IdentityQuestionPage") as identityPage:
+    let input = {
+      tag = "html";
+      attrs = { lang = "en" };
+      children = list(
+        {
+          tag = "head";
+          attrs = {  };
+          children = list(
+            { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+            {
+              tag = "meta";
+              attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = {
+                name = "theme-color";
+                content = one(concat("questions.palette.", one($identityPage, "key"), ".paper"), "value")
+              };
+              children = list()
+            },
+            {
+              tag = "title";
+              attrs = {  };
+              children = list(
+                concat(
+                  one($identityPage, "questionTitle"),
+                  " ",
+                  one($identityPage, "questionEm"),
+                  " — Aaron Alderman"
+                )
+              )
+            },
+            {
+              tag = "meta";
+              attrs = { name = "description"; content = one($identityPage, "questionIntro") };
+              children = list()
+            },
+            {
+              tag = "link";
+              attrs = {
+                rel = "canonical";
+                href = concat("https://aaronalderman.com/", one($identityPage, "questionHref"))
+              };
+              children = list()
+            },
+            {
+              tag = "link";
+              attrs = {
+                rel = "stylesheet";
+                href = concat("expedition.css?v=", one("site", "stylesheetVersion"))
+              };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = {
+                property = "og:title";
+                content = concat(one($identityPage, "questionTitle"), " ", one($identityPage, "questionEm"))
+              };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = { property = "og:description"; content = one($identityPage, "questionIntro") };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = { property = "og:type"; content = "website" };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = {
+                property = "og:url";
+                content = concat("https://aaronalderman.com/", one($identityPage, "questionHref"))
+              };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = {
+                property = "og:image";
+                content = concat(
+                  "https://aaronalderman.com/",
+                  one(concat("identity.", one($identityPage, "key")), "questionHero")
+                )
+              };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = {
+                property = "og:image:width";
+                content = one(concat("identity.", one($identityPage, "key")), "questionHeroWidth")
+              };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = {
+                property = "og:image:height";
+                content = one(concat("identity.", one($identityPage, "key")), "questionHeroHeight")
+              };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = {
+                property = "og:image:alt";
+                content = one(concat("identity.", one($identityPage, "key")), "questionHeroAlt")
+              };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = { name = "twitter:card"; content = "summary_large_image" };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = {
+                name = "twitter:title";
+                content = concat(one($identityPage, "questionTitle"), " ", one($identityPage, "questionEm"))
+              };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = { name = "twitter:description"; content = one($identityPage, "questionIntro") };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = {
+                name = "twitter:image";
+                content = concat(
+                  "https://aaronalderman.com/",
+                  one(concat("identity.", one($identityPage, "key")), "questionHero")
+                )
+              };
+              children = list()
+            },
+            {
+              tag = "meta";
+              attrs = {
+                name = "twitter:image:alt";
+                content = one(concat("identity.", one($identityPage, "key")), "questionHeroAlt")
+              };
+              children = list()
+            }
+          )
+        },
+        {
+          tag = "body";
+          attrs = { "data-question-identity" = one($identityPage, "key") };
+          children = list(
+            {
+              tag = "a";
+              attrs = { href = "#main"; class = "skip" };
+              children = list("Skip to content")
+            },
+            {
+              tag = "header";
+              attrs = { class = "masthead" };
+              children = list(
+                {
+                  tag = "a";
+                  attrs = {
+                    href = one($identityPage, "homeHref");
+                    class = "brand";
+                    "aria-label" = "Aaron Alderman"
+                  };
+                  children = list(
+                    {
+                      tag = "span";
+                      attrs = { class = "brand-name" };
+                      children = list(
+                        "Aaron ",
+                        { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                      )
+                    }
+                  )
+                },
+                {
+                  tag = "nav";
+                  attrs = { "aria-label" = "Site" };
+                  children = list(
+                    {
+                      tag = "a";
+                      attrs = { href = one($identityPage, "questionWorldHref") };
+                      children = list(concat(one($identityPage, "questionLabel"), " questions"))
+                    },
+                    {
+                      tag = "a";
+                      attrs = { href = one($identityPage, "threadsHref") };
+                      children = list("Threads")
+                    },
+                    {
+                      tag = "a";
+                      attrs = { href = one($identityPage, "atlasHref") };
+                      children = list("Atlas / Map")
+                    }
+                  )
+                }
+              )
+            },
+            {
+              tag = "main";
+              attrs = { id = "main"; class = "q-page"; "data-question-identity" = one($identityPage, "key") };
+              children = list(
+                {
+                  tag = "div";
+                  attrs = { class = "q-world" };
+                  children = list(
+                    {
+                      tag = "section";
+                      attrs = { class = "q-hero"; "aria-labelledby" = "q-heading" };
+                      children = list(
+                        {
+                          tag = "img";
+                          attrs = {
+                            class = "q-hero-art";
+                            src = one(concat("identity.", one($identityPage, "key")), "questionHero");
+                            alt = "";
+                            "aria-hidden" = "true";
+                            width = one(concat("identity.", one($identityPage, "key")), "questionHeroWidth");
+                            height = one(concat("identity.", one($identityPage, "key")), "questionHeroHeight");
+                            fetchpriority = "high"
+                          };
+                          children = list()
+                        },
+                        {
+                          tag = "div";
+                          attrs = { class = "q-hero-copy" };
+                          children = list(
+                            {
+                              tag = "p";
+                              attrs = { class = "eyebrow" };
+                              children = list(concat("Questions / ", one($identityPage, "questionLabel")))
+                            },
+                            {
+                              tag = "h1";
+                              attrs = { id = "q-heading" };
+                              children = list(
+                                concat(one($identityPage, "questionTitle"), " "),
+                                { tag = "em"; attrs = {  }; children = list(one($identityPage, "questionEm")) }
+                              )
+                            },
+                            {
+                              tag = "p";
+                              attrs = { class = "q-subtitle" };
+                              children = list(one($identityPage, "questionSubtitle"))
+                            },
+                            {
+                              tag = "p";
+                              attrs = { class = "q-intro" };
+                              children = list(one($identityPage, "questionIntro"))
+                            },
+                            {
+                              tag = "div";
+                              attrs = { class = "q-actions" };
+                              children = list(
+                                {
+                                  tag = "a";
+                                  attrs = { href = "#lived-questions"; class = "button q-primary" };
+                                  children = list("Follow the questions ↓")
+                                }
+                              )
+                            },
+                            {
+                              tag = "p";
+                              attrs = { class = "q-hero-note" };
+                              children = list("A question to practise, not a finished answer.")
+                            }
+                          )
+                        }
+                      )
+                    },
+                    {
+                      tag = "section";
+                      attrs = { class = "q-section q-posture"; "aria-labelledby" = "q-posture-heading" };
+                      children = list(
+                        {
+                          tag = "div";
+                          attrs = { class = "q-section-intro" };
+                          children = list(
+                            {
+                              tag = "p";
+                              attrs = { class = "eyebrow" };
+                              children = list(one($identityPage, "questionLabel"))
+                            },
+                            {
+                              tag = "h2";
+                              attrs = { id = "q-posture-heading" };
+                              children = list(one($identityPage, "questionHeading"))
+                            },
+                            { tag = "p"; attrs = {  }; children = list(one($identityPage, "questionBody")) }
+                          )
+                        }
+                      )
+                    },
+                    {
+                      tag = "section";
+                      attrs = {
+                        class = "q-section q-questions";
+                        id = "lived-questions";
+                        "aria-labelledby" = "q-questions-heading"
+                      };
+                      children = list(
+                        {
+                          tag = "div";
+                          attrs = { class = "q-section-intro" };
+                          children = list(
+                            {
+                              tag = "h2";
+                              attrs = { id = "q-questions-heading" };
+                              children = list("Where the question becomes concrete.")
+                            }
+                          )
+                        },
+                        {
+                          tag = "div";
+                          attrs = { class = "q-question-grid" };
+                          children = list(
+                            map(
+                              objects($identityPage, "question"),
+                              "q",
+                              {
+                                tag = "a";
+                                attrs = {
+                                  class = "q-question";
+                                  href = one($q, "href");
+                                  "data-light" = one($identityPage, "questionLight")
+                                };
+                                children = list(
+                                  {
+                                    tag = "img";
+                                    attrs = {
+                                      src = one($identityPage, "questionImage");
+                                      alt = "";
+                                      width = 112;
+                                      height = 140;
+                                      loading = "lazy";
+                                      decoding = "async"
+                                    };
+                                    children = list()
+                                  },
+                                  {
+                                    tag = "div";
+                                    attrs = { class = "q-question-copy" };
+                                    children = list(
+                                      { tag = "p"; attrs = { class = "eyebrow" }; children = list(one($q, "label")) },
+                                      { tag = "h3"; attrs = {  }; children = list(one($q, "title")) },
+                                      { tag = "p"; attrs = {  }; children = list(one($q, "note")) },
+                                      {
+                                        tag = "span";
+                                        attrs = { class = "q-card-link"; "aria-hidden" = "true" };
+                                        children = list(concat(one($q, "cta"), " →"))
+                                      }
+                                    )
+                                  }
+                                )
+                              }
+                            )
+                          )
+                        }
+                      )
+                    },
+                    {
+                      tag = "section";
+                      attrs = { class = "q-section q-closing" };
+                      children = list(
+                        { tag = "h2"; attrs = {  }; children = list("Another side of the same life.") },
+                        {
+                          tag = "p";
+                          attrs = {  };
+                          children = list("These commitments meet in one life. Each brings a different question into focus.")
+                        },
+                        {
+                          tag = "nav";
+                          attrs = { "aria-label" = "Questions from another side"; class = "q-actions" };
+                          children = list(
+                            {
+                              tag = "a";
+                              attrs = { href = one("identity.sourcerer", "questionWorldHref"); class = "q-text-link" };
+                              children = list("Sourcerer →")
+                            },
+                            {
+                              tag = "a";
+                              attrs = { href = one("identity.author", "questionWorldHref"); class = "q-text-link" };
+                              children = list("Author →")
+                            },
+                            {
+                              tag = "a";
+                              attrs = { href = one("identity.dad", "questionWorldHref"); class = "q-text-link" };
+                              children = list("Dad →")
+                            },
+                            {
+                              tag = "a";
+                              attrs = { href = one("identity.christian", "questionWorldHref"); class = "q-text-link" };
+                              children = list("Christian →")
+                            }
+                          )
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            },
+            {
+              tag = "footer";
+              attrs = { class = "footer" };
+              children = list(
+                {
+                  tag = "div";
+                  attrs = {  };
+                  children = list(
+                    { tag = "p"; attrs = { class = "signature" }; children = list("Aaron Alderman") },
+                    {
+                      tag = "p";
+                      attrs = {  };
+                      children = list("A few things I’ve built. A few things I’m still trying to understand.")
+                    }
+                  )
+                },
+                {
+                  tag = "nav";
+                  attrs = { "aria-label" = "Elsewhere" };
+                  children = list(
+                    {
+                      tag = "a";
+                      attrs = { href = "https://github.com/aaron-alderman" };
+                      children = list("GitHub ↗")
+                    },
+                    {
+                      tag = "a";
+                      attrs = { href = "https://www.linkedin.com/in/aaron-alderman/" };
+                      children = list("LinkedIn ↗")
+                    },
+                    {
+                      tag = "a";
+                      attrs = { href = "https://worldwright.io/" };
+                      children = list("Built with Worldwright.io ↗")
+                    },
+                    { tag = "a"; attrs = { href = "assurance/" }; children = list("Assurance") }
+                  )
+                },
+                $stewardshipLinks
+              )
+            }
+          )
+        }
+      )
+    }
+    call projection.serialize
+    let surfaceWritePath = one($identityPage, "questionHref")
+    call assurance.surface.register
+    port file.write {
+      path = one($identityPage, "questionHref");
+      text = $result
+    } → _

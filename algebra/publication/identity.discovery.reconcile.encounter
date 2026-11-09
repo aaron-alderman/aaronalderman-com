@@ -1,0 +1,67 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.discovery.reconcile:
+  let kindIndex = {
+    textContent = "text";
+    href = "navigation";
+    action = "navigation";
+    formaction = "navigation";
+    src = "media";
+    srcset = "media";
+    alt = "media";
+    width = "media";
+    height = "media";
+    loading = "media";
+    fetchpriority = "media";
+    decoding = "media";
+    class = "appearance";
+    style = "appearance";
+    fill = "appearance";
+    stroke = "appearance";
+    "stroke-width" = "appearance";
+    viewBox = "appearance";
+    cx = "appearance";
+    cy = "appearance";
+    r = "appearance";
+    d = "appearance";
+    "stroke-linecap" = "appearance";
+    "stroke-linejoin" = "appearance";
+    "opaque-content" = "opaque"
+  }
+  fold $eventInput.references as reference; registry starts {  }:
+    let selectorRegistry = or(at($registry, $reference.target), {  })
+    port record.put {
+      record = $selectorRegistry;
+      key = $reference.sink;
+      value = append(or(at($selectorRegistry, $reference.sink), list()), list($reference.id))
+    } → selectorRegistry
+    port record.put { record = $registry; key = $reference.target; value = $selectorRegistry } → registry
+    yield $registry → registry
+  fold $eventInput.observed as o; reconciled starts { observations = list(); groups = {  }; unknown = 0 }:
+    let declared = or(at(at($registry, $o.selector), $o.sink), list())
+    let known = if(if(true, not(eq($o.selector, "")), false), not(eq(count($declared), 0)), false)
+    let kind = or(at($kindIndex, $o.sink), "attributes")
+    let observation = {
+      ordinal = $o.ordinal;
+      tag = $o.tag;
+      selector = $o.selector;
+      sink = $o.sink;
+      value = $o.value;
+      declarations = $declared;
+      status = if($known, "declared-reference", "undecided");
+      kind = $kind
+    }
+    let groups = $reconciled.groups
+    when not($known):
+      port record.put {
+        record = $groups;
+        key = $kind;
+        value = append(or(at($groups, $kind), list()), list($observation))
+      } → groups
+    yield {
+    observations = append($reconciled.observations, list($observation));
+    groups = $groups;
+    unknown = add($reconciled.unknown, if($known, 0, 1))
+  } → reconciled
+  let result = $reconciled

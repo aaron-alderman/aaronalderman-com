@@ -1,0 +1,15 @@
+TAP version 13
+# policy basis 66d95260d7cef0d74c46626f2c86e00062b9d874a98998df1b9fce323edefd43
+# canonical declaration 8800a690a0977d4e5cab4423aba1a760e7bf845d7b0b6d6abe26f9fb91a7a069
+not ok 1 - test.publication.complete-inventory
+  ---
+  context: {"unknown":[],"actual":1909,"expected":1911,"execution":"0884548e7751c93d474526070951cb2b389f93aa31a7eb6b801508beebe1694a"}
+  message: Error: Canonical output contains an unrecorded or missing file.
+        at Object.run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\temple-seed.cjs:79:63)
+        at async Object.run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\encounter-source-front.cjs:83:11)
+        at async main (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\test.cjs:27:7)
+  ...
+1..1
+# tests 1
+# pass 0
+# fail 1

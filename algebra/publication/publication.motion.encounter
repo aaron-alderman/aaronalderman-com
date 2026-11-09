@@ -1,0 +1,15 @@
+process-module "temple/surface-process-module/1"
+
+process publication.motion:
+  let input = {
+    kind = "root";
+    children = map(subjects("isa", "Motion"), "motion", {
+      kind = "atrule"; name = "keyframes"; params = one($motion, "name");
+      children = map(objects($motion, "frame"), "frame", {
+        kind = "rule"; selector = one($frame, "selector");
+        children = map(objects($frame, "declaration"), "decl", { kind = "decl"; property = one($decl, "property"); value = one($decl, "value") })
+      })
+    })
+  }
+  call projection.stylesheet
+  let motionCSS = $result

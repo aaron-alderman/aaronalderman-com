@@ -1,0 +1,205 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process reader.route:
+  port browser.location {  } → location
+  port text.slice { value = $location.hash; start = 1 } → requested
+  let id = if(includes($data.ids, $requested), $requested, "home")
+  port state.get { key = "current" } → current
+  port state.get { key = "previous" } → previous
+  port state.get { key = "visited" } → visited
+  let returning = includes($visited, $id)
+  when not(eq($id, $current)):
+    port state.set { key = "previous"; value = $current } → _
+    let previous = $current
+  port state.set { key = "current"; value = $id } → _
+  let input = list()
+  call projection.serialize
+  let markup = $result
+  port browser.content { ref = "#reader-echo"; html = $markup } → _
+  port browser.dialog { ref = "#reader-dialog"; open = false } → _
+  when eq($id, "home"):
+    port browser.attribute { ref = "body"; name = "data-light"; value = "home" } → _
+    port state.get { key = "visited" } → visited
+    port state.get { key = "current" } → current
+    let input = {
+      tag = "section";
+      attrs = { class = "reader-home" };
+      children = list(
+        {
+          tag = "p";
+          attrs = { class = "eyebrow" };
+          children = list("Aaron Alderman / A personal expedition")
+        },
+        { tag = "h1"; attrs = {  }; children = list("Follow a question.") },
+        {
+          tag = "p";
+          attrs = {  };
+          children = list(
+            "Through physics, faith, machines, and the work of remembering care. Every place keeps its sources within reach."
+          )
+        },
+        { tag = "h2"; attrs = {  }; children = list("Three ways into the same world") },
+        {
+          tag = "div";
+          attrs = { class = "reader-places" };
+          children = list(
+            map(
+              $data.navigation.entrances,
+              "entrance",
+              {
+                tag = "a";
+                attrs = { href = concat("#", $entrance.to); class = "reader-place" };
+                children = list(
+                  {
+                    tag = "span";
+                    attrs = { class = "eyebrow" };
+                    children = list(concat($entrance.number, " / ", $entrance.name))
+                  },
+                  { tag = "strong"; attrs = {  }; children = list($entrance.question) },
+                  { tag = "span"; attrs = {  }; children = list($entrance.note) }
+                )
+              }
+            )
+          )
+        },
+        { tag = "h2"; attrs = {  }; children = list("Ten regions to explore") },
+        map(
+          $data.navigation.regions,
+          "region",
+          {
+            tag = "section";
+            attrs = {
+              class = "reader-region";
+              "data-reader-region-search" = concat($region.name, " ", $region.description, " ", $region.question)
+            };
+            children = list(
+              { tag = "h3"; attrs = {  }; children = list($region.name) },
+              { tag = "p"; attrs = {  }; children = list($region.question) },
+              { tag = "p"; attrs = {  }; children = list($region.description) },
+              if(
+                $region.optional,
+                {
+                  tag = "p";
+                  attrs = { class = "scope-note" };
+                  children = list(
+                    "Optional interpretation. Scientific routes remain available without entering this region."
+                  )
+                },
+                null
+              ),
+              {
+                tag = "div";
+                attrs = { class = "reader-places" };
+                children = list(
+                  map(
+                    $region.scenes,
+                    "id",
+                    {
+                      tag = "a";
+                      attrs = {
+                        href = concat("#", $id);
+                        class = concat("reader-place ", if(includes($visited, $id), "visited", ""));
+                        "data-reader-search" = null;
+                        "aria-current" = if(eq($current, $id), "location", null)
+                      };
+                      children = list(
+                        {
+                          tag = "strong";
+                          attrs = {  };
+                          children = list(
+                            concat(if(includes($visited, $id), "◆ ", "◇ "), at(at($data.places, $id), "region"))
+                          )
+                        },
+                        { tag = "span"; attrs = {  }; children = list(at(at($data.places, $id), "title")) }
+                      )
+                    }
+                  )
+                )
+              }
+            )
+          }
+        )
+      )
+    }
+    call projection.serialize
+    let markup = $result
+    port browser.content { ref = "#reader-content"; html = $markup } → _
+    port browser.title { value = "Aaron Alderman — Follow a question" } → _
+  when not(eq($id, "home")):
+    let place = at($data.places, $id)
+    port asset.text { url = concat("places/", $id, ".html"); cache = "no-cache" } → document
+    port document.fragmentTree {
+      html = $document;
+      selector = "main";
+      base = concat($location.base, "places/", $id, ".html");
+      removeSelectors = list("script");
+      urlAttributes = list("href", "src");
+      keepFragmentLinks = true
+    } → fragment
+    port rel.encode { value = $fragment } → hydrated
+    port rel.decode { text = $hydrated } → observed
+    let eventInput = { node = $observed; styles = {}; substitutions = {} }
+    call projection.observed
+    let input = $result
+    call projection.serialize
+    port browser.content { ref = "#reader-content"; html = $result } → _
+    port browser.title { value = concat($place.region, " — Aaron Alderman") } → _
+    port browser.attribute { ref = "body"; name = "data-light"; value = $place.light } → _
+    port browser.select { selector = "#reader-content a[href]" } → links
+    each $links as link:
+      let href = at($link.attributes, "href")
+      port text.match { value = $href; pattern = "/places/([^/?#]+)\\.html(?:$|[?#])" } → match
+      when $match:
+        port browser.attribute { ref = $link.ref; name = "href"; value = concat("#", at($match.groups, 0)) } → _
+    port record.get { record = $data.echoes; key = $id } → echo
+    when $echo:
+      when includes($visited, $echo.after):
+        let input = {
+          tag = "aside";
+          attrs = { class = "return-echo" };
+          children = list(
+            {
+              tag = "p";
+              attrs = { class = "eyebrow" };
+              children = list("Another light you have encountered")
+            },
+            { tag = "h2"; attrs = {  }; children = list($echo.heading) },
+            { tag = "p"; attrs = {  }; children = list($echo.text) },
+            {
+              tag = "a";
+              attrs = { href = concat("#", $echo.to) };
+              children = list("Visit that question again →")
+            }
+          )
+        }
+        call projection.serialize
+        let markup = $result
+        port browser.content { ref = "#reader-echo"; html = $markup } → _
+    when not($returning):
+      let visited = append($visited, list($id))
+      port state.set { key = "visited"; value = $visited } → _
+      port value.encode { value = $visited } → saved
+      port storage.write { key = "worldwright-aaron-trail-v1"; value = $saved } → _
+  port browser.attribute {
+    ref = "#reader-back";
+    name = "href";
+    value = concat("#", if(eq($previous, $id), "home", $previous))
+  } → _
+  port browser.write {
+    ref = "#reader-count";
+    name = "textContent";
+    value = concat(
+      count($visited),
+      " ",
+      if(eq(count($visited), 1), "place", "places"),
+      " discovered"
+    )
+  } → _
+  port browser.write {
+    ref = "#reader-announcement";
+    name = "textContent";
+    value = if(eq($id, "home"), "The expedition entrance", at(at($data.places, $id), "region"))
+  } → _
+  port browser.scroll {  } → _
+  port browser.focus { ref = "#reader-content"; preventScroll = true } → _

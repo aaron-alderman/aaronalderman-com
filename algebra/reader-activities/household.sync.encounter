@@ -1,0 +1,62 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.sync:
+  port state.get { key = "hh-run" } → run
+  port state.get { key = "hh-scenario" } → scenario
+  port state.get { key = "hh-person" } → person
+  port state.get { key = "hh-phase" } → phase
+  port state.get { key = "hh-overrides" } → overrides
+  port state.get { key = "hh-orientation" } → orientation
+  port state.get { key = "hh-change" } → change
+  port state.get { key = "hh-profile" } → profile
+  port state.get { key = "hh-enabled" } → enabled
+  port browser.write { ref = "#hh-orientation"; name = "value"; value = $orientation } → hp150
+  port browser.write { ref = "#hh-change"; name = "value"; value = $change } → hp151
+  port browser.write { ref = "#hh-profile"; name = "value"; value = $profile } → hp152
+  port browser.write { ref = "#hh-person"; name = "value"; value = $person } → hp153
+  port browser.write { ref = "#hh-phase"; name = "value"; value = $phase } → hp154
+  port browser.write { ref = "#hh-enabled"; name = "checked"; value = $enabled } → hp155
+  let row = at($run.history, if(eq($phase, "initial"), 0, 4))
+  let per = at($row.assumptions, if(eq($person, "A"), 0, 1))
+  fold $data.household.controls as def; unused starts null:
+    let phaseKey = if(eq($def.scope, "rate"), "run", if(eq($def.scope, "resource"), "initial", $phase))
+    let id = concat(
+      $def.scope,
+      "-",
+      if(eq($def.scope, "resource"), "household", $person),
+      "-",
+      $phaseKey,
+      "-",
+      $def.key
+    )
+    let edit = at(filter($overrides, "e", eq($e.id, $id)), 0)
+    let base = if(
+      eq($def.scope, "person"),
+      if(
+        includes(list("capacity", "willingness", "wage"), $def.key),
+        at($per, $def.key),
+        at($per.values, $def.key)
+      ),
+      if(
+        eq($def.scope, "experience"),
+        at(at($row.experience, $person), $def.key),
+        if(
+          eq($def.scope, "rate"),
+          at(at($scenario.feedback, $person), $def.key),
+          at($scenario.material.initial, $def.key)
+        )
+      )
+    )
+    let value = if($edit, at($edit, "value"), $base)
+    let ref = concat(if(eq($def.scope, "resource"), "#hh-resource-", "#hh-param-"), $def.key)
+    port browser.write { ref = $ref; name = "value"; value = $value } → hp156
+    port browser.select { selector = concat($ref, "-value") } → outputs
+    port number.calculate { operation = "greater"; values = list(count($outputs), 0) } → hn157
+    when $hn157:
+      port browser.write {
+        ref = concat($ref, "-value");
+        name = "textContent";
+        value = concat($value, " ", $def.unit)
+      } → hp158
+    yield null → unused

@@ -1,0 +1,84 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.rendered.report:
+  let reportInput = $eventInput
+  let eventInput = { plan = $reportInput.capturedPlan }
+  call assurance.rendered.acceptPlan
+  assert $result.ok
+    otherwise "RENDERED-PLAN: Captured selectors and viewport contract do not match."
+  port value.encode { value = $reportInput.capturedPlan } → capturedPlanJSON
+  port digest.sha256 { text = $capturedPlanJSON; fallback = true } → capturedPlanSHA
+  assert every($reportInput.snapshots, "snapshot", eq($snapshot.planSha256, $capturedPlanSHA))
+    otherwise "RENDERED-PLAN: Observation fingerprint mismatch."
+  call assurance.rendered.plan
+  let interpretationPlan = $result
+  let eventInput = $reportInput
+  call assurance.rendered.project
+  let reportSnapshots = $result
+  fold $reportSnapshots as snapshot; assessments starts list():
+    let eventInput = $snapshot
+    call assurance.rendered.classify
+    yield append($assessments, list($result)) → assessments
+  fold $assessments as a; byRoute starts {  }:
+    let prior = at($byRoute, $a.route)
+    port record.put {
+      record = $byRoute;
+      key = $a.route;
+      value = append(
+        or($prior, list()),
+        list(
+          {
+            route = $a.route;
+            profile = $a.profile;
+            viewport = $a.viewport;
+            status = $a.status;
+            readyState = $a.readyState;
+            fontStatus = $a.fontStatus;
+            capturedAt = $a.capturedAt;
+            document = $a.document;
+            findingsCount = count($a.findings)
+          }
+        )
+      )
+    } → updated
+    yield $updated → byRoute
+  let allFindings = fold(
+    $assessments,
+    "a",
+    "out",
+    list(),
+    append(
+      $out,
+      map($a.findings, "f", { route = $a.route; profile = $a.profile; finding = $f })
+    )
+  )
+  let result = {
+    protocol = "worldwright/rendered-layout-report/1";
+    criteria = $interpretationPlan.thresholds;
+    profiles = list(
+      { id = "desktop"; width = 1280; height = 800 },
+      { id = "mobile"; width = 390; height = 844 }
+    );
+    scope = "Every registered HTML route at desktop 1280×800 and mobile width 390×844; initial loaded state in same-origin browser frames.";
+    boundary = "These are responsive-width browser observations, not physical device certification. Interactive states, expanded evidence details, scrolling-dependent lazy content, other engines, subjective beauty and the purpose of whitespace remain outside this receipt. Review findings are candidates, not automatic repair instructions.";
+    assessments = map(
+      $assessments,
+      "a",
+      {
+        route = $a.route;
+        profile = $a.profile;
+        viewport = $a.viewport;
+        status = $a.status;
+        readyState = $a.readyState;
+        fontStatus = $a.fontStatus;
+        capturedAt = $a.capturedAt;
+        document = $a.document;
+        findingsCount = count($a.findings)
+      }
+    );
+    byRoute = $byRoute;
+    findings = $allFindings;
+    observationCount = count($assessments);
+    findingCount = count($allFindings)
+  }

@@ -1,0 +1,44 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.feedback:
+  let rateKey = if(
+    includes(list("heard", "outreach"), $eventInput.kind),
+    "heardGain",
+    if(
+      eq($eventInput.kind, "dismissed"),
+      "dismissedLoss",
+      if(
+        eq($eventInput.kind, "kept"),
+        "keptGain",
+        if(
+          eq($eventInput.kind, "implementation-shortfall"),
+          "missedLoss",
+          if(eq($eventInput.kind, "capacity-shortfall"), "capacityLoss", "none")
+        )
+      )
+    )
+  )
+  let positive = includes(list("heard", "outreach", "kept"), $eventInput.kind)
+  let result = $eventInput.value
+  when and($eventInput.feedback.enabled, not(eq($rateKey, "none"))):
+    let override = at(
+      filter(
+        or($eventInput.overrides, list()),
+        "edit",
+        and(
+          eq($edit.scope, "rate"),
+          eq($edit.person, $eventInput.person),
+          eq($edit.key, $rateKey)
+        )
+      ),
+      0
+    )
+    port record.get { record = or($override, {  }); key = "value" } → hp107
+    let rate = if(eq($hp107, null), at(at($eventInput.feedback, $eventInput.person), $rateKey), $hp107)
+    port number.calculate { operation = "subtract"; values = list(1, $eventInput.value) } → hn110
+    port number.calculate { operation = "multiply"; values = list($rate, $hn110) } → hn109
+    port number.calculate { operation = "add"; values = list($eventInput.value, $hn109) } → hn108
+    port number.calculate { operation = "subtract"; values = list(1, $rate) } → hn112
+    port number.calculate { operation = "multiply"; values = list($eventInput.value, $hn112) } → hn111
+    let result = if($positive, $hn108, $hn111)

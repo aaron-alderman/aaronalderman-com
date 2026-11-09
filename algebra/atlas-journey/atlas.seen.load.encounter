@@ -1,0 +1,11 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process atlas.seen.load:
+  port storage.read { key = "worldwright.atlas.seen.v1"; maxLength = 4096 } → stored
+  port state.get { key = "seen" } → previous
+  port text.split { value = if($stored.value, $stored.value, ""); pattern = "\\n" } → items
+  let candidate = if($stored.ok, $items, or($previous, list()))
+  call atlas.seen.clean
+  port state.set { key = "seen"; value = $clean } → _
+  port state.set { key = "saved"; value = $stored.ok } → _

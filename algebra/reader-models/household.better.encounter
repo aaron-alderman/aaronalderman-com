@@ -1,0 +1,54 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.better:
+  let result = true
+  when not(eq($eventInput.best, null)):
+    port number.calculate {
+      operation = "subtract";
+      values = list(at($eventInput.option.score, "paid"), at($eventInput.best.score, "paid"))
+    } → hn45
+    port number.calculate { operation = "abs"; values = list($hn45) } → hn44
+    port number.calculate { operation = "greater"; values = list($hn44, 1e-8) } → hn43
+    port number.calculate {
+      operation = "less";
+      values = list(at($eventInput.option.score, "paid"), at($eventInput.best.score, "paid"))
+    } → hn46
+    port number.calculate {
+      operation = "subtract";
+      values = list(at($eventInput.option.score, "free"), at($eventInput.best.score, "free"))
+    } → hn49
+    port number.calculate { operation = "abs"; values = list($hn49) } → hn48
+    port number.calculate { operation = "greater"; values = list($hn48, 1e-8) } → hn47
+    port number.calculate {
+      operation = "less";
+      values = list(at($eventInput.option.score, "free"), at($eventInput.best.score, "free"))
+    } → hn50
+    port number.calculate {
+      operation = "subtract";
+      values = list(at($eventInput.option.score, "role"), at($eventInput.best.score, "role"))
+    } → hn53
+    port number.calculate { operation = "abs"; values = list($hn53) } → hn52
+    port number.calculate { operation = "greater"; values = list($hn52, 1e-8) } → hn51
+    port number.calculate {
+      operation = "less";
+      values = list(at($eventInput.option.score, "role"), at($eventInput.best.score, "role"))
+    } → hn54
+    port number.calculate {
+      operation = "less";
+      values = list($eventInput.option.distance, $eventInput.best.distance)
+    } → hn55
+    port number.calculate { operation = "less"; values = list($eventInput.option.share, $eventInput.best.share) } → hn56
+    let result = if(
+      $hn43,
+      $hn46,
+      if(
+        $hn47,
+        $hn50,
+        if(
+          $hn51,
+          $hn54,
+          if(not(eq($eventInput.option.distance, $eventInput.best.distance)), $hn55, $hn56)
+        )
+      )
+    )

@@ -1,0 +1,39 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.code:
+  port state.get { key = "bits" } → bits
+  let bits = or($bits, list(0, 0, 0))
+  port state.get { key = "original" } → original
+  let original = or($original, 0)
+  port browser.select { selector = "[data-world=\"flip-bit\"]" } → buttons
+  fold $buttons as bitButton; index starts 0:
+    let bit = at($bits, $index)
+    port browser.write { ref = $bitButton.ref; name = "textContent"; value = $bit } → _
+    port browser.attribute { ref = $bitButton.ref; name = "aria-pressed"; value = eq($bit, 1) } → _
+    port browser.attribute {
+      ref = $bitButton.ref;
+      name = "aria-label";
+      value = concat("Received bit ", add($index, 1), ": ", if(eq($bit, 1), "one", "zero"))
+    } → _
+    yield add($index, 1) → index
+  port kernel.invoke { query = "reader.model.decode"; input = { bits = $bits } } → decoded
+  let changed = count(filter($bits, "bit", not(eq($bit, $original))))
+  port browser.write {
+    ref = ".world-result";
+    name = "textContent";
+    value = concat(
+      "Decoder returns ",
+      $decoded,
+      ". ",
+      $changed,
+      " changed ",
+      if(eq($changed, 1), "bit", "bits"),
+      ". ",
+      if(
+        eq($decoded, $original),
+        "The original bit is recovered.",
+        "This is outside the one-flip correction budget; the original bit is not recovered."
+      )
+    )
+  } → _

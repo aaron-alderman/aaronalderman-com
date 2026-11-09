@@ -1,0 +1,34 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process publication.icon:
+  let input = {
+    tag = "svg";
+    attrs = { xmlns = "http://www.w3.org/2000/svg"; viewBox = "0 0 64 64" };
+    children = list(
+      {
+        tag = "rect";
+        attrs = { width = "64"; height = "64"; rx = "16"; fill = "#0c111b" };
+        children = list()
+      },
+      {
+        tag = "circle";
+        attrs = { cx = "32"; cy = "32"; r = "27"; fill = "none"; stroke = "#ba975f" };
+        children = list()
+      },
+      {
+        tag = "text";
+        attrs = {
+          x = "32";
+          y = "44";
+          "text-anchor" = "middle";
+          "font-family" = "Georgia,serif";
+          "font-size" = "38";
+          fill = "#ebc991"
+        };
+        children = list("A")
+      }
+    )
+  }
+  call projection.serialize
+  port file.write { path = "assets/personal-mark.svg"; text = $result } → _

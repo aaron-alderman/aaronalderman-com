@@ -1,0 +1,41 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process workshop.apply:
+  let busy = true
+  call workshop.busy
+  port state.get { key = "workshop" } → snapshot
+  let kind = $eventInput.kind
+  port browser.property { ref = if(eq($kind, "title"), "#story-title", "#web-label"); name = "value" } → value
+  port browser.write { ref = "#error"; name = "hidden"; value = true } → _
+  port browser.write {
+    ref = "#status";
+    name = "textContent";
+    value = "Checking your change and updating the previews…"
+  } → _
+  try:
+    port kernel.invoke {
+      query = "workshop.change";
+      input = {
+        snapshot = $snapshot;
+        request = { revision = $snapshot.revision; kind = $kind; value = $value }
+      }
+    } → next
+    port state.set { key = "workshop"; value = $next } → _
+    port state.set { key = "sourceHighlight"; value = null } → _
+    call workshop.render
+    port browser.write {
+      ref = "#status";
+      name = "textContent";
+      value = concat("Change ", $next.revision, " applied. See what changed in steps 4 and 5.")
+    } → _
+  catch fault:
+    port browser.write { ref = "#error"; name = "hidden"; value = false } → _
+    port browser.write { ref = "#error"; name = "textContent"; value = $fault.message } → _
+    port browser.write {
+      ref = "#status";
+      name = "textContent";
+      value = "The change could not be applied. Your last accepted version is still shown."
+    } → _
+  let busy = false
+  call workshop.busy

@@ -1,0 +1,74 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.rendered.boot:
+  port asset.text { url = "../rendered-layout.values.rel"; cache = "no-store" } → renderedJSON
+  port static.read { text = $renderedJSON } → renderedData
+  let input = {
+    tag = "div";
+    attrs = {  };
+    children = list(
+      { tag = "p"; attrs = {}; children = list("Historical capture: changed or missing artifact dependencies require browser recapture. No browser text colours were measured in this older geometry track. Fresh scoped observations are available under Reading experience.") },
+      {
+        tag = "p";
+        attrs = {  };
+        children = list(
+          concat(
+            $renderedData.report.observationCount,
+            " desktop/mobile observations · ",
+            $renderedData.report.findingCount,
+            " measured findings and review candidates."
+          )
+        )
+      },
+      {
+        tag = "p";
+        attrs = {  };
+        children = list(
+          "Review findings preserve the observed layout. Purpose and visual intent remain open."
+        )
+      },
+      {
+        tag = "div";
+        attrs = {  };
+        children = map(
+          distinct(map($renderedData.report.findings, "f", $f.finding.rule)),
+          "rule",
+          {
+            tag = "details";
+            attrs = {  };
+            children = list(
+              { tag = "summary"; attrs = {  }; children = list($rule) },
+              {
+                tag = "ul";
+                attrs = {  };
+                children = map(
+                  filter($renderedData.report.findings, "f", eq($f.finding.rule, $rule)),
+                  "f",
+                  {
+                    tag = "li";
+                    attrs = {  };
+                    children = list(
+                      { tag = "a"; attrs = { href = concat("/", $f.route) }; children = list($f.route) },
+                      " · ",
+                      $f.profile,
+                      " · ",
+                      { tag = "strong"; attrs = {  }; children = list($f.finding.status) },
+                      " · “",
+                      $f.finding.text,
+                      "” — ",
+                      $f.finding.evidence,
+                      " ",
+                      { tag = "code"; attrs = {  }; children = list($f.finding.node) }
+                    )
+                  }
+                )
+              }
+            )
+          }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  port browser.content { ref = "#rendered-results"; html = $result } → _

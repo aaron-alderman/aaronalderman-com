@@ -1,0 +1,55 @@
+process-module "temple/surface-process-module/1"
+
+process reading.theme.build:
+  fold $readingRooms as room; themes starts list():
+    yield append($themes, list({ key = $room.key; label = $room.label; palette = $room.palette; index = count($themes) })) → themes
+  port runtime.bundle {
+    entry = "reading.theme.boot";
+    mode = "browser";
+    grantProfile = "micrositesBrowser";
+    queries = list("reading.theme.boot", "reading.theme.change", "reading.theme.apply");
+    factSubjects = list();
+    data = { themes = $themes };
+    budget = 2000000
+  } → runtime
+  port file.write { path = "reading-theme-runtime.js"; text = $runtime } → _
+
+process reading.theme.control:
+  let room = at(filter($readingRooms, "room", eq($room.key, $eventInput.key)), 0)
+  let result = { tag = "button"; attrs = {
+    type = "button"; id = "reading-theme-switch";
+    class = "identity-switch reading-theme-switch"; disabled = true;
+    "aria-label" = concat("Change reading colour theme. Current theme: ", $room.label);
+    "aria-describedby" = "reading-theme-status";
+    title = "Change reading colour theme"
+  }; children = list(
+    { tag = "span"; attrs = { class = "identity-cross"; "aria-hidden" = "true" }; children = list() },
+    { tag = "span"; attrs = { class = "identity-hint"; id = "reading-theme-label"; "data-theme-label" = $room.label; "aria-hidden" = "true" }; children = list() }
+  ) }
+
+process reading.theme.boot:
+  port browser.read { ref = "[data-reading-room]" } → room
+  let key = at($room.attributes, "data-reading-room")
+  let chosen = at(filter($data.themes, "theme", eq($theme.key, $key)), 0)
+  assert $chosen
+    otherwise "READING-THEME: Unknown initial reading palette."
+  port state.set { key = "readingThemeIndex"; value = $chosen.index } → _
+  port browser.on { ref = "#reading-theme-switch"; event = "click"; query = "reading.theme.change" } → _
+  port browser.write { ref = "#reading-theme-switch"; name = "disabled"; value = false } → _
+
+process reading.theme.change:
+  port state.get { key = "readingThemeIndex" } → current
+  let next = if(eq(add($current, 1), count($data.themes)), 0, add($current, 1))
+  let chosen = at($data.themes, $next)
+  call reading.theme.apply
+  port state.set { key = "readingThemeIndex"; value = $next } → _
+
+process reading.theme.apply:
+  port browser.attribute { ref = "[data-reading-room]"; name = "data-reading-room"; value = $chosen.key } → _
+  port browser.attribute { ref = "#reading-theme-label"; name = "data-theme-label"; value = $chosen.label } → _
+  port browser.attribute { ref = "#reading-theme-switch"; name = "aria-label"; value = concat("Change reading colour theme. Current theme: ", $chosen.label) } → _
+  port browser.write { ref = "#reading-theme-status"; name = "textContent"; value = concat("Theme set to ", $chosen.label, ".") } → _
+  port browser.select { selector = "[data-token-value]" } → swatches
+  each $swatches as swatch:
+    port record.get { record = $chosen.palette; key = at($swatch.attributes, "data-token-value") } → colour
+    port browser.write { ref = $swatch.ref; name = "textContent"; value = $colour } → _

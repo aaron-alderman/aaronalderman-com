@@ -1,0 +1,22 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process encounter.demo.render:
+  port state.get { key = "candidate" } → candidate
+  port state.get { key = "notice" } → notice
+  port kernel.invoke { query = "ec.run"; input = { candidate = $candidate } } → projections
+  let page = at(filter($projections, "item", eq($item.output.type, "Page")), 0)
+  let web = at(filter($projections, "item", eq($item.output.type, "WebLink")), 0)
+  let row = at(filter($projections, "item", eq($item.output.type, "MainframeRow")), 0)
+  port kernel.invoke { query = "encounter.demo.html"; input = { tree = $page.output.tree } } → pageHTML
+  port kernel.invoke { query = "encounter.demo.html"; input = { tree = $web.output.tree } } → webHTML
+  port kernel.invoke { query = "encounter.demo.html"; input = { tree = $row.output.tree } } → rowHTML
+  port browser.content { ref = "#encounter-story"; html = $pageHTML } → _
+  port browser.content { ref = "#encounter-menu"; html = $webHTML } → _
+  port browser.content { ref = "#encounter-row"; html = $rowHTML } → _
+  port browser.write { ref = "#encounter-title"; name = "value"; value = at($page.values, "P.title") } → _
+  port browser.write { ref = "#encounter-status"; name = "textContent"; value = $notice } → _
+  port browser.attribute { ref = "#encounter-menu a"; name = "href"; value = null } → _
+  port browser.attribute { ref = "#encounter-menu a"; name = "role"; value = "text" } → _
+  port browser.write { ref = "#encounter-row button"; name = "disabled"; value = true } → _
+  port kernel.invoke { query = "encounter.demo.inspect"; input = {  } } → result

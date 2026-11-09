@@ -1,0 +1,35 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process language.property:
+  when not(not(eq($state.subject, null))):
+    let code = "TEMPLE-M006"
+    let summary = "Relation appears outside an entity."
+    let correction = "Place the relation inside its owning entity block."
+    call language.refuse
+  when $state.ok:
+    port static.read { text = at($tokens, 3) } → decoded
+    let fact = {
+      s = $state.subject;
+      p = at($tokens, 2);
+      o = $decoded;
+      pol = if(eq(at($tokens, 1), "!"), "is-not", "is")
+    }
+    when not(not(some($state.facts, "previous", eq($previous, $fact)))):
+      let code = "TEMPLE-M007"
+      let summary = "Duplicate fact in this module."
+      let correction = "Keep a single authored assertion; repeated distinct values remain ordered."
+      call language.refuse
+    when $state.ok:
+      let state = {
+        module = $state.module;
+        subject = $state.subject;
+        seen = $state.seen;
+        facts = append($state.facts, list($fact));
+        origins = append(
+          $state.origins,
+          list({ index = count($state.facts); module = $state.module; span = $span })
+        );
+        ok = $state.ok;
+        diagnostic = $state.diagnostic
+      }

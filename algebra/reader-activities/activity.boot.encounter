@@ -1,0 +1,9 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.boot:
+  port browser.select { selector = "#household-root" } → hhRoot
+  when eq(count($hhRoot), 0):
+    call activity.standard.boot
+  when not(eq(count($hhRoot), 0)):
+    port kernel.invoke { query = "household.boot"; input = {  } } → _

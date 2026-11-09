@@ -1,0 +1,158 @@
+process-module "temple/surface-process-module/1"
+
+# Test decisions are Encounter. The host only transports calls and observations.
+process check.refusal:
+  port mechanism.attempt { operation = $operation } → attempted
+  when $attempted.ok:
+    port diagnostic.context { value = { expectedRefusal = $operation.method; returned = $attempted.value } } → ignored
+  assert not($attempted.ok)
+    otherwise "Expected the actual mechanism to refuse."
+  when not(eq($pattern, null)):
+    port text.matches { value = $attempted.error.message; pattern = $pattern } → matched
+    when not($matched):
+      port diagnostic.context { value = { expectedPattern = $pattern; observed = $attempted.error; method = $operation.method } } → ignored
+    assert $matched
+      otherwise "Refusal diagnostic changed."
+  let result = $attempted.error
+
+process check.setup:
+  port mechanism.load { module = "encounter-source-front.cjs" } → frontModule
+  port mechanism.load { module = "source-policy-machine.cjs" } → policyModule
+  port mechanism.call { target = $policyModule; method = "getSourcePolicyMachine"; keep = true } → policy
+  port mechanism.load { module = "Object" } → objectModule
+  port mechanism.ports { groups = list("value", "computation", "rel"); extra = $extra } → mechanics
+  port mechanism.call { target = $objectModule; method = "keys"; args = list($mechanics) } → grants
+  let grants = append($grants, list("kernel.invoke", "encounter.evaluate", "encounter.execute", "encounter.source"))
+  port mechanism.call { target = $frontModule; method = "createFrontDoor"; args = list({ profiles = { pure = $grants }; ports = $mechanics; basis = "encounter-tests" }); keep = true } → front
+
+process check.pure:
+  let extra = {}
+  call check.setup
+
+process check.candidate:
+  let text = concat("process-module \"temple/surface-process-module/1\"\nprocess example:\n", $body, "\n")
+  port mechanism.call { target = $front; method = "hydrate"; args = list("example.encounter", $text); keep = true } → candidate
+
+process check.admit:
+  call check.candidate
+  port file.read { file = "algebra/fact-index/facts.index.encounter" } → indexText
+  port mechanism.call { target = $front; method = "hydrate"; args = list("algebra/fact-index/facts.index.encounter", $indexText); keep = true } → indexCandidate
+  port mechanism.call { target = $front; method = "link"; args = list(list($candidate, $indexCandidate)); keep = true } → linked
+  port mechanism.call { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("example") }); keep = true } → admitted
+
+process check.run:
+  port mechanism.call { target = $front; method = "run"; args = list($admitted, "example", $options) } → execution
+  let result = $execution.value
+
+process fixture.null:
+  let result = null
+
+process fixture.value:
+  let result = $value
+
+process fixture.hash:
+  port mechanism.copy { target = at($args, 0) } → text
+  port digest.sha256 { text = $text } → result
+
+process fixture.clone:
+  port mechanism.copy { target = at($args, 0) } → result
+
+process fixture.authorize:
+  port mechanism.copy { target = at($args, 0) } → query
+  port mechanism.copy { target = at($args, 1) } → argument
+  port mechanism.call { target = $policy; method = "compute"; args = list($query, $argument) } → computed
+  let result = $computed.value
+
+process check.projection:
+  call check.pure
+  port mechanism.callback { query = "fixture.authorize"; bindings = { policy = $policy } } → authorize
+  port mechanism.callback { query = "fixture.hash" } → hash
+  port mechanism.callback { query = "fixture.clone" } → clone
+  port mechanism.load { module = "projection-transport.cjs" } → projectionModule
+  port mechanism.call { target = $projectionModule; method = "projectionTransport"; args = list({ authorize = $authorize; hash = $hash; clone = $clone }); keep = true } → projection
+  let sheet = { kind = "root"; children = list({ kind = "rule"; selector = ".card"; children = list({ kind = "decl"; property = "padding"; value = "2rem" }) }) }
+  let node = { tag = "article"; attrs = { class = "card" }; children = list("Room to grow & learn") }
+
+process check.output:
+  port mechanism.load { module = "Buffer" } → bufferModule
+  port mechanism.call { target = $bufferModule; method = "byteLength"; args = list($text) } → bytes
+  port mechanism.call { target = $projection; method = "admitOutput"; args = list({ name = $name; text = $text; bytes = $bytes }) } → result
+
+process check.manifest:
+  port rel.read { file = "bootstrap/publication.rel" } → declaration
+  let outputCells = filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "output")))
+  assert eq(count($outputCells), 1)
+    otherwise "Unique canonical publication output required."
+  let output = at(at($outputCells, 0), "o")
+  fold $declaration as fact; subjects starts {}:
+    let prior = at($subjects, $fact.s)
+    port record.put { record = if($prior, $prior, {}); key = $fact.p; value = $fact.o } → subject
+    port record.put { record = $subjects; key = $fact.s; value = $subject } → updated
+    yield $updated → resourceCells
+  let ids = map(filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "resource"))), "f", $f.o)
+  port record.fromEntries { entries = map($ids, "id", list(at(at($resourceCells, $id), "path"), at(at($resourceCells, $id), "source"))) } → aliases
+  fold $ids as id; paths starts {}:
+    let key = at(at($resourceCells, $id), "path")
+    let prior = at($paths, $key)
+    port record.put { record = $paths; key = $key; value = append(if($prior, $prior, list()), list($id)) } → updated
+    yield $updated → resourcePathIds
+
+process check.readAlias:
+  let actualFile = at($aliases, $file)
+  port file.read { file = if($actualFile, $actualFile, $file) } → result
+
+process tree.all:
+  fold $tree.children as child; collected starts list($tree):
+    let tree = $child
+    call tree.all
+    yield append($collected, $result) → result
+
+process tree.text:
+  fold $tree.children as child; collected starts $tree.text:
+    let tree = $child
+    call tree.text
+    yield concat($collected, $result) → result
+
+process tree.attrs:
+  port record.fromEntries { entries = map($tree.attrs, "a", list($a.name, $a.value)) } → result
+
+process tree.find:
+  call tree.all
+  fold $result as node; found starts null:
+    let tree = $node
+    call tree.attrs
+    port text.matches { value = if(at($result, "class"), at($result, "class"), ""); pattern = concat("(?:^|\\s)", $class, "(?:$|\\s)") } → matches
+    yield if(and(eq($found, null), eq($node.tag, $tag), $matches), $node, $found) → result
+
+process check.page:
+  port file.read { file = concat($output, "/", $page) } → html
+  port markup.observe { text = $html } → tree
+
+process tree.reading:
+  let result = ""
+  when not(includes(list("script", "style"), $tree.tag)):
+    fold $tree.children as child; collected starts $tree.text:
+      let tree = $child
+      call tree.reading
+      yield concat($collected, $result) → result
+
+process check.reading:
+  port markup.observe { text = $html } → tree
+  call tree.all
+  let tree = at(filter($result, "n", eq($n.tag, "body")), 0)
+  call tree.reading
+  # Inspection pages quote megabytes of source. Keep each native regex request
+  # bounded without changing the canonical whitespace-normalization semantics.
+  let reading = $result
+  port number.calculate { operation = "divide"; values = list(count($reading), 32000) } → parts
+  port number.calculate { operation = "ceil"; values = list($parts) } → parts
+  fold range($parts) as index; state starts { chunks = list(); lastSpace = false }:
+    port number.calculate { operation = "multiply"; values = list(add($index, -1), 32000) } → start
+    port number.calculate { operation = "multiply"; values = list($index, 32000) } → end
+    port text.slice { value = $reading; start = $start; end = $end } → part
+    port text.replace { value = $part; pattern = "\\s+"; flags = "g"; replacement = " " } → part
+    when and($state.lastSpace, eq(at($part, 0), " ")):
+      port text.slice { value = $part; start = 1 } → part
+    yield { chunks = append($state.chunks, list($part)); lastSpace = if(eq($part, ""), $state.lastSpace, eq(at($part, add(count($part), -1)), " ")) } → state
+  port text.join { values = $state.chunks; separator = "" } → result
+  port text.trim { value = $result } → result

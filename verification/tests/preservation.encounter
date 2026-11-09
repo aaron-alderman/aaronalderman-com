@@ -1,0 +1,206 @@
+process-module "temple/surface-process-module/1"
+
+process test.preservation.routes-text-assets:
+  call check.manifest
+  let baseline = "87082c2400dd90f99be7396762de2a491b62eb10"
+  port process.git { args = list("ls-tree", "-r", "--name-only", $baseline, "dist") } → expected
+  port text.trim { value = $expected } → expected
+  port text.split { value = $expected; pattern = "\r?\n" } → expected
+  let expected = map($expected, "file", at(list($file), 0))
+  port file.list { directory = $output; recursive = true } → actual
+  each $expected as file:
+    port text.slice { value = $file; start = 5 } → file
+    port text.matches { value = $file; pattern = "\\.html$" } → isPage
+    when $isPage:
+      assert includes($actual, $file)
+        otherwise "Historical route missing."
+  each list("index.html", "mission/index.html", "writing/power-must-serve-life/index.html") as file:
+    port file.read { file = concat($output, "/", $file) } → html
+    call check.reading
+    let current = $result
+    port process.git { args = list("show", concat($baseline, ":dist/", $file)) } → html
+    call check.reading
+    assert eq($current, $result)
+      otherwise "Historical canonical reading text changed."
+  port rel.read { file = "verification/site-preservation-baseline.rel" } → preserved
+  port rel.read { file = "verification/reading-qa-preservation-amendments.rel" } → amendments
+  let allowed = list("expedition.css", "worlds/dad/threads/growing-up-in-the-way-of-jesus/index.html", "assurance/reading-palette/index.html")
+  let amended = filter($amendments, "f", includes(list("readingTextSha256", "passiveSha256"), $f.p))
+  assert eq(count(distinct(map($amended, "f", $f.s))), count($amended))
+    otherwise "Duplicate preservation amendment."
+  each $amended as fact:
+    assert includes($allowed, $fact.s)
+      otherwise "Unscoped preservation amendment."
+    let prior = filter($preserved, "f", and(eq($f.s, $fact.s), eq($f.p, $fact.p)))
+    assert eq(count($prior), 1)
+      otherwise "Amendment must refer to an existing baseline."
+    let previous = filter($amendments, "f", and(eq($f.s, $fact.s), eq($f.p, "previousSha256")))
+    assert eq(at(at($previous, 0), "o"), at(at($prior, 0), "o"))
+      otherwise "Amendment failed to bind the exact prior identity."
+    let reasons = filter($amendments, "f", and(eq($f.s, $fact.s), eq($f.p, "reason")))
+    port number.calculate { operation = "greater"; values = list(count(at(at($reasons, 0), "o")), 20) } → reasoned
+    assert $reasoned
+      otherwise "Bounded amendment reason required."
+    port text.matches { value = $fact.o; pattern = "^[a-f0-9]{64}$" } → hash
+    assert $hash
+      otherwise "Amendment must bind a SHA-256 identity."
+  port rel.read { file = "verification/common-projection-preservation-amendments.rel" } → migration
+  let migrationAllowed = list("encounter/encounter.css", "encounter/index.html", "inspection/module-encounter.html", "inspection/module-microsite-ui.html", "inspection/module-microsite-temple-ui.html", "inspection/module-microsite-motion.html", "inspection/module-microsite-projection.html", "inspection/module-microsites.html", "inspection/module-microsite-return.html", "retained/workshop/index.html", "workshop/index.html", "expedition.css", "activity.css", "assurance/reading-palette/index.html", "assurance/identities/index.html")
+  let migrationNew = filter($migration, "f", includes(list("readingTextSha256", "passiveSha256"), $f.p))
+  assert eq(count(distinct(map($migrationNew, "f", $f.s))), count($migrationNew))
+    otherwise "Duplicate common projection amendment."
+  each $migrationNew as fact:
+    port diagnostic.context { value = $fact.s } → ignored
+    assert includes($migrationAllowed, $fact.s)
+      otherwise "Unscoped common projection amendment."
+    let base = filter($preserved, "f", and(eq($f.s, $fact.s), eq($f.p, $fact.p)))
+    let prior = filter($amended, "f", and(eq($f.s, $fact.s), eq($f.p, $fact.p)))
+    let previous = filter($migration, "f", and(eq($f.s, $fact.s), eq($f.p, "previousSha256")))
+    let reasons = filter($migration, "f", and(eq($f.s, $fact.s), eq($f.p, "reason")))
+    assert and(eq(count($base), 1), eq(count($previous), 1), eq(count($reasons), 1))
+      otherwise "One baseline, previous identity and bounded reason are required."
+    let expectedPrior = at(at(if(count($prior), $prior, $base), 0), "o")
+    assert eq(at(at($previous, 0), "o"), $expectedPrior)
+      otherwise "Common projection amendment broke the prior qualified identity chain."
+    port number.calculate { operation = "greater"; values = list(count(at(at($reasons, 0), "o")), 20) } → reasoned
+    port text.matches { value = $fact.o; pattern = "^[a-f0-9]{64}$" } → identity
+    assert and($reasoned, $identity)
+      otherwise "Bounded reason and SHA-256 identity required."
+  let amended = append(filter($amended, "f", not(includes(map($migrationNew, "m", $m.s), $f.s))), $migrationNew)
+  port rel.read { file = "verification/live-migration-preservation-amendments.rel" } → liveMigration
+  let liveAllowed = list("claimipedia/claimipedia.css", "inspection/module-microsite-projection.html", "expedition.css", "assurance/index.html", "assurance/rendered-layout/index.html", "assurance/navigation-layout/index.html")
+  let liveNew = filter($liveMigration, "f", includes(list("readingTextSha256", "passiveSha256"), $f.p))
+  assert and(eq(count($liveNew), 6), eq(count(distinct(map($liveNew, "f", $f.s))), 6))
+    otherwise "The live migration must retain exactly its six reviewed preservation amendments."
+  each $liveNew as fact:
+    assert includes($liveAllowed, $fact.s)
+      otherwise "Unscoped live migration amendment."
+    let prior = filter($amended, "f", and(eq($f.s, $fact.s), eq($f.p, $fact.p)))
+    let base = filter($preserved, "f", and(eq($f.s, $fact.s), eq($f.p, $fact.p)))
+    let previous = filter($liveMigration, "f", and(eq($f.s, $fact.s), eq($f.p, "previousSha256")))
+    let reasons = filter($liveMigration, "f", and(eq($f.s, $fact.s), eq($f.p, "reason")))
+    assert and(eq(count($base), 1), eq(count($previous), 1), eq(count($reasons), 1), eq(at(at($previous, 0), "o"), at(at(if(count($prior), $prior, $base), 0), "o")))
+      otherwise "Live migration broke its exact previous qualified identity chain."
+    port number.calculate { operation = "greater"; values = list(count(at(at($reasons, 0), "o")), 20) } → reasoned
+    port text.matches { value = $fact.o; pattern = "^[a-f0-9]{64}$" } → identity
+    assert and($reasoned, $identity)
+      otherwise "A scoped reason and exact SHA-256 identity are required."
+  let amended = append(filter($amended, "f", not(includes(map($liveNew, "m", $m.s), $f.s))), $liveNew)
+  let pages = filter($preserved, "f", eq($f.p, "readingTextSha256"))
+  fold $actual as file; htmlFiles starts list():
+    port text.matches { value = $file; pattern = "\\.html$" } → isPage
+    yield if($isPage, append($htmlFiles, list($file)), $htmlFiles) → htmlFiles
+  port value.sort { values = $htmlFiles } → htmlFiles
+  let restoredRoutes = list("assurance/contrast/index.html", "assurance/images/author.html", "assurance/images/christian.html", "assurance/images/counterexample-broken.html", "assurance/images/counterexample-size.html", "assurance/images/dad.html", "assurance/images/index.html", "assurance/images/main.html", "assurance/images/sourcerer.html", "assurance/plain-language/index.html", "assurance/reading-experience/index.html", "inspection/module-questions-images.html")
+  port value.sort { values = append(map($pages, "f", $f.s), $restoredRoutes) } → pinnedPages
+  assert eq($htmlFiles, $pinnedPages)
+    otherwise "Canonical HTML route set changed."
+  each filter($preserved, "f", includes(list("readingTextSha256", "passiveSha256"), $f.p)) as fact:
+    port diagnostic.context { value = $fact.s } → ignored
+    let changes = filter($amended, "f", eq($f.s, $fact.s))
+    let expected = if(eq(count($changes), 0), $fact.o, at(at($changes, 0), "o"))
+    when eq($fact.p, "readingTextSha256"):
+      port file.read { file = concat($output, "/", $fact.s) } → html
+      call check.reading
+      port digest.sha256 { text = $result } → digest
+    when eq($fact.p, "passiveSha256"):
+      port file.digest { file = concat($output, "/", $fact.s) } → digest
+    assert eq($digest, $expected)
+      otherwise "Pinned canonical reading text or passive asset changed."
+  each $actual as file:
+    port text.matches { value = $file; pattern = "\\.json$"; flags = "i" } → json
+    assert not($json)
+      otherwise "Publication contains a JSON file."
+
+process test.retention.historical-separation:
+  call check.manifest
+  port rel.read { file = "evidence/relocations.rel" } → ledger
+  let cells = filter($ledger, "f", eq($f.p, "physicalSource"))
+  assert and(eq(count($cells), 97), eq(count(distinct(map($cells, "f", $f.o))), 97))
+    otherwise "Historical physical evidence copy count changed."
+  assert some($declaration, "f", and(eq($f.s, "local"), eq($f.p, "input"), eq($f.o, "evidence")))
+    otherwise "Historical evidence is no longer a declared passive input."
+  let ids = map(filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "resource"))), "f", $f.o)
+  each $cells as cell:
+    port file.exists { file = $cell.s } → exists
+    assert not($exists)
+      otherwise "Historical evidence remains mixed with current source."
+    port file.digest { file = $cell.o } → digest
+    assert eq($digest, at(at(filter($ledger, "f", and(eq($f.s, $cell.s), eq($f.p, "sha256"))), 0), "o"))
+      otherwise "Relocated historical identity changed."
+    let bindings = at($resourcePathIds, $cell.s)
+    assert and($bindings, eq(count($bindings), 1))
+      otherwise "One logical publication binding required."
+    let resource = at($resourceCells, at($bindings, 0))
+    assert and(eq(at($resource, "source"), $cell.o), not(eq(at($resource, "kind"), "behaviour")))
+      otherwise "Historical evidence must retain passive logical publication binding."
+  each filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "module"))) as module:
+    let actual = at($aliases, $module.o)
+    let actual = if($actual, $actual, $module.o)
+    port text.matches { value = $actual; pattern = "^evidence/" } → evidence
+    assert not($evidence)
+      otherwise "Historical evidence selected as executable programme."
+
+process test.retention.artwork-provenance:
+  port rel.read { file = "assets/father/growing-up/provenance.rel" } → metadata
+  let original = "art.series-coastal-workshop.v1"
+  let derivative = "art.series-coastal-workshop.jpeg"
+  let receiptPath = at(at(filter($metadata, "f", and(eq($f.s, $original), eq($f.p, "provenanceReceipt"))), 0), "o")
+  port file.digest { file = $receiptPath } → digest
+  assert eq($digest, at(at(filter($metadata, "f", and(eq($f.s, $original), eq($f.p, "provenanceReceiptSha256"))), 0), "o"))
+    otherwise "Artwork provenance receipt changed."
+  port rel.read { file = $receiptPath } → origin
+  each list({ subject = $original; key = "originalSha256" }, { subject = $derivative; key = "servedSha256" }) as image:
+    let file = at(at(filter($metadata, "f", and(eq($f.s, $image.subject), eq($f.p, "path"))), 0), "o")
+    port file.digest { file = $file } → digest
+    let expected = at(at(filter($origin, "f", and(eq($f.s, "series.art.20261108"), eq($f.p, $image.key))), 0), "o")
+    assert and(eq($digest, $expected), eq(at(at(filter($metadata, "f", and(eq($f.s, $image.subject), eq($f.p, "sha256"))), 0), "o"), $expected))
+      otherwise "Served artwork or original identity changed."
+  each list({ subject = $original; key = "tool" }, { subject = $original; key = "prompt" }, { subject = $derivative; key = "encoding" }) as field:
+    assert eq(at(at(filter($metadata, "f", and(eq($f.s, $field.subject), eq($f.p, $field.key))), 0), "o"), at(at(filter($origin, "f", and(eq($f.s, "series.art.20261108"), eq($f.p, $field.key))), 0), "o"))
+      otherwise "Artwork attribution changed."
+  assert eq(at(at(filter($metadata, "f", and(eq($f.s, $derivative), eq($f.p, "derivedFrom"))), 0), "o"), $original)
+    otherwise "Derivative lost original attribution."
+  let pngPath = at(at(filter($metadata, "f", and(eq($f.s, $original), eq($f.p, "path"))), 0), "o")
+  port file.bytes { file = $pngPath } → png
+  port mechanism.load { module = "Buffer" } → bufferModule
+  port mechanism.call { target = $bufferModule; method = "from"; args = list($png); keep = true } → png
+  port mechanism.call { target = $png; method = "readUInt32BE"; args = list(16) } → width
+  port mechanism.call { target = $png; method = "readUInt32BE"; args = list(20) } → height
+  assert and(eq($width, 1536), eq($height, 1024))
+    otherwise "Original artwork geometry changed."
+
+process test.preservation.common-style-migration:
+  call check.manifest
+  port rel.read { file = "verification/site-preservation-baseline.rel" } → preserved
+  port rel.read { file = "verification/reading-qa-preservation-amendments.rel" } → amended
+  let prior = filter($amended, "f", and(eq($f.s, "expedition.css"), eq($f.p, "passiveSha256")))
+  assert eq(count($prior), 1)
+    otherwise "One previously qualified main stylesheet identity is required."
+  port file.read { file = concat($output, "/expedition.css") } → current
+  port file.read { file = concat($output, "/assets/projection.css") } → primitives
+  port text.replaceAll { value = $current; search = $primitives; replacement = "" } → restored
+  port text.replaceAll { value = $restored; search = ".q-question>img[src*=\"/world-emblems/\"]"; replacement = ".q-question:nth-child(2)>img,.q-question:nth-child(4)>img" } → restored
+  port text.replaceAll { value = $restored; search = ".q-question>img[src$=\"/questions/open-workshop-daylight-v2.png\"]"; replacement = ".q-question:last-child>img" } → restored
+  port text.replaceAll { value = $restored; search = ".hierarchy-actions a:not(:first-child),.hierarchy-usecase a,.science-mission-note a"; replacement = ".hierarchy-actions .hierarchy-inspect,.hierarchy-usecase a,.science-mission-note a" } → restored
+  port digest.sha256 { text = $restored } → digest
+  assert eq($digest, at(at($prior, 0), "o"))
+    otherwise "Main palette changed outside shared primitives, purpose selectors and the reviewed secondary-link hit target repair."
+  port file.read { file = concat($output, "/claimipedia/claimipedia.css") } → current
+  let priorRule = ".claim-hero h1{font-family:var(--serif);font-size:clamp(42px,5.7vw,78px);font-weight:600;line-height:1.08;letter-spacing:-.055em;margin:0 0 19px;"
+  port text.replaceAll { value = $current; search = concat($priorRule, "overflow-wrap:break-word;}"); replacement = concat($priorRule, "}") } → restored
+  port digest.sha256 { text = $restored } → digest
+  let prior = filter($preserved, "f", and(eq($f.s, "claimipedia/claimipedia.css"), eq($f.p, "passiveSha256")))
+  assert and(eq(count($prior), 1), eq($digest, at(at($prior, 0), "o")))
+    otherwise "Claimipedia changed outside the one reviewed heading-wrap repair."
+  each list({ file = "activity.css"; marker = "#activity .activity-component-" }, { file = "encounter/encounter.css"; marker = "@font-face{" }) as sheet:
+    port file.read { file = concat($output, "/", $sheet.file) } → current
+    port text.indexOf { value = $current; search = $sheet.marker; from = 0 } → boundary
+    port number.calculate { operation = "greaterEqual"; values = list($boundary, 0) } → found
+    assert $found
+      otherwise "Declared specialist stylesheet extension is missing."
+    port text.slice { value = $current; start = 0; end = $boundary } → original
+    port digest.sha256 { text = $original } → digest
+    let prior = filter($preserved, "f", and(eq($f.s, $sheet.file), eq($f.p, "passiveSha256")))
+    assert and(eq(count($prior), 1), eq($digest, at(at($prior, 0), "o")))
+      otherwise "Prior specialist stylesheet bytes were changed or reordered."

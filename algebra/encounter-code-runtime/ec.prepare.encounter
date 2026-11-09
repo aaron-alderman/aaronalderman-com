@@ -1,0 +1,98 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.prepare:
+  let ecInputs = $eventInput
+  port text.replaceAll { value = $ecInputs.codeText; search = "\r\n"; replacement = "\n" } → ecNormalCode
+  port record.put { record = $ecInputs; key = "codeText"; value = $ecNormalCode } → ecInputs
+  let ecAllFacts = list()
+  fold list(
+    { file = "source/experiment/contracts.rel"; text = $ecInputs.contractText },
+    { file = "source/experiment/story.rel"; text = $ecInputs.factText }
+  ) as ecDocument; ecAllFacts starts list():
+    let file = $ecDocument.file
+    let text = $ecDocument.text
+    call source.rel
+    assert $result.ok
+      otherwise "EC-F001: The REL source could not be read. Correct its tuple syntax before trying again."
+    yield append($ecAllFacts, $result.facts) → ecAllFacts
+  assert every($ecAllFacts, "ecF", eq($ecF.pol, "is"))
+    otherwise "EC-F002: This positive-fact profile does not interpret negative assertions."
+  let input = $ecAllFacts
+  call facts.index
+  let factIndex = $result
+  let file = "source/experiment/story.encounter"
+  let text = $ecInputs.codeText
+  call ec.compile
+  let ecCompilation = $result
+  when not($ecCompilation.ok):
+    port value.encode { value = $ecCompilation.diagnostic } → ecFailure
+    let result = raise(concat("EC-COMPILE: ", $ecFailure))
+  let codePlan = $ecCompilation.plan
+  let definitions = $ecInputs.definitions
+  let primitives = $ecInputs.primitives
+  let mode = "model"
+  let input = { queries = $ecCompilation.module.queries }
+  call lower.start
+  let ecLowered = $result.value
+  port record.entries { value = $model.queries } → ecRuntimeQueries
+  port record.entries { value = $ecLowered.queries } → ecEmittedQueries
+  port record.fromEntries {
+    entries = append(
+      filter(
+        $ecRuntimeQueries,
+        "ecEntry",
+        includes(
+          list(
+            "ec.schema",
+            "ec.slot",
+            "ec.scalar",
+            "ec.check",
+            "ec.referenceType",
+            "ec.fact",
+            "ec.reference",
+            "ec.argument"
+          ),
+          at($ecEntry, 0)
+        )
+      ),
+      $ecEmittedQueries
+    )
+  } → ecCandidateQueries
+  let codeModel = {
+    entry = at(map($codePlan.views, "ecV", $ecV.entry), 0);
+    queries = $ecCandidateQueries
+  }
+  let target = $codeModel
+  let profile = $ecInputs.profile
+  call admit.model
+  let grants = list(
+    "value.describe",
+    "record.entries",
+    "record.put",
+    "record.get",
+    "text.matches",
+    "text.split",
+    "kernel.invoke",
+    "kernel.execute"
+  )
+  port record.entries { value = $codeModel.queries } → ecEntries
+  each $ecEntries as ecEntryPair:
+    let target = { entry = at($ecEntryPair, 0); queries = $codeModel.queries }
+    call admit.effects
+  each distinct(map($ecAllFacts, "ecF", $ecF.s)) as ecFact:
+    let ecMembership = objects($ecFact, "isa")
+    assert eq(count($ecMembership), 1)
+      otherwise "EC-F003: Each fact identity in this profile needs exactly one declared type. Multiple participations require a later explicit alias profile."
+    when and(
+      eq(count($ecMembership), 1),
+      not(includes(list("Slot", "Interface"), at($ecMembership, 0)))
+    ):
+      port kernel.invoke { query = "ec.fact"; input = { id = $ecFact; type = at($ecMembership, 0) } } → _
+  let result = {
+    plan = $codePlan;
+    model = $codeModel;
+    factIndex = $factIndex;
+    facts = $ecAllFacts;
+    inputs = $ecInputs
+  }

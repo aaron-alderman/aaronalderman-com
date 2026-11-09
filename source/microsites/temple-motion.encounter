@@ -1,7 +1,5 @@
-# Readable process source; authority is selected explicitly by the build manifest.
-# The migration is gated by author.run correspondence and publication validation.
 process-module "temple/surface-process-module/1"
-profile "encounter/module-batch/microsite-temple-motion/1"
+profile "encounter/reconstituted-source/1"
 
 process motion.temple.init:
   port browser.environment {  } → env
@@ -894,4 +892,3 @@ process motion.constellation.intersection:
 process motion.constellation.resize:
   port kernel.invoke { query = "motion.constellation.size"; input = {  } } → result
   port kernel.invoke { query = "motion.constellation.start"; input = {  } } → result
-

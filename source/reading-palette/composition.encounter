@@ -1,0 +1,292 @@
+# Shared reading composition: static REL content is checked before article projection.
+# This bounded candidate uses the same Encounter hydration/admission front door.
+process-module "temple/surface-process-module/1"
+
+process reading.check:
+  let types = subjects("isa", "PaletteType")
+  let metadata = list("PaletteType", "PaletteIndex", "PaletteComponent", "StyleRule", "Motion")
+  let references = fold($types, "type", "refs", list(), append($refs, objects($type, "reference")))
+  let declarations = fold(subjects("isa", "StyleRule"), "rule", "decls", list(), append($decls, objects($rule, "declaration")))
+  let untyped = append(append($references, $declarations), objects("reading.palette", "guide"))
+  let frames = fold(subjects("isa", "Motion"), "motion", "frames", list(), append($frames, objects($motion, "frame")))
+  port record.entries { value = $factIndex.objects } → entries
+  # The main corpus contains other independently owned types. Check this
+  # reading namespace and all instances of its declared types, not that corpus.
+  fold $entries as entry; selected starts list():
+    let subject = at($entry, 0)
+    port text.indexOf { value = $subject; search = "grow."; from = 0 } → position
+    yield if(or(eq($position, 0), some(objects($subject, "isa"), "type", includes($types, $type))), append($selected, list($entry)), $selected) → selected
+  let entries = $selected
+  each $entries as entry:
+    let subject = at($entry, 0)
+    let cells = at($entry, 1)
+    let kinds = objects($subject, "isa")
+    port record.entries { value = $cells } → cellEntries
+    let styleDeclaration = and(eq(count($cellEntries), 2), eq(count(objects($subject, "property")), 1), eq(count(objects($subject, "value")), 1))
+    assert if(eq(count($kinds), 0), or(includes($untyped, $subject), includes($frames, $subject), $styleDeclaration), eq(count($kinds), 1))
+      otherwise "READING-TYPE: Every content subject must have exactly one declared type."
+    when eq(count($kinds), 1):
+      let type = at($kinds, 0)
+      assert includes(append($types, $metadata), $type)
+        otherwise "READING-TYPE: Unknown content type."
+      when includes($types, $type):
+        let required = objects($type, "required")
+        let many = objects($type, "many")
+        let allowed = append(append(append(list("isa"), $required), $many), objects($type, "optional"))
+        port record.entries { value = $cells } → fields
+        each $fields as field:
+          let predicate = at($field, 0)
+          let values = at($field, 1)
+          assert includes($allowed, $predicate)
+            otherwise "READING-FIELD: Undeclared field on content type."
+          assert or(includes($many, $predicate), eq(count($values), 1))
+            otherwise "READING-CARDINALITY: A single-valued field has several values."
+          each $values as text:
+            port text.trim { value = $text } → trimmed
+            assert not(eq($trimmed, ""))
+              otherwise "READING-EMPTY: Content fields must not be empty."
+        each $required as predicate:
+          assert not(eq(count(objects($subject, $predicate)), 0))
+            otherwise "READING-REQUIRED: A required content field is missing."
+        each objects($type, "reference") as reference:
+          each objects($subject, one($reference, "predicate")) as target:
+            assert eq(one($target, "isa"), one($reference, "expects"))
+              otherwise "READING-REFERENCE: A content reference has the wrong type."
+  let pages = append(subjects("isa", "ReadingArticle"), subjects("isa", "ReadingSeries"))
+  assert eq(count(map($pages, "page", one($page, "route"))), count(distinct(map($pages, "page", one($page, "route")))))
+    otherwise "READING-ROUTE: Reading pages must have distinct routes."
+  each $pages as page:
+    port text.matches { value = one($page, "route"); pattern = "^(?:[a-z0-9-]+/)+index\\.html$" } → safe
+    assert $safe
+      otherwise "READING-ROUTE: Expected a relative directory index route."
+  each subjects("isa", "ReadingImage") as image:
+    port text.matches { value = one($image, "src"); pattern = "^/assets/[a-zA-Z0-9/_-]+\\.(?:png|webp|avif|jpe?g)$" } → safe
+    assert $safe
+      otherwise "READING-IMAGE: Expected a local passive image asset."
+    each list("width", "height") as dimension:
+      port text.matches { value = one($image, $dimension); pattern = "^[1-9][0-9]{0,4}$" } → valid
+      assert $valid
+        otherwise "READING-IMAGE: Intrinsic dimensions must be positive integers."
+  each subjects("isa", "ScriptureReading") as scripture:
+    port text.matches { value = one($scripture, "href"); pattern = "^https://[A-Za-z0-9.-]+/[^\\s<>]*$" } → safe
+    assert $safe
+      otherwise "READING-LINK: Scripture sources must use HTTPS."
+  each subjects("isa", "ReadingSeries") as series:
+    port text.matches { value = one($series, "parent"); pattern = "^/worlds/[a-z0-9-]+/threads\\.html$" } → safe
+    assert $safe
+      otherwise "READING-PARENT: Expected a website Threads destination."
+    each objects($series, "entry") as item:
+      let status = one($item, "status")
+      assert includes(list("draft", "published", "planned"), $status)
+        otherwise "READING-STATUS: Unknown series entry status."
+      assert if(eq($status, "planned"), eq(count(objects($item, "article")), 0), eq(count(objects($item, "article")), 1))
+        otherwise "READING-STATUS: Planned items cannot link to an article; available items require one."
+      when not(eq($status, "planned")):
+        assert eq(one(one($item, "article"), "series"), $series)
+          otherwise "READING-SERIES: Article and entry must belong to the same series."
+  each subjects("isa", "ReadingArticle") as article:
+    when optional($article, "nextEntry"):
+      assert includes(objects(one($article, "series"), "entry"), one($article, "nextEntry"))
+        otherwise "READING-SERIES: The next entry must belong to this series."
+    let sections = objects($article, "section")
+    let anchors = map($sections, "section", one($section, "anchor"))
+    assert eq(count($anchors), count(distinct($anchors)))
+      otherwise "READING-ANCHOR: Section anchors must be unique within the article."
+    each $anchors as anchor:
+      port text.matches { value = $anchor; pattern = "^[a-z][a-z0-9-]*$" } → safe
+      assert and($safe, not(includes(list("reading", "reflection", "practice", "contents"), $anchor)))
+        otherwise "READING-ANCHOR: Section anchor is invalid or reserved."
+    each list(one(one($article, "pause"), "afterSection"), one($article, "scriptureAfterSection"), one($article, "examplesAfterSection")) as section:
+      assert includes($sections, $section)
+        otherwise "READING-PLACEMENT: A component must follow a section of this article."
+  let result = true
+
+process reading.section:
+  let subject = $eventInput.subject
+  let paragraphs = map(objects($subject, "paragraph"), "text", { tag = "p"; children = list($text) })
+  let sayings = list()
+  when not(eq(count(objects($subject, "saying")), 0)):
+    let sayings = list({ tag = "ul"; attrs = { class = "reading-sayings"; "aria-label" = "Words you could borrow" }; children = map(objects($subject, "saying"), "text", { tag = "li"; children = list($text) }) })
+  let result = {
+    tag = "section";
+    attrs = { class = "faith-essay-section"; id = one($subject, "anchor"); "aria-labelledby" = concat(one($subject, "anchor"), "-heading") };
+    children = append(
+      list(
+        { tag = "p"; attrs = { class = "faith-section-number"; "aria-hidden" = "true" }; children = list(if(includes(list(1,2,3,4,5,6,7,8,9), $eventInput.number), concat("0", $eventInput.number), concat("", $eventInput.number))) },
+        { tag = "h2"; attrs = { id = concat(one($subject, "anchor"), "-heading") }; children = list(one($subject, "title")) }
+      ),
+      append($paragraphs, append($sayings, map(objects($subject, "after"), "text", { tag = "p"; children = list($text) })))
+    )
+  }
+
+process reading.article.extras:
+  let article = $eventInput.subject
+  port kernel.invoke { query = "reading.fields"; input = { subject = $article; names = list("scripture", "pause", "question", "practice") } } → parts
+  port kernel.invoke { query = "reading.fields"; input = { subject = $parts.scripture; names = list("label", "reference", "note", "href") } } → scripture
+  port kernel.invoke { query = "reading.fields"; input = { subject = $parts.pause; names = list("label", "text", "note") } } → pause
+  port kernel.invoke { query = "reading.fields"; input = { subject = $parts.question; names = list("label", "text", "note") } } → question
+  port kernel.invoke { query = "reading.fields"; input = { subject = $parts.practice; names = list("label", "text", "followup") } } → practice
+  let result = {
+    source = { tag = "details"; attrs = { class = "faith-practice-note reading-source" }; children = list(
+      { tag = "summary"; children = list($scripture.label, " · ", { tag = "span"; attrs = { class = "reading-citation" }; children = list($scripture.reference) }) },
+      { tag = "p"; children = list($scripture.note) },
+      { tag = "a"; attrs = { href = $scripture.href }; children = list("Read ", $scripture.reference, " →") }
+    ) };
+    pause = { tag = "aside"; attrs = { class = "faith-practice-note reading-pause"; "aria-label" = $pause.label }; children = list(
+      { tag = "p"; attrs = { class = "eyebrow" }; children = list($pause.label) },
+      { tag = "p"; attrs = { class = "reading-pause-thought" }; children = list($pause.text) },
+      { tag = "p"; children = list($pause.note) }
+    ) };
+    examples = { tag = "aside"; attrs = { class = "faith-practice-note reading-examples"; "aria-label" = "A few things you could say" }; children = list(
+      { tag = "p"; attrs = { class = "eyebrow" }; children = list("Small words for ordinary moments") },
+      { tag = "div"; attrs = { class = "reading-example-grid" }; children = map(objects($article, "example"), "example", {
+        tag = "div"; attrs = { class = "reading-example" }; children = list(
+          { tag = "h3"; children = list(one($example, "situation")) },
+          { tag = "p"; children = list("“", one($example, "response"), "”") }
+        )
+      }) },
+      { tag = "p"; attrs = { class = "faith-meta" }; children = list("Examples to try in your own words.") }
+    ) };
+    reflection = { tag = "section"; attrs = { class = "faith-practice-note"; id = "reflection"; "aria-labelledby" = "reflection-heading" }; children = list(
+      { tag = "h2"; attrs = { id = "reflection-heading" }; children = list($question.label) },
+      { tag = "p"; attrs = { class = "reading-question" }; children = list($question.text) },
+      { tag = "p"; children = list($question.note) }
+    ) };
+    practice = { tag = "section"; attrs = { class = "faith-practice-note"; id = "practice"; "aria-labelledby" = "practice-heading" }; children = list(
+      { tag = "h2"; attrs = { id = "practice-heading" }; children = list($practice.label) },
+      { tag = "p"; children = list($practice.text) },
+      { tag = "p"; children = list($practice.followup) }
+    ) }
+  }
+
+process reading.article:
+  call reading.check
+  let article = $eventInput.subject
+  assert eq(one($article, "isa"), "ReadingArticle")
+    otherwise "READING-ENTRY: An article entry requires a ReadingArticle."
+  let series = one($article, "series")
+  let image = one($article, "image")
+  let pause = one($article, "pause")
+  port kernel.invoke { query = "reading.article.extras"; input = { subject = $article } } → extras
+  let onward = list()
+  when optional($article, "nextEntry"):
+    let next = one($article, "nextEntry")
+    let nextTitle = one($next, "title")
+    let nextContent = list("Next in the series: ", $nextTitle, " · Planned")
+    when not(eq(one($next, "status"), "planned")):
+      let nextContent = list("Next in the series: ", { tag = "a"; attrs = { href = concat("/", one(one($next, "article"), "route")) }; children = list($nextTitle) })
+    let onward = list({ tag = "p"; children = $nextContent })
+  fold objects($article, "section") as section; body starts { nodes = list(); number = 1 }:
+    port kernel.invoke { query = "reading.section"; input = { subject = $section; number = $body.number } } → node
+    let pieces = append($body.nodes, list($node))
+    when eq($section, one($article, "scriptureAfterSection")):
+      let pieces = append($pieces, list($extras.source))
+    when eq($section, one($pause, "afterSection")):
+      let pieces = append($pieces, list($extras.pause))
+    when eq($section, one($article, "examplesAfterSection")):
+      let pieces = append($pieces, list($extras.examples))
+    yield { nodes = $pieces; number = add($body.number, 1) } → body
+  let result = { tag = "article"; attrs = { class = "reading-essay"; "data-reading-room" = "dad" }; children = list(
+    { tag = "header"; attrs = { class = "faith-essay-header" }; children = list(
+      { tag = "p"; attrs = { class = "eyebrow" }; children = list("AARON ALDERMAN / DAD / ", one($article, "number")) },
+      { tag = "h1"; children = list(one($article, "title")) },
+      { tag = "p"; attrs = { class = "faith-essay-deck" }; children = list(one($article, "deck")) },
+      { tag = "p"; attrs = { class = "faith-meta" }; children = list({ tag = "a"; attrs = { href = concat("/", one($series, "route")) }; children = list(one($series, "title")) }, " · Draft for review") },
+      { tag = "img"; attrs = { class = "faith-essay-art"; src = one($image, "src"); alt = one($image, "alt"); width = one($image, "width"); height = one($image, "height"); fetchpriority = "high"; decoding = "async" } }
+    ) },
+    { tag = "div"; attrs = { class = "faith-essay-body" }; children = append(
+      map(objects($article, "opening"), "text", { tag = "p"; children = list($text) }),
+      append(list({ tag = "nav"; attrs = { class = "faith-essay-contents"; id = "contents"; "aria-label" = "In this article" }; children = list(
+        { tag = "p"; attrs = { class = "eyebrow" }; children = list("In this article") },
+        { tag = "ol"; children = map(objects($article, "section"), "section", { tag = "li"; children = list({ tag = "a"; attrs = { href = concat("#", one($section, "anchor")) }; children = list(one($section, "title")) }) }) },
+        { tag = "a"; attrs = { href = "#reflection" }; children = list("A question to carry ↓") }
+      ) }), append($body.nodes, list(
+          { tag = "aside"; attrs = { class = "reading-prayer"; "aria-label" = "A simple prayer" }; children = list({ tag = "p"; children = list("“", one($article, "prayer"), "”") }) },
+          { tag = "p"; attrs = { class = "reading-closing" }; children = list(one($article, "closing")) },
+          { tag = "hr" },
+          $extras.reflection,
+          $extras.practice,
+          { tag = "section"; attrs = { class = "faith-essay-sources" }; children = append($onward, list(
+            { tag = "p"; attrs = { class = "eyebrow" }; children = list("Keep following the thread") },
+            { tag = "div"; attrs = { class = "faith-essay-actions" }; children = list(
+              { tag = "a"; attrs = { class = "faith-button"; href = concat("/", one($series, "route")) }; children = list("Explore the series →") },
+              { tag = "a"; attrs = { class = "faith-secondary"; href = "https://aaronalderman.com/worlds/dad/threads.html" }; children = list("Return to Dad reading paths ←") }
+            ) }
+          )) }
+      )))
+    ) }
+  ) }
+
+process reading.fields:
+  call projection.fields
+
+process reading.series.cards:
+  let series = $eventInput.subject
+  fold objects($series, "entry") as entry; cards starts list():
+    port kernel.invoke { query = "reading.fields"; input = { subject = $entry; names = list("title", "note", "status") } } → entryData
+    let ordinal = concat("0", add(count($cards), 1))
+    let title = { tag = "h2"; children = list($entryData.title) }
+    let cardClass = "identity-thread"
+    let content = list(
+      { tag = "p"; attrs = { class = "faith-thread-kicker" }; children = list($ordinal, " / ", $entryData.status) },
+      $title,
+      { tag = "p"; children = list($entryData.note) }
+    )
+    when not(eq($entryData.status, "planned")):
+      let article = one($entry, "article")
+      port kernel.invoke { query = "reading.fields"; input = { subject = $article; names = list("route", "image") } } → articleData
+      port kernel.invoke { query = "reading.fields"; input = { subject = $articleData.image; names = list("src", "alt", "width", "height") } } → imageData
+      let content = list(
+        { tag = "img"; attrs = {
+          class = "faith-thread-art";
+          src = $imageData.src; alt = $imageData.alt;
+          width = $imageData.width; height = $imageData.height; loading = "lazy"; decoding = "async"
+        } },
+          { tag = "p"; attrs = { class = "faith-thread-kicker" }; children = list($ordinal, " / OPENING ARTICLE") },
+          { tag = "h2"; children = list($entryData.title) },
+          { tag = "p"; children = list($entryData.note) },
+          { tag = "a"; attrs = { class = "faith-button"; href = concat("/", $articleData.route) }; children = list("Read ", $entryData.title, " →") },
+          { tag = "p"; attrs = { class = "faith-meta" }; children = list("Draft for review") }
+      )
+    yield append($cards, list({ tag = "article"; attrs = { class = $cardClass }; children = $content })) → cards
+  let result = { tag = "div"; attrs = { class = "identity-thread-grid" }; children = $cards }
+
+process reading.series.feature:
+  let series = $eventInput.subject
+  port kernel.invoke { query = "reading.fields"; input = { subject = $series; names = list("title", "subtitle", "description", "image") } } → seriesData
+  port kernel.invoke { query = "reading.fields"; input = { subject = $seriesData.image; names = list("src", "alt", "width", "height", "caption") } } → heroData
+  let firstRoute = one(one(at(objects($series, "entry"), 0), "article"), "route")
+  let result = { tag = "section"; attrs = { class = "faith-feature"; "aria-label" = "About the series" }; children = list(
+      { tag = "div"; children = list(
+        { tag = "p"; attrs = { class = "eyebrow" }; children = list("GROWING UP IN THE WAY OF JESUS") },
+        { tag = "h2"; children = list($seriesData.subtitle) },
+        { tag = "p"; children = list($seriesData.description) },
+        { tag = "div"; attrs = { class = "faith-feature-actions" }; children = list(
+          { tag = "a"; attrs = { class = "faith-button"; href = concat("/", $firstRoute) }; children = list("Start with Room to Grow →") },
+          { tag = "a"; attrs = { class = "faith-secondary"; href = "/worlds/dad/threads.html" }; children = list("Dad Threads →") }
+        ) },
+        { tag = "p"; attrs = { class = "faith-meta" }; children = list($heroData.caption) }
+      ) },
+      { tag = "img"; attrs = { src = $heroData.src; alt = $heroData.alt; width = $heroData.width; height = $heroData.height; fetchpriority = "high"; decoding = "async" } }
+    ) }
+
+process reading.series:
+  call reading.check
+  let series = $eventInput.subject
+  assert eq(one($series, "isa"), "ReadingSeries")
+    otherwise "READING-ENTRY: A series entry requires a ReadingSeries."
+  port kernel.invoke { query = "reading.series.feature"; input = { subject = $series } } → feature
+  port kernel.invoke { query = "reading.series.cards"; input = { subject = $series } } → cards
+  let result = { tag = "div"; attrs = { class = "reading-room"; "data-reading-room" = "dad" }; children = list(
+    { tag = "section"; attrs = { class = "gate-hero" }; children = list(
+      { tag = "p"; attrs = { class = "eyebrow" }; children = list("THREADS / DAD / A SERIES FOR TEENAGERS") },
+      { tag = "h1"; children = list(one($series, "title")) }
+    ) },
+    $feature,
+    { tag = "section"; attrs = { id = "series-readings"; "aria-label" = "Articles in the series" }; children = list(
+      { tag = "p"; attrs = { class = "eyebrow" }; children = list("ONE STEP AT A TIME") },
+      { tag = "h2"; attrs = { class = "faith-paths-heading" }; children = list("A way into the series.") },
+      { tag = "p"; attrs = { class = "faith-paths-note" }; children = list("Begin with Room to Grow. The next seven articles are taking shape.") },
+      $cards
+    ) }
+  ) }

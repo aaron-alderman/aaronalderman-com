@@ -1,0 +1,175 @@
+process-module "temple/surface-process-module/1"
+
+process test.rel.roundtrip:
+  let value = { text = "quote \" slash \\ newline\n tab\t \u2028"; items = list(null, false, 0, -3.5, { x = "α" }) }
+  port rel.encode { value = $value } → encoded
+  port rel.decode { text = $encoded } → restored
+  assert eq($value, $restored)
+    otherwise "Typed REL changed scalar escapes or sequence order."
+  port mechanism.load { module = "rel-values.cjs" } → relModule
+  port mechanism.call { target = $relModule; method = "decode"; args = list($encoded); keep = true } → native
+  port mechanism.get { target = $native; key = "items"; keep = true } → items
+  port mechanism.load { module = "Object" } → objectModule
+  port mechanism.call { target = $objectModule; method = "isFrozen"; args = list($items) } → frozen
+  assert $frozen
+    otherwise "Decoded sequences must stay frozen."
+
+process test.rel.refusals:
+  port mechanism.load { module = "rel-values.cjs" } → relModule
+  port rel.encode { value = "safe" } → encoded
+  each list("(\"v0\", \"scalar\", \"changed\")", "(\"v0\", \"instruction\", \"execute\")", "(\"unused\", \"type\", \"Null\")") as addition:
+    let operation = { target = $relModule; method = "decode"; args = list(concat($encoded, $addition)) }
+    let pattern = null
+    call check.refusal
+  let cycle = "(\"rel.document\", \"kind\", \"StaticValue\")\n(\"rel.document\", \"root\", \"v0\")\n(\"v0\", \"type\", \"Sequence\")\n(\"v0\", \"item\", \"v0\")"
+  let operation = { target = $relModule; method = "decode"; args = list($cycle) }
+  let pattern = "Cyclic"
+  call check.refusal
+  port rel.encode { value = { x = 1 }; kind = "EncounterHydration" } → wrongKind
+  let operation = { target = $relModule; method = "decode"; args = list($wrongKind) }
+  let pattern = "Wrong REL document kind"
+  call check.refusal
+  let shared = "(\"rel.document\", \"kind\", \"StaticValue\")\n(\"rel.document\", \"root\", \"v0\")\n(\"v0\", \"type\", \"Sequence\")\n(\"v0\", \"item\", \"v1\")\n(\"v0\", \"item\", \"v1\")\n(\"v1\", \"type\", \"Null\")"
+  let operation = { target = $relModule; method = "decode"; args = list($shared) }
+  let pattern = "Shared REL"
+  call check.refusal
+
+process test.rel.own-data:
+  port mechanism.load { module = "rel-values.cjs" } → relModule
+  port mechanism.load { module = "Object" } → objectModule
+  port mechanism.callback { query = "fixture.value"; bindings = { value = "forbidden" } } → getter
+  port mechanism.object { value = list() } → array
+  port mechanism.call { target = $objectModule; method = "defineProperty"; args = list($array, "0", { enumerable = true; get = $getter }); keep = true } → array
+  let operation = { target = $relModule; method = "encode"; args = list($array) }
+  let pattern = "own-data"
+  call check.refusal
+  port mechanism.trace {} → trace
+  assert eq(count($trace), 0)
+    otherwise "REL encoding executed an accessor."
+  port mechanism.object {} → hidden
+  port mechanism.call { target = $objectModule; method = "defineProperty"; args = list($hidden, "secret", { value = 1 }); keep = true } → hidden
+  let operation = { target = $relModule; method = "encode"; args = list($hidden) }
+  call check.refusal
+  port mechanism.load { module = "Symbol" } → symbolModule
+  port mechanism.call { target = $symbolModule; args = list("hidden"); keep = true } → symbol
+  port mechanism.object {} → hidden
+  port mechanism.load { module = "Reflect" } → reflectModule
+  port mechanism.call { target = $reflectModule; method = "set"; args = list($hidden, $symbol, 1) } → ignored
+  let operation = { target = $relModule; method = "encode"; args = list($hidden) }
+  call check.refusal
+
+process test.rel.deep-static:
+  fold range(90) as n; value starts "leaf":
+    yield { child = $value } → deep
+  port rel.encode { value = $deep } → encoded
+  port rel.decode { text = $encoded } → restored
+  fold range(90) as n; value starts $restored:
+    yield $value.child → restored
+  assert eq($restored, "leaf")
+    otherwise "Static depth was confused with process bounds."
+  port mechanism.load { module = "String" } → stringModule
+  port mechanism.call { target = $stringModule; method = "fromCharCode"; args = list(55296) } → scalar
+  port rel.encode { value = $scalar } → encoded
+  port mechanism.load { module = "Buffer" } → bufferModule
+  port mechanism.call { target = $bufferModule; method = "from"; args = list($encoded, "utf8"); keep = true } → buffer
+  port mechanism.call { target = $buffer; method = "toString"; args = list("utf8") } → encoded
+  port rel.decode { text = $encoded } → restored
+  assert eq($restored, $scalar)
+    otherwise "Unpaired surrogate changed across UTF-8."
+  port mechanism.load { module = "Number" } → numberModule
+  port mechanism.call { target = $numberModule; args = list("-0"); keep = true } → minusZero
+  port mechanism.load { module = "rel-values.cjs" } → relModule
+  port mechanism.call { target = $relModule; method = "encode"; args = list($minusZero) } → encoded
+  port mechanism.call { target = $relModule; method = "decode"; args = list($encoded); keep = true } → restoredZero
+  port mechanism.load { module = "Object" } → objectModule
+  port mechanism.call { target = $objectModule; method = "is"; args = list($restoredZero, $minusZero) } → same
+  assert $same
+    otherwise "REL lost negative zero."
+
+process test.compiler.grammar:
+  call check.pure
+  port mechanism.load { module = "encounter-syntax.cjs" } → syntaxModule
+  let text = "process-module \"temple/surface-process-module/1\"\nprocess example:\n  try:\n    let result = 1\n  catch fault:\n  fold list(1) as n; acc starts 0:\n    yield add($acc, $n) → result\n"
+  port mechanism.call { target = $syntaxModule; method = "parseEncounter"; args = list($text) } → parsed
+  assert eq(count($parsed.queries.example), 2)
+    otherwise "Empty catch or fold yield grammar changed."
+  each list(concat($text, "garbage\n"), concat($text, "eof\nthis was previously ignored\n"), "process-module string\nprocess example:\n  let result = 1\n", "process-module \"temple/surface-process-module/1\"\nprocess example:\n  let result = \"$eventInput.x\"\n") as invalid:
+    let operation = { target = $syntaxModule; method = "parseEncounter"; args = list($invalid) }
+    let pattern = null
+    call check.refusal
+  port mechanism.load { module = "rel-values.cjs" } → relModule
+  port mechanism.load { module = "String" } → stringModule
+  port mechanism.call { target = $stringModule; method = "fromCharCode"; args = list(34, 92, 34) } → invalid
+  let operation = { target = $relModule; method = "atom"; args = list($invalid) }
+  let pattern = "Unclosed"
+  call check.refusal
+
+process test.compiler.inspection-spans:
+  port mechanism.load { module = "encounter-syntax.cjs" } → syntaxModule
+  let text = "process-module \"temple/surface-process-module/1\"\r\n# context\r\nprocess first:\r\n  let result = 1\r\n\r\nprocess second:\r\n  let result = 2\r\n"
+  port mechanism.call { target = $syntaxModule; method = "parseEncounter"; args = list($text, "actual.encounter", true) } → observed
+  let origins = filter($observed.origins, "o", eq($o.kind, "process-definition"))
+  assert eq(count($origins), 2)
+    otherwise "Missing source definition spans."
+  each $origins as origin:
+    port text.slice { value = $text; start = $origin.start; end = $origin.end } → slice
+    port mechanism.call { target = $syntaxModule; method = "parseEncounter"; args = list(concat("process-module \"temple/surface-process-module/1\"\n", $slice, "\n")) } → parsed
+    port text.slice { value = $origin.pointer; start = 9 } → name
+    port record.entries { value = $parsed.queries } → entries
+    assert and(eq(map($entries, "e", at($e, 0)), list($name)), eq($origin.synthetic, false))
+      otherwise "Inspection span is not the actual authored process."
+
+process test.foundation.laws-schema:
+  call check.pure
+  each list({ query = "foundation.laws"; file = "evidence/algebra/operators.expression.values.rel" }, { query = "foundation.schema"; file = "bootstrap/kernel-profile.values.rel" }) as comparison:
+    port mechanism.call { target = $policy; method = "compute"; args = list($comparison.query, null) } → actual
+    port file.read { file = $comparison.file } → expected
+    port rel.decode { text = $expected } → expected
+    assert eq($actual.value, $expected)
+      otherwise "Source-owned foundation changed retained semantics."
+  port file.read { file = "bootstrap/source-policy-machine.cjs" } → host
+  port text.matches { value = $host; pattern = "pinnedRead\\('(?:algebra/operators|bootstrap/kernel-profile)" } → importsTables
+  assert not($importsTables)
+    otherwise "Retained tables became operative policy."
+
+process test.foundation.self-and-application-correspondence:
+  call check.pure
+  port mechanism.load { module = "seed-source-reader.cjs" } → seedModule
+  call check.manifest
+  port rel.read { file = "bootstrap/foundation.rel" } → foundation
+  let modules = append(map(filter($foundation, "f", eq($f.p, "module")), "f", $f.o), map(filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "module"))), "f", $f.o))
+  each $modules as file:
+    port file.read { file = $file } → text
+    port mechanism.call { target = $policy; method = "compile"; args = list($file, $text) } → actual
+    assert $actual.value.ok
+      otherwise "Actual compiler refused selected source."
+    port mechanism.call { target = $seedModule; method = "parseEncounter"; args = list($text, $file) } → expected
+    assert eq($actual.value.surface, $expected)
+      otherwise "Bootstrap syntax reader disagrees with the operative Encounter compiler."
+
+process test.foundation.lowering-admission:
+  call check.pure
+  let text = "process-module \"temple/surface-process-module/1\"\nprocess sample:\n  let result = map(list(1, 2), \"n\", add($n, 1))\n"
+  port mechanism.call { target = $policy; method = "compile"; args = list("test.encounter", $text) } → parsed
+  assert $parsed.value.ok
+    otherwise "Pure source failed compilation."
+  port mechanism.call { target = $policy; method = "compute"; args = list("foundation.admit", { queries = $parsed.value.surface.queries; entries = list("sample"); grants = list(); available = list() }) } → lowered
+  port mechanism.load { module = "temple-seed.cjs" } → kernelModule
+  port mechanism.call { target = $kernelModule; method = "createKernel"; args = list({}, 10000); keep = true } → kernel
+  port mechanism.object {} → environment
+  port mechanism.call { target = $kernel; method = "run"; args = list($lowered.value.queries.sample, $environment) } → ignored
+  port mechanism.get { target = $environment; key = "result" } → result
+  assert eq($result, list(2, 3))
+    otherwise "Lowered source changed kernel result."
+  port mechanism.call { target = $policy; method = "compile"; args = list("test.encounter", "process-module \"temple/surface-process-module/1\"\nprocess sample:\n  when false:\n    port file.write { path = \"x.txt\"; text = \"x\" } → result\n") } → unsafe
+  let operation = { target = $policy; method = "compute"; args = list("foundation.admit", { queries = $unsafe.value.surface.queries; entries = list("sample"); grants = list(); available = list("file.write") }) }
+  let pattern = "Undeclared effect"
+  call check.refusal
+
+process test.foundation.diagnostic-owner:
+  call check.pure
+  let operation = { target = $policy; method = "compute"; args = list("lower.start", null, { mode = "expression"; input = list("unknown_retention_probe") }) }
+  let pattern = "TEMPLE-L001"
+  call check.refusal
+  assert and(includes($result.message, "source/foundation/laws.encounter"), not(includes($result.message, "algebra/operators.expression.values.rel")))
+    otherwise "Diagnostic points at retired policy tables."

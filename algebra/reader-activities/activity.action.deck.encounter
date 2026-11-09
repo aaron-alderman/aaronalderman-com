@@ -1,0 +1,19 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.deck:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port state.get { key = "activity" } → activity
+  port number.parse { value = $value } → index
+  let deck = at($data.decks, $activity.type)
+  let item = at($deck.items, $index)
+  port browser.select { selector = "[data-world=\"deck\"]" } → buttons
+  each $buttons as choice:
+    port browser.attribute {
+      ref = $choice.ref;
+      name = "aria-pressed";
+      value = eq($choice.ref.handle, $button.ref.handle)
+    } → _
+  port browser.write { ref = ".world-result"; name = "textContent"; value = at($item, 1) } → _
+  port browser.attribute { ref = ".world-encounter"; name = "data-open"; value = $value } → _

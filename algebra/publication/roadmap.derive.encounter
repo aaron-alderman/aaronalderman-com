@@ -1,0 +1,192 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process roadmap.derive:
+  let todoInput = $eventInput
+  call roadmap.collect
+  let currentItems = $result
+  fold distinct(
+    append(map($currentItems, "i", $i.id), map($todoInput.workflow.ledger, "i", $i.id))
+  ) as id; todoItems starts list():
+    let current = at(filter($currentItems, "i", eq($i.id, $id)), 0)
+    let prior = at(filter($todoInput.workflow.ledger, "i", eq($i.id, $id)), 0)
+    let base = or($current, $prior)
+    let active = if($current, true, false)
+    let decisions = filter($todoInput.workflow.decisions, "d", eq($d.itemId, $id))
+    assert includes(list(0, 1), count($decisions))
+      otherwise "ROADMAP-DECISION: More than one current decision names this item."
+    let decision = at($decisions, 0)
+    let owner = if(at($decision, "owner"), at($decision, "owner"), "Unassigned")
+    let requested = if(at($decision, "stage"), at($decision, "stage"), "")
+    port value.encode {
+      value = list(
+        $id,
+        $active,
+        $base.sourceState,
+        $base.scope,
+        $base.routes,
+        $base.occurrences,
+        if($current, $current.sourceVersion, "absent from current assurance")
+      )
+    } → verificationKey
+    let receipts = filter(
+      $todoInput.workflow.receipts,
+      "r",
+      and(
+        eq($r.itemId, $id),
+        eq($r.verificationKey, $verificationKey),
+        not(eq(if(at($r, "source"), at($r, "source"), ""), "")),
+        not(eq(if(at($r, "issuer"), at($r, "issuer"), ""), "")),
+        not(eq(if(at($r, "observedAt"), at($r, "observedAt"), ""), "")),
+        not(eq(if(at($r, "method"), at($r, "method"), ""), ""))
+      )
+    )
+    let verified = some($receipts, "r", eq($r.verdict, "verified"))
+    let accepted = some(
+      $receipts,
+      "r",
+      and(
+        eq($r.verdict, "accepted"),
+        not(eq(if(at($r, "rationale"), at($r, "rationale"), ""), ""))
+      )
+    )
+    let stage = if($active, $base.defaultStage, "verification-required")
+    let issue = ""
+    when not(eq($requested, "")):
+      let stage = $requested
+      when not(
+        includes(
+          list(
+            "triage",
+            "todo",
+            "in-progress",
+            "blocked",
+            "verification-required",
+            "done",
+            "accepted"
+          ),
+          $requested
+        )
+      ):
+        let stage = "triage"
+        let issue = "Unknown workflow stage; the declaration needs review."
+      when and(
+        eq($requested, "done"),
+        or(and($active, not(eq($base.origin, "planning"))), not($verified))
+      ):
+        let stage = "verification-required"
+        let issue = "Completion requires a matching scoped verification receipt. Assurance findings must also be absent from current observations."
+      when and(eq($requested, "accepted"), not($accepted)):
+        let stage = "verification-required"
+        let issue = "Acceptance requires a current scoped receipt with an explicit rationale."
+      when and(eq($requested, "in-progress"), eq($owner, "Unassigned")):
+        let stage = "triage"
+        let issue = "Assign an owner before marking work in progress."
+      when and(
+        eq($requested, "blocked"),
+        eq(if(at($decision, "reason"), at($decision, "reason"), ""), "")
+      ):
+        let stage = "triage"
+        let issue = "A blocked item needs a recorded blocking reason."
+    fold filter(
+      $currentItems,
+      "other",
+      and(
+        eq($base.kind, "evidence"),
+        eq($other.kind, "evidence"),
+        eq($other.product, $base.product),
+        eq($other.topic, $base.topic),
+        not(eq($other.id, $id))
+      )
+    ) as other; deps starts list():
+      port number.calculate { operation = "less"; values = list($other.targetLevel, $base.targetLevel) } → earlier
+      yield if($earlier, append($deps, list($other.id)), $deps) → dependencies
+    when and(eq($stage, "in-progress"), not(eq(count($dependencies), 0))):
+      let stage = "blocked"
+      let issue = "Earlier evidence gates remain open."
+    let priority = if(at($decision, "priority"), at($decision, "priority"), $base.priority)
+    when not(includes(list("P1", "P2", "P3"), $priority)):
+      let priority = $base.priority
+      let issue = "Unknown priority; the observed priority is retained."
+    let item = {
+      id = $id;
+      title = $base.title;
+      productName = let(
+        "productRecord",
+        at(filter($todoInput.topics.products, "p", eq($p.id, $base.product)), 0),
+        if(at($productRecord, "name"), at($productRecord, "name"), $base.product)
+      );
+      origin = $base.origin;
+      kind = $base.kind;
+      product = $base.product;
+      topic = $base.topic;
+      scope = $base.scope;
+      priority = $priority;
+      horizon = $base.horizon;
+      stage = $stage;
+      owner = $owner;
+      active = $active;
+      sourceState = if($active, $base.sourceState, "not-observed");
+      nextAction = $base.nextAction;
+      doneWhen = $base.doneWhen;
+      dependsOn = $dependencies;
+      evidence = $base.evidence;
+      routes = $base.routes;
+      profiles = $base.profiles;
+      occurrences = if($active, $base.occurrences, 0);
+      example = $base.example;
+      verificationKey = $verificationKey;
+      workflowIssue = $issue;
+      decisionReason = if(at($decision, "reason"), at($decision, "reason"), "");
+      verificationEvidence = $receipts;
+      defaultStage = $base.defaultStage;
+      targetLevel = $base.targetLevel;
+      sourceVersion = $base.sourceVersion
+    }
+    yield append($todoItems, list($item)) → todoItems
+  let todoItems = fold(
+    list("P1", "P2", "P3"),
+    "priority",
+    "ordered",
+    list(),
+    append($ordered, filter($todoItems, "item", eq($item.priority, $priority)))
+  )
+  let result = {
+    protocol = "worldwright/roadmap/1";
+    products = map($todoInput.topics.products, "p", { id = $p.id; name = $p.name });
+    topicNames = {
+      identity = "Identity mappings";
+      accessibility = "Accessibility";
+      internationalisation = "Internationalisation";
+      "rendered-layout" = "Rendered layout";
+      "navigation-layout" = "Navigation source checks";
+      "product-development" = "Product development"
+    };
+    workflowIssues = map(
+      filter(
+        $todoInput.workflow.decisions,
+        "d",
+        not(includes(map($todoItems, "i", $i.id), $d.itemId))
+      ),
+      "d",
+      { itemId = $d.itemId; issue = "No current or retained task matches this decision." }
+    );
+    items = $todoItems;
+    total = count($todoItems);
+    active = count(filter($todoItems, "i", $i.active));
+    retained = count(filter($todoItems, "i", not($i.active)));
+    stages = map(
+      list(
+        "triage",
+        "todo",
+        "in-progress",
+        "blocked",
+        "verification-required",
+        "done",
+        "accepted"
+      ),
+      "stage",
+      { stage = $stage; count = count(filter($todoItems, "i", eq($i.stage, $stage))) }
+    );
+    boundary = "This general roadmap combines declared product plans with assurance-derived work. Assurance is one source of work, not the scope of the roadmap. Priorities are review and planning order, not release promises or certified defect severity. Repeated observations are grouped without asserting a shared cause. Ownership and receipts are authored records; their presence does not authenticate an external reviewer. Disappearance alone never completes work."
+  }

@@ -1,7 +1,5 @@
-# Readable process source; authority is selected explicitly by the build manifest.
-# The migration is gated by author.run correspondence and publication validation.
 process-module "temple/surface-process-module/1"
-profile "encounter/module-batch/microsites/1"
+profile "encounter/reconstituted-source/1"
 
 process microsites.preview:
   each subjects("isa", "PublicationAsset") as msAsset:
@@ -20,22 +18,18 @@ process microsites.build:
   call microsites.project
 
 process microsites.project:
-  call microsite.return.styles
-  each subjects("isa", "MicrositeStylesheet") as msSheet:
-    let input = one($msSheet, "root")
-    call source.css
-    let surfaceWritePath = one($msSheet, "path")
-    call assurance.surface.register
-    port file.write { path = one($msSheet, "path"); text = $result } → _
+  # All CSS is compiled by the common palette phases before page projection.
   each subjects("isa", "MicrositeDocument") as msDocument:
     let input = one($msDocument, "root")
     call source.markup
+    let input = $result
+    call projection.serialize
     call microsite.return.project
     let surfaceWritePath = one($msDocument, "path")
     call assurance.surface.register
     port file.write { path = one($msDocument, "path"); text = $result } → _
   each subjects("isa", "Microsite") as msSite:
-    port json.parse { text = one($msSite, "configuration") } → msConfiguration
+    port static.read { text = one($msSite, "configuration") } → msConfiguration
     port runtime.bundle {
       entry = "microsite.boot";
       mode = "browser";
@@ -74,4 +68,3 @@ process microsite.boot:
   when eq($data.site, "temple"):
     port kernel.invoke { query = "motion.temple.init"; input = {  } } → _
     port kernel.invoke { query = "media.screens.init"; input = {  } } → _
-

@@ -1,0 +1,18 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.rebuild:
+  port state.get { key = "hh-orientation" } → orientation
+  port state.get { key = "hh-change" } → change
+  port state.get { key = "hh-profile" } → profile
+  port state.get { key = "hh-enabled" } → enabled
+  port state.get { key = "hh-overrides" } → overrides
+  port kernel.invoke {
+    query = "household.scenario";
+    input = { orientation = $orientation; change = $change; profile = $profile; enabled = $enabled }
+  } → scenario
+  port state.set { key = "hh-scenario"; value = $scenario } → hp146
+  port kernel.invoke { query = "household.run"; input = { scenario = $scenario; overrides = $overrides } } → run
+  port state.set { key = "hh-run"; value = $run } → hp147
+  port kernel.invoke { query = "household.render"; input = {  } } → hq148
+  port kernel.invoke { query = "household.sync"; input = {  } } → hq149

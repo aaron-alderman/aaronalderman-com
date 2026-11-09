@@ -1,0 +1,54 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.runtime.build:
+  port file.copy { path = "source/hierarchy.values.rel" } → _
+  port file.read { path = "source/hierarchy.values.rel" } → identityText
+  port static.read { text = $identityText } → identityCatalogue
+  fold subjects("isa", "IdentityTheme") as identitySubject; identityViews starts list():
+    let identityKey = one($identitySubject, "key")
+    call identity.catalogue.view
+    let tree = $result
+    port kernel.invoke { query = "projection.fields"; input = { subject = $identitySubject; names = list("homeRoute", "threadsRoute", "atlasRoute", "questionHref", "questionWorldRoute", "key") } } → journeyData
+    let eventInput = { tree = $tree; route = "index.html"; identity = $identitySubject; mode = "catalogue"; context = null; canonicalFrom = null; canonicalTo = null }
+    call projection.identity
+    yield append(
+    $identityViews,
+    list(
+      {
+        key = one($identitySubject, "key");
+        label = one($identitySubject, "label");
+        copy = one($identitySubject, "copy");
+        questionHref = one($identitySubject, "questionHref");
+        questionCopy = one($identitySubject, "questionCopy");
+        image = one($identitySubject, "image");
+        questionsImage = one($identitySubject, "questionsImage");
+        threadsImage = one($identitySubject, "threadsImage");
+        atlasImage = one($identitySubject, "atlasImage");
+        catalogueTree = $result;
+        catalogueIntro = one($identitySubject, "catalogueIntro");
+        homeHref = one($identitySubject, "homeHref");
+        threadsHref = one($identitySubject, "threadsHref");
+        atlasHref = one($identitySubject, "atlasHref");
+        questionWorldHref = one($identitySubject, "questionWorldHref");
+        threadsCardCopy = one($identitySubject, "threadsCardCopy");
+        atlasCardCopy = one($identitySubject, "atlasCardCopy");
+        homeTitle = one($identitySubject, "homeTitle");
+        homeCanonical = one($identitySubject, "homeCanonical");
+        homeShareImage = one($identitySubject, "homeShareImage");
+        homeShareType = one($identitySubject, "homeShareType");
+        homeShareAlt = one($identitySubject, "homeShareAlt");
+        homeThemeColor = one($identitySubject, "homeThemeColor")
+      }
+    )
+  ) → identityThemes
+  port runtime.bundle {
+    entry = "identity.boot";
+    mode = "browser";
+    grantProfile = "micrositesBrowser";
+    queries = list("identity.boot", "identity.change");
+    factSubjects = list();
+    data = { themes = $identityThemes };
+    budget = 2000000
+  } → identityRuntime
+  port file.write { path = "identity-runtime.js"; text = $identityRuntime } → _

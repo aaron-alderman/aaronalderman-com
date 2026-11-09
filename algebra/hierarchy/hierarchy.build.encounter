@@ -1,0 +1,289 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.build:
+  call hierarchy.load
+  call hierarchy.extract
+  call hierarchy.index.targets
+  call hierarchy.viewer.build
+  call hierarchy.module.build
+  each $hCatalogue.items as hItem:
+    call hierarchy.inspect.build
+    when not(
+      includes(
+        list("temple", "sourcery", "claimipedia", "worldwright", "encounter", "the-field"),
+        $hItem.id
+      )
+    ):
+      let input = {
+        tag = "html";
+        attrs = { lang = "en" };
+        children = list(
+          {
+            tag = "head";
+            attrs = {  };
+            children = list(
+              { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+              {
+                tag = "meta";
+                attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+                children = list()
+              },
+              { tag = "title"; attrs = {  }; children = list($hItem.name) },
+              {
+                tag = "meta";
+                attrs = { name = "description"; content = $hItem.description };
+                children = list()
+              },
+              {
+                tag = "link";
+                attrs = { rel = "canonical"; href = concat("https://aaronalderman.com/", $hItem.href) };
+                children = list()
+              },
+              {
+                tag = "link";
+                attrs = { rel = "stylesheet"; href = concat("../", "expedition.css?v=triple-braid-1") };
+                children = list()
+              },
+              {
+                tag = "meta";
+                attrs = { property = "og:title"; content = $hItem.name };
+                children = list()
+              },
+              {
+                tag = "meta";
+                attrs = { property = "og:description"; content = $hItem.description };
+                children = list()
+              },
+              {
+                tag = "meta";
+                attrs = { property = "og:url"; content = concat("https://aaronalderman.com/", $hItem.href) };
+                children = list()
+              }
+            )
+          },
+          {
+            tag = "body";
+            attrs = {  };
+            children = list(
+              {
+                tag = "a";
+                attrs = { class = "skip"; href = "#main" };
+                children = list("Skip to content")
+              },
+              {
+                tag = "header";
+                attrs = { class = "masthead" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { class = "brand"; href = "../index.html"; "aria-label" = "Aaron Alderman" };
+                    children = list(
+                      {
+                        tag = "span";
+                        attrs = { class = "brand-name" };
+                        children = list(
+                          "Aaron ",
+                          { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "nav";
+                    attrs = { "aria-label" = "Site" };
+                    children = list(
+                      {
+                        tag = "a";
+                        attrs = { href = "../index.html#microsites" };
+                        children = list("The work")
+                      },
+                      { tag = "a"; attrs = { href = "../atlas.html" }; children = list("The atlas") }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "main";
+                attrs = { class = "hierarchy-page"; id = "main"; "data-type" = $hItem.type };
+                children = list(
+                  or(at($hItem, "pageIcon"), $hItem.icon),
+                  { tag = "p"; attrs = { class = "eyebrow" }; children = list($hItem.status) },
+                  { tag = "h1"; attrs = {  }; children = list($hItem.name) },
+                  { tag = "p"; attrs = { class = "lead" }; children = list($hItem.description) },
+                  {
+                    tag = "p";
+                    attrs = { class = "hierarchy-scope" };
+                    children = list(
+                      if(
+                        eq($hItem.id, "creator-studio"),
+                        "Bring cartoons, animation, film and interactive stories into one creative workspace. Different forms can develop the same ideas while keeping their sources and uncertainty visible. This is an introduction to the work in development; the complete studio experience is still taking shape.",
+                        if(
+                          eq($hItem.id, "the-field"),
+                          "The source contains a single-encounter prototype with direct, relational and institutional consequences, including refusal and repair.",
+                          if(
+                            eq($hItem.id, "relationship-manager"),
+                            "The underlying source project is named Relationship Navigator. It explores boundaries, assistance, rupture and repair.",
+                            "This microsite introduces the work and its selected source bindings. Source inspection records declarations, rather than claiming a deployed application runtime."
+                          )
+                        )
+                      )
+                    )
+                  },
+                  {
+                    tag = "a";
+                    attrs = { class = "button"; href = concat("../inspection/", $hItem.id, ".html") };
+                    children = list("Inspect sources & shared capabilities →")
+                  },
+                  if(
+                    eq($hItem.id, "relational-geometry"),
+                    {
+                      tag = "section";
+                      attrs = { class = "science-usecase" };
+                      children = list(
+                        { tag = "p"; attrs = { class = "eyebrow" }; children = list("First use case") },
+                        { tag = "h2"; attrs = {  }; children = list("Relational Geometry Programme") },
+                        {
+                          tag = "p";
+                          attrs = {  };
+                          children = list(
+                            "An audited Spin(2,3) relational and response geometry research corpus. Explore its models, evidence and open questions."
+                          )
+                        },
+                        {
+                          tag = "a";
+                          attrs = { href = "https://aaron-alderman.github.io/spin23-relational-geometry/" };
+                          children = list("Explore the programme ↗")
+                        },
+                        {
+                          tag = "section";
+                          attrs = { class = "science-agent" };
+                          children = list(
+                            { tag = "p"; attrs = { class = "eyebrow" }; children = list("Agent-assisted research") },
+                            { tag = "h2"; attrs = {  }; children = list("Mission Control") },
+                            {
+                              tag = "p";
+                              attrs = {  };
+                              children = list(
+                                "Sourcery’s agent harness and automatic workflow mechanism coordinates the work behind an inquiry, using the internal job system to manage tasks, agents and results."
+                              )
+                            },
+                            {
+                              tag = "a";
+                              attrs = { class = "button"; href = "../mission-control/" };
+                              children = list("Explore Mission Control →")
+                            },
+                            {
+                              tag = "p";
+                              attrs = {  };
+                              children = list(
+                                {
+                                  tag = "a";
+                                  attrs = { href = "../inspection/mission-control.html" };
+                                  children = list("Inspect its source bindings")
+                                }
+                              )
+                            }
+                          )
+                        }
+                      )
+                    },
+                    null
+                  ),
+                  if(
+                    eq($hItem.id, "mission-control"),
+                    {
+                      tag = "section";
+                      attrs = { class = "mission-introduction" };
+                      children = list(
+                        {
+                          tag = "h2";
+                          attrs = {  };
+                          children = list("A harness for agents and automatic workflows")
+                        },
+                        {
+                          tag = "p";
+                          attrs = {  };
+                          children = list(
+                            "Mission Control belongs to Sourcery. It coordinates agent work through the internal job system: tasks, workers, progress, results and review. Claimipedia Science is one application of that mechanism."
+                          )
+                        },
+                        {
+                          tag = "details";
+                          attrs = { class = "mission-workflow" };
+                          children = list(
+                            { tag = "summary"; attrs = {  }; children = list("How Mission Control works") },
+                            {
+                              tag = "ol";
+                              attrs = {  };
+                              children = list(
+                                {
+                                  tag = "li";
+                                  attrs = {  };
+                                  children = list(
+                                    { tag = "strong"; attrs = {  }; children = list("Define the work") },
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Frame a task, its scope and the authority it needs.")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = {  };
+                                  children = list(
+                                    { tag = "strong"; attrs = {  }; children = list("Coordinate jobs and agents") },
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Manage worker lanes and bounded work through the internal job system.")
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "li";
+                                  attrs = {  };
+                                  children = list(
+                                    { tag = "strong"; attrs = {  }; children = list("Bring results back") },
+                                    {
+                                      tag = "p";
+                                      attrs = {  };
+                                      children = list("Keep progress and evidence visible, with findings returned for review.")
+                                    }
+                                  )
+                                }
+                              )
+                            }
+                          )
+                        }
+                      )
+                    },
+                    null
+                  ),
+                  {
+                    tag = "nav";
+                    attrs = { class = "hierarchy-page-links"; "aria-label" = "Explore further" };
+                    children = list(
+                      map(
+                        $hItem.links,
+                        "hLink",
+                        { tag = "a"; attrs = { href = at($hLink, 0) }; children = list(at($hLink, 1)) }
+                      )
+                    )
+                  }
+                )
+              }
+            )
+          }
+        )
+      }
+      call projection.serialize
+      let surfaceWritePath = concat($hItem.href, "index.html")
+      call assurance.surface.register
+      port file.write {
+        path = concat($hItem.href, "index.html");
+        text = $result
+      } → _
+  call hierarchy.questions.build
+  call hierarchy.usecase.build

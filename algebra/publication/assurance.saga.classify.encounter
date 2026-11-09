@@ -1,0 +1,81 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.saga.classify:
+  fold $eventInput.obligations as gate; gateResults starts list():
+    let candidates = filter($eventInput.evidence, "e", eq($e.id, $gate.id))
+    let proof = if(eq(count($candidates), 1), at($candidates, 0), {  })
+    let qualified = and(
+      includes(list("declaration", "machine", "human", "use", "maintenance"), $gate.kind),
+      eq(count($candidates), 1),
+      eq($proof.kind, $gate.kind),
+      eq($proof.scope, $eventInput.scope),
+      $proof.source,
+      $proof.issuer,
+      $proof.method,
+      $proof.observedAt
+    )
+    port value.describe { value = at($proof, "source") } → sourceKind
+    port value.describe { value = at($proof, "issuer") } → issuerKind
+    port value.describe { value = at($proof, "method") } → methodKind
+    port value.describe { value = at($proof, "observedAt") } → dateKind
+    let qualified = and(
+      $qualified,
+      eq($sourceKind.type, "string"),
+      eq($issuerKind.type, "string"),
+      eq($methodKind.type, "string"),
+      eq($dateKind.type, "string")
+    )
+    when $qualified:
+      port text.trim { value = $proof.source } → sourceText
+      port text.trim { value = $proof.issuer } → issuerText
+      port text.trim { value = $proof.method } → methodText
+      port text.trim { value = $proof.observedAt } → dateText
+      let qualified = and(
+        not(eq($sourceText, "")),
+        not(eq($issuerText, "")),
+        not(eq($methodText, "")),
+        not(eq($dateText, ""))
+      )
+    when and($qualified, includes(list("human", "use", "maintenance"), $gate.kind)):
+      port text.matches { value = $proof.observedAt; pattern = "^\\d{4}-\\d{2}-\\d{2}$" } → dated
+      let qualified = and($qualified, $dated)
+    let gateResult = {
+      id = $gate.id;
+      level = $gate.level;
+      kind = $gate.kind;
+      label = $gate.label;
+      next = $gate.next;
+      status = if(
+        $qualified,
+        if(
+          eq($proof.ok, true),
+          "supported",
+          if(eq($proof.ok, false), "failed", "not-evidenced")
+        ),
+        "not-evidenced"
+      );
+      evidence = if($qualified, $proof, null)
+    }
+    yield append($gateResults, list($gateResult)) → gateResults
+  fold list(1, 2, 3, 4, 5) as level; achieved starts 0:
+    let required = filter($gateResults, "g", eq($g.level, $level))
+    yield if(
+    and(
+      eq($achieved, add($level, -1)),
+      not(eq(count($required), 0)),
+      every($required, "g", eq($g.status, "supported"))
+    ),
+    $level,
+    $achieved
+  ) → achieved
+  let result = {
+    id = $eventInput.id;
+    title = $eventInput.title;
+    scope = $eventInput.scopeText;
+    scopeId = $eventInput.scope;
+    level = $achieved;
+    gates = $gateResults;
+    nextLevel = if(eq($achieved, 5), null, add($achieved, 1));
+    boundary = "Levels describe the maturity of evidence within this scope. Receipt metadata is checked; authenticity, evaluation quality and broader product readiness require their own review."
+  }

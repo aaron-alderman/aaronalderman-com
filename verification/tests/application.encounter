@@ -1,0 +1,123 @@
+process-module "temple/surface-process-module/1"
+
+process application.sources:
+  call check.pure
+  call check.manifest
+  port mechanism.load { module = "encounter-syntax.cjs" } → syntaxModule
+  let files = map(filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "module"))), "f", $f.o)
+  fold $files as file; sources starts list():
+    call check.readAlias
+    let text = $result
+    port mechanism.call { target = $syntaxModule; method = "parseEncounter"; args = list($text, $file) } → parsed
+    yield append($sources, list({ file = $file; text = $text; queries = $parsed.queries })) → sources
+  fold $sources as source; entries starts list():
+    port record.entries { value = $source.queries } → cells
+    yield append($entries, $cells) → entries
+  port record.fromEntries { entries = $entries } → allQueries
+  let file = at(at(filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "profileSource"))), 0), "o")
+  call check.readAlias
+  port rel.decode { text = $result } → profileDocument
+  let profiles = $profileDocument.profiles
+  port mechanism.callback { query = "fixture.null" } → noop
+  port mechanism.ports { groups = list("value", "computation", "browser", "rel"); extra = { "asset.rel" = $noop; "projection.render" = $noop; "projection.combine" = $noop; "markup.observe" = $noop } } → applicationPorts
+
+process application.front:
+  port record.fromEntries { entries = list(list($profile, at($profiles, $profile))) } → selectedProfiles
+  port mechanism.call { target = $frontModule; method = "createFrontDoor"; args = list({ profiles = $selectedProfiles; ports = $applicationPorts; basis = "actual-source-compatibility-test" }); keep = true } → applicationFront
+  fold $sources as source; candidates starts list():
+    port mechanism.call { target = $applicationFront; method = "hydrate"; args = list($source.file, $source.text); keep = true } → candidate
+    yield append($candidates, list($candidate)) → candidates
+
+process application.staticSelection:
+  let operation = at($selection, 0)
+  let result = $selection
+  when isArray($selection):
+    assert includes(list("list", "append", "objects"), $operation)
+      otherwise "Nonstatic runtime query selection."
+    when eq($operation, "list"):
+      port text.slice { value = $selection; start = 1 } → items
+      fold $items as item; values starts list():
+        let selection = $item
+        call application.staticSelection
+        yield append($values, list($result)) → result
+    when eq($operation, "append"):
+      fold list(at($selection, 1), at($selection, 2)) as child; values starts list():
+        let selection = $child
+        call application.staticSelection
+        yield append($values, $result) → result
+    when eq($operation, "objects"):
+      let subject = at($selection, 1)
+      let predicate = at($selection, 2)
+      let result = distinct(map(filter($facts, "f", and(or(eq(at($subject, 0), at(" $", 1)), eq($f.s, $subject)), eq($f.p, $predicate), eq($f.pol, "is"))), "f", $f.o))
+
+process application.scan:
+  fold $steps as step; checked starts 0:
+    let countHere = 0
+    when eq(at($step, "port"), "runtime.bundle"):
+      let args = $step.args
+      port value.describe { value = at($args, "entry") } → entryType
+      port value.describe { value = at($args, "grantProfile") } → profileType
+      when and(eq($entryType.type, "string"), eq($profileType.type, "string"), isArray(at($args, "queries")), not(eq(at($args.entry, 0), at(" $", 1))), not(eq(at($args.grantProfile, 0), at(" $", 1)))):
+        let selection = $args.queries
+        call application.staticSelection
+        let roots = $result
+        port diagnostic.context { value = { entry = $args.entry; roots = $roots } } → ignored
+        let profile = $args.grantProfile
+        call application.front
+        port mechanism.call { target = $applicationFront; method = "link"; args = list($candidates, { roots = $roots }); keep = true } → linked
+        port mechanism.call { target = $applicationFront; method = "admit"; args = list($linked, { profile = $profile; entries = $roots }); keep = true } → admitted
+        let countHere = 1
+    fold list("then", "steps", "try", "catch") as key; nested starts 0:
+      let extra = 0
+      when at($step, $key):
+        let steps = at($step, $key)
+        call application.scan
+        let extra = $result
+      yield add($nested, $extra) → nested
+    yield add($checked, add($countHere, $nested)) → result
+
+process test.application.browser-closures:
+  call application.sources
+  let factFiles = map(filter($declaration, "f", and(eq($f.s, "local"), eq($f.p, "factSource"))), "f", $f.o)
+  fold $factFiles as file; facts starts list():
+    call check.readAlias
+    port rel.parse { text = $result } → rows
+    yield append($facts, $rows) → facts
+  port record.entries { value = $allQueries } → queries
+  fold $queries as query; checked starts 0:
+    let steps = at($query, 1)
+    call application.scan
+    yield add($checked, $result) → checked
+  port number.calculate { operation = "greaterEqual"; values = list($checked, 5) } → covered
+  assert $covered
+    otherwise "Expected coverage of actual browser projection declarations."
+
+process test.application.view-edit-refusal:
+  call application.sources
+  let declarationSteps = filter(at($allQueries, "encounter.build"), "s", eq(at($s, "port"), "runtime.bundle"))
+  let selection = at(at(at($declarationSteps, 0), "args"), "queries")
+  let facts = list()
+  call application.staticSelection
+  let roots = $result
+  let profile = "encounterBrowser"
+  call application.front
+  port mechanism.call { target = $applicationFront; method = "link"; args = list($candidates, { roots = $roots }); keep = true } → linked
+  port mechanism.call { target = $applicationFront; method = "admit"; args = list($linked, { profile = $profile; entries = $roots }); keep = true } → admitted
+  let file = "source/encounter/example.values.rel"
+  call check.readAlias
+  port rel.decode { text = $result } → inputs
+  let file = "source/encounter/presentation.values.rel"
+  call check.readAlias
+  port rel.decode { text = $result } → presentation
+  let data = { inputs = $inputs; presentation = $presentation; processes = $allQueries }
+  port mechanism.call { target = $applicationFront; method = "run"; args = list($admitted, "ec.prepare", { input = $inputs; data = $data }) } → prepared
+  let original = $prepared.value
+  port mechanism.call { target = $applicationFront; method = "run"; args = list($admitted, "ec.run", { input = { candidate = $original }; data = $data }) } → views
+  assert and(not(eq(count($views.admissions), 0)), some($views.value, "v", eq($v.output.type, "Page")))
+    otherwise "Dynamic Encounter views must receive source/REL admissions."
+  port mechanism.call { target = $applicationFront; method = "run"; args = list($admitted, "encounter.demo.change", { input = { candidate = $original; value = "The part I missed" }; data = $data }) } → changed
+  assert and(includes($changed.value.candidate.inputs.factText, "The part I missed"), eq($original.inputs.factText, $inputs.factText))
+    otherwise "Checked editing changed original input or failed to update candidate."
+  let operation = { target = $applicationFront; method = "run"; args = list($admitted, "encounter.demo.change", { input = { candidate = $original; value = 42 }; data = $data }) }
+  let pattern = "EC-E010"
+  call check.refusal

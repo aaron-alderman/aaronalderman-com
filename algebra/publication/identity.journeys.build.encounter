@@ -1,0 +1,210 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.journeys.build:
+  let priorWorlds = list()
+  port artifact.list {} → artifacts
+  when some($artifacts, "artifact", eq($artifact.path, "assurance/identity-journeys.values.rel")):
+    port file.read { path = "assurance/identity-journeys.values.rel" } → previous
+    port static.read { text = $previous } → previous
+    let priorWorlds = $previous.worlds
+  let journeyReceipts = list()
+  fold list($journeySelection) as journeyIdentity; receipts starts $priorWorlds:
+    port kernel.invoke { query = "projection.fields"; input = { subject = $journeyIdentity; names = list("homeTitle", "copy", "homeRoute", "threadsTitle", "threadsCopy", "threadsRoute", "atlasRoute", "questionHref", "questionWorldRoute", "key", "homeHref", "threadsHref", "atlasHref", "readingPrompt", "threadsImage", "mapTitle", "mapCopy", "atlasImage", "image") } } → journeyData
+    let homeIdentity = $journeyIdentity
+    let prefix = ""
+    let light = "home"
+    let pageTitle = $journeyData.homeTitle
+    let description = $journeyData.copy
+    let canonical = concat(one("site", "origin"), $journeyData.homeRoute)
+    call publication.home
+    let body = $result
+    call publication.document
+    port projection.resolve { text = $result } → tree
+    let eventInput = { tree = $tree; route = "index.html"; identity = $journeyIdentity; mode = "home"; context = null; canonicalFrom = null; canonicalTo = null }
+    call projection.identity
+    let input = $result
+    call projection.serialize
+    let surfaceWritePath = $journeyData.homeRoute
+    call assurance.surface.register
+    port file.write {
+      path = $journeyData.homeRoute;
+      text = $result
+    } → _
+    let pageTitle = $journeyData.threadsTitle
+    let description = $journeyData.threadsCopy
+    let canonical = concat(one("site", "origin"), $journeyData.threadsRoute)
+    call identity.threads.view
+    let body = $result
+    call publication.document
+    port projection.resolve { text = $result } → tree
+    let eventInput = { tree = $tree; route = "gate.html"; identity = $journeyIdentity; mode = "threads"; context = null; canonicalFrom = null; canonicalTo = null }
+    call projection.identity
+    let input = $result
+    call projection.serialize
+    let surfaceWritePath = $journeyData.threadsRoute
+    call assurance.surface.register
+    port file.write {
+      path = $journeyData.threadsRoute;
+      text = $result
+    } → _
+    let journeyKind = "atlas"
+    call identity.journey.intro
+    let identityMapIntro = $result
+    let atlasIdentity = $journeyIdentity
+    call atlas.view
+    let input = $result
+    call projection.serialize
+    port projection.resolve { text = $result } → tree
+    let eventInput = { tree = $tree; route = "atlas.html"; identity = $journeyIdentity; mode = "atlas"; context = null; canonicalFrom = null; canonicalTo = null }
+    call projection.identity
+    let input = $result
+    call projection.serialize
+    let surfaceWritePath = $journeyData.atlasRoute
+    call assurance.surface.register
+    port file.write {
+      path = $journeyData.atlasRoute;
+      text = $result
+    } → _
+    port projection.tree { path = $journeyData.questionHref } → tree
+    let eventInput = { tree = $tree; route = $journeyData.questionHref; identity = $journeyIdentity; mode = "question"; context = null; canonicalFrom = concat(one("site", "origin"), $journeyData.questionHref); canonicalTo = concat(one("site", "origin"), $journeyData.questionWorldRoute) }
+    call projection.identity
+    let input = $result
+    call projection.serialize
+    let worldHtml = $result
+    let surfaceWritePath = $journeyData.questionWorldRoute
+    call assurance.surface.register
+    port file.write { path = $journeyData.questionWorldRoute; text = $worldHtml } → _
+    fold subjects("isa", "Place") as readingPlace; readings starts list():
+      port projection.tree { path = one($readingPlace, "route") } → tree
+      call identity.reading.context
+      let eventInput = { tree = $tree; route = one($readingPlace, "route"); identity = $journeyIdentity; mode = "reading"; context = $result; canonicalFrom = concat(one("site", "origin"), one($readingPlace, "route")); canonicalTo = concat(one("site", "origin"), "worlds/", $journeyData.key, "/", one($readingPlace, "route")) }
+      call projection.identity
+      let input = $result
+      call projection.serialize
+      let readingHtml = $result
+      let readingRoute = concat("worlds/", $journeyData.key, "/", one($readingPlace, "route"))
+      let surfaceWritePath = $readingRoute
+      call assurance.surface.register
+      port file.write { path = $readingRoute; text = $readingHtml } → _
+      port file.read { path = $readingRoute } → actual
+      let eventInput = {
+        html = $actual;
+        expected = list(
+          concat("data-identity=\"", $journeyData.key, "\""),
+          concat("href=\"", $journeyData.homeHref, "\""),
+          concat("href=\"", $journeyData.threadsHref, "\""),
+          concat("href=\"", $journeyData.atlasHref, "\""),
+          $journeyData.readingPrompt,
+          concat("href=\"", one("site", "origin"), one($readingPlace, "route"), "\""),
+          concat("href=\"/reader.html#", one($readingPlace, "slug"), "\""),
+          "Open the shared interactive reader ↗",
+          "href=\"/retained/workshop/index.html\"",
+          "Shared workshop ↗"
+        )
+      }
+      call identity.journey.check
+      yield append(
+      $readings,
+      list({ route = $readingRoute; ok = $result.ok; missing = $result.missing })
+    ) → readings
+    let navExpected = list(
+      concat("data-identity=\"", $journeyData.key, "\""),
+      concat("href=\"", $journeyData.homeHref, "\""),
+      concat("href=\"", $journeyData.threadsHref, "\""),
+      concat("href=\"", $journeyData.atlasHref, "\"")
+    )
+    port file.read { path = $journeyData.threadsRoute } → actual
+    let eventInput = {
+      html = $actual;
+      expected = append(
+        $navExpected,
+        append(
+          list(
+            $journeyData.threadsTitle,
+            $journeyData.threadsCopy,
+            concat("src=\"/", $journeyData.threadsImage, "\"")
+          ),
+          fold(
+            objects($journeyIdentity, "thread"),
+            "t",
+            "checks",
+            list(),
+            append(
+              $checks,
+              append(
+                list(one($t, "title"), one($t, "note")),
+                map(
+                  objects($t, "place"),
+                  "p",
+                  concat("href=\"/worlds/", $journeyData.key, "/", one($p, "route"), "\"")
+                )
+              )
+            )
+          )
+        )
+      )
+    }
+    call identity.journey.check
+    let threadsCheck = $result
+    port file.read { path = $journeyData.atlasRoute } → actual
+    let eventInput = {
+      html = $actual;
+      expected = append(
+        $navExpected,
+        append(
+          list(
+            $journeyData.mapTitle,
+            $journeyData.mapCopy,
+            concat("src=\"/", $journeyData.atlasImage, "\""),
+            "data-identity-recommended=\"true\""
+          ),
+          map(
+            subjects("isa", "Place"),
+            "p",
+            concat("href=\"/worlds/", $journeyData.key, "/", one($p, "route"), "\"")
+          )
+        )
+      )
+    }
+    call identity.journey.check
+    let mapCheck = $result
+    port file.read { path = $journeyData.homeRoute } → actual
+    let eventInput = {
+      html = $actual;
+      expected = append(
+        $navExpected,
+        list(
+          concat("data-initial-identity=\"", $journeyData.key, "\""),
+          $journeyData.copy,
+          concat("src=\"/", $journeyData.image, "\"")
+        )
+      )
+    }
+    call identity.journey.check
+    let homeCheck = $result
+    port file.read { path = $journeyData.questionWorldRoute } → actual
+    let eventInput = { html = $actual; expected = $navExpected }
+    call identity.journey.check
+    let questionCheck = $result
+    yield append(
+    $receipts,
+    list(
+      {
+        identity = $journeyData.key;
+        threads = $threadsCheck;
+        map = $mapCheck;
+        home = $homeCheck;
+        questions = $questionCheck;
+        readings = $readings
+      }
+    )
+  ) → journeyReceipts
+  port value.encode {
+    value = {
+      protocol = "worldwright/identity-journey-evidence/1";
+      worlds = $journeyReceipts;
+      boundary = "Source-fragment and link checks on generated HTML, with original readings and sources retained. Visual, semantic and browser behaviour require separate evidence."
+    }
+  } → journeyJson
+  port file.write { path = "assurance/identity-journeys.values.rel"; text = $journeyJson } → _

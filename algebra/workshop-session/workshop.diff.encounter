@@ -1,0 +1,15 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process workshop.diff:
+  port text.split { value = $eventInput.before; pattern = "\\r?\\n" } → before
+  port text.split { value = $eventInput.after; pattern = "\\r?\\n" } → after
+  fold range(count($before)) as line; diff starts "":
+    let index = add($line, -1)
+    let old = at($before, $index)
+    let next = at($after, $index)
+    yield concat(
+    $diff,
+    if(eq($old, $next), "", concat(if(eq($diff, ""), "", "\n"), "− ", $old, "\n+ ", $next))
+  ) → diff
+  let result = or($diff, "No change.")

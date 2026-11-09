@@ -1,0 +1,41 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.show:
+  let ecShowScope = $eventInput.scope
+  fold $eventInput.nodes as ecShowNode; ecShow starts null:
+    port text.matches { value = $ecShowNode.text; pattern = "^show as [A-Za-z_][A-Za-z0-9_.-]*:?$" } → ecIsShow
+    let ecShowNext = $ecShow
+    when $ecIsShow:
+      assert not($ecShow)
+        otherwise "EC-C003: Select one representation per contribution."
+      port text.split { value = $ecShowNode.text; pattern = "^show as ([A-Za-z_][A-Za-z0-9_.-]*):?$" } → ecShowTokens
+      fold filter($ecNodes, "ecChild", eq($ecChild.parent, $ecShowNode.id)) as ecParameter; ecShowParameters starts list():
+        port text.split { value = $ecParameter.text; pattern = "^([A-Za-z_][A-Za-z0-9_.-]*): (.+)$" } → ecParamTokens
+        assert eq(count($ecParamTokens), 4)
+          otherwise "EC-P017: A representation argument needs a name and expression."
+        port kernel.invoke {
+          query = "ec.attempt";
+          input = {
+            query = "ec.expression";
+            input = { text = at($ecParamTokens, 2); scope = $ecShowScope };
+            span = $ecSpan
+          }
+        } → ecParameterExpression
+        yield append(
+        $ecShowParameters,
+        list(
+          {
+            name = at($ecParamTokens, 1);
+            expression = $ecParameterExpression;
+            node = $ecParameter
+          }
+        )
+      ) → ecShowParameters
+      let ecShowNext = {
+        representation = at($ecShowTokens, 1);
+        parameters = $ecShowParameters;
+        node = $ecShowNode
+      }
+    yield $ecShowNext → ecShow
+  let result = $ecShow

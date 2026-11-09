@@ -1,0 +1,28 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process publication.scroll.pages:
+  port static.read { text = one("scroll.index", "tree") } → body
+  let prefix = "../"
+  let pageTitle = "Thoughts — Aaron Alderman"
+  let description = "Essays on power, understanding, faith, and what we can build together."
+  let canonical = "https://aaronalderman.com/writing/"
+  let light = "home"
+  call publication.document
+  let surfaceWritePath = "writing/index.html"
+  call assurance.surface.register
+  port file.write { path = "writing/index.html"; text = $result } → _
+  port static.read { text = one("scroll.article", "tree") } → body
+  let prefix = "../../"
+  let pageTitle = "AI Must Serve Life — The Scroll — Aaron Alderman"
+  let description = "The full arc of a kenotic programme for science, computing, and human flourishing."
+  let canonical = "https://aaronalderman.com/writing/power-must-serve-life/"
+  let light = "home"
+  call publication.document
+  let surfaceWritePath = "writing/power-must-serve-life/index.html"
+  call assurance.surface.register
+  port file.write {
+    path = "writing/power-must-serve-life/index.html";
+    text = $result
+  } → _
+  let prefix = ""

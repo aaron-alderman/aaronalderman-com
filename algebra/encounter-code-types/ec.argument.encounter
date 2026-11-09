@@ -1,0 +1,25 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.argument:
+  let ecArgType = $eventInput.type
+  let ecArgValue = $eventInput.value
+  port value.describe { value = $ecArgValue } → ecArgKind
+  when eq($ecArgType, "text"):
+    assert eq($ecArgKind.type, "string")
+      otherwise "EC-T020: This argument needs text."
+    let ecArgResult = { id = null; type = "text"; value = $ecArgValue }
+  when not(eq($ecArgType, "text")):
+    when eq($ecArgKind.type, "string"):
+      port kernel.invoke { query = "ec.reference"; input = { id = $ecArgValue; type = $ecArgType } } → ecArgResult
+    when not(eq($ecArgKind.type, "string")):
+      assert and($ecArgKind.plain, not($ecArgKind.array))
+        otherwise "EC-T021: This argument needs a typed value or reference."
+      assert eq(at($ecArgValue, "type"), $ecArgType)
+        otherwise "EC-T022: The supplied value has a different type."
+      port kernel.invoke {
+        query = "ec.check";
+        input = { type = $ecArgType; values = at($ecArgValue, "values") }
+      } → _
+      let ecArgResult = $ecArgValue
+  let result = $ecArgResult

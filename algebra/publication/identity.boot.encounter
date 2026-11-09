@@ -1,0 +1,12 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.boot:
+  port browser.read { ref = "body" } → initialBody
+  let initialKey = at(at($initialBody, "attributes"), "data-initial-identity")
+  let initialTheme = at(filter($data.themes, "t", eq($t.key, $initialKey)), 0)
+  let initialKey = if($initialTheme, $initialTheme.key, "sourcerer")
+  port state.set { key = "identity"; value = $initialKey } → _
+  port browser.attribute { ref = "body"; name = "data-identity"; value = $initialKey } → _
+  port browser.on { ref = "#identity-switch"; event = "click"; query = "identity.change" } → _
+  port browser.write { ref = "#identity-switch"; name = "disabled"; value = false } → _

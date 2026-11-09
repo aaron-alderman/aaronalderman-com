@@ -1,0 +1,232 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process roadmap.publish:
+  port static.read { text = one("roadmap", "workflow") } → todoWorkflow
+  port value.encode { value = $todoWorkflow } → todoWorkflowJSON
+  port file.write { path = "roadmap/workflow.values.rel"; text = $todoWorkflowJSON } → _
+  port runtime.bundle {
+    entry = "roadmap.boot";
+    mode = "browser";
+    grantProfile = "readerBrowser";
+    queries = list(
+      "roadmap.boot",
+      "roadmap.refresh",
+      "roadmap.collect",
+      "roadmap.derive",
+      "projection.serialize",
+      "html.escape",
+      "html.cssText"
+    );
+    factSubjects = list();
+    data = { workflow = $todoWorkflow };
+    budget = 20000000
+  } → todoRuntime
+  port file.write { path = "roadmap/runtime.js"; text = $todoRuntime } → _
+  let portfolioPage = {
+    route = "roadmap/index.html";
+    prefix = "../";
+    canonical = "https://aaronalderman.com/roadmap/";
+    title = "Roadmap — Aaron Alderman";
+    description = "The general roadmap for product plans, development and assurance-derived work, governed through the corpus algebra.";
+    body = list(
+      {
+        tag = "section";
+        attrs = { class = "assurance-intro" };
+        children = list(
+          { tag = "p"; attrs = { class = "eyebrow" }; children = list("ROADMAP") },
+          { tag = "h1"; attrs = {  }; children = list("Where we go next.") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Plans, product development and assurance work share one roadmap. Each item keeps its source, intended outcome, ownership and evidence for completion."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              { tag = "a"; attrs = { href = "../assurance/" }; children = list("Assurance inputs") },
+              " · ",
+              {
+                tag = "a";
+                attrs = { href = "../assurance/maturity/" };
+                children = list("Maturity profiles")
+              },
+              " · ",
+              {
+                tag = "a";
+                attrs = { href = "workflow.values.rel" };
+                children = list("Roadmap declarations (JSON)")
+              }
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("How work moves") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Triage → to do → in progress or blocked → verification → done or explicitly accepted. No owner or delivery date is invented. A finding is not automatically a bug; disappearance is not completion."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Closure needs a matching verification key, evidence, method, reviewer and date. Acceptance also needs a rationale. Source observations remain visible and do not change maturity levels when a workflow status changes."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Product plans and other work are declared in the corpus alongside the assurance adapter. Assurance findings seed the current queue; they do not define its scope. New plans need an ID, product, revision, next action and completion criteria."
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("Work queue") },
+          {
+            tag = "details";
+            attrs = {  };
+            children = list(
+              { tag = "summary"; attrs = {  }; children = list("Inspect roadmap and todo") },
+              {
+                tag = "div";
+                attrs = {
+                  id = "todo-controls";
+                  class = "projection-controls"
+                };
+                children = list(
+                  {
+                    tag = "label";
+                    attrs = { class = "projection-field" };
+                    children = list(
+                      "Product",
+                      {
+                        tag = "span";
+                        attrs = { id = "todo-product-host" };
+                        children = list(
+                          {
+                            tag = "select";
+                            attrs = { id = "todo-product" };
+                            children = list({ tag = "option"; attrs = { value = "all" }; children = list("All products") })
+                          }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "label";
+                    attrs = { class = "projection-field" };
+                    children = list(
+                      "Horizon",
+                      {
+                        tag = "select";
+                        attrs = { id = "todo-horizon" };
+                        children = list(
+                          { tag = "option"; attrs = { value = "now" }; children = list("Now: triage findings") },
+                          { tag = "option"; attrs = { value = "next" }; children = list("Next evidence gates") },
+                          { tag = "option"; attrs = { value = "later" }; children = list("Later evidence gates") },
+                          { tag = "option"; attrs = { value = "all" }; children = list("All horizons") }
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "label";
+                    attrs = { class = "projection-field" };
+                    children = list(
+                      "Status",
+                      {
+                        tag = "select";
+                        attrs = { id = "todo-stage" };
+                        children = list(
+                          { tag = "option"; attrs = { value = "all" }; children = list("All statuses") },
+                          { tag = "option"; attrs = { value = "triage" }; children = list("Triage") },
+                          { tag = "option"; attrs = { value = "todo" }; children = list("To do") },
+                          { tag = "option"; attrs = { value = "in-progress" }; children = list("In progress") },
+                          { tag = "option"; attrs = { value = "blocked" }; children = list("Blocked") },
+                          {
+                            tag = "option";
+                            attrs = { value = "verification-required" };
+                            children = list("Verification required")
+                          },
+                          { tag = "option"; attrs = { value = "done" }; children = list("Done") },
+                          { tag = "option"; attrs = { value = "accepted" }; children = list("Accepted") }
+                        )
+                      }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "details";
+                attrs = {  };
+                children = list(
+                  { tag = "summary"; attrs = {  }; children = list("Machine-readable roadmap") },
+                  {
+                    tag = "textarea";
+                    attrs = {
+                      id = "todo-json";
+                      readonly = true;
+                      rows = 12;
+                      class = "projection-input";
+                      "aria-label" = "Current roadmap JSON"
+                    };
+                    children = list()
+                  }
+                )
+              },
+              {
+                tag = "div";
+                attrs = { id = "todo-results"; "aria-live" = "polite" };
+                children = list({ tag = "p"; attrs = {  }; children = list("Loading assurance-derived work…") })
+              }
+            )
+          }
+        )
+      },
+      { tag = "script"; attrs = { src = "runtime.js"; defer = true }; children = list() }
+    )
+  }
+  call assurance.portfolio.document
+  let portfolioPage = {
+    route = "assurance/roadmap/index.html";
+    prefix = "../../";
+    canonical = "https://aaronalderman.com/roadmap/";
+    title = "Roadmap — Aaron Alderman";
+    description = "The general roadmap has moved to its own place.";
+    body = list(
+      {
+        tag = "section";
+        attrs = { class = "assurance-intro" };
+        children = list(
+          { tag = "p"; attrs = { class = "eyebrow" }; children = list("ROADMAP") },
+          { tag = "h1"; attrs = {  }; children = list("The general roadmap") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list("Assurance is one input to the general roadmap.")
+          },
+          {
+            tag = "a";
+            attrs = { href = "../../roadmap/" };
+            children = list("Open the general roadmap →")
+          }
+        )
+      }
+    )
+  }
+  call assurance.portfolio.document

@@ -1,0 +1,93 @@
+process-module "temple/surface-process-module/1"
+
+process fixture.publish-source:
+  port mechanism.copy { target = at($args, 0) } → file
+  port mechanism.copy { target = at($args, 1) } → text
+  port mechanism.call { target = $files; method = "set"; args = list($file, $text); keep = true } → ignored
+  let result = null
+
+process test.browser.emitted-bootstrap:
+  port mechanism.load { module = "Map" } → mapModule
+  port mechanism.call { target = $mapModule; construct = true; keep = true } → files
+  port mechanism.callback { query = "fixture.publish-source"; bindings = { files = $files } } → publish
+  port mechanism.callback { query = "fixture.null" } → issue
+  let file = "verification/browser-probe.encounter"
+  let text = "process-module \"temple/surface-process-module/1\"\nprocess browser.probe:\n  port text.matches { value = \"safe\"; pattern = \"^safe$\" } → matched\n  port value.string { value = $matched } → text\n  port dom.text { selector = \"#result\"; text = $text } → result\n"
+  port digest.sha256 { text = $text } → hash
+  port mechanism.load { module = "hosts/source-runtime.cjs" } → runtimeModule
+  port mechanism.call { target = $runtimeModule; method = "createSourceRuntime"; args = list({ sources = list({ file = $file; text = $text; sha256 = $hash; queries = list("browser.probe") }); facts = list(); profiles = { browser = list("text.matches", "value.string", "dom.text") }; basis = "browser-mechanism-qualification"; issue = $issue; publishSource = $publish }); keep = true } → runtime
+  port mechanism.call { target = $runtime; args = list({ mode = "browser"; entry = "browser.probe"; queries = list("browser.probe"); budget = 10000 }) } → code
+  port mechanism.load { module = "Object" } → objectModule
+  port mechanism.call { target = $objectModule; method = "fromEntries"; args = list($files) } → responses
+  port mechanism.load { module = "browser-test-transport.cjs" } → browserModule
+  let nodes = { "#result" = { localName = "p"; textContent = "" }; "[data-temple-errors]" = { textContent = "" } }
+  port mechanism.call { target = $browserModule; method = "execute"; args = list({ code = $code; files = $responses; nodes = $nodes }) } → actual
+  port diagnostic.context { value = $actual } → ignored
+  assert and(eq($actual.faults, list()), eq(at(at($actual.nodes, "#result"), "textContent"), "true"), includes($actual.requests, "source/foundation/compiler/entry.encounter"), includes($actual.requests, $file))
+    otherwise "Emitted browser bootstrap did not self-host source policy and gate DOM."
+  port record.put { record = $responses; key = "source/foundation/boundary.encounter"; value = concat(at($responses, "source/foundation/boundary.encounter"), "\n# changed") } → tampered
+  port mechanism.call { target = $browserModule; method = "execute"; args = list({ code = $code; files = $tampered; nodes = $nodes }) } → actual
+  assert and(eq(at(at($actual.nodes, "#result"), "textContent"), ""), some($actual.faults, "f", includes($f, "Foundation source identity mismatch")))
+    otherwise "Tampered foundation source reached browser DOM."
+
+process fixture.markup:
+  port mechanism.copy { target = at($args, 0) } → argument
+  port mechanism.load { module = "markup-observation.cjs" } → markupModule
+  port mechanism.call { target = $markupModule; method = "observeHtml"; args = list($argument.text) } → result
+
+process fixture.url:
+  port mechanism.copy { target = at($args, 0) } → argument
+  port mechanism.load { module = "URL" } → urlModule
+  port mechanism.call { target = $urlModule; construct = true; args = list($argument.value, $argument.base); keep = true } → url
+  port mechanism.get { target = $url; key = "href" } → href
+  port mechanism.get { target = $url; key = "origin" } → origin
+  port mechanism.get { target = $url; key = "protocol" } → protocol
+  port mechanism.get { target = $url; key = "pathname" } → pathname
+  port text.slice { value = $pathname; start = 1 } → path
+  port mechanism.get { target = $url; key = "hash" } → fragment
+  port mechanism.get { target = $url; key = "search" } → search
+  let result = { href = $href; origin = $origin; protocol = $protocol; path = $path; fragment = $fragment; search = $search }
+
+process test.browser.portable-foundation:
+  call check.pure
+  port mechanism.load { module = "portable.cjs" } → portableModule
+  port mechanism.call { target = $portableModule; method = "emitFoundation" } → code
+  assert and(not(includes($code, "JSON.parse(")), not(includes($code, "hydrateSnapshot")))
+    otherwise "Portable foundation regained an object loader."
+  port mechanism.import { code = $code } → portable
+  port mechanism.call { target = $policyModule; method = "loadSourcePolicyDescriptor" } → descriptor
+  port mechanism.ports { groups = list("computation") } → computations
+  port mechanism.get { target = $computations; key = "text.replace"; keep = true } → replace
+  port mechanism.get { target = $computations; key = "text.match"; keep = true } → match
+  port mechanism.callback { query = "fixture.markup" } → markup
+  port mechanism.callback { query = "fixture.url" } → url
+  port mechanism.callback { query = "fixture.hash" } → hash
+  port mechanism.call { target = $portable; method = "createPolicy"; args = list($descriptor, { "markup.parse" = $markup; "url.observe" = $url; "text.replace" = $replace; "text.match" = $match }, $hash); keep = true } → portablePolicy
+  port mechanism.load { module = "isolated-regexp.cjs" } → regexModule
+  port mechanism.call { target = $regexModule; method = "nodeRegexp"; keep = true } → regexp
+  port mechanism.call { target = $portable; method = "createCompiler"; args = list($hash, $portablePolicy, $regexp); keep = true } → compiler
+  port mechanism.call { target = $compiler; args = list({ ports = {}; profiles = { pure = list() }; basis = "portable-test" }); keep = true } → front
+  let body = "  let result = add(2, 3)"
+  call check.candidate
+  port mechanism.call { target = $front; method = "link"; args = list(list($candidate)); keep = true } → linked
+  port mechanism.call { target = $front; method = "admit"; args = list($linked, { profile = "pure"; entries = list("example") }); keep = true } → admitted
+  let options = {}
+  call check.run
+  assert eq($result, 5)
+    otherwise "Portable compiler did not execute admitted Encounter."
+  port mechanism.copy { target = $candidate } → copied
+  let operation = { target = $front; method = "link"; args = list(list($copied)) }
+  let pattern = "Foreign or forged"
+  call check.refusal
+  let operation = { target = $front; method = "hydrate"; args = list("portable.rel", $copied.rel) }
+  let pattern = "source identity"
+  call check.refusal
+
+process test.browser.utf8-hashes:
+  port mechanism.ports { groups = list("computation") } → computations
+  each list("", "\ufeff(\"life\", \"means\", \"ἀγάπη · AI\")", "😀 — Follow Jesus", "source\\ud800") as text:
+    port mechanism.get { target = $computations; key = "digest.sha256.sync"; keep = true } → hash
+    port mechanism.call { target = $hash; args = list({ text = $text }) } → actual
+    port digest.sha256 { text = $text } → expected
+    assert eq($actual, $expected)
+      otherwise "Browser and Node disagree on exact UTF-8 source identity."

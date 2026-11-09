@@ -1,0 +1,14 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.portfolio.document:
+  let body = $portfolioPage.body
+  let prefix = $portfolioPage.prefix
+  let pageTitle = $portfolioPage.title
+  let description = $portfolioPage.description
+  let canonical = $portfolioPage.canonical
+  let light = "assurance"
+  call publication.document
+  let surfaceWritePath = $portfolioPage.route
+  call assurance.surface.register
+  port file.write { path = $portfolioPage.route; text = $result } → _

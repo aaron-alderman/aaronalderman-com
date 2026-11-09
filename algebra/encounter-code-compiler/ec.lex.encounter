@@ -1,0 +1,66 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.lex:
+  port text.replaceAll { value = $text; search = "\r\n"; replacement = "\n" } → ecLexText
+  port text.split { value = $ecLexText; pattern = "\n" } → ecLines
+  fold $ecLines as ecRaw; ecLex starts { nodes = list(); stack = list(); line = 1; offset = 0; literals = {  } }:
+    try:
+      port text.trim { value = $ecRaw } → ecLine
+      port text.matches { value = $ecLine; pattern = "^(#.*)?$" } → ecSkip
+      let ecLexNext = $ecLex
+      when not($ecSkip):
+        let ecSpan = {
+          file = $file;
+          line = $ecLex.line;
+          column = 1;
+          offset = $ecLex.offset;
+          endOffset = add($ecLex.offset, count($ecRaw))
+        }
+        port text.matches { value = $ecRaw; pattern = "\t" } → ecTabs
+        assert not($ecTabs)
+          otherwise "EC-P001: Use spaces for indentation; tabs do not define a second nesting grammar."
+        port text.split { value = $ecRaw; pattern = "^( *)([\\s\\S]*)$" } → ecIndentParts
+        let ecIndent = count(at($ecIndentParts, 1))
+        let ecStack = filter($ecLex.stack, "ecParent", includes(range($ecIndent), add($ecParent.indent, 1)))
+        let ecParent = at($ecStack, add(count($ecStack), -1))
+        assert or(eq($ecIndent, 0), and($ecParent, eq($ecIndent, add(at($ecParent, "indent"), 2))))
+          otherwise "EC-P002: Indent a child exactly two spaces beyond its parent."
+        let ecLexNode = {
+          id = $ecLex.line;
+          line = $ecLex.line;
+          offset = $ecLex.offset;
+          raw = $ecRaw;
+          text = $ecLine;
+          indent = $ecIndent;
+          parent = if($ecParent, at($ecParent, "id"), 0)
+        }
+        port record.put { record = $ecLexNext; key = "nodes"; value = append($ecLex.nodes, list($ecLexNode)) } → ecLexNext
+        port record.put { record = $ecLexNext; key = "stack"; value = append($ecStack, list($ecLexNode)) } → ecLexNext
+        port text.matches { value = $ecLine; pattern = "(?:^|: |^- )(\"(?:\\\\[\\s\\S]|[^\"\\\\])*\")$" } → ecHasLiteral
+        when $ecHasLiteral:
+          port text.split { value = $ecLine; pattern = "(?:^|: |^- )(\"(?:\\\\[\\s\\S]|[^\"\\\\])*\")$" } → ecLiteralParts
+          let ecLiteralToken = at($ecLiteralParts, 1)
+          port static.read { text = $ecLiteralToken } → ecLiteralValue
+          port record.put { record = $ecLex.literals; key = $ecLiteralToken; value = $ecLiteralValue } → ecLiteralPool
+          port record.put { record = $ecLexNext; key = "literals"; value = $ecLiteralPool } → ecLexNext
+      port record.put { record = $ecLexNext; key = "line"; value = add($ecLex.line, 1) } → ecLexNext
+      port record.put {
+        record = $ecLexNext;
+        key = "offset";
+        value = add($ecLex.offset, add(count($ecRaw), 1))
+      } → ecLexNext
+    catch ecLocatedFault:
+      port text.matches { value = $ecLocatedFault.message; pattern = "^EC-DIAGNOSTIC:" } → ecAlreadyLocated
+      when $ecAlreadyLocated:
+        let ecUnreachable = raise($ecLocatedFault.message)
+      port value.encode {
+        value = {
+          protocol = "encounter/source-diagnostic/1";
+          span = $ecSpan;
+          message = $ecLocatedFault.message
+        }
+      } → ecDiagnosticWire
+      let ecUnreachable = raise(concat("EC-DIAGNOSTIC:", $ecDiagnosticWire))
+    yield $ecLexNext → ecLex
+  let result = $ecLex

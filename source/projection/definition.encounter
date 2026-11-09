@@ -1,0 +1,377 @@
+# The common projection definition. This is pinned operative Encounter policy,
+# not a second native renderer. Reading components and specialist components
+# lower to this closed tree; only this owner may issue projected artifact bytes.
+process-module "temple/surface-process-module/1"
+
+process projection.contract:
+  let result = {
+    protocol = "aaronalderman/common-projection/1";
+    kinds = list("markup", "stylesheet");
+    nodeFields = list("tag", "attrs", "children");
+    tags = "html head body title meta link base script style a abbr address article aside audio b blockquote br button canvas caption circle cite clipPath code col colgroup data datalist dd defs del desc details dfn dialog div dl dt ellipse em fieldset figcaption figure filter footer form g h1 h2 h3 h4 h5 h6 header hr i iframe img input kbd label legend li line linearGradient main mark mask nav noscript ol optgroup option output p path pattern picture polygon polyline pre progress q radialGradient rect s samp section select small source span stop strong sub summary sup svg symbol table tbody td template text textarea textPath th thead time tr track tspan u ul use var video wbr feGaussianBlur feOffset feMerge feMergeNode feColorMatrix feBlend feDropShadow feTurbulence feDisplacementMap feComposite feMorphology math semantics mrow mi mo msup annotation msub mfrac mn mspace msubsup mover mtext urlset url loc";
+    void = list("area", "base", "br", "col", "hr", "img", "input", "link", "meta", "source", "track", "wbr");
+    attributes = "id class title role lang dir hidden tabindex inert href src srcset sizes alt width height loading decoding fetchpriority rel target download hreflang type name value checked selected disabled readonly required multiple min max step maxlength minlength pattern placeholder autocomplete autofocus for form action method enctype accept inputmode rows cols wrap open start reversed scope colspan rowspan datetime cite charset content property http-equiv media as crossorigin integrity defer async sandbox allow allowfullscreen controls muted loop autoplay playsinline poster preload kind srclang label default xmlns xmlns:xlink viewBox preserveAspectRatio d x y x1 x2 y1 y2 cx cy r rx ry dx dy points fill fill-opacity fill-rule stroke stroke-width stroke-opacity stroke-linecap stroke-linejoin stroke-dasharray stroke-dashoffset opacity transform transform-origin offset stop-color stop-opacity gradientUnits gradientTransform spreadMethod clip-path clipPathUnits mask maskUnits filter filterUnits stdDeviation in in2 result mode values operator flood-color flood-opacity font-size font-family font-weight text-anchor dominant-baseline letter-spacing textLength lengthAdjust vector-effect focusable xlink:href style baseFrequency numOctaves scale xChannelSelector yChannelSelector color-interpolation-filters seed radius pathLength novalidate startOffset display encoding accent align";
+    # Named integration hooks may be classed without owning a visual rule.
+    hooks = "js is-active is-open is-visible active open selected ready loading error success paused on off assurance-products reading-sayings reading-pause reading-examples atlas-list-link lens-world doorway-hall identity-section-copy hierarchy-capabilities inspection-source-pane published-modules inspection-preview-pane module-reader full-reading reading-paths-return q-secondary place-page place-main flow ecosystem-links front-text plate-bg chapter--split chapter--flood sorcerer sound provenance columns distance gap-sentence gap-action slide ark-scene temple-panel identities presets journal-panel promise built screening-home field-essay-opening field-range-plot hh-timeline hh-period-nav hh-small hh-source field-correction-card hh-field-note reading-closing scroll-crayon-revision conversation emblem-will assurance-card appearance review-measures support review-trace review-rule hh-person hh-person-A hh-person-B hh-chart-person-A hh-chart-person-B field-eyebrow web-output sp-line sp-token sp-code reduce seal-label experiment-row no-js sp-plain sp-comment sp-keyword sp-string sp-property sp-number sp-boolean sp-reference sp-identifier sp-operator sp-punctuation sp-identity sp-predicate sp-type";
+    # Layout literals are migrated to shared component classes. Inline values
+    # are reserved for bounded chart geometry and declared data variables.
+    inlinePattern = "^(?:(?:left|top|width):[0-9]+(?:\\.[0-9]+)?%;?|--cell:-?(?:[0-9]+(?:\\.[0-9]+)?);?|--(?:x|y):-?[0-9]+(?:\\.[0-9]+)?%;?|--r:-?[0-9]+(?:\\.[0-9]+)?deg;?)+$";
+    layout = { "grid-template-columns:minmax(0,1fr);" = "projection-grid-one"; "width:100%;min-width:0;max-width:1140px;" = "projection-panel" };
+    activeDocuments = { activity = "retained/activity.html" }
+  }
+
+process projection.render:
+  call projection.contract
+  let projectionContract = $result
+  port text.split { value = $projectionContract.tags; pattern = " " } → tags
+  port text.split { value = $projectionContract.attributes; pattern = " " } → attributes
+  port record.put { record = $projectionContract; key = "tags"; value = $tags } → projectionContract
+  port record.put { record = $projectionContract; key = "attributes"; value = $attributes } → projectionContract
+  port text.split { value = $projectionContract.hooks; pattern = " " } → hooks
+  port record.put { record = $projectionContract; key = "hooks"; value = $hooks } → projectionContract
+  assert includes($projectionContract.kinds, $eventInput.kind)
+    otherwise "PROJECTION: Unknown projection kind."
+  let input = $eventInput.tree
+  let projectionClasses = $eventInput.classes
+  let result = ""
+  when eq($eventInput.kind, "markup"):
+    let projectionDepth = 0
+    call projection.node
+    let markup = $result
+    port kernel.invoke { query = "projection.documentCount"; input = { tree = $eventInput.tree } } → documents
+    assert includes(list(0, 1), $documents)
+      otherwise "PROJECTION: A document has exactly one HTML root."
+    let result = if(eq($documents, 1), concat("<!doctype html>\n", $markup), $markup)
+    when eq(at($eventInput.tree, "tag"), "urlset"):
+      let result = concat("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", $markup)
+  when eq($eventInput.kind, "stylesheet"):
+    call projection.css
+  let text = $result
+  let classes = list()
+  when eq($eventInput.kind, "stylesheet"):
+    port kernel.invoke { query = "projection.cssClasses"; input = { tree = $eventInput.tree } } → classes
+  let result = { text = $text; kind = $eventInput.kind; tree = $eventInput.tree; classes = $classes }
+
+process projection.escape:
+  port value.string { value = $input } → escaped
+  port text.replaceAll { value = $escaped; search = "&"; replacement = "&amp;" } → escaped
+  port text.replaceAll { value = $escaped; search = "<"; replacement = "&lt;" } → escaped
+  port text.replaceAll { value = $escaped; search = ">"; replacement = "&gt;" } → escaped
+  port text.replaceAll { value = $escaped; search = "\""; replacement = "&quot;" } → escaped
+  port text.replaceAll { value = $escaped; search = "'"; replacement = "&#39;" } → result
+
+process projection.node:
+  port number.calculate { operation = "lessEqual"; values = list($projectionDepth, 128) } → bounded
+  assert $bounded
+    otherwise "PROJECTION: Tree depth exceeded."
+  port value.describe { value = $input } → shape
+  let result = ""
+  when not(includes(list(null, false, at({}, "absent")), $input)):
+    when $shape.array:
+      fold $input as part; rendered starts "":
+        let input = $part
+        let projectionDepth = add($projectionDepth, 1)
+        call projection.node
+        yield concat($rendered, $result) → result
+    when and(not($shape.array), not(eq($shape.type, "object"))):
+      assert includes(list("string", "number", "boolean"), $shape.type)
+        otherwise "PROJECTION: A text leaf must be scalar."
+      call projection.escape
+    when and(not($shape.array), eq($shape.type, "object")):
+      let element = $input
+      port record.entries { value = $element } → fields
+      assert every($fields, "field", includes($projectionContract.nodeFields, at($field, 0)))
+        otherwise "PROJECTION: Undeclared element field."
+      let tag = at($element, "tag")
+      when not(includes($projectionContract.tags, $tag)):
+        let result = raise(concat("PROJECTION: Unknown element type: ", $tag))
+      let attrs = or(at($element, "attrs"), {})
+      let layout = at($projectionContract.layout, at($attrs, "style"))
+      when $layout:
+        port record.entries { value = $attrs } → entries
+        port record.fromEntries { entries = filter($entries, "entry", not(eq(at($entry, 0), "style"))) } → attrs
+        port record.put { record = $attrs; key = "class"; value = concat(or(at($attrs, "class"), ""), " ", $layout) } → attrs
+      port record.entries { value = $attrs } → attributes
+      fold $attributes as attribute; attributesText starts "":
+        let key = at($attribute, 0)
+        let value = at($attribute, 1)
+        port text.matches { value = $key; pattern = "^(?:aria|data)-[a-z][a-z0-9-]*$" } → extension
+        when not(or($extension, includes($projectionContract.attributes, $key))):
+          let result = raise(concat("PROJECTION: Undeclared attribute: ", $key))
+        let attributeText = ""
+        when not(includes(list(null, false, at({}, "absent")), $value)):
+          port value.describe { value = $value } → attributeShape
+          assert includes(list("string", "number", "boolean"), $attributeShape.type)
+            otherwise "PROJECTION: Attribute value must be scalar."
+          when eq($key, "style"):
+            port text.matches { value = $value; pattern = $projectionContract.inlinePattern } → declaredInline
+            assert $declaredInline
+              otherwise "PROJECTION: Layout belongs in the shared palette, not inline CSS."
+          when eq($key, "class"):
+            port text.split { value = $value; pattern = "\\s+" } → classes
+            when not(every($classes, "class", or(eq($class, ""), includes($projectionContract.hooks, $class), includes($projectionClasses, concat(".", $class))))):
+              let result = raise(concat("PROJECTION: Class is not defined by the common palette: ", $value))
+          let input = if(eq($value, true), "", $value)
+          call projection.escape
+          let attributeText = concat(" ", $key, "=\"", $result, "\"")
+        yield concat($attributesText, $attributeText) → attributesText
+      let children = or(at($element, "children"), list())
+      assert isArray($children)
+        otherwise "PROJECTION: Children must be a sequence."
+      when eq($tag, "head"):
+        let children = append($children, list({ tag = "link"; attrs = { rel = "stylesheet"; href = "/assets/projection.css" }; children = list() }))
+        when not(some($children, "child", and(eq(at($child, "tag"), "link"), includes(or(at(at($child, "attrs"), "rel"), ""), "icon")))):
+          let children = append($children, list({ tag = "link"; attrs = { rel = "icon"; type = "image/svg+xml"; href = "/assets/personal-mark.svg" }; children = list() }))
+      let childrenText = ""
+      when not(includes($projectionContract.void, $tag)):
+        when eq($tag, "style"):
+          assert every($children, "part", eq($part, ""))
+            otherwise "PROJECTION: Stylesheet text cannot be embedded as raw markup."
+        when not(eq($tag, "style")):
+          let input = $children
+          let projectionDepth = add($projectionDepth, 1)
+          call projection.node
+          let childrenText = $result
+      let result = concat("<", $tag, $attributesText, ">", if(includes($projectionContract.void, $tag), "", concat($childrenText, "</", $tag, ">")))
+
+process projection.css:
+  let cssNode = $input
+  assert includes(list("root", "comment", "decl", "rule", "atrule"), at($cssNode, "kind"))
+    otherwise "PROJECTION: Unknown stylesheet node."
+  port record.entries { value = $cssNode } → fields
+  let allowed = at({ root = list("kind", "children", "before", "after"); comment = list("kind", "before", "left", "text", "right", "after"); decl = list("kind", "before", "after", "property", "between", "value", "important", "semicolon"); rule = list("kind", "before", "after", "selector", "between", "children", "ownSemicolon"); atrule = list("kind", "before", "after", "name", "afterName", "params", "between", "children", "semicolon") }, $cssNode.kind)
+  assert every($fields, "field", includes($allowed, at($field, 0)))
+    otherwise "PROJECTION: Undeclared stylesheet field."
+  port text.matches { value = concat(or(at($cssNode, "before"), ""), or(at($cssNode, "after"), "")); pattern = "^\\s*$" } → trivia
+  assert $trivia
+    otherwise "PROJECTION: Stylesheet formatting must be whitespace."
+  fold or(at($cssNode, "children"), list()) as child; rendered starts "":
+    let input = $child
+    call projection.css
+    yield concat($rendered, $result) → children
+  let result = ""
+  when eq($cssNode.kind, "root"):
+    let result = concat($children, or(at($cssNode, "after"), ""))
+  when eq($cssNode.kind, "comment"):
+    port text.matches { value = concat(or(at($cssNode, "left"), ""), or(at($cssNode, "right"), "")); pattern = "^\\s*$" } → trivia
+    assert $trivia
+      otherwise "PROJECTION: Comment formatting must be whitespace."
+    port text.matches { value = $cssNode.text; pattern = "\\*/" } → escape
+    assert not($escape)
+      otherwise "PROJECTION: Comment escape refused."
+    let result = concat("/*", or(at($cssNode, "left"), ""), $cssNode.text, or(at($cssNode, "right"), ""), "*/")
+  when eq($cssNode.kind, "decl"):
+    port text.matches { value = $cssNode.property; pattern = "^(?:--?)?[a-zA-Z][a-zA-Z0-9-]*$" } → property
+    assert $property
+      otherwise "PROJECTION: Invalid stylesheet property."
+    port kernel.invoke { query = "projection.cssValue"; input = { text = $cssNode.value } } → _
+    port text.matches { value = or(at($cssNode, "between"), ":"); pattern = "^\\s*:\\s*$" } → between
+    port text.matches { value = concat(or(at($cssNode, "important"), "")); pattern = "^(?:\\s*!important)?$" } → important
+    port text.matches { value = concat(or(at($cssNode, "semicolon"), "")); pattern = "^;?$" } → semicolon
+    assert and($between, $important, $semicolon)
+      otherwise "PROJECTION: Stylesheet syntax cannot carry another declaration."
+    let result = concat($cssNode.property, if(eq(at($cssNode, "between"), at({}, "absent")), ":", at($cssNode, "between")), $cssNode.value, or(at($cssNode, "important"), ""), if(eq(at($cssNode, "semicolon"), at({}, "absent")), ";", at($cssNode, "semicolon")))
+  when eq($cssNode.kind, "rule"):
+    assert not(eq(at($cssNode, "selector"), null))
+      otherwise "PROJECTION: A style rule needs a selector."
+    port kernel.invoke { query = "projection.cssValue"; input = { text = $cssNode.selector } } → _
+    port text.matches { value = $cssNode.selector; pattern = "^\\s*@" } → hiddenAtRule
+    assert not($hiddenAtRule)
+      otherwise "PROJECTION: An at-rule cannot be expressed as a selector."
+    assert every(or(at($cssNode, "children"), list()), "child", includes(list("decl", "comment"), $child.kind))
+      otherwise "PROJECTION: Rule children must be declarations."
+    port text.matches { value = concat(or(at($cssNode, "between"), ""), or(at($cssNode, "ownSemicolon"), "")); pattern = "^\\s*;?$" } → syntax
+    assert $syntax
+      otherwise "PROJECTION: Invalid rule formatting."
+    let result = concat($cssNode.selector, or(at($cssNode, "between"), ""), "{", $children, or(at($cssNode, "after"), ""), "}", or(at($cssNode, "ownSemicolon"), ""))
+  when eq($cssNode.kind, "atrule"):
+    port text.matches { value = $cssNode.name; pattern = "^[a-zA-Z-]+$" } → name
+    assert $name
+      otherwise "PROJECTION: Invalid stylesheet at-rule."
+    assert includes(list("media", "supports", "font-face", "keyframes", "-webkit-keyframes", "layer", "container", "property", "page", "namespace", "charset", "starting-style"), $cssNode.name)
+      otherwise "PROJECTION: Unknown stylesheet at-rule."
+    port kernel.invoke { query = "projection.cssValue"; input = { text = concat(or(at($cssNode, "params"), "")) } } → _
+    port text.matches { value = concat(or(at($cssNode, "afterName"), ""), or(at($cssNode, "between"), ""), or(at($cssNode, "semicolon"), "")); pattern = "^\\s*;?$" } → syntax
+    assert $syntax
+      otherwise "PROJECTION: Invalid at-rule formatting."
+    let result = concat("@", $cssNode.name, if(eq(at($cssNode, "afterName"), at({}, "absent")), " ", at($cssNode, "afterName")), or(at($cssNode, "params"), ""), or(at($cssNode, "between"), ""), if(at($cssNode, "children"), concat("{", $children, or(at($cssNode, "after"), ""), "}"), if(eq(at($cssNode, "semicolon"), at({}, "absent")), ";", at($cssNode, "semicolon"))))
+  let result = concat(or(at($cssNode, "before"), ""), $result)
+
+process projection.cssValue:
+  port value.describe { value = $eventInput.text } → shape
+  assert includes(list("string", "number"), $shape.type)
+    otherwise "PROJECTION: CSS values must be scalar."
+  port value.string { value = $eventInput.text } → text
+  # Closed quoted strings and url() are CSS token observations, not executable
+  # source. Strip them before refusing declaration/block separators.
+  port text.replace { value = $text; pattern = "\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*'"; flags = "g"; replacement = "" } → text
+  port text.replace { value = $text; pattern = "url\\([^()]*\\)"; flags = "gi"; replacement = "" } → text
+  port text.matches { value = $text; pattern = "[{};\"']|/\\*|\\*/" } → escape
+  assert not($escape)
+    otherwise "PROJECTION: CSS token escapes its declared node."
+  let result = true
+
+process projection.output:
+  assert $eventInput.issued
+    otherwise "PROJECTION: Output was not issued by the common projection definition."
+  let result = true
+
+process projection.documentCount:
+  let tree = $eventInput.tree
+  let result = if(eq(at($tree, "tag"), "html"), 1, 0)
+  when isArray($tree):
+    fold $tree as child; count starts 0:
+      port kernel.invoke { query = "projection.documentCount"; input = { tree = $child } } → child
+      yield add($count, $child) → result
+
+process projection.combine:
+  assert eq($eventInput.kind, "stylesheet")
+    otherwise "PROJECTION: Only structured stylesheet outputs may be combined."
+  assert every($eventInput.entries, "entry", and($entry, eq($entry.kind, "stylesheet")))
+    otherwise "PROJECTION: Unissued stylesheet text cannot be combined."
+  port text.join { values = $eventInput.parts; separator = "" } → text
+  let result = { text = $text; kind = "stylesheet"; tree = { kind = "root"; children = map($eventInput.entries, "entry", $entry.tree) }; classes = list() }
+
+process projection.classes:
+  # CSS is already rendered from the common stylesheet tree. This observation
+  # extracts class tokens; it does not admit a stylesheet or mint an identity.
+  port text.matchAll { value = $eventInput.text; pattern = "\\.[_a-zA-Z][_a-zA-Z0-9-]*"; flags = "g" } → matches
+  let result = distinct(map($matches, "token", $token.text))
+
+process projection.cssClasses:
+  let tree = $eventInput.tree
+  let classes = list()
+  when eq($tree.kind, "rule"):
+    port kernel.invoke { query = "projection.classes"; input = { text = $tree.selector } } → classes
+  fold or(at($tree, "children"), list()) as child; classes starts $classes:
+    port kernel.invoke { query = "projection.cssClasses"; input = { tree = $child } } → found
+    yield append($classes, $found) → classes
+  let result = distinct($classes)
+
+process projection.route:
+  let name = $eventInput.name
+  let family = null
+  port text.matches { value = $name; pattern = "^(?:index|atlas|gate|reader|questions(?:-author|-dad|-sourcerer)?)\\.html$" } → root
+  when $root:
+    let family = "entrance"
+  port text.matches { value = $name; pattern = "^(?:worlds/(?:author|christian|dad|sourcerer)/)?places/[a-z0-9-]+\\.html$" } → place
+  when $place:
+    let family = "place"
+  port text.matches { value = $name; pattern = "^worlds/(?:author|christian|dad|sourcerer)/(?:index|threads|atlas|questions)\\.html$" } → world
+  when $world:
+    let family = "identity"
+  port text.matches { value = $name; pattern = "^(?:writing/(?:[a-z0-9-]+/)?|worlds/dad/threads/growing-up-in-the-way-of-jesus/(?:room-to-grow/)?|assurance/(?:[a-z0-9-]+/)?)index\\.html$" } → reading
+  when $reading:
+    let family = "reading-and-assurance"
+  port text.matches { value = $name; pattern = "^inspection/[a-z0-9-]+\\.html$|^(?:the-field/(?:correction/|households/(?:inspect/)?)?|temple/(?:films/)?|sourcery/(?:films/)?|claimipedia/|claimipedia-science/|creativity/|creator-studio/|encounter/|foundry/|harborboard/|kingdom/|mission/|mission-control/|relational-geometry/|relationship-manager/|roadmap/|simulation/|supercrm/|timesheet/|tradie/|usewords/|workgarden/|world-modelling/|worldwright/)index\\.html$" } → specialist
+  when $specialist:
+    let family = "specialist"
+  port text.matches { value = $name; pattern = "^(?:retained/(?:index|activity)\\.html|(?:retained/)?workshop/(?:index|encounter-story)\\.html)$" } → workshop
+  when $workshop:
+    let family = "reader-and-workshop"
+  port text.matches { value = $name; pattern = "^(?:expedition|activity|style|enchantment|reading|territories|wider-world|(?:retained/)?(?:style|enchantment|reading|territories|wider-world)|(?:source/)?reader/reader|(?:retained/)?workshop/style|assets/(?:microsite-return|projection)|claimipedia/claimipedia|encounter/encounter|sourcery/assets/css/story|temple/assets/covenant|the-field/correction/article)\\.css$" } → stylesheet
+  when $stylesheet:
+    let family = "stylesheet"
+  port text.matches { value = $name; pattern = "^assurance/images/(?:main|christian|dad|sourcerer|author|counterexample-broken|counterexample-size)\\.html$|^assets/assurance\\.css$" } → imageAssurance
+  when $imageAssurance:
+    let family = if(eq($name, "assets/assurance.css"), "stylesheet", "image-assurance")
+  when eq($name, "sitemap.xml"):
+    let family = "sitemap"
+  port text.matches { value = $name; pattern = "^(?:assets/personal-mark|claimipedia/mark|encounter/mark)\\.svg$" } → mark
+  when $mark:
+    let family = "identity-mark"
+  assert $family
+    otherwise "PROJECTION: Undeclared page or stylesheet family."
+  let result = $family
+
+process projection.class:
+  call projection.contract
+  port text.split { value = $result.hooks; pattern = " " } → hooks
+  let name = $eventInput.name
+  port text.split { value = concat($name); pattern = "\\s+" } → names
+  assert every($names, "name", or(eq($name, ""), includes($hooks, $name), includes($eventInput.classes, concat(".", $name))))
+    otherwise "PROJECTION: Dynamic class is not defined by the common palette."
+  let result = true
+
+process projection.style:
+  let name = $eventInput.name
+  let value = $eventInput.value
+  assert includes(list("display", "width", "grid-template-columns", "--turn", "--p", "--noise"), $name)
+    otherwise "PROJECTION: Undeclared dynamic style slot."
+  when not(eq($value, null)):
+    let valid = false
+    when eq($name, "display"):
+      let valid = includes(list("", "none"), $value)
+    when eq($name, "width"):
+      port text.matches { value = $value; pattern = "^[0-9]+(?:\\.[0-9]+)?%$" } → valid
+    when eq($name, "grid-template-columns"):
+      port text.matches { value = $value; pattern = "^repeat\\([1-9][0-9]?, 1fr\\)$" } → valid
+    when eq($name, "--turn"):
+      port text.matches { value = $value; pattern = "^-?[0-9]+(?:\\.[0-9]+)?deg$" } → valid
+    when eq($name, "--p"):
+      port value.describe { value = $value } → shape
+      when and(eq($shape.type, "number"), $shape.finite):
+        port number.calculate { operation = "greaterEqual"; values = list($value, 0) } → lower
+        port number.calculate { operation = "lessEqual"; values = list($value, 1) } → upper
+        let valid = and($lower, $upper)
+      when eq($shape.type, "string"):
+        # A motion component may supply its explicitly formatted progress scalar.
+        port text.matches { value = $value; pattern = "^(?:0(?:\\.[0-9]{1,6})?|1(?:\\.0{1,6})?)$" } → valid
+    when eq($name, "--noise"):
+      port text.matches { value = $value; pattern = "^url\\(data:image/png;base64,[A-Za-z0-9+/=]+\\)$" } → valid
+    assert $valid
+      otherwise "PROJECTION: Invalid value for a dynamic style slot."
+  let result = true
+
+process projection.inline:
+  call projection.contract
+  port text.matches { value = concat($eventInput.value); pattern = $result.inlinePattern } → valid
+  assert or(eq($eventInput.value, null), $valid)
+    otherwise "PROJECTION: Arbitrary inline layout is refused."
+  let result = true
+
+process projection.attribute:
+  call projection.contract
+  port text.split { value = $result.attributes; pattern = " " } → attributes
+  port text.matches { value = $eventInput.name; pattern = "^(?:aria|data)-[a-z][a-z0-9-]*$" } → extension
+  assert or($extension, includes($attributes, $eventInput.name))
+    otherwise "PROJECTION: Undeclared dynamic attribute."
+  let result = true
+
+process projection.mount:
+  assert eq($eventInput.kind, if(eq($eventInput.tag, "style"), "stylesheet", "markup"))
+    otherwise "PROJECTION: DOM mounting requires the matching issued projection kind."
+  let result = true
+
+process projection.activeFrame:
+  call projection.contract
+  let route = at($result.activeDocuments, at($eventInput.attributes, "data-projection-frame"))
+  let result = false
+  when and($route, at($eventInput.attributes, "src")):
+    port url.observe { value = $eventInput.attributes.src; base = $eventInput.base } → target
+    port url.observe { value = $eventInput.base; base = $eventInput.base } → original
+    let result = and(eq($target.origin, $original.origin), eq($target.path, $route))
+
+process projection.stylesheetReference:
+  port url.observe { value = $eventInput.href; base = $eventInput.base } → target
+  port url.observe { value = $eventInput.base; base = $eventInput.base } → original
+  assert eq($target.origin, $original.origin)
+    otherwise "PROJECTION: External stylesheets bypass the common definition."
+  port kernel.invoke { query = "projection.route"; input = { name = $target.path } } → family
+  assert eq($family, "stylesheet")
+    otherwise "PROJECTION: A stylesheet reference must use a declared stylesheet path."
+  when eq($eventInput.mode, "final"):
+    let artifact = at($eventInput.artifacts, $target.path)
+    assert and($artifact, eq(at($artifact, "issuedProjection"), "stylesheet"))
+      otherwise "PROJECTION: Stylesheet reference was not issued by the common definition."
+  let result = true
+
+process projection.assetSources:
+  let facts = $eventInput.facts
+  let assets = distinct(map(filter($facts, "fact", and(eq($fact.p, "isa"), eq($fact.o, "PublicationAsset"))), "fact", $fact.s))
+  let names = filter($facts, "fact", and(eq($fact.p, "path"), includes($assets, $fact.s)))
+  assert and(eq(count($names), count($assets)), eq(count(distinct(map($names, "name", $name.s))), count($assets)))
+    otherwise "PROJECTION: An opaque asset needs one declared source path."
+  fold $names as name; paths starts list():
+    port text.matches { value = $name.o; pattern = "\\.svg$"; flags = "i" } → graphic
+    yield if($graphic, append($paths, list($name.o)), $paths) → result

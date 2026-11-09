@@ -1,0 +1,14 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process claim.review.boot:
+  port state.set { key = "selected"; value = map($data.configuration.evidence, "e", $e.id) } → _
+  port browser.on {
+    ref = "#review-evidence";
+    event = "change";
+    query = "claim.review.change";
+    input = {  };
+    delegate = "input[data-evidence]"
+  } → _
+  port browser.on { ref = "#review-reset"; event = "click"; query = "claim.review.reset"; input = {  } } → _
+  port kernel.invoke { query = "claim.review.render"; input = {  } } → result

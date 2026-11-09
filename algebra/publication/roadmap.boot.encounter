@@ -1,0 +1,44 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process roadmap.boot:
+  port asset.text { url = "../assurance/topics.values.rel"; cache = "no-store" } → todoJSON
+  port static.read { text = $todoJSON } → todotopics
+  port asset.text { url = "../assurance/identity-mappings.values.rel"; cache = "no-store" } → todoJSON
+  port static.read { text = $todoJSON } → todoidentity
+  port asset.text { url = "../assurance/navigation-layout.values.rel"; cache = "no-store" } → todoJSON
+  port static.read { text = $todoJSON } → todosource
+  port asset.text { url = "../assurance/rendered-layout.values.rel"; cache = "no-store" } → todoJSON
+  port static.read { text = $todoJSON } → todorendered
+  let eventInput = {
+    topics = $todotopics;
+    identity = $todoidentity;
+    source = $todosource;
+    rendered = $todorendered;
+    workflow = $data.workflow
+  }
+  call roadmap.derive
+  port state.set { key = "roadmap"; value = $result } → _
+  port value.encode { value = $result } → todoExport
+  port browser.write { ref = "#todo-json"; name = "value"; value = $todoExport } → _
+  port browser.on { ref = "#todo-controls"; event = "change"; query = "roadmap.refresh"; input = {  } } → _
+  port state.get { key = "roadmap" } → todoReport
+  let input = {
+    tag = "select";
+    attrs = { id = "todo-product" };
+    children = list(
+      { tag = "option"; attrs = { value = "all" }; children = list("All products") },
+      {
+        tag = "optgroup";
+        attrs = { label = "Products" };
+        children = map(
+          $todoReport.products,
+          "product",
+          { tag = "option"; attrs = { value = $product.id }; children = list($product.name) }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  port browser.content { ref = "#todo-product-host"; html = $result } → _
+  call roadmap.refresh

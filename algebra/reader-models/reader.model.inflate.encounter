@@ -1,0 +1,14 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process reader.model.inflate:
+  port number.parse { value = $eventInput.step } → step
+  port number.calculate { operation = "max"; values = list(0, $step) } → step
+  port number.calculate { operation = "min"; values = list(5, $step) } → step
+  port number.calculate { operation = "ceil"; values = list($step) } → step
+  fold range($step) as iteration; pair starts { a = 1; b = 1 }:
+    port number.calculate { operation = "multiply"; values = list(2, $pair.a) } → double
+    port number.calculate { operation = "add"; values = list($double, $pair.b) } → a
+    port number.calculate { operation = "add"; values = list($pair.a, $pair.b) } → b
+    yield { a = $a; b = $b } → pair
+  let result = list($pair.a, $pair.b)

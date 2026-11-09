@@ -1,0 +1,16 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.surface.register:
+  port text.matches { value = $surfaceWritePath; pattern = "\\.(?:html|css)$" } → surfaceIsHTML
+  when $surfaceIsHTML:
+    let surfaceRegistryAvailable = true
+    try:
+      port file.read { path = "assurance/generated-pages.values.rel" } → surfaceRegistryJSON
+    catch surfaceRegistryError:
+      let surfaceRegistryAvailable = false
+    when $surfaceRegistryAvailable:
+      port static.read { text = $surfaceRegistryJSON } → surfaceRegistry
+      port record.put { record = $surfaceRegistry; key = $surfaceWritePath; value = true } → surfaceRegistry
+      port value.encode { value = $surfaceRegistry } → surfaceRegistryJSON
+      port file.write { path = "assurance/generated-pages.values.rel"; text = $surfaceRegistryJSON } → _

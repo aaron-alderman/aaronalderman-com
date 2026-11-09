@@ -1,0 +1,27 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process workshop.process:
+  let spPolicy = $data.presentation.spPolicy
+  let spGrammar = $data.presentation.spGrammar
+  port state.get { key = "workshop" } → snapshot
+  port browser.property { ref = "#process-file"; name = "value" } → selection
+  let query = at(
+    {
+      navigation = "code.story.view.experiment.nav.story";
+      web = "code.story.representation.WebLink";
+      row = "code.story.representation.MainframeRow";
+      resolve = "ec.resolve";
+      patch = "ec.patch";
+      corePatch = "ec.patch";
+      serialize = "projection.serialize";
+      live = "lab.edit"
+    },
+    $selection
+  )
+  let programme = or(at($snapshot.candidate.model.queries, $query), at($data.processes, $query))
+  port kernel.invoke {
+    query = "sp.listing";
+    input = { programme = $programme; origin = { file = "algebra"; query = $query } }
+  } → listing
+  port browser.write { ref = "#process-code"; name = "textContent"; value = $listing.text } → _

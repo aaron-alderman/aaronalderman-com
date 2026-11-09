@@ -1,0 +1,1179 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.portfolio.build:
+  let identityTopicReport = $report
+  let eventInput = { pages = $discoveryPages }
+  call assurance.entry.observe
+  let entryEvidence = $result
+  let entryCoverage = and(
+    not(eq(count($entryEvidence), 0)),
+    eq(count($entryEvidence), count($discoveryDocuments)),
+    every(
+      $discoveryDocuments,
+      "expected",
+      eq(count(filter($entryEvidence, "p", eq($p.file, $expected.file))), 1)
+    )
+  )
+  let obligations = map(
+    subjects("isa", "AssuranceObligation"),
+    "s",
+    {
+      id = one($s, "id");
+      saga = one($s, "saga");
+      level = add(one($s, "level"), 0);
+      kind = one($s, "kind");
+      label = one($s, "label");
+      next = one($s, "next")
+    }
+  )
+  let levelNames = {
+    "0" = "Unassessed";
+    "1" = "Scoped";
+    "2" = "Mechanically checked";
+    "3" = "Human reviewed";
+    "4" = "Experienced in use";
+    "5" = "Maintained"
+  }
+  fold subjects("isa", "AssuranceSaga") as sagaSubject; profiles starts list():
+    let sagaId = one($sagaSubject, "id")
+    let scopeId = one($sagaSubject, "scopeId")
+    let sagaGates = filter($obligations, "g", eq($g.saga, $sagaId))
+    fold $sagaGates as g; evidence starts list():
+      let available = includes(
+        list(
+          "identity.scope",
+          "identity.pipeline",
+          "access.scope",
+          "access.language",
+          "access.skip",
+          "access.alternatives",
+          "i18n.scope",
+          "i18n.metadata"
+        ),
+        $g.id
+      )
+      let ok = if(
+        eq($g.kind, "declaration"),
+        not(eq(one($sagaSubject, "scope"), "")),
+        if(
+          eq($g.id, "identity.pipeline"),
+          and(
+            eq(count(filter($identityTopicReport.rows, "r", eq($r.status, "missing"))), 0),
+            eq(count($entryEvidence), add(count(subjects("isa", "IdentityTheme")), 1))
+          ),
+          if(
+            eq($g.id, "access.language"),
+            every($entryEvidence, "p", $p.languageMarker),
+            if(
+              eq($g.id, "access.skip"),
+              every($entryEvidence, "p", $p.skipTarget),
+              if(
+                eq($g.id, "access.alternatives"),
+                every($entryEvidence, "p", $p.altAttributes),
+                if(
+                  eq($g.id, "i18n.metadata"),
+                  every($entryEvidence, "p", and($p.languageMarker, $p.utf8)),
+                  false
+                )
+              )
+            )
+          )
+        )
+      )
+      let method = if(
+        eq($g.kind, "declaration"),
+        "Authored scope and explicit boundaries.",
+        if(
+          eq($g.id, "identity.pipeline"),
+          "Current identity mapping and discovery reports; undecided groups remain open work.",
+          "Current generated entry markup; presence checks only."
+        )
+      )
+      let ok = if(eq($g.kind, "machine"), and($entryCoverage, $ok), $ok)
+      let proof = {
+        id = $g.id;
+        kind = $g.kind;
+        scope = $scopeId;
+        ok = $ok;
+        source = if(
+          eq($g.kind, "declaration"),
+          "source/hierarchy.rel",
+          if(
+            eq($g.id, "identity.pipeline"),
+            "/assurance/identity-mappings.values.rel",
+            "/assurance/entry-markup.values.rel"
+          )
+        );
+        issuer = if(eq($g.kind, "declaration"), "Authored scope record", "Algebra build");
+        method = $method;
+        observedAt = "current build"
+      }
+      yield if($available, append($evidence, list($proof)), $evidence) → evidence
+    let eventInput = {
+      id = $sagaId;
+      title = one($sagaSubject, "title");
+      scopeText = one($sagaSubject, "scope");
+      scope = $scopeId;
+      obligations = $sagaGates;
+      evidence = $evidence
+    }
+    call assurance.saga.classify
+    yield append($profiles, list($result)) → sagaProfiles
+  let roadmap = fold(
+    $sagaProfiles,
+    "s",
+    "rows",
+    list(),
+    append(
+      $rows,
+      map(
+        filter($s.gates, "g", not(eq($g.status, "supported"))),
+        "g",
+        {
+          id = $g.id;
+          saga = $s.id;
+          label = $g.label;
+          targetLevel = $g.level;
+          state = $g.status;
+          horizon = if(eq($g.level, $s.nextLevel), "next", "later");
+          action = $g.next;
+          owner = "Unassigned";
+          product = "aaronalderman"
+        }
+      )
+    )
+  )
+  call assurance.catalogue.build
+  let portfolioReport = {
+    protocol = "worldwright/assurance-portfolio/1";
+    product = "aaronalderman";
+    scope = "Five homepage entry routes plus 18 catalogue front doors; every product and saga retains its own bounded scope.";
+    levels = map(
+      subjects("isa", "AssuranceLevel"),
+      "s",
+      {
+        number = add(one($s, "number"), 0);
+        label = one($s, "label");
+        meaning = one($s, "meaning")
+      }
+    );
+    entryCoverage = $entryCoverage;
+    topics = map(
+      subjects("isa", "AssuranceTopic"),
+      "s",
+      {
+        id = one($s, "id");
+        title = one($s, "title");
+        href = one($s, "href");
+        description = one($s, "description");
+        sagas = map(objects($s, "saga"), "a", one($a, "id"))
+      }
+    );
+    sagas = $sagaProfiles;
+    roadmap = append($roadmap, $catalogueRoadmap);
+    products = append(
+      list(
+        {
+          id = "aaronalderman";
+          name = "Aaron Alderman website";
+          scope = "Homepage entry routes only";
+          profiles = map($sagaProfiles, "s", { saga = $s.id; level = $s.level })
+        }
+      ),
+      $catalogueProducts
+    );
+    boundary = "Evidence maturity is scoped by product and saga. Catalogue delivery labels do not supply assurance. No composite product score is calculated. These levels are separate from WCAG conformance or promised locale support. Higher-level review, use and maintenance receipts are not supplied by this release."
+  }
+  port value.encode {
+    value = {
+      protocol = "worldwright/entry-markup/1";
+      scope = "Five generated homepage entry routes";
+      pages = $entryEvidence;
+      boundary = "Language, skip-target and image-alt attribute presence only. Empty alt text may be appropriate for decoration; meaning, browser behaviour and accessibility conformance require evaluation."
+    }
+  } → entryJSON
+  port file.write { path = "assurance/entry-markup.values.rel"; text = $entryJSON } → _
+  port value.encode { value = $portfolioReport } → portfolioJSON
+  port file.write { path = "assurance/topics.values.rel"; text = $portfolioJSON } → _
+  let portfolioPage = {
+    route = "assurance/index.html";
+    prefix = "../";
+    canonical = "https://aaronalderman.com/assurance/";
+    title = "Assurance topics — Aaron Alderman";
+    description = "Scoped assurance topics, evidence maturity and the next work needed to strengthen each claim.";
+    body = list(
+      {
+        tag = "section";
+        attrs = { class = "assurance-intro" };
+        children = list(
+          { tag = "p"; attrs = { class = "eyebrow" }; children = list("ASSURANCE / TOPICS") },
+          { tag = "h1"; attrs = {  }; children = list("What can we stand behind?") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Assurance is a collection of questions about a product. Each topic declares its scope, shows its evidence and keeps its unfinished work visible."
+            )
+          },
+          {
+            tag = "svg";
+            attrs = {
+              viewBox = "0 0 160 180";
+              fill = "none";
+              "aria-hidden" = "true";
+              class = "assurance-shield"
+            };
+            children = list(
+              {
+                tag = "circle";
+                attrs = { cx = 80; cy = 82; r = 68; stroke = "#c5dcd2"; "stroke-width" = 1 };
+                children = list()
+              },
+              {
+                tag = "path";
+                attrs = {
+                  d = "M80 12 137 36v49c0 37-25 63-57 80-32-17-57-43-57-80V36Z";
+                  fill = "#e1efe7";
+                  stroke = "#216257";
+                  "stroke-width" = 2
+                };
+                children = list()
+              },
+              {
+                tag = "path";
+                attrs = {
+                  d = "M80 30 120 47v37c0 28-18 48-40 63-22-15-40-35-40-63V47Z";
+                  fill = "#faf9f1";
+                  stroke = "#b48a43";
+                  "stroke-width" = 2
+                };
+                children = list()
+              },
+              {
+                tag = "path";
+                attrs = {
+                  d = "M57 84 74 101 105 66";
+                  stroke = "#216257";
+                  "stroke-width" = 5;
+                  "stroke-linecap" = "round";
+                  "stroke-linejoin" = "round"
+                };
+                children = list()
+              }
+            )
+          }
+        )
+      },
+      {
+        tag = "div";
+        attrs = { class = "assurance-proof-strip" };
+        children = list(
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              { tag = "strong"; attrs = {  }; children = list(count($catalogueProducts)) },
+              " catalogue front doors assessed"
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              { tag = "strong"; attrs = {  }; children = list(count($portfolioReport.topics)) },
+              " independent assurance topics"
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              { tag = "strong"; attrs = {  }; children = list("Evidence before confidence") },
+              " · open gaps stay visible"
+            )
+          }
+        )
+      },
+      {
+        tag = "div";
+        attrs = { class = "assurance-topic-grid" };
+        children = list(
+          map(
+            $portfolioReport.topics,
+            "t",
+            {
+              tag = "section";
+              attrs = { class = "assurance-boundary"; "data-topic" = $t.id };
+              children = list(
+                {
+                  tag = "p";
+                  attrs = { class = "assurance-symbol"; "aria-hidden" = "true" };
+                  children = list(if(eq($t.id, "identity"), "◈", if(eq($t.id, "accessibility"), "◎", "✺")))
+                },
+                {
+                  tag = "h2";
+                  attrs = {  };
+                  children = list({ tag = "a"; attrs = { href = $t.href }; children = list($t.title) })
+                },
+                { tag = "p"; attrs = {  }; children = list($t.description) },
+                {
+                  tag = "ul";
+                  attrs = {  };
+                  children = list(
+                    map(
+                      filter($sagaProfiles, "s", includes($t.sagas, $s.id)),
+                      "s",
+                      {
+                        tag = "li";
+                        attrs = {  };
+                        children = list($s.title, " · Level ", $s.level, " — ", at($levelNames, concat("", $s.level)))
+                      }
+                    )
+                  )
+                },
+                if(
+                  eq($t.id, "identity"),
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(
+                      concat(
+                        "Identity inventory: ",
+                        count($identityTopicReport.rows),
+                        " review rows; open work remains visible in the detailed report."
+                      )
+                    )
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list("This topic has its own evidence gates, scope and roadmap.")
+                  }
+                )
+              )
+            }
+          )
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("From assurance to a product roadmap") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "A roadmap item names the evidence needed for the next level. Product maturity is a profile across topics, with scope and open work alongside each level."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "/assurance/maturity/" };
+                children = list("Explore maturity profiles and the evidence roadmap →")
+              }
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "topics.values.rel" };
+                children = list("Download topics, levels and roadmap evidence ↗")
+              }
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("Identity report shortcuts") },
+          map(
+            list("intentionally-invariant", "identity-mapped", "missing", "undecided"),
+            "status",
+            {
+              tag = "p";
+              attrs = { id = concat("status-", $status) };
+              children = list(
+                {
+                  tag = "a";
+                  attrs = { href = concat("/assurance/identities/#status-", $status) };
+                  children = list("Identity report: ", $status)
+                }
+              )
+            }
+          )
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("Navigation & layout") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list("Site-wide publication checks with visible layout evidence gaps.")
+          },
+          {
+            tag = "a";
+            attrs = { href = "navigation-layout/" };
+            children = list("Inspect navigation and spacing →")
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("Rendered layout") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Desktop and mobile geometry, heading containment, overflow and spacing candidates."
+            )
+          },
+          {
+            tag = "a";
+            attrs = { href = "rendered-layout/" };
+            children = list("Inspect measured browser findings →")
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("General roadmap") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Assurance findings feed the general roadmap alongside declared product plans and other work."
+            )
+          },
+          {
+            tag = "a";
+            attrs = { href = "../roadmap/" };
+            children = list("Open the general roadmap →")
+          }
+        )
+      }
+    )
+  }
+  call assurance.portfolio.document
+  # These routes have dedicated admitted publishers; the catalogue may link
+  # them, but must not overwrite their documents with the generic template.
+  each filter($portfolioReport.topics, "topic", not(includes(list("identity", "contrast", "reading-experience", "plain-language"), $topic.id))) as topic:
+    let portfolioPage = {
+      route = concat("assurance/", $topic.id, "/index.html");
+      prefix = "../../";
+      canonical = concat("https://aaronalderman.com", $topic.href);
+      title = concat($topic.title, " assurance — Aaron Alderman");
+      description = $topic.description;
+      body = list(
+        {
+          tag = "section";
+          attrs = { class = "assurance-intro" };
+          children = list(
+            {
+              tag = "p";
+              attrs = {  };
+              children = list(
+                {
+                  tag = "a";
+                  attrs = { href = "/assurance/" };
+                  children = list("← All assurance topics")
+                }
+              )
+            },
+            {
+              tag = "p";
+              attrs = { class = "eyebrow" };
+              children = list("ASSURANCE / INDEPENDENT TOPIC")
+            },
+            {
+              tag = "h1";
+              attrs = {  };
+              children = list(
+                if(
+                  eq($topic.id, "accessibility"),
+                  "Who can take part?",
+                  "Ready for other languages and locales?"
+                )
+              )
+            },
+            { tag = "p"; attrs = {  }; children = list($topic.description) },
+            {
+              tag = "p";
+              attrs = {  };
+              children = list(
+                "The current assessment covers five homepage entry routes. Levels describe evidence maturity within that scope; every topic keeps its own requirements and open work."
+              )
+            },
+            {
+              tag = "svg";
+              attrs = {
+                viewBox = "0 0 160 180";
+                fill = "none";
+                "aria-hidden" = "true";
+                class = "assurance-shield"
+              };
+              children = list(
+                {
+                  tag = "circle";
+                  attrs = { cx = 80; cy = 82; r = 68; stroke = "#c5dcd2"; "stroke-width" = 1 };
+                  children = list()
+                },
+                {
+                  tag = "path";
+                  attrs = {
+                    d = "M80 12 137 36v49c0 37-25 63-57 80-32-17-57-43-57-80V36Z";
+                    fill = "#e1efe7";
+                    stroke = "#216257";
+                    "stroke-width" = 2
+                  };
+                  children = list()
+                },
+                {
+                  tag = "path";
+                  attrs = {
+                    d = "M80 30 120 47v37c0 28-18 48-40 63-22-15-40-35-40-63V47Z";
+                    fill = "#faf9f1";
+                    stroke = "#b48a43";
+                    "stroke-width" = 2
+                  };
+                  children = list()
+                },
+                {
+                  tag = "path";
+                  attrs = {
+                    d = "M57 84 74 101 105 66";
+                    stroke = "#216257";
+                    "stroke-width" = 5;
+                    "stroke-linecap" = "round";
+                    "stroke-linejoin" = "round"
+                  };
+                  children = list()
+                }
+              )
+            }
+          )
+        },
+        map(
+          filter($sagaProfiles, "s", includes($topic.sagas, $s.id)),
+          "s",
+          {
+            tag = "section";
+            attrs = { class = "assurance-boundary"; id = concat("saga-", $s.id) };
+            children = list(
+              { tag = "h2"; attrs = {  }; children = list($s.title) },
+              {
+                tag = "p";
+                attrs = {  };
+                children = list(
+                  {
+                    tag = "strong";
+                    attrs = {  };
+                    children = list("Level ", $s.level, " — ", at($levelNames, concat("", $s.level)))
+                  }
+                )
+              },
+              { tag = "p"; attrs = {  }; children = list($s.scope) },
+              {
+                tag = "ul";
+                attrs = {  };
+                children = list(
+                  map(
+                    $s.gates,
+                    "g",
+                    {
+                      tag = "li";
+                      attrs = {  };
+                      children = list(
+                        { tag = "strong"; attrs = {  }; children = list($g.label) },
+                        " · ",
+                        $g.status,
+                        " · level ",
+                        $g.level,
+                        if(
+                          eq($g.status, "supported"),
+                          { tag = "span"; attrs = {  }; children = list(" — ", at(at($g, "evidence"), "method")) },
+                          { tag = "span"; attrs = {  }; children = list(" — ", $g.next) }
+                        )
+                      )
+                    }
+                  )
+                )
+              },
+              {
+                tag = "p";
+                attrs = {  };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = concat("/assurance/maturity/#roadmap-", $s.id) };
+                    children = list("See the evidence roadmap →")
+                  }
+                )
+              }
+            )
+          }
+        ),
+        {
+          tag = "section";
+          attrs = { class = "assurance-boundary" };
+          children = list(
+            { tag = "h2"; attrs = {  }; children = list("What the current evidence establishes") },
+            {
+              tag = "p";
+              attrs = {  };
+              children = list(
+                if(
+                  eq($topic.id, "accessibility"),
+                  "The automatic checks cover document language markers, a skip link with its target and image alt-attribute presence. Alternative-text meaning, focus order, keyboard operation, assistive technology, reflow and visual contrast remain evaluation work. WCAG conformance requires a separate scoped evaluation.",
+                  "Language and UTF-8 markers are observed. Supported locale commitments, message/content externalisation, locale selection, fallback, formatting and text direction have not been evidenced by this assessment. Linguistic and cultural review are later obligations."
+                )
+              )
+            },
+            {
+              tag = "p";
+              attrs = {  };
+              children = list(
+                {
+                  tag = "a";
+                  attrs = { href = "../entry-markup.values.rel" };
+                  children = list("Inspect the generated markup evidence ↗")
+                }
+              )
+            }
+          )
+        },
+        {
+          tag = "section";
+          attrs = { class = "assurance-boundary" };
+          children = list(
+            { tag = "h2"; attrs = {  }; children = list("Evaluation reference") },
+            {
+              tag = "p";
+              attrs = {  };
+              children = list(
+                {
+                  tag = "a";
+                  attrs = {
+                    href = if(
+                      eq($topic.id, "accessibility"),
+                      "https://www.w3.org/WAI/test-evaluate/",
+                      "https://www.w3.org/International/questions/qa-i18n"
+                    )
+                  };
+                  children = list(
+                    if(
+                      eq($topic.id, "accessibility"),
+                      "W3C: evaluating web accessibility ↗",
+                      "W3C: internationalisation and localisation ↗"
+                    )
+                  )
+                }
+              )
+            },
+            {
+              tag = "p";
+              attrs = {  };
+              children = list("Human and audience evaluation receipts have not been recorded for this saga.")
+            }
+          )
+        },
+        {
+          tag = "section";
+          attrs = { class = "assurance-boundary" };
+          children = list(
+            { tag = "h2"; attrs = {  }; children = list("Catalogue product assessments") },
+            {
+              tag = "p";
+              attrs = {  };
+              children = list(
+                concat(
+                  "All ",
+                  count($catalogueProducts),
+                  " catalogue front doors now have independent product profiles. Automatic checks report their own passes and failures; human and locale evidence remains open."
+                )
+              )
+            },
+            {
+              tag = "a";
+              attrs = { href = "/assurance/maturity/" };
+              children = list("Compare products and inspect their evidence →")
+            }
+          )
+        }
+      )
+    }
+    call assurance.portfolio.document
+  let portfolioPage = {
+    route = "assurance/maturity/index.html";
+    prefix = "../../";
+    canonical = "https://aaronalderman.com/assurance/maturity/";
+    title = "Product maturity & evidence roadmap — Aaron Alderman";
+    description = "A scoped maturity profile by assurance saga, and the evidence work needed to advance it.";
+    body = list(
+      {
+        tag = "section";
+        attrs = { class = "assurance-intro" };
+        children = list(
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "/assurance/" };
+                children = list("← All assurance topics")
+              }
+            )
+          },
+          {
+            tag = "p";
+            attrs = { class = "eyebrow" };
+            children = list("ASSURANCE / MATURITY & ROADMAP")
+          },
+          { tag = "h1"; attrs = {  }; children = list("Maturity that shows its work.") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Each product has a profile across assurance topics. The level records the evidence available for a stated scope; open obligations remain visible."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "A catalogue label such as “Live example” or “In progress” describes delivery. It does not establish an assurance level. “Unassessed” records the absence of an assessment, without judging a product’s underlying quality."
+            )
+          },
+          {
+            tag = "svg";
+            attrs = {
+              viewBox = "0 0 160 180";
+              fill = "none";
+              "aria-hidden" = "true";
+              class = "assurance-shield"
+            };
+            children = list(
+              {
+                tag = "circle";
+                attrs = { cx = 80; cy = 82; r = 68; stroke = "#c5dcd2"; "stroke-width" = 1 };
+                children = list()
+              },
+              {
+                tag = "path";
+                attrs = {
+                  d = "M80 12 137 36v49c0 37-25 63-57 80-32-17-57-43-57-80V36Z";
+                  fill = "#e1efe7";
+                  stroke = "#216257";
+                  "stroke-width" = 2
+                };
+                children = list()
+              },
+              {
+                tag = "path";
+                attrs = {
+                  d = "M80 30 120 47v37c0 28-18 48-40 63-22-15-40-35-40-63V47Z";
+                  fill = "#faf9f1";
+                  stroke = "#b48a43";
+                  "stroke-width" = 2
+                };
+                children = list()
+              },
+              {
+                tag = "path";
+                attrs = {
+                  d = "M57 84 74 101 105 66";
+                  stroke = "#216257";
+                  "stroke-width" = 5;
+                  "stroke-linecap" = "round";
+                  "stroke-linejoin" = "round"
+                };
+                children = list()
+              }
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("Evidence levels") },
+          {
+            tag = "ol";
+            attrs = { start = 0 };
+            children = list(
+              map(
+                $portfolioReport.levels,
+                "level",
+                {
+                  tag = "li";
+                  attrs = {  };
+                  children = list(
+                    { tag = "strong"; attrs = {  }; children = list($level.label) },
+                    " — ",
+                    $level.meaning
+                  )
+                }
+              )
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("Product profiles") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Each catalogue entry now has its own static assessment. Expand a product below to see automatic passes, failures and evidence still needed."
+            )
+          },
+          {
+            tag = "div";
+            attrs = {
+              class = "hierarchy-table-wrap";
+              role = "region";
+              "aria-label" = "Product assurance profiles";
+              tabindex = 0
+            };
+            children = list(
+              {
+                tag = "table";
+                attrs = { class = "hierarchy-table" };
+                children = list(
+                  {
+                    tag = "thead";
+                    attrs = {  };
+                    children = list(
+                      {
+                        tag = "tr";
+                        attrs = {  };
+                        children = list(
+                          { tag = "th"; attrs = { scope = "col" }; children = list("Product") },
+                          {
+                            tag = "th";
+                            attrs = { scope = "col" };
+                            children = list("Delivery / assessment scope")
+                          },
+                          map(
+                            $sagaProfiles,
+                            "s",
+                            { tag = "th"; attrs = { scope = "col" }; children = list($s.title) }
+                          )
+                        )
+                      }
+                    )
+                  },
+                  {
+                    tag = "tbody";
+                    attrs = {  };
+                    children = list(
+                      map(
+                        $portfolioReport.products,
+                        "p",
+                        {
+                          tag = "tr";
+                          attrs = {  };
+                          children = list(
+                            {
+                              tag = "th";
+                              attrs = { scope = "row" };
+                              children = list(
+                                if(
+                                  eq($p.id, "aaronalderman"),
+                                  $p.name,
+                                  { tag = "a"; attrs = { href = concat("#product-", $p.id) }; children = list($p.name) }
+                                )
+                              )
+                            },
+                            {
+                              tag = "td";
+                              attrs = {  };
+                              children = list(
+                                if(
+                                  eq($p.id, "aaronalderman"),
+                                  "Homepage entry routes only",
+                                  concat($p.deliveryLabel, " · ", $p.scope)
+                                )
+                              )
+                            },
+                            map(
+                              $p.profiles,
+                              "profile",
+                              {
+                                tag = "td";
+                                attrs = {  };
+                                children = list(
+                                  {
+                                    tag = "span";
+                                    attrs = { class = "assurance-meter"; "data-level" = $profile.level; "aria-hidden" = "true" };
+                                    children = list()
+                                  },
+                                  at($levelNames, concat("", $profile.level))
+                                )
+                              }
+                            )
+                          )
+                        }
+                      )
+                    )
+                  }
+                )
+              }
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("Inside each catalogue assessment") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Automatic observations are separate from human judgment. A failed required gate holds its topic at Scoped. Metadata alone cannot establish internationalisation readiness."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "../catalogue.values.rel" };
+                children = list("Inspect all product observations, gates and roadmap items ↗")
+              }
+            )
+          },
+          map(
+            $catalogueProducts,
+            "product",
+            {
+              tag = "details";
+              attrs = { class = "assurance-product"; id = concat("product-", $product.id) };
+              children = list(
+                {
+                  tag = "summary";
+                  attrs = {  };
+                  children = list(
+                    $product.name,
+                    { tag = "span"; attrs = {  }; children = list("Entry assessment →") }
+                  )
+                },
+                {
+                  tag = "p";
+                  attrs = {  };
+                  children = list(
+                    {
+                      tag = "a";
+                      attrs = { href = concat("/", $product.route) };
+                      children = list($product.route)
+                    },
+                    " · ",
+                    $product.scope
+                  )
+                },
+                map(
+                  $product.profiles,
+                  "s",
+                  {
+                    tag = "div";
+                    attrs = { "data-topic" = $s.id; class = "assurance-product-topic" };
+                    children = list(
+                      {
+                        tag = "h3";
+                        attrs = {  };
+                        children = list($s.title, " · Level ", $s.level, " — ", at($levelNames, concat("", $s.level)))
+                      },
+                      {
+                        tag = "span";
+                        attrs = { class = "assurance-meter"; "data-level" = $s.level; "aria-hidden" = "true" };
+                        children = list()
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          { tag = "strong"; attrs = {  }; children = list("Automatically supported: ") },
+                          fold(
+                            filter($s.gates, "g", and(eq($g.kind, "machine"), eq($g.status, "supported"))),
+                            "g",
+                            "text",
+                            "",
+                            if(eq($text, ""), $g.label, concat($text, "; ", $g.label))
+                          )
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          { tag = "strong"; attrs = {  }; children = list("Automatic failures: ") },
+                          or(
+                            fold(
+                              filter($s.gates, "g", eq($g.status, "failed")),
+                              "g",
+                              "text",
+                              "",
+                              if(eq($text, ""), $g.label, concat($text, "; ", $g.label))
+                            ),
+                            "None in this scope."
+                          )
+                        )
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          { tag = "strong"; attrs = {  }; children = list("Human evidence still needed: ") },
+                          or(
+                            fold(
+                              filter(
+                                $s.gates,
+                                "g",
+                                and(
+                                  includes(list("human", "use", "maintenance"), $g.kind),
+                                  not(eq($g.status, "supported"))
+                                )
+                              ),
+                              "g",
+                              "text",
+                              "",
+                              if(eq($text, ""), $g.label, concat($text, "; ", $g.label))
+                            ),
+                            "None recorded as missing."
+                          ),
+                          { tag = "br"; attrs = {  }; children = list() },
+                          { tag = "strong"; attrs = {  }; children = list("Policy / implementation gaps: ") },
+                          or(
+                            fold(
+                              filter(
+                                $s.gates,
+                                "g",
+                                and(
+                                  not(includes(list("human", "use", "maintenance"), $g.kind)),
+                                  not(eq($g.status, "supported"))
+                                )
+                              ),
+                              "g",
+                              "text",
+                              "",
+                              if(eq($text, ""), $g.label, concat($text, "; ", $g.label))
+                            ),
+                            "None in this scope."
+                          )
+                        )
+                      }
+                    )
+                  }
+                ),
+                {
+                  tag = "p";
+                  attrs = { class = "assurance-scope-note" };
+                  children = list($product.boundary)
+                }
+              )
+            }
+          )
+        )
+      },
+      map(
+        $sagaProfiles,
+        "s",
+        {
+          tag = "section";
+          attrs = { class = "assurance-boundary"; id = concat("roadmap-", $s.id) };
+          children = list(
+            { tag = "h2"; attrs = {  }; children = list($s.title, " roadmap") },
+            {
+              tag = "p";
+              attrs = {  };
+              children = list(
+                "Current: level ",
+                $s.level,
+                " · ",
+                at($levelNames, concat("", $s.level)),
+                ". Owner assignment and delivery dates remain open."
+              )
+            },
+            {
+              tag = "ul";
+              attrs = {  };
+              children = list(
+                map(
+                  filter($roadmap, "r", eq($r.saga, $s.id)),
+                  "r",
+                  {
+                    tag = "li";
+                    attrs = { id = concat("gate-", $r.id) };
+                    children = list(
+                      {
+                        tag = "strong";
+                        attrs = {  };
+                        children = list(if(eq($r.horizon, "next"), "Next evidence gate: ", "Later: "), $r.label)
+                      },
+                      " · level ",
+                      $r.targetLevel,
+                      " · ",
+                      $r.state,
+                      " — ",
+                      $r.action
+                    )
+                  }
+                )
+              )
+            }
+          )
+        }
+      ),
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("How a level changes") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "Every required gate at a level and every earlier level needs matching evidence. Missing, failed, ambiguous or differently scoped receipts block promotion. New evidence can lower a level when a required check fails. Source, issuer, method and observation date accompany each accepted receipt; those fields alone do not authenticate an evaluation."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              {
+                tag = "a";
+                attrs = { href = "../topics.values.rel" };
+                children = list("Download the maturity profile and roadmap ↗")
+              }
+            )
+          }
+        )
+      }
+    )
+  }
+  call assurance.portfolio.document

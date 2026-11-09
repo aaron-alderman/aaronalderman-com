@@ -1,0 +1,27 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process household.patch:
+  fold $eventInput.state.people as person; people starts list():
+    let patch = or(
+      at(
+        filter(
+          or(at($eventInput.patch, "people"), list()),
+          "change",
+          eq($change.id, $person.id)
+        ),
+        0
+      ),
+      {  }
+    )
+    port kernel.invoke { query = "household.patchPerson"; input = { person = $person; patch = $patch } } → patched
+    yield append($people, list($patched)) → people
+  port record.get { record = $eventInput.patch; key = "domesticHours" } → hp101
+  port record.get { record = $eventInput.patch; key = "expenses" } → hp102
+  let result = {
+    people = $people;
+    shareA = $eventInput.state.shareA;
+    reserve = $eventInput.state.reserve;
+    domesticHours = if(eq($hp101, null), at($eventInput.state, "domesticHours"), $hp101);
+    expenses = if(eq($hp102, null), at($eventInput.state, "expenses"), $hp102)
+  }

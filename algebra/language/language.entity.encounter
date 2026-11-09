@@ -1,0 +1,26 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process language.entity:
+  when not(and(not(eq($state.module, null)), eq($state.subject, null))):
+    let code = "TEMPLE-M003"
+    let summary = "Entity requires a module and cannot be nested."
+    let correction = "Declare a module, then close the previous entity before opening another."
+    call language.refuse
+  when $state.ok:
+    port static.read { text = at($tokens, 1) } → decoded
+    when not(and(not(eq($decoded, "")), not(includes($state.seen, $decoded)))):
+      let code = "TEMPLE-M005"
+      let summary = "Entity identity is empty or declared twice."
+      let correction = "Give each entity one nonempty identity in this module."
+      call language.refuse
+    when $state.ok:
+      let state = {
+        module = $state.module;
+        subject = $decoded;
+        seen = append($state.seen, list($decoded));
+        facts = $state.facts;
+        origins = $state.origins;
+        ok = $state.ok;
+        diagnostic = $state.diagnostic
+      }

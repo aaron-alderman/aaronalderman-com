@@ -1,7 +1,5 @@
-# Readable process source; authority is selected explicitly by the build manifest.
-# The migration is gated by author.run correspondence and publication validation.
 process-module "temple/surface-process-module/1"
-profile "encounter/module-batch/microsite-media/1"
+profile "encounter/reconstituted-source/1"
 
 process media.screens.init:
   port browser.select { selector = "[data-screen]" } → screens
@@ -161,7 +159,7 @@ process media.seek.finish:
 
 process media.provenance:
   try:
-    port asset.json { url = "manifest.json"; cache = "no-cache" } → manifest
+    port asset.rel { url = "manifest.values.rel"; cache = "no-cache" } → manifest
     port kernel.invoke { query = "media.provenance.view"; input = { manifest = $manifest } } → node
     port kernel.invoke { query = "ui.html"; input = { node = $node } } → html
     port browser.content { ref = "#provenance"; html = $html } → _
@@ -174,7 +172,11 @@ process media.provenance:
           attrs = { class = "fine" };
           children = list(
             "The manifest could not be read here. It sits beside the film as ",
-            { tag = "a"; attrs = { href = "manifest.json" }; children = list("manifest.json") },
+            {
+              tag = "a";
+              attrs = { href = "manifest.values.rel" };
+              children = list("manifest.values.rel")
+            },
             "."
           )
         }
@@ -308,4 +310,3 @@ process media.provenance.view:
       )
     }
   )
-

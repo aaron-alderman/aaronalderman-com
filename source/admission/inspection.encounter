@@ -1,0 +1,36 @@
+# Preserve the existing source inspector from actual Encounter definitions.
+# These read-only REL projections never enter programme admission.
+process-module "temple/surface-process-module/1"
+
+process publication.inspect:
+  port file.read { path = "bootstrap/site.values.rel" } → catalogueText
+  port static.read { text = $catalogueText } → catalogue
+  port source.modules {} → selectedSources
+  each $catalogue.modules as module:
+    port text.replaceAll { value = $module; search = ".process.values.rel"; replacement = "/" } → prefix
+    fold $selectedSources as selection; definitions starts list():
+      port text.slice { value = $selection.file; start = 0; end = count($prefix) } → beginning
+      when eq($beginning, $prefix):
+        port file.read { path = $selection.file } → sourceText
+        port encounter.inspect { text = $sourceText; file = $selection.file } → source
+        port record.entries { value = $source.queries } → entries
+        let definitions = append($definitions, $entries)
+      yield $definitions → definitions
+    assert count($definitions)
+      otherwise "INSPECTION: Catalogue entry has no selected Encounter source."
+    port record.fromEntries { entries = $definitions } → queries
+    port rel.encode { value = { protocol = "temple/surface-process-module/1"; queries = $queries } } → text
+    port file.write { path = $module; text = $text } → _
+  each $catalogue.processModules as selection:
+    port file.read { path = $selection.file } → sourceText
+    port encounter.observe { text = $sourceText; file = $selection.file } → observation
+    port rel.encode { value = $observation.module } → text
+    port file.write { path = $selection.output; text = $text } → _
+    port rel.encode { value = {
+      file = $selection.file;
+      sourceHash = $observation.sourceHash;
+      basis = "Actual Encounter source syntax; read-only inspection data, no admission authority";
+      origins = $observation.origins
+    } } → text
+    port file.write { path = concat($selection.output, ".map.values.rel"); text = $text } → _
+  let result = { inspection = "Actual authored Encounter source"; programmeAuthority = false }

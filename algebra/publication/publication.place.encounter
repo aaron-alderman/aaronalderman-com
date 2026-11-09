@@ -1,0 +1,376 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process publication.place:
+  let result = list(
+    {
+      tag = "section";
+      attrs = { class = "place-opening" };
+      children = list(
+        {
+          tag = "div";
+          attrs = { class = "breadcrumbs" };
+          children = list(
+            {
+              tag = "a";
+              attrs = { href = "../atlas.html" };
+              children = list("← Return to the map")
+            },
+            {
+              tag = "span";
+              attrs = {  };
+              children = list(concat("Place ", one($place, "chapter"), " / ", one($place, "region")))
+            }
+          )
+        },
+        {
+          tag = "p";
+          attrs = { class = "eyebrow" };
+          children = list(
+            if(
+              eq(one($place, "light"), "unseen"),
+              "Finding things out",
+              if(eq(one($place, "light"), "human"), "Understanding people", "Using power responsibly")
+            )
+          )
+        },
+        { tag = "h1"; attrs = {  }; children = list(one($place, "title")) },
+        { tag = "p"; attrs = { class = "place-lead" }; children = list(one($place, "lead")) }
+      )
+    },
+    {
+      tag = "section";
+      attrs = { class = "encounter-layout"; "aria-label" = "Explore this question" };
+      children = list(
+        {
+          tag = "div";
+          attrs = { class = "activity-wrap" };
+          children = list(
+            {
+              tag = "div";
+              attrs = { class = "activity-heading" };
+              children = list(
+                { tag = "span"; attrs = { class = "eyebrow" }; children = list("A closer look") },
+                {
+                  tag = "a";
+                  attrs = { href = concat("../reader.html#", one($place, "slug")) };
+                  children = list("Open in a larger view ↗")
+                }
+              )
+            },
+            {
+              tag = "iframe";
+              attrs = {
+                src = concat("../retained/activity.html?v=algebra-1#", one($place, "slug"));
+                title = concat(one($place, "region"), " — interactive example");
+                loading = "lazy";
+                "data-projection-frame" = "activity";
+                class = "activity-frame"
+              };
+              children = list()
+            },
+            {
+              tag = "p";
+              attrs = { class = "frame-note" };
+              children = list(
+                "The interactive example has its own motion control. Scroll inside it if you need more room."
+              )
+            }
+          )
+        },
+        {
+          tag = "div";
+          attrs = { class = "reading" };
+          children = list(
+            {
+              tag = "p";
+              attrs = { class = "scope" };
+              children = list(at(objects(one($place, "source"), "paragraph"), 0))
+            },
+            if(
+              optional($place, "personal"),
+              {
+                tag = "p";
+                attrs = { class = "draft-label" };
+                children = list("Personal account · working draft")
+              },
+              null
+            ),
+            {
+              tag = "div";
+              attrs = {  };
+              children = map(
+                objects($place, "paragraph"),
+                "paragraph",
+                { tag = "p"; attrs = {  }; children = list($paragraph) }
+              )
+            },
+            if(
+              optional($place, "instruction"),
+              {
+                tag = "p";
+                attrs = { class = "instruction" };
+                children = list(one($place, "instruction"))
+              },
+              null
+            ),
+            if(
+              count(objects($place, "word")),
+              {
+                tag = "details";
+                attrs = { class = "word-help" };
+                children = list(
+                  { tag = "summary"; attrs = {  }; children = list("Words used here") },
+                  {
+                    tag = "dl";
+                    attrs = {  };
+                    children = map(
+                      objects($place, "word"),
+                      "word",
+                      list(
+                        { tag = "dt"; attrs = {  }; children = list(one($word, "label")) },
+                        { tag = "dd"; attrs = {  }; children = list(one($word, "meaning")) }
+                      )
+                    )
+                  }
+                )
+              },
+              null
+            ),
+            {
+              tag = "details";
+              attrs = { class = "full-reading" };
+              children = list(
+                { tag = "summary"; attrs = {  }; children = list("Read the fuller explanation") },
+                {
+                  tag = "div";
+                  attrs = {  };
+                  children = map(
+                    objects($place, "fullParagraph"),
+                    "paragraph",
+                    { tag = "p"; attrs = {  }; children = list($paragraph) }
+                  )
+                }
+              )
+            },
+            {
+              tag = "details";
+              attrs = { class = "source-note" };
+              children = list(
+                {
+                  tag = "summary";
+                  attrs = {  };
+                  children = list(concat("Where this comes from: ", one(one($place, "source"), "title")))
+                },
+                {
+                  tag = "p";
+                  attrs = { class = "scope" };
+                  children = list(one(one($place, "source"), "kind"))
+                },
+                {
+                  tag = "div";
+                  attrs = {  };
+                  children = map(
+                    objects(one($place, "source"), "paragraph"),
+                    "paragraph",
+                    { tag = "p"; attrs = {  }; children = list($paragraph) }
+                  )
+                },
+                {
+                  tag = "details";
+                  attrs = {  };
+                  children = list(
+                    { tag = "summary"; attrs = {  }; children = list("Read the full source note") },
+                    {
+                      tag = "h3";
+                      attrs = {  };
+                      children = list(one(one($place, "source"), "originalTitle"))
+                    },
+                    { tag = "p"; attrs = {  }; children = list(one(one($place, "source"), "note")) }
+                  )
+                },
+                if(
+                  optional(one($place, "source"), "href"),
+                  {
+                    tag = "a";
+                    attrs = { href = concat($prefix, one(one($place, "source"), "href")) };
+                    children = list("Read the original source ↗")
+                  },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(
+                      "This account is drawn from Aaron’s own words; it is not an independent account of anyone else’s experience."
+                    )
+                  }
+                )
+              )
+            },
+            {
+              tag = "div";
+              attrs = {  };
+              children = map(
+                objects($place, "supplement"),
+                "supplement",
+                {
+                  tag = "details";
+                  attrs = { class = "source-note" };
+                  children = list(
+                    {
+                      tag = "summary";
+                      attrs = {  };
+                      children = list(concat("Where this comes from: ", one($supplement, "title")))
+                    },
+                    { tag = "p"; attrs = { class = "scope" }; children = list(one($supplement, "kind")) },
+                    {
+                      tag = "div";
+                      attrs = {  };
+                      children = map(
+                        objects($supplement, "paragraph"),
+                        "paragraph",
+                        { tag = "p"; attrs = {  }; children = list($paragraph) }
+                      )
+                    },
+                    {
+                      tag = "details";
+                      attrs = {  };
+                      children = list(
+                        { tag = "summary"; attrs = {  }; children = list("Read the full source note") },
+                        { tag = "h3"; attrs = {  }; children = list(one($supplement, "originalTitle")) },
+                        { tag = "p"; attrs = {  }; children = list(one($supplement, "note")) }
+                      )
+                    },
+                    if(
+                      optional($supplement, "href"),
+                      {
+                        tag = "a";
+                        attrs = { href = concat($prefix, one($supplement, "href")) };
+                        children = list("Read the original source ↗")
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list(
+                          "This account is drawn from Aaron’s own words; it is not an independent account of anyone else’s experience."
+                        )
+                      }
+                    )
+                  )
+                }
+              )
+            },
+            if(
+              optional($place, "pause"),
+              {
+                tag = "aside";
+                attrs = { class = "pause" };
+                children = list(
+                  { tag = "p"; attrs = { class = "eyebrow" }; children = list("Stay with the question") },
+                  { tag = "p"; attrs = {  }; children = list(one($place, "pause")) }
+                )
+              },
+              null
+            ),
+            if(
+              optional($place, "experience"),
+              {
+                tag = "p";
+                attrs = {  };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "../retained/workshop/index.html"; class = "button" };
+                    children = list("Enter the interactive workshop ↗")
+                  }
+                )
+              },
+              null
+            ),
+            {
+              tag = "p";
+              attrs = { class = "share-note" };
+              children = list(
+                "To share this question, copy this page’s address. Its title, introduction and landscape travel with the link."
+              )
+            }
+          )
+        }
+      )
+    },
+    {
+      tag = "section";
+      attrs = { class = "section onward" };
+      children = list(
+        {
+          tag = "div";
+          attrs = { class = "section-heading" };
+          children = list(
+            {
+              tag = "p";
+              attrs = { class = "eyebrow" };
+              children = list("Where does your curiosity go?")
+            },
+            { tag = "h2"; attrs = {  }; children = list("Another doorway.") }
+          )
+        },
+        {
+          tag = "div";
+          attrs = { class = "trail-grid" };
+          children = map(
+            objects($place, "choice"),
+            "choice",
+            {
+              tag = "a";
+              attrs = {
+                class = "trail";
+                href = concat(one(one($choice, "destination"), "slug"), ".html");
+                "data-light" = one(one($choice, "destination"), "light")
+              };
+              children = list(
+                { tag = "span"; attrs = { class = "eyebrow" }; children = list(one($choice, "kind")) },
+                { tag = "h3"; attrs = {  }; children = list(one($choice, "label")) },
+                { tag = "p"; attrs = {  }; children = list(one(one($choice, "destination"), "lead")) },
+                {
+                  tag = "span";
+                  attrs = { class = "arrow"; "aria-hidden" = "true" };
+                  children = list("↗")
+                }
+              )
+            }
+          )
+        },
+        {
+          tag = "p";
+          attrs = { class = "reading-paths-return" };
+          children = list(
+            {
+              tag = "a";
+              attrs = { href = "../gate.html"; class = "gate-nav" };
+              children = list("Reading paths →")
+            },
+            " · ",
+            {
+              tag = "a";
+              attrs = { href = "../retained/workshop/index.html" };
+              children = list("Shared workshop ↗")
+            }
+          )
+        }
+      )
+    },
+    {
+      tag = "p";
+      attrs = {
+        class = "atlas-visit-note";
+        "data-atlas-current" = one($place, "slug");
+        id = "atlas-visit-note";
+        hidden = true
+      };
+      children = list("Seen on your map.")
+    },
+    {
+      tag = "script";
+      attrs = { src = "../atlas-runtime.js?v=journey-1"; defer = true };
+      children = list()
+    }
+  )

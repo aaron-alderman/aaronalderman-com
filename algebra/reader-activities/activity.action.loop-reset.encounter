@@ -1,0 +1,14 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.loop-reset:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  port state.set { key = "loopRunning"; value = false } → _
+  port browser.attribute { ref = "#return-frame"; name = "transform"; value = "translate(250,65) rotate(0)" } → _
+  port browser.attribute { ref = "[data-demo=\"loop\"]"; name = "aria-pressed"; value = false } → _
+  port browser.write {
+    ref = "#loop-readout";
+    name = "textContent";
+    value = "Same starting point. Follow the attached frame."
+  } → _

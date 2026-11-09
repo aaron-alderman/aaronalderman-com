@@ -1,0 +1,3 @@
+process-module "temple/surface-process-module/1"
+process test.output:
+  port file.write { path = "index.html"; text = "<!doctype html><img src=x onerror=alert(1)>" } → result

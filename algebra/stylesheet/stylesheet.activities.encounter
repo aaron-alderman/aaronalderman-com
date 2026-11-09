@@ -1,0 +1,37 @@
+# Fixed activity components compile into the common tree; layout bindings
+# become shared stylesheet classes rather than inline HTML substitutions.
+process-module "temple/surface-process-module/1"
+
+process stylesheet.activities:
+  let activitiesInput = $input
+  call stylesheet.catalog
+  let bindingsSource = $result.inline.source
+  port file.copy { path = $bindingsSource } → _
+  port file.read { path = $bindingsSource } → text
+  port static.read { text = $text } → bindings
+  port record.entries { value = $activitiesInput.activities } → entries
+  fold $entries as entry; compiled starts { activities = {}; rules = list() }:
+    let id = at($entry, 0)
+    let activity = at($entry, 1)
+    fold or(at($bindings.bindings, $id), list()) as binding; styles starts { names = {}; rules = list(); index = 0 }:
+      let class = concat("activity-component-", $id, "-", $styles.index)
+      port record.put { record = $styles.names; key = $binding.placeholder; value = $class } → names
+      yield { names = $names; rules = append($styles.rules, list({ kind = "rule"; selector = concat("#activity .", $class); children = $binding.declarations })); index = add($styles.index, 1) } → styles
+    let componentText = $activity.html
+    let componentFragment = true
+    let componentStyles = $styles.names
+    let componentSubstitutions = {}
+    call projection.compileComponent
+    let tree = $result
+    port record.entries { value = $activity } → fields
+    port record.fromEntries { entries = filter($fields, "field", not(eq(at($field, 0), "html"))) } → activity
+    port record.put { record = $activity; key = "tree"; value = $tree } → activity
+    port record.put { record = $compiled.activities; key = $id; value = $activity } → activities
+    yield { activities = $activities; rules = append($compiled.rules, $styles.rules) } → compiled
+  let input = { kind = "root"; children = $compiled.rules }
+  call projection.stylesheet
+  let componentCSS = $result
+  port file.read { path = "activity.css" } → baseCSS
+  port projection.combine { kind = "stylesheet"; parts = list($baseCSS, $componentCSS) } → css
+  port file.write { path = "activity.css"; text = $css } → _
+  port record.put { record = $activitiesInput; key = "activities"; value = $compiled.activities } → result

@@ -1,0 +1,40 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.verifyShow:
+  let ecShowVerify = $eventInput.show
+  let ecShowType = $eventInput.type
+  let ecReps = filter($codePlan.representations, "ecR", eq($ecR.id, $ecShowVerify.representation))
+  assert eq(count($ecReps), 1)
+    otherwise "EC-C004: Select a representation declared by this Encounter module."
+  let ecRepSignature = at($ecReps, 0)
+  assert and(
+    not(eq(count($ecRepSignature.given), 0)),
+    eq(at(at($ecRepSignature.given, 0), "type"), $ecShowType)
+  )
+    otherwise "EC-C005: The representation’s primary input does not match the resolved view type."
+  let ecOtherInputs = filter(
+    $ecRepSignature.given,
+    "ecG",
+    not(eq($ecG.name, at(at($ecRepSignature.given, 0), "name")))
+  )
+  assert eq(count($ecOtherInputs), count($ecShowVerify.parameters))
+    otherwise "EC-C006: Supply exactly the representation’s declared configuration inputs."
+  each $ecOtherInputs as ecRequired:
+    let ecSupplied = filter($ecShowVerify.parameters, "ecP", eq($ecP.name, $ecRequired.name))
+    assert eq(count($ecSupplied), 1)
+      otherwise "EC-C007: A required representation input is missing or duplicated."
+    let ecSuppliedExpression = at(at($ecSupplied, 0), "expression")
+    assert if(
+      eq($ecRequired.type, "text"),
+      and(
+        eq($ecSuppliedExpression.kind, "string"),
+        eq($ecSuppliedExpression.cardinality, "one")
+      ),
+      and(
+        eq($ecSuppliedExpression.kind, "ref"),
+        eq($ecSuppliedExpression.expects, $ecRequired.type)
+      )
+    )
+      otherwise "EC-C008: A representation argument has the wrong value or reference type."
+  let result = true

@@ -1,0 +1,185 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.assurance.classify:
+  fold $eventInput.policies as p; rows starts list():
+    let needsReview = includes(
+      list(
+        "nav.routes",
+        "metadata",
+        "section.headings",
+        "cards.style",
+        "typography",
+        "aesthetics",
+        "footer",
+        "questions.article"
+      ),
+      $p.id
+    )
+    let review = at(at($eventInput, "reviewEvidence"), $p.id)
+    let proofOk = if(
+      and($needsReview, $review),
+      and(
+        $review.ok,
+        eq($review.id, $p.id),
+        eq($review.intent, $p.intent),
+        not(eq(count($eventInput.identities), 0)),
+        eq(count($review.worlds), count($eventInput.identities)),
+        every(
+          $eventInput.identities,
+          "key",
+          eq(count(filter($review.worlds, "w", and(eq($w.identity, $key), $w.ok))), 1)
+        )
+      ),
+      false
+    )
+    let values = if(
+      and($needsReview, $review),
+      map($review.worlds, "w", { identity = $w.identity; value = $w.value }),
+      map($eventInput.worlds, "w", { identity = $w.key; value = at($w.values, $p.id) })
+    )
+    let dataBinding = at($eventInput.themeFields, $p.field)
+    let dataBound = if(
+      eq($p.resolver, "style"),
+      true,
+      if(
+        includes(list("catalogue", "collection", "app"), $p.resolver),
+        $eventInput.catalogueBound,
+        and(
+          eq(at($dataBinding, 0), "one"),
+          eq(at($dataBinding, 1), $p.subjectRead),
+          eq(at($dataBinding, 2), $p.field)
+        )
+      )
+    )
+    let writers = filter(
+      $eventInput.bindings,
+      "b",
+      and(eq($b.args.ref, $p.target), eq($b.args.name, $p.sink))
+    )
+    port value.encode { value = $p.read } → serializedRead
+    fold $writers as b; writerReads starts true:
+      port value.encode { value = $b.args.value } → serialized
+      port text.indexOf { value = $serialized; search = $serializedRead; from = 0 } → offset
+      yield and($writerReads, or(not(eq($offset, -1)), and(includes(list("catalogue", "collection", "app"), $p.resolver), $eventInput.catalogueBound, eq($b.args.value, one("identity.assurance.scope", "catalogueResult"))))) → writerReads
+    let writerBound = and(not(eq(count($writers), 0)), $writerReads)
+    let complete = if(
+      $needsReview,
+      $proofOk,
+      and(
+        and(
+          $dataBound,
+          $writerBound,
+          not(eq(count($eventInput.identities), 0)),
+          every(
+            $eventInput.identities,
+            "key",
+            eq(count(filter($eventInput.worlds, "w", eq($w.key, $key))), 1)
+          ),
+          every($values, "v", $v.value)
+        ),
+        if(
+          includes(list("threads.context", "atlas.context"), $p.id),
+          at($eventInput.journeyChecks, $p.id),
+          true
+        )
+      )
+    )
+    let status = if(
+      eq($p.intent, "undecided"),
+      "undecided",
+      if(
+        eq($p.intent, "invariant"),
+        if(
+          and(not(eq($p.reason, "")), eq(count($writers), 0), if($needsReview, $proofOk, true)),
+          "intentionally-invariant",
+          "missing"
+        ),
+        if($complete, "identity-mapped", "missing")
+      )
+    )
+    let row = {
+      id = $p.id;
+      area = $p.area;
+      label = $p.label;
+      intent = $p.intent;
+      status = $status;
+      reason = $p.reason;
+      next = if(
+        eq($status, "identity-mapped"),
+        "Review semantic fit and downstream behaviour; the declared structural connection is present.",
+        $p.next
+      );
+      source = $p.source;
+      target = $p.target;
+      sink = $p.sink;
+      field = $p.field;
+      values = $values;
+      dataBound = $dataBound;
+      writerBound = $writerBound;
+      boundary = if(
+        $needsReview,
+        if(
+          $review,
+          $review.boundary,
+          "The declared decision has no generated-output verification receipt."
+        ),
+        if(
+          eq($p.intent, "invariant"),
+          "Declared policy; this is not an automated proof that every descendant is invariant.",
+          if(
+            eq($p.resolver, "style"),
+            "Checks declared CSS values and the body identity writer; does not certify visual appearance.",
+            "Checks authored world values, runtime field projection and matching browser writer; does not certify downstream meaning."
+          )
+        )
+      );
+      destinationBound = if(
+        includes(list("threads.context", "atlas.context"), $p.id),
+        at($eventInput.journeyChecks, $p.id),
+        null
+      );
+      review = if($needsReview, if($review, $review, null), null)
+    }
+    yield append($rows, list($row)) → rows
+  fold $eventInput.bindings as b; scanRows starts $rows:
+    yield if(
+    not(
+      or(
+        some(
+          $eventInput.policies,
+          "p",
+          and(eq($p.target, $b.args.ref), eq($p.sink, $b.args.name))
+        ),
+        some(
+          or(at($eventInput, "reviewWriters"), list()),
+          "w",
+          and(eq($w.ref, $b.args.ref), eq($w.name, $b.args.name))
+        )
+      )
+    ),
+    append(
+      $scanRows,
+      list(
+        {
+          id = concat("unclassified:", $b.args.ref, ":", $b.args.name);
+          area = "Unclassified cross updates";
+          label = concat($b.args.ref, " → ", $b.args.name);
+          intent = "undecided";
+          status = "undecided";
+          reason = "A cross writer exists without an assurance declaration.";
+          next = "Declare the intended identity relationship and its evidence.";
+          source = "algebra/publication.process.values.rel · identity.change";
+          target = $b.args.ref;
+          sink = $b.args.name;
+          field = "";
+          values = list();
+          dataBound = false;
+          writerBound = true;
+          boundary = "Automatically discovered browser writer; no invariance is inferred."
+        }
+      )
+    ),
+    $scanRows
+  ) → rows
+  let result = $rows

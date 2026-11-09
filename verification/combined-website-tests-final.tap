@@ -1,0 +1,112 @@
+TAP version 13
+# policy basis 66d95260d7cef0d74c46626f2c86e00062b9d874a98998df1b9fce323edefd43
+# canonical declaration 8800a690a0977d4e5cab4423aba1a760e7bf845d7b0b6d6abe26f9fb91a7a069
+ok 1 - test.application.browser-closures
+ok 2 - test.application.view-edit-refusal
+ok 3 - test.audit.compiler-boundary
+ok 4 - test.audit.fact-accessors
+ok 5 - test.audit.meta-refresh-before-dom
+ok 6 - test.audit.refresh-linear-time
+ok 7 - test.audit.regex-isolation-and-recovery
+ok 8 - test.audit.runtime-shared-budget
+ok 9 - test.boundary.files
+ok 10 - test.browser.emitted-bootstrap
+ok 11 - test.browser.portable-foundation
+ok 12 - test.browser.utf8-hashes
+ok 13 - test.compiler.grammar
+ok 14 - test.compiler.inspection-spans
+ok 15 - test.foundation.diagnostic-owner
+ok 16 - test.foundation.laws-schema
+ok 17 - test.foundation.lowering-admission
+ok 18 - test.foundation.self-and-application-correspondence
+ok 19 - test.front.bad-programmes
+ok 20 - test.front.child-bindings
+ok 21 - test.front.child-expression-shape
+ok 22 - test.front.children
+ok 23 - test.front.exhaustion
+ok 24 - test.front.expression
+ok 25 - test.front.fact-snapshots
+ok 26 - test.front.facts
+ok 27 - test.front.forbidden-grants
+ok 28 - test.front.forged
+ok 29 - test.front.freeze-and-entries
+ok 30 - test.front.hydration
+ok 31 - test.front.local-host
+ok 32 - test.front.nested-invoke
+ok 33 - test.front.no-caller-interpreter
+ok 34 - test.front.phase-closure
+ok 35 - test.front.reflection
+ok 36 - test.front.source-only
+ok 37 - test.front.undeclared
+ok 38 - test.preservation.common-style-migration
+ok 39 - test.preservation.routes-text-assets
+ok 40 - test.projection.activity-frames
+ok 41 - test.projection.css-grammar
+ok 42 - test.projection.css-source-fidelity
+ok 43 - test.projection.dynamic-palette
+ok 44 - test.projection.families-and-kinds
+ok 45 - test.projection.final-surface
+ok 46 - test.projection.grants
+ok 47 - test.projection.identity-metadata
+ok 48 - test.projection.issuance
+ok 49 - test.projection.layout-escapes
+ok 50 - test.projection.mount
+ok 51 - test.projection.owner
+ok 52 - test.projection.progress-slot
+ok 53 - test.projection.real-style-effect
+ok 54 - test.projection.stylesheet-references
+ok 55 - test.projection.type-contract
+ok 56 - test.publication.budgets
+not ok 57 - test.publication.complete-inventory
+  ---
+  context: null
+  message: Error: Canonical output contains an unrecorded or missing file.
+        at Object.run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\temple-seed.cjs:79:63)
+        at async Object.run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\encounter-source-front.cjs:83:11)
+        at async main (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\test.cjs:27:7)
+  ...
+ok 58 - test.publication.projection-closure
+ok 59 - test.publication.source-artifact-identity
+ok 60 - test.reading.accessibility-and-links
+ok 61 - test.reading.article-shell
+ok 62 - test.reading.canonical-css
+ok 63 - test.reading.content-style-boundary
+ok 64 - test.reading.contrast
+ok 65 - test.reading.cover-geometry
+ok 66 - test.reading.guide-specimens
+ok 67 - test.reading.palette-ownership
+ok 68 - test.reading.persistent-cross
+ok 69 - test.reading.planned-cards
+ok 70 - test.reading.shared-shell-and-components
+ok 71 - test.reading.sitemap-and-art
+ok 72 - test.reading.source-owners
+ok 73 - test.reading.theme-runtime
+ok 74 - test.reading.threads
+ok 75 - test.rel.deep-static
+ok 76 - test.rel.own-data
+ok 77 - test.rel.refusals
+ok 78 - test.rel.roundtrip
+ok 79 - test.retention.artwork-provenance
+ok 80 - test.retention.file-owners
+ok 81 - test.retention.historical-separation
+ok 82 - test.retention.single-process-owners
+ok 83 - test.surface.alternate-execution
+ok 84 - test.surface.captured-entry
+ok 85 - test.surface.mutations
+ok 86 - test.surface.passive
+ok 87 - test.surface.private-gate
+ok 88 - test.surface.refresh
+ok 89 - test.surface.xml
+not ok 90 - test.zz.source-stability
+  ---
+  context: "verification/tests/audits.encounter"
+  message: Error: Test, policy or canonical declaration changed during this run.
+        at run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\temple-seed.cjs:79:63)
+        at async Object.run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\temple-seed.cjs:82:56)
+        at async Object.run (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\encounter-source-front.cjs:83:11)
+        at async main (C:\Users\aaron\grand-theory\applications\aaronalderman-mission-publication\bootstrap\test.cjs:27:7)
+  ...
+1..90
+# tests 90
+# pass 88
+# fail 2

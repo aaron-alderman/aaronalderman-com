@@ -1,0 +1,6 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process atlas.pin.reveal:
+  port browser.class { ref = $eventInput.matched.ref; name = "is-dismissed"; value = false } → _
+  call atlas.pin.preview

@@ -1,0 +1,103 @@
+process-module "temple/surface-process-module/1"
+
+# Identity is a typed tree transform, never a substitution into serialized HTML.
+process projection.identity:
+  let node = $eventInput.tree
+  port value.describe { value = $node } → shape
+  let result = $node
+  when $shape.array:
+    fold $node as child; children starts list():
+      port kernel.invoke { query = "projection.identity"; input = { tree = $child; identity = $eventInput.identity; route = $eventInput.route; mode = $eventInput.mode; context = $eventInput.context; canonicalFrom = $eventInput.canonicalFrom; canonicalTo = $eventInput.canonicalTo } } → child
+      yield append($children, list($child)) → result
+  when and(not($shape.array), eq($shape.type, "object"), not(eq($node, null))):
+    let identity = $eventInput.identity
+    let attrs = or(at($node, "attrs"), {})
+    port record.entries { value = $attrs } → attributes
+    fold $attributes as attribute; attrs starts $attrs:
+      let key = at($attribute, 0)
+      let href = at($attribute, 1)
+      when and(eq($key, "content"), eq($href, $eventInput.canonicalFrom)):
+        port record.put { record = $attrs; key = $key; value = $eventInput.canonicalTo } → attrs
+      when includes(list("href", "src"), $key):
+        let target = $href
+        when eq($href, $eventInput.canonicalFrom):
+          let target = $eventInput.canonicalTo
+        port text.matches { value = $target; pattern = "^(?:#|[A-Za-z][A-Za-z0-9+.-]*:|//)" } → leave
+        when not($leave):
+          port url.resolve { href = $target; route = $eventInput.route } → resolved
+          port text.matches { value = $resolved.route; pattern = "^places/[a-z0-9-]+\\.html$" } → place
+          let path = if(eq($resolved.route, "index.html"), $journeyData.homeRoute, if(eq($resolved.route, "gate.html"), $journeyData.threadsRoute, if(eq($resolved.route, "atlas.html"), $journeyData.atlasRoute, if(eq($resolved.route, $journeyData.questionHref), $journeyData.questionWorldRoute, if($place, concat("worlds/", $journeyData.key, "/", $resolved.route), $resolved.route)))))
+          port text.split { value = $target; pattern = "(\\?[^#]*)" } → query
+          let target = concat("/", $path, or(at($query, 1), ""), if(eq($resolved.fragment, ""), "", concat("#", $resolved.fragment)))
+        port record.put { record = $attrs; key = $key; value = $target } → attrs
+      yield $attrs → attrs
+    when eq($node.tag, "body"):
+      port record.put { record = $attrs; key = "data-identity"; value = $journeyData.key } → attrs
+      when eq($eventInput.mode, "home"):
+        port record.put { record = $attrs; key = "data-initial-identity"; value = $journeyData.key } → attrs
+    port kernel.invoke { query = "projection.identity"; input = { tree = or(at($node, "children"), list()); identity = $identity; route = $eventInput.route; mode = $eventInput.mode; context = $eventInput.context; canonicalFrom = $eventInput.canonicalFrom; canonicalTo = $eventInput.canonicalTo } } → children
+    when and(eq($node.tag, "main"), eq(at($attrs, "id"), "main"), not(eq($eventInput.context, null))):
+      let children = append(list($eventInput.context), $children)
+    let result = { tag = $node.tag; attrs = $attrs; children = $children }
+  when and(eq($shape.type, "string"), eq($eventInput.mode, "reading"), eq($node, "Open in a larger view ↗")):
+    let result = "Open the shared interactive reader ↗"
+
+process projection.integrity:
+  let node = $eventInput.tree
+  port value.describe { value = $node } → shape
+  let result = $node
+  when $shape.array:
+    fold $node as child; children starts list():
+      port kernel.invoke { query = "projection.integrity"; input = { tree = $child; route = $eventInput.route } } → child
+      yield append($children, list($child)) → result
+  when and(not($shape.array), eq($shape.type, "object"), not(eq($node, null))):
+    let attrs = or(at($node, "attrs"), {})
+    let route = $eventInput.route
+    when and(eq($node.tag, "base"), at($attrs, "href")):
+      port url.resolve { href = $attrs.href; route = $route } → base
+      assert not($base.external)
+        otherwise "PROJECTION: External document base refused."
+    when and(eq($node.tag, "script"), at($attrs, "src")):
+      port url.resolve { href = $attrs.src; route = $route } → target
+      assert not($target.external)
+        otherwise "PROJECTION: External runtime refused."
+      port artifact.identity { path = $target.route } → identity
+      assert $identity.issuedRuntime
+        otherwise "PROJECTION: Runtime was not issued by admission."
+      port record.put { record = $attrs; key = "integrity"; value = $identity.integrity } → attrs
+    port kernel.invoke { query = "projection.integrity"; input = { tree = or(at($node, "children"), list()); route = $route } } → children
+    let result = { tag = $node.tag; attrs = $attrs; children = $children }
+
+# Find an explicit document base before walking its runtime references.
+process projection.base:
+  let node = $eventInput.tree
+  port value.describe { value = $node } → shape
+  let result = $eventInput.route
+  when $shape.array:
+    fold $node as child; route starts $eventInput.route:
+      port kernel.invoke { query = "projection.base"; input = { tree = $child; route = $route } } → route
+      yield $route → result
+  when and(not($shape.array), eq($shape.type, "object"), not(eq($node, null))):
+    when and(eq($node.tag, "base"), at(at($node, "attrs"), "href")):
+      port url.resolve { href = $node.attrs.href; route = $eventInput.route } → target
+      assert not($target.external)
+        otherwise "PROJECTION: External document base refused."
+      let result = $target.route
+    when not(eq($node.tag, "base")):
+      port kernel.invoke { query = "projection.base"; input = { tree = or(at($node, "children"), list()); route = $eventInput.route } } → result
+
+process projection.return:
+  let node = $eventInput.tree
+  port value.describe { value = $node } → shape
+  let result = $node
+  when $shape.array:
+    fold $node as child; children starts list():
+      port kernel.invoke { query = "projection.return"; input = { tree = $child; prefix = $eventInput.prefix; site = $eventInput.site } } → child
+      yield append($children, list($child)) → result
+  when and(not($shape.array), eq($shape.type, "object"), not(eq($node, null))):
+    port kernel.invoke { query = "projection.return"; input = { tree = or(at($node, "children"), list()); prefix = $eventInput.prefix; site = $eventInput.site } } → children
+    when eq($node.tag, "head"):
+      let children = append($children, list({ tag = "link"; attrs = { rel = "stylesheet"; href = concat($eventInput.prefix, "assets/microsite-return.css?v=return-2") }; children = list() }, "\n"))
+    when eq($node.tag, "body"):
+      let children = append($children, list("\n", { tag = "a"; attrs = { id = "microsite-return"; class = "microsite-return"; href = concat($eventInput.prefix, "index.html#microsites"); "aria-label" = "Back to Aaron Alderman’s main website"; "data-site" = $eventInput.site }; children = list({ tag = "span"; attrs = { "aria-hidden" = "true" }; children = list("←") }, { tag = "span"; attrs = {}; children = list("Back to Aaron Alderman") }) }, "\n"))
+    let result = { tag = $node.tag; attrs = or(at($node, "attrs"), {}); children = $children }

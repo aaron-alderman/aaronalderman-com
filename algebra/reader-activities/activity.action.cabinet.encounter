@@ -1,0 +1,32 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process activity.action.cabinet:
+  let button = $eventInput.button
+  let value = $eventInput.value
+  let currents = eq($value, "currents")
+  port browser.select { selector = "[data-encounter=\"cabinet\"]" } → buttons
+  each $buttons as choice:
+    port browser.attribute {
+      ref = $choice.ref;
+      name = "aria-pressed";
+      value = eq($choice.ref.handle, $button.ref.handle)
+    } → _
+  port browser.class { ref = ".art-panel"; name = "spectral"; value = $currents } → _
+  port browser.select { selector = "#specimen-values strong" } → specimens
+  fold $specimens as specimen; index starts 0:
+    port browser.write {
+      ref = $specimen.ref;
+      name = "textContent";
+      value = if($currents, at(list("744", "24", "0"), $index), "≈")
+    } → _
+    yield add($index, 1) → index
+  port browser.write {
+    ref = "#cabinet-caption";
+    name = "textContent";
+    value = if(
+      $currents,
+      "This detailed mathematical count tells the three structures apart.",
+      "These three mathematical structures look alike in the broad measurement."
+    )
+  } → _

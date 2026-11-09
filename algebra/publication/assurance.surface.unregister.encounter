@@ -1,0 +1,12 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.surface.unregister:
+  port file.read { path = "assurance/generated-pages.values.rel" } → surfaceRegistryJSON
+  port static.read { text = $surfaceRegistryJSON } → surfaceRegistry
+  port record.entries { value = $surfaceRegistry } → surfaceRegistryEntries
+  port record.fromEntries {
+    entries = filter($surfaceRegistryEntries, "e", not(eq(at($e, 0), $surfaceWritePath)))
+  } → surfaceRegistry
+  port value.encode { value = $surfaceRegistry } → surfaceRegistryJSON
+  port file.write { path = "assurance/generated-pages.values.rel"; text = $surfaceRegistryJSON } → _

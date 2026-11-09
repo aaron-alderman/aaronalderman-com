@@ -1,0 +1,11 @@
+process-module "temple/surface-process-module/1"
+
+# Preserve the newer live linear target index and its first-seen order.
+process hierarchy.index.targets:
+  fold $hRows as row; scan starts { index = {}; order = list() }:
+    port record.get { record = $scan.index; key = $row.target } → prior
+    port record.put { record = $scan.index; key = $row.target; value = { target = $row.target; rows = append(if($prior, $prior.rows, list()), list($row)) } } → updated
+    yield { index = $updated; order = if($prior, $scan.order, append($scan.order, list($row.target))) } → scan
+  let hTargetIndex = $scan.index
+  let hRowsByTarget = map($scan.order, "target", at($hTargetIndex, $target))
+  let result = $hRowsByTarget

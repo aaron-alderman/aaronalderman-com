@@ -1,0 +1,520 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process hierarchy.inspect.build:
+  let hItemRows = filter($hRows, "hRow", eq($hRow.item, $hItem.id))
+  let hItemBindings = filter($hEvidence.bindings, "hBinding", eq($hBinding.item, $hItem.id))
+  let hCapabilityViews = list()
+  let hSeen = list()
+  fold $hItemRows as hRow; hCardScan starts { views = list(); seen = list() }:
+    let hCapabilityViews = $hCardScan.views
+    let hSeen = $hCardScan.seen
+    let hKey = concat($hRow.relation, ":", $hRow.target)
+    when not(includes($hSeen, $hKey)):
+      let hTargetGroup = at($hTargetIndex, $hRow.target)
+      let hSeen = append($hSeen, list($hKey))
+      let eventInput = { rows = $hTargetGroup.rows; relation = $hRow.relation; target = $hRow.target }
+      call hierarchy.shared
+      let hPeers = $result
+      when not(includes(list(0, 1), count($hPeers))):
+        let hWitnesses = filter(
+          $hTargetGroup.rows,
+          "hWitness",
+          and(eq($hWitness.relation, $hRow.relation), eq($hWitness.target, $hRow.target))
+        )
+        let hCapabilityViews = append(
+          $hCapabilityViews,
+          list(
+            {
+              tag = "details";
+              attrs = { class = "hierarchy-capability" };
+              children = list(
+                {
+                  tag = "summary";
+                  attrs = {  };
+                  children = list(
+                    { tag = "code"; attrs = {  }; children = list($hRow.target) },
+                    {
+                      tag = "span";
+                      attrs = {  };
+                      children = list(
+                        concat(
+                          " · ",
+                          count($hPeers),
+                          " consumers · ",
+                          if(eq($hRow.relation, "pack"), "semantic pack", "bundle dependency")
+                        )
+                      )
+                    }
+                  )
+                },
+                {
+                  tag = "nav";
+                  attrs = { "aria-label" = "Consumers" };
+                  children = list(
+                    map(
+                      $hPeers,
+                      "hPeer",
+                      {
+                        tag = "a";
+                        attrs = { href = concat($hPeer, ".html") };
+                        children = list(
+                          at(at(filter($hCatalogue.items, "hPeerItem", eq($hPeerItem.id, $hPeer)), 0), "name")
+                        )
+                      }
+                    )
+                  )
+                },
+                {
+                  tag = "ul";
+                  attrs = {  };
+                  children = list(
+                    map(
+                      $hWitnesses,
+                      "hWitness",
+                      {
+                        tag = "li";
+                        attrs = {  };
+                        children = list(
+                          {
+                            tag = "code";
+                            attrs = {  };
+                            children = list(concat($hWitness.subject, " — ", $hWitness.relation, " → ", $hWitness.target))
+                          },
+                          {
+                            tag = "a";
+                            attrs = {
+                              href = concat(
+                                "../",
+                                at(at(filter($hEvidence.bindings, "hB", eq($hB.id, $hWitness.binding)), 0), "file")
+                              )
+                            };
+                            children = list(concat("source line ", $hWitness.line))
+                          }
+                        )
+                      }
+                    )
+                  )
+                }
+              )
+            }
+          )
+        )
+    yield { views = $hCapabilityViews; seen = $hSeen } → hCardScan
+  let hCapabilityViews = $hCardScan.views
+  let hDisplayedSource = ""
+  let hSourceLanguage = "rel"
+  fold $hItemBindings as hBinding; hSourceText starts "":
+    port file.read { path = $hBinding.file } → hRaw
+    yield concat($hSourceText, "// ", $hBinding.origin, "\n", $hRaw, "\n") → hDisplayedSource
+  when eq(count($hItemRows), 0):
+    let hFirst = at($hItemBindings, 0)
+    port file.read { path = $hFirst.file } → hDisplayedSource
+    let hSourceLanguage = if(
+      eq($hFirst.kind, "rel"),
+      "rel",
+      if(
+        eq($hFirst.file, concat("source/hierarchy-evidence/", $hFirst.id, ".values.rel")),
+        "json",
+        "text"
+      )
+    )
+    port text.matches { value = $hFirst.file; pattern = "\\.md$" } → hMarkdown
+    when $hMarkdown:
+      let hSourceLanguage = "markdown"
+  let input = {
+    tag = "html";
+    attrs = { lang = "en" };
+    children = list(
+      {
+        tag = "head";
+        attrs = {  };
+        children = list(
+          { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+          {
+            tag = "meta";
+            attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
+            children = list()
+          },
+          { tag = "title"; attrs = {  }; children = list(concat("Inspect ", $hItem.name)) },
+          {
+            tag = "meta";
+            attrs = {
+              name = "description";
+              content = "Exact source bindings and declared shared capabilities."
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = {
+              rel = "canonical";
+              href = concat("https://aaronalderman.com/inspection/", $hItem.id, ".html")
+            };
+            children = list()
+          },
+          {
+            tag = "link";
+            attrs = { rel = "stylesheet"; href = concat("../", "expedition.css?v=triple-braid-1") };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = { property = "og:title"; content = concat("Inspect ", $hItem.name) };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:description";
+              content = "Exact source bindings and declared shared capabilities."
+            };
+            children = list()
+          },
+          {
+            tag = "meta";
+            attrs = {
+              property = "og:url";
+              content = concat("https://aaronalderman.com/inspection/", $hItem.id, ".html")
+            };
+            children = list()
+          }
+        )
+      },
+      {
+        tag = "body";
+        attrs = {  };
+        children = list(
+          {
+            tag = "a";
+            attrs = { class = "skip"; href = "#main" };
+            children = list("Skip to content")
+          },
+          {
+            tag = "header";
+            attrs = { class = "masthead" };
+            children = list(
+              {
+                tag = "a";
+                attrs = { class = "brand"; href = "../index.html"; "aria-label" = "Aaron Alderman" };
+                children = list(
+                  {
+                    tag = "span";
+                    attrs = { class = "brand-name" };
+                    children = list(
+                      "Aaron ",
+                      { tag = "span"; attrs = { class = "brand-surname" }; children = list("Alderman") }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "nav";
+                attrs = { "aria-label" = "Site" };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "../index.html#microsites" };
+                    children = list("The work")
+                  },
+                  { tag = "a"; attrs = { href = "../atlas.html" }; children = list("The atlas") }
+                )
+              }
+            )
+          },
+          {
+            tag = "main";
+            attrs = { class = "hierarchy-page hierarchy-inspector"; id = "main" };
+            children = list(
+              { tag = "p"; attrs = { class = "eyebrow" }; children = list("Inspect / source-bound") },
+              { tag = "h1"; attrs = {  }; children = list($hItem.name) },
+              { tag = "p"; attrs = {  }; children = list($hItem.description) },
+              if(
+                eq($hItem.id, "relational-geometry"),
+                {
+                  tag = "p";
+                  attrs = { class = "hierarchy-scope" };
+                  children = list(
+                    "The source bindings below describe the first use case: the Relational Geometry Programme."
+                  )
+                },
+                null
+              ),
+              {
+                tag = "p";
+                attrs = { class = "hierarchy-scope" };
+                children = list(
+                  "These connections are extracted from recorded source declarations. Exact identity establishes declared reuse; it does not establish deployment or equivalent behaviour."
+                )
+              },
+              {
+                tag = "a";
+                attrs = { href = concat("../", $hItem.href) };
+                children = list(concat("Open ", $hItem.name, " ↗"))
+              },
+              { tag = "h2"; attrs = {  }; children = list("Shared capabilities & dependencies") },
+              if(
+                eq(count($hCapabilityViews), 0),
+                {
+                  tag = "p";
+                  attrs = {  };
+                  children = list(
+                    "No shared capability identity is declared in the selected sources. The source bindings below remain inspectable."
+                  )
+                },
+                {
+                  tag = "div";
+                  attrs = { class = "hierarchy-capabilities" };
+                  children = list($hCapabilityViews)
+                }
+              ),
+              { tag = "h2"; attrs = {  }; children = list("Source bindings") },
+              {
+                tag = "div";
+                attrs = { class = "hierarchy-table-wrap" };
+                children = list(
+                  {
+                    tag = "table";
+                    attrs = { class = "hierarchy-table" };
+                    children = list(
+                      {
+                        tag = "thead";
+                        attrs = {  };
+                        children = list(
+                          {
+                            tag = "tr";
+                            attrs = {  };
+                            children = list(
+                              { tag = "th"; attrs = {  }; children = list("Source binding") },
+                              { tag = "th"; attrs = {  }; children = list("Snapshot") }
+                            )
+                          }
+                        )
+                      },
+                      {
+                        tag = "tbody";
+                        attrs = {  };
+                        children = list(
+                          map(
+                            $hItemBindings,
+                            "hBinding",
+                            {
+                              tag = "tr";
+                              attrs = {  };
+                              children = list(
+                                {
+                                  tag = "td";
+                                  attrs = {  };
+                                  children = list(
+                                    {
+                                      tag = "code";
+                                      attrs = {  };
+                                      children = list(concat($hBinding.sourceRoot, "/", $hBinding.origin))
+                                    },
+                                    { tag = "p"; attrs = {  }; children = list($hBinding.scope) },
+                                    {
+                                      tag = "small";
+                                      attrs = {  };
+                                      children = list(concat("Upstream SHA-256: ", $hBinding.sourceSha256))
+                                    }
+                                  )
+                                },
+                                {
+                                  tag = "td";
+                                  attrs = {  };
+                                  children = list(
+                                    {
+                                      tag = "a";
+                                      attrs = { href = concat("../", $hBinding.file) };
+                                      children = list("Read exact snapshot")
+                                    },
+                                    {
+                                      tag = "small";
+                                      attrs = {  };
+                                      children = list(concat("Snapshot SHA-256: ", $hBinding.snapshotSha256))
+                                    }
+                                  )
+                                }
+                              )
+                            }
+                          )
+                        )
+                      }
+                    )
+                  }
+                )
+              },
+              { tag = "h2"; attrs = {  }; children = list("Readable source") },
+              {
+                tag = "input";
+                attrs = { id = "hierarchy-language"; type = "hidden"; value = $hSourceLanguage };
+                children = list()
+              },
+              { tag = "style"; attrs = { id = "hierarchy-source-style" }; children = list() },
+              {
+                tag = "div";
+                attrs = {
+                  class = if(
+                    eq($hSourceLanguage, "markdown"),
+                    "inspection-document inspection-document-dual",
+                    "inspection-document"
+                  )
+                };
+                children = list(
+                  if(
+                    eq($hSourceLanguage, "markdown"),
+                    {
+                      tag = "section";
+                      attrs = { class = "inspection-preview-pane"; "aria-label" = "Markdown preview" };
+                      children = list(
+                        { tag = "h3"; attrs = {  }; children = list("Preview") },
+                        {
+                          tag = "p";
+                          attrs = { class = "md-note" };
+                          children = list(
+                            "Rendered from the exact snapshot. Source-relative links retain their target; unbundled documents do not navigate."
+                          )
+                        },
+                        {
+                          tag = "div";
+                          attrs = {
+                            id = "hierarchy-preview";
+                            tabindex = "0";
+                            "aria-label" = "Scrollable Markdown preview"
+                          };
+                          children = list("Markdown preview loads through the shared algebra.")
+                        }
+                      )
+                    },
+                    null
+                  ),
+                  {
+                    tag = "section";
+                    attrs = { class = "inspection-source-pane"; "aria-label" = "Highlighted exact source" };
+                    children = list(
+                      { tag = "h3"; attrs = {  }; children = list("Source") },
+                      {
+                        tag = "p";
+                        attrs = { class = "md-note" };
+                        children = list(
+                          "Exact source, with shared syntax highlighting. Line wrapping is visual; the snapshot and its SHA-256 remain unchanged."
+                        )
+                      },
+                      {
+                        tag = "pre";
+                        attrs = {
+                          id = "hierarchy-source";
+                          class = "hierarchy-source";
+                          tabindex = "0";
+                          "aria-label" = "Scrollable highlighted source"
+                        };
+                        children = list($hDisplayedSource)
+                      }
+                    )
+                  }
+                )
+              },
+              {
+                tag = "p";
+                attrs = { id = "hierarchy-source-hash"; class = "hierarchy-source-digest" };
+                children = list("Source highlighting uses the shared Encounter presenter.")
+              },
+              {
+                tag = "p";
+                attrs = {  };
+                children = list(
+                  "Snapshots preserve the observed source version. An excerpt retains its upstream file hash and original line locations. This is source inspection, not an execution trace."
+                )
+              },
+              { tag = "h2"; attrs = {  }; children = list("How sharing is computed") },
+              {
+                tag = "pre";
+                attrs = { id = "hierarchy-process"; class = "hierarchy-source" };
+                children = list("Readable process definition loads through the shared source presenter.")
+              },
+              {
+                tag = "p";
+                attrs = {  };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "../algebra/hierarchy.process.values.rel" };
+                    children = list("Authoritative inspection algebra")
+                  },
+                  " · ",
+                  {
+                    tag = "a";
+                    attrs = { href = "../source/hierarchy.values.rel" };
+                    children = list("Homepage source catalogue")
+                  },
+                  " · ",
+                  {
+                    tag = "a";
+                    attrs = { href = "../source/hierarchy.rel" };
+                    children = list("Presentation facts")
+                  }
+                )
+              },
+              { tag = "script"; attrs = { src = "runtime.js"; defer = true }; children = list() },
+              {
+                tag = "p";
+                attrs = {  };
+                children = list(
+                  {
+                    tag = "a";
+                    attrs = { href = "source-algebra.html" };
+                    children = list("Shared Markdown, lexer and formatting algebra")
+                  }
+                )
+              },
+              {
+                tag = "details";
+                attrs = { class = "module-disclosure" };
+                children = list(
+                  { tag = "summary"; attrs = {  }; children = list("Published Encounter definitions") },
+                  {
+                    tag = "p";
+                    attrs = {  };
+                    children = list(
+                      "These are the readable source owners selected by this publication’s build manifest."
+                    )
+                  },
+                  {
+                    tag = "ul";
+                    attrs = { class = "published-modules" };
+                    children = map(
+                      $hModuleMetadata,
+                      "publishedModule",
+                      {
+                        tag = "li";
+                        attrs = {  };
+                        children = list(
+                          {
+                            tag = "a";
+                            attrs = { href = $publishedModule.page };
+                            children = list($publishedModule.title)
+                          },
+                          {
+                            tag = "small";
+                            attrs = {  };
+                            children = list(concat(" · ", $publishedModule.sourceFile))
+                          }
+                        )
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          }
+        )
+      }
+    )
+  }
+  call projection.serialize
+  let surfaceWritePath = concat("inspection/", $hItem.id, ".html")
+  call assurance.surface.register
+  port file.write {
+    path = concat("inspection/", $hItem.id, ".html");
+    text = $result
+  } → _

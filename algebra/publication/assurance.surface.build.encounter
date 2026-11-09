@@ -1,0 +1,375 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process assurance.surface.build:
+  let surfaceCSSFindings = list()
+  let surfacePages = list()
+  let surfaceReport = { pageCount = 0; findings = 0; geometryUnmeasured = 0 }
+  let portfolioPage = {
+    route = "assurance/navigation-layout/index.html";
+    prefix = "../../";
+    canonical = "https://aaronalderman.com/assurance/navigation-layout/";
+    title = "Navigation & layout assurance — Aaron Alderman";
+    description = "Site-wide evidence for redundant return navigation and unnecessary spacing, with explicit browser evidence gaps.";
+    body = list(
+      {
+        tag = "section";
+        attrs = { class = "assurance-intro" };
+        children = list(
+          {
+            tag = "p";
+            attrs = { class = "eyebrow" };
+            children = list("ASSURANCE / NAVIGATION & LAYOUT")
+          },
+          { tag = "h1"; attrs = {  }; children = list("Room for what matters") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "The algebra records pages as it publishes them, then checks their finished markup for redundant return navigation and space reservations."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              concat(
+                $surfaceReport.pageCount,
+                " pages inspected · ",
+                $surfaceReport.findings,
+                " targeted source findings. Desktop and mobile measurements are reported separately."
+              )
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              { tag = "a"; attrs = { href = "../" }; children = list("All assurance topics") },
+              " · ",
+              {
+                tag = "a";
+                attrs = { href = "../navigation-layout.values.rel" };
+                children = list("Download the evidence")
+              },
+              " · ",
+              {
+                tag = "a";
+                attrs = { href = "../rendered-layout/" };
+                children = list("Rendered browser findings")
+              }
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("What this can establish") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "A named Aaron Alderman home link plus a floating return control is redundant. Loading the return stylesheet without its control is an orphan dependency. Explicit body bottom spacing is a review candidate whose purpose remains undecided."
+            )
+          },
+          { tag = "h2"; attrs = {  }; children = list("What remains open") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "The source audit does not measure visible whitespace. Browser evidence must include the route, viewport, runtime state, document height and footer position. Repeated header/footer links and generous spacing are not automatically defects."
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = append(
+          list({ tag = "h2"; attrs = {  }; children = list("Stylesheet space reservations") }),
+          map(
+            $surfaceCSSFindings,
+            "f",
+            {
+              tag = "p";
+              attrs = {  };
+              children = list(
+                { tag = "a"; attrs = { href = concat("/", $f.route) }; children = list($f.route) },
+                " · undecided — ",
+                $f.evidence
+              )
+            }
+          )
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-products" };
+        children = append(
+          list({ tag = "h2"; attrs = {  }; children = list("Source findings") }),
+          map(
+            filter($surfacePages, "p", not(eq(count($p.findings), 0))),
+            "p",
+            {
+              tag = "article";
+              attrs = { class = "assurance-card" };
+              children = list(
+                {
+                  tag = "h3";
+                  attrs = {  };
+                  children = list({ tag = "a"; attrs = { href = concat("/", $p.route) }; children = list($p.route) })
+                },
+                {
+                  tag = "p";
+                  attrs = {  };
+                  children = list(
+                    if(
+                      eq(count($p.findings), 0),
+                      "Targeted source checks passed.",
+                      "Source findings require attention."
+                    )
+                  )
+                },
+                {
+                  tag = "ul";
+                  attrs = {  };
+                  children = map(
+                    $p.findings,
+                    "f",
+                    {
+                      tag = "li";
+                      attrs = {  };
+                      children = list(
+                        { tag = "strong"; attrs = {  }; children = list($f.status, " · ", $f.rule) },
+                        " — ",
+                        $f.evidence
+                      )
+                    }
+                  )
+                },
+                { tag = "p"; attrs = {  }; children = list("Browser layout: needs evidence.") }
+              )
+            }
+          )
+        )
+      }
+    )
+  }
+  call assurance.portfolio.document
+  port file.read { path = "assurance/generated-pages.values.rel" } → surfaceRegistryJSON
+  port static.read { text = $surfaceRegistryJSON } → surfaceRegistry
+  port record.entries { value = $surfaceRegistry } → surfaceEntries
+  let surfaceHTMLEntries = list()
+  fold $surfaceEntries as surfaceEntry; surfaceCSSFindings starts list():
+    let surfaceRoute = at($surfaceEntry, 0)
+    port text.matches { value = $surfaceRoute; pattern = "\\.css$" } → surfaceIsCSS
+    let surfaceCSSNext = $surfaceCSSFindings
+    when $surfaceIsCSS:
+      port file.read { path = $surfaceRoute } → surfaceCSSDocument
+      let eventInput = { route = $surfaceRoute; css = $surfaceCSSDocument }
+      call assurance.surface.stylesheet
+      when eq($result.status, "undecided"):
+        let surfaceCSSNext = append($surfaceCSSFindings, list($result))
+    yield $surfaceCSSNext → surfaceCSSFindings
+  fold $surfaceEntries as surfaceEntry; surfaceFiltered starts list():
+    port text.matches { value = at($surfaceEntry, 0); pattern = "\\.html$" } → surfaceIsHTML
+    yield if($surfaceIsHTML, append($surfaceFiltered, list($surfaceEntry)), $surfaceFiltered) → surfaceHTMLEntries
+  fold $surfaceHTMLEntries as surfaceEntry; surfacePages starts list():
+    let surfaceRoute = at($surfaceEntry, 0)
+    port file.read { path = $surfaceRoute } → surfaceDocument
+    let eventInput = { route = $surfaceRoute; html = $surfaceDocument }
+    call assurance.surface.scan
+    yield append($surfacePages, list($result)) → surfacePages
+  let surfacePages = map(
+    $surfacePages,
+    "page",
+    let(
+      "readings",
+      or(at($renderedReceipt.report.byRoute, $page.route), list()),
+      {
+        route = $page.route;
+        headerHome = $page.headerHome;
+        returnWidget = $page.returnWidget;
+        returnStylesheet = $page.returnStylesheet;
+        findings = $page.findings;
+        geometry = {
+          status = "needs-browser-recapture";
+          evidence = "assurance/rendered-layout.values.rel";
+          readings = $readings;
+          currentness = { status = "needs-browser-recapture"; reason = "Common projection and runtime dependencies changed. Historical geometry readings retain their original scope; use the separately bound current reading-experience track." }
+        }
+      }
+    )
+  )
+  let surfaceReport = {
+    protocol = "worldwright/navigation-layout-assurance/1";
+    scope = "Every HTML route recorded by the algebra publication effects; independently compared with the generated artifact set by the release checks.";
+    method = "Publication-effect registration, then a static audit of the finished HTML. No manually maintained route inventory.";
+    boundary = "Lexical source checks target redundant personal home-return controls, orphan return stylesheets and explicit inline body bottom reservations. They do not certify arbitrary CSS, computed geometry, duplicate navigation intent, runtime states or visual fitness. Per-route browser readings and their initial-state limits are recorded separately in assurance/rendered-layout.values.rel. Registered CSS is checked for unconditional body padding-bottom/margin-bottom in positive supported units. Shorthands, variables, fractional values below one unit, selector groups, cascade and other stylesheet patterns remain outside this check.";
+    pages = $surfacePages;
+    pageCount = count($surfacePages);
+    findings = add(
+      fold($surfacePages, "p", "n", 0, add($n, count($p.findings))),
+      count($surfaceCSSFindings)
+    );
+    geometryUnmeasured = count(filter($surfacePages, "p", not(eq($p.geometry.status, "measured"))));
+    stylesheetFindings = $surfaceCSSFindings;
+    stylesheetCount = add(count($surfaceEntries), add(0, fold($surfaceHTMLEntries, "e", "n", 0, add($n, -1))))
+  }
+  port value.encode { value = $surfaceReport } → surfaceReportJSON
+  port file.write { path = "assurance/navigation-layout.values.rel"; text = $surfaceReportJSON } → _
+  let portfolioPage = {
+    route = "assurance/navigation-layout/index.html";
+    prefix = "../../";
+    canonical = "https://aaronalderman.com/assurance/navigation-layout/";
+    title = "Navigation & layout assurance — Aaron Alderman";
+    description = "Site-wide evidence for redundant return navigation and unnecessary spacing, with explicit browser evidence gaps.";
+    body = list(
+      {
+        tag = "section";
+        attrs = { class = "assurance-intro" };
+        children = list(
+          {
+            tag = "p";
+            attrs = { class = "eyebrow" };
+            children = list("ASSURANCE / NAVIGATION & LAYOUT")
+          },
+          { tag = "h1"; attrs = {  }; children = list("Room for what matters") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "The algebra records pages as it publishes them, then checks their finished markup for redundant return navigation and space reservations."
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              concat(
+                $surfaceReport.pageCount,
+                " pages inspected · ",
+                $surfaceReport.findings,
+                " targeted source findings. Desktop and mobile measurements are reported separately."
+              )
+            )
+          },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              { tag = "a"; attrs = { href = "../" }; children = list("All assurance topics") },
+              " · ",
+              {
+                tag = "a";
+                attrs = { href = "../navigation-layout.values.rel" };
+                children = list("Download the evidence")
+              },
+              " · ",
+              {
+                tag = "a";
+                attrs = { href = "../rendered-layout/" };
+                children = list("Rendered browser findings")
+              }
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = list(
+          { tag = "h2"; attrs = {  }; children = list("What this can establish") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "A named Aaron Alderman home link plus a floating return control is redundant. Loading the return stylesheet without its control is an orphan dependency. Explicit body bottom spacing is a review candidate whose purpose remains undecided."
+            )
+          },
+          { tag = "h2"; attrs = {  }; children = list("What remains open") },
+          {
+            tag = "p";
+            attrs = {  };
+            children = list(
+              "The source audit does not measure visible whitespace. Browser evidence must include the route, viewport, runtime state, document height and footer position. Repeated header/footer links and generous spacing are not automatically defects."
+            )
+          }
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-boundary" };
+        children = append(
+          list({ tag = "h2"; attrs = {  }; children = list("Stylesheet space reservations") }),
+          map(
+            $surfaceCSSFindings,
+            "f",
+            {
+              tag = "p";
+              attrs = {  };
+              children = list(
+                { tag = "a"; attrs = { href = concat("/", $f.route) }; children = list($f.route) },
+                " · undecided — ",
+                $f.evidence
+              )
+            }
+          )
+        )
+      },
+      {
+        tag = "section";
+        attrs = { class = "assurance-products" };
+        children = append(
+          list({ tag = "h2"; attrs = {  }; children = list("Source findings") }),
+          map(
+            filter($surfacePages, "p", not(eq(count($p.findings), 0))),
+            "p",
+            {
+              tag = "article";
+              attrs = { class = "assurance-card" };
+              children = list(
+                {
+                  tag = "h3";
+                  attrs = {  };
+                  children = list({ tag = "a"; attrs = { href = concat("/", $p.route) }; children = list($p.route) })
+                },
+                {
+                  tag = "p";
+                  attrs = {  };
+                  children = list(
+                    if(
+                      eq(count($p.findings), 0),
+                      "Targeted source checks passed.",
+                      "Source findings require attention."
+                    )
+                  )
+                },
+                {
+                  tag = "ul";
+                  attrs = {  };
+                  children = map(
+                    $p.findings,
+                    "f",
+                    {
+                      tag = "li";
+                      attrs = {  };
+                      children = list(
+                        { tag = "strong"; attrs = {  }; children = list($f.status, " · ", $f.rule) },
+                        " — ",
+                        $f.evidence
+                      )
+                    }
+                  )
+                },
+                { tag = "p"; attrs = {  }; children = list("Browser layout: needs evidence.") }
+              )
+            }
+          )
+        )
+      }
+    )
+  }
+  call assurance.portfolio.document

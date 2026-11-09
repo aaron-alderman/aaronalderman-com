@@ -1,0 +1,11 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process identity.journey.check:
+  fold $eventInput.expected as fragment; missing starts list():
+    port text.indexOf { value = $eventInput.html; search = $fragment; from = 0 } → found
+    yield if(eq($found, -1), append($missing, list($fragment)), $missing) → missing
+  let result = {
+    ok = and(not(eq(count($eventInput.expected), 0)), eq(count($missing), 0));
+    missing = $missing
+  }

@@ -1,7 +1,5 @@
-# Readable process source; authority is selected explicitly by the build manifest.
-# The migration is gated by author.run correspondence and publication validation.
 process-module "temple/surface-process-module/1"
-profile "encounter/module-batch/microsite-return/1"
+profile "encounter/reconstituted-source/1"
 
 process microsite.return.styles:
   let cssPlan = {
@@ -308,49 +306,16 @@ process microsite.return.project:
   let returnDocument = one($msDocument, "path")
   call microsite.return.decorate
 
-# Header navigation eligibility is evaluated by the shared publication algebra.
 process microsite.return.decorate:
   call microsite.return.inspectHome
   when and(not($returnHasHome), not(includes($result, "id=\"microsite-return\""))):
-    let returnMarkup = $result
-    port text.split { value = $returnDocument; pattern = "/" } → returnParts
-    port text.join { values = map(range(add(count($returnParts), -1)), "level", "../"); separator = "" } → returnPrefix
-    let input = {
-      tag = "link";
-      attrs = {
-        rel = "stylesheet";
-        href = concat($returnPrefix, "assets/microsite-return.css?v=return-2")
-      };
-      children = list()
-    }
-    call html.serialize
-    let returnHead = concat($result, "\n")
-    let input = {
-      tag = "a";
-      attrs = {
-        id = "microsite-return";
-        class = "microsite-return";
-        href = concat($returnPrefix, "index.html#microsites");
-        "aria-label" = "Back to Aaron Alderman’s main website";
-        "data-site" = at($returnParts, 0)
-      };
-      children = list(
-        { tag = "span"; attrs = { "aria-hidden" = "true" }; children = list("←") },
-        { tag = "span"; attrs = {  }; children = list("Back to Aaron Alderman") }
-      )
-    }
-    call html.serialize
-    let returnBody = concat("\n", $result, "\n")
-    port text.replaceAll {
-      value = $returnMarkup;
-      search = "</head>";
-      replacement = concat($returnHead, "</head>")
-    } → returnMarkup
-    port text.replaceAll {
-      value = $returnMarkup;
-      search = "</body>";
-      replacement = concat($returnBody, "</body>")
-    } → result
+    port projection.resolve { text = $result } → tree
+    port text.split { value = $returnDocument; pattern = "/" } → parts
+    port text.join { values = map(range(add(count($parts), -1)), "level", "../"); separator = "" } → prefix
+    let eventInput = { tree = $tree; prefix = $prefix; site = at($parts, 0) }
+    call projection.return
+    let input = $result
+    call projection.serialize
 
 process microsite.return.all:
   each subjects("isa", "StandalonePage") as returnPage:
@@ -368,4 +333,3 @@ process microsite.return.all:
       let surfaceWritePath = $returnDocument
       call assurance.surface.register
       port file.write { path = $returnDocument; text = $result } → _
-

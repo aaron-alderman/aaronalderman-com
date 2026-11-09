@@ -1,0 +1,60 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process workshop.boot:
+  let busy = true
+  call workshop.busy
+  port kernel.invoke { query = "ec.prepare"; input = $data.inputs } → candidate
+  port kernel.invoke {
+    query = "workshop.snapshot";
+    input = { candidate = $candidate; revision = 0; receipt = null }
+  } → snapshot
+  port state.set { key = "workshop"; value = $snapshot } → _
+  port state.set { key = "activeTab"; value = "source" } → _
+  port state.set { key = "sourceHighlight"; value = null } → _
+  port browser.on {
+    ref = "#title-form";
+    event = "submit";
+    query = "workshop.apply";
+    input = { kind = "title" };
+    preventDefault = true
+  } → _
+  port browser.on {
+    ref = "#web-form";
+    event = "submit";
+    query = "workshop.apply";
+    input = { kind = "web-label" };
+    preventDefault = true
+  } → _
+  port browser.on {
+    ref = "document";
+    event = "click";
+    query = "workshop.tab";
+    input = {  };
+    delegate = "[data-tab]"
+  } → _
+  port browser.on {
+    ref = "document";
+    event = "keydown";
+    query = "workshop.key";
+    input = {  };
+    delegate = "[data-tab]";
+    preventKeys = list("ArrowRight", "ArrowLeft", "Home", "End")
+  } → _
+  port browser.on {
+    ref = "document";
+    event = "click";
+    query = "workshop.route";
+    input = {  };
+    delegate = "[data-route],[data-source]"
+  } → _
+  port browser.on { ref = "#source-file"; event = "change"; query = "workshop.source"; input = {  } } → _
+  port browser.on { ref = "#process-file"; event = "change"; query = "workshop.process"; input = {  } } → _
+  call workshop.render
+  port browser.write {
+    ref = "#status";
+    name = "textContent";
+    value = "Ready. Try changing the story title in step 1."
+  } → _
+  let busy = false
+  call workshop.busy

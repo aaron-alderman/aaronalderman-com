@@ -1,0 +1,35 @@
+# Pure shared assurance components. Children return trees, never artifact bytes.
+process-module "temple/surface-process-module/1"
+
+process component.experience.page:
+  let findings = filter($report.assessments, "r", not(eq($r.status, "passed")))
+  let sample = map(filter(range(60), "n", includes(range(count($findings)), $n)), "n", at($findings, add($n, -1)))
+  let portfolioPage = { route = concat("assurance/", $reportRoute, "/index.html"); prefix = "../../"; canonical = concat("https://aaronalderman.com/assurance/", $reportRoute, "/"); title = concat($reportTitle, " — Aaron Alderman"); description = at($reportIntro, 0); body = list(
+    { tag = "section"; attrs = { class = "assurance-boundary" }; children = append(list({ tag = "p"; attrs = { class = "eyebrow" }; children = list("ASSURANCE / ", $reportRoute) }, { tag = "h1"; attrs = {}; children = list($reportTitle) }), map($reportIntro, "p", { tag = "p"; attrs = {}; children = list($p) })) },
+    { tag = "section"; attrs = { class = "assurance-boundary" }; children = list({ tag = "h2"; attrs = {}; children = list("Evidence and its limits") }, { tag = "p"; attrs = {}; children = list($report.boundary) }, { tag = "p"; attrs = {}; children = list(concat($report.counts.routes, " routes · ", $report.status, " · ", count($findings), " findings and review obligations.")) }, { tag = "p"; attrs = {}; children = list({ tag = "a"; attrs = { href = concat("../", $reportRoute, ".rel") }; children = list("Download the complete measured report") }, " · ", { tag = "a"; attrs = { href = "../reading-experience-capture.rel" }; children = list("Raw bound observations") }, " · ", { tag = "a"; attrs = { href = "../images/" }; children = list("Questions image diagnostics") }, " · ", { tag = "a"; attrs = { href = "../" }; children = list("All assurance topics") }) }) },
+    { tag = "p"; attrs = { class = "assurance-boundary" }; children = list({ tag = "a"; attrs = { href = concat("https://github.com/aaron-alderman/aaronalderman-com/blob/26cc4bdd9753068e54cb6708ad2ce37fc5193ec9/dist/assurance/", $reportRoute, ".json") }; children = list("Earlier live evidence, preserved at its original revision ↗") }) },
+    { tag = "section"; attrs = { class = "assurance-boundary projection-wrap" }; children = list({ tag = "h2"; attrs = {}; children = list("Findings and review obligations") }, { tag = "p"; attrs = {}; children = list("A sample is shown here; the complete report retains every assessment. Review candidates are not automatic judgments about the page.") }, { tag = "ul"; attrs = {}; children = map($sample, "f", { tag = "li"; attrs = {}; children = list({ tag = "a"; attrs = { href = concat("/", $f.route) }; children = list($f.route) }, " · ", $f.profile, " · ", { tag = "strong"; attrs = {}; children = list($f.status) }, " · ", $f.rule, " — ", $f.evidence, " ", { tag = "q"; attrs = {}; children = list($f.text) }) }) }) }
+  ) }
+  let result = $portfolioPage
+
+process component.images.index:
+  let portfolioPage = { route = "assurance/images/index.html"; prefix = "../../"; canonical = "https://aaronalderman.com/assurance/images/"; title = "Questions image assurance — Aaron Alderman"; description = "Purpose-based image fitting and real browser diagnostics, including deliberate failures."; body = list(
+    { tag = "section"; attrs = { class = "assurance-boundary" }; children = list(
+      { tag = "p"; attrs = { class = "eyebrow" }; children = list("ASSURANCE / QUESTIONS IMAGERY") },
+      { tag = "h1"; attrs = {}; children = list("Does each image belong in its frame?") },
+      { tag = "p"; attrs = {}; children = list("Portrait illustrations fill their frames. Transparent emblems fit inside them. The choice belongs to the image’s purpose, rather than its position in a row.") },
+      { tag = "p"; attrs = {}; children = list("The source checks fitting rules and refuses positional overrides. The admitted browser programme measures loading, natural dimensions, card bounds and consistent frame sizes. Deliberately broken images and a wrong-size card must fail their checks.") },
+      { tag = "p"; attrs = {}; children = list("These diagnostic copies use eager image loading. They do not establish scrolling-triggered lazy loading, arbitrary computed CSS, or artistic crop quality.") },
+      { tag = "p"; attrs = {}; children = list({ tag = "a"; attrs = { href = "../reading-experience/" }; children = list("Reading experience and measured evidence →") }) },
+      { tag = "p"; attrs = {}; children = list({ tag = "a"; attrs = { href = "../images.rel" }; children = list("Download the separate measured image report →") }) },
+      { tag = "p"; attrs = {}; children = list({ tag = "a"; attrs = { href = "/inspection/module-questions-images.html" }; children = list("Inspect the actual Encounter source →") }) },
+      { tag = "h2"; attrs = {}; children = list("Explore the diagnostic copies") },
+      { tag = "ul"; attrs = {}; children = map(filter($imageVariants, "v", not(includes($v.id, "counterexample"))), "v", { tag = "li"; attrs = {}; children = list({ tag = "a"; attrs = { href = concat($v.id, ".html") }; children = list(if(eq($v.id, "main"), "Main Questions", $v.id)) }) }) },
+      { tag = "details"; attrs = {}; children = list({ tag = "summary"; attrs = {}; children = list("Deliberate counterexamples") }, { tag = "p"; attrs = {}; children = list("These copies intentionally contain an invalid image or a mismatched frame. They must be rejected by assurance.") }, { tag = "ul"; attrs = {}; children = list({ tag = "li"; attrs = {}; children = list({ tag = "a"; attrs = { href = "counterexample-broken.html" }; children = list("Broken image") }) }, { tag = "li"; attrs = {}; children = list({ tag = "a"; attrs = { href = "counterexample-size.html" }; children = list("Wrong frame size") }) }) }) }
+    ) }
+  ) }
+  let result = $portfolioPage
+
+process component.images.inspector:
+  let portfolioPage = { route = "inspection/module-questions-images.html"; prefix = "../"; canonical = "https://aaronalderman.com/inspection/module-questions-images.html"; title = "Questions image source — Aaron Alderman"; description = "Inspect the actual admitted Encounter source for image diagnostics."; body = list({ tag = "section"; attrs = { class = "assurance-boundary" }; children = list({ tag = "h1"; attrs = {}; children = list("Questions image assurance source") }, { tag = "p"; attrs = {}; children = list("Actual Encounter source. Read-only inspection grants no execution authority. The common projection definition owns every rendered node and stylesheet.") }, { tag = "p"; attrs = {}; children = list({ tag = "a"; attrs = { href = "/assurance/images/" }; children = list("Explore the diagnostics →") }) }, { tag = "details"; attrs = { open = true }; children = list({ tag = "summary"; attrs = {}; children = list("source/assurance/images.encounter") }, { tag = "pre"; attrs = { class = "hierarchy-source md-code"; tabindex = 0; "aria-label" = "Questions image assurance source code" }; children = list({ tag = "code"; attrs = {}; children = list($source) }) }) }) }) }
+  let result = $portfolioPage

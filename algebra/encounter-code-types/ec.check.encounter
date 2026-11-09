@@ -1,0 +1,32 @@
+process-module "temple/surface-process-module/1"
+profile "encounter/reconstituted-source/1"
+
+process ec.check:
+  port kernel.invoke { query = "ec.schema"; input = { type = $eventInput.type } } → ecCheckSchema
+  let ecCheckValues = $eventInput.values
+  port value.describe { value = $ecCheckValues } → ecRecordKind
+  assert and($ecRecordKind.plain, not($ecRecordKind.array), $ecRecordKind.dataOnly)
+    otherwise "EC-T011: A typed value must be an own-data record."
+  port record.entries { value = $ecCheckValues } → ecValueEntries
+  assert every(
+    $ecValueEntries,
+    "ecEntry",
+    some($ecCheckSchema.slots, "ecS", eq($ecS.name, at($ecEntry, 0)))
+  )
+    otherwise "EC-T012: This closed interface contains an undeclared field."
+  each $ecCheckSchema.slots as ecCheckSlot:
+    let ecCheckValue = at($ecCheckValues, $ecCheckSlot.name)
+    port value.describe { value = $ecCheckValue } → ecCheckKind
+    assert includes(list("one", "optional", "many"), $ecCheckSlot.cardinality)
+      otherwise "EC-T013: Unknown slot cardinality; assurance cannot be inferred."
+    assert or(not(eq($ecCheckKind.type, "undefined")), eq($ecCheckSlot.cardinality, "optional"))
+      otherwise "EC-T014: A required field is missing."
+    when not(eq($ecCheckKind.type, "undefined")):
+      when eq($ecCheckSlot.cardinality, "many"):
+        assert $ecCheckKind.array
+          otherwise "EC-T015: This field requires an ordered collection."
+        each $ecCheckValue as ecItem:
+          port kernel.invoke { query = "ec.scalar"; input = { slot = $ecCheckSlot; value = $ecItem } } → _
+      when not(eq($ecCheckSlot.cardinality, "many")):
+        port kernel.invoke { query = "ec.scalar"; input = { slot = $ecCheckSlot; value = $ecCheckValue } } → _
+  let result = true
