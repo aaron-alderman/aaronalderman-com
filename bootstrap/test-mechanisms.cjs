@@ -77,6 +77,7 @@ function mechanisms(){
     'file.read':({file})=>fs.readFileSync(path.resolve(root,file),'utf8'),
     'file.bytes':({file})=>[...fs.readFileSync(path.resolve(root,file))],
     'file.digest':({file})=>crypto.createHash('sha256').update(fs.readFileSync(path.resolve(root,file))).digest('hex'),
+    'file.identities':({files})=>files.map(file=>({file,sha256:crypto.createHash('sha256').update(fs.readFileSync(path.resolve(root,file))).digest('hex')})),
     'file.exists':({file})=>fs.existsSync(path.resolve(root,file)),
     'file.stat':({file})=>{const s=fs.statSync(path.resolve(root,file));return {size:s.size,directory:s.isDirectory()};},
     'file.list':({directory='.',recursive=false,details=false})=>{

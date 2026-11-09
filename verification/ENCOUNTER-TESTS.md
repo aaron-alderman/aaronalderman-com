@@ -6,7 +6,8 @@ Run the full suite from this worktree:
 node bootstrap/test.cjs
 ```
 
-Arguments select process-name substrings, combined as alternatives:
+Arguments select process-name substrings, combined as alternatives. Every run
+also appends the Source-owned final stability guard, including filtered runs:
 
 ```powershell
 node bootstrap/test.cjs test.front test.rel test.foundation
@@ -28,6 +29,7 @@ node bootstrap/serve.mjs
 | `tests/reading.encounter` | Reading content, shared components, exact style-library identity, AA colour calculations, links, accessible names, guide specimens and theme controls |
 | `tests/preservation.encounter` | Frozen route/text/asset comparisons, 97 evidence relocations and original/derivative artwork provenance |
 | `tests/audits.encounter` | Native regex isolation, compiler/caller accounting, completed publication identities and phase budgets, common projection closure and whole-worktree file boundaries |
+| `tests/validation.encounter` | Source-owned snapshot scope, explicit retention registration and regressions for unregistered files, missing purposes, changed bytes and snapshot coverage |
 | `tests/helpers.encounter` | Source-owned test helpers and behavioural callbacks; no JavaScript test code is embedded |
 
 The runner uses the existing compiler/front door: Encounter source → hydrated
@@ -84,7 +86,26 @@ behind `.txt` suffixes. Git administrative metadata is outside this inventory.
 Scope is this publication worktree; other Git worktrees and the deployed site
 are separate.
 
-Each run records its loaded policy basis and canonical declaration hash. The
-last test checks that its Encounter sources, pinned policy inputs and canonical
-declaration have not changed during execution. It cannot silently turn a run
-across changing worktrees into a stable qualification result.
+Each run records its loaded policy basis, canonical declaration hash and captured
+file count. After admission, `audit.run.snapshot` captures the declared input
+roots (including native code, content and verification evidence), explicit
+module/resource sources, loaded test/runner identities and the selected output.
+It also records input and output file membership. This works for filtered unit
+runs before a publication exists; a missing selected output remains part of the
+captured state, while publication-specific tests still require a valid receipt.
+
+The final Source guard checks all captured identities, both file sets and
+retention metadata. `file.identities` is only a mechanical batch byte-hashing
+port; Encounter selects the paths and owns every assertion. Do not write test
+transcripts into a declared input root while tests are running. Send stdout to
+the terminal, CI logs or an external evidence directory. Hashes and membership
+are compared at the run boundaries; intentional scratch mutations must restore
+their original state before the final guard.
+
+Every retained non-output file requires an explicit nonblank purpose, owner and
+approved disposition in `retention-register.rel`, and its owner must exist.
+Broad directory names no longer assign self-ownership. Review new file purposes
+and refresh the descriptive register before qualification; the register remains
+evidence interpreted by Source, not an executable admission policy. Only files
+inside actual `.local-*/` directory paths use the separate output inventory; a
+root filename beginning `.local-` receives no such exemption.
