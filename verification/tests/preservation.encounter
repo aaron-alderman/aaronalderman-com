@@ -14,14 +14,28 @@ process test.preservation.routes-text-assets:
     when $isPage:
       assert includes($actual, $file)
         otherwise "Historical route missing."
+  port rel.read { file = "verification/field-definition-preservation-amendments.rel" } → fieldAmendments
   each list("index.html", "mission/index.html", "writing/power-must-serve-life/index.html") as file:
     port file.read { file = concat($output, "/", $file) } → html
     call check.reading
     let current = $result
     port process.git { args = list("show", concat($baseline, ":dist/", $file)) } → html
     call check.reading
-    assert eq($current, $result)
-      otherwise "Historical canonical reading text changed."
+    let historical = $result
+    when eq($file, "index.html"):
+      let previous = filter($fieldAmendments, "f", and(eq($f.s, $file), eq($f.p, "previousSha256")))
+      let successor = filter($fieldAmendments, "f", and(eq($f.s, $file), eq($f.p, "readingTextSha256")))
+      assert and(eq(count($previous), 1), eq(count($successor), 1))
+        otherwise "One reviewed home-page predecessor and successor are required."
+      port digest.sha256 { text = $historical } → historicalHash
+      port digest.sha256 { text = $current } → currentHash
+      assert eq($historicalHash, at(at($previous, 0), "o"))
+        otherwise "The Field amendment does not bind the exact historical home-page text."
+      assert eq($currentHash, at(at($successor, 0), "o"))
+        otherwise "The canonical home-page text differs from the reviewed Field amendment."
+    when not(eq($file, "index.html")):
+      assert eq($current, $historical)
+        otherwise "Historical canonical reading text changed."
   port rel.read { file = "verification/site-preservation-baseline.rel" } → preserved
   port rel.read { file = "verification/reading-qa-preservation-amendments.rel" } → amendments
   let allowed = list("expedition.css", "worlds/dad/threads/growing-up-in-the-way-of-jesus/index.html", "assurance/reading-palette/index.html")
@@ -86,6 +100,25 @@ process test.preservation.routes-text-assets:
     assert and($reasoned, $identity)
       otherwise "A scoped reason and exact SHA-256 identity are required."
   let amended = append(filter($amended, "f", not(includes(map($liveNew, "m", $m.s), $f.s))), $liveNew)
+  let fieldAllowed = list("the-field/index.html", "index.html", "worlds/sourcerer/index.html", "worlds/christian/index.html", "assurance/identities/index.html")
+  let fieldNew = filter($fieldAmendments, "f", eq($f.p, "readingTextSha256"))
+  assert and(eq(count($fieldAmendments), 15), eq(count($fieldNew), 5), eq(count(distinct(map($fieldNew, "f", $f.s))), 5))
+    otherwise "The Field amendment must contain exactly five distinct reading-text successors."
+  each $fieldNew as fact:
+    port diagnostic.context { value = $fact.s } → ignored
+    assert includes($fieldAllowed, $fact.s)
+      otherwise "Unscoped Field definition amendment."
+    let prior = filter($amended, "f", and(eq($f.s, $fact.s), eq($f.p, $fact.p)))
+    let base = filter($preserved, "f", and(eq($f.s, $fact.s), eq($f.p, $fact.p)))
+    let previous = filter($fieldAmendments, "f", and(eq($f.s, $fact.s), eq($f.p, "previousSha256")))
+    let reasons = filter($fieldAmendments, "f", and(eq($f.s, $fact.s), eq($f.p, "reason")))
+    assert and(eq(count($base), 1), eq(count($previous), 1), eq(count($reasons), 1), eq(at(at($previous, 0), "o"), at(at(if(count($prior), $prior, $base), 0), "o")))
+      otherwise "Field definition amendment broke its exact previous qualified identity chain."
+    port number.calculate { operation = "greater"; values = list(count(at(at($reasons, 0), "o")), 20) } → reasoned
+    port text.matches { value = $fact.o; pattern = "^[a-f0-9]{64}$" } → identity
+    assert and($reasoned, $identity)
+      otherwise "A scoped reason and exact SHA-256 identity are required."
+  let amended = append(filter($amended, "f", not(includes($fieldAllowed, $f.s))), $fieldNew)
   let pages = filter($preserved, "f", eq($f.p, "readingTextSha256"))
   fold $actual as file; htmlFiles starts list():
     port text.matches { value = $file; pattern = "\\.html$" } → isPage

@@ -334,18 +334,25 @@ process identity.catalogue.view:
                           tag = "div";
                           attrs = { class = "hierarchy-actions" };
                           children = list(
-                            {
-                              tag = "a";
-                              attrs = { href = $hItem.href; "aria-label" = concat("Explore ", $hItem.name) };
-                              children = list(
-                                "Explore ",
-                                {
-                                  tag = "span";
-                                  attrs = { class = "action-arrow"; "aria-hidden" = "true" };
-                                  children = list("↗")
-                                }
-                              )
-                            },
+                            let(
+                              "caseHref",
+                              optional(concat("identity.card.", $identityKey, ".", $hItem.id), "caseHref"),
+                              {
+                                tag = "a";
+                                attrs = {
+                                  href = or($caseHref, $hItem.href);
+                                  "aria-label" = if($caseHref, concat("Read the worked case in ", $hItem.name), concat("Explore ", $hItem.name))
+                                };
+                                children = list(
+                                  if($caseHref, "Read the worked case ", "Explore "),
+                                  {
+                                    tag = "span";
+                                    attrs = { class = "action-arrow"; "aria-hidden" = "true" };
+                                    children = list("↗")
+                                  }
+                                )
+                              }
+                            ),
                             {
                               tag = "a";
                               attrs = {

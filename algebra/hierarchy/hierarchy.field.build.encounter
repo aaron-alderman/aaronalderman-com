@@ -26,13 +26,13 @@ process hierarchy.field.build:
           {
             tag = "title";
             attrs = {  };
-            children = list(concat("The Field — What does love require here?", " — Aaron Alderman"))
+            children = list(concat("The Field — Model human interactions over time", " — Aaron Alderman"))
           },
           {
             tag = "meta";
             attrs = {
               name = "description";
-              content = "Explore a fictional workshop encounter through five choices and their immediate, relational and institutional consequences."
+              content = "Model how human interactions unfold over time. Examine how choices change relationships, obligations and what people can do next."
             };
             children = list()
           },
@@ -48,14 +48,14 @@ process hierarchy.field.build:
           },
           {
             tag = "meta";
-            attrs = { property = "og:title"; content = "The Field — What does love require here?" };
+            attrs = { property = "og:title"; content = "The Field — Model human interactions over time" };
             children = list()
           },
           {
             tag = "meta";
             attrs = {
               property = "og:description";
-              content = "Explore a fictional workshop encounter through five choices and their immediate, relational and institutional consequences."
+              content = "Model how human interactions unfold over time. Examine how choices change relationships, obligations and what people can do next."
             };
             children = list()
           },
@@ -102,14 +102,14 @@ process hierarchy.field.build:
           },
           {
             tag = "meta";
-            attrs = { name = "twitter:title"; content = "The Field — What does love require here?" };
+            attrs = { name = "twitter:title"; content = "The Field — Model human interactions over time" };
             children = list()
           },
           {
             tag = "meta";
             attrs = {
               name = "twitter:description";
-              content = "Explore a fictional workshop encounter through five choices and their immediate, relational and institutional consequences."
+              content = "Model how human interactions unfold over time. Examine how choices change relationships, obligations and what people can do next."
             };
             children = list()
           },
@@ -188,23 +188,23 @@ process hierarchy.field.build:
                           {
                             tag = "p";
                             attrs = { class = "eyebrow" };
-                            children = list("The Field / A first encounter")
+                            children = list("Human interaction over time")
                           },
                           {
                             tag = "h1";
                             attrs = {  };
-                            children = list("What does love", { tag = "em"; attrs = {  }; children = list("require here?") })
+                            children = list("The Field")
                           },
                           {
                             tag = "p";
                             attrs = { class = "q-subtitle" };
-                            children = list("A place to practise attention, choice and responsibility.")
+                            children = list("The Field is a framework for modelling how human interactions unfold over time.")
                           },
                           {
                             tag = "p";
                             attrs = { class = "q-intro" };
                             children = list(
-                              "I want to understand what my help asks of someone else—and what kind of world my choices make easier to repeat."
+                              "It makes resources, permissions, obligations, dependencies and attributed expectations explicit. Compare choices to see how they change relationships and what people can do next."
                             )
                           },
                           {
@@ -305,6 +305,21 @@ process hierarchy.field.build:
                         children = list(
                           "Open a choice to examine possible consequences. Compare them in any order. These branches are authored possibilities, not predictions about real people."
                         )
+                      },
+                      {
+                        tag = "h3";
+                        attrs = {  };
+                        children = list("Apply kenotic criteria to the choices")
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list("Ask whose room to act grows, who bears the cost, and whether people can refuse or challenge the decision. Apply these questions to actions and their consequences.")
+                      },
+                      {
+                        tag = "p";
+                        attrs = {  };
+                        children = list("Asking privately and sharing responsibility lets Mira choose what to disclose and gives workers a way to question the staffing rule. Covering quietly gives immediate help and may leave the rule unchallenged. A shared response may also take too long for this shift.")
                       },
                       {
                         tag = "div";
