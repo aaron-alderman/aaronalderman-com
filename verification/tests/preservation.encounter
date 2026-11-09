@@ -151,6 +151,12 @@ process test.preservation.routes-text-assets:
       port digest.sha256 { text = $result } → digest
     when eq($fact.p, "passiveSha256"):
       port file.digest { file = concat($output, "/", $fact.s) } → digest
+      when eq($fact.s, "expedition.css"):
+        assert eq($digest, "cfdb32944cd2592137734c30be70d1e916cf4473d07abee573184ac2dccc3550")
+          otherwise "Main stylesheet differs from the reviewed Thoughts and contrast update."
+        port file.read { file = concat($output, "/expedition.css") } → current
+        call preservation.before-thoughts-styles
+        port digest.sha256 { text = $result } → digest
     assert eq($digest, $expected)
       otherwise "Pinned canonical reading text or passive asset changed."
   each $actual as file:
@@ -216,6 +222,18 @@ process test.retention.artwork-provenance:
   assert and(eq($width, 1536), eq($height, 1024))
     otherwise "Original artwork geometry changed."
 
+# Remove the one reviewed insertion before checking the existing predecessor chain.
+process preservation.before-thoughts-styles:
+  let marker = "#microsites.identity-catalogue .hierarchy-card[data-type] :is(.hierarchy-usecase,.science-mission-note) a{color:var(--q-accent);}"
+  port text.indexOf { value = $current; search = $marker; from = 0 } → start
+  assert not(eq($start, -1))
+    otherwise "Reviewed Thoughts and contrast rules are missing."
+  port text.slice { value = $current; start = $start; end = add($start, 756) } → insertion
+  port digest.sha256 { text = $insertion } → identity
+  assert eq($identity, "392ff30e993789fae9d23833244cdcd577aa21852bdb0ee39cddbe04f9eb393b")
+    otherwise "The reviewed Thoughts and contrast insertion changed."
+  port text.replaceAll { value = $current; search = $insertion; replacement = "" } → result
+
 process test.preservation.common-style-migration:
   call check.manifest
   port rel.read { file = "verification/site-preservation-baseline.rel" } → preserved
@@ -224,8 +242,10 @@ process test.preservation.common-style-migration:
   assert eq(count($prior), 1)
     otherwise "One previously qualified main stylesheet identity is required."
   port file.read { file = concat($output, "/expedition.css") } → current
+  call preservation.before-thoughts-styles
+  let previous = $result
   port file.read { file = concat($output, "/assets/projection.css") } → primitives
-  port text.replaceAll { value = $current; search = $primitives; replacement = "" } → restored
+  port text.replaceAll { value = $previous; search = $primitives; replacement = "" } → restored
   port text.replaceAll { value = $restored; search = ".q-question>img[src*=\"/world-emblems/\"]"; replacement = ".q-question:nth-child(2)>img,.q-question:nth-child(4)>img" } → restored
   port text.replaceAll { value = $restored; search = ".q-question>img[src$=\"/questions/open-workshop-daylight-v2.png\"]"; replacement = ".q-question:last-child>img" } → restored
   port text.replaceAll { value = $restored; search = ".hierarchy-actions a:not(:first-child),.hierarchy-usecase a,.science-mission-note a"; replacement = ".hierarchy-actions .hierarchy-inspect,.hierarchy-usecase a,.science-mission-note a" } → restored
