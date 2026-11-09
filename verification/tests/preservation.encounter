@@ -119,6 +119,19 @@ process test.preservation.routes-text-assets:
     assert and($reasoned, $identity)
       otherwise "A scoped reason and exact SHA-256 identity are required."
   let amended = append(filter($amended, "f", not(includes($fieldAllowed, $f.s))), $fieldNew)
+  port rel.read { file = "verification/pwa-preservation-amendment.rel" } → pwaAmendment
+  let assurancePage = "assurance/identities/index.html"
+  let pwaSuccessor = filter($pwaAmendment, "f", and(eq($f.s, $assurancePage), eq($f.p, "readingTextSha256")))
+  let pwaPrevious = filter($pwaAmendment, "f", and(eq($f.s, $assurancePage), eq($f.p, "previousSha256")))
+  let pwaReason = filter($pwaAmendment, "f", and(eq($f.s, $assurancePage), eq($f.p, "reason")))
+  let prior = filter($amended, "f", and(eq($f.s, $assurancePage), eq($f.p, "readingTextSha256")))
+  assert and(eq(count($pwaAmendment), 3), eq(count($pwaSuccessor), 1), eq(count($pwaPrevious), 1), eq(count($pwaReason), 1), eq(count($prior), 1), eq(at(at($pwaPrevious, 0), "o"), at(at($prior, 0), "o")))
+    otherwise "PWA amendment must bind the exact prior homepage assurance report."
+  port text.matches { value = at(at($pwaSuccessor, 0), "o"); pattern = "^[a-f0-9]{64}$" } → pwaIdentity
+  port number.calculate { operation = "greater"; values = list(count(at(at($pwaReason, 0), "o")), 20) } → pwaReasoned
+  assert and($pwaIdentity, $pwaReasoned)
+    otherwise "PWA amendment requires an exact successor hash and a scoped reason."
+  let amended = append(filter($amended, "f", not(eq($f.s, $assurancePage))), $pwaSuccessor)
   let pages = filter($preserved, "f", eq($f.p, "readingTextSha256"))
   fold $actual as file; htmlFiles starts list():
     port text.matches { value = $file; pattern = "\\.html$" } → isPage

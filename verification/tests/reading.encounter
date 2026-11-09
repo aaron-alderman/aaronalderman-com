@@ -155,7 +155,7 @@ process test.reading.article-shell:
     otherwise "Article is not using the versioned shared stylesheet."
   assert not(some($articleNodes, "n", includes(list("form", "input", "textarea"), $n.tag)))
     otherwise "Article acquired an input surface."
-  assert eq(map(filter($articleNodes, "n", eq($n.tag, "script")), "n", at($n.attrs, "src")), list("/reading-theme-runtime.js?v=palette-theme-5"))
+  assert eq(map(filter($articleNodes, "n", eq($n.tag, "script")), "n", at($n.attrs, "src")), list("/pwa-register.js", "/reading-theme-runtime.js?v=palette-theme-5"))
     otherwise "Article executable surface changed."
   assert some($articleNodes, "n", and(eq($n.tag, "meta"), eq(at($n.attrs, "property"), "og:type"), eq(at($n.attrs, "content"), "article")))
     otherwise "Article social metadata changed."
@@ -343,7 +343,7 @@ process test.reading.shared-shell-and-components:
     fold $links as link; hrefs starts list():
       port url.observe { value = at($link.attrs, "href"); base = concat("https://qa.invalid/", $page) } → url
       yield append($hrefs, list(concat($url.pathname, $url.search))) → hrefs
-    assert and(eq($hrefs, list(concat("/expedition.css?v=", $version), "/assets/projection.css")), eq(count(filter($nodes, "n", eq(at($n.attrs, "data-reading-room"), "dad"))), 1), not(some($nodes, "n", or(eq($n.tag, "style"), at($n.attrs, "style")))))
+    assert and(eq($hrefs, list("/assets/pwa.css", concat("/expedition.css?v=", $version), "/assets/projection.css")), eq(count(filter($nodes, "n", eq(at($n.attrs, "data-reading-room"), "dad"))), 1), not(some($nodes, "n", or(eq($n.tag, "style"), at($n.attrs, "style")))))
       otherwise "Dad comparison page diverged from shared palette or stylesheet."
     each list(list("header", "masthead"), list("footer", "footer")) as component:
       let tag = at($component, 0)
@@ -433,7 +433,7 @@ process test.reading.guide-specimens:
   each map($palette, "p", at($p, 1)) as value:
     assert includes($guideText, $value)
       otherwise "Guide omitted a palette value."
-  assert and(eq(count(filter($guideNodes, "n", eq($n.tag, "details"))), 10), not(some($guideNodes, "n", includes(list("form", "textarea"), $n.tag))), eq(map(filter($guideNodes, "n", eq($n.tag, "script")), "n", at($n.attrs, "src")), list("/reading-theme-runtime.js?v=palette-theme-5")))
+  assert and(eq(count(filter($guideNodes, "n", eq($n.tag, "details"))), 10), not(some($guideNodes, "n", includes(list("form", "textarea"), $n.tag))), eq(map(filter($guideNodes, "n", eq($n.tag, "script")), "n", at($n.attrs, "src")), list("/pwa-register.js", "/reading-theme-runtime.js?v=palette-theme-5")))
     otherwise "Guide disclosure or executable surface changed."
   let example = at(filter($guideNodes, "n", and(eq($n.tag, "label"), includes($n.text, "Component name"))), 0)
   assert $example

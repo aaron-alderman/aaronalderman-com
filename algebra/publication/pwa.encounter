@@ -1,0 +1,117 @@
+process-module "temple/surface-process-module/1"
+
+process pwa.prepare:
+  each list("site-qr", "icon-180", "icon-192", "icon-512") as image:
+    port file.copy { path = concat("assets/pwa/", $image, ".png") } → _
+  call pwa.styles
+  let input = { kind = "root"; children = $result }
+  call projection.stylesheet
+  port file.write { path = "assets/pwa.css"; text = $result } → _
+  let manifest = {
+    id = "/";
+    name = "Aaron Alderman";
+    short_name = "Aaron Alderman";
+    start_url = "/";
+    scope = "/";
+    display = "standalone";
+    theme_color = "#0c111b";
+    background_color = "#0c111b";
+    icons = map(list("192", "512"), "size", {
+      src = concat("/assets/pwa/icon-", $size, ".png");
+      sizes = concat($size, "x", $size);
+      type = "image/png"
+    })
+  }
+  port runtime.bundle { mode = "pwa"; data = { kind = "client"; manifest = $manifest } } → pwa
+  port file.write { path = "site.webmanifest"; text = $pwa.manifest } → _
+  port file.write { path = "pwa-register.js"; text = $pwa.script } → _
+
+# The worker is packaged after sealing, so a change to the offline shell
+# produces a new cache name and a new worker even when the adapter is unchanged.
+process pwa.worker:
+  let styles = concat("/expedition.css?v=", one("site", "stylesheetVersion"))
+  let shell = list(
+    "/index.html", $styles, "/assets/projection.css", "/assets/pwa.css", "/pwa-register.js", "/assets/pwa/site-qr.png",
+    "/assets/personal-mark.svg", "/assets/pwa/icon-180.png", "/site.webmanifest",
+    "/assets/identities/optimized/sourcerer-hero-v2.webp",
+    "/assets/identities/optimized/sourcerer-questions-v2.webp",
+    "/assets/identities/optimized/sourcerer-threads-v2.webp",
+    "/assets/identities/optimized/sourcerer-atlas-v2.webp"
+  )
+  fold $shell as url; identities starts "":
+    port url.resolve { href = $url; route = "index.html" } → target
+    port artifact.identity { path = $target.route } → artifact
+    yield concat($identities, $url, ":", $artifact.sha256, "\n") → identities
+  port digest.sha256 { text = $identities } → revision
+  port runtime.bundle {
+    mode = "pwa";
+    data = {
+      kind = "worker";
+      shell = $shell;
+      home = "/index.html";
+      start = "/";
+      revision = $revision;
+      offlineMessage = "This page needs an internet connection. You can go back to the home page while offline."
+    }
+  } → pwa
+  port file.write { path = "service-worker.js"; text = $pwa.script } → _
+
+process pwa.share:
+  let target = one("site", "origin")
+  let result = list(
+    {
+      tag = "button";
+      attrs = { id = "site-qr-open"; type = "button"; popovertarget = "site-qr-panel"; "aria-label" = "Show site QR code" };
+      children = list({
+        tag = "svg";
+        attrs = { xmlns = "http://www.w3.org/2000/svg"; viewBox = "0 0 24 24"; width = "22"; height = "22"; "aria-hidden" = "true" };
+        children = list({ tag = "path"; attrs = { fill = "currentColor"; "fill-rule" = "evenodd"; d = "M2 2h9v9H2zM4 4v5h5V4zM13 2h9v9h-9zM15 4v5h5V4zM2 13h9v9H2zM4 15v5h5v-5zM6 6h1v1H6zM17 6h1v1h-1zM6 17h1v1H6zM13 13h3v3h-3zM17 13h5v2h-5zM17 16h2v3h-2zM20 17h2v5h-2zM13 18h2v4h-2zM16 20h3v2h-3z" }; children = list() })
+      })
+    },
+    {
+      tag = "section";
+      attrs = { id = "site-qr-panel"; role = "dialog"; popover = "auto"; "aria-label" = "Share aaronalderman.com" };
+      children = list(
+        { tag = "a"; attrs = { href = $target }; children = list(
+          { tag = "img"; attrs = { src = "/assets/pwa/site-qr.png"; width = "264"; height = "264"; alt = "QR code for aaronalderman.com" }; children = list() }
+        ) },
+        { tag = "button"; attrs = { type = "button"; autofocus = true; popovertarget = "site-qr-panel"; popovertargetaction = "hide"; "aria-label" = "Close QR code" }; children = list() }
+      )
+    }
+  )
+
+process pwa.styles:
+  let rules = list(
+    { selector = "#site-qr-open, #site-qr-panel"; styles = { display = "none" } },
+    { selector = "#site-qr-panel:popover-open"; styles = {
+      display = "block"; "box-sizing" = "border-box"; width = "min(340px, calc(100% - 32px))";
+      "max-height" = "calc(100% - 32px)"; overflow = "auto"; padding = "20px"; "text-align" = "center";
+      color = "#0c111b"; background = "#fff"; border = "1px solid #ba975f"; "border-radius" = "16px"
+    } },
+    { selector = "#site-qr-panel::backdrop"; styles = { background = "rgba(12,17,27,.55)" } },
+    { selector = "#site-qr-panel button::before"; styles = { content = "'Close'" } },
+    { selector = "#site-qr-panel img"; styles = { display = "block"; "max-width" = "100%"; height = "auto"; margin = "0 auto 12px" } },
+    { selector = "#site-qr-open, #site-qr-panel button"; styles = {
+      "min-height" = "48px"; "min-width" = "48px"; padding = "0 12px"; color = "#fff";
+      background = "#0c111b"; border = "1px solid #ba975f"; "border-radius" = "999px";
+      font = "600 1rem system-ui, sans-serif"; cursor = "pointer"
+    } }
+  )
+  let mobileRules = list(
+    { selector = "#site-qr-open"; styles = {
+      display = "grid"; "place-items" = "center"; position = "fixed"; right = "max(16px, env(safe-area-inset-right))";
+      bottom = "max(16px, env(safe-area-inset-bottom))"; "z-index" = "51"
+    } },
+    { selector = ".reading-theme-switch ~ #site-qr-open"; styles = { bottom = "calc(max(20px, env(safe-area-inset-bottom)) + 68px)" } }
+  )
+  fold append($rules, $mobileRules) as rule; nodes starts list():
+    port record.entries { value = $rule.styles } → properties
+    let node = { kind = "rule"; selector = $rule.selector; children = map($properties, "pair", { kind = "decl"; property = at($pair, 0); value = at($pair, 1) }) }
+    yield append($nodes, list($node)) → nodes
+  let result = append(
+    filter($nodes, "node", not(includes(map($mobileRules, "rule", $rule.selector), $node.selector))),
+    list({ kind = "atrule"; name = "media"; params = "(max-width: 767px)"; children = list({
+      kind = "atrule"; name = "supports"; params = "selector(:popover-open)";
+      children = filter($nodes, "node", includes(map($mobileRules, "rule", $rule.selector), $node.selector))
+    }) })
+  )
