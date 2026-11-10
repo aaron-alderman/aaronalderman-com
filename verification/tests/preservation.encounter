@@ -145,6 +145,11 @@ process test.preservation.routes-text-assets:
     port diagnostic.context { value = $fact.s } → ignored
     let changes = filter($amended, "f", eq($f.s, $fact.s))
     let expected = if(eq(count($changes), 0), $fact.o, at(at($changes, 0), "o"))
+    # Current-page markup changes the derived homepage discovery report.
+    when eq($fact.s, $assurancePage):
+      assert eq($expected, "f330d5ef87dc541b3690275785eebae3266f23950d93ce6c1e5111160e697e04")
+        otherwise "Navigation audit amendment must extend the reviewed PWA report."
+      let expected = "966666dca97df901cf426d75ebba0cf958110f2ed487d1fdd39265a6373ccf34"
     when eq($fact.p, "readingTextSha256"):
       port file.read { file = concat($output, "/", $fact.s) } → html
       call check.reading
@@ -152,9 +157,11 @@ process test.preservation.routes-text-assets:
     when eq($fact.p, "passiveSha256"):
       port file.digest { file = concat($output, "/", $fact.s) } → digest
       when eq($fact.s, "expedition.css"):
-        assert eq($digest, "cfdb32944cd2592137734c30be70d1e916cf4473d07abee573184ac2dccc3550")
-          otherwise "Main stylesheet differs from the reviewed Thoughts and contrast update."
+        assert eq($digest, "8c2f6a2dc7ae4d1a344fcd8ac8da50495454a86726f006c19858101fcfb4f5af")
+          otherwise "Main stylesheet differs from the reviewed light-page contrast corrections."
         port file.read { file = concat($output, "/expedition.css") } → current
+        call preservation.before-audit-styles
+        let current = $result
         call preservation.before-thoughts-styles
         port digest.sha256 { text = $result } → digest
     assert eq($digest, $expected)
@@ -222,6 +229,16 @@ process test.retention.artwork-provenance:
   assert and(eq($width, 1536), eq($height, 1024))
     otherwise "Original artwork geometry changed."
 
+# Restore the Thoughts stylesheet before checking its original predecessor.
+process preservation.before-audit-styles:
+  let reviewed = "body:has(:is(.mission-invitation,.writing-page,.scroll-page))>footer .signature{color:#193d44;}.mission-invitation :is(.mission-caption,.mission-art figcaption),.scroll-page .scroll-comic .scroll-art-note{color:#635543;}"
+  let previous = "body:has(.writing-page)>footer .signature{color:#193d44;}"
+  port text.replaceAll { value = $current; search = $reviewed; replacement = $previous } → restored
+  port digest.sha256 { text = $restored } → digest
+  assert eq($digest, "cfdb32944cd2592137734c30be70d1e916cf4473d07abee573184ac2dccc3550")
+    otherwise "Stylesheet differs outside the reviewed footer and caption corrections."
+  let result = $restored
+
 # Remove the one reviewed insertion before checking the existing predecessor chain.
 process preservation.before-thoughts-styles:
   let marker = "#microsites.identity-catalogue .hierarchy-card[data-type] :is(.hierarchy-usecase,.science-mission-note) a{color:var(--q-accent);}"
@@ -242,6 +259,8 @@ process test.preservation.common-style-migration:
   assert eq(count($prior), 1)
     otherwise "One previously qualified main stylesheet identity is required."
   port file.read { file = concat($output, "/expedition.css") } → current
+  call preservation.before-audit-styles
+  let current = $result
   call preservation.before-thoughts-styles
   let previous = $result
   port file.read { file = concat($output, "/assets/projection.css") } → primitives

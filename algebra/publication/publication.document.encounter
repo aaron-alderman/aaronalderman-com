@@ -35,6 +35,9 @@ process publication.document:
     port kernel.invoke { query = "reading.theme.control"; input = { key = $documentPalette.key } } → readingThemeControl
   call pwa.share
   let qrControl = $result
+  let navHome = eq($canonical, one("site", "origin"))
+  let navThoughts = eq($canonical, one("scroll.index", "canonical"))
+  let navMission = eq($canonical, one("scroll.mission", "canonical"))
   let input = {
     tag = "html";
     attrs = { lang = "en" };
@@ -46,7 +49,7 @@ process publication.document:
           { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
           { tag = "link"; attrs = { rel = "manifest"; href = "/site.webmanifest" }; children = list() },
           { tag = "link"; attrs = { rel = "apple-touch-icon"; href = "/assets/pwa/icon-180.png" }; children = list() },
-          { tag = "link"; attrs = { rel = "stylesheet"; href = "/assets/pwa.css" }; children = list() },
+          { tag = "link"; attrs = { rel = "stylesheet"; href = concat("/assets/pwa.css?v=", one("site", "stylesheetVersion")) }; children = list() },
           {
             tag = "meta";
             attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" };
@@ -348,15 +351,15 @@ process publication.document:
                 children = list(
                   {
                     tag = "a";
-                    attrs = { href = "/mission/"; class = "mission-nav" };
+                    attrs = { href = "/mission/"; class = if(or($navHome, $navThoughts), null, "mission-nav"); "aria-current" = if($navMission, "page", null) };
                     children = list("The mission")
                   },
                   {
                     tag = "a";
-                    attrs = { href = "/writing/"; class = "nav-thoughts" };
+                    attrs = { href = "/writing/"; class = if($navThoughts, "nav-thoughts mission-nav", "nav-thoughts"); "aria-current" = if($navThoughts, "page", null) };
                     children = list("Thoughts")
                   },
-                  { tag = "a"; attrs = { href = "/"; class = "nav-mind" }; children = list("My Mind") }
+                  { tag = "a"; attrs = { href = "/"; class = if($navHome, "nav-mind mission-nav", "nav-mind"); "aria-current" = if($navHome, "page", null) }; children = list("My Mind") }
                 )
               }
             )
