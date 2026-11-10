@@ -343,7 +343,7 @@ process test.reading.shared-shell-and-components:
     fold $links as link; hrefs starts list():
       port url.observe { value = at($link.attrs, "href"); base = concat("https://qa.invalid/", $page) } → url
       yield append($hrefs, list(concat($url.pathname, $url.search))) → hrefs
-    assert and(eq($hrefs, list("/assets/pwa.css", concat("/expedition.css?v=", $version), "/assets/projection.css")), eq(count(filter($nodes, "n", eq(at($n.attrs, "data-reading-room"), "dad"))), 1), not(some($nodes, "n", or(eq($n.tag, "style"), at($n.attrs, "style")))))
+    assert and(eq($hrefs, list(concat("/assets/pwa.css?v=", $version), concat("/expedition.css?v=", $version), "/assets/projection.css")), eq(count(filter($nodes, "n", eq(at($n.attrs, "data-reading-room"), "dad"))), 1), not(some($nodes, "n", or(eq($n.tag, "style"), at($n.attrs, "style")))))
       otherwise "Dad comparison page diverged from shared palette or stylesheet."
     each list(list("header", "masthead"), list("footer", "footer")) as component:
       let tag = at($component, 0)

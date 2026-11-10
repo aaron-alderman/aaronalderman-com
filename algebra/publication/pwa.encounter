@@ -31,7 +31,7 @@ process pwa.prepare:
 process pwa.worker:
   let styles = concat("/expedition.css?v=", one("site", "stylesheetVersion"))
   let shell = list(
-    "/index.html", $styles, "/assets/projection.css", "/assets/pwa.css", "/pwa-register.js", "/assets/pwa/site-qr.png",
+    "/index.html", $styles, "/assets/projection.css", concat("/assets/pwa.css?v=", one("site", "stylesheetVersion")), "/pwa-register.js", "/assets/pwa/site-qr.png",
     "/assets/personal-mark.svg", "/assets/pwa/icon-180.png", "/site.webmanifest",
     "/assets/identities/optimized/sourcerer-hero-v2.webp",
     "/assets/identities/optimized/sourcerer-questions-v2.webp",
@@ -43,6 +43,22 @@ process pwa.worker:
     port artifact.identity { path = $target.route } → artifact
     yield concat($identities, $url, ":", $artifact.sha256, "\n") → identities
   port digest.sha256 { text = $identities } → revision
+  let input = { tag = "html"; attrs = { lang = "en" }; children = list(
+    { tag = "head"; attrs = {}; children = list(
+      { tag = "meta"; attrs = { charset = "utf-8" }; children = list() },
+      { tag = "meta"; attrs = { name = "viewport"; content = "width=device-width, initial-scale=1" }; children = list() },
+      { tag = "title"; attrs = {}; children = list("Offline — Aaron Alderman") }
+    ) },
+    { tag = "body"; attrs = {}; children = list(
+      { tag = "main"; attrs = {}; children = list(
+        { tag = "h1"; attrs = {}; children = list("You’re offline") },
+        { tag = "p"; attrs = {}; children = list("This page needs an internet connection.") },
+        { tag = "a"; attrs = { href = "/" }; children = list("Go to the homepage") }
+      ) }
+    ) }
+  ) }
+  call projection.serialize
+  let offlinePage = $result
   port runtime.bundle {
     mode = "pwa";
     data = {
@@ -51,7 +67,7 @@ process pwa.worker:
       home = "/index.html";
       start = "/";
       revision = $revision;
-      offlineMessage = "This page needs an internet connection. You can go back to the home page while offline."
+      offlinePage = $offlinePage
     }
   } → pwa
   port file.write { path = "service-worker.js"; text = $pwa.script } → _
@@ -85,12 +101,12 @@ process pwa.styles:
     { selector = "#site-qr-open, #site-qr-panel"; styles = { display = "none" } },
     { selector = "#site-qr-panel:popover-open"; styles = {
       display = "block"; "box-sizing" = "border-box"; width = "min(340px, calc(100% - 32px))";
-      "max-height" = "calc(100% - 32px)"; overflow = "auto"; padding = "20px"; "text-align" = "center";
+      "max-height" = "calc(100dvh - 32px)"; overflow = "auto"; padding = "20px"; "text-align" = "center";
       color = "#0c111b"; background = "#fff"; border = "1px solid #ba975f"; "border-radius" = "16px"
     } },
     { selector = "#site-qr-panel::backdrop"; styles = { background = "rgba(12,17,27,.55)" } },
     { selector = "#site-qr-panel button::before"; styles = { content = "'Close'" } },
-    { selector = "#site-qr-panel img"; styles = { display = "block"; "max-width" = "100%"; height = "auto"; margin = "0 auto 12px" } },
+    { selector = "#site-qr-panel img"; styles = { display = "block"; width = "min(264px, max(80px, calc(100dvh - 144px)))"; "max-width" = "100%"; height = "auto"; margin = "0 auto 12px" } },
     { selector = "#site-qr-open, #site-qr-panel button"; styles = {
       "min-height" = "48px"; "min-width" = "48px"; padding = "0 12px"; color = "#fff";
       background = "#0c111b"; border = "1px solid #ba975f"; "border-radius" = "999px";
@@ -110,7 +126,7 @@ process pwa.styles:
     yield append($nodes, list($node)) → nodes
   let result = append(
     filter($nodes, "node", not(includes(map($mobileRules, "rule", $rule.selector), $node.selector))),
-    list({ kind = "atrule"; name = "media"; params = "(max-width: 767px)"; children = list({
+    list({ kind = "atrule"; name = "media"; params = "(max-width: 767px), (hover: none) and (pointer: coarse) and (orientation: landscape)"; children = list({
       kind = "atrule"; name = "supports"; params = "selector(:popover-open)";
       children = filter($nodes, "node", includes(map($mobileRules, "rule", $rule.selector), $node.selector))
     }) })

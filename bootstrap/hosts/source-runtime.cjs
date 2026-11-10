@@ -68,7 +68,7 @@ function registerServiceWorker(){
     navigator.serviceWorker.register('/service-worker.js').catch(error=>console.warn('Offline setup failed',error));
   }
 }
-function startServiceWorker({cacheName,cachePrefix,shell,home,start,offlineMessage}){
+function startServiceWorker({cacheName,cachePrefix,shell,home,start,offlinePage}){
   const urls=new Set(shell.map(path=>new URL(path,self.location.origin).href));
   const cached=async request=>(await caches.open(cacheName)).match(request);
   self.addEventListener('install',event=>{
@@ -92,7 +92,7 @@ function startServiceWorker({cacheName,cachePrefix,shell,home,start,offlineMessa
           const page=await cached(home);
           if(page)return page;
         }
-        return new Response(offlineMessage,{status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
+        return new Response(offlinePage,{status:503,headers:{'Content-Type':'text/html; charset=utf-8'}});
       }));
     }else if(urls.has(url.href)){
       event.respondWith(fetch(request).catch(async()=>await cached(request)??Response.error()));

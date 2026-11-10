@@ -185,3 +185,20 @@ process test.release.pwa-shell:
     port file.exists { file = concat($output, "/", $path) } → exists
     assert $exists
       otherwise "Required PWA artifact missing."
+  port file.read { file = concat($output, "/service-worker.js") } → worker
+  assert includes($worker, "<a href=\\\"/\\\">Go to the homepage</a>")
+    otherwise "The offline response lacks a link back to the cached homepage."
+
+process test.release.current-primary-navigation:
+  call check.manifest
+  each list(
+    { route = "index.html"; href = "/" },
+    { route = "mission/index.html"; href = "/mission/" },
+    { route = "writing/index.html"; href = "/writing/" }
+  ) as destination:
+    let page = $destination.route
+    port diagnostic.context { value = $page } → ignored
+    call page.catalogue
+    let current = filter($nodes, "node", and(eq($node.tag, "a"), eq(at($node.attrs, "aria-current"), "page")))
+    assert and(eq(count($current), 1), eq(at(at(at($current, 0), "attrs"), "href"), $destination.href))
+      otherwise "Primary navigation does not identify the current page."
