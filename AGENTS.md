@@ -11,8 +11,10 @@ output as an authoring input. The retained kernel/mechanisms do not author
 application policy, transformations, or publication composition.
 
 The owner authorized publication and preservation of newer live changes on
-2026-11-08. `bootstrap/publication.rel` remains the canonical source declaration;
-`bootstrap/local.cjs` is its generic host. The host requires literal zero JSON
+2026-11-08. The bounded Encounter fragments under `bootstrap/publication/`
+own the canonical publication declaration. The verification front door projects
+them to `bootstrap/publication.rel`, the declaration consumed by the unchanged
+`bootstrap/local.cjs` generic host. The host requires literal zero JSON
 files before and after execution. Migration intake is retired. GitHub Pages
 may publish only a fresh canonical build after the Encounter verification gate.
 Do not restore the legacy build or deploy an archived `dist/`.

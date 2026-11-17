@@ -13,6 +13,17 @@ async function main(filters=process.argv.slice(2)){
   const snapshot=[...sources.map(s=>({file:s.file,sha256:digest(s.text)})),...machine.identities,
     ...['bootstrap/foundation.rel','bootstrap/publication.rel','bootstrap/test.cjs','bootstrap/test-mechanisms.cjs'].map(file=>({file,sha256:digest(fs.readFileSync(path.join(root,file)))}))];
   const names=sources.flatMap(s=>{const compiled=machine.compile(s.file,s.text).value;if(!compiled.ok)throw Error(s.file+': '+require('node:util').inspect(compiled.diagnostic));return Object.keys(compiled.surface.queries);});
+  if(filters[0]==='--emit'){
+    const entry=filters[1];
+    if(filters.length!==2||!entry.startsWith('emit.')||!names.includes(entry))throw Error('Expected one Encounter emit entry');
+    const ports=mechanisms(),front=createFrontDoor({ports,profiles:{test:Object.keys(ports)},basis:'encounter-test-runner'});
+    const linked=front.link(sources.map(s=>front.hydrate(s.file,s.text)),{roots:[entry]});
+    const handle=front.admit(linked,{profile:'test',entries:[entry]});
+    const {value}=await front.run(handle,entry);
+    if(typeof value!=='string')throw Error('Encounter emit entry must return text');
+    await new Promise((resolve,reject)=>process.stdout.write(value,error=>error?reject(error):resolve()));
+    return;
+  }
   const matching=names.filter(name=>name.startsWith('test.')&&(!filters.length||filters.some(filter=>name.includes(filter)))).sort();
   if(!matching.length)throw Error('No Encounter tests selected');
   const finalGuard='test.zz.source-stability';

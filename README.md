@@ -98,6 +98,21 @@ node bootstrap/test.cjs
 node bootstrap/serve.mjs
 ```
 
+The ordered publication declaration is authored in the bounded Encounter
+fragments under `bootstrap/publication/`. To regenerate its REL, stage the
+read-only output of the existing verification front door, then compare it
+before replacing `bootstrap/publication.rel`.
+
+```sh
+staged=$(mktemp)
+node bootstrap/test.cjs --emit emit.publication > "$staged"
+cmp "$staged" bootstrap/publication.rel
+```
+
+The Encounter suite checks projection identity. Publication still starts
+through the captured-byte launcher and admits the generated declaration under
+the pinned foundation.
+
 The declaration selects canonical sources and ordered bounded phases. A run
 requires a fresh `.local-*` output and literal zero JSON files before and after
 execution. Generated outputs, migration directories and retired dependencies

@@ -28,6 +28,7 @@ process publication.phase.prepare:
   call publication.context
   call identity.runtime.build
   call reading.theme.build
+  call pwa.prepare
   assert eq(count(subjects("isa", "Place")), 40)
     otherwise "Publication must retain all forty places."
 

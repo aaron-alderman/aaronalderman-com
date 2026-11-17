@@ -205,7 +205,7 @@ process host.output:
     otherwise "HOST: Output byte bound."
   port text.matches { value = $eventInput.name; pattern = "\\.(?:m?js|cjs)$"; flags = "i" } → executable
   port text.matches { value = $eventInput.name; pattern = "\\.(?:rel|encounter|html|css|txt|md|xml|svg|png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|mp4|webm|vtt|pdf)$|(?:^|/)(?:CNAME|\\.nojekyll)$"; flags = "i" } → passive
-  assert if($executable, $eventInput.issuedRuntime, $passive)
+  assert if($executable, $eventInput.issuedRuntime, or($passive, eq($eventInput.name, "site.webmanifest")))
     otherwise "HOST: Unadmitted output type or executable artifact."
   port text.matches { value = $eventInput.name; pattern = "\\.html$"; flags = "i" } → html
   port text.matches { value = $eventInput.name; pattern = "\\.css$"; flags = "i" } → css
@@ -230,6 +230,31 @@ process host.runtime:
   when and(count($facts), not(includes($roots, "facts.index"))):
     let roots = append($roots, list("facts.index"))
   let result = { profile = $profileName; grants = $grants; roots = $roots; facts = $facts }
+
+# The web platform adapter accepts typed settings, never executable source.
+process host.pwaRuntime:
+  let data = $eventInput
+  assert includes(list("client", "worker"), $data.kind)
+    otherwise "HOST: Unknown PWA package."
+  when eq($data.kind, "client"):
+    let manifest = $data.manifest
+    assert and(eq($manifest.id, "/"), eq($manifest.scope, "/"), eq($manifest.start_url, "/"), eq($manifest.display, "standalone"))
+      otherwise "HOST: PWA manifest must launch the same-origin site."
+    assert and(isArray($manifest.icons), count($manifest.icons), every($manifest.icons, "icon", includes(list("/assets/pwa/icon-192.png", "/assets/pwa/icon-512.png"), $icon.src)))
+      otherwise "HOST: PWA icons must be local application assets."
+  when eq($data.kind, "worker"):
+    assert and(eq($data.start, "/"), eq($data.home, "/index.html"), isArray($data.shell), includes($data.shell, $data.home))
+      otherwise "HOST: Worker must cache the site launch page."
+    port text.matches { value = $data.revision; pattern = "^[a-f0-9]{64}$" } → revision
+    assert $revision
+      otherwise "HOST: Worker cache requires an artifact revision."
+    each $data.shell as url:
+      port text.matches { value = $url; pattern = "^/[a-z0-9._/-]+(?:\\?v=[a-z0-9-]+)?$" } → localUrl
+      port url.observe { value = $url; base = "https://publication.invalid/" } → target
+      assert and($localUrl, eq($target.origin, "https://publication.invalid"))
+        otherwise "HOST: Worker cache entries must be local."
+      port kernel.invoke { query = "host.path"; input = { value = $target.path } } → _
+  let result = $data
 
 process foundation.observe:
   call foundation.compile

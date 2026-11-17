@@ -9,7 +9,7 @@ const outputs=declaration.filter(f=>f.s==='local'&&f.p==='output');
 if(outputs.length!==1)throw Error('Unique canonical publication output required');
 const root=path.join(directory,process.env.WORLDWRIGHT_ROOT||outputs[0].o);
 const port=Number(process.env.WORLDWRIGHT_PORT||4186);
-const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.xml':'application/xml; charset=utf-8','.txt':'text/plain; charset=utf-8','.rel':'text/plain; charset=utf-8','.encounter':'text/plain; charset=utf-8'};
+const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.webmanifest':'application/manifest+json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.xml':'application/xml; charset=utf-8','.txt':'text/plain; charset=utf-8','.rel':'text/plain; charset=utf-8','.encounter':'text/plain; charset=utf-8'};
 const server=http.createServer(async(req,res)=>{try{
  const url=new URL(req.url,'http://localhost');
  let filename=path.resolve(root,'.'+decodeURIComponent(url.pathname==='/'?'/index.html':url.pathname));

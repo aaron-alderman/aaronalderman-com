@@ -119,6 +119,19 @@ process test.preservation.routes-text-assets:
     assert and($reasoned, $identity)
       otherwise "A scoped reason and exact SHA-256 identity are required."
   let amended = append(filter($amended, "f", not(includes($fieldAllowed, $f.s))), $fieldNew)
+  port rel.read { file = "verification/pwa-preservation-amendment.rel" } → pwaAmendment
+  let assurancePage = "assurance/identities/index.html"
+  let pwaSuccessor = filter($pwaAmendment, "f", and(eq($f.s, $assurancePage), eq($f.p, "readingTextSha256")))
+  let pwaPrevious = filter($pwaAmendment, "f", and(eq($f.s, $assurancePage), eq($f.p, "previousSha256")))
+  let pwaReason = filter($pwaAmendment, "f", and(eq($f.s, $assurancePage), eq($f.p, "reason")))
+  let prior = filter($amended, "f", and(eq($f.s, $assurancePage), eq($f.p, "readingTextSha256")))
+  assert and(eq(count($pwaAmendment), 3), eq(count($pwaSuccessor), 1), eq(count($pwaPrevious), 1), eq(count($pwaReason), 1), eq(count($prior), 1), eq(at(at($pwaPrevious, 0), "o"), at(at($prior, 0), "o")))
+    otherwise "PWA amendment must bind the exact prior homepage assurance report."
+  port text.matches { value = at(at($pwaSuccessor, 0), "o"); pattern = "^[a-f0-9]{64}$" } → pwaIdentity
+  port number.calculate { operation = "greater"; values = list(count(at(at($pwaReason, 0), "o")), 20) } → pwaReasoned
+  assert and($pwaIdentity, $pwaReasoned)
+    otherwise "PWA amendment requires an exact successor hash and a scoped reason."
+  let amended = append(filter($amended, "f", not(eq($f.s, $assurancePage))), $pwaSuccessor)
   let pages = filter($preserved, "f", eq($f.p, "readingTextSha256"))
   fold $actual as file; htmlFiles starts list():
     port text.matches { value = $file; pattern = "\\.html$" } → isPage
@@ -132,12 +145,25 @@ process test.preservation.routes-text-assets:
     port diagnostic.context { value = $fact.s } → ignored
     let changes = filter($amended, "f", eq($f.s, $fact.s))
     let expected = if(eq(count($changes), 0), $fact.o, at(at($changes, 0), "o"))
+    # Current-page markup changes the derived homepage discovery report.
+    when eq($fact.s, $assurancePage):
+      assert eq($expected, "f330d5ef87dc541b3690275785eebae3266f23950d93ce6c1e5111160e697e04")
+        otherwise "Navigation audit amendment must extend the reviewed PWA report."
+      let expected = "966666dca97df901cf426d75ebba0cf958110f2ed487d1fdd39265a6373ccf34"
     when eq($fact.p, "readingTextSha256"):
       port file.read { file = concat($output, "/", $fact.s) } → html
       call check.reading
       port digest.sha256 { text = $result } → digest
     when eq($fact.p, "passiveSha256"):
       port file.digest { file = concat($output, "/", $fact.s) } → digest
+      when eq($fact.s, "expedition.css"):
+        assert eq($digest, "8c2f6a2dc7ae4d1a344fcd8ac8da50495454a86726f006c19858101fcfb4f5af")
+          otherwise "Main stylesheet differs from the reviewed light-page contrast corrections."
+        port file.read { file = concat($output, "/expedition.css") } → current
+        call preservation.before-audit-styles
+        let current = $result
+        call preservation.before-thoughts-styles
+        port digest.sha256 { text = $result } → digest
     assert eq($digest, $expected)
       otherwise "Pinned canonical reading text or passive asset changed."
   each $actual as file:
@@ -203,6 +229,28 @@ process test.retention.artwork-provenance:
   assert and(eq($width, 1536), eq($height, 1024))
     otherwise "Original artwork geometry changed."
 
+# Restore the Thoughts stylesheet before checking its original predecessor.
+process preservation.before-audit-styles:
+  let reviewed = "body:has(:is(.mission-invitation,.writing-page,.scroll-page))>footer .signature{color:#193d44;}.mission-invitation :is(.mission-caption,.mission-art figcaption),.scroll-page .scroll-comic .scroll-art-note{color:#635543;}"
+  let previous = "body:has(.writing-page)>footer .signature{color:#193d44;}"
+  port text.replaceAll { value = $current; search = $reviewed; replacement = $previous } → restored
+  port digest.sha256 { text = $restored } → digest
+  assert eq($digest, "cfdb32944cd2592137734c30be70d1e916cf4473d07abee573184ac2dccc3550")
+    otherwise "Stylesheet differs outside the reviewed footer and caption corrections."
+  let result = $restored
+
+# Remove the one reviewed insertion before checking the existing predecessor chain.
+process preservation.before-thoughts-styles:
+  let marker = "#microsites.identity-catalogue .hierarchy-card[data-type] :is(.hierarchy-usecase,.science-mission-note) a{color:var(--q-accent);}"
+  port text.indexOf { value = $current; search = $marker; from = 0 } → start
+  assert not(eq($start, -1))
+    otherwise "Reviewed Thoughts and contrast rules are missing."
+  port text.slice { value = $current; start = $start; end = add($start, 756) } → insertion
+  port digest.sha256 { text = $insertion } → identity
+  assert eq($identity, "392ff30e993789fae9d23833244cdcd577aa21852bdb0ee39cddbe04f9eb393b")
+    otherwise "The reviewed Thoughts and contrast insertion changed."
+  port text.replaceAll { value = $current; search = $insertion; replacement = "" } → result
+
 process test.preservation.common-style-migration:
   call check.manifest
   port rel.read { file = "verification/site-preservation-baseline.rel" } → preserved
@@ -211,8 +259,12 @@ process test.preservation.common-style-migration:
   assert eq(count($prior), 1)
     otherwise "One previously qualified main stylesheet identity is required."
   port file.read { file = concat($output, "/expedition.css") } → current
+  call preservation.before-audit-styles
+  let current = $result
+  call preservation.before-thoughts-styles
+  let previous = $result
   port file.read { file = concat($output, "/assets/projection.css") } → primitives
-  port text.replaceAll { value = $current; search = $primitives; replacement = "" } → restored
+  port text.replaceAll { value = $previous; search = $primitives; replacement = "" } → restored
   port text.replaceAll { value = $restored; search = ".q-question>img[src*=\"/world-emblems/\"]"; replacement = ".q-question:nth-child(2)>img,.q-question:nth-child(4)>img" } → restored
   port text.replaceAll { value = $restored; search = ".q-question>img[src$=\"/questions/open-workshop-daylight-v2.png\"]"; replacement = ".q-question:last-child>img" } → restored
   port text.replaceAll { value = $restored; search = ".hierarchy-actions a:not(:first-child),.hierarchy-usecase a,.science-mission-note a"; replacement = ".hierarchy-actions .hierarchy-inspect,.hierarchy-usecase a,.science-mission-note a" } → restored
