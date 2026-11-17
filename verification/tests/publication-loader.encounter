@@ -1,0 +1,30 @@
+process-module "temple/surface-process-module/1"
+
+# Verification-only emission. Each fragment is separately hydrated, linked and
+# admitted through the same front door, with no effect ports in its profile.
+process emit.publication:
+  port mechanism.load { module = "encounter-source-front.cjs" } → frontModule
+  port mechanism.call { target = $frontModule; method = "createFrontDoor"; args = list({ ports = {}; profiles = { data = list() }; basis = "publication-manifest-projection" }); keep = true } → front
+  port mechanism.load { module = "rel-values.cjs" } → codec
+  let entry = "publication.loader.fragment"
+  fold list("01", "02", "03", "04", "05", "06", "07", "08") as number; output starts "":
+    let file = concat("bootstrap/publication/", $number, ".encounter")
+    port file.read { file = $file } → source
+    port mechanism.call { target = $front; method = "hydrate"; args = list($file, $source); keep = true } → candidate
+    port mechanism.call { target = $front; method = "link"; args = list(list($candidate)); keep = true } → linked
+    port mechanism.call { target = $front; method = "admit"; args = list($linked, { profile = "data"; entries = list($entry) }); keep = true } → admitted
+    port mechanism.call { target = $front; method = "run"; args = list($admitted, $entry) } → execution
+    fold $execution.value as block; fragment starts "":
+      let text = "\n"
+      when not(eq($block, null)):
+        let facts = map($block, "row", { s = at($row, 0); p = at($row, 1); o = at($row, 2) })
+        port mechanism.call { target = $codec; method = "print"; args = list($facts) } → text
+      yield concat($fragment, $text) → fragment
+    yield concat($output, $fragment) → result
+
+process test.publication.loader-projection:
+  call emit.publication
+  port digest.sha256 { text = $result } → generated
+  port file.digest { file = "bootstrap/publication.rel" } → observed
+  assert eq($generated, $observed)
+    otherwise "The publication REL differs from its Encounter source."
