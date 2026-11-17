@@ -161,3 +161,17 @@ this worktree in the local Codex visualizations directory's
 Earlier audit records and browser
 captures retain their historical scope; consult current source-policy receipts
 for this replacement. See also [the repository boundary](AGENTS.md).
+
+## Publication variants
+
+The repository root supplies the canonical publication. The common-projection
+and Mission variants have independent source closures and pinned evidence.
+Open an isolated checkout of either variant from this repository:
+
+```sh
+git worktree add --detach ../site-common variant/common-projection
+git worktree add --detach ../site-mission variant/mission-publication
+```
+
+From the chosen checkout, run `node bootstrap/launch.cjs bootstrap/publication.rel`
+and `node bootstrap/test.cjs`. GitHub Pages uses the canonical publication.
